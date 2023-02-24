@@ -3,7 +3,9 @@ void DisplacedHcalJetAnalyzer::SetHistCategories(){
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::SetCategories()"<<endl;
 
-	categories = {"PreSel"};
+	// histogram category corresponds to selections (jet energy, etc)
+	// decides what is ultimately written
+	categories = {"NoSel", "JetPt10"};
 
 	if( !save_hists ){
 		cout<<"  NOTE: 'save_hists' is set to false. Will not run over ANY histogram categories..."<<endl;
@@ -64,6 +66,9 @@ void DisplacedHcalJetAnalyzer::BookHists(){
 
 		cat += "__";
 
+		h[cat+"jet1_Pt"]  = new TH1F( Form( "%sjet1_Pt",  cat.c_str() ), "pt; pt [GeV]; Events ", NBins, 0, 1000); // GK
+
+
 		// 1D //
 
 		// --------------------------------------------------------------------------------------------
@@ -91,7 +96,7 @@ void DisplacedHcalJetAnalyzer::BookHists(){
 
 		// Reco Objects
 		for( auto is: istring ){
-			// Reco Photons //
+			// Reco Photons
 			h[cat+"ph"+is+"_pt"]  = new TH1F( Form( "%sph%s_pt",  cat.c_str(), is.c_str() ), "pt; pt [GeV]; Events ", NBins, 0, 1000);
 			h[cat+"ph"+is+"_eta"] = new TH1F( Form( "%sph%s_eta", cat.c_str(), is.c_str() ), "eta; eta; Events", NBins, -3.2, 3.2 );
 			h[cat+"ph"+is+"_phi"] = new TH1F( Form( "%sph%s_phi", cat.c_str(), is.c_str() ), "phi; phi; Events", NBins, -3.2, 3.2 );
@@ -127,6 +132,11 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 	cat+= "__";
 
 	if( isData && blind_data ) return;
+
+	if (jet_Pt->size() > 0) { // GK
+		h[cat+"jet1_Pt"]->Fill(jet_Pt->at(0) );
+	}
+
 
 	/*if( debug ) cout<<"  -- N photons = "<<ph_i.size()<<endl;
 	h[cat+"N_ph"]->Fill( ph_i.size(), weight );
