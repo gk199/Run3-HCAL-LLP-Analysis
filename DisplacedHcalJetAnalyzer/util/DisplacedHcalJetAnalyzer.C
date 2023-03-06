@@ -14,6 +14,8 @@ void DisplacedHcalJetAnalyzer::Initialize( string infiletag ){
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::Initialize()"<<endl;
 
+	SetHistCategories();
+
 	return;
 }
 
