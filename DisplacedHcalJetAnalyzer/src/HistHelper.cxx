@@ -5,7 +5,7 @@ void DisplacedHcalJetAnalyzer::SetHistCategories(){
 
 	// histogram category corresponds to selections (jet energy, etc)
 	// decides what is ultimately written
-	categories = {"NoSel", "JetPt10"};
+	categories = {"NoSel", "JetPt40"};
 
 	if( !save_hists ){
 		cout<<"  NOTE: 'save_hists' is set to false. Will not run over ANY histogram categories..."<<endl;
@@ -58,16 +58,13 @@ void DisplacedHcalJetAnalyzer::BookHists(){
 	if( categories.size() == 0 ) cout<<"WARNING: No categories specified!"<<endl;
 
 	// For creating general histograms for all, leading and subleading objects
-	vector<string> istring = {"", "1", "2"};
+	vector<string> istring = {"0", "1", "2"};
 
 	for( auto cat: categories ){
 
 		cout<<"  --> "<<cat<<endl;
 
 		cat += "__";
-
-		h[cat+"jet1_Pt"]  = new TH1F( Form( "%sjet1_Pt",  cat.c_str() ), "pt; pt [GeV]; Events ", NBins, 0, 1000); // GK
-
 
 		// 1D //
 
@@ -97,23 +94,22 @@ void DisplacedHcalJetAnalyzer::BookHists(){
 		// Reco Objects
 		for( auto is: istring ){
 			// Reco Photons
-			h[cat+"ph"+is+"_pt"]  = new TH1F( Form( "%sph%s_pt",  cat.c_str(), is.c_str() ), "pt; pt [GeV]; Events ", NBins, 0, 1000);
-			h[cat+"ph"+is+"_eta"] = new TH1F( Form( "%sph%s_eta", cat.c_str(), is.c_str() ), "eta; eta; Events", NBins, -3.2, 3.2 );
-			h[cat+"ph"+is+"_phi"] = new TH1F( Form( "%sph%s_phi", cat.c_str(), is.c_str() ), "phi; phi; Events", NBins, -3.2, 3.2 );
+			h[cat+"pho"+is+"_pt"]  = new TH1F( Form( "%spho%s_pt",  cat.c_str(), is.c_str() ), "pt; pt [GeV]; Events ", NBins, 0, 1000);
+			h[cat+"pho"+is+"_eta"] = new TH1F( Form( "%spho%s_eta", cat.c_str(), is.c_str() ), "eta; eta; Events", NBins, -3.2, 3.2 );
+			h[cat+"pho"+is+"_phi"] = new TH1F( Form( "%spho%s_phi", cat.c_str(), is.c_str() ), "phi; phi; Events", NBins, -3.2, 3.2 );
 			// Reco Electrons
-			h[cat+"el"+is+"_pt"]  = new TH1F( Form( "%sel%s_pt",  cat.c_str(), is.c_str() ), "pt; pt [GeV]; Events ", NBins, 0, 1000);
-			h[cat+"el"+is+"_eta"] = new TH1F( Form( "%sel%s_eta", cat.c_str(), is.c_str() ), "eta; eta; Events", NBins, -3.2, 3.2 );
-			h[cat+"el"+is+"_phi"] = new TH1F( Form( "%sel%s_phi", cat.c_str(), is.c_str() ), "phi; phi; Events", NBins, -3.2, 3.2 );
+			h[cat+"ele"+is+"_pt"]  = new TH1F( Form( "%sele%s_pt",  cat.c_str(), is.c_str() ), "pt; pt [GeV]; Events ", NBins, 0, 1000);
+			h[cat+"ele"+is+"_eta"] = new TH1F( Form( "%sele%s_eta", cat.c_str(), is.c_str() ), "eta; eta; Events", NBins, -3.2, 3.2 );
+			h[cat+"ele"+is+"_phi"] = new TH1F( Form( "%sele%s_phi", cat.c_str(), is.c_str() ), "phi; phi; Events", NBins, -3.2, 3.2 );
 			// Reco Muons
-			h[cat+"mu"+is+"_pt"]  = new TH1F( Form( "%smu%s_pt",  cat.c_str(), is.c_str() ), "pt; pt [GeV]; Events ", NBins, 0, 1000);
-			h[cat+"mu"+is+"_eta"] = new TH1F( Form( "%smu%s_eta", cat.c_str(), is.c_str() ), "eta; eta; Events", NBins, -3.2, 3.2 );
-			h[cat+"mu"+is+"_phi"] = new TH1F( Form( "%smu%s_phi", cat.c_str(), is.c_str() ), "phi; phi; Events", NBins, -3.2, 3.2 );            
+			h[cat+"muon"+is+"_pt"]  = new TH1F( Form( "%smuon%s_pt",  cat.c_str(), is.c_str() ), "pt; pt [GeV]; Events ", NBins, 0, 1000);
+			h[cat+"muon"+is+"_eta"] = new TH1F( Form( "%smuon%s_eta", cat.c_str(), is.c_str() ), "eta; eta; Events", NBins, -3.2, 3.2 );
+			h[cat+"muon"+is+"_phi"] = new TH1F( Form( "%smuon%s_phi", cat.c_str(), is.c_str() ), "phi; phi; Events", NBins, -3.2, 3.2 );            
 			// Reco Jets
 			h[cat+"jet"+is+"_pt"]  = new TH1F( Form( "%sjet%s_pt",  cat.c_str(), is.c_str() ), "pt; pt [GeV]; Events ", NBins, 0, 1000);
 			h[cat+"jet"+is+"_eta"] = new TH1F( Form( "%sjet%s_eta", cat.c_str(), is.c_str() ), "eta; eta; Events", NBins, -3.2, 3.2 );
 			h[cat+"jet"+is+"_phi"] = new TH1F( Form( "%sjet%s_phi", cat.c_str(), is.c_str() ), "phi; phi; Events", NBins, -3.2, 3.2 );
 		}
-
 
 	}
 
@@ -122,34 +118,58 @@ void DisplacedHcalJetAnalyzer::BookHists(){
 /* ====================================================================================================================== */
 void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 
-	if( debug ) cout<<"DisplacedHcalJetAnalyzer::FillHists()"<<endl;
+	if ( debug ) cout<<"DisplacedHcalJetAnalyzer::FillHists()"<<endl;
 
 	// Check if category exists...
 	if ( std::find(categories.begin(), categories.end(), cat) == categories.end() ) return;
 
-	if( debug ) cout<<"  -- Running on category: "<<cat<<endl;
+	if ( debug ) cout<<"  -- Running on category: "<<cat<<endl;
 
 	cat+= "__";
 
-	if( isData && blind_data ) return;
+	if ( isData && blind_data ) return;
 
-	if (jet_Pt->size() > 0) { // GK
-		h[cat+"jet1_Pt"]->Fill(jet_Pt->at(0) );
-	}
-
-
-	/*if( debug ) cout<<"  -- N photons = "<<ph_i.size()<<endl;
-	h[cat+"N_ph"]->Fill( ph_i.size(), weight );
-	for( int i = 0; i<ph_i.size(); i++ ){
-		string is = Form("%d", i+1);
-		int ii = ph_i.at(i);
-		// All Photons
-		h[cat+"ph_pt"]->Fill( ph_pt->at(ii)/GeV, weight ); //ph_pt_corr.at(i)/GeV  ); //ph_pt->at(i)/GeV ); //ph_pt_corr.at(i)/GeV  );
-		h[cat+"ph_eta"]->Fill( ph_eta->at(ii), weight );
-		h[cat+"ph_phi"]->Fill( ph_phi->at(ii), weight );
-		h[cat+"ph_E"]->Fill( ph_caloCluster_e->at(ii), weight );
-	}*/
-
+	// Reco jets
+	if ( debug ) cout << "  -- N Jets = " << n_jet << endl;
+	if (n_jet > 0) { // GK
+		for (int i=0; i < n_jet; i++) {
+			if (i > 2) continue;
+			string is = to_string(i);
+			h[cat+"jet"+is+"_pt"]->Fill(jet_Pt->at(i) );
+			h[cat+"jet"+is+"_eta"]->Fill(jet_Eta->at(i) );
+			h[cat+"jet"+is+"_phi"]->Fill(jet_Phi->at(i) );
+		}
+	} 
+	// Reco photons
+	if (n_pho > 0) { // GK
+		for (int i=0; i < n_pho; i++) {
+			if (i > 2) continue;
+			string is = to_string(i);
+			h[cat+"pho"+is+"_pt"]->Fill(pho_Pt->at(i) );
+			h[cat+"pho"+is+"_eta"]->Fill(pho_Eta->at(i) );
+			h[cat+"pho"+is+"_phi"]->Fill(pho_Phi->at(i) );
+		}
+	} 
+	// Reco muons
+	if (n_muon > 0) { // GK
+		for (int i=0; i < n_muon; i++) {
+			if (i > 2) continue;
+			string is = to_string(i);
+			h[cat+"muon"+is+"_pt"]->Fill(muon_Pt->at(i) );
+			h[cat+"muon"+is+"_eta"]->Fill(muon_Eta->at(i) );
+			h[cat+"muon"+is+"_phi"]->Fill(muon_Phi->at(i) );
+		}
+	} 
+	// Reco electrons
+	if (n_ele > 0) { // GK
+		for (int i=0; i < n_ele; i++) {
+			if (i > 2) continue;
+			string is = to_string(i);
+			h[cat+"ele"+is+"_pt"]->Fill(ele_Pt->at(i) );
+			h[cat+"ele"+is+"_eta"]->Fill(ele_Eta->at(i) );
+			h[cat+"ele"+is+"_phi"]->Fill(ele_Phi->at(i) );
+		}
+	} 
 }
 
 /* ====================================================================================================================== */

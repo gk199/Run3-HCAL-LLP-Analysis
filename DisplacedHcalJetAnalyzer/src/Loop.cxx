@@ -13,8 +13,8 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 	// GK, fill the below catergories of histograms
 	FillHists("NoSel"); 
 
-	if (jet_Pt->at(0) > 10) {
-		FillHists("JetPt10");
+	if (jet_Pt->at(0) > 40) {
+		FillHists("JetPt40");
 	}
 	// FillOutputTrees("");
 
