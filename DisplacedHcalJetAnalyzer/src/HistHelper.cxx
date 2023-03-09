@@ -94,21 +94,25 @@ void DisplacedHcalJetAnalyzer::BookHists(){
 		// Reco Objects
 		for( auto is: istring ){
 			// Reco Photons
-			h[cat+"pho"+is+"_pt"]  = new TH1F( Form( "%spho%s_pt",  cat.c_str(), is.c_str() ), "pt; pt [GeV]; Events ", NBins, 0, 1000);
-			h[cat+"pho"+is+"_eta"] = new TH1F( Form( "%spho%s_eta", cat.c_str(), is.c_str() ), "eta; eta; Events", NBins, -3.2, 3.2 );
-			h[cat+"pho"+is+"_phi"] = new TH1F( Form( "%spho%s_phi", cat.c_str(), is.c_str() ), "phi; phi; Events", NBins, -3.2, 3.2 );
+			h[cat+"pho"+is+"_pt"]  = new TH1F( Form( "%spho%s_pt",  cat.c_str(), is.c_str() ), "Photon p_{t}; pt [GeV]; Events ", NBins, 0, 1000);
+			h[cat+"pho"+is+"_eta"] = new TH1F( Form( "%spho%s_eta", cat.c_str(), is.c_str() ), "Photon #eta; eta; Events", NBins, -3.2, 3.2 );
+			h[cat+"pho"+is+"_phi"] = new TH1F( Form( "%spho%s_phi", cat.c_str(), is.c_str() ), "Photon #phi; phi; Events", NBins, -3.2, 3.2 );
+			h[cat+"pho"+is+"_energy"] = new TH1F( Form( "%spho%s_energy", cat.c_str(), is.c_str() ), "Photon energy; energy [GeV]; Events", NBins, 0, 200 );
 			// Reco Electrons
-			h[cat+"ele"+is+"_pt"]  = new TH1F( Form( "%sele%s_pt",  cat.c_str(), is.c_str() ), "pt; pt [GeV]; Events ", NBins, 0, 1000);
-			h[cat+"ele"+is+"_eta"] = new TH1F( Form( "%sele%s_eta", cat.c_str(), is.c_str() ), "eta; eta; Events", NBins, -3.2, 3.2 );
-			h[cat+"ele"+is+"_phi"] = new TH1F( Form( "%sele%s_phi", cat.c_str(), is.c_str() ), "phi; phi; Events", NBins, -3.2, 3.2 );
+			h[cat+"ele"+is+"_pt"]  = new TH1F( Form( "%sele%s_pt",  cat.c_str(), is.c_str() ), "Electron p_{t}; pt [GeV]; Events ", NBins, 0, 1000);
+			h[cat+"ele"+is+"_eta"] = new TH1F( Form( "%sele%s_eta", cat.c_str(), is.c_str() ), "Electron #eta; eta; Events", NBins, -3.2, 3.2 );
+			h[cat+"ele"+is+"_phi"] = new TH1F( Form( "%sele%s_phi", cat.c_str(), is.c_str() ), "Electron #phi; phi; Events", NBins, -3.2, 3.2 );
+			h[cat+"ele"+is+"_energy"] = new TH1F( Form( "%sele%s_energy", cat.c_str(), is.c_str() ), "Electron energy; energy [GeV]; Events", NBins, 0, 200 );
 			// Reco Muons
-			h[cat+"muon"+is+"_pt"]  = new TH1F( Form( "%smuon%s_pt",  cat.c_str(), is.c_str() ), "pt; pt [GeV]; Events ", NBins, 0, 1000);
-			h[cat+"muon"+is+"_eta"] = new TH1F( Form( "%smuon%s_eta", cat.c_str(), is.c_str() ), "eta; eta; Events", NBins, -3.2, 3.2 );
-			h[cat+"muon"+is+"_phi"] = new TH1F( Form( "%smuon%s_phi", cat.c_str(), is.c_str() ), "phi; phi; Events", NBins, -3.2, 3.2 );            
+			h[cat+"muon"+is+"_pt"]  = new TH1F( Form( "%smuon%s_pt",  cat.c_str(), is.c_str() ), "Muon p_{t}; pt [GeV]; Events ", NBins, 0, 1000);
+			h[cat+"muon"+is+"_eta"] = new TH1F( Form( "%smuon%s_eta", cat.c_str(), is.c_str() ), "Muon #eta; eta; Events", NBins, -3.2, 3.2 );
+			h[cat+"muon"+is+"_phi"] = new TH1F( Form( "%smuon%s_phi", cat.c_str(), is.c_str() ), "Muon #phi; phi; Events", NBins, -3.2, 3.2 );
+			h[cat+"muon"+is+"_energy"] = new TH1F( Form( "%smuon%s_energy", cat.c_str(), is.c_str() ), "Muon energy; energy [GeV]; Events", NBins, 0, 200 );
 			// Reco Jets
-			h[cat+"jet"+is+"_pt"]  = new TH1F( Form( "%sjet%s_pt",  cat.c_str(), is.c_str() ), "pt; pt [GeV]; Events ", NBins, 0, 1000);
-			h[cat+"jet"+is+"_eta"] = new TH1F( Form( "%sjet%s_eta", cat.c_str(), is.c_str() ), "eta; eta; Events", NBins, -3.2, 3.2 );
-			h[cat+"jet"+is+"_phi"] = new TH1F( Form( "%sjet%s_phi", cat.c_str(), is.c_str() ), "phi; phi; Events", NBins, -3.2, 3.2 );
+			h[cat+"jet"+is+"_pt"]  = new TH1F( Form( "%sjet%s_pt",  cat.c_str(), is.c_str() ), "Jet p_{t}; pt [GeV]; Events ", NBins, 0, 1000);
+			h[cat+"jet"+is+"_eta"] = new TH1F( Form( "%sjet%s_eta", cat.c_str(), is.c_str() ), "Jet #eta; eta; Events", NBins, -3.2, 3.2 );
+			h[cat+"jet"+is+"_phi"] = new TH1F( Form( "%sjet%s_phi", cat.c_str(), is.c_str() ), "Jet #phi; phi; Events", NBins, -3.2, 3.2 );
+			h[cat+"jet"+is+"_energy"] = new TH1F( Form( "%sjet%s_energy", cat.c_str(), is.c_str() ), "Jet energy; energy [GeV]; Events", NBins, 0, 200 );
 		}
 
 	}
@@ -138,6 +142,7 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 			h[cat+"jet"+is+"_pt"]->Fill(jet_Pt->at(i) );
 			h[cat+"jet"+is+"_eta"]->Fill(jet_Eta->at(i) );
 			h[cat+"jet"+is+"_phi"]->Fill(jet_Phi->at(i) );
+			h[cat+"jet"+is+"_energy"]->Fill(jet_E->at(i) );
 		}
 	} 
 	// Reco photons
@@ -148,6 +153,7 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 			h[cat+"pho"+is+"_pt"]->Fill(pho_Pt->at(i) );
 			h[cat+"pho"+is+"_eta"]->Fill(pho_Eta->at(i) );
 			h[cat+"pho"+is+"_phi"]->Fill(pho_Phi->at(i) );
+			h[cat+"pho"+is+"_energy"]->Fill(pho_E->at(i) );
 		}
 	} 
 	// Reco muons
@@ -158,6 +164,7 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 			h[cat+"muon"+is+"_pt"]->Fill(muon_Pt->at(i) );
 			h[cat+"muon"+is+"_eta"]->Fill(muon_Eta->at(i) );
 			h[cat+"muon"+is+"_phi"]->Fill(muon_Phi->at(i) );
+			h[cat+"muon"+is+"_energy"]->Fill(muon_E->at(i) );
 		}
 	} 
 	// Reco electrons
@@ -168,6 +175,7 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 			h[cat+"ele"+is+"_pt"]->Fill(ele_Pt->at(i) );
 			h[cat+"ele"+is+"_eta"]->Fill(ele_Eta->at(i) );
 			h[cat+"ele"+is+"_phi"]->Fill(ele_Phi->at(i) );
+			h[cat+"ele"+is+"_energy"]->Fill(ele_E->at(i) );
 		}
 	} 
 }
