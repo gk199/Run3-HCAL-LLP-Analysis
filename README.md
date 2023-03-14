@@ -17,6 +17,12 @@ In `HistHelper.cxx` set what histograms are filled, and categories are selected.
 
 The histograms that are read in are listed in  `DisplacedHcalJetAnalyzer.h`. 
 
+## Plotting
+```
+python KinematicPlots.py ../Run/hists_test.root 
+```
+where `../Run/hists_test.root` is the output of the previous step. 
+
 ## Locations on lxplus
 This directory: `/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/LLP_NtuplerAnalyzer`.
 

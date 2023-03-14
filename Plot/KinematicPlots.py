@@ -66,11 +66,13 @@ for obj in objects:
         canv.SaveAs(folder + obj + "/" + obj + str(i) + "_" + quant + "_" + cat + ".png")
 
         overlayCanv.cd()
+        overlayCanv.SetLogy()
         legend.AddEntry(hist,obj + str(i))
-        if (quant == "energy"): hist.GetYaxis().SetRangeUser(0,0.6)
-        if (quant == "eta"): hist.GetYaxis().SetRangeUser(0,0.2)
-        if (quant == "phi"): hist.GetYaxis().SetRangeUser(0,0.06)
-        if (quant == "pt"): hist.GetYaxis().SetRangeUser(0,1)
+        if (quant == "energy"): hist.GetYaxis().SetRangeUser(0.001,0.6)
+        if (quant == "eta"): hist.GetYaxis().SetRangeUser(0.001,0.4)
+        if (quant == "phi"): hist.GetYaxis().SetRangeUser(0.00001,0.1)
+        if (quant == "pt"): hist.GetYaxis().SetRangeUser(0.001,1)
+        if (quant == "pt"): hist.GetXaxis().SetRangeUser(0,400)
         hist.Rebin(5)
 
         # Overlay various leading / sub-leading quantities 
