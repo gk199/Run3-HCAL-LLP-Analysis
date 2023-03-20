@@ -51,7 +51,7 @@ public :
 
    // ----- Settings ----- //
 
-   bool debug         = true; 
+   bool debug         = false; 
    bool print_counts  = false; 
    bool save_hists    = true;
    bool save_trees    = true;
@@ -80,6 +80,11 @@ public :
    map<string,float>    tree_output_vars_float;  
    map<string,string>   tree_output_vars_string;
 
+   // ----- Globals ----- //
+
+   vector<string> HLT_Names;
+   map<string, int> HLT_Indices;
+
    // ----- Variables ----- //
 
    // Fixed size dimensions of array or collections stored in the TTree if any.
@@ -104,7 +109,6 @@ public :
    vector<float>   *PVTrack_Pt;
    vector<float>   *PVTrack_Eta;
    vector<float>   *PVTrack_Phi;
-   vector<string>  *HLT_Names;
    vector<bool>    *HLT_Decision;
    vector<int>     *HLT_Prescale;
    Float_t         met_Pt;
@@ -391,7 +395,6 @@ public :
    TBranch        *b_PVTrack_Pt;   //!
    TBranch        *b_PVTrack_Eta;   //!
    TBranch        *b_PVTrack_Phi;   //!
-   TBranch        *b_HLT_Names;   //!
    TBranch        *b_HLT_Decision;   //!
    TBranch        *b_HLT_Prescale;   //!
    TBranch        *b_met_Pt;   //!
@@ -668,10 +671,13 @@ public :
    virtual void     Show(Long64_t entry = -1);
 
    // DisplacedHcalJetAnalyzer.C
-   virtual void   Initialize( string infiletag );
+   virtual void   Initialize(  string infiletag, string infilepath );
    // Loop.cxx
    virtual void   Loop();
    virtual void   ProcessEvent( Long64_t jentry );
+   // TriggerHelper.cxx
+   virtual void   SetTriggerNames( string infilepath, string hist_name );
+   // Object Helper.cxx
    // EventHelper.cxx
    virtual float  GetEventRuntime( clock_t clock_start, Long64_t init_entry, Long64_t current_entry );
    // OutputHelper.cxx
@@ -744,7 +750,6 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    PVTrack_Pt = 0;
    PVTrack_Eta = 0;
    PVTrack_Phi = 0;
-   HLT_Names = 0;
    HLT_Decision = 0;
    HLT_Prescale = 0;
    ele_Pt = 0;
@@ -1019,7 +1024,6 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("PVTrack_Pt", &PVTrack_Pt, &b_PVTrack_Pt);
    fChain->SetBranchAddress("PVTrack_Eta", &PVTrack_Eta, &b_PVTrack_Eta);
    fChain->SetBranchAddress("PVTrack_Phi", &PVTrack_Phi, &b_PVTrack_Phi);
-   fChain->SetBranchAddress("HLT_Names", &HLT_Names, &b_HLT_Names);
    fChain->SetBranchAddress("HLT_Decision", &HLT_Decision, &b_HLT_Decision);
    fChain->SetBranchAddress("HLT_Prescale", &HLT_Prescale, &b_HLT_Prescale);
    fChain->SetBranchAddress("met_Pt", &met_Pt, &b_met_Pt);

@@ -6,15 +6,22 @@ using namespace std;
 
 #include "../src/Loop.cxx"
 #include "../src/EventHelper.cxx"
+#include "../src/TriggerHelper.cxx"
+#include "../src/ObjectHelper.cxx"
 #include "../src/HistHelper.cxx"
 #include "../src/OutputHelper.cxx"
 
 /* ====================================================================================================================== */
-void DisplacedHcalJetAnalyzer::Initialize( string infiletag ){
+void DisplacedHcalJetAnalyzer::Initialize( string infiletag, string infilepath ){
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::Initialize()"<<endl;
 
+	// Initialize trigger names from NEvents_HLT histogram
+	SetTriggerNames( infilepath, "DisplacedHcalJets/NEvents_HLT");
+
+	// Set Categories
 	SetHistCategories();
+
 
 	return;
 }
@@ -36,7 +43,7 @@ void DisplacedHcalJetAnalyzer( string infiletag = "", string infilepath = "" ){
 		vector<string> infilepaths = {
 			// Look locally
 			"",
-			"../NTuples/02_17_2023", 
+			"../NTuples/02_17_2023/", 
 			// Look globally -- for files on lxplus
 			// Fix path "/afs/cern.ch/work/k/kikenned/public/L1LLPJetStudies/HcalTuples/",
 			// Look on cmsxrootd
@@ -88,7 +95,7 @@ void DisplacedHcalJetAnalyzer( string infiletag = "", string infilepath = "" ){
 
 	// ----- Initialize ----- // 
 
-	AnalysisReader.Initialize( infiletag ); 
+	AnalysisReader.Initialize( infiletag, infilepath ); 
 	
 	//TString outfilename = Form( "minituple_%s.root", infiletag.c_str() ); // Not yet
 	TString outfilename = Form( "hists_%s.root", infiletag.c_str() );
