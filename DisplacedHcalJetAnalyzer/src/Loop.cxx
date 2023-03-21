@@ -11,9 +11,24 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 	count["All"]++;
 	
 	// GK, fill the below catergories of histograms
+	if (jet_Pt->size() == 0) return; // added to avoid vector out of range if there are no jets 
+
 	FillHists("NoSel"); 
 
-	if (jet_Pt->at(0) > 40) {
+	// check HLT results for these triggers
+	int passedHLT = 0;
+	for (int i = 0; i < HLT_Indices.size(); i++) {
+		if (HLT_Decision->at(i) > 0) {
+			if (debug) cout << HLT_Decision->at(i) << " for the trigger " << HLT_Names[i] << endl;
+			passedHLT += 1;
+		}		
+	}
+
+	if (passedHLT > 0) {
+		FillHists("PassedHLT");
+	}
+
+	if (jet_Pt->at(0) > 40 && jet_Pt->size() > 0) {
 		FillHists("JetPt40");
 	}
 	// FillOutputTrees("");

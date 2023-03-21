@@ -5,7 +5,7 @@ void DisplacedHcalJetAnalyzer::SetHistCategories(){
 
 	// histogram category corresponds to selections (jet energy, etc)
 	// decides what is ultimately written
-	categories = {"NoSel", "JetPt40"};
+	categories = {"NoSel", "JetPt40","PassedHLT"};
 
 	if( !save_hists ){
 		cout<<"  NOTE: 'save_hists' is set to false. Will not run over ANY histogram categories..."<<endl;
