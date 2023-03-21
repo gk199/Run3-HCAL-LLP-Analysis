@@ -1,4 +1,4 @@
-# To run: python KinematicPlots.py <path to output of ../DisplacedHcalJetAnalyzer/util/DisplacedHcalJetAnalyzer.C>import ROOT
+# To run: python KinematicPlots.py <path to output of ../DisplacedHcalJetAnalyzer/util/DisplacedHcalJetAnalyzer.C>
 
 import ROOT
 from ROOT import Form
@@ -35,6 +35,7 @@ print("Starting plotting script")
 
 # Save output plots
 folder = "./outPlots/"
+if (MC): folder = "./outPlots_MC/"
 try:
   os.makedirs(folder)
 except OSError:
@@ -44,7 +45,7 @@ path = sys.argv[1] # pass the location of the processed ntuple as an argument
 
 infile = ROOT.TFile.Open( path)
 
-categories = {"NoSel", "JetPt40"};
+categories = {"NoSel", "JetPt40", "PassedHLT"};
 objects = {"jet", "ele", "muon", "pho"}
 quantities = {"energy", "eta", "phi", "pt"}
 leading = [0,1,2]
@@ -84,7 +85,3 @@ for obj in objects:
           legend.Draw()
           stamp_text.DrawLatex( xpos, ypos, cmsLabel)
           overlayCanv.SaveAs(folder + obj + "/Overlay_" + obj + str(i) + "_" + quant + "_" + cat + ".png")
-
-jet_energy = infile.Get("JetPt40__jet0_energy")
-jet_energy.Draw("HIST")
-canv.SaveAs(folder + "LeadingJet_energy.png")

@@ -15,13 +15,16 @@ In `DisplacedHcalJetAnalyzer/DisplacedHcalJetAnalyzer/DisplacedHcalJetAnalyzer.h
 
 In `HistHelper.cxx` set what histograms are filled, and categories are selected. Requirements for when each category is filled are listed in `Loop.cxx`.
 
-The histograms that are read in are listed in  `DisplacedHcalJetAnalyzer.h`. 
+`TriggerHelper.cxx` contains trigger-related functions. `ObjectHelper.cxx` is a placeholder to put object-related functions.
+
+The histograms that are read in are listed in `DisplacedHcalJetAnalyzer.h`. 
 
 ## Plotting
 ```
 python KinematicPlots.py ../Run/hists_test.root 
+python Data_MC_overlay.py ../Run/hists_test_data1.root ../Run/hists_test_signal1.root
 ```
-where `../Run/hists_test.root` is the output of the previous step. 
+where `../Run/hists_test.root` is the output of the previous step. Indicate in the script whether MC or data is being used. Plots can be copied to the [EOS webpage](https://gkopp.web.cern.ch/gkopp/LLP_HCAL_Run3Analysis/outPlots/).
 
 ## Locations on lxplus
 This directory: `/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/LLP_NtuplerAnalyzer`.
