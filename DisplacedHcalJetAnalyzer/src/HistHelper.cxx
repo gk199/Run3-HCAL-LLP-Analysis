@@ -64,32 +64,7 @@ void DisplacedHcalJetAnalyzer::BookHists(){
 
 		cout<<"  --> "<<cat<<endl;
 
-		cat += "__";
-
-		// 1D //
-
-		// --------------------------------------------------------------------------------------------
-		// Truth: General (any form of MC)      
-
-		//if( !isData ){
-
-			// Truth Vertex
-			//h[cat+"TVx"]  = new TH1F( Form( "%sTVx",  cat.c_str() ), "; TVx [mm]; Events ", NBins, -2000, 2000);
-
-		//}
-
-		//if( isSignal ){
-
-		//	// Object Kinematics            
-		//	vector<string> istring = {"", "1", "2"};
-		//	for( auto is: istring ){                
-		//		h[cat+"trugrv"+is+"_pt"]  = new TH1F( Form( "%strugrv%s_pt",  cat.c_str(), is.c_str() ), "pt; pt [GeV]; Events ", NBins, 0, 1000);
-		//		h[cat+"trugrv"+is+"_eta"] = new TH1F( Form( "%strugrv%s_eta", cat.c_str(), is.c_str() ), "eta; eta; Events", NBins, -3.2, 3.2 );
-		//		h[cat+"trugrv"+is+"_phi"] = new TH1F( Form( "%strugrv%s_phi", cat.c_str(), is.c_str() ), "phi; phi; Events", NBins, -3.2, 3.2 );
-		//	}
-
-		// --------------------------------------------------------------------------------------------
-		// Reco-Level     
+		cat += "__";   
 
 		// Reco Objects
 		for( auto is: istring ){
@@ -114,9 +89,13 @@ void DisplacedHcalJetAnalyzer::BookHists(){
 			h[cat+"jet"+is+"_phi"] = new TH1F( Form( "%sjet%s_phi", cat.c_str(), is.c_str() ), "Jet #phi; phi; Events", NBins, -3.2, 3.2 );
 			h[cat+"jet"+is+"_energy"] = new TH1F( Form( "%sjet%s_energy", cat.c_str(), is.c_str() ), "Jet energy; energy [GeV]; Events", NBins, 0, 200 );
 		}
-
+		// HCAL rechits - not leading / subleading object as others are
+		h[cat+"hbhe_eta"] = new TH1F( Form( "%shbhe_eta", cat.c_str()), "HBHE #eta; eta; Events", NBins, -3.2, 3.2 );
+		h[cat+"hbhe_phi"] = new TH1F( Form( "%shbhe_phi", cat.c_str()), "HBHE #phi; phi; Events", NBins, -3.2, 3.2 );
+		h[cat+"hbhe_energy"] = new TH1F( Form( "%shbhe_energy", cat.c_str()), "HBHE energy; energy [GeV]; Events", NBins, 0, 200 );
+		h[cat+"hbhe_depth"] = new TH1F( Form( "%shbhe_depth", cat.c_str()), "HBHE depth; depth; Events", 8, 0, 8);
+		h[cat+"hbhe_auxTDC"] = new TH1F( Form( "%shbhe_auxTDC", cat.c_str()), "HBHE aux TDC; aux TDC; Events", NBins, 0, 2000000000 );
 	}
-
 }
 
 /* ====================================================================================================================== */
@@ -178,6 +157,16 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 			h[cat+"ele"+is+"_energy"]->Fill(ele_E->at(i) );
 		}
 	} 
+	// HCAL rechits
+	if (n_hbheRechit > 0) { // GK
+		for (int i=0; i < n_hbheRechit; i++) {
+			h[cat+"hbhe_eta"]->Fill(hbheRechit_Eta->at(i) );
+			h[cat+"hbhe_phi"]->Fill(hbheRechit_Phi->at(i) );
+			h[cat+"hbhe_energy"]->Fill(hbheRechit_E->at(i) );
+			h[cat+"hbhe_depth"]->Fill(hbheRechit_depth->at(i) );
+			h[cat+"hbhe_auxTDC"]->Fill(hbheRechit_auxTDC->at(i) );
+		}
+	}
 }
 
 /* ====================================================================================================================== */
