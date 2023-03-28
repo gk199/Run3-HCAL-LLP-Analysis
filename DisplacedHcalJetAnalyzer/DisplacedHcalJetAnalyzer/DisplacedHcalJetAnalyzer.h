@@ -26,6 +26,8 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 
+#include <TMath.h>
+
 //#include "Math/GSLMinimizer.h"
 //#include "Minuit2/Minuit2Minimizer.h"
 //#include <Math/Functor.h>
@@ -363,6 +365,7 @@ public :
    vector<float>   *gParticle_ProdVtx_X;
    vector<float>   *gParticle_ProdVtx_Y;
    vector<float>   *gParticle_ProdVtx_Z;
+   Int_t           n_gLLP;
    vector<float>   *gLLP_Pt;
    vector<float>   *gLLP_Eta;
    vector<float>   *gLLP_Phi;
@@ -649,6 +652,7 @@ public :
    TBranch        *b_gParticle_ProdVtx_X;   //!
    TBranch        *b_gParticle_ProdVtx_Y;   //!
    TBranch        *b_gParticle_ProdVtx_Z;   //!
+   TBranch        *b_n_gLLP;   //! 
    TBranch        *b_gLLP_Pt;   //!
    TBranch        *b_gLLP_Eta;   //!
    TBranch        *b_gLLP_Phi;   //!
@@ -1278,6 +1282,7 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("gParticle_ProdVtx_X", &gParticle_ProdVtx_X, &b_gParticle_ProdVtx_X);
    fChain->SetBranchAddress("gParticle_ProdVtx_Y", &gParticle_ProdVtx_Y, &b_gParticle_ProdVtx_Y);
    fChain->SetBranchAddress("gParticle_ProdVtx_Z", &gParticle_ProdVtx_Z, &b_gParticle_ProdVtx_Z);
+   fChain->SetBranchAddress("n_gLLP", &n_gLLP, &b_n_gLLP);
    fChain->SetBranchAddress("gLLP_Pt", &gLLP_Pt, &b_gLLP_Pt);
    fChain->SetBranchAddress("gLLP_Eta", &gLLP_Eta, &b_gLLP_Eta);
    fChain->SetBranchAddress("gLLP_Phi", &gLLP_Phi, &b_gLLP_Phi);
@@ -1318,4 +1323,19 @@ Int_t DisplacedHcalJetAnalyzer::Cut(Long64_t entry)
 // returns -1 otherwise.
    return 1;
 }
+
+double deltaPhi(double phi1, double phi2) {  // calculate delta phi given two phi values
+  double result = phi1 - phi2;
+  if(fabs(result) > 9999) return result;
+  while (result > TMath::Pi()) result -= 2*TMath::Pi();
+  while (result <= -TMath::Pi()) result += 2*TMath::Pi();
+  return result;
+}
+
+double deltaR(double eta1, double phi1, double eta2, double phi2) { // calculate deltaR given two eta and phi values
+  double deta = eta1 - eta2;
+  double dphi = deltaPhi(phi1, phi2);
+  return sqrt(deta*deta + dphi*dphi);
+}
+
 #endif // #ifdef DisplacedHcalJetAnalyzer_cxx
