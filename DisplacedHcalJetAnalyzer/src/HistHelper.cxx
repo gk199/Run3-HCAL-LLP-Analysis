@@ -5,7 +5,7 @@ void DisplacedHcalJetAnalyzer::SetHistCategories(){
 
 	// histogram category corresponds to selections (jet energy, etc)
 	// decides what is ultimately written
-	categories = {"NoSel", "JetPt40","PassedHLT"};
+	categories = {"NoSel", "JetPt40","PassedHLT", "genMatchLLP_pt5"};
 
 	if( !save_hists ){
 		cout<<"  NOTE: 'save_hists' is set to false. Will not run over ANY histogram categories..."<<endl;
@@ -106,7 +106,7 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 	// Check if category exists...
 	if ( std::find(categories.begin(), categories.end(), cat) == categories.end() ) return;
 
-	if ( debug ) cout<<"  -- Running on category: "<<cat<<endl;
+	if ( debug ) cout << "  -- Running on category: " << cat << endl;
 
 	cat+= "__";
 
