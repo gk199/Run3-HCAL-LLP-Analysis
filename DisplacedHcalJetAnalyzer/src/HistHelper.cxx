@@ -96,6 +96,10 @@ void DisplacedHcalJetAnalyzer::BookHists(){
 		h[cat+"hbhe_depth"] = new TH1F( Form( "%shbhe_depth", cat.c_str()), "HBHE depth; depth; Events", 8, 0, 8);
 		h[cat+"hbhe_auxTDC"] = new TH1F( Form( "%shbhe_auxTDC", cat.c_str()), "HBHE aux TDC; aux TDC; Events", NBins, 0, 2000000000 );
 	}
+	// not split by category 
+	h["gen_Xdecay"] = new TH1F("gen_Xdecay", "LLP x decay position; X Decay Vertex (mm); Events", 100, -2000, 2000);
+	h["gen_Ydecay"] = new TH1F("gen_Ydecay", "LLP x decay position; Y Decay Vertex (mm); Events", 100, -2000, 2000);
+	h["gen_Zdecay"] = new TH1F("gen_Zdecay", "LLP x decay position; Z Decay Vertex (mm); Events", 100, -20000, 20000); 
 }
 
 /* ====================================================================================================================== */
@@ -165,6 +169,16 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 			h[cat+"hbhe_energy"]->Fill(hbheRechit_E->at(i) );
 			h[cat+"hbhe_depth"]->Fill(hbheRechit_depth->at(i) );
 			h[cat+"hbhe_auxTDC"]->Fill(hbheRechit_auxTDC->at(i) );
+		}
+	}
+	// LLP gen information plots
+	if (cat == "NoSel__") {
+		if (n_gLLP > 0) { // make sure gen LLP exists 
+			for (int i = 0; i < n_gLLP; i++) {
+				h["gen_Xdecay"]->Fill(gLLP_DecayVtx_X->at(i));
+				h["gen_Ydecay"]->Fill(gLLP_DecayVtx_Y->at(i));
+				h["gen_Zdecay"]->Fill(gLLP_DecayVtx_Z->at(i));
+			}
 		}
 	}
 }
