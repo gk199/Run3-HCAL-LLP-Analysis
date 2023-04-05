@@ -683,6 +683,7 @@ public :
    // TriggerHelper.cxx
    virtual void   SetTriggerNames( string infilepath, string hist_name );
    // Object Helper.cxx
+   virtual Int_t  GetRechitMult( Long64_t jentry, int LLP_number );
    // EventHelper.cxx
    virtual float  GetEventRuntime( clock_t clock_start, Long64_t init_entry, Long64_t current_entry );
    // OutputHelper.cxx

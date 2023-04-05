@@ -175,6 +175,9 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 			h[cat+"hbhe_auxTDC"]->Fill(hbheRechit_auxTDC->at(i) );
 		}
 	}
+
+	// h[cat+"hbhe_mult"]->Fill()
+
 	// LLP gen information plots
 	if (cat == "NoSel__") {
 		if (n_gLLP > 0) { // make sure gen LLP exists 

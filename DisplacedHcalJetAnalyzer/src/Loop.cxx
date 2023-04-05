@@ -32,33 +32,9 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 		FillHists("JetPt40");
 	}
 
-	// check gen LLP decay positions if signal (in mm)
-	double HB_outer_radius = 2950;
-	double HB_inner_radius = 1750;
-	double HE_start = 3900;
-
-	if (n_gLLP > 0 && n_hbheRechit > 0) { // make sure gen LLP exists and HBHE rechits exist
-
-		for (int i = 0; i < n_gLLP; i++) {
-			double x_LLP = gLLP_DecayVtx_X->at(i);
-			double y_LLP = gLLP_DecayVtx_Y->at(i);
-			double z_LLP = gLLP_DecayVtx_Z->at(i);
-			double LLP_eta = gLLP_Eta->at(i);
-			double LLP_phi = gLLP_Phi->at(i);
-			if ((sqrt( pow(x_LLP,2) + pow(y_LLP,2)) > HB_inner_radius) && (sqrt( pow(x_LLP,2) + pow(y_LLP,2)) < HB_outer_radius) && abs(z_LLP) < HE_start) { 
-				// LLP i decay is in HB - now want to find relevant HCAL rechits
-
-				std::cout << "found gen LLP with position (eta, phi) = " << LLP_eta << ", " << LLP_phi << "\n" << std::endl;
-
-				for (int j = 0; j < n_hbheRechit; j++) { // loop over HCAL rechits
-					double HBHE_eta = hbheRechit_Eta->at(j);
-					double HBHE_phi = hbheRechit_Phi->at(j);
-					double dR = deltaR(LLP_eta, LLP_phi, HBHE_eta, HBHE_phi);
-					if (dR < 0.5) std::cout << "and gen LLP is matched to a jet \n" << std::endl; 
-					if (dR < 0.5) FillHists("genMatchLLP_pt5");
-				}
-			}
-		}
+	// check hit multiplicity 
+	for (int i = 0; i < n_gLLP; i++) {
+		GetRechitMult(jentry, i);
 	}
 
 	// FillOutputTrees("");
