@@ -7,8 +7,10 @@ Starting from the LLP ntuple in [cms-lpc-llp](https://github.com/cms-lpc-llp/llp
 cd DisplacedHcalJetAnalyzer/
 source compile.sh 
 cd ../Run/
-root -q -b -l '../DisplacedHcalJetAnalyzer/util/DisplacedHcalJetAnalyzer.C("test", "/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/CMSSW_12_4_6/src/cms_lpc_llp/llp_ntupler/run/ntuple_output_test_data1.root")'
 root -q -b -l '../DisplacedHcalJetAnalyzer/util/DisplacedHcalJetAnalyzer.C("test", "/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/CMSSW_12_4_6/src/cms_lpc_llp/llp_ntupler/run/ntuple_output_test_signal1.root")'
+mv hists_test.root hists_test_signal1_april5.root
+root -q -b -l '../DisplacedHcalJetAnalyzer/util/DisplacedHcalJetAnalyzer.C("test", "/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/CMSSW_12_4_6/src/cms_lpc_llp/llp_ntupler/run/ntuple_output_test_data1.root")'
+mv hists_test.root hists_test_data1.root
 ```
 
 In `DisplacedHcalJetAnalyzer/DisplacedHcalJetAnalyzer/DisplacedHcalJetAnalyzer.h` can set the variables: `debug, print_counts, save_hists, save_trees, blind_data`. 
@@ -21,6 +23,7 @@ The histograms that are read in are listed in `DisplacedHcalJetAnalyzer.h`.
 
 ## Plotting
 ```
+cd ../Plot/
 python KinematicPlots.py ../Run/hists_test.root 
 python Data_MC_overlay.py ../Run/hists_test_data1.root ../Run/hists_test_signal1.root
 ```

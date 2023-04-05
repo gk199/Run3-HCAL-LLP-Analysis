@@ -8,8 +8,8 @@ import sys, os, argparse, time, errno
 import matplotlib.pyplot as plt
 
 debug = False
-data = True
-MC = False
+data = False
+MC = True
 
 # Set up for plots
 ROOT.gROOT.SetBatch(1)
@@ -85,3 +85,39 @@ for obj in objects:
           legend.Draw()
           stamp_text.DrawLatex( xpos, ypos, cmsLabel)
           overlayCanv.SaveAs(folder + obj + "/Overlay_" + obj + str(i) + "_" + quant + "_" + cat + ".png")
+
+if (MC):
+  plots = {"gen_Ddecay", "gen_Rdecay", "gen_Xdecay", "gen_Ydecay", "gen_Zdecay", "gen_cTau", "gen_deltaT"};
+
+  print ("Plots for generator LLP information now run: ")
+  for plot in plots:
+    print (plot)
+    legend = ROOT.TLegend(xpos+0.2,0.65,xpos+0.35,0.8)
+    canv.cd()
+    hist = infile.Get(plot)
+    if (hist.GetEntries() > 0): hist.Scale(1/hist.GetEntries())
+    
+    if (plot == "gen_cTau"):
+      expFit = hist.Fit("expo","S")
+      hist.Draw("pe")
+      latex = ROOT.TLatex()
+      latex.SetNDC()
+      latex.SetTextSize(0.03)
+      constant = expFit.Parameter(0)
+      decay = expFit.Parameter(1)
+      print(constant)
+      print(decay)
+      ctau = -1/decay
+      latex.DrawText(0.7, 0.75, "Constant = %.3f"%constant)
+      latex.DrawText(0.7, 0.7, "Decay = %.3f"%decay)
+      latex.DrawText(0.7, 0.65, "ctau = %.3f"%ctau)
+    else:
+      hist.Draw("HIST PLC")
+    stamp_text.DrawLatex( xpos, ypos, cmsLabel)
+
+    try:
+      os.makedirs(folder + "genLLP")
+    except OSError:
+      pass
+    canv.SaveAs(folder + "genLLP" + "/" + plot + ".png")
+

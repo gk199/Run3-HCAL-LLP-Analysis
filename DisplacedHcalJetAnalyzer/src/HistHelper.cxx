@@ -97,9 +97,13 @@ void DisplacedHcalJetAnalyzer::BookHists(){
 		h[cat+"hbhe_auxTDC"] = new TH1F( Form( "%shbhe_auxTDC", cat.c_str()), "HBHE aux TDC; aux TDC; Events", NBins, 0, 2000000000 );
 	}
 	// not split by category 
-	h["gen_Xdecay"] = new TH1F("gen_Xdecay", "LLP x decay position; X Decay Vertex (mm); Events", 100, -2000, 2000);
-	h["gen_Ydecay"] = new TH1F("gen_Ydecay", "LLP x decay position; Y Decay Vertex (mm); Events", 100, -2000, 2000);
-	h["gen_Zdecay"] = new TH1F("gen_Zdecay", "LLP x decay position; Z Decay Vertex (mm); Events", 100, -20000, 20000); 
+	h["gen_Xdecay"] = new TH1F("gen_Xdecay", "LLP x decay position; X Decay Vertex (mm); Events", 100, -20000, 20000);
+	h["gen_Ydecay"] = new TH1F("gen_Ydecay", "LLP x decay position; Y Decay Vertex (mm); Events", 100, -20000, 20000);
+	h["gen_Zdecay"] = new TH1F("gen_Zdecay", "LLP x decay position; Z Decay Vertex (mm); Events", 100, -100000, 100000); 
+	h["gen_Rdecay"] = new TH1F("gen_Rdecay", "LLP radial decay position; #sqrt{x^{2} + y^{2}} Radial Decay Vertex (mm); Events", 100, 0, 25000); 
+	h["gen_Ddecay"] = new TH1F("gen_Ddecay", "LLP decay position; #sqrt{x^{2} + y^{2} + z^{2}} Decay Vertex (mm); Events", 100, 0, 50000); 
+	h["gen_cTau"] = new TH1F("gen_cTau", "LLP c#tau; c#tau (mm); Events", 100, 0, 10000); 
+	h["gen_deltaT"] = new TH1F("gen_deltaT", "LLP #Delta t; #Delta T (ns); Events", 100, 0, 10); 
 }
 
 /* ====================================================================================================================== */
@@ -175,9 +179,17 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 	if (cat == "NoSel__") {
 		if (n_gLLP > 0) { // make sure gen LLP exists 
 			for (int i = 0; i < n_gLLP; i++) {
-				h["gen_Xdecay"]->Fill(gLLP_DecayVtx_X->at(i));
-				h["gen_Ydecay"]->Fill(gLLP_DecayVtx_Y->at(i));
-				h["gen_Zdecay"]->Fill(gLLP_DecayVtx_Z->at(i));
+				double x_LLP = gLLP_DecayVtx_X->at(i);
+				double y_LLP = gLLP_DecayVtx_Y->at(i);
+				double z_LLP = gLLP_DecayVtx_Z->at(i);
+				h["gen_Xdecay"]->Fill(x_LLP);
+				h["gen_Ydecay"]->Fill(y_LLP);
+				h["gen_Zdecay"]->Fill(z_LLP);
+				h["gen_Rdecay"]->Fill(sqrt( pow(x_LLP,2) + pow(y_LLP,2) ));
+				double distance = sqrt( pow(x_LLP,2) + pow(y_LLP,2) + pow(z_LLP,2) );
+				h["gen_Ddecay"]->Fill(distance);
+				h["gen_cTau"]->Fill(distance * (sqrt( 1 / pow(gLLP_Beta->at(i),2) - 1)));
+				h["gen_deltaT"]->Fill(distance * ( 1 / gLLP_Beta->at(i) - 1) * 0.003336); // 1/c in ns / mm to give answer in ns
 			}
 		}
 	}

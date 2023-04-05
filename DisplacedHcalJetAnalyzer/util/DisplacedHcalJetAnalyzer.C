@@ -99,7 +99,7 @@ void DisplacedHcalJetAnalyzer( string infiletag = "", string infilepath = "" ){
 	
 	//TString outfilename = Form( "minituple_%s.root", infiletag.c_str() ); // Not yet
 	TString outfilename = Form( "hists_%s.root", infiletag.c_str() );
-	TFile *fout = new TFile( outfilename, "RECREATE" ); 
+	TFile *fout = new TFile( outfilename, "RECREATE" );
 
 	// ----- Run!!! ----- // 
 
