@@ -10,6 +10,7 @@ using namespace std;
 #include "../src/ObjectHelper.cxx"
 #include "../src/HistHelper.cxx"
 #include "../src/OutputHelper.cxx"
+#include "../src/TruthInfoHelper.cxx"
 
 /* ====================================================================================================================== */
 void DisplacedHcalJetAnalyzer::Initialize( string infiletag, string infilepath ){

@@ -684,6 +684,13 @@ public :
    virtual void   SetTriggerNames( string infilepath, string hist_name );
    // Object Helper.cxx
    virtual Int_t  GetRechitMult( Long64_t jentry, int LLP_number );
+   virtual float DeltaR( float eta1, float eta2, float phi1, float phi2);
+   virtual double deltaPhi(double phi1, double phi2);
+   virtual double deltaR(double eta1, double phi1, double eta2, double phi2);
+   // TruthInfoHelper.cxx
+   virtual vector<TVector3> GetLLPDecayProdCoords(int idx_llp, int idx_llp_decay, vector<float> intersection_depths);
+   virtual vector<float> GetMatchedHcalRechits_LLPDecay( int idx_llp, int idx_llp_decay, float deltaR_cut );
+   virtual bool IsTruthMatchedLLPDecay_HcalRechit( int idx_hbheRechit, float deltaR_cut );
    // EventHelper.cxx
    virtual float  GetEventRuntime( clock_t clock_start, Long64_t init_entry, Long64_t current_entry );
    // OutputHelper.cxx
@@ -1323,20 +1330,6 @@ Int_t DisplacedHcalJetAnalyzer::Cut(Long64_t entry)
 // returns  1 if entry is accepted.
 // returns -1 otherwise.
    return 1;
-}
-
-double deltaPhi(double phi1, double phi2) {  // calculate delta phi given two phi values
-  double result = phi1 - phi2;
-  if(fabs(result) > 9999) return result;
-  while (result > TMath::Pi()) result -= 2*TMath::Pi();
-  while (result <= -TMath::Pi()) result += 2*TMath::Pi();
-  return result;
-}
-
-double deltaR(double eta1, double phi1, double eta2, double phi2) { // calculate deltaR given two eta and phi values
-  double deta = eta1 - eta2;
-  double dphi = deltaPhi(phi1, phi2);
-  return sqrt(deta*deta + dphi*dphi);
 }
 
 #endif // #ifdef DisplacedHcalJetAnalyzer_cxx

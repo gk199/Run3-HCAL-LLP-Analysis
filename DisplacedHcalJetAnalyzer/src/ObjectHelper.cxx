@@ -1,5 +1,34 @@
 // Put object-related functions here (e.g. selection functions, etc)
 
+/* ====================================================================================================================== */
+float DisplacedHcalJetAnalyzer::DeltaR( float eta1, float eta2, float phi1, float phi2){
+
+	if( debug ) cout<<"DisplacedHggAnalysis::DeltaR()"<<endl;
+
+ 	float deta = fabs(eta2 - eta1);
+ 	float dphi = fabs(phi2 - phi1);
+ 	if( dphi > 3.14159 ) dphi -= 2*3.14159; // PBC
+
+ 	float dR = sqrt( pow(deta, 2.) + pow(dphi, 2.) );
+ 	return dR;
+}
+
+/* ====================================================================================================================== */
+double DisplacedHcalJetAnalyzer::deltaPhi(double phi1, double phi2) {  // calculate delta phi given two phi values
+  double result = phi1 - phi2;
+  if(fabs(result) > 9999) return result;
+  while (result > TMath::Pi()) result -= 2*TMath::Pi();
+  while (result <= -TMath::Pi()) result += 2*TMath::Pi();
+  return result;
+}
+
+double DisplacedHcalJetAnalyzer::deltaR(double eta1, double phi1, double eta2, double phi2) { // calculate deltaR given two eta and phi values
+  double deta = eta1 - eta2;
+  double dphi = deltaPhi(phi1, phi2);
+  return sqrt(deta*deta + dphi*dphi);
+}
+
+/* ====================================================================================================================== */
 int DisplacedHcalJetAnalyzer::GetRechitMult(Long64_t jentry, int LLP_number){
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetRechitMult()"<<endl;
@@ -41,5 +70,4 @@ int DisplacedHcalJetAnalyzer::GetRechitMult(Long64_t jentry, int LLP_number){
 	// FillOutputTrees("");
 
 	return rechitMult;
-
 }
