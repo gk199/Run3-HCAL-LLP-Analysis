@@ -34,6 +34,7 @@
 //#include <TMVA/Reader.h>
 
 #include <vector>
+#include<algorithm>
 #ifdef __ROOTCLING__
 #pragma link C++ class vector<vector <float> >+;
 #pragma link C++ class vector<vector <int> >+;
@@ -676,19 +677,21 @@ public :
    virtual void     Show(Long64_t entry = -1);
 
    // DisplacedHcalJetAnalyzer.C
-   virtual void   Initialize(  string infiletag, string infilepath );
+   virtual void   Initialize( string infiletag, string infilepath );
    // Loop.cxx
    virtual void   Loop();
    virtual void   ProcessEvent( Long64_t jentry );
    // TriggerHelper.cxx
    virtual void   SetTriggerNames( string infilepath, string hist_name );
    // Object Helper.cxx
-   virtual Int_t  GetRechitMult( Long64_t jentry, int LLP_number );
-   virtual float DeltaR( float eta1, float eta2, float phi1, float phi2);
-   virtual double deltaPhi(double phi1, double phi2);
-   virtual double deltaR(double eta1, double phi1, double eta2, double phi2);
+   virtual float  DeltaR( float eta1, float eta2, float phi1, float phi2);
+   virtual double deltaPhi( double phi1, double phi2);
+   virtual double deltaR( double eta1, double phi1, double eta2, double phi2);
+   virtual int    GetRechitMult( int idx_llp);
+   virtual vector<float> GetEnergyProfile( int idx_llp);
    // TruthInfoHelper.cxx
-   virtual vector<TVector3> GetLLPDecayProdCoords(int idx_llp, int idx_llp_decay, vector<float> intersection_depths);
+   virtual vector<TVector3> GetLLPDecayProdCoords( int idx_llp, int idx_llp_decay, vector<float> intersection_depths);
+   virtual float GetDecayRadiusHB_LLP( int idx_llp);
    virtual vector<float> GetMatchedHcalRechits_LLPDecay( int idx_llp, int idx_llp_decay, float deltaR_cut );
    virtual bool IsTruthMatchedLLPDecay_HcalRechit( int idx_hbheRechit, float deltaR_cut );
    // EventHelper.cxx

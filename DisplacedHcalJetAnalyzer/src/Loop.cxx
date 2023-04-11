@@ -32,11 +32,6 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 		FillHists("JetPt40");
 	}
 
-	// check hit multiplicity 
-	for (int i = 0; i < n_gLLP; i++) {
-		GetRechitMult(jentry, i);
-	}
-
 	// FillOutputTrees("");
 
 	return;
