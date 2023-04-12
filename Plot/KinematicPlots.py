@@ -83,11 +83,11 @@ for obj in objects:
           hist.Draw("SAME HIST PLC")
         if (i == 2):
           legend.Draw()
-          stamp_text.DrawLatex( xpos, ypos, cmsLabel)
+          stamp_text.DrawLatex( xpos+0.2, ypos, cmsLabel)
           overlayCanv.SaveAs(folder + obj + "/Overlay_" + obj + str(i) + "_" + quant + "_" + cat + ".png")
 
 if (MC):
-  plots = {"gen_Ddecay", "gen_Rdecay", "gen_Xdecay", "gen_Ydecay", "gen_Zdecay", "gen_cTau", "gen_deltaT"};
+  plots = {"gen_Ddecay", "gen_Rdecay", "gen_Xdecay", "gen_Ydecay", "gen_Zdecay", "gen_cTau", "gen_deltaT", "gen_rechitNpt2", "gen_rechitNpt4", "gen_rechitNpt6", "gen_energyP"};
 
   print ("Plots for generator LLP information now run: ")
   for plot in plots:
@@ -96,7 +96,9 @@ if (MC):
     canv.cd()
     hist = infile.Get(plot)
     if (hist.GetEntries() > 0): hist.Scale(1/hist.GetEntries())
-    
+    if (plot == "gen_deltaT" or plot == "gen_rechitNpt2" or plot == "gen_rechitNpt4" or plot == "gen_rechitNpt6" or plot == "gen_energyP"): canv.SetLogy()
+    else: canv.SetLogy(0)
+
     if (plot == "gen_cTau"):
       expFit = hist.Fit("expo","S")
       hist.Draw("pe")
@@ -113,7 +115,7 @@ if (MC):
       latex.DrawText(0.7, 0.65, "ctau = %.3f"%ctau)
     else:
       hist.Draw("HIST PLC")
-    stamp_text.DrawLatex( xpos, ypos, cmsLabel)
+    stamp_text.DrawLatex( xpos+0.2, ypos, cmsLabel)
 
     try:
       os.makedirs(folder + "genLLP")

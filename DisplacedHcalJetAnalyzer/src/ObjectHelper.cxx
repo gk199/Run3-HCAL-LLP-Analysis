@@ -29,21 +29,21 @@ double DisplacedHcalJetAnalyzer::deltaR(double eta1, double phi1, double eta2, d
 }
 
 /* ====================================================================================================================== */
-int DisplacedHcalJetAnalyzer::GetRechitMult(int idx_llp) { // given a LLP, find how many associated HB rechits there are
+int DisplacedHcalJetAnalyzer::GetRechitMult(int idx_llp, float deltaR_cut) { // given a LLP, find how many associated HB rechits there are
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetRechitMult()"<<endl;
 
 	/* this finds the total number of HB rechits that are matched to a LLP
 	int rechitMult = 0; 
 	if (n_hbheRechit > 0) {
-		for (int i = 0; i < n_hbheRechit; i++) if (IsTruthMatchedLLPDecay_HcalRechit(i,0.4)) rechitMult += 1;
+		for (int i = 0; i < n_hbheRechit; i++) if (IsTruthMatchedLLPDecay_HcalRechit(i, deltaR_cut)) rechitMult += 1;
 	}
 	if (rechitMult > 0) std::cout << rechitMult << " = total event rechitMult" << std::endl; 
 	*/
 	
 	vector<float> matchedRechit[2];
 	for (int idx_llp_decay = 0; idx_llp_decay < 2; idx_llp_decay++) {
-		vector<float> hbhe_matched_indices = GetMatchedHcalRechits_LLPDecay(idx_llp, idx_llp_decay, 0.4);
+		vector<float> hbhe_matched_indices = GetMatchedHcalRechits_LLPDecay(idx_llp, idx_llp_decay, deltaR_cut);
 		matchedRechit[idx_llp_decay] = hbhe_matched_indices;
 		// if (hbhe_matched_indices.size() > 0) std::cout << hbhe_matched_indices.size() << " = hbhe_matched_indices.size(), for LLP number " << idx_llp << std::endl;
 		// if (matchedRechit[idx_llp_decay].size() > 0 ) std::cout << matchedRechit[idx_llp_decay].size() << " = matchedRechit[idx_llp_decay].size(), for LLP number " << idx_llp << std::endl;
@@ -57,18 +57,21 @@ int DisplacedHcalJetAnalyzer::GetRechitMult(int idx_llp) { // given a LLP, find 
 }
 
 /* ====================================================================================================================== */
-vector<float> DisplacedHcalJetAnalyzer::GetEnergyProfile(int idx_llp) { // given a LLP, find the normalized energy profile from associated HB rechits 
+vector<float> DisplacedHcalJetAnalyzer::GetEnergyProfile(int idx_llp, float deltaR_cut) { // given a LLP, find the normalized energy profile from associated HB rechits 
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetEnergyProfile()"<<endl;
 
 	vector<float> energy = {0,0,0,0};
 
+	vector<float> matchedRechit[2];
 	for (int idx_llp_decay = 0; idx_llp_decay < 2; idx_llp_decay++) {
-		vector<float> hbhe_matched_indices = GetMatchedHcalRechits_LLPDecay(idx_llp, idx_llp_decay, 0.4);
+		matchedRechit[idx_llp_decay] = GetMatchedHcalRechits_LLPDecay(idx_llp, idx_llp_decay, deltaR_cut);
 
-		for (int i = 0; i < hbhe_matched_indices.size(); i++) {
+		for (int i = 0; i < matchedRechit[idx_llp_decay].size(); i++) {
 			energy[hbheRechit_depth->at(i) - 1] += hbheRechit_E->at(i); // how much energy in each depth? 
+			// TODO this is overcounting rechits, exclude ones already in first set of matched indicies 
 		}
+	//std::remove_copy_if(matchedRechit[0].begin(), matchedRechit[0].end(), back_inserter(matchedRechit[1]), Contained(matchedRechit[1]));
 	}
 	int totalE = energy[0] + energy[1] + energy[2] + energy[3];
 	if (totalE > 0) for (int i=0; i<energy.size(); i++) energy[i] = energy[i] / totalE;

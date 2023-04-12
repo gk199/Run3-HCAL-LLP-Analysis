@@ -79,8 +79,9 @@ float DisplacedHcalJetAnalyzer::GetDecayRadiusHB_LLP( int idx_llp ) {
 	double z_LLP = gLLP_DecayVtx_Z->at(idx_llp);
 	
 	float radiusLLPdecay = -999;
-    //if ((sqrt( pow(x_LLP,2) + pow(y_LLP,2)) > HB_inner_radius) && (sqrt( pow(x_LLP,2) + pow(y_LLP,2)) < HB_outer_radius) && abs(z_LLP) < HE_start) { 
-    if ((sqrt( pow(x_LLP,2) + pow(y_LLP,2)) < HB_outer_radius) && abs(z_LLP) < HE_start) { 
+    // if ((sqrt( pow(x_LLP,2) + pow(y_LLP,2)) > HB_inner_radius) && (sqrt( pow(x_LLP,2) + pow(y_LLP,2)) < HB_outer_radius) && abs(z_LLP) < HE_start) { 
+    // if ((sqrt( pow(x_LLP,2) + pow(y_LLP,2)) < HB_outer_radius) && abs(z_LLP) < HE_start) { 
+    if (abs(z_LLP) < HE_start) { 
 		radiusLLPdecay = sqrt( pow(x_LLP,2) + pow(y_LLP,2)); // in cm
 	}
 	return radiusLLPdecay;
