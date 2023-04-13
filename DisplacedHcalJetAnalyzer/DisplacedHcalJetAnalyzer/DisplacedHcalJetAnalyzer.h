@@ -687,12 +687,13 @@ public :
    virtual float  DeltaR( float eta1, float eta2, float phi1, float phi2);
    virtual double deltaPhi( double phi1, double phi2);
    virtual double deltaR( double eta1, double phi1, double eta2, double phi2);
-   virtual int    GetRechitMult( int idx_llp, float deltaR_cut );
-   virtual vector<float> GetEnergyProfile( int idx_llp, float deltaR_cut );
+   virtual vector<int> GetRechitMult( int idx_llp, float deltaR_cut );
+   virtual vector<vector<float>> GetEnergyProfile( int idx_llp, float deltaR_cut );
    // TruthInfoHelper.cxx
    virtual vector<TVector3> GetLLPDecayProdCoords( int idx_llp, int idx_llp_decay, vector<float> intersection_depths);
    virtual float GetDecayRadiusHB_LLP( int idx_llp);
    virtual vector<float> GetMatchedHcalRechits_LLPDecay( int idx_llp, int idx_llp_decay, float deltaR_cut );
+   virtual vector<float> GetMatchedHcalRechits_LLPDecay_Overlap( int idx_llp, float deltaR_cut );
    virtual bool IsTruthMatchedLLPDecay_HcalRechit( int idx_hbheRechit, float deltaR_cut );
    // EventHelper.cxx
    virtual float  GetEventRuntime( clock_t clock_start, Long64_t init_entry, Long64_t current_entry );

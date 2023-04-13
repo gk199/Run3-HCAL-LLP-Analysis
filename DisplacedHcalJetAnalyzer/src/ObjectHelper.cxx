@@ -29,51 +29,71 @@ double DisplacedHcalJetAnalyzer::deltaR(double eta1, double phi1, double eta2, d
 }
 
 /* ====================================================================================================================== */
-int DisplacedHcalJetAnalyzer::GetRechitMult(int idx_llp, float deltaR_cut) { // given a LLP, find how many associated HB rechits there are
+vector<int> DisplacedHcalJetAnalyzer::GetRechitMult(int idx_llp, float deltaR_cut) { // given a LLP, find how many associated HB rechits there are (rechits for LLP total, first daughter, second daughter)
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetRechitMult()"<<endl;
-
-	/* this finds the total number of HB rechits that are matched to a LLP
-	int rechitMult = 0; 
-	if (n_hbheRechit > 0) {
-		for (int i = 0; i < n_hbheRechit; i++) if (IsTruthMatchedLLPDecay_HcalRechit(i, deltaR_cut)) rechitMult += 1;
-	}
-	if (rechitMult > 0) std::cout << rechitMult << " = total event rechitMult" << std::endl; 
-	*/
 	
 	vector<float> matchedRechit[2];
 	for (int idx_llp_decay = 0; idx_llp_decay < 2; idx_llp_decay++) {
-		vector<float> hbhe_matched_indices = GetMatchedHcalRechits_LLPDecay(idx_llp, idx_llp_decay, deltaR_cut);
-		matchedRechit[idx_llp_decay] = hbhe_matched_indices;
-		// if (hbhe_matched_indices.size() > 0) std::cout << hbhe_matched_indices.size() << " = hbhe_matched_indices.size(), for LLP number " << idx_llp << std::endl;
-		// if (matchedRechit[idx_llp_decay].size() > 0 ) std::cout << matchedRechit[idx_llp_decay].size() << " = matchedRechit[idx_llp_decay].size(), for LLP number " << idx_llp << std::endl;
+		matchedRechit[idx_llp_decay] = GetMatchedHcalRechits_LLPDecay(idx_llp, idx_llp_decay, deltaR_cut);
 	}
-	std::vector<int> v_intersection;
+	vector<float> v_intersection;
 	std::set_intersection( matchedRechit[0].begin(), matchedRechit[0].end(), matchedRechit[1].begin(), matchedRechit[1].end(), std::back_inserter(v_intersection));
 
-	int rechits_forLLP = matchedRechit[0].size() + matchedRechit[1].size() - v_intersection.size();
-	// if (rechits_forLLP > 0) std::cout << rechits_forLLP << " = total rechits for this LLP" << std::endl;
+	int rechitMult_LLP	 	= matchedRechit[0].size() + matchedRechit[1].size() - v_intersection.size();
+	int rechitMult_decay1 	= matchedRechit[0].size();
+	int rechitMult_decay2	= matchedRechit[1].size();
+
+	vector<int> rechits_forLLP = {rechitMult_LLP, rechitMult_decay1, rechitMult_decay2};
 	return rechits_forLLP;
 }
 
 /* ====================================================================================================================== */
-vector<float> DisplacedHcalJetAnalyzer::GetEnergyProfile(int idx_llp, float deltaR_cut) { // given a LLP, find the normalized energy profile from associated HB rechits 
+vector<vector<float>> DisplacedHcalJetAnalyzer::GetEnergyProfile(int idx_llp, float deltaR_cut) { // given a LLP, find the normalized energy profile from associated HB rechits 
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetEnergyProfile()"<<endl;
 
-	vector<float> energy = {0,0,0,0};
+	// vectors to fill wiht energy in each depth
+	vector<float> energy_LLP 		= {0,0,0,0};
+	vector<float> energy_daughter1 	= {0,0,0,0};
+	vector<float> energy_daughter2 	= {0,0,0,0};
 
 	vector<float> matchedRechit[2];
 	for (int idx_llp_decay = 0; idx_llp_decay < 2; idx_llp_decay++) {
 		matchedRechit[idx_llp_decay] = GetMatchedHcalRechits_LLPDecay(idx_llp, idx_llp_decay, deltaR_cut);
-
-		for (int i = 0; i < matchedRechit[idx_llp_decay].size(); i++) {
-			energy[hbheRechit_depth->at(i) - 1] += hbheRechit_E->at(i); // how much energy in each depth? 
-			// TODO this is overcounting rechits, exclude ones already in first set of matched indicies 
-		}
-	//std::remove_copy_if(matchedRechit[0].begin(), matchedRechit[0].end(), back_inserter(matchedRechit[1]), Contained(matchedRechit[1]));
 	}
-	int totalE = energy[0] + energy[1] + energy[2] + energy[3];
-	if (totalE > 0) for (int i=0; i<energy.size(); i++) energy[i] = energy[i] / totalE;
+	vector<float> v_intersection;
+	std::set_intersection( matchedRechit[0].begin(), matchedRechit[0].end(), matchedRechit[1].begin(), matchedRechit[1].end(), std::back_inserter(v_intersection));
+	
+	vector<int> matched_indices; // prevent double counting rechits in energy profile for LLP 
+	for (int idx_llp_decay = 0; idx_llp_decay < 2; idx_llp_decay++) {
+		for (int i = 0; i < matchedRechit[idx_llp_decay].size(); i++) {
+			int hbhe_matched_indices = matchedRechit[idx_llp_decay][i];
+			if (idx_llp_decay == 0) {
+				energy_daughter1[hbheRechit_depth->at(hbhe_matched_indices) - 1] += hbheRechit_E->at(hbhe_matched_indices);
+				matched_indices.push_back(hbhe_matched_indices); // contains all matched indicies for decay product 1
+				energy_LLP[hbheRechit_depth->at(hbhe_matched_indices) - 1] += hbheRechit_E->at(hbhe_matched_indices);
+			}
+			if (idx_llp_decay == 1) { // for decay product 2, make sure to not double count the same hbhe_matched_indices for overall LLP energy
+				energy_daughter2[hbheRechit_depth->at(hbhe_matched_indices) - 1] += hbheRechit_E->at(hbhe_matched_indices);
+				if (!(std::count(matched_indices.begin(), matched_indices.end(), hbhe_matched_indices))) { 
+					energy_LLP[hbheRechit_depth->at(hbhe_matched_indices) - 1] += hbheRechit_E->at(hbhe_matched_indices);
+				}
+			}
+		}
+	}
+
+	int totalE_LLP = 0, totalE_daughter1 = 0, totalE_daughter2 = 0;
+	for (int i = 0; i < energy_LLP.size(); i++) { // total energy calculation
+		totalE_LLP += energy_LLP[i];
+		totalE_daughter1 += energy_daughter1[i];
+		totalE_daughter2 += energy_daughter2[i];
+	}
+	// energy normalization
+	if (totalE_LLP > 0) for (int i=0; i<energy_LLP.size(); i++) energy_LLP[i] = energy_LLP[i] / totalE_LLP;
+	if (totalE_daughter1 > 0) for (int i=0; i<energy_daughter1.size(); i++) energy_daughter1[i] = energy_daughter1[i] / totalE_daughter1;
+	if (totalE_daughter2 > 0) for (int i=0; i<energy_daughter2.size(); i++) energy_daughter2[i] = energy_daughter2[i] / totalE_daughter2;
+
+	vector<vector<float>> energy = {energy_LLP, energy_daughter1, energy_daughter2};
 	return energy;
 }

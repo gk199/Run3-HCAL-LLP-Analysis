@@ -104,14 +104,19 @@ void DisplacedHcalJetAnalyzer::BookHists(){
 	h["gen_Ddecay"] = new TH1F("gen_Ddecay", "LLP decay position; #sqrt{x^{2} + y^{2} + z^{2}} Decay Vertex (cm); Events", 100, 0, 5000); 
 	h["gen_cTau"] = new TH1F("gen_cTau", "LLP c#tau; c#tau (cm); Events", 100, 0, 1000); 
 	h["gen_deltaT"] = new TH1F("gen_deltaT", "LLP #Delta t; #Delta T (ns); Events", 100, 0, 10); 
-	h["gen_rechitNpt4"] = new TH1F("gen_rechitNpt4", "Number of HB Rechits Associated with LLP (#Delta R 0.4); Number of HB Rechits; Events", 100,0,100);
-	h["gen_rechitNpt2"] = new TH1F("gen_rechitNpt2", "Number of HB Rechits Associated with LLP (#Delta R 0.2); Number of HB Rechits; Events", 100,0,100);
-	h["gen_rechitNpt6"] = new TH1F("gen_rechitNpt6", "Number of HB Rechits Associated with LLP (#Delta R 0.6); Number of HB Rechits; Events", 100,0,100);
-	h2["gen_decay_rechitN"] = new TH2F("gen_decay_rechitN", "LLP decay position vs. number of HB rechits; Decay Radius (cm); Number of HB Rechits", 100,0,1000,100,0,100);
-	h["gen_energyP"] = new TH1F("gen_energyP", "Energy Profile of HB Rechits Associated with LLP; Normalized Energy per HB Depth; Events", 5,0,5);
-	h["gen_energyP_HBstart"] = new TH1F("gen_energyP_HBstart", "Energy Profile of HB Rechits Associated with LLP (decaying in start of HB); Normalized Energy per HB Depth; Events", 5,0,5);
-	h["gen_energyP_HBend"] = new TH1F("gen_energyP_HBend", "Energy Profile of HB Rechits Associated with LLP (decaying in end of HB); Normalized Energy per HB Depth; Events", 5,0,5);
 
+	for( auto is: istring ) {
+		h["gen_rechitNpt2_"+is] = new TH1F(Form("gen_rechitNpt2_%s",is.c_str()), "Number of HB Rechits Associated with LLP (#Delta R<0.2); Number of HB Rechits; Events", 100,0,100);
+		h["gen_rechitNpt4_"+is] = new TH1F(Form("gen_rechitNpt4_%s",is.c_str()), "Number of HB Rechits Associated with LLP (#Delta R<0.4); Number of HB Rechits; Events", 100,0,100);
+		h["gen_rechitNpt6_"+is] = new TH1F(Form("gen_rechitNpt6_%s",is.c_str()), "Number of HB Rechits Associated with LLP (#Delta R<0.6); Number of HB Rechits; Events", 100,0,100);
+
+		h2["gen_depth_energyP_"+is] = new TH2F(Form("gen_depth_energyP_%s",is.c_str()), "Energy Profile of HB Rechits Associated with LLP; HB Depth; Fraction of Energy", 5,0,5,100,0,1.5);
+		h["gen_energyP_"+is] = new TH1F(Form("gen_energyP_%s",is.c_str()), "Energy Profile of HB Rechits Associated with LLP; Normalized Energy per HB Depth; Events", 5,0,5);
+		h["gen_energyP_HBstart_"+is] = new TH1F(Form("gen_energyP_HBstart_%s",is.c_str()), "Energy Profile of HB Rechits Associated with LLP (decaying in start of HB); Normalized Energy per HB Depth; Events", 5,0,5);
+		h["gen_energyP_HBend_"+is] = new TH1F(Form("gen_energyP_HBend_%s",is.c_str()), "Energy Profile of HB Rechits Associated with LLP (decaying in end of HB); Normalized Energy per HB Depth; Events", 5,0,5);
+	}
+	h2["gen_decay_rechitN"] = new TH2F("gen_decay_rechitN", "LLP decay position vs. number of HB rechits; Decay Radius (cm); Number of HB Rechits", 100,0,1000,100,0,100);
+	
 }
 
 /* ====================================================================================================================== */
@@ -194,6 +199,7 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 				double radius = sqrt( pow(x_LLP,2) + pow(y_LLP,2) );
 				double distance = sqrt( pow(x_LLP,2) + pow(y_LLP,2) + pow(z_LLP,2) );
 
+				// positional quantities
 				h["gen_Xdecay"]->Fill(x_LLP);
 				h["gen_Ydecay"]->Fill(y_LLP);
 				h["gen_Zdecay"]->Fill(z_LLP);
@@ -202,24 +208,30 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 				h["gen_cTau"]->Fill(distance * (sqrt( 1 / pow(gLLP_Beta->at(idx_llp),2) - 1)));
 				h["gen_deltaT"]->Fill(distance * ( 1 / gLLP_Beta->at(idx_llp) - 1) * 0.03336); // 1/c in ns / cm to give answer in ns
 
-				int n_rechit_pt2 = GetRechitMult(idx_llp, 0.2);
-				int n_rechit_pt4 = GetRechitMult(idx_llp, 0.4);
-				int n_rechit_pt6 = GetRechitMult(idx_llp, 0.6);
+				// rechit multiplicity
+				vector<int> n_rechit_pt2 = GetRechitMult(idx_llp, 0.2); // GetRechitMult returns rechit multiplicity associated with LLP, first daughter, second daughter
+				vector<int> n_rechit_pt4 = GetRechitMult(idx_llp, 0.4);
+				vector<int> n_rechit_pt6 = GetRechitMult(idx_llp, 0.6);
 				float decay_radius = abs(GetDecayRadiusHB_LLP(idx_llp));
-				h["gen_rechitNpt2"]->Fill(n_rechit_pt2);
-				h["gen_rechitNpt4"]->Fill(n_rechit_pt4);
-				h["gen_rechitNpt6"]->Fill(n_rechit_pt6);
+				h2["gen_decay_rechitN"]->Fill(decay_radius, n_rechit_pt4[0]);
+				
+				// energy profile					
+				vector<vector<float>> energy = GetEnergyProfile(idx_llp, 0.4); // [0] is LLP, [1] is daughter 1, [2] is daughter 2
 
-				if (n_rechit_pt4 > 0) std::cout << n_rechit_pt4 << " = GetRechitMult(idx_llp, 0.4)" << std::endl;
-				h2["gen_decay_rechitN"]->Fill(decay_radius, n_rechit_pt4);	
+				for (int i=0; i<3; i++) { // LLP, daughter 1, daughter 2
+					string is = to_string(i);
+					h["gen_rechitNpt2_"+is]->Fill(n_rechit_pt2[i]);
+					h["gen_rechitNpt4_"+is]->Fill(n_rechit_pt4[i]);
+					h["gen_rechitNpt6_"+is]->Fill(n_rechit_pt6[i]);
 
-				vector<float> energy = GetEnergyProfile(idx_llp, 0.4);
-				for (int depth = 0; depth < 4; depth++) {
-					h["gen_energyP"]->Fill(depth + 1, energy[depth]);
-					if (decay_radius > 175 && decay_radius < 235) h["gen_energyP_HBstart"]->Fill(depth + 1, energy[depth]);
-					if (decay_radius > 235 && decay_radius < 295) h["gen_energyP_HBend"]->Fill(depth + 1, energy[depth]); // currently all energies are 0 for these matched rechits
+					// if (n_rechit_pt4[i] > 0) std::cout << n_rechit_pt4[i] << " = GetRechitMult(idx_llp, 0.4) for i=" << i << std::endl;
+					for (int depth = 0; depth < 4; depth++) {
+						h2["gen_depth_energyP_"+is]->Fill(depth + 1, energy[i][depth]);
+						h["gen_energyP_"+is]->Fill(depth + 1, energy[i][depth]);
+						if (decay_radius > 175 && decay_radius < 235) h["gen_energyP_HBstart_"+is]->Fill(depth + 1, energy[i][depth]);
+						if (decay_radius > 235 && decay_radius < 295) h["gen_energyP_HBend_"+is]->Fill(depth + 1, energy[i][depth]); // currently all energies are 0 for these matched rechits
+					}
 				}
-				// if (energy[0] + energy[1] + energy[2] + energy[3] > 0) std::cout << energy[0] << ", " << energy[1] << ", " << energy[2] << ", " << energy[3] << " = energy at each depth " << std::endl;
 			}
 		}
 	}
