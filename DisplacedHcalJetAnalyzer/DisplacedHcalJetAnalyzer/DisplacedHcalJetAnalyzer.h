@@ -689,6 +689,8 @@ public :
    virtual double deltaR( double eta1, double phi1, double eta2, double phi2);
    virtual vector<int> GetRechitMult( int idx_llp, float deltaR_cut );
    virtual vector<vector<float>> GetEnergyProfile( int idx_llp, float deltaR_cut );
+   virtual vector<float> GetMatchedHcalRechits_Jet( int idx_jet, float deltaR_cut );
+   virtual vector<float> GetEnergyProfile_Jet( int idx_jet, float deltaR_cut );
    // TruthInfoHelper.cxx
    virtual vector<TVector3> GetLLPDecayProdCoords( int idx_llp, int idx_llp_decay, vector<float> intersection_depths);
    virtual float GetDecayRadiusHB_LLP( int idx_llp);

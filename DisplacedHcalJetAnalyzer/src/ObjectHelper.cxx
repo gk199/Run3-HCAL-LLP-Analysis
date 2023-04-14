@@ -53,7 +53,7 @@ vector<vector<float>> DisplacedHcalJetAnalyzer::GetEnergyProfile(int idx_llp, fl
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetEnergyProfile()"<<endl;
 
-	// vectors to fill wiht energy in each depth
+	// vectors to fill with energy in each depth
 	vector<float> energy_LLP 		= {0,0,0,0};
 	vector<float> energy_daughter1 	= {0,0,0,0};
 	vector<float> energy_daughter2 	= {0,0,0,0};
@@ -96,4 +96,49 @@ vector<vector<float>> DisplacedHcalJetAnalyzer::GetEnergyProfile(int idx_llp, fl
 
 	vector<vector<float>> energy = {energy_LLP, energy_daughter1, energy_daughter2};
 	return energy;
+}
+
+/* ====================================================================================================================== */
+vector<float> DisplacedHcalJetAnalyzer::GetMatchedHcalRechits_Jet( int idx_jet, float deltaR_cut ){
+	/* 
+	Description: Delivers vector of indices of matched hcal rechits (in hbheRechit)
+	Inputs: idx_jet: 		Jet index
+			deltaR: 		deltaR between hcalrechit and jet (default: 0.4)
+	*/
+
+	vector<float> hbhe_matched_indices;
+
+	for( int j=0; j<hbheRechit_E->size(); j++ ){
+
+		// q: for LLP matching, had to consider right depth, for jet should take all depths? 		
+			
+		float dR_temp = DeltaR( jet_Eta->at(idx_jet), hbheRechit_Eta->at(j), jet_Phi->at(idx_jet), hbheRechit_Phi->at(j) );
+
+		if( dR_temp < deltaR_cut ) hbhe_matched_indices.push_back( j );
+	}
+
+	return hbhe_matched_indices;
+
+}
+
+/* ====================================================================================================================== */
+vector<float> DisplacedHcalJetAnalyzer::GetEnergyProfile_Jet(int idx_jet, float deltaR_cut) { // given a jet, find the normalized energy profile from associated HB rechits 
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetEnergyProfile_Jet()"<<endl;
+
+	// vectors to fill with energy in each depth
+	vector<float> energy_jet = {0,0,0,0};
+
+	vector<float> matchedRechit = GetMatchedHcalRechits_Jet(idx_jet, deltaR_cut);
+	
+	for (int i = 0; i < matchedRechit.size(); i++) {
+		energy_jet[hbheRechit_depth->at(matchedRechit[i]) - 1] += hbheRechit_E->at(matchedRechit[i]);
+	}
+
+	int totalE_jet = 0;
+	for (int i = 0; i < energy_jet.size(); i++) totalE_jet += energy_jet[i]; // total energy calculation
+	// energy normalization
+	if (totalE_jet > 0) for (int i=0; i<energy_jet.size(); i++) energy_jet[i] = energy_jet[i] / totalE_jet;
+
+	return energy_jet;
 }

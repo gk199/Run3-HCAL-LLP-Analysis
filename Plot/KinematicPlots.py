@@ -52,31 +52,38 @@ print("Starting plotting script")
 
 categories = {"NoSel", "JetPt40", "PassedHLT"};
 objects = {"jet", "ele", "muon", "pho"}
-quantities = {"energy", "eta", "phi", "pt"}
+quantities = {"energy", "eta", "phi", "pt", "energyProfile"}
 leading = [0,1,2]
 
 print("Making plots!")
 for obj in objects:
   OutputFolder(obj)
   for quant in quantities:
+    if (quant == "energyProfile" and obj != "jet"): continue
     for cat in categories:
       legend = ROOT.TLegend(xpos+0.2,0.65,xpos+0.35,0.8)
       for i in leading:
         canv.cd()
         hist = infile.Get(cat + "__" + obj + str(i) + "_" + quant)
-        if (hist.GetEntries() > 0): hist.Scale(1/hist.GetEntries())
+        if (hist.GetEntries() > 0): 
+          if (quant == "energyProfile" and hist.Integral() > 0): hist.Scale(1/hist.Integral())
+          else: hist.Scale(1/hist.GetEntries())
         hist.Draw("HIST PLC")
         canv.SaveAs(folder + obj + "/" + obj + str(i) + "_" + quant + "_" + cat + ".png")
 
         overlayCanv.cd()
         overlayCanv.SetLogy()
+        if (quant == "energyProfile"): 
+          overlayCanv.SetLogy(0)
+          hist.GetYaxis().SetRangeUser(0,0.65)
+
         legend.AddEntry(hist,obj + str(i))
         if (quant == "energy"): hist.GetYaxis().SetRangeUser(0.001,0.6)
         if (quant == "eta"): hist.GetYaxis().SetRangeUser(0.001,0.4)
         if (quant == "phi"): hist.GetYaxis().SetRangeUser(0.00001,0.1)
         if (quant == "pt"): hist.GetYaxis().SetRangeUser(0.001,1)
         if (quant == "pt"): hist.GetXaxis().SetRangeUser(0,400)
-        hist.Rebin(5)
+        if (quant != "energyProfile"): hist.Rebin(5)
 
         # Overlay various leading / sub-leading quantities 
         if (i == 0):
