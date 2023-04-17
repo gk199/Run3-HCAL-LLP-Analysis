@@ -142,3 +142,32 @@ vector<float> DisplacedHcalJetAnalyzer::GetEnergyProfile_Jet(int idx_jet, float 
 
 	return energy_jet;
 }
+
+/* ====================================================================================================================== */
+vector<float> DisplacedHcalJetAnalyzer::GetEtaPhiSpread_Jet(int idx_jet, float deltaR_cut) { // given a jet, find the normalized energy profile from associated HB rechits 
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetEtaPhiSpread_Jet()"<<endl;
+
+	// vector to fill with eta and phi spread
+	vector<float> eta_phi = {0,0};
+
+	vector<float> matchedRechit = GetMatchedHcalRechits_Jet(idx_jet, deltaR_cut);
+	
+	float spread_Eta = 0, spread_Phi = 0, totalE = 0;
+	for (int i = 0; i < matchedRechit.size(); i++) {
+		float delta_Eta = hbheRechit_Eta->at(matchedRechit[i]) - jet_Eta->at(idx_jet);
+		float delta_Phi = deltaPhi(hbheRechit_Phi->at(matchedRechit[i]), jet_Phi->at(idx_jet));
+		// now do energy weighting
+		spread_Eta 	+= pow(delta_Eta * hbheRechit_E->at(matchedRechit[i]),2);
+		spread_Phi 	+= pow(delta_Phi * hbheRechit_E->at(matchedRechit[i]),2);
+		totalE 		+= hbheRechit_E->at(matchedRechit[i]);
+	}
+
+	spread_Eta = sqrt(spread_Eta) / totalE;
+	spread_Phi = sqrt(spread_Phi) / totalE;
+
+	vector<float> spread_Eta_Phi = {spread_Eta, spread_Phi};
+
+	return spread_Eta_Phi;
+}
+

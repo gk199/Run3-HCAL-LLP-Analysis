@@ -52,7 +52,6 @@ vector<TVector3> DisplacedHcalJetAnalyzer::GetLLPDecayProdCoords(int idx_llp, in
 		
 		TVector3 vec_llp_decay_temp;
 		vec_llp_decay_temp.SetPtEtaPhi( dist_to_depth, gParticle_Eta->at(llp_decay_indices[idx_llp_decay]), gParticle_Phi->at(llp_decay_indices[idx_llp_decay]) );
-		// confused about this above line, isn't gParticle_Eta not accurate for things not originating from PV, and this is looking at the eta of the LLP decay products? 
 		// essentially, vec_llp_decay_temp is the trajectory of LLP decay product (distance to depth in Pt), eta, phi
 
 		TVector3 vec_intersection_temp = vec_llp + vec_llp_decay_temp;
@@ -116,6 +115,24 @@ vector<float> DisplacedHcalJetAnalyzer::GetMatchedHcalRechits_LLPDecay( int idx_
 
 	return hbhe_matched_indices;
 
+}
+
+/* ====================================================================================================================== */
+vector<float> DisplacedHcalJetAnalyzer::GetMatchedHcalRechits_LLPDecay_Overlap( int idx_llp, float deltaR_cut ){
+	/*
+	Description: Given a LLP, find the overlap in the matched rechits of its decy products
+	Inputs: idx_llp: 		LLP index (0 or 1)
+			deltaR_cut:		deltaR between hcalrechit and LLP decay product
+	*/
+
+	vector<float> matchedRechit[2];
+	for (int idx_llp_decay = 0; idx_llp_decay < 2; idx_llp_decay++) {
+		matchedRechit[idx_llp_decay] = GetMatchedHcalRechits_LLPDecay(idx_llp, idx_llp_decay, deltaR_cut);
+	}
+	vector<float> v_intersection;
+	std::set_intersection( matchedRechit[0].begin(), matchedRechit[0].end(), matchedRechit[1].begin(), matchedRechit[1].end(), std::back_inserter(v_intersection));
+
+	return v_intersection;
 }
 
 /* ====================================================================================================================== */

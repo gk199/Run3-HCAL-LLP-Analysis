@@ -89,6 +89,8 @@ void DisplacedHcalJetAnalyzer::BookHists(){
 			h[cat+"jet"+is+"_phi"] = new TH1F( Form( "%sjet%s_phi", cat.c_str(), is.c_str() ), "Jet #phi; phi; Events", NBins, -3.2, 3.2 );
 			h[cat+"jet"+is+"_energy"] = new TH1F( Form( "%sjet%s_energy", cat.c_str(), is.c_str() ), "Jet energy; energy [GeV]; Events", NBins, 0, 200 );
 			h[cat+"jet"+is+"_energyProfile"] = new TH1F(Form("%sjet%s_energyProfile", cat.c_str(), is.c_str() ), "Energy Profile of HB Rechits Associated with Jet; HB Depth; Fraction of Energy", 6,0,6);
+			h[cat+"jet"+is+"_rechitN"] = new TH1F(Form("%sjet%s_rechitN", cat.c_str(), is.c_str() ), "Number of HB Rechits Associated with Jet (#Delta R<0.4); Number of HB Rechits; Energy", 100,0,100);
+			h2[cat+"jet"+is+"_spreadEtaPhi"] = new TH2F(Form("%sjet%s_spreadEtaPhi", cat.c_str(), is.c_str() ), "Energy Weighted Eta Phi Spread of HB Rechits Associated with Jet (#Delta R<0.4); Eta Spread; Phi Spread", 50,0,0.5,50,0,0.5);
 		}
 		// HCAL rechits - not leading / subleading object as others are
 		h[cat+"hbhe_eta"] = new TH1F( Form( "%shbhe_eta", cat.c_str()), "HBHE #eta; eta; Events", NBins, -3.2, 3.2 );
@@ -145,9 +147,13 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 			h[cat+"jet"+is+"_phi"]->Fill(jet_Phi->at(i) );
 			h[cat+"jet"+is+"_energy"]->Fill(jet_E->at(i) );
 
+			vector<float> rechitJet = GetMatchedHcalRechits_Jet(i, 0.4);
 			vector<float> energy = GetEnergyProfile_Jet(i, 0.4);
+			vector<float> spread_Eta_Phi = GetEtaPhiSpread_Jet(i, 0.4);
 			for (int depth = 0; depth < 4; depth++) {
-				h[cat+"jet"+is+"_energyProfile"] ->Fill(depth + 1, energy[depth]); 
+				h[cat+"jet"+is+"_energyProfile"]->Fill(depth + 1, energy[depth]); 
+				h[cat+"jet"+is+"_rechitN"]->Fill(rechitJet.size());
+				h2[cat+"jet"+is+"_spreadEtaPhi"]->Fill(spread_Eta_Phi[0], spread_Eta_Phi[1]);
 			}
 		}
 	} 
