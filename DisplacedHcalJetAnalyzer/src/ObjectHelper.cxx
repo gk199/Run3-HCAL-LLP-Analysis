@@ -3,7 +3,7 @@
 /* ====================================================================================================================== */
 float DisplacedHcalJetAnalyzer::DeltaR( float eta1, float eta2, float phi1, float phi2){
 
-	if( debug ) cout<<"DisplacedHggAnalysis::DeltaR()"<<endl;
+	//if( debug ) cout<<"DisplacedHcalJetAnalyzer::DeltaR()"<<endl;
 
  	float deta = fabs(eta2 - eta1);
  	float dphi = fabs(phi2 - phi1);
@@ -149,24 +149,27 @@ vector<float> DisplacedHcalJetAnalyzer::GetEtaPhiSpread_Jet(int idx_jet, float d
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetEtaPhiSpread_Jet()"<<endl;
 
 	// vector to fill with eta and phi spread
-	vector<float> eta_phi = {0,0};
+	vector<float> eta_phi = {0,0,0,0};
 
 	vector<float> matchedRechit = GetMatchedHcalRechits_Jet(idx_jet, deltaR_cut);
 	
-	float spread_Eta = 0, spread_Phi = 0, totalE = 0;
+	float spread_Eta = 0, spread_Phi = 0, spread_Eta_E = 0, spread_Phi_E = 0, totalE = 0;
 	for (int i = 0; i < matchedRechit.size(); i++) {
 		float delta_Eta = hbheRechit_Eta->at(matchedRechit[i]) - jet_Eta->at(idx_jet);
 		float delta_Phi = deltaPhi(hbheRechit_Phi->at(matchedRechit[i]), jet_Phi->at(idx_jet));
+		spread_Eta 		+= abs(delta_Eta);
+		spread_Phi		+= abs(delta_Phi);
 		// now do energy weighting
-		spread_Eta 	+= pow(delta_Eta * hbheRechit_E->at(matchedRechit[i]),2);
-		spread_Phi 	+= pow(delta_Phi * hbheRechit_E->at(matchedRechit[i]),2);
-		totalE 		+= hbheRechit_E->at(matchedRechit[i]);
+		spread_Eta_E 	+= pow(delta_Eta * hbheRechit_E->at(matchedRechit[i]),2);
+		spread_Phi_E 	+= pow(delta_Phi * hbheRechit_E->at(matchedRechit[i]),2);
+		totalE 			+= hbheRechit_E->at(matchedRechit[i]);
 	}
+	spread_Eta = spread_Eta / matchedRechit.size();
+	spread_Phi = spread_Phi / matchedRechit.size();
+	spread_Eta_E = sqrt(spread_Eta_E) / totalE;
+	spread_Phi_E = sqrt(spread_Phi_E) / totalE;
 
-	spread_Eta = sqrt(spread_Eta) / totalE;
-	spread_Phi = sqrt(spread_Phi) / totalE;
-
-	vector<float> spread_Eta_Phi = {spread_Eta, spread_Phi};
+	vector<float> spread_Eta_Phi = {spread_Eta, spread_Phi, spread_Eta_E, spread_Phi_E};
 
 	return spread_Eta_Phi;
 }

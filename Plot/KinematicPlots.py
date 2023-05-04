@@ -8,8 +8,10 @@ import sys, os, argparse, time, errno
 import matplotlib.pyplot as plt
 
 debug = False
-data = True
+data = False
 MC = False
+if sys.argv[2] == "data": data = True
+if sys.argv[2] == "MC": MC = True
 
 # Set up for plots
 ROOT.gROOT.SetBatch(1)
@@ -47,19 +49,22 @@ def OutputFolder(name):
 OutputFolder("")
 
 path = sys.argv[1] # pass the location of the processed ntuple as an argument 
-infile = ROOT.TFile.Open( path)
+infile = ROOT.TFile.Open(path)
 
 print("Starting plotting script")
 
 categories = {"NoSel", "JetPt40", "PassedHLT"};
 objects = {"jet", "ele", "muon", "pho"}
-quantities = {"energy", "eta", "phi", "pt", "energyProfile", "rechitN"}
+quantities = {"energy", "eta", "phi", "pt"}
+jet_quantities = {"energyProfile", "rechitN", "etaSpread", "etaSpread_energy", "phiSpread", "phiSpread_energy"}
 leading = [0,1,2]
 
 print("Making plots!")
 for obj in objects:
   OutputFolder(obj)
-  for quant in quantities:
+  if (obj == "jet"): quantities_loop = quantities | jet_quantities # these are sets -- use set union operator
+  else: quantities_loop = quantities
+  for quant in quantities_loop:
     if ((quant == "energyProfile" or quant == "rechitN") and obj != "jet"): continue # only have these plots for jets currently 
     for cat in categories:
       legend = ROOT.TLegend(0.65,0.65,0.8,0.8)
@@ -67,7 +72,7 @@ for obj in objects:
         canv.cd()
         hist = infile.Get(cat + "__" + obj + str(i) + "_" + quant)
         if (hist.GetEntries() > 0): 
-          if (quant == "energyProfile" and hist.Integral() > 0): hist.Scale(1/hist.Integral())
+          if (quant == "energyProfile" and hist.Integral() > 0): hist.Scale(1/hist.Integral()) # for ones that are already normalized (not by entry)
           else: hist.Scale(1/hist.GetEntries())
         hist.Draw("HIST PLC")
         canv.SaveAs(folder + obj + "/" + obj + str(i) + "_" + quant + "_" + cat + ".png")
@@ -82,8 +87,10 @@ for obj in objects:
         if (quant == "energy"): hist.GetYaxis().SetRangeUser(0.001,0.6)
         if (quant == "eta"): hist.GetYaxis().SetRangeUser(0.001,0.4)
         if (quant == "phi"): hist.GetYaxis().SetRangeUser(0.00001,0.1)
-        if (quant == "pt"): hist.GetYaxis().SetRangeUser(0.001,1)
-        if (quant == "pt"): hist.GetXaxis().SetRangeUser(0,400)
+        if (quant == "pt"): 
+          hist.GetYaxis().SetRangeUser(0.001,1)
+          hist.GetXaxis().SetRangeUser(0,400)
+        if (quant[3:9] == "Spread"): hist.GetYaxis().SetRangeUser(0.0001,0.1)
         if (quant != "energyProfile"): hist.Rebin(5)
 
         # Overlay various leading / sub-leading quantities 
@@ -98,7 +105,7 @@ for obj in objects:
 
 print ("2D histogram for eta and phi spread in a jet")
 obj = "jet"
-plots = {"spreadEtaPhi"}
+plots = {"spreadEtaPhi", "spreadEtaPhi_energy"}
 for cat in categories:  
   for plot in plots:
     for i in leading:

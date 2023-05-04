@@ -12,6 +12,7 @@ mv hists_test.root hists_test_signal1.root
 root -q -b -l '../DisplacedHcalJetAnalyzer/util/DisplacedHcalJetAnalyzer.C("test", "/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/CMSSW_12_4_6/src/cms_lpc_llp/llp_ntupler/run/ntuple_output_test_data1.root")'
 mv hists_test.root hists_test_data1.root
 
+cd Run/
 ./run_signal.sh
 ./run_data.sh
 ```
@@ -27,7 +28,13 @@ The histograms that are read in are listed in `DisplacedHcalJetAnalyzer.h`.
 ## Plotting
 ```
 cd ../Plot/
-python KinematicPlots.py ../Run/hists_test.root 
+python KinematicPlots.py ../Run/hists_test_<>.root <data / MC>
+
+python KinematicPlots.py ../Run/hists_test_data1_04-May-2023.root data
+python KinematicPlots.py ../Run/hists_test_signal1_04-May-2023.root MC
+cp -r outPlots/* /eos/user/g/gkopp/www/LLP_HCAL_Run3Analysis/outPlots
+cp -r outPlots_MC/* /eos/user/g/gkopp/www/LLP_HCAL_Run3Analysis/outPlots_MC
+
 python Data_MC_overlay.py ../Run/hists_test_data1.root ../Run/hists_test_signal1.root
 ```
 where `../Run/hists_test.root` is the output of the previous step. Indicate in the script whether MC or data is being used. Plots can be copied to the [EOS webpage](https://gkopp.web.cern.ch/gkopp/LLP_HCAL_Run3Analysis/outPlots/).
