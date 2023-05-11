@@ -8,7 +8,7 @@ import sys, os, argparse, time, errno
 import matplotlib.pyplot as plt
 
 debug = False
-data = False
+data = True
 MC = False
 if sys.argv[2] == "data": data = True
 if sys.argv[2] == "MC": MC = True
@@ -32,7 +32,7 @@ ypos = 0.85
 canv = ROOT.TCanvas("c","c",800,600)
 overlayCanv = ROOT.TCanvas("c1","c1",800,600)
 if (data): 
-  cmsLabel = "#scale[1.0]{#bf{CMS}} #scale[0.8]{#it{2022 13.6 TeV Collisions Data}}"; 
+  cmsLabel = "#scale[1.0]{#bf{CMS}} #scale[0.8]{#it{2022 13.6 TeV Collisions Data (JetMET)}}"; 
   folder = "./outPlots/"
 if (MC): 
   cmsLabel = "#scale[1.0]{#bf{CMS}} #scale[0.8]{#it{2023 LLP MC}}"; 

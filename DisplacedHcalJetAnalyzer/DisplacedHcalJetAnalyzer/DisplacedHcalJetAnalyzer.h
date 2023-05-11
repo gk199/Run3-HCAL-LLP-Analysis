@@ -54,7 +54,7 @@ public :
 
    // ----- Settings ----- //
 
-   bool debug         = true; 
+   bool debug         = false; 
    bool print_counts  = false; 
    bool save_hists    = true;
    bool save_trees    = true;
