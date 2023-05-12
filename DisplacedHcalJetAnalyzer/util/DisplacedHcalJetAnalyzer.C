@@ -48,7 +48,8 @@ void DisplacedHcalJetAnalyzer( string infiletag = "", string infilepath = "" ){
 			// Look globally -- for files on lxplus
 			// Fix path "/afs/cern.ch/work/k/kikenned/public/L1LLPJetStudies/HcalTuples/",
 			// Look on cmsxrootd
-			// Fix path "root://cmsxrootd.fnal.gov///store/user/kikenned/JetMET/Run2022F-v1_RAW_20221117_002820/221116_232834/0000/", // Run 362085, produced on 2022-11-16
+			"root://cmsxrootd.fnal.gov///store/user/kikenned/JetMET/Run2022G-EXOHighMET-PromptReco-v1_RAW-RECO_20230509_041536/230509_021544/0000/", // High MET
+			"root://cmsxrootd.fnal.gov///store/user/gkopp/ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV/LLP_MC_test__20230511_194008/230511_174021/0000/", // MC signal
 		};
 
 		// Get filepath
@@ -88,7 +89,7 @@ void DisplacedHcalJetAnalyzer( string infiletag = "", string infilepath = "" ){
 
 	// ----- Modify Properties ----- // 
 
-	AnalysisReader.debug		= false; 
+	AnalysisReader.debug		= true; 
 	AnalysisReader.print_counts	= true;
 	AnalysisReader.save_hists	= true;		// For output histograms
 	AnalysisReader.save_trees	= false;	// For minituples

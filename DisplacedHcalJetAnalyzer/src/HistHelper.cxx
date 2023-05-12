@@ -72,22 +72,22 @@ void DisplacedHcalJetAnalyzer::BookHists(){
 			h[cat+"pho"+is+"_pt"]  = new TH1F( Form( "%spho%s_pt",  cat.c_str(), is.c_str() ), "Photon p_{t}; pt [GeV]; Events ", NBins, 0, 1000);
 			h[cat+"pho"+is+"_eta"] = new TH1F( Form( "%spho%s_eta", cat.c_str(), is.c_str() ), "Photon #eta; eta; Events", NBins, -3.2, 3.2 );
 			h[cat+"pho"+is+"_phi"] = new TH1F( Form( "%spho%s_phi", cat.c_str(), is.c_str() ), "Photon #phi; phi; Events", NBins, -3.2, 3.2 );
-			h[cat+"pho"+is+"_energy"] = new TH1F( Form( "%spho%s_energy", cat.c_str(), is.c_str() ), "Photon energy; energy [GeV]; Events", NBins, 0, 200 );
+			h[cat+"pho"+is+"_energy"] = new TH1F( Form( "%spho%s_energy", cat.c_str(), is.c_str() ), "Photon energy; energy [GeV]; Events", NBins, 0, 1000 );
 			// Reco Electrons
 			h[cat+"ele"+is+"_pt"]  = new TH1F( Form( "%sele%s_pt",  cat.c_str(), is.c_str() ), "Electron p_{t}; pt [GeV]; Events ", NBins, 0, 1000);
 			h[cat+"ele"+is+"_eta"] = new TH1F( Form( "%sele%s_eta", cat.c_str(), is.c_str() ), "Electron #eta; eta; Events", NBins, -3.2, 3.2 );
 			h[cat+"ele"+is+"_phi"] = new TH1F( Form( "%sele%s_phi", cat.c_str(), is.c_str() ), "Electron #phi; phi; Events", NBins, -3.2, 3.2 );
-			h[cat+"ele"+is+"_energy"] = new TH1F( Form( "%sele%s_energy", cat.c_str(), is.c_str() ), "Electron energy; energy [GeV]; Events", NBins, 0, 200 );
+			h[cat+"ele"+is+"_energy"] = new TH1F( Form( "%sele%s_energy", cat.c_str(), is.c_str() ), "Electron energy; energy [GeV]; Events", NBins, 0, 1000 );
 			// Reco Muons
 			h[cat+"muon"+is+"_pt"]  = new TH1F( Form( "%smuon%s_pt",  cat.c_str(), is.c_str() ), "Muon p_{t}; pt [GeV]; Events ", NBins, 0, 1000);
 			h[cat+"muon"+is+"_eta"] = new TH1F( Form( "%smuon%s_eta", cat.c_str(), is.c_str() ), "Muon #eta; eta; Events", NBins, -3.2, 3.2 );
 			h[cat+"muon"+is+"_phi"] = new TH1F( Form( "%smuon%s_phi", cat.c_str(), is.c_str() ), "Muon #phi; phi; Events", NBins, -3.2, 3.2 );
-			h[cat+"muon"+is+"_energy"] = new TH1F( Form( "%smuon%s_energy", cat.c_str(), is.c_str() ), "Muon energy; energy [GeV]; Events", NBins, 0, 200 );
+			h[cat+"muon"+is+"_energy"] = new TH1F( Form( "%smuon%s_energy", cat.c_str(), is.c_str() ), "Muon energy; energy [GeV]; Events", NBins, 0, 1000 );
 			// Reco Jets
 			h[cat+"jet"+is+"_pt"]  = new TH1F( Form( "%sjet%s_pt",  cat.c_str(), is.c_str() ), "Jet p_{t}; pt [GeV]; Events ", NBins, 0, 1000);
 			h[cat+"jet"+is+"_eta"] = new TH1F( Form( "%sjet%s_eta", cat.c_str(), is.c_str() ), "Jet #eta; eta; Events", NBins, -3.2, 3.2 );
 			h[cat+"jet"+is+"_phi"] = new TH1F( Form( "%sjet%s_phi", cat.c_str(), is.c_str() ), "Jet #phi; phi; Events", NBins, -3.2, 3.2 );
-			h[cat+"jet"+is+"_energy"] = new TH1F( Form( "%sjet%s_energy", cat.c_str(), is.c_str() ), "Jet energy; energy [GeV]; Events", NBins, 0, 200 );
+			h[cat+"jet"+is+"_energy"] = new TH1F( Form( "%sjet%s_energy", cat.c_str(), is.c_str() ), "Jet energy; energy [GeV]; Events", NBins, 0, 1000 );
 			h[cat+"jet"+is+"_energyProfile"] = new TH1F(Form("%sjet%s_energyProfile", cat.c_str(), is.c_str() ), "Energy Profile of HB Rechits Associated with Jet; HB Depth; Fraction of Energy", 6,0,6);
 			h[cat+"jet"+is+"_rechitN"] = new TH1F(Form("%sjet%s_rechitN", cat.c_str(), is.c_str() ), "Number of HB Rechits Associated with Jet (#Delta R<0.4); Number of HB Rechits; Events", NBins,0,100);
 			h[cat+"jet"+is+"_etaSpread"] = new TH1F(Form("%sjet%s_etaSpread", cat.c_str(), is.c_str() ), "#eta Spread of HB Rechits Associated with Jet; #eta Spread; Events", NBins,0,0.5);
