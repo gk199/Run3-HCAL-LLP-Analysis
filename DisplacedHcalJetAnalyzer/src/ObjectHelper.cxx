@@ -57,7 +57,7 @@ vector<vector<float>> DisplacedHcalJetAnalyzer::GetEnergyProfile(int idx_llp, fl
 	vector<float> energy_LLP 		= {0,0,0,0};
 	vector<float> energy_daughter1 	= {0,0,0,0};
 	vector<float> energy_daughter2 	= {0,0,0,0};
-	int totalE_LLP = 0, totalE_daughter1 = 0, totalE_daughter2 = 0; // for total energy calculation 
+	float totalE_LLP = 0, totalE_daughter1 = 0, totalE_daughter2 = 0; // for total energy calculation 
 
 	vector<float> matchedRechit[2];
 	for (int idx_llp_decay = 0; idx_llp_decay < 2; idx_llp_decay++) {
@@ -134,7 +134,7 @@ vector<float> DisplacedHcalJetAnalyzer::GetEnergyProfile_Jet(int idx_jet, float 
 		energy_jet[hbheRechit_depth->at(matchedRechit[i]) - 1] += hbheRechit_E->at(matchedRechit[i]);
 	}
 
-	int totalE_jet = 0;
+	float totalE_jet = 0;
 	for (int i = 0; i < energy_jet.size(); i++) totalE_jet += energy_jet[i]; // total energy calculation
 	// energy normalization
 	if (totalE_jet > 0) for (int i=0; i<energy_jet.size(); i++) energy_jet[i] = energy_jet[i] / totalE_jet;
