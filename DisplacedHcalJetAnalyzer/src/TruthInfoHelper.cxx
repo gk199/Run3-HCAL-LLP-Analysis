@@ -32,7 +32,7 @@ vector<TVector3> DisplacedHcalJetAnalyzer::GetLLPDecayProdCoords(int idx_llp, in
 		if( gParticle_ProdVtx_X->at(i) != gLLP_DecayVtx_X->at(idx_llp) ) continue; // require production is decay vtx of LLP
 		if( gParticle_ProdVtx_Y->at(i) != gLLP_DecayVtx_Y->at(idx_llp) ) continue;
 		if( gParticle_ProdVtx_Z->at(i) != gLLP_DecayVtx_Z->at(idx_llp) ) continue;
-		std::cout << gParticle_ParentId->at(i) << " = gParticle_ParentId->at(i)" << std::endl;
+		if (debug) std::cout << gParticle_ParentId->at(i) << " = gParticle_ParentId->at(i)" << std::endl;
 		if( abs(gParticle_ParentId->at(i)) != 9000006) continue; // require parent is LLP
 		llp_decay_indices.push_back( i );
 	}

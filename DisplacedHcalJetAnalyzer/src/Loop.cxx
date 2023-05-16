@@ -32,7 +32,8 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 		FillHists("JetPt40");
 	}
 
-	// FillOutputTrees("");
+	// fill output trees in minituples
+	FillOutputTrees("NoSel");
 
 	return;
 

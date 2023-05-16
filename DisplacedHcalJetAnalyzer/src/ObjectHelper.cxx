@@ -57,6 +57,7 @@ vector<vector<float>> DisplacedHcalJetAnalyzer::GetEnergyProfile(int idx_llp, fl
 	vector<float> energy_LLP 		= {0,0,0,0};
 	vector<float> energy_daughter1 	= {0,0,0,0};
 	vector<float> energy_daughter2 	= {0,0,0,0};
+	int totalE_LLP = 0, totalE_daughter1 = 0, totalE_daughter2 = 0; // for total energy calculation 
 
 	vector<float> matchedRechit[2];
 	for (int idx_llp_decay = 0; idx_llp_decay < 2; idx_llp_decay++) {
@@ -71,24 +72,22 @@ vector<vector<float>> DisplacedHcalJetAnalyzer::GetEnergyProfile(int idx_llp, fl
 			int hbhe_matched_indices = matchedRechit[idx_llp_decay][i];
 			if (idx_llp_decay == 0) {
 				energy_daughter1[hbheRechit_depth->at(hbhe_matched_indices) - 1] += hbheRechit_E->at(hbhe_matched_indices);
+				totalE_daughter1 += hbheRechit_E->at(hbhe_matched_indices);
 				matched_indices.push_back(hbhe_matched_indices); // contains all matched indicies for decay product 1
 				energy_LLP[hbheRechit_depth->at(hbhe_matched_indices) - 1] += hbheRechit_E->at(hbhe_matched_indices);
+				totalE_LLP += hbheRechit_E->at(hbhe_matched_indices);
 			}
 			if (idx_llp_decay == 1) { // for decay product 2, make sure to not double count the same hbhe_matched_indices for overall LLP energy
 				energy_daughter2[hbheRechit_depth->at(hbhe_matched_indices) - 1] += hbheRechit_E->at(hbhe_matched_indices);
+				totalE_daughter2 += hbheRechit_E->at(hbhe_matched_indices);
 				if (!(std::count(matched_indices.begin(), matched_indices.end(), hbhe_matched_indices))) { 
 					energy_LLP[hbheRechit_depth->at(hbhe_matched_indices) - 1] += hbheRechit_E->at(hbhe_matched_indices);
+					totalE_LLP += hbheRechit_E->at(hbhe_matched_indices);
 				}
 			}
 		}
 	}
 
-	int totalE_LLP = 0, totalE_daughter1 = 0, totalE_daughter2 = 0;
-	for (int i = 0; i < energy_LLP.size(); i++) { // total energy calculation
-		totalE_LLP += energy_LLP[i];
-		totalE_daughter1 += energy_daughter1[i];
-		totalE_daughter2 += energy_daughter2[i];
-	}
 	// energy normalization
 	if (totalE_LLP > 0) for (int i=0; i<energy_LLP.size(); i++) energy_LLP[i] = energy_LLP[i] / totalE_LLP;
 	if (totalE_daughter1 > 0) for (int i=0; i<energy_daughter1.size(); i++) energy_daughter1[i] = energy_daughter1[i] / totalE_daughter1;
