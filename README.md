@@ -13,6 +13,8 @@ root -q -b -l '../DisplacedHcalJetAnalyzer/util/DisplacedHcalJetAnalyzer.C("test
 mv hists_test.root hists_test_data1.root
 
 cd Run/
+proxy
+crab_setup
 ./run_signal.sh
 ./run_data.sh
 ```
