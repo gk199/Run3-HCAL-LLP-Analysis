@@ -22,6 +22,10 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 	};	
 	for ( int i=0; i<3; i++ ) {
 		myvars_int.push_back( Form("jet%d_rechitN", i) );
+
+		if (i < 2) {
+			myvars_int.push_back( Form("gLLP%d_rechitN", i));
+		}
 	}
 
 	vector<string> myvars_float = {
@@ -39,10 +43,14 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("jet%d_phiSpread", i) );
 		myvars_float.push_back( Form("jet%d_phiSpread_energy", i) );
 
+		for (int d=0; d<4; d++) myvars_float.push_back( Form("jet%d_energyFrac_depth%d", i, d+1) );
+
 		if (i < 2) {
+			myvars_float.push_back( Form("gLLP%d_DecayR", i));
 			myvars_float.push_back( Form("gLLP%d_DecayX", i));
 			myvars_float.push_back( Form("gLLP%d_DecayY", i));
 			myvars_float.push_back( Form("gLLP%d_DecayZ", i));
+			for (int d=0; d<4; d++) myvars_float.push_back( Form("gLLP%d_energyFrac_depth%d", i, d+1));
 		}
 	}
 
@@ -94,17 +102,28 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		vector<float> rechitJet = GetMatchedHcalRechits_Jet(i, 0.4);
 		vector<float> energy = GetEnergyProfile_Jet(i, 0.4);
 		vector<float> spread_Eta_Phi = GetEtaPhiSpread_Jet(i, 0.4); // eta, phi (average); eta, phi (energy weighted)
-		// for (int depth = 0; depth < 4; depth++) h["jet"+i+"_energyProfile"]->Fill(depth + 1, energy[depth]); // figuring out how to save still
+		
+		for (int depth = 0; depth < 4; depth++) tree_output_vars_float[Form("jet%d_energyFrac_depth%d", i, depth+1)] = energy[depth]; // each fractional energy saved in different tree
 		tree_output_vars_int[Form("jet%d_rechitN", i)] = rechitJet.size();
 		tree_output_vars_float[Form("jet%d_etaSpread", i)] = spread_Eta_Phi[0];
 		tree_output_vars_float[Form("jet%d_etaSpread_energy", i)] = spread_Eta_Phi[2];
 		tree_output_vars_float[Form("jet%d_phiSpread", i)] = spread_Eta_Phi[1];
 		tree_output_vars_float[Form("jet%d_phiSpread_energy", i)] = spread_Eta_Phi[3];
 	}
+
 	for (int i = 0; i < n_gLLP; i++) {
+		float decay_radius = GetDecayRadiusHB_LLP(i); // -999 default value
+		vector<int> n_rechit_pt4 = GetRechitMult(i, 0.4); // GetRechitMult returns rechit multiplicity associated with LLP [0], first daughter, second daughter
+		vector<vector<float>> energy = GetEnergyProfile(i, 0.4); // [0] is LLP, [1] is daughter 1, [2] is daughter 2
+
+		tree_output_vars_int[Form("gLLP%d_rechitN", i)] = n_rechit_pt4[0];
+		tree_output_vars_float[Form("gLLP%d_DecayR", i)] = decay_radius;
+
 		tree_output_vars_float[Form("gLLP%d_DecayX", i)] = gLLP_DecayVtx_X->at(i);
 		tree_output_vars_float[Form("gLLP%d_DecayY", i)] = gLLP_DecayVtx_Y->at(i);
 		tree_output_vars_float[Form("gLLP%d_DecayZ", i)] = gLLP_DecayVtx_Z->at(i);
+
+		for (int depth = 0; depth < 4; depth++) tree_output_vars_float[Form("gLLP%d_energyFrac_depth%d", i, depth+1)] = energy[0][depth]; // each fractional energy saved in different tree
 	}
 
 	tree_output[treename]->Fill();

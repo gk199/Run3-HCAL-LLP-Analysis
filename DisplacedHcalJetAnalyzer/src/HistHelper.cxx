@@ -234,7 +234,7 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 				vector<int> n_rechit_pt2 = GetRechitMult(idx_llp, 0.2); // GetRechitMult returns rechit multiplicity associated with LLP, first daughter, second daughter
 				vector<int> n_rechit_pt4 = GetRechitMult(idx_llp, 0.4);
 				vector<int> n_rechit_pt6 = GetRechitMult(idx_llp, 0.6);
-				float decay_radius = abs(GetDecayRadiusHB_LLP(idx_llp));
+				float decay_radius = GetDecayRadiusHB_LLP(idx_llp);
 				
 				// energy profile					
 				vector<vector<float>> energy = GetEnergyProfile(idx_llp, 0.4); // [0] is LLP, [1] is daughter 1, [2] is daughter 2
@@ -244,7 +244,7 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 					h["gen_rechitNpt2_"+is]->Fill(n_rechit_pt2[i]);
 					h["gen_rechitNpt4_"+is]->Fill(n_rechit_pt4[i]);
 					h["gen_rechitNpt6_"+is]->Fill(n_rechit_pt6[i]);
-					h2["gen_decay_rechitN_"+is]->Fill(decay_radius, n_rechit_pt4[i]);
+					if (decay_radius >=0) h2["gen_decay_rechitN_"+is]->Fill(decay_radius, n_rechit_pt4[i]);
 
 					// if (n_rechit_pt4[i] > 0) std::cout << n_rechit_pt4[i] << " = GetRechitMult(idx_llp, 0.4) for i=" << i << std::endl;
 					for (int depth = 0; depth < 4; depth++) {
