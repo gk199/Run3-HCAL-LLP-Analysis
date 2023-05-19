@@ -9,7 +9,7 @@ from datetime import datetime
 start = time.time()
 
 debug = True
-time_debug = True
+time_debug = False
 
 # declare any variables or settings here
 data = False
@@ -136,14 +136,12 @@ def ExcludedCut( branch_name, branch_sel ):
 
 
 # ------------------------------------------------------------------------------
-def Plot(infilepath):
+def PlotSetup(infilepath):
 
-    kinematic_vars = ["LLP0_DecayR", "LLP0_DecayX", "LLP0_DecayY", "LLP0_DecayZ", ]
-
-    cut_vars = ["LLP0_DecayR"]
-    
     infile = ROOT.TFile.Open( infilepath )
     tree = infile.Get("NoSel")
+    
+    cut_vars = ["LLP0_DecayR"]
 
     radius_range    = [50, 2000]
     radius_beforeHB = [153, 183.6]
@@ -154,77 +152,90 @@ def Plot(infilepath):
 
     selection_region = GetCut(cut_vars[0], radius_range)
 
-    LLP_Rdecay = {}
-    hname_temp = "h_LLP_radius"
-    LLP_Rdecay = ROOT.TH1F(hname_temp, "LLP Decay Radius ; Radius [cm]; Number of Entries", 100, 0, 2000 ); # this can be made into LLP_Rdecay[]
-    
-    canv = ROOT.TCanvas()
-
-    if (time_debug): print("Drawing tree, with time = " + str(time.time() - start))
-    for var in kinematic_vars:
-        tree.Draw(var +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
-
-        LLP_Rdecay.Draw()
-        stamp_text = ROOT.TLatex()
-        stamp_text.SetNDC()
-
-        if (time_debug): print("Plotting results, with time = " + str(time.time() - start))
-        canv.SaveAs("plotter_test_hist_"+var+".png")
-
+    Plot1D(tree, selection_region)
+    Plot2D(tree, selection_region)
 
 # ------------------------------------------------------------------------------
-def Plot2D(infilepath):
+def Plot1D(tree, selection_region):
 
-    kinematic_vars = ["LLP0_energyFrac_depth"]
+    object = ["LLP"]
+    number = ["0", "1"]
+    kinematic_vars = ["DecayR", "DecayX", "DecayY", "DecayZ", ]
 
-    cut_vars = ["LLP0_DecayR"]
+    LLP_decay = {}
     
-    infile = ROOT.TFile.Open( infilepath )
-    tree = infile.Get("NoSel")
-
-    radius_range    = [50, 2000]
-    radius_beforeHB = [153, 183.6]
-    radius_depth1   = [183.6, 190.2]
-    radius_depth2   = [190.2, 214.2]
-    radius_depth3   = [214.2, 244.8]
-    radius_depth4   = [244.8, 295]
-
-    selection_region = GetCut(cut_vars[0], radius_range)
-
-    LLP_energy_profile = {}
-    LLP_energy_depth_profile = {}
-    hname = "h_LLP_energy_depth_profile"
-    LLP_energy_depth_profile = ROOT.TH1F(hname, "LLP Depth Energy Profile ; Depth (HB); Fraction of Energy", 6,0,6 ); 
-
     canv = ROOT.TCanvas()
+    canvTemp = ROOT.TCanvas()
+
+    for obj in object:
+        for var in kinematic_vars:
+            legend = ROOT.TLegend(0.65,0.65,0.8,0.8)
+            for i in number:
+                hname_temp = obj + var + i
+                LLP_decay[i] = ROOT.TH1F(hname_temp, "LLP Decay Position " + var[-1] +" ; " + var +" [cm]; Number of Entries", 200, 1000, 1000 ); # this can be made into LLP_Rdecay[]
+                legend.AddEntry(LLP_decay[i], obj + i)
+
+                dist = obj + i + "_" + var
+                canvTemp.cd()
+                tree.Draw(dist +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
+                
+                canv.cd()
+                if i == "0": LLP_decay[i].Draw("HIST PLC")
+                else: LLP_decay[i].Draw("HIST PLC SAME")
+
+            legend.Draw()
+            stamp_text = ROOT.TLatex()
+            stamp_text.SetNDC()
+            stamp_text.DrawLatex( xpos, ypos, cmsLabel)
+            canv.SaveAs(obj + "_" +var+".png")
+
+# ------------------------------------------------------------------------------
+def Plot2D(tree, selection_region):
+
+    object = ["LLP", "jet"]
+    number = ["0", "1", "2"]
+    kinematic_vars = ["_energyFrac_depth"]
+
+    energy_profile, energy_depth_profile = {}, {}
+
     canvTemp = ROOT.TCanvas()
     canvDepth = ROOT.TCanvas()
 
-    if (time_debug): print("Drawing tree, with time = " + str(time.time() - start))
-    for depth in range(4):
-        depth += 1
-        var = kinematic_vars[0]+str(depth)
-        print(var)
+    for obj in object:
+        legend = ROOT.TLegend(0.65,0.65,0.8,0.8)
+        for i in number:
+            if (i == "2" and obj != "jet"): continue
+            hname = obj + i + "_energy_depth_profile"
+            energy_depth_profile[i] = ROOT.TH1F(hname, obj + " Depth Energy Profile ; Depth (HB); Fraction of Energy", 6,0,6 ); 
 
-        hname_temp = "h_LLP_energy_profile_d"+str(depth)
-        LLP_energy_profile[depth] = ROOT.TH1F(hname_temp, "LLP Depth Energy Frac in Depth "+str(depth)+"; Depth (HB); Fraction of Energy", 100, 0, 1 ); # replicate the initial plots first
+            for depth in range(4):
+                depth += 1
+                var = obj + i + kinematic_vars[0] + str(depth)
+                hname_temp = obj+i+"_energy_profile_d"+str(depth)
+                energy_profile[depth] = ROOT.TH1F(hname_temp, obj+" Depth Energy Frac in Depth "+str(depth)+"; Depth (HB); Fraction of Energy", 100, 0, 1 ); # replicate the initial plots first
 
-        canvTemp.cd()
-        tree.Draw(var +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
-        AverageEnergyFrac = LLP_energy_profile[depth].GetMean()
-        AverageEnergyFrac_error = LLP_energy_profile[depth].GetMeanError()
-        print (str(depth) + " = depth, with energy profile mean = " + str(AverageEnergyFrac))
+                canvTemp.cd()
+                if (time_debug): print("Drawing tree, with time = " + str(time.time() - start))
+                tree.Draw(var +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
+                AverageEnergyFrac = energy_profile[depth].GetMean()
+                AverageEnergyFrac_error = energy_profile[depth].GetMeanError()
 
-        canvDepth.cd()
-        LLP_energy_depth_profile.SetBinContent(depth+1, AverageEnergyFrac)
-        LLP_energy_depth_profile.SetBinError(depth+1, AverageEnergyFrac_error)
+                energy_depth_profile[i].SetBinContent(depth+1, AverageEnergyFrac)
+                energy_depth_profile[i].SetBinError(depth+1, AverageEnergyFrac_error)
+
+            canvDepth.cd()
+            legend.AddEntry(energy_depth_profile[i], obj + i)
+            energy_depth_profile[i].GetYaxis().SetRangeUser(0,0.7)
+            if i == "0": energy_depth_profile[i].Draw("HIST PLC")
+            else: energy_depth_profile[i].Draw("SAME HIST PLC")
+
+        if (time_debug): print("Plotting results, with time = " + str(time.time() - start))
+        legend.Draw()
         stamp_text = ROOT.TLatex()
         stamp_text.SetNDC()
-        LLP_energy_depth_profile.Draw()
+        stamp_text.DrawLatex( xpos, ypos, cmsLabel)
+        canvDepth.SaveAs(obj+"_energyProfile.png")
 
-    if (time_debug): print("Plotting results, with time = " + str(time.time() - start))
-    canvTemp.SaveAs("plotter_test_hist_"+kinematic_vars[0]+str(depth)+".png")
-    canvDepth.SaveAs("plotter_test_hist_"+kinematic_vars[0]+".png")
 # ------------------------------------------------------------------------------
 def main():
 
@@ -232,8 +243,7 @@ def main():
 
 	if len(sys.argv) > 1: infilepath = sys.argv[1]
 
-	Plot(infilepath)
-	Plot2D(infilepath)
+	PlotSetup(infilepath)
 
 if __name__ == '__main__':
 	main()
