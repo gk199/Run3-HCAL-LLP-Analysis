@@ -136,13 +136,23 @@ def ExcludedCut( branch_name, branch_sel ):
 
 
 # ------------------------------------------------------------------------------
-def Plot(infilepath, data_MC):
+def Plot(infilepath):
+
+    kinematic_vars = ["LLP0_DecayR", "LLP0_DecayX", "LLP0_DecayY", "LLP0_DecayZ", ]
+
+    cut_vars = ["LLP0_DecayR"]
     
     infile = ROOT.TFile.Open( infilepath )
     tree = infile.Get("NoSel")
 
-    radius_range = [100, 2000]
-    selection_region = GetCut("gLLP0_DecayR", radius_range)
+    radius_range    = [50, 2000]
+    radius_beforeHB = [153, 183.6]
+    radius_depth1   = [183.6, 190.2]
+    radius_depth2   = [190.2, 214.2]
+    radius_depth3   = [214.2, 244.8]
+    radius_depth4   = [244.8, 295]
+
+    selection_region = GetCut(cut_vars[0], radius_range)
 
     LLP_Rdecay = {}
     hname_temp = "h_LLP_radius"
@@ -151,25 +161,79 @@ def Plot(infilepath, data_MC):
     canv = ROOT.TCanvas()
 
     if (time_debug): print("Drawing tree, with time = " + str(time.time() - start))
-    tree.Draw("gLLP0_DecayR >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
-    print(tree.GetEntries())
+    for var in kinematic_vars:
+        tree.Draw(var +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
 
-    LLP_Rdecay.Draw()
-    stamp_text = ROOT.TLatex()
-    stamp_text.SetNDC()
+        LLP_Rdecay.Draw()
+        stamp_text = ROOT.TLatex()
+        stamp_text.SetNDC()
+
+        if (time_debug): print("Plotting results, with time = " + str(time.time() - start))
+        canv.SaveAs("plotter_test_hist_"+var+".png")
+
+
+# ------------------------------------------------------------------------------
+def Plot2D(infilepath):
+
+    kinematic_vars = ["LLP0_energyFrac_depth"]
+
+    cut_vars = ["LLP0_DecayR"]
+    
+    infile = ROOT.TFile.Open( infilepath )
+    tree = infile.Get("NoSel")
+
+    radius_range    = [50, 2000]
+    radius_beforeHB = [153, 183.6]
+    radius_depth1   = [183.6, 190.2]
+    radius_depth2   = [190.2, 214.2]
+    radius_depth3   = [214.2, 244.8]
+    radius_depth4   = [244.8, 295]
+
+    selection_region = GetCut(cut_vars[0], radius_range)
+
+    LLP_energy_profile = {}
+    LLP_energy_depth_profile = {}
+    hname = "h_LLP_energy_depth_profile"
+    LLP_energy_depth_profile = ROOT.TH1F(hname, "LLP Depth Energy Profile ; Depth (HB); Fraction of Energy", 6,0,6 ); 
+
+    canv = ROOT.TCanvas()
+    canvTemp = ROOT.TCanvas()
+    canvDepth = ROOT.TCanvas()
+
+    if (time_debug): print("Drawing tree, with time = " + str(time.time() - start))
+    for depth in range(4):
+        depth += 1
+        var = kinematic_vars[0]+str(depth)
+        print(var)
+
+        hname_temp = "h_LLP_energy_profile_d"+str(depth)
+        LLP_energy_profile[depth] = ROOT.TH1F(hname_temp, "LLP Depth Energy Frac in Depth "+str(depth)+"; Depth (HB); Fraction of Energy", 100, 0, 1 ); # replicate the initial plots first
+
+        canvTemp.cd()
+        tree.Draw(var +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
+        AverageEnergyFrac = LLP_energy_profile[depth].GetMean()
+        AverageEnergyFrac_error = LLP_energy_profile[depth].GetMeanError()
+        print (str(depth) + " = depth, with energy profile mean = " + str(AverageEnergyFrac))
+
+        canvDepth.cd()
+        LLP_energy_depth_profile.SetBinContent(depth+1, AverageEnergyFrac)
+        LLP_energy_depth_profile.SetBinError(depth+1, AverageEnergyFrac_error)
+        stamp_text = ROOT.TLatex()
+        stamp_text.SetNDC()
+        LLP_energy_depth_profile.Draw()
 
     if (time_debug): print("Plotting results, with time = " + str(time.time() - start))
-    canv.SaveAs("plotter_test_hist.png")
-
+    canvTemp.SaveAs("plotter_test_hist_"+kinematic_vars[0]+str(depth)+".png")
+    canvDepth.SaveAs("plotter_test_hist_"+kinematic_vars[0]+".png")
 # ------------------------------------------------------------------------------
 def main():
 
 	infilepath = "../Run/hists_test.root"
 
 	if len(sys.argv) > 1: infilepath = sys.argv[1]
-	if len(sys.argv) > 2: data_MC = sys.argv[2]
 
-	Plot(infilepath, data_MC)
+	Plot(infilepath)
+	Plot2D(infilepath)
 
 if __name__ == '__main__':
 	main()
