@@ -218,14 +218,14 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 				double x_LLP = gLLP_DecayVtx_X->at(idx_llp);
 				double y_LLP = gLLP_DecayVtx_Y->at(idx_llp);
 				double z_LLP = gLLP_DecayVtx_Z->at(idx_llp);
-				double radius = sqrt( pow(x_LLP,2) + pow(y_LLP,2) );
-				double distance = sqrt( pow(x_LLP,2) + pow(y_LLP,2) + pow(z_LLP,2) );
+				float decay_radius = GetDecayRadiusHB_LLP(idx_llp);
+				float distance = GetDecayDistance_LLP(idx_llp);
 
 				// positional quantities
 				h["gen_Xdecay"]->Fill(x_LLP);
 				h["gen_Ydecay"]->Fill(y_LLP);
 				h["gen_Zdecay"]->Fill(z_LLP);
-				h["gen_Rdecay"]->Fill(radius);
+				h["gen_Rdecay"]->Fill(decay_radius);
 				h["gen_Ddecay"]->Fill(distance);
 				h["gen_cTau"]->Fill(distance * (sqrt( 1 / pow(gLLP_Beta->at(idx_llp),2) - 1)));
 				h["gen_deltaT"]->Fill(distance * ( 1 / gLLP_Beta->at(idx_llp) - 1) * 0.03336); // 1/c in ns / cm to give answer in ns
@@ -234,8 +234,7 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 				vector<int> n_rechit_pt2 = GetRechitMult(idx_llp, 0.2); // GetRechitMult returns rechit multiplicity associated with LLP, first daughter, second daughter
 				vector<int> n_rechit_pt4 = GetRechitMult(idx_llp, 0.4);
 				vector<int> n_rechit_pt6 = GetRechitMult(idx_llp, 0.6);
-				float decay_radius = GetDecayRadiusHB_LLP(idx_llp);
-				
+
 				// energy profile					
 				vector<vector<float>> energy = GetEnergyProfile(idx_llp, 0.4); // [0] is LLP, [1] is daughter 1, [2] is daughter 2
 

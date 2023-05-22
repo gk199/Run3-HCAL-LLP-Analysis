@@ -86,6 +86,20 @@ float DisplacedHcalJetAnalyzer::GetDecayRadiusHB_LLP( int idx_llp ) {
 }
 
 /* ====================================================================================================================== */
+float DisplacedHcalJetAnalyzer::GetDecayDistance_LLP( int idx_llp ) {
+	/*
+	Description: get the total distance of LLP decay
+	Input: idx_llp:        LLP index (generally either 0 or 1)
+	*/
+	double x_LLP = gLLP_DecayVtx_X->at(idx_llp);
+	double y_LLP = gLLP_DecayVtx_Y->at(idx_llp);
+	double z_LLP = gLLP_DecayVtx_Z->at(idx_llp);
+	
+    float distance = sqrt( pow(x_LLP,2) + pow(y_LLP,2) + pow(z_LLP,2) ); // in cm
+
+	return distance;
+}
+/* ====================================================================================================================== */
 vector<float> DisplacedHcalJetAnalyzer::GetMatchedHcalRechits_LLPDecay( int idx_llp, int idx_llp_decay, float deltaR_cut ){
 	/* 
 	Description: Delivers vector of indices of matched hcal rechits (in hbheRechit)
