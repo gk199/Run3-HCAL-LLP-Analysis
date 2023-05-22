@@ -141,16 +141,19 @@ def PlotSetup(infilepath):
     infile = ROOT.TFile.Open( infilepath )
     tree = infile.Get("NoSel")
     
-    cut_vars = ["LLP0_DecayR"]
-
+    radius_all      = [0,9999]
     radius_range    = [50, 2000]
     radius_beforeHB = [153, 183.6]
     radius_depth1   = [183.6, 190.2]
     radius_depth2   = [190.2, 214.2]
     radius_depth3   = [214.2, 244.8]
     radius_depth4   = [244.8, 295]
+    radius_inHCAL   = [183.6, 295]
 
-    selection_region = GetCut(cut_vars[0], radius_range)
+    selection_radius = radius_all
+    cut_vars = ["LLP0_DecayR", "LLP1_DecayR"]
+
+    selection_region = GetCut(cut_vars[0], selection_radius) + GetCut(cut_vars[1], selection_radius)
 
     Plot1D(tree, selection_region)
     Plot2D(tree, selection_region)
@@ -158,9 +161,10 @@ def PlotSetup(infilepath):
 # ------------------------------------------------------------------------------
 def Plot1D(tree, selection_region):
 
+    # LLP kinematic / decay plotting
     object = ["LLP"]
     number = ["0", "1"]
-    kinematic_vars = ["DecayR", "DecayX", "DecayY", "DecayZ", ]
+    kinematic_vars = ["DecayR", "DecayX", "DecayY", "DecayZ", "DecayD", "DecayT", "DecayCtau", "rechitN"]
 
     LLP_decay = {}
     
@@ -172,11 +176,12 @@ def Plot1D(tree, selection_region):
             legend = ROOT.TLegend(0.65,0.65,0.8,0.8)
             for i in number:
                 hname_temp = obj + var + i
-                LLP_decay[i] = ROOT.TH1F(hname_temp, "LLP Decay Position " + var[-1] +" ; " + var +" [cm]; Number of Entries", 200, 1000, 1000 ); # this can be made into LLP_Rdecay[]
+                LLP_decay[i] = ROOT.TH1F(hname_temp, "LLP " + var +" ; " + var +" [cm]; Number of Entries", 200, 1000, 1000 ); # this can be made into LLP_Rdecay[]
                 legend.AddEntry(LLP_decay[i], obj + i)
 
                 dist = obj + i + "_" + var
                 canvTemp.cd()
+                if (time_debug): print("1D LLP loop, drawing tree, with time = " + str(time.time() - start))
                 tree.Draw(dist +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
                 
                 canv.cd()
@@ -189,9 +194,39 @@ def Plot1D(tree, selection_region):
             stamp_text.DrawLatex( xpos, ypos, cmsLabel)
             canv.SaveAs(obj + "_" +var+".png")
 
+    # jet kinematic plotting 
+    object = ["jet"]
+    number = ["0", "1", "2"]
+    kinematic_vars = ["rechitN", "Eta", "Phi", "etaSpread", "phiSpread", "etaSpread_energy", "phiSpread_energy", "energy", "pt"]
+
+    jet_kinematic = {}
+
+    for obj in object:
+        for var in kinematic_vars:
+            legend = ROOT.TLegend(0.65,0.65,0.8,0.8)
+            for i in number:
+                hname_temp = obj + var + i
+                jet_kinematic[i] = ROOT.TH1F(hname_temp, "Jet " + var +" ; " + var +"; Number of Entries", 200, 1000, 1000 ); 
+                legend.AddEntry(jet_kinematic[i], obj + i)
+
+                dist = obj + i + "_" + var
+                canvTemp.cd()
+                if (time_debug): print("1D jet loop, drawing tree, with time = " + str(time.time() - start))
+                tree.Draw(dist +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
+                
+                canv.cd()
+                if i == "0": jet_kinematic[i].Draw("HIST PLC")
+                else: jet_kinematic[i].Draw("HIST PLC SAME")
+
+            legend.Draw()
+            stamp_text = ROOT.TLatex()
+            stamp_text.SetNDC()
+            stamp_text.DrawLatex( xpos, ypos, cmsLabel)
+            canv.SaveAs(obj + "_" +var+".png")
 # ------------------------------------------------------------------------------
 def Plot2D(tree, selection_region):
 
+    # fraction of energy in each depth
     object = ["LLP", "jet"]
     number = ["0", "1", "2"]
     kinematic_vars = ["_energyFrac_depth"]
@@ -215,7 +250,7 @@ def Plot2D(tree, selection_region):
                 energy_profile[depth] = ROOT.TH1F(hname_temp, obj+" Depth Energy Frac in Depth "+str(depth)+"; Depth (HB); Fraction of Energy", 100, 0, 1 ); # replicate the initial plots first
 
                 canvTemp.cd()
-                if (time_debug): print("Drawing tree, with time = " + str(time.time() - start))
+                if (time_debug): print("2D loop, drawing tree, with time = " + str(time.time() - start))
                 tree.Draw(var +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
                 AverageEnergyFrac = energy_profile[depth].GetMean()
                 AverageEnergyFrac_error = energy_profile[depth].GetMeanError()
@@ -226,8 +261,8 @@ def Plot2D(tree, selection_region):
             canvDepth.cd()
             legend.AddEntry(energy_depth_profile[i], obj + i)
             energy_depth_profile[i].GetYaxis().SetRangeUser(0,0.7)
-            if i == "0": energy_depth_profile[i].Draw("HIST PLC")
-            else: energy_depth_profile[i].Draw("SAME HIST PLC")
+            if i == "0": energy_depth_profile[i].Draw("HIST E1 PLC")
+            else: energy_depth_profile[i].Draw("SAME HIST E1 PLC")
 
         if (time_debug): print("Plotting results, with time = " + str(time.time() - start))
         legend.Draw()
@@ -236,6 +271,12 @@ def Plot2D(tree, selection_region):
         stamp_text.DrawLatex( xpos, ypos, cmsLabel)
         canvDepth.SaveAs(obj+"_energyProfile.png")
 
+    # more standard 2D distributions
+    object = ["jet"]
+    number = ["0", "1", "2"]
+    jet_group = [["etaSpread", "phiSpread"], ["etaSpread_energy", "phiSpread_energy"]]
+
+    # unclear how to do this type of 2D spread plot, need to know what the values are for a given event
 # ------------------------------------------------------------------------------
 def main():
 
