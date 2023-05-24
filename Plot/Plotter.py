@@ -8,7 +8,7 @@ from datetime import datetime
 
 start = time.time()
 
-debug = True
+debug = False
 time_debug = False
 
 # declare any variables or settings here
@@ -141,11 +141,11 @@ def PlotSetup(infilepath):
     infile = ROOT.TFile.Open( infilepath )
     tree = infile.Get("NoSel")
     
-    obj_type = "LLP"
-    obj_type = "jet"
+    obj_type = ["LLP", "jet"]
 
-    Plot1D(tree, obj_type)
-    Plot2D(tree, obj_type)
+    for obj in obj_type:
+        Plot1D(tree, obj)
+        Plot2D(tree, obj)
 
 # ------------------------------------------------------------------------------
 def MakeSelection(variable):
@@ -180,6 +180,10 @@ def ResetRange(hist):
     maxXbin = hist.FindLastBinAbove()
 
     hist.GetXaxis().SetRange(minXbin, maxXbin)
+
+# ------------------------------------------------------------------------------
+def Normalize(hist):
+    hist.Scale(1/hist.GetEntries())
 
 # ------------------------------------------------------------------------------
 def Plot1D(tree, obj_type):
@@ -229,9 +233,13 @@ def Plot1D(tree, obj_type):
         jet_kinematic = {}
         for var in kinematic_vars:
             legend = ROOT.TLegend(0.65,0.65,0.8,0.8)
+            hs = ROOT.THStack("hs",  "Jet " + var +" ; " + var +";Normalized Number of Entries")
+            minXbin = 0
+            maxXbin = 0
             for i in number:
-                hname_temp = obj_type + var + i
-                jet_kinematic[i] = ROOT.TH1F(hname_temp, "Jet " + var +" ; " + var +"; Number of Entries", 200, 1000, 1000 ); 
+                hname_temp = obj_type + i + var
+                if (var[1:3] == "ta" or var[1:3] == "hi"): jet_kinematic[i] = ROOT.TH1F(hname_temp, "Jet " + var +" ; " + var +"; Number of Entries", 1000, -4, 4 ); # eta phi range
+                else: jet_kinematic[i] = ROOT.TH1F(hname_temp, "Jet " + var +" ; " + var +"; Number of Entries", 300, -100, 500 ); 
                 legend.AddEntry(jet_kinematic[i], obj_type + i)
 
                 dist = obj_type + i + "_" + var
@@ -240,10 +248,14 @@ def Plot1D(tree, obj_type):
                 selection_region = MakeSelection(obj_type + i)
                 tree.Draw(dist +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
                 
-                canv.cd()
-                if i == "0": jet_kinematic[i].Draw("HIST PLC")
-                else: jet_kinematic[i].Draw("HIST PLC SAME")
+                Normalize(jet_kinematic[i])
+                if (jet_kinematic[i].FindFirstBinAbove() > minXbin): minXbin = jet_kinematic[i].FindFirstBinAbove()
+                if (jet_kinematic[i].FindLastBinAbove() > maxXbin): maxXbin = jet_kinematic[i].FindLastBinAbove()
+                hs.Add(jet_kinematic[i])
 
+            canv.cd()
+            hs.Draw("HIST PLC nostack")
+            hs.GetXaxis().SetRange(minXbin, maxXbin)
             legend.Draw()
             stamp_text = ROOT.TLatex()
             stamp_text.SetNDC()
@@ -280,7 +292,6 @@ def Plot2D(tree, obj_type):
 
     # LLP and jet are essentially treated the same here
     # fraction of energy in each depth
-    object = ["LLP", "jet"]
     number = ["0", "1", "2"]
     kinematic_vars = ["_energyFrac_depth"]
 
@@ -291,12 +302,13 @@ def Plot2D(tree, obj_type):
     canvDepth = ROOT.TCanvas()
 
     legend = ROOT.TLegend(0.65,0.65,0.8,0.8)
-    legend_depth = ROOT.TLegend(0.65,0.65,0.8,0.8)
     for i in number:
         if (i == "2" and obj_type != "jet"): continue
         hname = obj_type + i + "_energy_depth_profile"
         energy_depth_profile[i] = ROOT.TH1F(hname, obj_type + " Depth Energy Profile ; Depth (HB); Fraction of Energy", 6,0,6 ); 
 
+        hs = ROOT.THStack("hs",  obj_type + i + " Energy Fraction in HCAL Depths; Fraction of HCAL Rechit Energy; Normalized Number of Entries")
+        legend_depth = ROOT.TLegend(0.65,0.65,0.8,0.8)
         for depth in range(4):
             depth += 1
             var = obj_type + i + kinematic_vars[0] + str(depth)
@@ -309,31 +321,30 @@ def Plot2D(tree, obj_type):
             tree.Draw(var +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
 
             # for LLP, combine distributions
-            if i == "0" and obj_type == "LLP": continue
-            if i == "1" and obj_type == "LLP": 
-                legend_depth.AddEntry(energy_profile[(depth,i)], "depth = " + str(depth))
-                energy_profile[(depth,i)].Add(energy_profile[(depth,"0")])
-                canv.cd()
-                if (depth == 1): energy_profile[(depth,i)].Draw("HIST PLC")
-                else: energy_profile[(depth,i)].Draw("SAME HIST PLC")
-                if (depth == 4):
-                    legend_depth.Draw()
-                    stamp_text = ROOT.TLatex()
-                    stamp_text.SetNDC()
-                    stamp_text.DrawLatex( xpos, ypos, cmsLabel)
-                    canv.SaveAs(folder + obj_type + "_energyFractionOverlay.png")
+            if obj_type == "LLP":
+                if i == "0": continue
+                if i == "1": energy_profile[(depth,i)].Add(energy_profile[(depth,"0")]) # determine averages for summed LLP1 and LLP2
+                
+            Normalize(energy_profile[(depth,i)])
+            legend_depth.AddEntry(energy_profile[(depth,i)], "depth = " + str(depth))
+            hs.Add(energy_profile[(depth,i)])
 
-                # determine averages for summed LLP1 and LLP2
-                AverageEnergyFrac = energy_profile[(depth,i)].GetMean()
-                AverageEnergyFrac_error = energy_profile[(depth,i)].GetMeanError()
+            AverageEnergyFrac = energy_profile[(depth,i)].GetMean()
+            AverageEnergyFrac_error = energy_profile[(depth,i)].GetMeanError()
             
-            else:
-                AverageEnergyFrac = energy_profile[(depth,i)].GetMean()
-                AverageEnergyFrac_error = energy_profile[(depth,i)].GetMeanError()
-
             energy_depth_profile[i].SetBinContent(depth+1, AverageEnergyFrac)
             energy_depth_profile[i].SetBinError(depth+1, AverageEnergyFrac_error)
 
+        if obj_type == "LLP" and i == "0": continue
+        canv.cd()
+        hs.Draw("HIST PLC nostack")
+        legend_depth.Draw()
+        stamp_text = ROOT.TLatex()
+        stamp_text.SetNDC()
+        stamp_text.DrawLatex( xpos, ypos, cmsLabel)
+        canv.SaveAs(folder + obj_type + i + "_energyFractionOverlay.png")
+
+        # average energy fraction vs depth
         if i == "0" and obj_type == "LLP": continue
         canvDepth.cd()
         legend.AddEntry(energy_depth_profile[i], obj_type + i)
