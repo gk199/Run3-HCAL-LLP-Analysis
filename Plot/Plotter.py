@@ -153,7 +153,7 @@ def PlotSetup(infilepath):
     selection_radius = radius_all
     cut_vars = ["LLP0_DecayR", "LLP1_DecayR"]
 
-    selection_region = GetCut(cut_vars[0], selection_radius) + GetCut(cut_vars[1], selection_radius)
+    selection_region = GetCut(cut_vars[0], radius_beforeHB) #  + GetCut(cut_vars[1], selection_radius)
 
     Plot1D(tree, selection_region)
     Plot2D(tree, selection_region)
@@ -192,12 +192,13 @@ def Plot1D(tree, selection_region):
             stamp_text = ROOT.TLatex()
             stamp_text.SetNDC()
             stamp_text.DrawLatex( xpos, ypos, cmsLabel)
-            canv.SaveAs(obj + "_" +var+".png")
+            canv.SaveAs(folder + obj + "_" +var+".png")
 
     # jet kinematic plotting 
     object = ["jet"]
     number = ["0", "1", "2"]
     kinematic_vars = ["rechitN", "Eta", "Phi", "etaSpread", "phiSpread", "etaSpread_energy", "phiSpread_energy", "energy", "pt"]
+    jet_group = [["etaSpread", "phiSpread"], ["etaSpread_energy", "phiSpread_energy"]]
 
     jet_kinematic = {}
 
@@ -222,7 +223,33 @@ def Plot1D(tree, selection_region):
             stamp_text = ROOT.TLatex()
             stamp_text.SetNDC()
             stamp_text.DrawLatex( xpos, ypos, cmsLabel)
-            canv.SaveAs(obj + "_" +var+".png")
+            canv.SaveAs(folder + obj + "_" +var+".png")
+
+        jet_dist = {}
+        # more standard 2D distributions
+        for var in jet_group:
+            for i in number:
+                legend = ROOT.TLegend(0.65,0.65,0.75,0.75)
+                xaxis = 0.25
+                if var[0] == "etaSpread": xaxis = 0.35
+                hname_temp = obj + var[0] + i
+                jet_dist[i] = ROOT.TH2F(hname_temp, "Jet " + i + " " + var[0] + " vs. " + var[1] + " ; " + var[0] + "; " + var[1], 100, 0, xaxis, 100, 0, xaxis ); 
+                legend.AddEntry(jet_dist[i], obj + i)
+
+                dist1 = obj + i + "_" + var[0] 
+                dist2 = obj + i + "_" + var[1] 
+                canvTemp.cd()
+                tree.Draw(dist1 + ":" + dist2 +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
+                canv.cd()
+                jet_dist[i].Draw("COLZ PLC")
+
+                legend.Draw()
+                stamp_text = ROOT.TLatex()
+                stamp_text.SetNDC()
+                stamp_text.DrawLatex( xpos, ypos, cmsLabel)
+                canv.SaveAs(folder + obj + i + "_" +var[0]+ "_" +var[1]+ ".png")
+
+
 # ------------------------------------------------------------------------------
 def Plot2D(tree, selection_region):
 
@@ -269,14 +296,8 @@ def Plot2D(tree, selection_region):
         stamp_text = ROOT.TLatex()
         stamp_text.SetNDC()
         stamp_text.DrawLatex( xpos, ypos, cmsLabel)
-        canvDepth.SaveAs(obj+"_energyProfile.png")
+        canvDepth.SaveAs(folder + obj+"_energyProfile.png")
 
-    # more standard 2D distributions
-    object = ["jet"]
-    number = ["0", "1", "2"]
-    jet_group = [["etaSpread", "phiSpread"], ["etaSpread_energy", "phiSpread_energy"]]
-
-    # unclear how to do this type of 2D spread plot, need to know what the values are for a given event
 # ------------------------------------------------------------------------------
 def main():
 
