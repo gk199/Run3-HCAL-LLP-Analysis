@@ -133,7 +133,7 @@ def ExcludedCut( branch_name, branch_sel ):
 
 # ------------------------------------------------------------------------------
 
-
+# ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 def PlotSetup(infilepath):
@@ -162,7 +162,7 @@ def MakeSelection(variable):
     radius_depth12  = [183.6, 214.2]
     radius_depth34  = [214.2, 295]
 
-    selection_radius = radius_all
+    selection_radius = radius_depth34
 
     # variable = LLP0 or LLP1. Would do jet - LLP matching requrements here, this is a placeholder
     if (variable == "jet0"): variable = "LLP0"
@@ -184,6 +184,13 @@ def ResetRange(hist):
 # ------------------------------------------------------------------------------
 def Normalize(hist):
     hist.Scale(1/hist.GetEntries())
+
+# ------------------------------------------------------------------------------
+def LegendLabel(legend):
+    legend.Draw()
+    stamp_text = ROOT.TLatex()
+    stamp_text.SetNDC()
+    stamp_text.DrawLatex( xpos, ypos, cmsLabel)
 
 # ------------------------------------------------------------------------------
 def Plot1D(tree, obj_type):
@@ -218,10 +225,7 @@ def Plot1D(tree, obj_type):
                     canv.cd()
                     LLP_decay[i].Draw("HIST PLC")
 
-            legend.Draw()
-            stamp_text = ROOT.TLatex()
-            stamp_text.SetNDC()
-            stamp_text.DrawLatex( xpos, ypos, cmsLabel)
+            LegendLabel(legend)
             canv.SaveAs(folder + obj_type + "_" +var+".png")
 
     # jet kinematic plotting 
@@ -256,10 +260,7 @@ def Plot1D(tree, obj_type):
             canv.cd()
             hs.Draw("HIST PLC nostack")
             hs.GetXaxis().SetRange(minXbin, maxXbin)
-            legend.Draw()
-            stamp_text = ROOT.TLatex()
-            stamp_text.SetNDC()
-            stamp_text.DrawLatex( xpos, ypos, cmsLabel)
+            LegendLabel(legend)
             canv.SaveAs(folder + obj_type + "_" +var+".png")
 
         # jet 2D distributions
@@ -281,10 +282,7 @@ def Plot1D(tree, obj_type):
                 canv.cd()
                 jet_dist[i].Draw("COLZ PLC")
 
-                legend.Draw()
-                stamp_text = ROOT.TLatex()
-                stamp_text.SetNDC()
-                stamp_text.DrawLatex( xpos, ypos, cmsLabel)
+                LegendLabel(legend)
                 canv.SaveAs(folder + obj_type + i + "_" +var[0]+ "_" +var[1]+ ".png")
 
 # ------------------------------------------------------------------------------
@@ -338,10 +336,7 @@ def Plot2D(tree, obj_type):
         if obj_type == "LLP" and i == "0": continue
         canv.cd()
         hs.Draw("HIST PLC nostack")
-        legend_depth.Draw()
-        stamp_text = ROOT.TLatex()
-        stamp_text.SetNDC()
-        stamp_text.DrawLatex( xpos, ypos, cmsLabel)
+        LegendLabel(legend_depth)
         canv.SaveAs(folder + obj_type + i + "_energyFractionOverlay.png")
 
         # average energy fraction vs depth
@@ -353,10 +348,7 @@ def Plot2D(tree, obj_type):
         else: energy_depth_profile[i].Draw("SAME HIST E1 PLC")
 
     if (time_debug): print("Plotting results, with time = " + str(time.time() - start))
-    legend.Draw()
-    stamp_text = ROOT.TLatex()
-    stamp_text.SetNDC()
-    stamp_text.DrawLatex( xpos, ypos, cmsLabel)
+    LegendLabel(legend)
     canvDepth.SaveAs(folder + obj_type + "_energyProfile.png")
 
 # ------------------------------------------------------------------------------
