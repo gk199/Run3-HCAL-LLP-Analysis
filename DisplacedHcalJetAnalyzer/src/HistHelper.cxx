@@ -117,14 +117,16 @@ void DisplacedHcalJetAnalyzer::BookHists(){
 		h["gen_rechitNpt2_"+is] = new TH1F(Form("gen_rechitNpt2_%s",is.c_str()), "Number of HB Rechits Associated with LLP (#Delta R<0.2); Number of HB Rechits; Events", 100,0,100);
 		h["gen_rechitNpt4_"+is] = new TH1F(Form("gen_rechitNpt4_%s",is.c_str()), "Number of HB Rechits Associated with LLP (#Delta R<0.4); Number of HB Rechits; Events", 100,0,100);
 		h["gen_rechitNpt6_"+is] = new TH1F(Form("gen_rechitNpt6_%s",is.c_str()), "Number of HB Rechits Associated with LLP (#Delta R<0.6); Number of HB Rechits; Events", 100,0,100);
-		h2["gen_decay_rechitN_"+is] = new TH2F(Form("gen_decay_rechitN_%s",is.c_str()), "LLP decay position vs. number of HB rechits; Decay Radius (cm); Number of HB Rechits", 100,0,1000,100,0,100);
+		h2["gen_decay_rechitN_"+is] = new TH2F(Form("gen_decay_rechitN_%s",is.c_str()), "LLP decay position vs. number of HB rechits; Decay Radius (cm); Number of HB Rechits", 100,0,400,200,0,200);
 
 		h2["gen_depth_energyP_"+is] = new TH2F(Form("gen_depth_energyP_%s",is.c_str()), "Energy Profile of HB Rechits Associated with LLP; HB Depth; Fraction of Energy", 6,0,6,60,0,1.2);
 		h["gen_energyP_"+is] = new TH1F(Form("gen_energyP_%s",is.c_str()), "Energy Profile of HB Rechits Associated with LLP; HB Depth; Fraction of Energy", 6,0,6);
-		h["gen_energyP_HBstart_"+is] = new TH1F(Form("gen_energyP_HBstart_%s",is.c_str()), "Energy Profile of HB Rechits Associated with LLP (decaying in start of HB); HB Depth; Fraction of Energy", 6,0,6);
-		h["gen_energyP_HBend_"+is] = new TH1F(Form("gen_energyP_HBend_%s",is.c_str()), "Energy Profile of HB Rechits Associated with LLP (decaying in end of HB); HB Depth; Fraction of Energy", 6,0,6);
+		h["gen_energyP_beforeHB_"+is] = new TH1F(Form("gen_energyP_beforeHB_%s",is.c_str()), "Energy Profile of HB Rechits Associated with LLP (decaying 20 cm before HB); HB Depth; Fraction of Energy", 6,0,6);
+		h["gen_energyP_HBdepth1_"+is] = new TH1F(Form("gen_energyP_HBdepth1_%s",is.c_str()), "Energy Profile of HB Rechits Associated with LLP (decaying in depth 1 of HB); HB Depth; Fraction of Energy", 6,0,6);
+		h["gen_energyP_HBdepth2_"+is] = new TH1F(Form("gen_energyP_HBdepth2_%s",is.c_str()), "Energy Profile of HB Rechits Associated with LLP (decaying in depth 2 of HB); HB Depth; Fraction of Energy", 6,0,6);
+		h["gen_energyP_HBdepth3_"+is] = new TH1F(Form("gen_energyP_HBdepth3_%s",is.c_str()), "Energy Profile of HB Rechits Associated with LLP (decaying in depth 3 of HB); HB Depth; Fraction of Energy", 6,0,6);
+		h["gen_energyP_HBdepth4_"+is] = new TH1F(Form("gen_energyP_HBdepth4_%s",is.c_str()), "Energy Profile of HB Rechits Associated with LLP (decaying in depth 4 of HB); HB Depth; Fraction of Energy", 6,0,6);
 	}
-	
 }
 
 /* ====================================================================================================================== */
@@ -155,16 +157,14 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 			vector<float> rechitJet = GetMatchedHcalRechits_Jet(i, 0.4);
 			vector<float> energy = GetEnergyProfile_Jet(i, 0.4);
 			vector<float> spread_Eta_Phi = GetEtaPhiSpread_Jet(i, 0.4); // eta, phi (average); eta, phi (energy weighted)
-			for (int depth = 0; depth < 4; depth++) {
-				h[cat+"jet"+is+"_energyProfile"]->Fill(depth + 1, energy[depth]); 
-				h[cat+"jet"+is+"_rechitN"]->Fill(rechitJet.size());
-				h[cat+"jet"+is+"_etaSpread"]->Fill(spread_Eta_Phi[0]);
-				h[cat+"jet"+is+"_etaSpread_energy"]->Fill(spread_Eta_Phi[2]);
-				h[cat+"jet"+is+"_phiSpread"]->Fill(spread_Eta_Phi[1]);
-				h[cat+"jet"+is+"_phiSpread_energy"]->Fill(spread_Eta_Phi[3]);
-				h2[cat+"jet"+is+"_spreadEtaPhi"]->Fill(spread_Eta_Phi[0], spread_Eta_Phi[1]);
-				h2[cat+"jet"+is+"_spreadEtaPhi_energy"]->Fill(spread_Eta_Phi[2], spread_Eta_Phi[3]);
-			}
+			for (int depth = 0; depth < 4; depth++) h[cat+"jet"+is+"_energyProfile"]->Fill(depth + 1, energy[depth]); 
+			h[cat+"jet"+is+"_rechitN"]->Fill(rechitJet.size());
+			h[cat+"jet"+is+"_etaSpread"]->Fill(spread_Eta_Phi[0]);
+			h[cat+"jet"+is+"_etaSpread_energy"]->Fill(spread_Eta_Phi[2]);
+			h[cat+"jet"+is+"_phiSpread"]->Fill(spread_Eta_Phi[1]);
+			h[cat+"jet"+is+"_phiSpread_energy"]->Fill(spread_Eta_Phi[3]);
+			h2[cat+"jet"+is+"_spreadEtaPhi"]->Fill(spread_Eta_Phi[0], spread_Eta_Phi[1]);
+			h2[cat+"jet"+is+"_spreadEtaPhi_energy"]->Fill(spread_Eta_Phi[2], spread_Eta_Phi[3]);
 		}
 	} 
 	// Reco photons
@@ -218,14 +218,14 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 				double x_LLP = gLLP_DecayVtx_X->at(idx_llp);
 				double y_LLP = gLLP_DecayVtx_Y->at(idx_llp);
 				double z_LLP = gLLP_DecayVtx_Z->at(idx_llp);
-				double radius = sqrt( pow(x_LLP,2) + pow(y_LLP,2) );
-				double distance = sqrt( pow(x_LLP,2) + pow(y_LLP,2) + pow(z_LLP,2) );
+				float decay_radius = GetDecayRadiusHB_LLP(idx_llp);
+				float distance = GetDecayDistance_LLP(idx_llp);
 
 				// positional quantities
 				h["gen_Xdecay"]->Fill(x_LLP);
 				h["gen_Ydecay"]->Fill(y_LLP);
 				h["gen_Zdecay"]->Fill(z_LLP);
-				h["gen_Rdecay"]->Fill(radius);
+				h["gen_Rdecay"]->Fill(decay_radius);
 				h["gen_Ddecay"]->Fill(distance);
 				h["gen_cTau"]->Fill(distance * (sqrt( 1 / pow(gLLP_Beta->at(idx_llp),2) - 1)));
 				h["gen_deltaT"]->Fill(distance * ( 1 / gLLP_Beta->at(idx_llp) - 1) * 0.03336); // 1/c in ns / cm to give answer in ns
@@ -234,8 +234,7 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 				vector<int> n_rechit_pt2 = GetRechitMult(idx_llp, 0.2); // GetRechitMult returns rechit multiplicity associated with LLP, first daughter, second daughter
 				vector<int> n_rechit_pt4 = GetRechitMult(idx_llp, 0.4);
 				vector<int> n_rechit_pt6 = GetRechitMult(idx_llp, 0.6);
-				float decay_radius = abs(GetDecayRadiusHB_LLP(idx_llp));
-				
+
 				// energy profile					
 				vector<vector<float>> energy = GetEnergyProfile(idx_llp, 0.4); // [0] is LLP, [1] is daughter 1, [2] is daughter 2
 
@@ -244,14 +243,17 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 					h["gen_rechitNpt2_"+is]->Fill(n_rechit_pt2[i]);
 					h["gen_rechitNpt4_"+is]->Fill(n_rechit_pt4[i]);
 					h["gen_rechitNpt6_"+is]->Fill(n_rechit_pt6[i]);
-					h2["gen_decay_rechitN_"+is]->Fill(decay_radius, n_rechit_pt4[i]);
+					if (decay_radius >=0) h2["gen_decay_rechitN_"+is]->Fill(decay_radius, n_rechit_pt4[i]);
 
 					// if (n_rechit_pt4[i] > 0) std::cout << n_rechit_pt4[i] << " = GetRechitMult(idx_llp, 0.4) for i=" << i << std::endl;
 					for (int depth = 0; depth < 4; depth++) {
 						h2["gen_depth_energyP_"+is]->Fill(depth + 1, energy[i][depth]);
 						h["gen_energyP_"+is]->Fill(depth + 1, energy[i][depth]); // fill TH1D, weight = fractional energy at that depth
-						if (decay_radius > 175 && decay_radius < 235) h["gen_energyP_HBstart_"+is]->Fill(depth + 1, energy[i][depth]);
-						if (decay_radius > 235 && decay_radius < 295) h["gen_energyP_HBend_"+is]->Fill(depth + 1, energy[i][depth]); // currently all energies are 0 for these matched rechits
+						if (decay_radius > 153 && decay_radius < 183.6) h["gen_energyP_beforeHB_"+is]->Fill(depth + 1, energy[i][depth]);
+						if (decay_radius >= 183.6 && decay_radius < 190.2) h["gen_energyP_HBdepth1_"+is]->Fill(depth + 1, energy[i][depth]); 
+						if (decay_radius >= 190.2 && decay_radius < 214.2) h["gen_energyP_HBdepth2_"+is]->Fill(depth + 1, energy[i][depth]); 
+						if (decay_radius >= 214.2 && decay_radius < 244.8) h["gen_energyP_HBdepth3_"+is]->Fill(depth + 1, energy[i][depth]); 
+						if (decay_radius >= 244.8 && decay_radius < 295) h["gen_energyP_HBdepth4_"+is]->Fill(depth + 1, energy[i][depth]); 
 					}
 				}
 			}

@@ -8,7 +8,7 @@ import sys, os, argparse, time, errno
 import matplotlib.pyplot as plt
 
 debug = False
-data = True
+data = False
 MC = False
 if sys.argv[2] == "data": data = True
 if sys.argv[2] == "MC": MC = True
@@ -32,7 +32,7 @@ ypos = 0.85
 canv = ROOT.TCanvas("c","c",800,600)
 overlayCanv = ROOT.TCanvas("c1","c1",800,600)
 if (data): 
-  cmsLabel = "#scale[1.0]{#bf{CMS}} #scale[0.8]{#it{2022 13.6 TeV Collisions Data (JetMET)}}"; 
+  cmsLabel = "#scale[1.0]{#bf{CMS}} #scale[0.8]{#it{2022 13.6 TeV Collisions Data (MET skim)}}"; 
   folder = "./outPlots/"
 if (MC): 
   cmsLabel = "#scale[1.0]{#bf{CMS}} #scale[0.8]{#it{2023 LLP MC}}"; 
@@ -122,7 +122,7 @@ for cat in categories:
 
 # =========================================================================================================== #
 if (MC):
-  plots = {"gen_Ddecay", "gen_Rdecay", "gen_Xdecay", "gen_Ydecay", "gen_Zdecay", "gen_cTau", "gen_deltaT"};
+  plots = {"gen_Ddecay", "gen_Rdecay", "gen_Xdecay", "gen_Ydecay", "gen_Zdecay", "gen_cTau", "gen_deltaT"};	
 
   print ("Plots for generator LLP positional information now run: ")
   for plot in plots:
@@ -156,7 +156,7 @@ if (MC):
     canv.SaveAs(folder + "genLLP" + "/" + plot + ".png")
 
   print ("Plots for generator LLP rechit multiplicity and energy profiles now run: ")
-  plots = {"gen_rechitNpt2", "gen_rechitNpt4", "gen_rechitNpt6", "gen_energyP"}
+  plots = {"gen_rechitNpt2", "gen_rechitNpt4", "gen_rechitNpt6", "gen_energyP", "gen_energyP_beforeHB", "gen_energyP_HBdepth1", "gen_energyP_HBdepth1", "gen_energyP_HBdepth2", "gen_energyP_HBdepth3", "gen_energyP_HBdepth4"}
   leading = [0,1,2]
   for plot in plots:
     legend = ROOT.TLegend(0.65,0.65,0.8,0.8)

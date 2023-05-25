@@ -330,6 +330,7 @@ public :
    vector<int>     *PFCand_TrackIndex;
    vector<int>     *PFCand_GeneralTrackIndex;
    vector<int>     *PFCand_PVIndex;
+   Int_t           n_ecalRechit;
    Int_t           n_hbheRechit;
    vector<float>   *hbheRechit_Eta;
    vector<float>   *hbheRechit_Phi;
@@ -617,6 +618,7 @@ public :
    TBranch        *b_PFCand_TrackIndex;   //!
    TBranch        *b_PFCand_GeneralTrackIndex;   //!
    TBranch        *b_PFCand_PVIndex;   //!
+   TBranch        *b_n_ecalRechit;   //!
    TBranch        *b_n_hbheRechit;   //!
    TBranch        *b_hbheRechit_Eta;   //!
    TBranch        *b_hbheRechit_Phi;   //!
@@ -695,6 +697,7 @@ public :
    // TruthInfoHelper.cxx
    virtual vector<TVector3> GetLLPDecayProdCoords( int idx_llp, int idx_llp_decay, vector<float> intersection_depths);
    virtual float GetDecayRadiusHB_LLP( int idx_llp);
+   virtual float GetDecayDistance_LLP( int idx_llp);
    virtual vector<float> GetMatchedHcalRechits_LLPDecay( int idx_llp, int idx_llp_decay, float deltaR_cut );
    virtual vector<float> GetMatchedHcalRechits_LLPDecay_Overlap( int idx_llp, float deltaR_cut );
    virtual bool IsTruthMatchedLLPDecay_HcalRechit( int idx_hbheRechit, float deltaR_cut );
@@ -1261,6 +1264,7 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("PFCand_TrackIndex", &PFCand_TrackIndex, &b_PFCand_TrackIndex);
    fChain->SetBranchAddress("PFCand_GeneralTrackIndex", &PFCand_GeneralTrackIndex, &b_PFCand_GeneralTrackIndex);
    fChain->SetBranchAddress("PFCand_PVIndex", &PFCand_PVIndex, &b_PFCand_PVIndex);
+   fChain->SetBranchAddress("n_ecalRechit", &n_ecalRechit, &b_n_ecalRechit);
    fChain->SetBranchAddress("n_hbheRechit", &n_hbheRechit, &b_n_hbheRechit);
    fChain->SetBranchAddress("hbheRechit_Eta", &hbheRechit_Eta, &b_hbheRechit_Eta);
    fChain->SetBranchAddress("hbheRechit_Phi", &hbheRechit_Phi, &b_hbheRechit_Phi);

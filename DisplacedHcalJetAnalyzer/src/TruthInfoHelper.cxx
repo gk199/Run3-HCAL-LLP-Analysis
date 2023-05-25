@@ -32,7 +32,7 @@ vector<TVector3> DisplacedHcalJetAnalyzer::GetLLPDecayProdCoords(int idx_llp, in
 		if( gParticle_ProdVtx_X->at(i) != gLLP_DecayVtx_X->at(idx_llp) ) continue; // require production is decay vtx of LLP
 		if( gParticle_ProdVtx_Y->at(i) != gLLP_DecayVtx_Y->at(idx_llp) ) continue;
 		if( gParticle_ProdVtx_Z->at(i) != gLLP_DecayVtx_Z->at(idx_llp) ) continue;
-		std::cout << gParticle_ParentId->at(i) << " = gParticle_ParentId->at(i)" << std::endl;
+		if (debug) std::cout << gParticle_ParentId->at(i) << " = gParticle_ParentId->at(i)" << std::endl;
 		if( abs(gParticle_ParentId->at(i)) != 9000006) continue; // require parent is LLP
 		llp_decay_indices.push_back( i );
 	}
@@ -79,14 +79,26 @@ float DisplacedHcalJetAnalyzer::GetDecayRadiusHB_LLP( int idx_llp ) {
 	double z_LLP = gLLP_DecayVtx_Z->at(idx_llp);
 	
 	float radiusLLPdecay = -999;
-    // if ((sqrt( pow(x_LLP,2) + pow(y_LLP,2)) > HB_inner_radius) && (sqrt( pow(x_LLP,2) + pow(y_LLP,2)) < HB_outer_radius) && abs(z_LLP) < HE_start) { 
-    // if ((sqrt( pow(x_LLP,2) + pow(y_LLP,2)) < HB_outer_radius) && abs(z_LLP) < HE_start) { 
     if (abs(z_LLP) < HE_start) { 
 		radiusLLPdecay = sqrt( pow(x_LLP,2) + pow(y_LLP,2)); // in cm
 	}
 	return radiusLLPdecay;
 }
 
+/* ====================================================================================================================== */
+float DisplacedHcalJetAnalyzer::GetDecayDistance_LLP( int idx_llp ) {
+	/*
+	Description: get the total distance of LLP decay
+	Input: idx_llp:        LLP index (generally either 0 or 1)
+	*/
+	double x_LLP = gLLP_DecayVtx_X->at(idx_llp);
+	double y_LLP = gLLP_DecayVtx_Y->at(idx_llp);
+	double z_LLP = gLLP_DecayVtx_Z->at(idx_llp);
+	
+    float distance = sqrt( pow(x_LLP,2) + pow(y_LLP,2) + pow(z_LLP,2) ); // in cm
+
+	return distance;
+}
 /* ====================================================================================================================== */
 vector<float> DisplacedHcalJetAnalyzer::GetMatchedHcalRechits_LLPDecay( int idx_llp, int idx_llp_decay, float deltaR_cut ){
 	/* 

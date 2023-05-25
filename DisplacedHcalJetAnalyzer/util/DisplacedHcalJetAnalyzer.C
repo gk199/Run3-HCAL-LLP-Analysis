@@ -89,10 +89,10 @@ void DisplacedHcalJetAnalyzer( string infiletag = "", string infilepath = "" ){
 
 	// ----- Modify Properties ----- // 
 
-	AnalysisReader.debug		= true; 
+	AnalysisReader.debug		= false; 
 	AnalysisReader.print_counts	= true;
 	AnalysisReader.save_hists	= true;		// For output histograms
-	AnalysisReader.save_trees	= false;	// For minituples
+	AnalysisReader.save_trees	= true;		// For minituples
 	AnalysisReader.NEvents 		= -1; 		// Run over specified number of events (set to -1 for ALL)
 
 	// ----- Initialize ----- // 
