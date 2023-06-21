@@ -61,6 +61,8 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 			myvars_float.push_back( Form("LLP%d_DecayT", i));
 			myvars_float.push_back( Form("LLP%d_DecayCtau", i));
 			for (int d=0; d<4; d++) myvars_float.push_back( Form("LLP%d_energyFrac_depth%d", i, d+1));
+			myvars_float.push_back( Form("LLP%d_Eta", i));
+			myvars_float.push_back( Form("LLP%d_Phi", i));
 		}
 	}
 
@@ -126,11 +128,9 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("jet%d_phiSpread_energy", i)] = spread_Eta_Phi[3];
 		
 		// find three highest pT tracks matched to a jet
-		// there seems to be an issue here, because jet_track_index numbers are always the same, no matter now many tracks are matched to a jet
 		vector<pair<float, float>> track_pt_PV;
 		vector<uint> jet_track_index = jet_TrackIndices->at(i);
 		for (int j = 0; j < jet_track_index.size(); j++) { // jet_NTracks->at(i) == jet_track_index.size()
-			//std::cout << jet_track_index.size() << " = size of jet_TrackIndices, and jet_track_index[j = " << j << "] = " << jet_track_index[j] << std::endl;
 			for (int k = 0; k < n_track; k++) { // find which generalTrack matches to jet_track_index[j]
 				if (jet_track_index[j] == track_index->at(k)) {
 					track_pt_PV.push_back({track_Pt->at(k), track_dzToPV->at(k)});
@@ -138,11 +138,8 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 			} 
 		}	
 		if (track_pt_PV.size() > 0) {
-			//for (int j = 0; j < track_pt_PV.size(); j++) std::cout << track_pt_PV[j].first << ", " << track_pt_PV[j].second << std::endl;
-			//std::cout << "sorted: " << std::endl;
 			std::sort (track_pt_PV.begin(), track_pt_PV.end(), greater<pair<float, float>>());
-			//for (int j = 0; j < track_pt_PV.size(); j++) std::cout << track_pt_PV[j].first << ", " << track_pt_PV[j].second << std::endl;
-			//std::cout << " " << std::endl;
+			for (int j = 0; j < track_pt_PV.size(); j++) if (track_pt_PV[j].second > -9999) std::cout << track_pt_PV[j].first << ", " << track_pt_PV[j].second << std::endl;
 
 			int n_track = std::min(3, (int) jet_track_index.size());
 			for (int track = 0; track < n_track; track++) {
@@ -158,6 +155,14 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		float distance = GetDecayDistance_LLP(i);
 		vector<int> n_rechit_pt4 = GetRechitMult(i, 0.4); // GetRechitMult returns rechit multiplicity associated with LLP [0], first daughter, second daughter
 		vector<vector<float>> energy = GetEnergyProfile(i, 0.4); // [0] is LLP, [1] is daughter 1, [2] is daughter 2
+
+		vector<TVector3> decay_product_coords = GetLLPDecayProdCoords(i,0,vector<float>{decay_radius});  // 0 for daughter particle, just getting decay of LLP, since R is LLP decay radius
+		if (decay_product_coords.size() > 0) {
+			float eta = decay_product_coords.at(0).Eta();
+			float phi = decay_product_coords.at(0).Phi();
+			tree_output_vars_float[Form("LLP%d_Eta", i)] = eta;
+			tree_output_vars_float[Form("LLP%d_Phi", i)] = phi;
+		}
 
 		tree_output_vars_int[Form("LLP%d_rechitN", i)] = n_rechit_pt4[0];
 		tree_output_vars_float[Form("LLP%d_DecayR", i)] = decay_radius;
