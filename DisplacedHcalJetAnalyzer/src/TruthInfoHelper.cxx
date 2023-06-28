@@ -238,33 +238,67 @@ bool DisplacedHcalJetAnalyzer::LLPDecayIsTruthMatched( int idx_gLLPDecay, float 
 }
 
 /* ====================================================================================================================== */
-/*float DisplacedHcalJetAnalyzer::LLPDecayTruthMatchMaxPT( int idx_llp, int idx_llp_decay, float deltaR_cut ){
- 
-	//Description: Delivers max reco jet pt matched to llp decay product 
-	//Inputs: eta/phi: 	reco jet eta/phi
-	//		deltaR_cut: deltaR between jet and LLP decay prod (default: 0.4)	
-	
+vector<TVector3> DisplacedHcalJetAnalyzer::GetLLPDecayProdCoords(int idx_llp, int idx_llp_decay, vector<float> intersection_depths){
+	/* DEPRECATED !!!
+	Description: Delivers displaced truth particle eta & phi coordinates for a given set of depths (these vary with depth)
+	Inputs: idx_llp: 					LLP index (generally either 0 or 1)
+			idx_llp_decay: 				LLP decay product index (generally either 0 or 1)
+			intersection_depths:		vector a radii at which to extract eta/phi info. 
+	TODO: 	- Are Reco pt/eta/phi reported from (0,0,0) or from PV?
+			- Currently only implemented for barrel with constant depths (this is generally ok for HB)
+			- Are hbheRechit_X, Y, Z coordinates the center of a cell?
+	*/
 
-	float pt_max = 0;
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetLLPDecayProdCoords()"<<endl;
 
-	TVector3 vec_llp;
-	vec_llp.SetXYZ( gLLP_DecayVtx_X->at(idx_llp), gLLP_DecayVtx_Y->at(idx_llp), gLLP_DecayVtx_Z->at(idx_llp) );
+	vector<TVector3> decay_product_coords;
 
-	int idx_gParticle = GetLLPDecayProductIndex( idx_llp, idx_llp_decay);
+	if( gLLP_DecayVtx_X->size() < idx_llp+1 ) return decay_product_coords;
 
-	for( int i=0; i<jet_Pt->size(); i++){
-		TVector3 vec_jet;
-		vec_jet.SetPtEtaPhi( 235., jet_eta, jet_phi );
-		vec_jet_new = vec_jet - vec_llp;
+	// Get LLP Trajectory // 
 
-		float dR_temp = DeltaR( gParticle_Eta->at(idx_gParticle), vec_jet_new.Eta(), gParticle_Phi->at(idx_gParticle), vec_jet_new.Phi() );
+	TVector3 vec_pv, vec_sv, vec_llp;
+	vec_pv.SetXYZ( 0., 0., 0. ); //PV_X, PV_Y, PV_Z ); TODO: Are Reco pt/eta/phi reported from (0,0,0) or from PV?
+	vec_sv.SetXYZ( gLLP_DecayVtx_X->at(idx_llp), gLLP_DecayVtx_Y->at(idx_llp), gLLP_DecayVtx_Z->at(idx_llp) );
+	vec_llp = vec_sv-vec_pv;
 
-		if( dR_temp < deltaR_cut && jet_Pt->at(i) > pt_max ) 
-			pt_max = jet_Pt->at(i);
+	// Get LLP Decay Products //
 
+	vector<int> llp_decay_indices;
+
+	// loop over gParticles to determine which gParticle is the LLP decay product 
+	for( int i=0; i<gParticle_ProdVtx_X->size(); i++ ){
+		if( gParticle_ProdVtx_X->at(i) != gLLP_DecayVtx_X->at(idx_llp) ) continue; // require production is decay vtx of LLP
+		if( gParticle_ProdVtx_Y->at(i) != gLLP_DecayVtx_Y->at(idx_llp) ) continue;
+		if( gParticle_ProdVtx_Z->at(i) != gLLP_DecayVtx_Z->at(idx_llp) ) continue;
+		if (debug) std::cout << gParticle_ParentId->at(i) << " = gParticle_ParentId->at(i)" << std::endl;
+		if( abs(gParticle_ParentId->at(i)) != 9000006) continue; // require parent is LLP
+		llp_decay_indices.push_back( i );
 	}
 
-	return pt_max;
+	if( llp_decay_indices.size() != 2 ) cout<<"WARNING: Detected abnormal number of LLP decay products ("<<llp_decay_indices.size()<<")"<<endl;
+	
+	if( llp_decay_indices.size() < idx_llp_decay+1 ) return decay_product_coords;
+	
+	if( gParticle_E->size() < llp_decay_indices[idx_llp_decay]+1 ) return decay_product_coords;
 
-}*/
+	// Get LLP Trajectory Intersection with Detector Layer //
+
+	for( int i=0; i<intersection_depths.size(); i ++ ){ // i=0
+
+		if( vec_sv.Pt() > intersection_depths.at(i)*1.1 ) continue; // Allow 10% leeway
+
+		float dist_to_depth = intersection_depths.at(i) - vec_llp.Pt(); // Here, Pt is the perp magnitude
+		
+		TVector3 vec_llp_decay_temp;
+		vec_llp_decay_temp.SetPtEtaPhi( dist_to_depth, gParticle_Eta->at(llp_decay_indices[idx_llp_decay]), gParticle_Phi->at(llp_decay_indices[idx_llp_decay]) );
+		// essentially, vec_llp_decay_temp is the trajectory of LLP decay product (distance to depth in Pt), eta, phi
+
+		TVector3 vec_intersection_temp = vec_llp + vec_llp_decay_temp;
+		decay_product_coords.push_back( vec_intersection_temp );
+
+	}
+	return decay_product_coords;
+}
+
 
