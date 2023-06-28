@@ -8,6 +8,12 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 	Long64_t ientry = LoadTree(jentry);
 	if (ientry < 0) return;	
 
+	// ----- Reset and Set Global Variables ----- //
+
+	ResetGlobalEventVars();
+
+	SetLLPDecayProducts();
+
 	count["All"]++;
 	
 	// GK, fill the below catergories of histograms
