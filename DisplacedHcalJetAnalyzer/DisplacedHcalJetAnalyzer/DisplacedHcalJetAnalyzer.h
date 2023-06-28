@@ -89,6 +89,10 @@ public :
    vector<string> HLT_Names;
    map<string, int> HLT_Indices;
 
+   vector<int> gLLPDecay_iLLP;
+   vector<int> gLLPDecay_iParticle;
+   vector<vector<int>> map_gLLP_to_gParticle_indices;
+
    // ----- Variables ----- //
 
    // Fixed size dimensions of array or collections stored in the TTree if any.
@@ -695,14 +699,18 @@ public :
    virtual vector<float> GetEnergyProfile_Jet( int idx_jet, float deltaR_cut );
    virtual vector<float> GetEtaPhiSpread_Jet( int idx_jet, float deltaR_cut );
    // TruthInfoHelper.cxx
-   virtual vector<TVector3> GetLLPDecayProdCoords( int idx_llp, int idx_llp_decay, vector<float> intersection_depths);
-   virtual float GetDecayRadiusHB_LLP( int idx_llp);
-   virtual float GetDecayDistance_LLP( int idx_llp);
-   virtual vector<float> GetMatchedHcalRechits_LLPDecay( int idx_llp, int idx_llp_decay, float deltaR_cut );
-   virtual vector<float> GetMatchedHcalRechits_LLPDecay_Overlap( int idx_llp, float deltaR_cut );
-   virtual bool IsTruthMatchedLLPDecay_HcalRechit( int idx_hbheRechit, float deltaR_cut );
+   virtual void   SetLLPDecayProducts();
+   virtual int    GetLLPDecayProductIndex( int idx_llp, int idx_llp_decay );
+   virtual float  GetDecayRadiusHB_LLP( int idx_llp);
+   virtual float  GetDecayDistance_LLP( int idx_llp);
+   virtual vector<float> GetMatchedHcalRechits_LLPDecay( int idx_llp, int idx_llp_decay, float deltaR_cut=0.4 );
+   virtual vector<float> GetMatchedHcalRechits_LLPDecay_Overlap( int idx_llp, float deltaR_cut=0.4 );
+   virtual bool   JetIsTruthMatched( float jet_eta, float jet_phi, float deltaR_cut=0.4 );
+   virtual bool   LLPDecayIsTruthMatched( int idx_llp, int idx_llp_decay, float deltaR_cut=0.4 );
+   virtual bool   LLPDecayIsTruthMatched( int idx_gLLPDecay, float deltaR_cut=0.4 );
    // EventHelper.cxx
    virtual float  GetEventRuntime( clock_t clock_start, Long64_t init_entry, Long64_t current_entry );
+   virtual void   ResetGlobalEventVars();
    // OutputHelper.cxx
    virtual void   DeclareOutputTrees();
    virtual void   FillOutputTrees( string treename );
@@ -710,6 +718,7 @@ public :
    virtual void   SetHistCategories();
    virtual void   BookHists();
    virtual void   FillHists(string cat = "");
+   virtual void   FillTriggerMatchHists(string cat = "");
    virtual void   WriteHists();   
 };
 
@@ -1291,7 +1300,8 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("gParticle_ParentId", &gParticle_ParentId, &b_gParticle_ParentId);
    fChain->SetBranchAddress("gParticle_Status", &gParticle_Status, &b_gParticle_Status);
    fChain->SetBranchAddress("gParticle_Id", &gParticle_Id, &b_gParticle_Id);
-   fChain->SetBranchAddress("gParticle_Pt", &gParticle_Pt, &b_gParticle_Pt);
+   fChain->SetBranchAddress("gParticle_Pt", &
+      gParticle_Pt, &b_gParticle_Pt);
    fChain->SetBranchAddress("gParticle_Px", &gParticle_Px, &b_gParticle_Px);
    fChain->SetBranchAddress("gParticle_Py", &gParticle_Py, &b_gParticle_Py);
    fChain->SetBranchAddress("gParticle_Pz", &gParticle_Pz, &b_gParticle_Pz);
