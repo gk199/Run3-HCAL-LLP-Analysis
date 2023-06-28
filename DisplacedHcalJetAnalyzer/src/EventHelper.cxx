@@ -5,3 +5,14 @@ float DisplacedHcalJetAnalyzer::GetEventRuntime( clock_t clock_start, Long64_t i
 	float events_per_sec = (current_entry - init_entry)/duration_sec; 
 	return events_per_sec;
 }
+
+/* ====================================================================================================================== */
+void DisplacedHcalJetAnalyzer::ResetGlobalEventVars(){
+
+	if ( debug ) cout<<"DisplacedHcalJetAnalyzer::ResetGlobalEventVars()"<<endl;
+
+	gLLPDecay_iLLP.clear();
+	gLLPDecay_iParticle.clear();
+	map_gLLP_to_gParticle_indices.clear();
+
+}
