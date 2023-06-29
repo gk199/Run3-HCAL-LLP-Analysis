@@ -1,9 +1,17 @@
 # Run3-HCAL-LLP-Analysis
 Run 3 HCAL LLP analysis
 
-Starting from the LLP ntuple in [cms-lpc-llp](https://github.com/cms-lpc-llp/llp_ntupler/tree/run3_GKdev_2022HCAL), the MakeClass was used to initalize the `LLP_HCAL_Analyzer.*` files, and Kiley's setup for the full framework.  
+Setup:
+```
+git clone git@github.com:gk199/Run3-HCAL-LLP-Analysis.git
+cd Run3-HCAL-LLP-Analysis
+git checkout -b <your-branch>
+```
+
+Starting from the LLP ntuple in [cms-lpc-llp](https://github.com/cms-lpc-llp/llp_ntupler/tree/run3_GKdev_2022HCAL), the MakeClass was used to initalize the `LLP_HCAL_Analyzer.*` files, and Kiley's setup for the full framework. 
 
 ```
+py_setup # setup if needed for python environment 
 cd DisplacedHcalJetAnalyzer/
 source compile.sh 
 cd ../Run/
