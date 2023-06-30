@@ -30,18 +30,20 @@ stamp_text.SetNDC()
 stamp_text.SetTextFont(42)
 stamp_text.SetTextColor(ROOT.kBlack)
 stamp_text.SetTextSize(0.045)
-xpos = 0.45
+xpos = 0.13
 ypos = 0.85
 
 canv = ROOT.TCanvas("c","c",800,600)
 overlayCanv = ROOT.TCanvas("c1","c1",800,600)
+cmsLabel = "#scale[1]{#bf{CMS} }"
 if (data): 
-  cmsLabel = "#scale[1.0]{#bf{CMS}} #scale[0.8]{#it{2022 13.6 TeV Collisions Data (MET skim)}}"; 
+  cmsLabelExtra = "#scale[0.8]{#it{HCAL LLP Skim}}"
+  yearLumi = "#scale[0.85]{2023C (13.6 TeV)}"
   folder = "./outPlots/"
 if (MC): 
-  cmsLabel = "#scale[1.0]{#bf{CMS}} #scale[0.8]{#it{2023 LLP MC}}"; 
+  cmsLabelExtra = "#scale[0.8]{#it{2023 LLP MC}}"
+  yearLumi = "#scale[0.85]{#sqrt{s} = 13.6 TeV}"
   folder = "./outPlots_MC/"
-  xpos += 0.2
 
 # Save output plots
 def OutputFolder(name):
@@ -183,14 +185,18 @@ def ResetRange(hist):
 
 # ------------------------------------------------------------------------------
 def Normalize(hist):
-    hist.Scale(1/hist.GetEntries())
+    if (hist.GetEntries() > 0): hist.Scale(1/hist.GetEntries())
 
 # ------------------------------------------------------------------------------
 def LegendLabel(legend):
     legend.Draw()
     stamp_text = ROOT.TLatex()
     stamp_text.SetNDC()
+    stamp_text.SetTextFont(42)
+    stamp_text.SetTextSize(0.036)
     stamp_text.DrawLatex( xpos, ypos, cmsLabel)
+    stamp_text.DrawLatex( xpos+0.06, ypos, cmsLabelExtra)
+    stamp_text.DrawLatex( 0.75, 0.91, yearLumi)
 
 # ------------------------------------------------------------------------------
 def Plot1D(tree, obj_type):
@@ -201,7 +207,7 @@ def Plot1D(tree, obj_type):
     # LLP kinematic / decay plotting
     if (obj_type == "LLP"):
         number = ["0", "1"]
-        kinematic_vars = ["DecayR", "DecayX", "DecayY", "DecayZ", "DecayD", "DecayT", "DecayCtau", "rechitN"]
+        kinematic_vars = ["DecayR", "DecayX", "DecayY", "DecayZ", "DecayD", "DecayT", "DecayCtau", "RechitN"]
 
         LLP_decay = {}
     
@@ -231,8 +237,8 @@ def Plot1D(tree, obj_type):
     # jet kinematic plotting 
     if (obj_type == "jet"):
         number = ["0", "1", "2"]
-        kinematic_vars = ["rechitN", "Eta", "Phi", "etaSpread", "phiSpread", "etaSpread_energy", "phiSpread_energy", "energy", "pt"]
-        jet_group = [["etaSpread", "phiSpread"], ["etaSpread_energy", "phiSpread_energy"]]
+        kinematic_vars = ["RechitN", "Eta", "Phi", "EtaSpread", "PhiSpread", "EtaSpread_energy", "PhiSpread_energy", "E", "Pt"]
+        jet_group = [["EtaSpread", "PhiSpread"], ["EtaSpread_energy", "PhiSpread_energy"]]
 
         jet_kinematic = {}
         for var in kinematic_vars:
@@ -249,7 +255,8 @@ def Plot1D(tree, obj_type):
                 dist = obj_type + i + "_" + var
                 canvTemp.cd()
                 if (time_debug): print("1D jet loop, drawing tree, with time = " + str(time.time() - start))
-                selection_region = MakeSelection(obj_type + i)
+                if (MC): selection_region = MakeSelection(obj_type + i)
+                else: selection_region = ""
                 tree.Draw(dist +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
                 
                 Normalize(jet_kinematic[i])
@@ -269,7 +276,7 @@ def Plot1D(tree, obj_type):
             for i in number:
                 legend = ROOT.TLegend(0.65,0.65,0.75,0.75)
                 xaxis = 0.25
-                if var[0] == "etaSpread": xaxis = 0.35
+                if var[0] == "EtaSpread": xaxis = 0.35
                 hname_temp = obj_type + var[0] + i
                 jet_dist[i] = ROOT.TH2F(hname_temp, "Jet " + i + " " + var[0] + " vs. " + var[1] + " ; " + var[0] + "; " + var[1], 100, 0, xaxis, 100, 0, xaxis ); 
                 legend.AddEntry(jet_dist[i], obj_type + i)
@@ -277,7 +284,8 @@ def Plot1D(tree, obj_type):
                 dist1 = obj_type + i + "_" + var[0] 
                 dist2 = obj_type + i + "_" + var[1] 
                 canvTemp.cd()
-                selection_region = MakeSelection(obj_type + i)
+                if (MC): selection_region = MakeSelection(obj_type + i)
+                else: selection_region = ""
                 tree.Draw(dist1 + ":" + dist2 +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
                 canv.cd()
                 jet_dist[i].Draw("COLZ PLC")
@@ -291,7 +299,7 @@ def Plot2D(tree, obj_type):
     # LLP and jet are essentially treated the same here
     # fraction of energy in each depth
     number = ["0", "1", "2"]
-    kinematic_vars = ["_energyFrac_depth"]
+    kinematic_vars = ["_EnergyFrac_Depth"]
 
     energy_profile, energy_depth_profile = {}, {}
 
@@ -315,7 +323,8 @@ def Plot2D(tree, obj_type):
 
             canvTemp.cd()
             if (time_debug): print("2D loop, drawing tree, with time = " + str(time.time() - start))
-            selection_region = MakeSelection(obj_type + i)
+            if (MC): selection_region = MakeSelection(obj_type + i)
+            else: selection_region = ""
             tree.Draw(var +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
 
             # for LLP, combine distributions
