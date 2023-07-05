@@ -270,7 +270,6 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 					h["gen_rechitNpt6_"+is]->Fill(n_rechit_pt6[i]);
 					if (decay_radius >=0) h2["gen_decay_rechitN_"+is]->Fill(decay_radius, n_rechit_pt4[i]);
 
-					// if (n_rechit_pt4[i] > 0) std::cout << n_rechit_pt4[i] << " = GetRechitMult(idx_llp, 0.4) for i=" << i << std::endl;
 					for (int depth = 0; depth < 4; depth++) {
 						h2["gen_depth_energyP_"+is]->Fill(depth + 1, energy[i][depth]);
 						h["gen_energyP_"+is]->Fill(depth + 1, energy[i][depth]); // fill TH1D, weight = fractional energy at that depth

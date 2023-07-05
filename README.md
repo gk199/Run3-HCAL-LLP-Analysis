@@ -38,12 +38,22 @@ source compile.sh
 cd ../Run
 ./../DisplacedHcalJetAnalyzer/exe/DisplacedHcalJetAnalyzer <file_output_tag> <path_to_file>
 ./../DisplacedHcalJetAnalyzer/exe/DisplacedHcalJetAnalyzer MC_29June root://cmsxrootd.fnal.gov///store/user/gkopp/ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV/LLP_MC_test__20230629_113607/230629_093620/0000/output_24.root
+
+./run_signal_data.sh
+# change number of events in DisplacedHcalJetAnalyzer.C -- particularly helpful for testing changes before processing all data. 
+
+# multiprocessing, took 30 minutes for 100k events (MC); 1 hour for 500k events (data)
+./mp_local.py InputFiles_2023_06_29_MCsignal_100k.txt
+./mp_local.py InputFiles_2023_06_29_Run2023C-EXOLLPJetHCAL-PromptReco-v4.txt
+# files will be saved to /eos/user/g/gkopp/LLP_Analysis/
 ```
 For running in compiled mode, remember to input the file path as `root://cmsxrootd.fnal.gov///store/user...`.
 
 In `DisplacedHcalJetAnalyzer/DisplacedHcalJetAnalyzer/DisplacedHcalJetAnalyzer.h` can set the variables: `debug, print_counts, save_hists, save_trees, blind_data`. Setting `AnalysisReader.debug = true` in `DisplacedHcalJetAnalyzer.C` is very helpful for debugging. 
 
-In `HistHelper.cxx` set what histograms are filled, and categories are selected. Requirements for when each category is filled are listed in `Loop.cxx`.
+In `HistHelper.cxx` set what histograms are filled (plotted with the outdated Kinematic plotters), and categories are selected. Requirements for when each category is filled are listed in `Loop.cxx`.
+
+`OutputHelper.cxx` is the main file to edit, where output trees are booked and filled. 
 
 `TriggerHelper.cxx` contains trigger-related functions. `ObjectHelper.cxx` is a placeholder to put object-related functions.
 
@@ -54,8 +64,10 @@ Plotting from the minituples tree:
 ```
 python Plotter.py <path to ntuple> <data / MC>
 
-python Plotter.py ../Run/hists_test_signal20k_17-May-2023.root MC
+python Plotter.py /eos/user/g/gkopp/LLP_Analysis/output_minituples_2023_07_04_InputFiles_2023_06_29_MCsignal_100k/hadd_hists_output.root MC
+python Plotter.py /eos/user/g/gkopp/LLP_Analysis/output_minituples_2023_07_04_InputFiles_2023_06_29_Run2023C-EXOLLPJetHCAL-PromptReco-v4_500k/hadd_hists_output.root data
 ```
+
 Outdated plotting scripts:
 ```
 cd ../Plot/

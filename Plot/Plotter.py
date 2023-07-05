@@ -84,29 +84,57 @@ def GetTag( branch_name, branch_sel ):
 	return tag 
 
 # ------------------------------------------------------------------------------
-def GetCut( branch_name, branch_sel ):
+def GetCut( variable, branch_name, branch_sel ):
+    # variable = jetx_IsMatchedTo or LLPx. branch_name = _DecayR. branch_sel = radius for LLP
 
-	selection = ""
+    # if just LLP, do below cuts
+    if (variable[0:3] == "LLP"):
+        selection = ""
+        if type(branch_sel) is int:
+		    selection = variable + branch_name + " == " + str(branch_sel)
+        elif type(branch_sel) is list:
+            if len(branch_sel) == 0:
+			    print("WARNING <GetCut> : Entry error (length = 0). No cut implemented")
+            elif len(branch_sel) == 1:
+			    selection = variable + branch_name + " == " + str(branch_sel[0])
+            elif len(branch_sel) == 2:
+		    	selection = variable + branch_name + " >= " + str(branch_sel[0]) + " && " + variable + branch_name + " < " + str(branch_sel[1])
+            else:
+	    		print("WARNING <GetCut> : 'branch_sel' input has more than two entries. Only using the first two!")
+        else: 
+	    	print("WARNING <GetCut> : Type Error. No cut implemented")
+        
+        if debug: print(selection + " in Get Cut (on LLP) ")
+        return ROOT.TCut( selection + " " )
 
-	if type(branch_sel) is int:
-		selection = branch_name + " == " + str(branch_sel) 
-
-	elif type(branch_sel) is list:
-		if len(branch_sel) == 0:
-			print("WARNING <GetCut> : Entry error (length = 0). No cut implemented")
-		elif len(branch_sel) == 1:
-			selection = branch_name + " == " + str(branch_sel[0])
-		elif len(branch_sel) == 2:
-			selection = branch_name + " >= " + str(branch_sel[0]) + " && " + branch_name + " < " + str(branch_sel[1])
-
-		else:
-			if (branch_name != "bx"): print("WARNING <GetCut> : 'branch_sel' input has more than two entries. Only using the first two!")
-
-	else: 
-		print("WARNING <GetCut> : Type Error. No cut implemented")
-
-	if debug: print(selection + "  in Get Cut ")
-	return ROOT.TCut( selection + " " )
+    # if jet, a bit more complicated. which LLP does the jet in question match to? 
+    if (variable[0:3] == "jet"):
+        jet_match_selection_0 = variable + " == 0"
+        jet_match_selection_1 = variable + " == 1"
+    
+        selection_0 = ""
+        selection_1 = ""
+    
+        if type(branch_sel) is int:
+		    selection_0 = "LLP0" + branch_name + " == " + str(branch_sel) + " && " + jet_match_selection_0
+		    selection_1 = "LLP1" + branch_name + " == " + str(branch_sel) + " && " + jet_match_selection_1
+    
+        elif type(branch_sel) is list:
+            if len(branch_sel) == 0:
+                print("WARNING <GetCut> : Entry error (length = 0). No cut implemented")
+            elif len(branch_sel) == 1:
+	    		selection_0 = "LLP0" + branch_name + " == " + str(branch_sel[0]) + " && " + jet_match_selection_0
+		    	selection_1 = "LLP1" + branch_name + " == " + str(branch_sel[0]) + " && " + jet_match_selection_1
+            elif len(branch_sel) == 2:
+	    		selection_0 = "LLP0" + branch_name + " >= " + str(branch_sel[0]) + " && " + "LLP0" + branch_name + " < " + str(branch_sel[1]) + " && " + jet_match_selection_0
+		    	selection_1 = "LLP1" + branch_name + " >= " + str(branch_sel[0]) + " && " + "LLP1" + branch_name + " < " + str(branch_sel[1]) + " && " + jet_match_selection_1
+            else:
+			    print("WARNING <GetCut> : 'branch_sel' input has more than two entries. Only using the first two!")    
+        else: 
+		    print("WARNING <GetCut> : Type Error. No cut implemented")
+        
+        if debug: print("(" + selection_0 + ") || (" + selection_1 + ")  in Get Cut (on jet) ")
+        return ROOT.TCut( "(" + selection_0 + ") || (" + selection_1 + ") " )
 
 # ------------------------------------------------------------------------------
 # select which iphi values to exclude, if this is empty, no cut is implemented 
@@ -134,10 +162,6 @@ def ExcludedCut( branch_name, branch_sel ):
     return ROOT.TCut( selection + " " )
 
 # ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
 def PlotSetup(infilepath):
 
     infile = ROOT.TFile.Open( infilepath )
@@ -151,6 +175,7 @@ def PlotSetup(infilepath):
 
 # ------------------------------------------------------------------------------
 def MakeSelection(variable):
+    # variable could be jet or LLP
    
     radius_preECAL  = [0, 161.6]
     radius_ECAL     = [161.6, 183.6] # 22cm of ECAL
@@ -165,14 +190,15 @@ def MakeSelection(variable):
     radius_depth34  = [214.2, 295]
 
     selection_radius = radius_depth34
+    cut_vars = "_DecayR"
 
     # variable = LLP0 or LLP1. Would do jet - LLP matching requrements here, this is a placeholder
-    if (variable == "jet0"): variable = "LLP0"
-    if (variable == "jet1"): variable = "LLP1"
-    if (variable == "jet2"): variable = "LLP1"
-    cut_vars = variable + "_DecayR"
+    #if (variable == "jet0"): variable = "LLP0"
+    #if (variable == "jet1"): variable = "LLP1"
+    #if (variable == "jet2"): variable = "LLP1"
+    if (variable[0:3] == "jet"): variable = variable + "_isMatchedTo"
 
-    selection_region = GetCut(cut_vars, selection_radius)
+    selection_region = GetCut(variable, cut_vars, selection_radius)
 
     return selection_region
 
@@ -207,7 +233,7 @@ def Plot1D(tree, obj_type):
     # LLP kinematic / decay plotting
     if (obj_type == "LLP"):
         number = ["0", "1"]
-        kinematic_vars = ["DecayR", "DecayX", "DecayY", "DecayZ", "DecayD", "DecayT", "DecayCtau", "RechitN"]
+        kinematic_vars = ["DecayR", "DecayX", "DecayY", "DecayZ", "DecayD", "DecayT", "DecayCtau", "RechitN", "dR_b"]
 
         LLP_decay = {}
     
@@ -215,7 +241,9 @@ def Plot1D(tree, obj_type):
             legend = ROOT.TLegend(0.65,0.65,0.75,0.75)
             for i in number:
                 hname_temp = obj_type + i + var
-                if (var == "DecayT"): LLP_decay[i] = ROOT.TH1F(hname_temp, "LLP " + var +" ; " + var +" [cm]; Number of Entries", 3000, 0, 300 ); 
+                if (var == "DecayT" or var == "dR_b"): 
+                    if (var == "DecayT"): LLP_decay[i] = ROOT.TH1F(hname_temp, "LLP " + var +" ; " + var +" [cm]; Number of Entries", 3000, 0, 300 ); 
+                    if (var == "dR_b"): LLP_decay[i] = ROOT.TH1F(hname_temp, "#Delta R (LLP, b); #Delta R; Number of Entries", 100, 0, 4 ); 
                 else: LLP_decay[i] = ROOT.TH1F(hname_temp, "LLP " + var +" ; " + var +" [cm]; Number of Entries", 3000, -3000, 3000 ); 
 
                 dist = obj_type + i + "_" + var
@@ -237,7 +265,9 @@ def Plot1D(tree, obj_type):
     # jet kinematic plotting 
     if (obj_type == "jet"):
         number = ["0", "1", "2"]
-        kinematic_vars = ["RechitN", "Eta", "Phi", "EtaSpread", "PhiSpread", "EtaSpread_energy", "PhiSpread_energy", "E", "Pt"]
+        kinematic_vars = ["RechitN", "Eta", "Phi", "EtaSpread", "PhiSpread", "EtaSpread_energy", "PhiSpread_energy", 
+                            "E", "Pt", 
+                            "Track0Pt", "Track1Pt", "Track2Pt", "Track0dzToPV", "Track1dzToPV", "Track2dzToPV"]
         jet_group = [["EtaSpread", "PhiSpread"], ["EtaSpread_energy", "PhiSpread_energy"]]
 
         jet_kinematic = {}
@@ -248,7 +278,7 @@ def Plot1D(tree, obj_type):
             maxXbin = 0
             for i in number:
                 hname_temp = obj_type + i + var
-                if (var[1:3] == "ta" or var[1:3] == "hi"): jet_kinematic[i] = ROOT.TH1F(hname_temp, "Jet " + var +" ; " + var +"; Number of Entries", 1000, -4, 4 ); # eta phi range
+                if (var[0:3] == "Eta" or var[0:3] == "Phi"): jet_kinematic[i] = ROOT.TH1F(hname_temp, "Jet " + var +" ; " + var +"; Number of Entries", 1000, -4, 4 ); # eta phi range
                 else: jet_kinematic[i] = ROOT.TH1F(hname_temp, "Jet " + var +" ; " + var +"; Number of Entries", 300, -100, 500 ); 
                 legend.AddEntry(jet_kinematic[i], obj_type + i)
 
@@ -299,66 +329,69 @@ def Plot2D(tree, obj_type):
     # LLP and jet are essentially treated the same here
     # fraction of energy in each depth
     number = ["0", "1", "2"]
-    kinematic_vars = ["_EnergyFrac_Depth"]
+    kinematic_vars = ["_EnergyFrac_Depth", "_EnergyFracLLP_Depth"]
 
-    energy_profile, energy_depth_profile = {}, {}
+    for var in kinematic_vars:
+        energy_profile, energy_depth_profile = {}, {}
 
-    canvTemp = ROOT.TCanvas()
-    canv = ROOT.TCanvas()
-    canvDepth = ROOT.TCanvas()
+        canvTemp = ROOT.TCanvas()
+        canv = ROOT.TCanvas()
+        canvDepth = ROOT.TCanvas()
+        legend = ROOT.TLegend(0.65,0.65,0.8,0.8)
 
-    legend = ROOT.TLegend(0.65,0.65,0.8,0.8)
-    for i in number:
-        if (i == "2" and obj_type != "jet"): continue
-        hname = obj_type + i + "_energy_depth_profile"
-        energy_depth_profile[i] = ROOT.TH1F(hname, obj_type + " Depth Energy Profile ; Depth (HB); Fraction of Energy", 6,0,6 ); 
+        if (obj_type == "jet" and var == "_EnergyFracLLP_Depth"): continue # only have this for LLP
+        for i in number:
+            if (i == "2" and obj_type != "jet"): continue
+            hname = obj_type + var + i + "_energy_depth_profile"
+            energy_depth_profile[i] = ROOT.TH1F(hname, obj_type + " Depth Energy Profile ; Depth (HB); Fraction of Energy", 6,0,6 ); 
 
-        hs = ROOT.THStack("hs",  obj_type + i + " Energy Fraction in HCAL Depths; Fraction of HCAL Rechit Energy; Normalized Number of Entries")
-        legend_depth = ROOT.TLegend(0.65,0.65,0.8,0.8)
-        for depth in range(4):
-            depth += 1
-            var = obj_type + i + kinematic_vars[0] + str(depth)
-            hname_temp = obj_type + i + "_energy_profile_d"+str(depth)
-            energy_profile[(depth,i)] = ROOT.TH1F(hname_temp, obj_type+" Depth Energy Frac in Depth "+str(depth)+"; Depth (HB); Fraction of Energy", 100, 0, 1 ); # replicate the initial plots first
+            hs = ROOT.THStack("hs",  obj_type + i + " Energy Fraction in HCAL Depths; Fraction of HCAL Rechit Energy; Normalized Number of Entries")
+            legend_depth = ROOT.TLegend(0.65,0.65,0.8,0.8)
+            for depth in range(4):
+                depth += 1
+                var_type = obj_type + i + var + str(depth)
+                hname_temp = var_type + "_energy_profile_d"+str(depth)
+                energy_profile[(depth,i)] = ROOT.TH1F(hname_temp, obj_type+" Depth Energy Frac in Depth "+str(depth)+"; Depth (HB); Fraction of Energy", 100, 0, 1 ); # replicate the initial plots first
 
-            canvTemp.cd()
-            if (time_debug): print("2D loop, drawing tree, with time = " + str(time.time() - start))
-            if (MC): selection_region = MakeSelection(obj_type + i)
-            else: selection_region = ""
-            tree.Draw(var +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
+                canvTemp.cd()
+                if (time_debug): print("2D loop, drawing tree, with time = " + str(time.time() - start))
+                if (MC): selection_region = MakeSelection(obj_type + i)
+                else: selection_region = ""
+                tree.Draw(var_type +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
 
-            # for LLP, combine distributions
-            if obj_type == "LLP":
-                if i == "0": continue
-                if i == "1": energy_profile[(depth,i)].Add(energy_profile[(depth,"0")]) # determine averages for summed LLP1 and LLP2
+                # for LLP, combine distributions
+                if obj_type == "LLP":
+                    if i == "0": continue
+                    if i == "1": energy_profile[(depth,i)].Add(energy_profile[(depth,"0")]) # determine averages for summed LLP1 and LLP2
                 
-            Normalize(energy_profile[(depth,i)])
-            legend_depth.AddEntry(energy_profile[(depth,i)], "depth = " + str(depth))
-            hs.Add(energy_profile[(depth,i)])
+                Normalize(energy_profile[(depth,i)])
+                legend_depth.AddEntry(energy_profile[(depth,i)], "depth = " + str(depth))
+                hs.Add(energy_profile[(depth,i)])
 
-            AverageEnergyFrac = energy_profile[(depth,i)].GetMean()
-            AverageEnergyFrac_error = energy_profile[(depth,i)].GetMeanError()
+                AverageEnergyFrac = energy_profile[(depth,i)].GetMean()
+                AverageEnergyFrac_error = energy_profile[(depth,i)].GetMeanError()
             
-            energy_depth_profile[i].SetBinContent(depth+1, AverageEnergyFrac)
-            energy_depth_profile[i].SetBinError(depth+1, AverageEnergyFrac_error)
+                energy_depth_profile[i].SetBinContent(depth+1, AverageEnergyFrac)
+                energy_depth_profile[i].SetBinError(depth+1, AverageEnergyFrac_error)
 
-        if obj_type == "LLP" and i == "0": continue
-        canv.cd()
-        hs.Draw("HIST PLC nostack")
-        LegendLabel(legend_depth)
-        canv.SaveAs(folder + obj_type + i + "_energyFractionOverlay.png")
+            if obj_type == "LLP" and i == "0": continue
+            canv.cd()
+            canv.SetLogy()
+            hs.Draw("HIST PLC nostack")
+            LegendLabel(legend_depth)
+            canv.SaveAs(folder + obj_type + var + i + "_energyFractionOverlay.png")
 
-        # average energy fraction vs depth
-        if i == "0" and obj_type == "LLP": continue
-        canvDepth.cd()
-        legend.AddEntry(energy_depth_profile[i], obj_type + i)
-        energy_depth_profile[i].GetYaxis().SetRangeUser(0,0.7)
-        if i == "0": energy_depth_profile[i].Draw("HIST E1 PLC")
-        else: energy_depth_profile[i].Draw("SAME HIST E1 PLC")
+            # average energy fraction vs depth
+            if i == "0" and obj_type == "LLP": continue
+            canvDepth.cd()
+            legend.AddEntry(energy_depth_profile[i], obj_type + i)
+            energy_depth_profile[i].GetYaxis().SetRangeUser(0,0.7)
+            if i == "0": energy_depth_profile[i].Draw("HIST E1 PLC")
+            else: energy_depth_profile[i].Draw("SAME HIST E1 PLC")
 
-    if (time_debug): print("Plotting results, with time = " + str(time.time() - start))
-    LegendLabel(legend)
-    canvDepth.SaveAs(folder + obj_type + "_energyProfile.png")
+        if (time_debug): print("Plotting results, with time = " + str(time.time() - start))
+        LegendLabel(legend)
+        canvDepth.SaveAs(folder + obj_type + var + "_energyProfile.png")
 
 # ------------------------------------------------------------------------------
 def main():
