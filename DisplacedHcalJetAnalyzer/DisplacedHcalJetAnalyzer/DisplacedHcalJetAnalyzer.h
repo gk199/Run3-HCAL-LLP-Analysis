@@ -698,6 +698,7 @@ public :
    virtual vector<float> GetMatchedHcalRechits_Jet( int idx_jet, float deltaR_cut );
    virtual vector<float> GetEnergyProfile_Jet( int idx_jet, float deltaR_cut );
    virtual vector<float> GetEtaPhiSpread_Jet( int idx_jet, float deltaR_cut );
+   virtual vector<float> GetTDCavg_Jet( int idx_jet, float deltaR_cut );
    // TruthInfoHelper.cxx
    virtual void   SetLLPDecayProducts();
    virtual int    GetLLPDecayProductIndex( int idx_llp, int idx_llp_decay );

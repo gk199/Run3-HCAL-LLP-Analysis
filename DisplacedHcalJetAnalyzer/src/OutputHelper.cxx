@@ -19,7 +19,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 	vector<string> myvars_int = {
 		"run","lumi","event",
 		"RechitN","RechitN_1GeV","RechitN_5GeV","RechitN_10GeV",
-		"TrackN", "ecalRechitN",
+		"TrackN", "ecalRechitN", "HBHE_Rechit_auxTDC"
 	};	
 
 	for ( int i=0; i<3; i++ ) {
@@ -126,6 +126,8 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		if (hbheRechit_E->at(i) > 1) tree_output_vars_int["RechitN_1GeV"] += 1;
 		if (hbheRechit_E->at(i) > 5) tree_output_vars_int["RechitN_5GeV"] += 5;
 		if (hbheRechit_E->at(i) > 10) tree_output_vars_int["RechitN_10GeV"] += 10;
+		// auxTDC is already unmasked in ntupler (v1) to give TDC in SOI
+		tree_output_vars_int["HBHE_Rechit_auxTDC"] = hbheRechit_auxTDC->at(i);
 	}
 
 	// jets are already sorted in jet Pt (not jet E!). Loop over first three jets, and save quantities in the ntuples

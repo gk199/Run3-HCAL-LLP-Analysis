@@ -54,10 +54,10 @@ vector<vector<float>> DisplacedHcalJetAnalyzer::GetEnergyProfile(int idx_llp, fl
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetEnergyProfile()"<<endl;
 
 	// vectors to fill with energy in each depth
-	vector<float> energy_LLP_total	= {0,0,0,0};
+	vector<float> energy_LLP_total	= {0,0,0,0}; // LLP energy distribution, from combination of b quark decay products
 	vector<float> energy_daughter1 	= {0,0,0,0};
 	vector<float> energy_daughter2 	= {0,0,0,0};
-	vector<float> energy_LLP 		= {0,0,0,0};
+	vector<float> energy_LLP 		= {0,0,0,0}; // LLP energy distribution, from LLP direction only (not decay products)
 	float totalE_LLPb = 0, totalE_daughter1 = 0, totalE_daughter2 = 0, totalE_LLP = 0; // for total energy calculation 
 
 	// for LLP matched with the decay products (match rechits to b quarks)
@@ -155,7 +155,8 @@ vector<float> DisplacedHcalJetAnalyzer::GetEnergyProfile_Jet(int idx_jet, float 
 }
 
 /* ====================================================================================================================== */
-vector<float> DisplacedHcalJetAnalyzer::GetEtaPhiSpread_Jet(int idx_jet, float deltaR_cut) { // given a jet, find the normalized energy profile from associated HB rechits 
+vector<float> DisplacedHcalJetAnalyzer::GetEtaPhiSpread_Jet(int idx_jet, float deltaR_cut) { 
+	// given a jet, find the normalized energy profile from associated HB rechits 
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetEtaPhiSpread_Jet()"<<endl;
 
@@ -185,3 +186,38 @@ vector<float> DisplacedHcalJetAnalyzer::GetEtaPhiSpread_Jet(int idx_jet, float d
 	return spread_Eta_Phi;
 }
 
+/* ====================================================================================================================== */
+vector<float> DisplacedHcalJetAnalyzer::GetTDCavg_Jet(int idx_jet, float deltaR_cut) {
+	// given a jet, find the average TDC value for energetic rechits in the jet
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetTDCavg_Jet()"<<endl;
+
+	vector<float> matchedRechit = GetMatchedHcalRechits_Jet(idx_jet, deltaR_cut);
+
+	int rechitN = 0;
+	int totalTDC = 0;
+	int energy = 0;
+	int energyTDC = 0;
+	float avgTDC = 0;
+	float avgTDCenergy = 0;
+
+	for (int i = 0; i < matchedRechit.size(); i++) {
+		int TDC = hbheRechit_auxTDC->at(matchedRechit[i]);
+		if (hbheRechit_E->at(matchedRechit[i]) > 4 && TDC < 3) {
+			rechitN += 1;
+			totalTDC += TDC;
+			energy += hbheRechit_E->at(matchedRechit[i]);
+			energyTDC += TDC * hbheRechit_E->at(matchedRechit[i]);
+		}
+	}
+
+	if (rechitN > 0) {
+		avgTDC = totalTDC / rechitN;
+		avgTDCenergy = energyTDC / energy;
+	}
+	
+	vector<float> TDC_TDCenergy = {avgTDC,avgTDCenergy};
+
+	return TDC_TDCenergy;
+
+}
