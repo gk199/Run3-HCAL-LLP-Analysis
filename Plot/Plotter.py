@@ -43,7 +43,7 @@ if (data):
 if (MC): 
   cmsLabelExtra = "#scale[0.8]{#it{2023 LLP MC}}"
   yearLumi = "#scale[0.85]{#sqrt{s} = 13.6 TeV}"
-  folder = "./outPlots_MC/"
+  folder = "./outPlots_MC_radius_" + sys.argv[3] + "/"
 
 # Save output plots
 def OutputFolder(name):
@@ -107,7 +107,7 @@ def GetCut( variable, branch_name, branch_sel ):
         if debug: print(selection + " in Get Cut (on LLP) ")
         return ROOT.TCut( selection + " " )
 
-    # if jet, a bit more complicated. which LLP does the jet in question match to? 
+    # if jet, a bit more complicated. Which LLP does the jet in question match to? 
     if (variable[0:3] == "jet"):
         jet_match_selection_0 = variable + " == 0"
         jet_match_selection_1 = variable + " == 1"
@@ -175,7 +175,9 @@ def PlotSetup(infilepath):
 
 # ------------------------------------------------------------------------------
 def MakeSelection(variable):
-    # variable could be jet or LLP
+    # variable could be jet or LLP. If jet, account for which LLP it is matched to. If LLP, cut directly on LLP
+    if (variable[0:3] == "jet"): variable = variable + "_isMatchedTo"
+    cut_vars = "_DecayR"
    
     radius_preECAL  = [0, 161.6]
     radius_ECAL     = [161.6, 183.6] # 22cm of ECAL
@@ -189,15 +191,12 @@ def MakeSelection(variable):
     radius_depth12  = [183.6, 214.2]
     radius_depth34  = [214.2, 295]
 
-    selection_radius = radius_depth34
-    cut_vars = "_DecayR"
-
-    # variable = LLP0 or LLP1. Would do jet - LLP matching requrements here, this is a placeholder
-    #if (variable == "jet0"): variable = "LLP0"
-    #if (variable == "jet1"): variable = "LLP1"
-    #if (variable == "jet2"): variable = "LLP1"
-    if (variable[0:3] == "jet"): variable = variable + "_isMatchedTo"
-
+    selection_radius = radius_all
+    if (sys.argv[3] == "all"):      selection_radius = radius_all
+    if (sys.argv[3] == "preECAL"):  selection_radius = radius_preECAL
+    if (sys.argv[3] == "ECAL"):     selection_radius = radius_ECAL
+    if (sys.argv[3] == "depth12"):  selection_radius = radius_depth12
+    if (sys.argv[3] == "depth34"):  selection_radius = radius_depth34
     selection_region = GetCut(variable, cut_vars, selection_radius)
 
     return selection_region
@@ -234,6 +233,7 @@ def Plot1D(tree, obj_type):
     if (obj_type == "LLP"):
         number = ["0", "1"]
         kinematic_vars = ["DecayR", "DecayX", "DecayY", "DecayZ", "DecayD", "DecayT", "DecayCtau", "RechitN", "dR_b"]
+        LLP_group = [["RechitN", "DecayR"]]
 
         LLP_decay = {}
     
@@ -243,7 +243,7 @@ def Plot1D(tree, obj_type):
                 hname_temp = obj_type + i + var
                 if (var == "DecayT" or var == "dR_b"): 
                     if (var == "DecayT"): LLP_decay[i] = ROOT.TH1F(hname_temp, "LLP " + var +" ; " + var +" [cm]; Number of Entries", 3000, 0, 300 ); 
-                    if (var == "dR_b"): LLP_decay[i] = ROOT.TH1F(hname_temp, "#Delta R (LLP, b); #Delta R; Number of Entries", 100, 0, 4 ); 
+                    if (var == "dR_b"): LLP_decay[i] = ROOT.TH1F(hname_temp, "#Delta R (LLP, b); #Delta R; Number of Entries", 100, 0, 1.6 ); 
                 else: LLP_decay[i] = ROOT.TH1F(hname_temp, "LLP " + var +" ; " + var +" [cm]; Number of Entries", 3000, -3000, 3000 ); 
 
                 dist = obj_type + i + "_" + var
@@ -258,17 +258,45 @@ def Plot1D(tree, obj_type):
                     LLP_decay[i].Add(LLP_decay["0"])
                     canv.cd()
                     LLP_decay[i].Draw("HIST PLC")
+                    mean_text = ROOT.TLatex()
+                    mean_text.SetNDC()
+                    mean_text.SetTextFont(42)
+                    mean_text.SetTextSize(0.036)
+                    mean_text.DrawLatex( xpos+0.4, ypos, "mean = %.2f" %(LLP_decay[i].GetMean()))
+                    mean_text.DrawLatex( xpos+0.4, ypos-0.05, "#sigma = %.2f" %(LLP_decay[i].GetStdDev()))
 
             LegendLabel(legend)
             canv.SaveAs(folder + obj_type + "_" +var+".png")
+
+        # LLP 2D distributions
+        LLP_dist = {}
+        for var in LLP_group:
+            for i in number:
+                legend = ROOT.TLegend(0.65,0.65,0.75,0.75)
+                xaxis = 300
+                hname_temp = obj_type + var[0] + i
+                LLP_dist[i] = ROOT.TH2F(hname_temp, "Jet " + i + " " + var[0] + " vs. " + var[1] + " ; " + var[1] + "; " + var[0], 100, 0, xaxis, 100/2, 0, xaxis/6 ); 
+                legend.AddEntry(LLP_dist[i], obj_type + i)
+
+                dist1 = obj_type + i + "_" + var[0] 
+                dist2 = obj_type + i + "_" + var[1] 
+                canvTemp.cd()
+                selection_region = MakeSelection(obj_type + i)
+                tree.Draw(dist1 + ":" + dist2 +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
+                if i == "1": 
+                    LLP_dist[i].Add(LLP_dist["0"])
+                    canv.cd()
+                    LLP_dist[i].Draw("COLZ PLC")
+                    LegendLabel(legend)
+                    canv.SaveAs(folder + obj_type + i + "_" +var[0]+ "_" +var[1]+ ".png")
 
     # jet kinematic plotting 
     if (obj_type == "jet"):
         number = ["0", "1", "2"]
         kinematic_vars = ["RechitN", "Eta", "Phi", "EtaSpread", "PhiSpread", "EtaSpread_energy", "PhiSpread_energy", 
                             "E", "Pt", 
-                            "Track0Pt", "Track1Pt", "Track2Pt", "Track0dzToPV", "Track1dzToPV", "Track2dzToPV"]
-        jet_group = [["EtaSpread", "PhiSpread"], ["EtaSpread_energy", "PhiSpread_energy"]]
+                            "Track0Pt", "Track1Pt", "Track2Pt", "Track0dzToPV", "Track1dzToPV", "Track2dzToPV", "Track0dxyToBS", "Track1dxyToBS", "Track2dxyToBS"]
+        jet_group = [[ "PhiSpread", "EtaSpread"], ["PhiSpread_energy", "EtaSpread_energy"]]
 
         jet_kinematic = {}
         for var in kinematic_vars:
@@ -278,8 +306,25 @@ def Plot1D(tree, obj_type):
             maxXbin = 0
             for i in number:
                 hname_temp = obj_type + i + var
-                if (var[0:3] == "Eta" or var[0:3] == "Phi"): jet_kinematic[i] = ROOT.TH1F(hname_temp, "Jet " + var +" ; " + var +"; Number of Entries", 1000, -4, 4 ); # eta phi range
-                else: jet_kinematic[i] = ROOT.TH1F(hname_temp, "Jet " + var +" ; " + var +"; Number of Entries", 300, -100, 500 ); 
+                nBins = 300
+                x_min = -100
+                x_max = 500
+                if (var[0:3] == "Eta" or var[0:3] == "Phi"): # eta phi range
+                    nBins = 100
+                    x_min = -4
+                    x_max = 4
+                if (var[0:5] == "Track"):
+                    nBins = 100
+                    x_min = 0
+                    x_max = 50
+                if (var[6:12] == "dzToPV" or var[6:13] == "dxyToBS" ):
+                    nBins = 80
+                    x_min = -40
+                    x_max = 40
+                    if (var[6:13] == "dxyToBS"):
+                        x_min = -10
+                        x_max = 10
+                jet_kinematic[i] = ROOT.TH1F(hname_temp, "Jet " + var +" ; " + var +"; Number of Entries", nBins, x_min, x_max ); 
                 legend.AddEntry(jet_kinematic[i], obj_type + i)
 
                 dist = obj_type + i + "_" + var
@@ -308,7 +353,7 @@ def Plot1D(tree, obj_type):
                 xaxis = 0.25
                 if var[0] == "EtaSpread": xaxis = 0.35
                 hname_temp = obj_type + var[0] + i
-                jet_dist[i] = ROOT.TH2F(hname_temp, "Jet " + i + " " + var[0] + " vs. " + var[1] + " ; " + var[0] + "; " + var[1], 100, 0, xaxis, 100, 0, xaxis ); 
+                jet_dist[i] = ROOT.TH2F(hname_temp, "Jet " + i + " " + var[0] + " vs. " + var[1] + " ; " + var[1] + "; " + var[0], 100, 0, xaxis, 100, 0, xaxis ); 
                 legend.AddEntry(jet_dist[i], obj_type + i)
 
                 dist1 = obj_type + i + "_" + var[0] 
