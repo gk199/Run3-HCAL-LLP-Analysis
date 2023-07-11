@@ -47,14 +47,17 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("jet%d_EtaSpread_energy", i) );
 		myvars_float.push_back( Form("jet%d_PhiSpread", i) );
 		myvars_float.push_back( Form("jet%d_PhiSpread_energy", i) );
+		myvars_float.push_back( Form("jet%d_TDCavg", i) );
+		myvars_float.push_back( Form("jet%d_TDCavg_energyWeight", i) );
+		myvars_float.push_back( Form("jet%d_TDCnDelayed", i) );
 		myvars_float.push_back( Form("jet%d_Track0Pt", i) );
 		myvars_float.push_back( Form("jet%d_Track1Pt", i) );
 		myvars_float.push_back( Form("jet%d_Track2Pt", i) );
 		for (int t=0; t<3; t++) {
 			myvars_float.push_back( Form("jet%d_Track%ddzToPV", i, t) );
 			myvars_float.push_back( Form("jet%d_Track%ddxyToBS", i, t) );
-			myvars_float.push_back( Form("jet%d_Track%ddzErr", i, t) );
-			myvars_float.push_back( Form("jet%d_Track%ddxyErr", i, t) );
+			myvars_float.push_back( Form("jet%d_Track%ddzOverErr", i, t) );
+			myvars_float.push_back( Form("jet%d_Track%ddxyOverErr", i, t) );
 		}
 
 		for (int d=0; d<4; d++) myvars_float.push_back( Form("jet%d_EnergyFrac_Depth%d", i, d+1) );
@@ -148,6 +151,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		vector<float> rechitJet = GetMatchedHcalRechits_Jet(i, 0.4);
 		vector<float> energy = GetEnergyProfile_Jet(i, 0.4);
 		vector<float> spread_Eta_Phi = GetEtaPhiSpread_Jet(i, 0.4); // eta, phi (average); eta, phi (energy weighted)
+		vector<float> TDC_TDCenergy = GetTDCavg_Jet(i, 0.4); // TDC average, energy weighted TDC
 
 		for (int depth = 0; depth < 4; depth++) tree_output_vars_float[Form("jet%d_EnergyFrac_Depth%d", i, depth+1)] = energy[depth]; // each fractional energy saved in different tree
 		tree_output_vars_int[Form("jet%d_RechitN", i)] = rechitJet.size();
@@ -155,6 +159,10 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("jet%d_EtaSpread_energy", i)] = spread_Eta_Phi[2];
 		tree_output_vars_float[Form("jet%d_PhiSpread", i)] = spread_Eta_Phi[1];
 		tree_output_vars_float[Form("jet%d_PhiSpread_energy", i)] = spread_Eta_Phi[3];
+
+		tree_output_vars_float[Form("jet%d_TDCavg", i)] = TDC_TDCenergy[0];
+		tree_output_vars_float[Form("jet%d_TDCavg_energyWeight", i)] = TDC_TDCenergy[1];
+		tree_output_vars_float[Form("jet%d_TDCnDelayed", i)] = TDC_TDCenergy[2];
 		
 		// find three highest pT tracks matched to a jet, and save the generalTrack index for use later (in dzToPV and dzyToBS)
 		vector<pair<float, float>> track_pt_index;
@@ -175,8 +183,8 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 				int track_num = track_pt_index[track].second;
 				tree_output_vars_float[Form("jet%d_Track%ddzToPV", i, track)] = track_dzToPV->at(track_num); 
 				tree_output_vars_float[Form("jet%d_Track%ddxyToBS", i, track)] = track_dxyToBS->at(track_num); 
-				tree_output_vars_float[Form("jet%d_Track%ddzErr", i, track)] = track_dzErr->at(track_num); 
-				tree_output_vars_float[Form("jet%d_Track%ddxyErr", i, track)] = track_dxyErr->at(track_num); 
+				tree_output_vars_float[Form("jet%d_Track%ddzOverErr", i, track)] = track_dzToPV->at(track_num) / track_dzErr->at(track_num); 
+				tree_output_vars_float[Form("jet%d_Track%ddxyOverErr", i, track)] = track_dxyToBS->at(track_num) / track_dxyErr->at(track_num); 
 			}
 		} // end of track matching 
 	}

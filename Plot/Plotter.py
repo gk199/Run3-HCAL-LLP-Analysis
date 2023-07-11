@@ -295,7 +295,10 @@ def Plot1D(tree, obj_type):
         number = ["0", "1", "2"]
         kinematic_vars = ["RechitN", "Eta", "Phi", "EtaSpread", "PhiSpread", "EtaSpread_energy", "PhiSpread_energy", 
                             "E", "Pt", 
-                            "Track0Pt", "Track1Pt", "Track2Pt", "Track0dzToPV", "Track1dzToPV", "Track2dzToPV", "Track0dxyToBS", "Track1dxyToBS", "Track2dxyToBS"]
+                            "Track0Pt", "Track1Pt", "Track2Pt", 
+                            "Track0dzToPV", "Track1dzToPV", "Track2dzToPV", "Track0dxyToBS", "Track1dxyToBS", "Track2dxyToBS",
+                            "Track0dzOverErr", "Track1dzOverErr", "Track2dzOverErr", "Track0dxyOverErr", "Track1dxyOverErr", "Track2dxyOverErr",
+                            "TDCavg", "TDCavg_energyWeight", "TDCnDelayed"]
         jet_group = [[ "PhiSpread", "EtaSpread"], ["PhiSpread_energy", "EtaSpread_energy"]]
 
         jet_kinematic = {}
@@ -306,13 +309,15 @@ def Plot1D(tree, obj_type):
             maxXbin = 0
             for i in number:
                 hname_temp = obj_type + i + var
-                nBins = 300
+                nBins = 600
                 x_min = -100
                 x_max = 500
                 if (var[0:3] == "Eta" or var[0:3] == "Phi"): # eta phi range
                     nBins = 100
                     x_min = -4
                     x_max = 4
+                    if (var[3:9] == "Spread"):
+                        nBins = 600
                 if (var[0:5] == "Track"):
                     nBins = 100
                     x_min = 0
@@ -322,8 +327,15 @@ def Plot1D(tree, obj_type):
                     x_min = -40
                     x_max = 40
                     if (var[6:13] == "dxyToBS"):
+                        canv.SetLogy()
                         x_min = -10
                         x_max = 10
+                if (var[9:16] == "OverErr"):
+                    canv.SetLogy()
+                    x_max = 25
+                if (var[0:3] == "TDC" or var[0:12] == "energyWeight"):
+                    canv.SetLogy()
+                    nBins = 3000
                 jet_kinematic[i] = ROOT.TH1F(hname_temp, "Jet " + var +" ; " + var +"; Number of Entries", nBins, x_min, x_max ); 
                 legend.AddEntry(jet_kinematic[i], obj_type + i)
 
@@ -338,6 +350,14 @@ def Plot1D(tree, obj_type):
                 if (jet_kinematic[i].FindFirstBinAbove() > minXbin): minXbin = jet_kinematic[i].FindFirstBinAbove()
                 if (jet_kinematic[i].FindLastBinAbove() > maxXbin): maxXbin = jet_kinematic[i].FindLastBinAbove()
                 hs.Add(jet_kinematic[i])
+
+                if (i == 0):
+                    mean_text = ROOT.TLatex()
+                    mean_text.SetNDC()
+                    mean_text.SetTextFont(42)
+                    mean_text.SetTextSize(0.036)
+                    mean_text.DrawLatex( xpos+0.4, ypos, "jet 0 mean = %.2f" %(jet_kinematic[i].GetMean()))
+                    mean_text.DrawLatex( xpos+0.4, ypos-0.05, "#sigma = %.2f" %(jet_kinematic[i].GetStdDev()))
 
             canv.cd()
             hs.Draw("HIST PLC nostack")
@@ -366,6 +386,7 @@ def Plot1D(tree, obj_type):
                 jet_dist[i].Draw("COLZ PLC")
 
                 LegendLabel(legend)
+                canv.SetLogy(0) # linear                
                 canv.SaveAs(folder + obj_type + i + "_" +var[0]+ "_" +var[1]+ ".png")
 
 # ------------------------------------------------------------------------------

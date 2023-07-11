@@ -189,35 +189,50 @@ vector<float> DisplacedHcalJetAnalyzer::GetEtaPhiSpread_Jet(int idx_jet, float d
 /* ====================================================================================================================== */
 vector<float> DisplacedHcalJetAnalyzer::GetTDCavg_Jet(int idx_jet, float deltaR_cut) {
 	// given a jet, find the average TDC value for energetic rechits in the jet
+	// returns avg TDC, energy weighted average TDC, and n delayed TDC over threshold
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetTDCavg_Jet()"<<endl;
 
 	vector<float> matchedRechit = GetMatchedHcalRechits_Jet(idx_jet, deltaR_cut);
 
-	int rechitN = 0;
+	float rechitN = 0;
 	int totalTDC = 0;
-	int energy = 0;
+	float totalEnergy = 0;
 	int energyTDC = 0;
 	float avgTDC = 0;
 	float avgTDCenergy = 0;
+	float nDelayedTDC = 0;
 
 	for (int i = 0; i < matchedRechit.size(); i++) {
+		// TEMP CODE FOR SIX BIT MASK, REMOVE WHEN SIX BIT MASK AND SHIFT ADDED TO NTUPLER //
+		int six_bit_mask = 0x3f;
+		int ts = 3; // aux TDC contains TS 0 - 5, with ts3 as SOI
+		int SOI_TDC = (int(hbheRechit_auxTDC->at(matchedRechit[i])) >> ts * 6) & six_bit_mask;
+		// TEMP CODE FOR SIX BIT MASK, REMOVE WHEN SIX BIT MASK AND SHIFT ADDED TO NTUPLER -- SOI_TDC can then be replaced by TDC //
 		int TDC = hbheRechit_auxTDC->at(matchedRechit[i]);
-		if (hbheRechit_E->at(matchedRechit[i]) > 4 && TDC < 3) {
+		int energy = hbheRechit_E->at(matchedRechit[i]);
+		if (energy > 4 && SOI_TDC < 3) {
 			rechitN += 1;
-			totalTDC += TDC;
-			energy += hbheRechit_E->at(matchedRechit[i]);
-			energyTDC += TDC * hbheRechit_E->at(matchedRechit[i]);
+			totalTDC += SOI_TDC;
+			totalEnergy += energy;
+			energyTDC += SOI_TDC * energy;
+			if (SOI_TDC > 0) nDelayedTDC += 1;
 		}
 	}
 
 	if (rechitN > 0) {
 		avgTDC = totalTDC / rechitN;
-		avgTDCenergy = energyTDC / energy;
+		avgTDCenergy = energyTDC / totalEnergy;
 	}
 	
-	vector<float> TDC_TDCenergy = {avgTDC,avgTDCenergy};
+	// debugging, seeing ints 0,1,2 not floats
+	/*
+	if (rechitN > 1) {
+		std::cout << avgTDC << " = avgTDC from totalTDC = " << totalTDC << " and rechitN = " << rechitN << std::endl;
+		std::cout << avgTDCenergy << " = avgTDCenergy from energyTDC = " << energyTDC << " and totalEnergy = " << totalEnergy << std::endl;
+	}
+	*/
+	vector<float> TDC_TDCenergy = {avgTDC,avgTDCenergy,nDelayedTDC};
 
 	return TDC_TDCenergy;
-
 }
