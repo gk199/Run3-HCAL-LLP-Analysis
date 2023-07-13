@@ -83,8 +83,33 @@ def GetTag( branch_name, branch_sel ):
 		print("WARNING <GetTag> : Type Error. No tag included")
 	return tag 
 
+
 # ------------------------------------------------------------------------------
-def GetCut( variable, branch_name, branch_sel ):
+def GetCut( branch_name, branch_sel):
+
+	selection = ""
+
+	if type(branch_sel) is int:
+		selection = branch_name + " == " + str(branch_sel) 
+
+	elif type(branch_sel) is list:
+		if len(branch_sel) == 0:
+			print("WARNING <GetCut> : Entry error (length = 0). No cut implemented")
+		elif len(branch_sel) == 1:
+			selection = branch_name + " == " + str(branch_sel[0])
+		else:
+			selection = branch_name + " >= " + str(branch_sel[0]) + " && " + branch_name + " < " + str(branch_sel[1])
+
+		if len(branch_sel) > 2:
+			print("WARNING <GetCut> : 'branch_sel' input has more than two entries. Only using the first two!")
+
+	else: 
+		print("WARNING <GetCut> : Type Error. No cut implemented")
+
+	return ROOT.TCut( selection + " " )
+
+# ------------------------------------------------------------------------------
+def GetCut_LLPmatch( variable, branch_name, branch_sel ):
     # variable = jetx_IsMatchedTo or LLPx. branch_name = _DecayR. branch_sel = radius for LLP
 
     # if just LLP, do below cuts
@@ -94,15 +119,15 @@ def GetCut( variable, branch_name, branch_sel ):
 		    selection = variable + branch_name + " == " + str(branch_sel)
         elif type(branch_sel) is list:
             if len(branch_sel) == 0:
-			    print("WARNING <GetCut> : Entry error (length = 0). No cut implemented")
+			    print("WARNING <GetCut_LLPmatch> : Entry error (length = 0). No cut implemented")
             elif len(branch_sel) == 1:
 			    selection = variable + branch_name + " == " + str(branch_sel[0])
             elif len(branch_sel) == 2:
 		    	selection = variable + branch_name + " >= " + str(branch_sel[0]) + " && " + variable + branch_name + " < " + str(branch_sel[1])
             else:
-	    		print("WARNING <GetCut> : 'branch_sel' input has more than two entries. Only using the first two!")
+	    		print("WARNING <GetCut_LLPmatch> : 'branch_sel' input has more than two entries. Only using the first two!")
         else: 
-	    	print("WARNING <GetCut> : Type Error. No cut implemented")
+	    	print("WARNING <GetCut_LLPmatch> : Type Error. No cut implemented")
         
         if debug: print(selection + " in Get Cut (on LLP) ")
         return ROOT.TCut( selection + " " )
@@ -121,7 +146,7 @@ def GetCut( variable, branch_name, branch_sel ):
     
         elif type(branch_sel) is list:
             if len(branch_sel) == 0:
-                print("WARNING <GetCut> : Entry error (length = 0). No cut implemented")
+                print("WARNING <GetCut_LLPmatch> : Entry error (length = 0). No cut implemented")
             elif len(branch_sel) == 1:
 	    		selection_0 = "LLP0" + branch_name + " == " + str(branch_sel[0]) + " && " + jet_match_selection_0
 		    	selection_1 = "LLP1" + branch_name + " == " + str(branch_sel[0]) + " && " + jet_match_selection_1
@@ -129,9 +154,9 @@ def GetCut( variable, branch_name, branch_sel ):
 	    		selection_0 = "LLP0" + branch_name + " >= " + str(branch_sel[0]) + " && " + "LLP0" + branch_name + " < " + str(branch_sel[1]) + " && " + jet_match_selection_0
 		    	selection_1 = "LLP1" + branch_name + " >= " + str(branch_sel[0]) + " && " + "LLP1" + branch_name + " < " + str(branch_sel[1]) + " && " + jet_match_selection_1
             else:
-			    print("WARNING <GetCut> : 'branch_sel' input has more than two entries. Only using the first two!")    
+			    print("WARNING <GetCut_LLPmatch> : 'branch_sel' input has more than two entries. Only using the first two!")    
         else: 
-		    print("WARNING <GetCut> : Type Error. No cut implemented")
+		    print("WARNING <GetCut_LLPmatch> : Type Error. No cut implemented")
         
         if debug: print("(" + selection_0 + ") || (" + selection_1 + ")  in Get Cut (on jet) ")
         return ROOT.TCut( "(" + selection_0 + ") || (" + selection_1 + ") " )
@@ -197,7 +222,7 @@ def MakeSelection(variable):
     if (sys.argv[3] == "ECAL"):     selection_radius = radius_ECAL
     if (sys.argv[3] == "depth12"):  selection_radius = radius_depth12
     if (sys.argv[3] == "depth34"):  selection_radius = radius_depth34
-    selection_region = GetCut(variable, cut_vars, selection_radius)
+    selection_region = GetCut_LLPmatch(variable, cut_vars, selection_radius)
 
     return selection_region
 
@@ -351,18 +376,17 @@ def Plot1D(tree, obj_type):
                 if (jet_kinematic[i].FindLastBinAbove() > maxXbin): maxXbin = jet_kinematic[i].FindLastBinAbove()
                 hs.Add(jet_kinematic[i])
 
-                if (i == 0):
-                    mean_text = ROOT.TLatex()
-                    mean_text.SetNDC()
-                    mean_text.SetTextFont(42)
-                    mean_text.SetTextSize(0.036)
-                    mean_text.DrawLatex( xpos+0.4, ypos, "jet 0 mean = %.2f" %(jet_kinematic[i].GetMean()))
-                    mean_text.DrawLatex( xpos+0.4, ypos-0.05, "#sigma = %.2f" %(jet_kinematic[i].GetStdDev()))
-
             canv.cd()
             hs.Draw("HIST PLC nostack")
             hs.GetXaxis().SetRange(minXbin, maxXbin)
             LegendLabel(legend)
+            # write mean and sigma for jet 0 to easily compare plots
+            mean_text = ROOT.TLatex()
+            mean_text.SetNDC()
+            mean_text.SetTextFont(42)
+            mean_text.SetTextSize(0.036)
+            mean_text.DrawLatex( xpos+0.4, ypos, "jet 0 mean = %.2f" %(jet_kinematic["0"].GetMean()))
+            mean_text.DrawLatex( xpos+0.4, ypos-0.05, "#sigma = %.2f" %(jet_kinematic["0"].GetStdDev()))
             canv.SaveAs(folder + obj_type + "_" +var+".png")
 
         # jet 2D distributions
@@ -421,7 +445,10 @@ def Plot2D(tree, obj_type):
 
                 canvTemp.cd()
                 if (time_debug): print("2D loop, drawing tree, with time = " + str(time.time() - start))
-                if (MC): selection_region = MakeSelection(obj_type + i)
+                if (MC):
+                    selection_region = MakeSelection(obj_type + i)
+                    if (obj_type == "jet"): selection_region += GetCut(obj_type + i + "_Pt", [0,200])
+                    print (selection_region)
                 else: selection_region = ""
                 tree.Draw(var_type +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
 
@@ -445,7 +472,7 @@ def Plot2D(tree, obj_type):
             canv.SetLogy()
             hs.Draw("HIST PLC nostack")
             LegendLabel(legend_depth)
-            canv.SaveAs(folder + obj_type + var + i + "_energyFractionOverlay.png")
+            canv.SaveAs(folder + obj_type + i + var + "_energyFractionOverlay.png")
 
             # average energy fraction vs depth
             if i == "0" and obj_type == "LLP": continue
