@@ -14,6 +14,13 @@ export X509_USER_PROXY=$myproxy
 voms-proxy-info -all
 voms-proxy-info -all -file $myproxy
 
+# Environment setup -- no packages sourced, just setting up C++ for compiling needs
+echo "CMSSW environment"
+cmsrel CMSSW_11_3_0_pre1
+cd CMSSW_11_3_0_pre1/src
+cmsenv
+cd ../..
+
 echo ""
 echo "Infile: $ds_in"
 echo ""

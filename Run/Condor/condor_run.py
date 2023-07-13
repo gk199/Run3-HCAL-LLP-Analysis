@@ -89,7 +89,7 @@ def main():
 	else: 
 		os.mkdir( output_dir )
 
-        # ----- Make Submission Dir ----- #
+    # ----- Make Submission Dir ----- #
 
 	submission_dir = "Jobs_"+datetime_now
 

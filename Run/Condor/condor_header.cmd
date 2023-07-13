@@ -17,7 +17,7 @@ executable              = condor_executable.sh
 # Things to Add: #########################################################
 #transfer_input_files   = 
 #output_destination    	= 
-#arguments		= PROXY INFILE_NAME OUTFILE_NAME
+#arguments		        = PROXY INFILE_NAME OUTFILE_NAME
 #input                  = data_file.root
 #queue
 ##########################################################################
