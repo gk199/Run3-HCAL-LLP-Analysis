@@ -204,19 +204,14 @@ vector<float> DisplacedHcalJetAnalyzer::GetTDCavg_Jet(int idx_jet, float deltaR_
 	float nDelayedTDC = 0;
 
 	for (int i = 0; i < matchedRechit.size(); i++) {
-		// TEMP CODE FOR SIX BIT MASK, REMOVE WHEN SIX BIT MASK AND SHIFT ADDED TO NTUPLER //
-		int six_bit_mask = 0x3f;
-		int ts = 3; // aux TDC contains TS 0 - 5, with ts3 as SOI
-		int SOI_TDC = (int(hbheRechit_auxTDC->at(matchedRechit[i])) >> ts * 6) & six_bit_mask;
-		// TEMP CODE FOR SIX BIT MASK, REMOVE WHEN SIX BIT MASK AND SHIFT ADDED TO NTUPLER -- SOI_TDC can then be replaced by TDC //
-		int TDC = hbheRechit_auxTDC->at(matchedRechit[i]);
+		int TDC = hbheRechit_auxTDC->at(matchedRechit[i]); // decoded in ntupler (six bit mask, bit shifting applied)
 		int energy = hbheRechit_E->at(matchedRechit[i]);
-		if (energy > 4 && SOI_TDC < 3) {
+		if (energy > 4 && TDC < 3) {
 			rechitN += 1;
-			totalTDC += SOI_TDC;
+			totalTDC += TDC;
 			totalEnergy += energy;
-			energyTDC += SOI_TDC * energy;
-			if (SOI_TDC > 0) nDelayedTDC += 1;
+			energyTDC += TDC * energy;
+			if (TDC > 0) nDelayedTDC += 1;
 		}
 	}
 
