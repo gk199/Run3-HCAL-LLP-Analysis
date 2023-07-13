@@ -265,7 +265,7 @@ vector<float> DisplacedHcalJetAnalyzer::JetIsMatchedTo( float jet_eta, float jet
 }
 
 /* ====================================================================================================================== */
-bool DisplacedHcalJetAnalyzer::LLPDecayIsTruthMatched( int idx_llp, int idx_llp_decay, float deltaR_cut ){
+bool DisplacedHcalJetAnalyzer::LLPDecayIsTruthMatched_LLP_b( int idx_llp, int idx_llp_decay, float deltaR_cut ){
 	/* 
 	Description: Delivers true/false on if there is an llp decay product matched to a reco akt jet object
 	deltaR_cut: deltaR between jet and LLP decay prod (default: 0.4)	
@@ -303,6 +303,8 @@ bool DisplacedHcalJetAnalyzer::LLPDecayIsTruthMatched( int idx_gLLPDecay, float 
 
 	int idx_gParticle = gLLPDecay_iParticle.at(idx_gLLPDecay);
 	int idx_gLLP      = gLLPDecay_iLLP.at(idx_gLLPDecay);
+
+	// LLPDecayIsTruthMatched_LLP_b(idx_gLLP, idx_gParticle, deltaR_cut); // confused on how to combine still, is idx_gParticle equivalent to GetLLPDecayProductIndex( idx_llp, idx_llp_decay), or idx_llp_decay???
 
 	TVector3 vec_llp;
 	vec_llp.SetXYZ( gLLP_DecayVtx_X->at(idx_gLLP), gLLP_DecayVtx_Y->at(idx_gLLP), gLLP_DecayVtx_Z->at(idx_gLLP) );

@@ -193,7 +193,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		float decay_radius = GetDecayRadiusHB_LLP(i); // -999 default value
 		float distance = GetDecayDistance_LLP(i);
 		vector<int> n_rechit_pt4 = GetRechitMult(i, 0.4); // GetRechitMult returns rechit multiplicity associated with LLP [0], first daughter [1], second daughter [2]
-		vector<vector<float>> energy = GetEnergyProfile(i, 0.4); // [0] is LLP, [1] is daughter 1, [2] is daughter 2. [3] is LLP only (not with decay products considered)
+		vector<vector<float>> energy = GetEnergyProfile(i, 0.4); // [0] is LLP, [1] is daughter 1, [2] is daughter 2, [3] is LLP only (not with decay products considered). [4] is total energies (LLP, daughter1, daughter2, LLP no decay prods)
 
 		vector<TVector3> decay_product_coords = GetLLPDecayProdCoords(i,0,vector<float>{decay_radius});  // 0 for daughter particle, just getting decay of LLP, since R is LLP decay radius
 		if (decay_product_coords.size() > 0) {
@@ -220,6 +220,8 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		if (energy[3][0] + energy[3][1] + energy[3][2] + energy[3][3] > 0) { // ensure there is positive energy in one depth
 			for (int depth = 0; depth < 4; depth++) tree_output_vars_float[Form("LLP%d_EnergyFracLLP_Depth%d", i, depth+1)] = energy[3][depth]; // LLP only matching. each fractional energy saved in different tree
 		}
+		tree_output_vars_float[Form("LLP%dDecay_RechitEnergy", i)] = energy[0];
+		tree_output_vars_float[Form("LLP%d_RechitEnergy", i)] = energy[3];
 	}
 
 	for (int i = 0; i < gLLPDecay_iParticle.size(); i++) {
