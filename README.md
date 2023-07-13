@@ -18,37 +18,32 @@ cd ../Run/
 ```
 To run in compiler mode:
 ```
-root -q -b -l '../DisplacedHcalJetAnalyzer/util/DisplacedHcalJetAnalyzer.C("test", "/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/CMSSW_12_4_6/src/cms_lpc_llp/llp_ntupler/run/ntuple_output_test_signal1.root")'
-mv hists_test.root hists_test_signal1.root
-root -q -b -l '../DisplacedHcalJetAnalyzer/util/DisplacedHcalJetAnalyzer.C("test", "/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/CMSSW_12_4_6/src/cms_lpc_llp/llp_ntupler/run/ntuple_output_test_data1.root")'
-mv hists_test.root hists_test_data1.root
-
 cd Run/
 proxy
 crab_setup
-./run_signal.sh
-./run_data.sh
+root -q -b -l '../DisplacedHcalJetAnalyzer/util/DisplacedHcalJetAnalyzer.C("<tag>", "<path/to/ntuple.root>")'
 ```
-Note that paths to ntuples must be local for running in compiler mode.
-
-To run in compiled mode:
+Note that paths to ntuples must be local for running in compiler mode. To run in compiled mode (preferred method):
 ```
 cd DisplacedHcalJetAnalyzer/
 source compile.sh 
 cd ../Run
-./../DisplacedHcalJetAnalyzer/exe/DisplacedHcalJetAnalyzer <file_output_tag> <path_to_file>
-./../DisplacedHcalJetAnalyzer/exe/DisplacedHcalJetAnalyzer MC_29June root://cmsxrootd.fnal.gov///store/user/gkopp/ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV/LLP_MC_test__20230629_113607/230629_093620/0000/output_24.root
+./../DisplacedHcalJetAnalyzer/exe/DisplacedHcalJetAnalyzer <file_output_tag> root://cmsxrootd.fnal.gov///store/user/gkopp/<path_to_file>
 
 ./run_signal_data.sh
 # change number of events in DisplacedHcalJetAnalyzer.C -- particularly helpful for testing changes before processing all data. 
 
 # multiprocessing, took 30 minutes for 100k events (MC); 1 hour for 500k events (data)
-./mp_local.py InputFiles_2023_06_29_MCsignal_100k.txt
-./mp_local.py InputFiles_2023_06_29_Run2023C-EXOLLPJetHCAL-PromptReco-v4.txt
+./mp_local.py InputFiles_2023_*_*_Run2023C-EXOLLPJetHCAL-PromptReco-v4_ntuplesv*.txt
+./mp_local.py InputFiles_2023_*_*_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_ntuplesv*.txt
 # files will be saved to /eos/user/g/gkopp/LLP_Analysis/
 ```
 For running in compiled mode, remember to input the file path as `root://cmsxrootd.fnal.gov///store/user...`.
 
+## Condor Processing
+Follow the [instructions](https://github.com/gk199/Run3-HCAL-LLP-Analysis/tree/dev-gillian/Run/Condor) in the condor subdirectory. 
+
+## Analyzer Setttings
 In `DisplacedHcalJetAnalyzer/DisplacedHcalJetAnalyzer/DisplacedHcalJetAnalyzer.h` can set the variables: `debug, print_counts, save_hists, save_trees, blind_data`. Setting `AnalysisReader.debug = true` in `DisplacedHcalJetAnalyzer.C` is very helpful for debugging. 
 
 In `HistHelper.cxx` set what histograms are filled (plotted with the outdated Kinematic plotters), and categories are selected. Requirements for when each category is filled are listed in `Loop.cxx`.
