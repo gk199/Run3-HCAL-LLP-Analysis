@@ -39,11 +39,11 @@ cmsLabel = "#scale[1]{#bf{CMS} }"
 if (data): 
   cmsLabelExtra = "#scale[0.8]{#it{HCAL LLP Skim}}"
   yearLumi = "#scale[0.85]{2023C (13.6 TeV)}"
-  folder = "./outPlots/"
+  folder = "./outPlots"
 if (MC): 
   cmsLabelExtra = "#scale[0.8]{#it{2023 LLP MC}}"
   yearLumi = "#scale[0.85]{#sqrt{s} = 13.6 TeV}"
-  folder = "./outPlots_MC_radius_" + sys.argv[3] + "/"
+  folder = "./outPlots_MC"
 
 # Save output plots
 def OutputFolder(name):
@@ -193,13 +193,20 @@ def PlotSetup(infilepath):
     tree = infile.Get("NoSel")
     
     obj_type = ["LLP", "jet"]
+    radius = ["all", "preECAL", "ECAL", "depth12", "depth34", "depth3", "depth4"]
 
     for obj in obj_type:
-        Plot1D(tree, obj)
-        Plot2D(tree, obj)
+        print("Plotting for " + obj + " ----------------------------------------------------------------------------------:")
+        for rad in radius:
+            if (data and rad != "all"): continue;
+            print("Plotting radius = " + rad + " ----------------------------------------------------------------------------- for " + obj + ":")
+            Plot1D(tree, obj, rad)
+            Plot2D(tree, obj, rad)
+
+    LLP_MatchingEfficiency(tree, "LLP")
 
 # ------------------------------------------------------------------------------
-def MakeSelection(variable):
+def MakeSelection(variable, radius):
     # variable could be jet or LLP. If jet, account for which LLP it is matched to. If LLP, cut directly on LLP
     if (variable[0:3] == "jet"): variable = variable + "_isMatchedTo"
     cut_vars = "_DecayR"
@@ -217,11 +224,13 @@ def MakeSelection(variable):
     radius_depth34  = [214.2, 295]
 
     selection_radius = radius_all
-    if (sys.argv[3] == "all"):      selection_radius = radius_all
-    if (sys.argv[3] == "preECAL"):  selection_radius = radius_preECAL
-    if (sys.argv[3] == "ECAL"):     selection_radius = radius_ECAL
-    if (sys.argv[3] == "depth12"):  selection_radius = radius_depth12
-    if (sys.argv[3] == "depth34"):  selection_radius = radius_depth34
+    if (radius == "all"):      selection_radius = radius_all
+    if (radius == "preECAL"):  selection_radius = radius_preECAL
+    if (radius == "ECAL"):     selection_radius = radius_ECAL
+    if (radius == "depth12"):  selection_radius = radius_depth12
+    if (radius == "depth34"):  selection_radius = radius_depth34
+    if (radius == "depth3"):   selection_radius = radius_depth3
+    if (radius == "depth4"):   selection_radius = radius_depth4
     selection_region = GetCut_LLPmatch(variable, cut_vars, selection_radius)
 
     return selection_region
@@ -249,7 +258,7 @@ def LegendLabel(legend):
     stamp_text.DrawLatex( 0.75, 0.91, yearLumi)
 
 # ------------------------------------------------------------------------------
-def Plot1D(tree, obj_type):
+def Plot1D(tree, obj_type, radius):
 
     canv = ROOT.TCanvas()
     canvTemp = ROOT.TCanvas()
@@ -274,7 +283,7 @@ def Plot1D(tree, obj_type):
                 dist = obj_type + i + "_" + var
                 canvTemp.cd()
                 if (time_debug): print("1D LLP loop, drawing tree, with time = " + str(time.time() - start))
-                selection_region = MakeSelection(obj_type + i)
+                selection_region = MakeSelection(obj_type + i, radius)
                 tree.Draw(dist +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
                 
                 if i == "1": 
@@ -291,7 +300,10 @@ def Plot1D(tree, obj_type):
                     mean_text.DrawLatex( xpos+0.4, ypos-0.05, "#sigma = %.2f" %(LLP_decay[i].GetStdDev()))
 
             LegendLabel(legend)
-            canv.SaveAs(folder + obj_type + "_" +var+".png")
+            OutputFolder("_" + radius)
+            canv.SaveAs(folder + "_" + radius + "/" + obj_type + "_" +var+".png")
+
+        LLP_decay = {}
 
         # LLP 2D distributions
         LLP_dist = {}
@@ -306,14 +318,15 @@ def Plot1D(tree, obj_type):
                 dist1 = obj_type + i + "_" + var[0] 
                 dist2 = obj_type + i + "_" + var[1] 
                 canvTemp.cd()
-                selection_region = MakeSelection(obj_type + i)
+                selection_region = MakeSelection(obj_type + i, radius)
                 tree.Draw(dist1 + ":" + dist2 +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
                 if i == "1": 
                     LLP_dist[i].Add(LLP_dist["0"])
                     canv.cd()
                     LLP_dist[i].Draw("COLZ PLC")
                     LegendLabel(legend)
-                    canv.SaveAs(folder + obj_type + i + "_" +var[0]+ "_" +var[1]+ ".png")
+                    canv.SaveAs(folder + "_" + radius + "/" + obj_type + i + "_" +var[0]+ "_" +var[1]+ ".png")
+        LLP_dist = {}
 
     # jet kinematic plotting 
     if (obj_type == "jet"):
@@ -333,7 +346,7 @@ def Plot1D(tree, obj_type):
             minXbin = 0
             maxXbin = 0
             for i in number:
-                hname_temp = obj_type + i + var
+                hname_temp = obj_type + i + var + radius
                 nBins = 600
                 x_min = -100
                 x_max = 500
@@ -367,7 +380,7 @@ def Plot1D(tree, obj_type):
                 dist = obj_type + i + "_" + var
                 canvTemp.cd()
                 if (time_debug): print("1D jet loop, drawing tree, with time = " + str(time.time() - start))
-                if (MC): selection_region = MakeSelection(obj_type + i)
+                if (MC): selection_region = MakeSelection(obj_type + i, radius)
                 else: selection_region = ""
                 tree.Draw(dist +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
                 
@@ -387,7 +400,8 @@ def Plot1D(tree, obj_type):
             mean_text.SetTextSize(0.036)
             mean_text.DrawLatex( xpos+0.4, ypos, "jet 0 mean = %.2f" %(jet_kinematic["0"].GetMean()))
             mean_text.DrawLatex( xpos+0.4, ypos-0.05, "#sigma = %.2f" %(jet_kinematic["0"].GetStdDev()))
-            canv.SaveAs(folder + obj_type + "_" +var+".png")
+            canv.SaveAs(folder + "_" + radius + "/" + obj_type + "_" +var+".png")
+        jet_kinematic = {}
 
         # jet 2D distributions
         jet_dist = {}
@@ -403,7 +417,7 @@ def Plot1D(tree, obj_type):
                 dist1 = obj_type + i + "_" + var[0] 
                 dist2 = obj_type + i + "_" + var[1] 
                 canvTemp.cd()
-                if (MC): selection_region = MakeSelection(obj_type + i)
+                if (MC): selection_region = MakeSelection(obj_type + i, radius)
                 else: selection_region = ""
                 tree.Draw(dist1 + ":" + dist2 +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
                 canv.cd()
@@ -411,10 +425,11 @@ def Plot1D(tree, obj_type):
 
                 LegendLabel(legend)
                 canv.SetLogy(0) # linear                
-                canv.SaveAs(folder + obj_type + i + "_" +var[0]+ "_" +var[1]+ ".png")
+                canv.SaveAs(folder + "_" + radius + "/"  + obj_type + i + "_" +var[0]+ "_" +var[1]+ ".png")
+        jet_dist = {}
 
 # ------------------------------------------------------------------------------
-def Plot2D(tree, obj_type):
+def Plot2D(tree, obj_type, radius):
 
     # LLP and jet are essentially treated the same here
     # fraction of energy in each depth
@@ -440,15 +455,15 @@ def Plot2D(tree, obj_type):
             for depth in range(4):
                 depth += 1
                 var_type = obj_type + i + var + str(depth)
-                hname_temp = var_type + "_energy_profile_d"+str(depth)
-                energy_profile[(depth,i)] = ROOT.TH1F(hname_temp, obj_type+" Depth Energy Frac in Depth "+str(depth)+"; Depth (HB); Fraction of Energy", 100, 0, 1 ); # replicate the initial plots first
+                hname_temp = var_type + "_energy_profile_d"+str(depth) + "_" + radius
+                energy_profile[(depth,i)] = ROOT.TH1F(hname_temp, obj_type+" Depth Energy Frac in Depth "+str(depth)+"; Depth (HB); Fraction of Energy", 100, 0, 1 );
 
                 canvTemp.cd()
                 if (time_debug): print("2D loop, drawing tree, with time = " + str(time.time() - start))
                 if (MC):
-                    selection_region = MakeSelection(obj_type + i)
-                    if (obj_type == "jet"): selection_region += GetCut(obj_type + i + "_Pt", [0,200])
-                    print (selection_region)
+                    selection_region = MakeSelection(obj_type + i, radius)
+                    if (obj_type == "jet"): selection_region += GetCut(obj_type + i + "_Pt", [200,2000000])  # [0, 200]
+                    if (debug): print (selection_region)
                 else: selection_region = ""
                 tree.Draw(var_type +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
 
@@ -472,7 +487,7 @@ def Plot2D(tree, obj_type):
             canv.SetLogy()
             hs.Draw("HIST PLC nostack")
             LegendLabel(legend_depth)
-            canv.SaveAs(folder + obj_type + i + var + "_energyFractionOverlay.png")
+            canv.SaveAs(folder + "_" + radius + "/" + obj_type + i + var + "_energyFractionOverlay.png")
 
             # average energy fraction vs depth
             if i == "0" and obj_type == "LLP": continue
@@ -484,7 +499,65 @@ def Plot2D(tree, obj_type):
 
         if (time_debug): print("Plotting results, with time = " + str(time.time() - start))
         LegendLabel(legend)
-        canvDepth.SaveAs(folder + obj_type + var + "_energyProfile.png")
+        canvDepth.SaveAs(folder + "_" + radius + "/" + obj_type + var + "_energyProfile.png")
+        
+        energy_profile, energy_depth_profile = {}, {}
+
+# ------------------------------------------------------------------------------
+def LLP_MatchingEfficiency(tree, obj_type):
+    # for an LLP, determine efficiency for it's matching to a rechit cluster; and determine efficiency for its matching to a L1 jet
+    # plot the efficiency as a function of decay R (or other variables -- start with radius for now)
+
+    # LLP0Decay_RechitEnergy(20Gev)
+    # LLP0_RechitEnergy(20GeV)
+    # LLP0_isTruthMatched
+    # if these are true (or if these pass a cut), then determine number of LLP with this over all LLP
+
+    canv = ROOT.TCanvas()
+    canvTemp = ROOT.TCanvas()
+        
+    if (obj_type == "LLP"):
+        number = ["0", "1"]
+        LLP_matching = ["Decay_RechitEnergy20GeV", "_RechitEnergy20GeV", "_isTruthMatched"] # LLP + 0 or 1 + kinematic_var = full histogram name
+        LLP_denominator = ["DecayR"]
+
+        LLP_effs = {}
+        LLP_denom = {}
+    
+        for var in LLP_matching:
+            legend = ROOT.TLegend(0.65,0.65,0.75,0.75)
+            for i in number:
+                hname_temp = obj_type + i + var
+                LLP_effs[i] = ROOT.TH1F(hname_temp, "LLP " + var +" ; " + var +" efficiency by LLP decayR [cm]; Matching Efficiency", 300, 0, 300 ); 
+                hname_denom = obj_type + i + var + "_" + LLP_denominator[0]
+                LLP_denom[i] = ROOT.TH1F(hname_denom, "LLP " + var +" ; " + var +" efficiency by LLP decayR [cm]; Matching Efficiency", 300, 0, 300 ); 
+
+                selection_region = GetCut(obj_type + i + var, [1,2])
+                canvTemp.cd()
+
+                LLP_radius = obj_type + i + "_" + LLP_denominator[0]
+                tree.Draw(LLP_radius +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
+                tree.Draw(LLP_radius +" >> "+hname_denom, "", "", tree.GetEntries(), 0 )
+                
+                if i == "1": 
+                    ResetRange(LLP_effs[i])
+                    legend.AddEntry(LLP_effs[i], obj_type)
+                    LLP_effs[i].Add(LLP_effs["0"])
+                    LLP_denom[i].Add(LLP_denom["0"])
+                    # check efficiency on the whole distribution now
+                    if(ROOT.TEfficiency.CheckConsistency(LLP_effs[i],LLP_denom[i])):
+                        pEff = ROOT.TEfficiency(LLP_effs[i],LLP_denom[i])
+                        canv.cd()
+                        pEff.Draw()
+                        mean_text = ROOT.TLatex()
+                        mean_text.SetNDC()
+                        mean_text.SetTextFont(42)
+                        mean_text.SetTextSize(0.036)
+                        mean_text.DrawLatex( xpos+0.4, ypos, "mean = %.2f" %(LLP_effs[i].GetMean()))
+                        mean_text.DrawLatex( xpos+0.4, ypos-0.05, "#sigma = %.2f" %(LLP_effs[i].GetStdDev()))
+
+            LegendLabel(legend)
+            canv.SaveAs(folder + "/Efficiency_" + obj_type + "_" +var+".png")
 
 # ------------------------------------------------------------------------------
 def main():
