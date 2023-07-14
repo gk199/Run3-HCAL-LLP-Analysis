@@ -265,20 +265,20 @@ vector<float> DisplacedHcalJetAnalyzer::JetIsMatchedTo( float jet_eta, float jet
 }
 
 /* ====================================================================================================================== */
-bool DisplacedHcalJetAnalyzer::LLPDecayIsTruthMatched_LLP_b( int idx_llp, int idx_llp_decay, float deltaR_cut ){
+bool DisplacedHcalJetAnalyzer::LLPDecayIsTruthMatched_LLP_b( int idx_gLLP, int idx_gParticle, float deltaR_cut ){
 	/* 
 	Description: Delivers true/false on if there is an llp decay product matched to a reco akt jet object
 	deltaR_cut: deltaR between jet and LLP decay prod (default: 0.4)	
 	*/
 
 	TVector3 vec_llp;
-	vec_llp.SetXYZ( gLLP_DecayVtx_X->at(idx_llp), gLLP_DecayVtx_Y->at(idx_llp), gLLP_DecayVtx_Z->at(idx_llp) );
+	vec_llp.SetXYZ( gLLP_DecayVtx_X->at(idx_gLLP), gLLP_DecayVtx_Y->at(idx_gLLP), gLLP_DecayVtx_Z->at(idx_gLLP) );
 
-	int idx_gParticle = GetLLPDecayProductIndex( idx_llp, idx_llp_decay);
+	// int idx_gParticle = GetLLPDecayProductIndex( idx_gLLP, idx_llp_decay); // line was needed when function input was idx_llp_decay (0 or 1)
 
 	for( int i=0; i<jet_Pt->size(); i++){
 		TVector3 vec_jet;
-		if( jet_Pt->at(i) < 40 ) continue;
+		// if( jet_Pt->at(i) < 40 ) continue;
 		vec_jet.SetPtEtaPhi( 235., jet_Eta->at(i), jet_Phi->at(i) );
 		TVector3 vec_jet_new = vec_jet - vec_llp;
 
@@ -293,10 +293,14 @@ bool DisplacedHcalJetAnalyzer::LLPDecayIsTruthMatched_LLP_b( int idx_llp, int id
 }
 
 /* ====================================================================================================================== */
-bool DisplacedHcalJetAnalyzer::LLPDecayIsTruthMatched( int idx_gLLPDecay, float deltaR_cut ){ // TODO : combine with above
+bool DisplacedHcalJetAnalyzer::LLPDecayIsTruthMatched( int idx_gLLPDecay, float deltaR_cut ){
 	/* 
 	Description: Delivers true/false on if there is an llp decay product matched to a reco akt jet object
 	deltaR_cut: deltaR between jet and LLP decay prod (default: 0.4)	
+
+	between the two similar LLPDecayIsTruthMatched functions:
+	in LLPDecayIsTruthMatched, idx_gLLP  		=  idx_llp 			in LLPDecayIsTruthMatched_LLP_b
+	in LLPDecayIsTruthMatched, idx_gParticle  	=  idx_gParticle 	in LLPDecayIsTruthMatched_LLP_b
 	*/
 
 	if( idx_gLLPDecay >= gLLPDecay_iLLP.size() ) return false;
@@ -304,24 +308,19 @@ bool DisplacedHcalJetAnalyzer::LLPDecayIsTruthMatched( int idx_gLLPDecay, float 
 	int idx_gParticle = gLLPDecay_iParticle.at(idx_gLLPDecay);
 	int idx_gLLP      = gLLPDecay_iLLP.at(idx_gLLPDecay);
 
-	// LLPDecayIsTruthMatched_LLP_b(idx_gLLP, idx_gParticle, deltaR_cut); // confused on how to combine still, is idx_gParticle equivalent to GetLLPDecayProductIndex( idx_llp, idx_llp_decay), or idx_llp_decay???
+	return LLPDecayIsTruthMatched_LLP_b(idx_gLLP, idx_gParticle, deltaR_cut); // confused on how to combine still, is idx_gParticle equivalent to GetLLPDecayProductIndex( idx_llp, idx_llp_decay), or idx_llp_decay???
 
-	TVector3 vec_llp;
-	vec_llp.SetXYZ( gLLP_DecayVtx_X->at(idx_gLLP), gLLP_DecayVtx_Y->at(idx_gLLP), gLLP_DecayVtx_Z->at(idx_gLLP) );
+}
 
-	for( int i=0; i<jet_Pt->size(); i++){
-		TVector3 vec_jet;
-		vec_jet.SetPtEtaPhi( 235., jet_Eta->at(i), jet_Phi->at(i) );
-		TVector3 vec_jet_new = vec_jet - vec_llp;
+/* ====================================================================================================================== */
+int DisplacedHcalJetAnalyzer::LLPDecayIsFromLLP( int idx_gLLPDecay ){
+	/* 
+	Description: Delivers 0 / 1 on which llp the decay product comes from. Useful in combination with LLPDecayIsTruthMatched()
+	*/
 
-		float dR_temp = DeltaR( gParticle_Eta->at(idx_gParticle), vec_jet_new.Eta(), gParticle_Phi->at(idx_gParticle), vec_jet_new.Phi() );
+	int idx_gLLP      = gLLPDecay_iLLP.at(idx_gLLPDecay);
 
-		if( dR_temp < deltaR_cut ) 
-			return true;
-	}
-
-	return false;
-
+	return idx_gLLP;
 }
 
 /* ====================================================================================================================== */

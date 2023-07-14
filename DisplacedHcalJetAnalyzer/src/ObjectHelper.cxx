@@ -105,7 +105,7 @@ vector<vector<float>> DisplacedHcalJetAnalyzer::GetEnergyProfile(int idx_llp, fl
 	if (totalE_daughter2 > 0) for (int i=0; i<energy_daughter2.size(); i++) energy_daughter2[i] = energy_daughter2[i] / totalE_daughter2;
 	if (totalE_LLP > 0) for (int i=0; i<energy_LLP.size(); i++) energy_LLP[i] = energy_LLP[i] / totalE_LLP;
 
-	vector<float> totalEnergies = {totalE_LLPb, totalE_daughter1, totalE_daughter2, totalE_LLP}
+	vector<float> totalEnergies = {totalE_LLPb, totalE_daughter1, totalE_daughter2, totalE_LLP};
 
 	vector<vector<float>> energy = {energy_LLP_total, energy_daughter1, energy_daughter2, energy_LLP, totalEnergies};
 	return energy;
