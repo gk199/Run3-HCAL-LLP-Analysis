@@ -22,6 +22,10 @@
 
 #include "TLatex.h"
 
+// ==========================================================================================
+// Plot Appearance 
+// ===========================================================================================
+
 // -------------------------------------------------------------------------------------
 void SetStyle(){
 	gStyle->SetOptStat(0);
@@ -50,33 +54,38 @@ void SetStyle(){
 }
 
 // -------------------------------------------------------------------------------------
-void StampCMS( const std::string & text = "Internal", float lumi=140., float x=0.14, float y=0.84, float textsize=0.045) {
+void StampCMS( const std::string & approvaltext = "Internal", float lumi=140., float x=0.14, float y=0.84, float textsize=0.045) {
   // Usage:  StampCMS("Internal", 126.5, 0.12, 0.75);
   
   textsize = 0.045;
-  TLatex CMS;
-  CMS.SetNDC();
-  //CMS.SetTextFont(72);
-  CMS.SetTextColor(1);
-  CMS.SetTextSize(textsize);
-  CMS.DrawLatex( x, y, "CMS" );
+  TLatex label_cms;
+  label_cms.SetNDC();
+  //label_cms.SetTextFont(72);
+  label_cms.SetTextColor(1);
+  label_cms.SetTextSize(textsize);
+  label_cms.DrawLatex( x, y, "CMS" );
 
-  TLatex plottype;
-  plottype.SetNDC();
-  plottype.SetTextFont(52);
-  plottype.SetTextColor(1);
-  plottype.SetTextSize(textsize*0.85);
-  plottype.DrawLatex( x+0.08, y, text.c_str() ); 
+  TLatex label_approvaltext;
+  label_approvaltext.SetNDC();
+  label_approvaltext.SetTextFont(52);
+  label_approvaltext.SetTextColor(1);
+  label_approvaltext.SetTextSize(textsize*0.85);
+  label_approvaltext.DrawLatex( x+0.08, y, approvaltext.c_str() ); 
 
-  TLatex energylumi;
-  energylumi.SetNDC();
-  energylumi.SetTextFont(42);
-  energylumi.SetTextColor(1);
-  energylumi.SetTextSize(textsize*0.65 );
-  energylumi.DrawLatex( x, y-.035, "#sqrt{s} = 13.6 TeV" );
-  //energylumi.DrawLatex( x, y-.08, Form("L = %.1f fb^{-1}", lumi) );
-  //energylumi.DrawLatex( x+.01, y-.2, "SF = #frac{N_{SR}}{N_{CR}} = 0.88" );
+  TLatex label_energylumi; 
+  label_energylumi.SetNDC();
+  label_energylumi.SetTextFont(42);
+  label_energylumi.SetTextColor(1);
+  label_energylumi.SetTextSize(textsize*0.65 );
+  label_energylumi.DrawLatex( x, y-.035, "#sqrt{s} = 13.6 TeV" ); // Just energy for now...
+  //label_energylumi.DrawLatex( x, y-.08, Form("L = %.1f fb^{-1}", lumi) );
+  //label_energylumi.DrawLatex( x+.01, y-.2, "SF = #frac{N_{SR}}{N_{CR}} = 0.88" );
+
 }
+
+// ==========================================================================================
+// Fits 
+// ===========================================================================================
 
 // -------------------------------------------------------------------------------------------
 TF1* IterativeGaussianFit( TH1F* h, float nSig = 1.5, TString fit_settings = "Q0" ) {
@@ -129,6 +138,10 @@ TF1* LorentzCauchyFit( TH1F* h, TString fit_settings = "Q0" ) {
 
 }
 
+// ==========================================================================================
+// Cumulative Distribution Functions 
+// ===========================================================================================
+
 // -------------------------------------------------------------------------------------
 TH1F* GetCDF( TH1F* h ){
 	// Cumulative Distribution Function. Returns the fraction of events to the right of
@@ -163,6 +176,10 @@ TH1F* GetReverseCDF( TH1F* h ){
 	}
 	return h_cdf;
 }
+
+// ==========================================================================================
+// Significance Formulas 
+// ===========================================================================================
 
 // -------------------------------------------------------------------------------------
 TH1F* GetSignificanceZ( TH1F* h_s, TH1F* h_b ){
@@ -208,6 +225,10 @@ TH1F* DevinsFormulaZprime( TH1F* h_s, TH1F* h_b ){
 	}
 	return h_Zprime;
 }
+
+// ==========================================================================================
+// Other General Histogram Manipulations
+// ===========================================================================================
 
 // -------------------------------------------------------------------------------------
 TH1F* GetSqrtTH1( TH1F* h ){
