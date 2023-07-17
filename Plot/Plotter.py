@@ -198,7 +198,7 @@ def PlotSetup(infilepath):
     for obj in obj_type:
         print("Plotting for " + obj + " ----------------------------------------------------------------------------------:")
         for rad in radius:
-            if (data and rad != "all"): continue;
+            if (data and (rad != "all" or obj == "LLP")): continue;
             print("Plotting radius = " + rad + " ----------------------------------------------------------------------------- for " + obj + ":")
             Plot1D(tree, obj, rad)
             Plot2D(tree, obj, rad)
@@ -268,17 +268,16 @@ def Plot1D(tree, obj_type, radius):
         number = ["0", "1"]
         kinematic_vars = ["DecayR", "DecayX", "DecayY", "DecayZ", "DecayD", "DecayT", "DecayCtau", "RechitN", "dR_b"]
         LLP_group = [["RechitN", "DecayR"]]
-
         LLP_decay = {}
-    
+
         for var in kinematic_vars:
             legend = ROOT.TLegend(0.65,0.65,0.75,0.75)
             for i in number:
                 hname_temp = obj_type + i + var
                 if (var == "DecayT" or var == "dR_b"): 
-                    if (var == "DecayT"): LLP_decay[i] = ROOT.TH1F(hname_temp, "LLP " + var +" ; " + var +" [cm]; Number of Entries", 3000, 0, 300 ); 
-                    if (var == "dR_b"): LLP_decay[i] = ROOT.TH1F(hname_temp, "#Delta R (LLP, b); #Delta R; Number of Entries", 100, 0, 1.6 ); 
-                else: LLP_decay[i] = ROOT.TH1F(hname_temp, "LLP " + var +" ; " + var +" [cm]; Number of Entries", 3000, -3000, 3000 ); 
+                    if (var == "DecayT"): LLP_decay[i] = ROOT.TH1F(hname_temp, "LLP " + var +"  r=" + radius + "; " + var +" [cm]; Number of Entries", 3000, 0, 300 ); 
+                    if (var == "dR_b"): LLP_decay[i] = ROOT.TH1F(hname_temp, "#Delta R (LLP, b),  r=" + radius + "; #Delta R; Number of Entries", 100, 0, 1.6 ); 
+                else: LLP_decay[i] = ROOT.TH1F(hname_temp, "LLP " + var +", r=" + radius + "; " + var +" [cm]; Number of Entries", 3000, -3000, 3000 ); 
 
                 dist = obj_type + i + "_" + var
                 canvTemp.cd()
@@ -303,8 +302,6 @@ def Plot1D(tree, obj_type, radius):
             OutputFolder("_" + radius)
             canv.SaveAs(folder + "_" + radius + "/" + obj_type + "_" +var+".png")
 
-        LLP_decay = {}
-
         # LLP 2D distributions
         LLP_dist = {}
         for var in LLP_group:
@@ -312,7 +309,7 @@ def Plot1D(tree, obj_type, radius):
                 legend = ROOT.TLegend(0.65,0.65,0.75,0.75)
                 xaxis = 300
                 hname_temp = obj_type + var[0] + i
-                LLP_dist[i] = ROOT.TH2F(hname_temp, "Jet " + i + " " + var[0] + " vs. " + var[1] + " ; " + var[1] + "; " + var[0], 100, 0, xaxis, 100/2, 0, xaxis/6 ); 
+                LLP_dist[i] = ROOT.TH2F(hname_temp, "Jet " + i + " " + var[0] + " vs. " + var[1] + "  r=" + radius + "; " + var[1] + "; " + var[0], 100, 0, xaxis, 100/2, 0, xaxis/6 ); 
                 legend.AddEntry(LLP_dist[i], obj_type + i)
 
                 dist1 = obj_type + i + "_" + var[0] 
@@ -326,7 +323,6 @@ def Plot1D(tree, obj_type, radius):
                     LLP_dist[i].Draw("COLZ PLC")
                     LegendLabel(legend)
                     canv.SaveAs(folder + "_" + radius + "/" + obj_type + i + "_" +var[0]+ "_" +var[1]+ ".png")
-        LLP_dist = {}
 
     # jet kinematic plotting 
     if (obj_type == "jet"):
@@ -342,7 +338,7 @@ def Plot1D(tree, obj_type, radius):
         jet_kinematic = {}
         for var in kinematic_vars:
             legend = ROOT.TLegend(0.65,0.65,0.8,0.8)
-            hs = ROOT.THStack("hs",  "Jet " + var +" ; " + var +";Normalized Number of Entries")
+            hs = ROOT.THStack("hs",  "Jet " + var +", r=" + radius + "; " + var +";Normalized Number of Entries")
             minXbin = 0
             maxXbin = 0
             for i in number:
@@ -374,7 +370,7 @@ def Plot1D(tree, obj_type, radius):
                 if (var[0:3] == "TDC" or var[0:12] == "energyWeight"):
                     canv.SetLogy()
                     nBins = 3000
-                jet_kinematic[i] = ROOT.TH1F(hname_temp, "Jet " + var +" ; " + var +"; Number of Entries", nBins, x_min, x_max ); 
+                jet_kinematic[i] = ROOT.TH1F(hname_temp, "Jet " + var +"  r=" + radius + "; " + var +"; Number of Entries", nBins, x_min, x_max ); 
                 legend.AddEntry(jet_kinematic[i], obj_type + i)
 
                 dist = obj_type + i + "_" + var
@@ -400,8 +396,8 @@ def Plot1D(tree, obj_type, radius):
             mean_text.SetTextSize(0.036)
             mean_text.DrawLatex( xpos+0.4, ypos, "jet 0 mean = %.2f" %(jet_kinematic["0"].GetMean()))
             mean_text.DrawLatex( xpos+0.4, ypos-0.05, "#sigma = %.2f" %(jet_kinematic["0"].GetStdDev()))
+            OutputFolder("_" + radius)
             canv.SaveAs(folder + "_" + radius + "/" + obj_type + "_" +var+".png")
-        jet_kinematic = {}
 
         # jet 2D distributions
         jet_dist = {}
@@ -411,7 +407,7 @@ def Plot1D(tree, obj_type, radius):
                 xaxis = 0.25
                 if var[0] == "EtaSpread": xaxis = 0.35
                 hname_temp = obj_type + var[0] + i
-                jet_dist[i] = ROOT.TH2F(hname_temp, "Jet " + i + " " + var[0] + " vs. " + var[1] + " ; " + var[1] + "; " + var[0], 100, 0, xaxis, 100, 0, xaxis ); 
+                jet_dist[i] = ROOT.TH2F(hname_temp, "Jet " + i + " " + var[0] + " vs. " + var[1] + "  r=" + radius + "; " + var[1] + "; " + var[0], 100, 0, xaxis, 100, 0, xaxis ); 
                 legend.AddEntry(jet_dist[i], obj_type + i)
 
                 dist1 = obj_type + i + "_" + var[0] 
@@ -426,7 +422,6 @@ def Plot1D(tree, obj_type, radius):
                 LegendLabel(legend)
                 canv.SetLogy(0) # linear                
                 canv.SaveAs(folder + "_" + radius + "/"  + obj_type + i + "_" +var[0]+ "_" +var[1]+ ".png")
-        jet_dist = {}
 
 # ------------------------------------------------------------------------------
 def Plot2D(tree, obj_type, radius):
@@ -436,73 +431,75 @@ def Plot2D(tree, obj_type, radius):
     number = ["0", "1", "2"]
     kinematic_vars = ["_EnergyFrac_Depth", "_EnergyFracLLP_Depth"]
 
-    for var in kinematic_vars:
-        energy_profile, energy_depth_profile = {}, {}
+    jet_et_cuts = [""]
+    if (obj_type == "jet"): jet_et_cuts = [[0,2000000], [0,200], [200,2000000]]
 
-        canvTemp = ROOT.TCanvas()
-        canv = ROOT.TCanvas()
-        canvDepth = ROOT.TCanvas()
-        legend = ROOT.TLegend(0.65,0.65,0.8,0.8)
+    for cut in jet_et_cuts:
+        for var in kinematic_vars:
+            energy_profile, energy_depth_profile = {}, {}
 
-        if (obj_type == "jet" and var == "_EnergyFracLLP_Depth"): continue # only have this for LLP
-        for i in number:
-            if (i == "2" and obj_type != "jet"): continue
-            hname = obj_type + var + i + "_energy_depth_profile"
-            energy_depth_profile[i] = ROOT.TH1F(hname, obj_type + " Depth Energy Profile ; Depth (HB); Fraction of Energy", 6,0,6 ); 
+            canvTemp = ROOT.TCanvas()
+            canv = ROOT.TCanvas()
+            canvDepth = ROOT.TCanvas()
+            legend = ROOT.TLegend(0.65,0.65,0.8,0.8)
 
-            hs = ROOT.THStack("hs",  obj_type + i + " Energy Fraction in HCAL Depths; Fraction of HCAL Rechit Energy; Normalized Number of Entries")
-            legend_depth = ROOT.TLegend(0.65,0.65,0.8,0.8)
-            for depth in range(4):
-                depth += 1
-                var_type = obj_type + i + var + str(depth)
-                hname_temp = var_type + "_energy_profile_d"+str(depth) + "_" + radius
-                energy_profile[(depth,i)] = ROOT.TH1F(hname_temp, obj_type+" Depth Energy Frac in Depth "+str(depth)+"; Depth (HB); Fraction of Energy", 100, 0, 1 );
+            if (obj_type == "jet" and var == "_EnergyFracLLP_Depth"): continue # only have this for LLP
+            for i in number:
+                if (i == "2" and obj_type != "jet"): continue
+                hname = obj_type + var + i + "_energy_depth_profile"
+                energy_depth_profile[i] = ROOT.TH1F(hname, obj_type + " Depth Energy Profile r=" + radius + "; Depth (HB); Fraction of Energy", 6,0,6 ); 
 
-                canvTemp.cd()
-                if (time_debug): print("2D loop, drawing tree, with time = " + str(time.time() - start))
-                if (MC):
-                    selection_region = MakeSelection(obj_type + i, radius)
-                    if (obj_type == "jet"): selection_region += GetCut(obj_type + i + "_Pt", [200,2000000])  # [0, 200]
-                    if (debug): print (selection_region)
-                else: selection_region = ""
-                tree.Draw(var_type +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
+                hs = ROOT.THStack("hs",  obj_type + i + " Energy Fraction in HCAL Depths, r=" + radius + "; Fraction of HCAL Rechit Energy; Normalized Number of Entries")
+                legend_depth = ROOT.TLegend(0.65,0.65,0.8,0.8)
+                for depth in range(4):
+                    depth += 1
+                    var_type = obj_type + i + var + str(depth)
+                    hname_temp = var_type + "_energy_profile_d"+str(depth) + "_" + radius + str(cut)
+                    energy_profile[(depth,i)] = ROOT.TH1F(hname_temp, obj_type+" Depth Energy Frac in Depth "+str(depth)+ ", r=" + radius + "; Depth (HB); Fraction of Energy", 100, 0, 1 );
 
-                # for LLP, combine distributions
-                if obj_type == "LLP":
-                    if i == "0": continue
-                    if i == "1": energy_profile[(depth,i)].Add(energy_profile[(depth,"0")]) # determine averages for summed LLP1 and LLP2
+                    canvTemp.cd()
+                    if (time_debug): print("2D loop, drawing tree, with time = " + str(time.time() - start))
+                    if (MC):
+                        selection_region = MakeSelection(obj_type + i, radius)
+                        if (obj_type == "jet"): selection_region += GetCut(obj_type + i + "_Pt", cut)  # [0, 200]
+                        if (debug): print (selection_region)
+                    else: selection_region = ""
+                    tree.Draw(var_type +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
+
+                    # for LLP, combine distributions
+                    if obj_type == "LLP":
+                        if i == "0": continue
+                        if i == "1": energy_profile[(depth,i)].Add(energy_profile[(depth,"0")]) # determine averages for summed LLP1 and LLP2
+                    
+                    Normalize(energy_profile[(depth,i)])
+                    legend_depth.AddEntry(energy_profile[(depth,i)], "depth = " + str(depth))
+                    hs.Add(energy_profile[(depth,i)])
+
+                    AverageEnergyFrac = energy_profile[(depth,i)].GetMean()
+                    AverageEnergyFrac_error = energy_profile[(depth,i)].GetMeanError()
                 
-                Normalize(energy_profile[(depth,i)])
-                legend_depth.AddEntry(energy_profile[(depth,i)], "depth = " + str(depth))
-                hs.Add(energy_profile[(depth,i)])
+                    energy_depth_profile[i].SetBinContent(depth+1, AverageEnergyFrac)
+                    energy_depth_profile[i].SetBinError(depth+1, AverageEnergyFrac_error)
 
-                AverageEnergyFrac = energy_profile[(depth,i)].GetMean()
-                AverageEnergyFrac_error = energy_profile[(depth,i)].GetMeanError()
+                if obj_type == "LLP" and i == "0": continue
+                canv.cd()
+                canv.SetLogy()
+                hs.Draw("HIST PLC nostack")
+                LegendLabel(legend_depth)
+                canv.SaveAs(folder + "_" + radius + "/" + obj_type + i + var + "_energyFractionOverlay" + str(cut) + ".png")
+
+                # average energy fraction vs depth
+                if i == "0" and obj_type == "LLP": continue
+                canvDepth.cd()
+                legend.AddEntry(energy_depth_profile[i], obj_type + i)
+                energy_depth_profile[i].GetYaxis().SetRangeUser(0,0.7)
+                if i == "0": energy_depth_profile[i].Draw("HIST E1 PLC")
+                else: energy_depth_profile[i].Draw("SAME HIST E1 PLC")
+
+            if (time_debug): print("Plotting results, with time = " + str(time.time() - start))
+            LegendLabel(legend)
+            canvDepth.SaveAs(folder + "_" + radius + "/" + obj_type + var + "_energyProfile" + str(cut) + ".png")
             
-                energy_depth_profile[i].SetBinContent(depth+1, AverageEnergyFrac)
-                energy_depth_profile[i].SetBinError(depth+1, AverageEnergyFrac_error)
-
-            if obj_type == "LLP" and i == "0": continue
-            canv.cd()
-            canv.SetLogy()
-            hs.Draw("HIST PLC nostack")
-            LegendLabel(legend_depth)
-            canv.SaveAs(folder + "_" + radius + "/" + obj_type + i + var + "_energyFractionOverlay.png")
-
-            # average energy fraction vs depth
-            if i == "0" and obj_type == "LLP": continue
-            canvDepth.cd()
-            legend.AddEntry(energy_depth_profile[i], obj_type + i)
-            energy_depth_profile[i].GetYaxis().SetRangeUser(0,0.7)
-            if i == "0": energy_depth_profile[i].Draw("HIST E1 PLC")
-            else: energy_depth_profile[i].Draw("SAME HIST E1 PLC")
-
-        if (time_debug): print("Plotting results, with time = " + str(time.time() - start))
-        LegendLabel(legend)
-        canvDepth.SaveAs(folder + "_" + radius + "/" + obj_type + var + "_energyProfile.png")
-        
-        energy_profile, energy_depth_profile = {}, {}
-
 # ------------------------------------------------------------------------------
 def LLP_MatchingEfficiency(tree, obj_type):
     # for an LLP, determine efficiency for it's matching to a rechit cluster; and determine efficiency for its matching to a L1 jet
@@ -515,7 +512,7 @@ def LLP_MatchingEfficiency(tree, obj_type):
 
     canv = ROOT.TCanvas()
     canvTemp = ROOT.TCanvas()
-        
+    
     if (obj_type == "LLP"):
         number = ["0", "1"]
         LLP_matching = ["Decay_RechitEnergy20GeV", "_RechitEnergy20GeV", "_isTruthMatched"] # LLP + 0 or 1 + kinematic_var = full histogram name
@@ -525,12 +522,13 @@ def LLP_MatchingEfficiency(tree, obj_type):
         LLP_denom = {}
     
         for var in LLP_matching:
+            if (data): continue
             legend = ROOT.TLegend(0.65,0.65,0.75,0.75)
             for i in number:
                 hname_temp = obj_type + i + var
-                LLP_effs[i] = ROOT.TH1F(hname_temp, "LLP " + var +" ; " + var +" efficiency by LLP decayR [cm]; Matching Efficiency", 300, 0, 300 ); 
+                LLP_effs[i] = ROOT.TH1F(hname_temp, "LLP " + var + "; " + var +" efficiency by LLP decayR [cm]; Matching Efficiency", 300, 0, 300 ); 
                 hname_denom = obj_type + i + var + "_" + LLP_denominator[0]
-                LLP_denom[i] = ROOT.TH1F(hname_denom, "LLP " + var +" ; " + var +" efficiency by LLP decayR [cm]; Matching Efficiency", 300, 0, 300 ); 
+                LLP_denom[i] = ROOT.TH1F(hname_denom, "LLP " + var + "; " + var +" efficiency by LLP decayR [cm]; Matching Efficiency", 300, 0, 300 ); 
 
                 selection_region = GetCut(obj_type + i + var, [1,2])
                 canvTemp.cd()
@@ -553,8 +551,8 @@ def LLP_MatchingEfficiency(tree, obj_type):
                         mean_text.SetNDC()
                         mean_text.SetTextFont(42)
                         mean_text.SetTextSize(0.036)
-                        mean_text.DrawLatex( xpos+0.4, ypos, "mean = %.2f" %(LLP_effs[i].GetMean()))
-                        mean_text.DrawLatex( xpos+0.4, ypos-0.05, "#sigma = %.2f" %(LLP_effs[i].GetStdDev()))
+                        mean_text.DrawLatex( xpos+0.5, ypos, "mean = %.2f" %(LLP_effs[i].GetMean()))
+                        mean_text.DrawLatex( xpos+0.5, ypos-0.05, "#sigma = %.2f" %(LLP_effs[i].GetStdDev()))
 
             LegendLabel(legend)
             canv.SaveAs(folder + "/Efficiency_" + obj_type + "_" +var+".png")
