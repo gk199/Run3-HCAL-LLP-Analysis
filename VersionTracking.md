@@ -1,4 +1,4 @@
-# Ntuples by version:
+# MiniTuples by version:
 
 ## V1
 Updates: 
@@ -9,8 +9,8 @@ Updates:
 
 Location of minituples:
 ```
-/eos/user/g/gkopp/LLP_Analysis/output_minituples_v1_MCsignal_500k_2023_07_14/hadd_hists_output.root 
-/eos/user/g/gkopp/LLP_Analysis/output_minituples_v1_LLPskim_500k_2023_07_14/hadd_hists_output.root
+/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.0/minituple_v1_MCsignal_500k_2023_07_14.root
+/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.0/minituple_v1_LLPskim_500k_2023_07_14.root
 ```
 
 ## V2
