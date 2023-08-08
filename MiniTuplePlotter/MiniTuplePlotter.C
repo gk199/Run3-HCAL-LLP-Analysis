@@ -1,4 +1,5 @@
 #include "MiniTuplePlotter.h"
+#include "TString.h"
 
 // -------------------------------------------------------------------------------------------------
 void MiniTuplePlotter(){
@@ -41,22 +42,61 @@ void MiniTuplePlotter(){
 	cout<<endl;
 	
 	vector<string> filetags_example2 = filetags_example1;
-	TCut Cut_DecayTk 	= "LLP0_DecayR < 161.6 && abs(LLP0_DecayR) < 300";
-	TCut Cut_DecayHCAL 	= "LLP0_DecayR > 183.6 && LLP0_DecayR < 295 && abs(LLP0_DecayR) < 376"; // Approx 
+
+	float radius_preECAL[2]  = {0, 161.6};
+    float radius_ECAL[2]     = {161.6, 183.6}; // 22cm of ECAL
+    float radius_depth1[2]   = {183.6, 190.2};
+    float radius_depth2[2]   = {190.2, 214.2};
+    float radius_depth3[2]   = {214.2, 244.8};
+    float radius_depth4[2]   = {244.8, 295};
+    float radius_all[2]      = {0,9999};
+    float radius_inHCAL[2]   = {183.6, 295};
+    float radius_depth12[2]  = {183.6, 214.2};
+    float radius_depth34[2]  = {214.2, 295};
+
+	int z_pos = 425;
+	// depth 1 and 2 have a z position < 388, dpeth 3 and 4 have z position < 425cm
+
+	TString preECAL = Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", radius_preECAL[0], radius_preECAL[1], z_pos);
+	preECAL 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", radius_preECAL[0], radius_preECAL[1], z_pos);
+	TString ECAL 	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", radius_ECAL[0], radius_ECAL[1], z_pos);
+	ECAL 			+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", radius_ECAL[0], radius_ECAL[1], z_pos);
+	TString depth12 = Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", radius_depth12[0], radius_depth12[1], z_pos);
+	depth12 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", radius_depth12[0], radius_depth12[1], z_pos);
+	TString depth34 = Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", radius_depth34[0], radius_depth34[1], z_pos);
+	depth34 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", radius_depth34[0], radius_depth34[1], z_pos);
+	TString depth1	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", radius_depth1[0], radius_depth1[1], z_pos);
+	depth1 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", radius_depth1[0], radius_depth1[1], z_pos);
+	TString depth2	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", radius_depth2[0], radius_depth2[1], z_pos);
+	depth2 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", radius_depth2[0], radius_depth2[1], z_pos);
+	TString depth3	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", radius_depth3[0], radius_depth3[1], z_pos);
+	depth3 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", radius_depth3[0], radius_depth3[1], z_pos);
+	TString depth4	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", radius_depth4[0], radius_depth4[1], z_pos);
+	depth4 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", radius_depth4[0], radius_depth4[1], z_pos);
+	// jet0_isMatchedTo will be 0 or 1 depending which LLP is matched to 
+
+	TCut Cut_Decay_preECAL 	= preECAL.Data();
+	TCut Cut_Decay_ECAL 	= ECAL.Data();;
+	TCut Cut_Decay_depth12 	= depth12.Data();
+	TCut Cut_Decay_depth34 	= depth34.Data();
+	TCut Cut_Decay_depth1 	= depth1.Data();
+	TCut Cut_Decay_depth2 	= depth2.Data();
+	TCut Cut_Decay_depth3 	= depth3.Data();
+	TCut Cut_Decay_depth4 	= depth4.Data();
 
 	class MiniTuplePlotter plotter_example2( filetags_example2, path );
 	plotter_example2.SetPlots({jet0_EnergyFrac_Depth1, jet0_EnergyFrac_Depth2, jet0_EnergyFrac_Depth3}); 
 	plotter_example2.AddPlot( jet0_EnergyFrac_Depth4 );
-	plotter_example2.SetTreeNames( {"NoSel", "NoSel"} ); 					// Multiple Tree Names -- number must match number of input files (1:1)
-	plotter_example2.SetCuts("jet0_Pt > 40 && abs(jet0_Eta) < 1.5"); 		// Apply cuts to all events
-	plotter_example2.SetComparisonCuts({Cut_DecayTk, Cut_DecayHCAL}); 		// Apply cuts to overlay
-	plotter_example2.ApplySelectiveCuts("5k", "jet0_E > 100");				// Apply this only to filetag names that include the string "data"
-	plotter_example2.SetOutputFileTag("MC_LLPskim"); 						// Your own special name :)
-	plotter_example2.SetLegendManual( 0.35, 0.6, 0.9, 0.9 );				// Manual Legend location
-	plotter_example2.colors = {kOrange, kOrange, kGreen+2, kGreen+2};		// Your own colors (default kBlack + rainbow)
-	plotter_example2.linestyle = {kDotted, kDashed, kDotted, kDashed}; 		// Your own linestyle (default kSolid)
-	plotter_example2.NBins = 30; 									 		// Default = 100
-	plotter_example2.Plot("ratio");									 		// Ratio panel
+	plotter_example2.SetTreeNames( {"NoSel", "NoSel"} ); 						// Multiple Tree Names -- number must match number of input files (1:1)
+	plotter_example2.SetCuts("jet0_Pt > 40 && abs(jet0_Eta) < 1.5"); 			// Apply cuts to all events
+	plotter_example2.SetComparisonCuts({Cut_Decay_preECAL, Cut_Decay_depth12}); // Apply cuts to overlay
+	plotter_example2.ApplySelectiveCuts("MC", "jet0_isMatchedTo == 1 && jet0_isMatchedTo == 0");							// Apply this only to filetag names that include the string "data"
+	plotter_example2.SetOutputFileTag("MC_LLPskim"); 							// Your own special name :)
+	plotter_example2.SetLegendManual( 0.35, 0.6, 0.9, 0.9 );					// Manual Legend location
+	plotter_example2.colors = {kOrange, kOrange, kGreen+2, kGreen+2};			// Your own colors (default kBlack + rainbow)
+	plotter_example2.linestyle = {kDotted, kDashed, kDotted, kDashed}; 			// Your own linestyle (default kSolid)
+	plotter_example2.NBins = 30; 									 			// Default = 100
+	plotter_example2.Plot("ratio");									 			// Ratio panel
 
 	// ----- Other Current Featues ----- //
 
