@@ -153,6 +153,10 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 			tree_output_vars_float[Form("jet%d_isMatchedTo",i)] = JetIsMatchedTo( jet_Eta->at(i), jet_Phi->at(i) )[0];
 			tree_output_vars_float[Form("jet%d_isMatchedWithDR",i)] = JetIsMatchedTo( jet_Eta->at(i), jet_Phi->at(i) )[1];
 		}
+		else {
+			tree_output_vars_float[Form("jet%d_isMatchedTo",i)] = -1;
+			tree_output_vars_float[Form("jet%d_isMatchedWithDR",i)] = -1;
+		}
 
 		vector<float> rechitJet = GetMatchedHcalRechits_Jet(i, 0.4);
 		vector<float> energy = GetEnergyProfile_Jet(i, 0.4);
