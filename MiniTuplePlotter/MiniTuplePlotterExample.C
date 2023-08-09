@@ -15,20 +15,22 @@ void MiniTuplePlotterExample(){
 	cout<<endl;
 
 	class MiniTuplePlotter plotter_example1( filetags_example1, path );
-	plotter_example1.SetPlots({jet0_energy, jet0_pt, jet0_Eta, jet0_Phi}); // These "P_" variables are PlotParams structs defined in PlotParams.h
+
 	plotter_example1.SetTreeName( "NoSel" );	// TreeName
+	plotter_example1.SetPlots({P_jet0_energy, P_jet0_pt, P_jet0_Eta, P_jet0_Phi}); // These "P_" variables are PlotParams structs defined in PlotParams.h
 	plotter_example1.debug  		  = true; 	// Default = false
-	plotter_example1.plot_norm 		  = false; 	// Default = true
+	plotter_example1.plot_norm 		  = true; 	// Default = true
 	plotter_example1.plot_log  		  = false; 	// Default = true
 	plotter_example1.plot_log_ratio   = false; 	// Default = false. Make bottom panel log scale
 	plotter_example1.plot_log_x       = false; 	// Default = false. Plot log on the x axis
 	plotter_example1.stamp_counts 	  = true;	// Default = false. Print event count and integral in legend
 	plotter_example1.plot_grid 	  	  = true;	// Default = true. Draw grid lines on plot
-	plotter_example1.run_fit   		  = false;	// Default = false. Fit core & tail
+	plotter_example1.run_fit   		  = true;	// Default = false. Fit core & tail
+	plotter_example1.fit_type         = "exp_decay";
 	plotter_example1.plot_cdf 		  = false;	// Default = false. Cumulative distribution function 
 	plotter_example1.plot_reverse_cdf = false;	// Default = false. Cumulative distribution function 
 	plotter_example1.use_weight       = false;	// Default = true, which uses weight branch when drawing non-normalized hists
-	plotter_example1.Plot("ratio");				// This is what does stuff -- arguments: None/"", "ratio", "sig"/"ssqrtb"
+	plotter_example1.Plot();				// This is what does stuff -- arguments: None/"", "ratio", "sig"/"ssqrtb"
 
 	// ----- Example 2 -----//
 	// - Adding Plots
@@ -41,12 +43,13 @@ void MiniTuplePlotterExample(){
 	cout<<endl;
 	
 	vector<string> filetags_example2 = filetags_example1;
-	TCut Cut_DecayTk 	= "LLP0_DecayR < 161.6 && abs(LLP0_DecayR) < 300";
-	TCut Cut_DecayHCAL 	= "LLP0_DecayR > 183.6 && LLP0_DecayR < 295 && abs(LLP0_DecayR) < 376"; // Approx 
+	TCut Cut_DecayTk 	= "LLP0_DecayR < 161.6 && abs(LLP0_DecayZ) < 300";
+	TCut Cut_DecayHCAL 	= "LLP0_DecayR > 183.6 && LLP0_DecayR < 295 && abs(LLP0_DecayZ) < 376"; // Approx 
 
 	class MiniTuplePlotter plotter_example2( filetags_example2, path );
-	plotter_example2.SetPlots({jet0_energyFrac_depth1, jet0_energyFrac_depth2, jet0_energyFrac_depth3}); 
-	plotter_example2.AddPlot( jet0_energyFrac_depth4 );
+
+	plotter_example2.SetPlots({ P_jet0_energyFrac_depth1, P_jet0_energyFrac_depth2, P_jet0_energyFrac_depth3}); 
+	plotter_example2.AddPlot( P_jet0_energyFrac_depth4 );
 	plotter_example2.SetTreeNames( {"NoSel", "NoSel"} ); 					// Multiple Tree Names -- number must match number of input files (1:1)
 	plotter_example2.SetCuts("jet0_pt > 40 && abs(jet0_Eta) < 1.5"); 		// Apply cuts to all events
 	plotter_example2.SetComparisonCuts({Cut_DecayTk, Cut_DecayHCAL}); 		// Apply cuts to overlay
