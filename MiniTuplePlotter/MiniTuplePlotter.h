@@ -295,9 +295,12 @@ public :
 	void ApplySelectiveCuts( string match_filetag_or_treename, TCut cut ){
 		if( debug) cout<<"MiniTuplePlotter::ApplySelectiveCuts()"<<endl;
 		// filetag_or_treename can be either -- there is string matching
-
+		
+		if( debug) std::cout << "ApplySelectiveCuts, with filetag = " << match_filetag_or_treename << std::endl;
 		for( auto filetag_treename: filetags_treenames ){
+			if( debug) std::cout << "ApplySelectiveCuts, checking filetag" << std::endl;
 			if( filetag_treename.find( match_filetag_or_treename ) != string::npos ){
+				if( debug) std::cout << "ApplySelectiveCuts, found filetag = " << match_filetag_or_treename << std::endl;
 				selective_cuts[filetag_treename] = selective_cuts[filetag_treename] && cut;
 			}
 		}	
