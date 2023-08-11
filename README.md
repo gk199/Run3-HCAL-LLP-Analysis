@@ -57,10 +57,10 @@ The histograms that are read in are listed in `DisplacedHcalJetAnalyzer.h`.
 ## Plotting
 Plotting from the minituples tree:
 ```
-python Plotter.py <path to ntuple> <data / MC> <region for LLP decay requirement>
+python Plotter.py <path to ntuple> <data / MC>
 
-python Plotter.py /eos/user/g/gkopp/LLP_Analysis/output_minituples_2023_07_04_InputFiles_2023_06_29_MCsignal_100k/hadd_hists_output.root MC
-python Plotter.py /eos/user/g/gkopp/LLP_Analysis/output_minituples_2023_07_04_InputFiles_2023_06_29_Run2023C-EXOLLPJetHCAL-PromptReco-v4_500k/hadd_hists_output.root data
+python Plotter.py /eos/user/g/gkopp/LLP_Analysis/MiniTuples/v <version> /minituple_v <version> _LLPskim_500k_2023_07_14.root data
+python Plotter.py /eos/user/g/gkopp/LLP_Analysis/MiniTuples/v <version> /minituple_v <version> _MCsignal_500k_2023_08_09.root MC
 
 ./Plot_all.sh
 ```
