@@ -26,6 +26,7 @@ public :
 	// Cuts
 	TCut cuts_all;
 	vector<TCut> cuts_compare = {""};
+	map<string,TCut> selective_cuts_preprocessed;
 	map<string,TCut> selective_cuts;
 
 	// Default Plot Options 
@@ -202,9 +203,13 @@ public :
 		for( int i=0; i<filetags.size(); i++ ){
 			if( GetTree(filetags[i], treenames[i]) ){
 				trees_ok = true;
-				filetags_treenames.push_back( GetFiletagTreename( filetags[i], treenames[i]) );
+				string filetag_treename = GetFiletagTreename( filetags[i], treenames[i]);
+				filetags_treenames.push_back( filetag_treename );
+				selective_cuts[filetag_treename] = "";
 			}
 		}
+
+		ApplySelectiveCuts();
 
 		if( !trees_ok ) cout<<"ERROR: Input files or trees do not exist. Check input file paths & parameters.."<<endl;
 	}
@@ -292,16 +297,27 @@ public :
 	}	
 
 	// -------------------------------------------------------------------------------------
-	void ApplySelectiveCuts( string match_filetag_or_treename, TCut cut ){
+	void SetSelectiveCuts( string match_filetag_or_treename, TCut cut ){
+		if( debug) cout<<"MiniTuplePlotter::SetSelectiveCut()"<<endl;
+		// match_filetag_or_treename can be either filetag or treename -- there is string matching
+
+		if( selective_cuts_preprocessed.count(match_filetag_or_treename) == 0 )
+			selective_cuts_preprocessed[match_filetag_or_treename] = cut;
+		else
+			selective_cuts_preprocessed[match_filetag_or_treename] = selective_cuts_preprocessed[match_filetag_or_treename] && cut;
+
+	}
+
+	// -------------------------------------------------------------------------------------
+	void ApplySelectiveCuts(){
 		if( debug) cout<<"MiniTuplePlotter::ApplySelectiveCuts()"<<endl;
-		// filetag_or_treename can be either -- there is string matching
-		
-		if( debug) std::cout << "ApplySelectiveCuts, with filetag = " << match_filetag_or_treename << std::endl;
-		for( auto filetag_treename: filetags_treenames ){
-			if( debug) std::cout << "ApplySelectiveCuts, checking filetag" << std::endl;
-			if( filetag_treename.find( match_filetag_or_treename ) != string::npos ){
-				if( debug) std::cout << "ApplySelectiveCuts, found filetag = " << match_filetag_or_treename << std::endl;
-				selective_cuts[filetag_treename] = selective_cuts[filetag_treename] && cut;
+
+		for ( const auto &[match_filetag_or_treename, cut]: selective_cuts_preprocessed ) {
+			for( auto filetag_treename: filetags_treenames ){
+
+				if( filetag_treename.find( match_filetag_or_treename ) != string::npos )
+					selective_cuts[filetag_treename] = selective_cuts[filetag_treename] && cut;
+				
 			}
 		}	
 	}

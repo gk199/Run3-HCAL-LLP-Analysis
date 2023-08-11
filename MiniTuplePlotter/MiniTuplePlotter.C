@@ -16,9 +16,9 @@ void MiniTuplePlotter(){
 	cout<<endl;
 
 	class MiniTuplePlotter plotter_example1( filetags_example1, path );
-	plotter_example1.SetPlots({jet0_E, jet0_Pt, jet0_Eta, jet0_Phi}); // These "P_" variables are PlotParams structs defined in PlotParams.h
+	plotter_example1.SetPlots({P_jet0_E, P_jet0_Pt, P_jet0_Eta, P_jet0_Phi}); // These "P_" variables are PlotParams structs defined in PlotParams.h
 	plotter_example1.SetTreeName( "NoSel" );	// TreeName
-	plotter_example1.debug  		  = true; 	// Default = false
+	plotter_example1.debug  		  = false; 	// Default = false
 	plotter_example1.plot_norm 		  = false; 	// Default = true
 	plotter_example1.plot_log  		  = false; 	// Default = true
 	plotter_example1.plot_log_ratio   = false; 	// Default = false. Make bottom panel log scale
@@ -57,22 +57,22 @@ void MiniTuplePlotter(){
 	int z_pos = 425;
 	// depth 1 and 2 have a z position < 388, dpeth 3 and 4 have z position < 425cm
 
-	TString preECAL = Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", radius_preECAL[0], radius_preECAL[1], z_pos);
-	preECAL 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", radius_preECAL[0], radius_preECAL[1], z_pos);
-	TString ECAL 	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", radius_ECAL[0], radius_ECAL[1], z_pos);
-	ECAL 			+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", radius_ECAL[0], radius_ECAL[1], z_pos);
-	TString depth12 = Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", radius_depth12[0], radius_depth12[1], z_pos);
-	depth12 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", radius_depth12[0], radius_depth12[1], z_pos);
-	TString depth34 = Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", radius_depth34[0], radius_depth34[1], z_pos);
-	depth34 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", radius_depth34[0], radius_depth34[1], z_pos);
-	TString depth1	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", radius_depth1[0], radius_depth1[1], z_pos);
-	depth1 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", radius_depth1[0], radius_depth1[1], z_pos);
-	TString depth2	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", radius_depth2[0], radius_depth2[1], z_pos);
-	depth2 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", radius_depth2[0], radius_depth2[1], z_pos);
-	TString depth3	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", radius_depth3[0], radius_depth3[1], z_pos);
-	depth3 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", radius_depth3[0], radius_depth3[1], z_pos);
-	TString depth4	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", radius_depth4[0], radius_depth4[1], z_pos);
-	depth4 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", radius_depth4[0], radius_depth4[1], z_pos);
+	TString preECAL = Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", 		radius_preECAL[0], radius_preECAL[1], z_pos);
+	preECAL 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", 	radius_preECAL[0], radius_preECAL[1], z_pos);
+	TString ECAL 	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", 		radius_ECAL[0], radius_ECAL[1], z_pos);
+	ECAL 			+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", 	radius_ECAL[0], radius_ECAL[1], z_pos);
+	TString depth12 = Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", 		radius_depth12[0], radius_depth12[1], z_pos);
+	depth12 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", 	radius_depth12[0], radius_depth12[1], z_pos);
+	TString depth34 = Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", 		radius_depth34[0], radius_depth34[1], z_pos);
+	depth34 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", 	radius_depth34[0], radius_depth34[1], z_pos);
+	TString depth1	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", 		radius_depth1[0], radius_depth1[1], z_pos);
+	depth1 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", 		radius_depth1[0], radius_depth1[1], z_pos);
+	TString depth2	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", 		radius_depth2[0], radius_depth2[1], z_pos);
+	depth2 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", 		radius_depth2[0], radius_depth2[1], z_pos);
+	TString depth3	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", 		radius_depth3[0], radius_depth3[1], z_pos);
+	depth3 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", 		radius_depth3[0], radius_depth3[1], z_pos);
+	TString depth4	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", 		radius_depth4[0], radius_depth4[1], z_pos);
+	depth4 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", 		radius_depth4[0], radius_depth4[1], z_pos);
 	// jet0_isMatchedTo will be 0 or 1 depending which LLP is matched to 
 
 	TCut Cut_Decay_preECAL 	= preECAL.Data();
@@ -85,12 +85,13 @@ void MiniTuplePlotter(){
 	TCut Cut_Decay_depth4 	= depth4.Data();
 
 	class MiniTuplePlotter plotter_example2( filetags_example2, path );
-	plotter_example2.SetPlots({jet0_EnergyFrac_Depth1, jet0_EnergyFrac_Depth2, jet0_EnergyFrac_Depth3}); 
-	plotter_example2.AddPlot( jet0_EnergyFrac_Depth4 );
+	plotter_example2.debug = false; 
+	plotter_example2.SetPlots({P_jet0_EnergyFrac_Depth1, P_jet0_EnergyFrac_Depth2, P_jet0_EnergyFrac_Depth3}); 
+	plotter_example2.AddPlot( P_jet0_EnergyFrac_Depth4 );
 	plotter_example2.SetTreeNames( {"NoSel", "NoSel"} ); 						// Multiple Tree Names -- number must match number of input files (1:1)
 	plotter_example2.SetCuts("jet0_Pt > 40 && abs(jet0_Eta) < 1.5"); 			// Apply cuts to all events
 	plotter_example2.SetComparisonCuts({Cut_Decay_preECAL, Cut_Decay_depth12}); // Apply cuts to overlay
-	plotter_example2.ApplySelectiveCuts("MC", "jet0_isMatchedTo == 1 && jet0_isMatchedTo == 0");							// Apply this only to filetag names that include the string "data"
+	plotter_example2.SetSelectiveCuts("MC", "");			// Apply this only to filetag names that include the string "data"
 	plotter_example2.SetOutputFileTag("MC_LLPskim"); 							// Your own special name :)
 	plotter_example2.SetLegendManual( 0.35, 0.6, 0.9, 0.9 );					// Manual Legend location
 	plotter_example2.colors = {kOrange, kOrange, kGreen+2, kGreen+2};			// Your own colors (default kBlack + rainbow)
