@@ -174,6 +174,12 @@ public :
    vector<unsigned int> *pho_SeedRechitIndex;
    vector<vector<unsigned int> > *pho_EcalRechitIDs;
    vector<vector<unsigned int> > *pho_EcalRechitIndices;
+   Int_t           n_l1jet;
+   vector<float>   *l1jet_Pt;
+   vector<float>   *l1jet_Eta;
+   vector<float>   *l1jet_Phi;
+   vector<float>   *l1jet_E;
+   vector<float>   *l1jet_hwQual;
    Int_t           n_jet;
    vector<float>   *jet_Pt;
    vector<float>   *jet_Eta;
@@ -462,6 +468,12 @@ public :
    TBranch        *b_pho_SeedRechitIndex;   //!
    TBranch        *b_pho_EcalRechitIDs;   //!
    TBranch        *b_pho_EcalRechitIndices;   //!
+   TBranch        *b_n_l1jet;
+   TBranch        *b_l1jet_Pt;
+   TBranch        *b_l1jet_Eta;
+   TBranch        *b_l1jet_Phi;
+   TBranch        *b_l1jet_E;
+   TBranch        *b_l1jet_hwQual;
    TBranch        *b_n_jet;   //!
    TBranch        *b_jet_Pt;   //!
    TBranch        *b_jet_Eta;   //!
@@ -838,6 +850,11 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    pho_SeedRechitIndex = 0;
    pho_EcalRechitIDs = 0;
    pho_EcalRechitIndices = 0;
+   l1jet_Pt = 0;
+   l1jet_Eta = 0;
+   l1jet_Phi = 0;
+   l1jet_E = 0;
+   l1jet_hwQual = 0;
    jet_Pt = 0;
    jet_Eta = 0;
    jet_Phi = 0;
@@ -1119,6 +1136,12 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("pho_SeedRechitIndex", &pho_SeedRechitIndex, &b_pho_SeedRechitIndex);
    fChain->SetBranchAddress("pho_EcalRechitIDs", &pho_EcalRechitIDs, &b_pho_EcalRechitIDs);
    fChain->SetBranchAddress("pho_EcalRechitIndices", &pho_EcalRechitIndices, &b_pho_EcalRechitIndices);
+   fChain->SetBranchAddress("n_l1jet", &n_l1jet, &b_n_l1jet);
+   fChain->SetBranchAddress("l1jet_Pt", &l1jet_Pt, &b_l1jet_Pt);
+   fChain->SetBranchAddress("l1jet_Eta", &l1jet_Eta, &b_l1jet_Eta);
+   fChain->SetBranchAddress("l1jet_Phi", &l1jet_Phi, &b_l1jet_Phi);
+   fChain->SetBranchAddress("l1jet_E", &l1jet_E, &b_l1jet_E);
+   fChain->SetBranchAddress("l1jet_hwQual", &l1jet_hwQual, &b_l1jet_hwQual);
    fChain->SetBranchAddress("n_jet", &n_jet, &b_n_jet);
    fChain->SetBranchAddress("jet_Pt", &jet_Pt, &b_jet_Pt);
    fChain->SetBranchAddress("jet_Eta", &jet_Eta, &b_jet_Eta);

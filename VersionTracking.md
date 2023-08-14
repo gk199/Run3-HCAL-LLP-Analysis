@@ -23,4 +23,6 @@ Location of minituples:
 /eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.1/minituple_v1.1_LLPskim_500k_2023_08_09.root
 ```
 
+* Add l1jet quantities (n, Pt, Eta, Phi, E, hwQual)
+
 ## V2

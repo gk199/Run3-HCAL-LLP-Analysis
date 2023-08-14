@@ -35,6 +35,12 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 	};
 
 	for( int i=0; i<3; i++ ) {
+		myvars_float.push_back( Form("l1jet%d_Pt", i) );
+		myvars_float.push_back( Form("l1jet%d_E", i) );
+		myvars_float.push_back( Form("l1jet%d_Eta", i) );
+		myvars_float.push_back( Form("l1jet%d_Phi", i) );
+		myvars_float.push_back( Form("l1jet%d_hwQual", i) );
+		
 		myvars_float.push_back( Form("jet%d_Pt", i) );
 		myvars_float.push_back( Form("jet%d_Eta", i) );
 		myvars_float.push_back( Form("jet%d_Phi", i) );
@@ -138,6 +144,15 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		// auxTDC is already unmasked in ntupler (v1) to give TDC in SOI
 		tree_output_vars_int["HBHE_Rechit_auxTDC"] = hbheRechit_auxTDC->at(i);
 	}
+
+	int max_l1jets = std::min(3, n_l1jet);
+	for (int i = 0; i < max_l1jets; i++) {
+		tree_output_vars_float[Form("l1jet%d_Pt", i)]		= l1jet_Pt->at(i);
+		tree_output_vars_float[Form("l1jet%d_E", i)]		= l1jet_E->at(i);
+		tree_output_vars_float[Form("l1jet%d_Eta", i)]		= l1jet_Eta->at(i);
+		tree_output_vars_float[Form("l1jet%d_Phi", i)]		= l1jet_Phi->at(i);
+		tree_output_vars_float[Form("l1jet%d_hwQual", i)]	= l1jet_hwQual->at(i);
+	}		
 
 	// jets are already sorted in jet Pt (not jet E!). Loop over first three jets, and save quantities in the ntuples
 	int max_jets = std::min(3, n_jet);
