@@ -31,7 +31,7 @@ void MiniTuplePlotterExample(){
 	plotter_example1.plot_cdf 		  = false;	// Default = false. Cumulative distribution function 
 	plotter_example1.plot_reverse_cdf = false;	// Default = false. Cumulative distribution function 
 	plotter_example1.use_weight       = false;	// Default = true, which uses weight branch when drawing non-normalized hists
-	plotter_example1.Plot("ratio");				// This is what does stuff -- arguments: None/"", "ratio", "sig"/"ssqrtb"
+	plotter_example1.Plot();				// This is what does stuff -- arguments: None/"", "ratio", "sig"/"ssqrtb"
 
 	// ----- Example 2 -----//
 	// - Adding Plots
