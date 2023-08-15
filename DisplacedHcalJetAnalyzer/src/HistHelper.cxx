@@ -69,38 +69,38 @@ void DisplacedHcalJetAnalyzer::BookHists(){
 		// Reco Objects
 		for( auto is: istring ){
 			// Reco Photons
-			h[cat+"pho"+is+"_pt"]  = new TH1F( Form( "%spho%s_pt",  cat.c_str(), is.c_str() ), "Photon p_{t}; pt [GeV]; Events ", NBins, 0, 1000);
-			h[cat+"pho"+is+"_eta"] = new TH1F( Form( "%spho%s_eta", cat.c_str(), is.c_str() ), "Photon #eta; eta; Events", NBins, -3.2, 3.2 );
-			h[cat+"pho"+is+"_phi"] = new TH1F( Form( "%spho%s_phi", cat.c_str(), is.c_str() ), "Photon #phi; phi; Events", NBins, -3.2, 3.2 );
-			h[cat+"pho"+is+"_energy"] = new TH1F( Form( "%spho%s_energy", cat.c_str(), is.c_str() ), "Photon energy; energy [GeV]; Events", NBins, 0, 1000 );
+			h[cat+"pho"+is+"_Pt"]  = new TH1F( Form( "%spho%s_Pt",  cat.c_str(), is.c_str() ), "Photon p_{t}; pt [GeV]; Events ", NBins, 0, 1000);
+			h[cat+"pho"+is+"_Eta"] = new TH1F( Form( "%spho%s_Eta", cat.c_str(), is.c_str() ), "Photon #eta; eta; Events", NBins, -3.2, 3.2 );
+			h[cat+"pho"+is+"_Phi"] = new TH1F( Form( "%spho%s_Phi", cat.c_str(), is.c_str() ), "Photon #phi; phi; Events", NBins, -3.2, 3.2 );
+			h[cat+"pho"+is+"_E"] = new TH1F( Form( "%spho%s_E", cat.c_str(), is.c_str() ), "Photon energy; energy [GeV]; Events", NBins, 0, 1000 );
 			// Reco Electrons
-			h[cat+"ele"+is+"_pt"]  = new TH1F( Form( "%sele%s_pt",  cat.c_str(), is.c_str() ), "Electron p_{t}; pt [GeV]; Events ", NBins, 0, 1000);
-			h[cat+"ele"+is+"_eta"] = new TH1F( Form( "%sele%s_eta", cat.c_str(), is.c_str() ), "Electron #eta; eta; Events", NBins, -3.2, 3.2 );
-			h[cat+"ele"+is+"_phi"] = new TH1F( Form( "%sele%s_phi", cat.c_str(), is.c_str() ), "Electron #phi; phi; Events", NBins, -3.2, 3.2 );
-			h[cat+"ele"+is+"_energy"] = new TH1F( Form( "%sele%s_energy", cat.c_str(), is.c_str() ), "Electron energy; energy [GeV]; Events", NBins, 0, 1000 );
+			h[cat+"ele"+is+"_Pt"]  = new TH1F( Form( "%sele%s_Pt",  cat.c_str(), is.c_str() ), "Electron p_{t}; pt [GeV]; Events ", NBins, 0, 1000);
+			h[cat+"ele"+is+"_Eta"] = new TH1F( Form( "%sele%s_Eta", cat.c_str(), is.c_str() ), "Electron #eta; eta; Events", NBins, -3.2, 3.2 );
+			h[cat+"ele"+is+"_Phi"] = new TH1F( Form( "%sele%s_Phi", cat.c_str(), is.c_str() ), "Electron #phi; phi; Events", NBins, -3.2, 3.2 );
+			h[cat+"ele"+is+"_E"] = new TH1F( Form( "%sele%s_E", cat.c_str(), is.c_str() ), "Electron energy; energy [GeV]; Events", NBins, 0, 1000 );
 			// Reco Muons
-			h[cat+"muon"+is+"_pt"]  = new TH1F( Form( "%smuon%s_pt",  cat.c_str(), is.c_str() ), "Muon p_{t}; pt [GeV]; Events ", NBins, 0, 1000);
-			h[cat+"muon"+is+"_eta"] = new TH1F( Form( "%smuon%s_eta", cat.c_str(), is.c_str() ), "Muon #eta; eta; Events", NBins, -3.2, 3.2 );
-			h[cat+"muon"+is+"_phi"] = new TH1F( Form( "%smuon%s_phi", cat.c_str(), is.c_str() ), "Muon #phi; phi; Events", NBins, -3.2, 3.2 );
-			h[cat+"muon"+is+"_energy"] = new TH1F( Form( "%smuon%s_energy", cat.c_str(), is.c_str() ), "Muon energy; energy [GeV]; Events", NBins, 0, 1000 );
+			h[cat+"muon"+is+"_Pt"]  = new TH1F( Form( "%smuon%s_Pt",  cat.c_str(), is.c_str() ), "Muon p_{t}; pt [GeV]; Events ", NBins, 0, 1000);
+			h[cat+"muon"+is+"_Eta"] = new TH1F( Form( "%smuon%s_Eta", cat.c_str(), is.c_str() ), "Muon #eta; eta; Events", NBins, -3.2, 3.2 );
+			h[cat+"muon"+is+"_Phi"] = new TH1F( Form( "%smuon%s_Phi", cat.c_str(), is.c_str() ), "Muon #phi; phi; Events", NBins, -3.2, 3.2 );
+			h[cat+"muon"+is+"_E"] = new TH1F( Form( "%smuon%s_E", cat.c_str(), is.c_str() ), "Muon energy; energy [GeV]; Events", NBins, 0, 1000 );
 			// Reco Jets
-			h[cat+"jet"+is+"_pt"]  = new TH1F( Form( "%sjet%s_pt",  cat.c_str(), is.c_str() ), "Jet p_{t}; pt [GeV]; Events ", NBins, 0, 1000);
-			h[cat+"jet"+is+"_eta"] = new TH1F( Form( "%sjet%s_eta", cat.c_str(), is.c_str() ), "Jet #eta; eta; Events", NBins, -3.2, 3.2 );
-			h[cat+"jet"+is+"_phi"] = new TH1F( Form( "%sjet%s_phi", cat.c_str(), is.c_str() ), "Jet #phi; phi; Events", NBins, -3.2, 3.2 );
-			h[cat+"jet"+is+"_energy"] = new TH1F( Form( "%sjet%s_energy", cat.c_str(), is.c_str() ), "Jet energy; energy [GeV]; Events", NBins, 0, 1000 );
-			h[cat+"jet"+is+"_energyProfile"] = new TH1F(Form("%sjet%s_energyProfile", cat.c_str(), is.c_str() ), "Energy Profile of HB Rechits Associated with Jet; HB Depth; Fraction of Energy", 6,0,6);
-			h[cat+"jet"+is+"_rechitN"] = new TH1F(Form("%sjet%s_rechitN", cat.c_str(), is.c_str() ), "Number of HB Rechits Associated with Jet (#Delta R<0.4); Number of HB Rechits; Events", NBins,0,100);
-			h[cat+"jet"+is+"_etaSpread"] = new TH1F(Form("%sjet%s_etaSpread", cat.c_str(), is.c_str() ), "#eta Spread of HB Rechits Associated with Jet; #eta Spread; Events", NBins,0,0.5);
-			h[cat+"jet"+is+"_etaSpread_energy"] = new TH1F(Form("%sjet%s_etaSpread_energy", cat.c_str(), is.c_str() ), "Energy Weighted #eta Spread of HB Rechits Associated with Jet; Energy weighted #eta Spread; Events", NBins,0,0.5);
-			h[cat+"jet"+is+"_phiSpread"] = new TH1F(Form("%sjet%s_phiSpread", cat.c_str(), is.c_str() ), "#phi Spread of HB Rechits Associated with Jet; #phi Spread; Events", NBins,0,0.5);
-			h[cat+"jet"+is+"_phiSpread_energy"] = new TH1F(Form("%sjet%s_phiSpread_energy", cat.c_str(), is.c_str() ), "Energy Weighted #phi Spread of HB Rechits Associated with Jet; Energy weighted #phi Spread; Events", NBins,0,0.5);
-			h2[cat+"jet"+is+"_spreadEtaPhi"] = new TH2F(Form("%sjet%s_spreadEtaPhi", cat.c_str(), is.c_str() ), "#eta #phi Spread of HB Rechits Associated with Jet (#Delta R<0.4); #eta Spread; #phi Spread", NBins,0,0.5,NBins,0,0.5);
-			h2[cat+"jet"+is+"_spreadEtaPhi_energy"] = new TH2F(Form("%sjet%s_spreadEtaPhi_energy", cat.c_str(), is.c_str() ), "Energy Weighted #eta #phi Spread of HB Rechits Associated with Jet (#Delta R<0.4); #eta Spread; #phi Spread", NBins,0,0.5,NBins,0,0.5);
+			h[cat+"jet"+is+"_Pt"]  = new TH1F( Form( "%sjet%s_Pt",  cat.c_str(), is.c_str() ), "Jet p_{t}; pt [GeV]; Events ", NBins, 0, 1000);
+			h[cat+"jet"+is+"_Eta"] = new TH1F( Form( "%sjet%s_Eta", cat.c_str(), is.c_str() ), "Jet #eta; eta; Events", NBins, -3.2, 3.2 );
+			h[cat+"jet"+is+"_Phi"] = new TH1F( Form( "%sjet%s_Phi", cat.c_str(), is.c_str() ), "Jet #phi; phi; Events", NBins, -3.2, 3.2 );
+			h[cat+"jet"+is+"_E"] = new TH1F( Form( "%sjet%s_E", cat.c_str(), is.c_str() ), "Jet energy; energy [GeV]; Events", NBins, 0, 1000 );
+			h[cat+"jet"+is+"_EnergyProfile"] = new TH1F(Form("%sjet%s_EnergyProfile", cat.c_str(), is.c_str() ), "Energy Profile of HB Rechits Associated with Jet; HB Depth; Fraction of Energy", 6,0,6);
+			h[cat+"jet"+is+"_RechitN"] = new TH1F(Form("%sjet%s_RechitN", cat.c_str(), is.c_str() ), "Number of HB Rechits Associated with Jet (#Delta R<0.4); Number of HB Rechits; Events", NBins,0,100);
+			h[cat+"jet"+is+"_EtaSpread"] = new TH1F(Form("%sjet%s_EtaSpread", cat.c_str(), is.c_str() ), "#eta Spread of HB Rechits Associated with Jet; #eta Spread; Events", NBins,0,0.5);
+			h[cat+"jet"+is+"_EtaSpread_energy"] = new TH1F(Form("%sjet%s_EtaSpread_energy", cat.c_str(), is.c_str() ), "Energy Weighted #eta Spread of HB Rechits Associated with Jet; Energy weighted #eta Spread; Events", NBins,0,0.5);
+			h[cat+"jet"+is+"_PhiSpread"] = new TH1F(Form("%sjet%s_PhiSpread", cat.c_str(), is.c_str() ), "#phi Spread of HB Rechits Associated with Jet; #phi Spread; Events", NBins,0,0.5);
+			h[cat+"jet"+is+"_PhiSpread_energy"] = new TH1F(Form("%sjet%s_PhiSpread_energy", cat.c_str(), is.c_str() ), "Energy Weighted #phi Spread of HB Rechits Associated with Jet; Energy weighted #phi Spread; Events", NBins,0,0.5);
+			h2[cat+"jet"+is+"_SpreadEtaPhi"] = new TH2F(Form("%sjet%s_SpreadEtaPhi", cat.c_str(), is.c_str() ), "#eta #phi Spread of HB Rechits Associated with Jet (#Delta R<0.4); #eta Spread; #phi Spread", NBins,0,0.5,NBins,0,0.5);
+			h2[cat+"jet"+is+"_SpreadEtaPhi_energy"] = new TH2F(Form("%sjet%s_SpreadEtaPhi_energy", cat.c_str(), is.c_str() ), "Energy Weighted #eta #phi Spread of HB Rechits Associated with Jet (#Delta R<0.4); #eta Spread; #phi Spread", NBins,0,0.5,NBins,0,0.5);
 		}
 		// HCAL rechits - not leading / subleading object as others are
-		h[cat+"hbhe_eta"] = new TH1F( Form( "%shbhe_eta", cat.c_str()), "HBHE #eta; eta; Events", NBins, -3.2, 3.2 );
-		h[cat+"hbhe_phi"] = new TH1F( Form( "%shbhe_phi", cat.c_str()), "HBHE #phi; phi; Events", NBins, -3.2, 3.2 );
-		h[cat+"hbhe_energy"] = new TH1F( Form( "%shbhe_energy", cat.c_str()), "HBHE energy; energy [GeV]; Events", NBins, 0, 200 );
+		h[cat+"hbhe_Eta"] = new TH1F( Form( "%shbhe_Eta", cat.c_str()), "HBHE #eta; eta; Events", NBins, -3.2, 3.2 );
+		h[cat+"hbhe_Phi"] = new TH1F( Form( "%shbhe_Phi", cat.c_str()), "HBHE #phi; phi; Events", NBins, -3.2, 3.2 );
+		h[cat+"hbhe_E"] = new TH1F( Form( "%shbhe_E", cat.c_str()), "HBHE energy; energy [GeV]; Events", NBins, 0, 200 );
 		h[cat+"hbhe_depth"] = new TH1F( Form( "%shbhe_depth", cat.c_str()), "HBHE depth; depth; Events", 8, 0, 8);
 		h[cat+"hbhe_auxTDC"] = new TH1F( Form( "%shbhe_auxTDC", cat.c_str()), "HBHE aux TDC; aux TDC; Events", NBins, 0, 2000000000 );
 	
@@ -171,22 +171,23 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 		for (int i=0; i < n_jet; i++) {
 			if (i > 2) continue;
 			string is = to_string(i);
-			h[cat+"jet"+is+"_pt"]->Fill(jet_Pt->at(i) );
-			h[cat+"jet"+is+"_eta"]->Fill(jet_Eta->at(i) );
-			h[cat+"jet"+is+"_phi"]->Fill(jet_Phi->at(i) );
-			h[cat+"jet"+is+"_energy"]->Fill(jet_E->at(i) );
+			h[cat+"jet"+is+"_Pt"]->Fill(jet_Pt->at(i) );
+			h[cat+"jet"+is+"_Eta"]->Fill(jet_Eta->at(i) );
+			h[cat+"jet"+is+"_Phi"]->Fill(jet_Phi->at(i) );
+			h[cat+"jet"+is+"_E"]->Fill(jet_E->at(i) );
 
 			vector<float> rechitJet = GetMatchedHcalRechits_Jet(i, 0.4);
 			vector<float> energy = GetEnergyProfile_Jet(i, 0.4);
 			vector<float> spread_Eta_Phi = GetEtaPhiSpread_Jet(i, 0.4); // eta, phi (average); eta, phi (energy weighted)
-			for (int depth = 0; depth < 4; depth++) h[cat+"jet"+is+"_energyProfile"]->Fill(depth + 1, energy[depth]); 
-			h[cat+"jet"+is+"_rechitN"]->Fill(rechitJet.size());
-			h[cat+"jet"+is+"_etaSpread"]->Fill(spread_Eta_Phi[0]);
-			h[cat+"jet"+is+"_etaSpread_energy"]->Fill(spread_Eta_Phi[2]);
-			h[cat+"jet"+is+"_phiSpread"]->Fill(spread_Eta_Phi[1]);
-			h[cat+"jet"+is+"_phiSpread_energy"]->Fill(spread_Eta_Phi[3]);
-			h2[cat+"jet"+is+"_spreadEtaPhi"]->Fill(spread_Eta_Phi[0], spread_Eta_Phi[1]);
-			h2[cat+"jet"+is+"_spreadEtaPhi_energy"]->Fill(spread_Eta_Phi[2], spread_Eta_Phi[3]);
+
+			for (int depth = 0; depth < 4; depth++) h[cat+"jet"+is+"_EnergyProfile"]->Fill(depth + 1, energy[depth]); 
+			h[cat+"jet"+is+"_RechitN"]->Fill(rechitJet.size());
+			h[cat+"jet"+is+"_EtaSpread"]->Fill(spread_Eta_Phi[0]);
+			h[cat+"jet"+is+"_EtaSpread_energy"]->Fill(spread_Eta_Phi[2]);
+			h[cat+"jet"+is+"_PhiSpread"]->Fill(spread_Eta_Phi[1]);
+			h[cat+"jet"+is+"_PhiSpread_energy"]->Fill(spread_Eta_Phi[3]);
+			h2[cat+"jet"+is+"_SpreadEtaPhi"]->Fill(spread_Eta_Phi[0], spread_Eta_Phi[1]);
+			h2[cat+"jet"+is+"_SpreadEtaPhi_energy"]->Fill(spread_Eta_Phi[2], spread_Eta_Phi[3]);
 		}
 	} 
 	// Reco photons
@@ -194,10 +195,10 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 		for (int i=0; i < n_pho; i++) {
 			if (i > 2) continue;
 			string is = to_string(i);
-			h[cat+"pho"+is+"_pt"]->Fill(pho_Pt->at(i) );
-			h[cat+"pho"+is+"_eta"]->Fill(pho_Eta->at(i) );
-			h[cat+"pho"+is+"_phi"]->Fill(pho_Phi->at(i) );
-			h[cat+"pho"+is+"_energy"]->Fill(pho_E->at(i) );
+			h[cat+"pho"+is+"_Pt"]->Fill(pho_Pt->at(i) );
+			h[cat+"pho"+is+"_Eta"]->Fill(pho_Eta->at(i) );
+			h[cat+"pho"+is+"_Phi"]->Fill(pho_Phi->at(i) );
+			h[cat+"pho"+is+"_E"]->Fill(pho_E->at(i) );
 		}
 	} 
 	// Reco muons
@@ -205,10 +206,10 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 		for (int i=0; i < n_muon; i++) {
 			if (i > 2) continue;
 			string is = to_string(i);
-			h[cat+"muon"+is+"_pt"]->Fill(muon_Pt->at(i) );
-			h[cat+"muon"+is+"_eta"]->Fill(muon_Eta->at(i) );
-			h[cat+"muon"+is+"_phi"]->Fill(muon_Phi->at(i) );
-			h[cat+"muon"+is+"_energy"]->Fill(muon_E->at(i) );
+			h[cat+"muon"+is+"_Pt"]->Fill(muon_Pt->at(i) );
+			h[cat+"muon"+is+"_Eta"]->Fill(muon_Eta->at(i) );
+			h[cat+"muon"+is+"_Phi"]->Fill(muon_Phi->at(i) );
+			h[cat+"muon"+is+"_E"]->Fill(muon_E->at(i) );
 		}
 	} 
 	// Reco electrons
@@ -216,18 +217,18 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 		for (int i=0; i < n_ele; i++) {
 			if (i > 2) continue;
 			string is = to_string(i);
-			h[cat+"ele"+is+"_pt"]->Fill(ele_Pt->at(i) );
-			h[cat+"ele"+is+"_eta"]->Fill(ele_Eta->at(i) );
-			h[cat+"ele"+is+"_phi"]->Fill(ele_Phi->at(i) );
-			h[cat+"ele"+is+"_energy"]->Fill(ele_E->at(i) );
+			h[cat+"ele"+is+"_Pt"]->Fill(ele_Pt->at(i) );
+			h[cat+"ele"+is+"_Eta"]->Fill(ele_Eta->at(i) );
+			h[cat+"ele"+is+"_Phi"]->Fill(ele_Phi->at(i) );
+			h[cat+"ele"+is+"_E"]->Fill(ele_E->at(i) );
 		}
 	} 
 	// HCAL rechits
 	if (n_hbheRechit > 0) { // GK
 		for (int i=0; i < n_hbheRechit; i++) {
-			h[cat+"hbhe_eta"]->Fill(hbheRechit_Eta->at(i) );
-			h[cat+"hbhe_phi"]->Fill(hbheRechit_Phi->at(i) );
-			h[cat+"hbhe_energy"]->Fill(hbheRechit_E->at(i) );
+			h[cat+"hbhe_Eta"]->Fill(hbheRechit_Eta->at(i) );
+			h[cat+"hbhe_Phi"]->Fill(hbheRechit_Phi->at(i) );
+			h[cat+"hbhe_E"]->Fill(hbheRechit_E->at(i) );
 			h[cat+"hbhe_depth"]->Fill(hbheRechit_depth->at(i) );
 			h[cat+"hbhe_auxTDC"]->Fill(hbheRechit_auxTDC->at(i) );
 		}
@@ -235,6 +236,8 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 
 	// LLP gen information plots
 	if (cat == "NoSel__") {
+		if( debug ) cout<<"DisplacedHcalJetAnalyzer::FillHists() -- started LLP loop"<<endl;
+
 		if (n_gLLP > 0) { // make sure gen LLP exists 
 			for (int idx_llp = 0; idx_llp < n_gLLP; idx_llp++) {
 				double x_LLP = gLLP_DecayVtx_X->at(idx_llp);
@@ -267,7 +270,6 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 					h["gen_rechitNpt6_"+is]->Fill(n_rechit_pt6[i]);
 					if (decay_radius >=0) h2["gen_decay_rechitN_"+is]->Fill(decay_radius, n_rechit_pt4[i]);
 
-					// if (n_rechit_pt4[i] > 0) std::cout << n_rechit_pt4[i] << " = GetRechitMult(idx_llp, 0.4) for i=" << i << std::endl;
 					for (int depth = 0; depth < 4; depth++) {
 						h2["gen_depth_energyP_"+is]->Fill(depth + 1, energy[i][depth]);
 						h["gen_energyP_"+is]->Fill(depth + 1, energy[i][depth]); // fill TH1D, weight = fractional energy at that depth
@@ -369,9 +371,6 @@ void DisplacedHcalJetAnalyzer::FillTriggerMatchHists( string cat ){
 		}
 
 	}		
-
-
-
 }
 
 /* ====================================================================================================================== */

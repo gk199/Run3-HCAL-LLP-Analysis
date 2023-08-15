@@ -174,6 +174,12 @@ public :
    vector<unsigned int> *pho_SeedRechitIndex;
    vector<vector<unsigned int> > *pho_EcalRechitIDs;
    vector<vector<unsigned int> > *pho_EcalRechitIndices;
+   Int_t           n_l1jet;
+   vector<float>   *l1jet_Pt;
+   vector<float>   *l1jet_Eta;
+   vector<float>   *l1jet_Phi;
+   vector<float>   *l1jet_E;
+   vector<float>   *l1jet_hwQual;
    Int_t           n_jet;
    vector<float>   *jet_Pt;
    vector<float>   *jet_Eta;
@@ -462,6 +468,12 @@ public :
    TBranch        *b_pho_SeedRechitIndex;   //!
    TBranch        *b_pho_EcalRechitIDs;   //!
    TBranch        *b_pho_EcalRechitIndices;   //!
+   TBranch        *b_n_l1jet;
+   TBranch        *b_l1jet_Pt;
+   TBranch        *b_l1jet_Eta;
+   TBranch        *b_l1jet_Phi;
+   TBranch        *b_l1jet_E;
+   TBranch        *b_l1jet_hwQual;
    TBranch        *b_n_jet;   //!
    TBranch        *b_jet_Pt;   //!
    TBranch        *b_jet_Eta;   //!
@@ -698,6 +710,7 @@ public :
    virtual vector<float> GetMatchedHcalRechits_Jet( int idx_jet, float deltaR_cut );
    virtual vector<float> GetEnergyProfile_Jet( int idx_jet, float deltaR_cut );
    virtual vector<float> GetEtaPhiSpread_Jet( int idx_jet, float deltaR_cut );
+   virtual vector<float> GetTDCavg_Jet( int idx_jet, float deltaR_cut );
    // TruthInfoHelper.cxx
    virtual void   SetLLPDecayProducts();
    virtual int    GetLLPDecayProductIndex( int idx_llp, int idx_llp_decay );
@@ -705,9 +718,13 @@ public :
    virtual float  GetDecayDistance_LLP( int idx_llp);
    virtual vector<float> GetMatchedHcalRechits_LLPDecay( int idx_llp, int idx_llp_decay, float deltaR_cut=0.4 );
    virtual vector<float> GetMatchedHcalRechits_LLPDecay_Overlap( int idx_llp, float deltaR_cut=0.4 );
+   virtual vector<float> GetMatchedHcalRechits_LLP( int idx_llp, float deltaR_cut=0.4 );
+   virtual float  DeltaR_LLP_b( int idx_llp, int idx_llp_decay);
    virtual bool   JetIsTruthMatched( float jet_eta, float jet_phi, float deltaR_cut=0.4 );
-   virtual bool   LLPDecayIsTruthMatched( int idx_llp, int idx_llp_decay, float deltaR_cut=0.4 );
+   virtual vector<float> JetIsMatchedTo( float jet_eta, float jet_phi, float deltaR_cut=0.4 );
+   virtual bool   LLPDecayIsTruthMatched_LLP_b( int idx_gLLP, int idx_gParticle, float deltaR_cut=0.4 );
    virtual bool   LLPDecayIsTruthMatched( int idx_gLLPDecay, float deltaR_cut=0.4 );
+   virtual int    LLPDecayIsFromLLP( int idx_gLLPDecay);
    virtual vector<TVector3> GetLLPDecayProdCoords(int idx_llp, int idx_llp_decay, vector<float> intersection_depths); // Deprecated
    // EventHelper.cxx
    virtual float  GetEventRuntime( clock_t clock_start, Long64_t init_entry, Long64_t current_entry );
@@ -833,6 +850,11 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    pho_SeedRechitIndex = 0;
    pho_EcalRechitIDs = 0;
    pho_EcalRechitIndices = 0;
+   l1jet_Pt = 0;
+   l1jet_Eta = 0;
+   l1jet_Phi = 0;
+   l1jet_E = 0;
+   l1jet_hwQual = 0;
    jet_Pt = 0;
    jet_Eta = 0;
    jet_Phi = 0;
@@ -1114,6 +1136,12 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("pho_SeedRechitIndex", &pho_SeedRechitIndex, &b_pho_SeedRechitIndex);
    fChain->SetBranchAddress("pho_EcalRechitIDs", &pho_EcalRechitIDs, &b_pho_EcalRechitIDs);
    fChain->SetBranchAddress("pho_EcalRechitIndices", &pho_EcalRechitIndices, &b_pho_EcalRechitIndices);
+   fChain->SetBranchAddress("n_l1jet", &n_l1jet, &b_n_l1jet);
+   fChain->SetBranchAddress("l1jet_Pt", &l1jet_Pt, &b_l1jet_Pt);
+   fChain->SetBranchAddress("l1jet_Eta", &l1jet_Eta, &b_l1jet_Eta);
+   fChain->SetBranchAddress("l1jet_Phi", &l1jet_Phi, &b_l1jet_Phi);
+   fChain->SetBranchAddress("l1jet_E", &l1jet_E, &b_l1jet_E);
+   fChain->SetBranchAddress("l1jet_hwQual", &l1jet_hwQual, &b_l1jet_hwQual);
    fChain->SetBranchAddress("n_jet", &n_jet, &b_n_jet);
    fChain->SetBranchAddress("jet_Pt", &jet_Pt, &b_jet_Pt);
    fChain->SetBranchAddress("jet_Eta", &jet_Eta, &b_jet_Eta);
