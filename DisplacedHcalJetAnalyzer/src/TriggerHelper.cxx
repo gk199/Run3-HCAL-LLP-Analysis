@@ -3,7 +3,6 @@ void DisplacedHcalJetAnalyzer::SetTriggerNames( string infilepath, string hist_n
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::SetTriggerNames()"<<endl;
 
-	/*
 	TFile *f = new TFile( Form("%s", infilepath.c_str() ) ); // issue reading in remote file with current trigger structure
 	TH1F  *h_hlt = (TH1F*) f->Get( Form( "%s", hist_name.c_str() ) );
 
@@ -15,6 +14,5 @@ void DisplacedHcalJetAnalyzer::SetTriggerNames( string infilepath, string hist_n
 		HLT_Indices[hlt_name_temp] = i; // Index at which to access HLT_Decision and HLT_Prescale
 	}
 	f->Close();
-	*/
 
 }

@@ -13,8 +13,12 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 	treenames = { "NoSel" }; 
 
 	vector<string> myvars_bool = {
-		"",
+		//"",
 	};
+	// for (int i = 0; i < HLT_Indices.size(); i++) { // TEMPORARY for setting up HLT efficiency work
+	for (int i = 0; i < 12; i++) {					  // TEMPORARY for setting up HLT efficiency work
+		myvars_bool.push_back(HLT_Names[i]);
+	}
 
 	vector<string> myvars_int = {
 		"run","lumi","event",
@@ -107,8 +111,8 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 	for( auto treename: treenames ){
 		tree_output[treename] = new TTree( Form("%s",treename.c_str()), Form("%s",treename.c_str()) ); 
 
-		//for( auto var: myvars_bool )
-		//	tree_output[treename]->Branch( Form("%s",var.c_str()), &tree_output_vars_bool[var] );
+		for( auto var: myvars_bool )
+			tree_output[treename]->Branch( Form("%s",var.c_str()), &tree_output_vars_bool[var] );
 
 		for( auto var: myvars_int )
 			tree_output[treename]->Branch( Form("%s",var.c_str()), &tree_output_vars_int[var] );
@@ -133,6 +137,11 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 	tree_output_vars_int["RechitN"] = n_hbheRechit;
 	tree_output_vars_int["TrackN"]	= n_track;
 	tree_output_vars_int["ecalRechitN"] = n_ecalRechit;
+
+	// for (int i = 0; i < HLT_Indices.size(); i++) { // TEMPORARY for setting up HLT efficiency work
+	for (int i = 0; i < 12; i++) {					  // TEMPORARY for setting up HLT efficiency work
+		tree_output_vars_bool[HLT_Names[i]] = HLT_Decision->at(i);
+	}
 
 	tree_output_vars_int["RechitN_1GeV"] = 0; 
 	tree_output_vars_int["RechitN_5GeV"] = 0; 
