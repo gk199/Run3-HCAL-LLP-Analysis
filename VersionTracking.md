@@ -23,6 +23,7 @@ Location of minituples:
 /eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.1/minituple_v1.1_LLPskim_500k_2023_08_09.root
 ```
 
-* Add l1jet quantities (n, Pt, Eta, Phi, E, hwQual)
+* Add L1 jet quantities (n, Pt, Eta, Phi, E, hwQual) for highest 3 pT L1 jets
+* Add HLT results (for 12 triggers, will fix once ntupler has all 15 saved)
 
 ## V2

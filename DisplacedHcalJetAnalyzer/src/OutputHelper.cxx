@@ -4,6 +4,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::DeclareOutputTrees()"<<endl;
 
 	if( !save_trees ){
+		cout<<"  NOTE: 'save_trees' is set to false. Will not run over ANY tree categories..."<<endl;
 		treenames = {};
 		return;
 	}
@@ -108,7 +109,11 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		if (i < 2) myvars_float.push_back( Form("LLP%d_isTruthMatched", i) );
 	}
 
+	cout<<"Creating new trees for the following:"<<endl;
+	if( treenames.size() == 0 ) cout<<"WARNING: No treenames specified!"<<endl;
 	for( auto treename: treenames ){
+		cout<<"  --> "<<treename<<endl;
+
 		tree_output[treename] = new TTree( Form("%s",treename.c_str()), Form("%s",treename.c_str()) ); 
 
 		for( auto var: myvars_bool )
