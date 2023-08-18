@@ -59,8 +59,8 @@ Plotting from the minituples tree:
 ```
 python Plotter.py <path to ntuple> <data / MC>
 
-python Plotter.py /eos/user/g/gkopp/LLP_Analysis/MiniTuples/v <version> /minituple_v <version> _LLPskim_500k_2023_07_14.root data
-python Plotter.py /eos/user/g/gkopp/LLP_Analysis/MiniTuples/v <version> /minituple_v <version> _MCsignal_500k_2023_08_09.root MC
+python Plotter.py /eos/user/g/gkopp/LLP_Analysis/MiniTuples/v <version> /minituple_v <version> _LLPskim_500k_ <date> .root data
+python Plotter.py /eos/user/g/gkopp/LLP_Analysis/MiniTuples/v <version> /minituple_v <version> _MCsignal_500k_ <date> .root MC
 
 ./Plot_all.sh
 ```
