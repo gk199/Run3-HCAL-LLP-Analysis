@@ -53,7 +53,7 @@ void MiniTuplePlotterExample(){
 	plotter_example2.SetTreeNames( {"NoSel", "NoSel"} ); 					// Multiple Tree Names -- number must match number of input files (1:1)
 	plotter_example2.SetCuts("jet0_pt > 40 && abs(jet0_Eta) < 1.5"); 		// Apply cuts to all events
 	plotter_example2.SetComparisonCuts({Cut_DecayTk, Cut_DecayHCAL}); 		// Apply cuts to overlay
-	plotter_example2.ApplySelectiveCuts("5k", "jet0_energy > 100");			// Apply this only to filetag names that include the string "data"
+	plotter_example2.SetSelectiveCuts("5k", "jet0_energy > 100");			// Apply this only to filetag names that include the string "data"
 	plotter_example2.SetOutputFileTag("mycoolplot"); 						// Your own special name :)
 	plotter_example2.SetLegendManual( 0.35, 0.6, 0.9, 0.9 );				// Manual Legend location
 	plotter_example2.colors = {kOrange, kOrange, kGreen+2, kGreen+2};		// Your own colors (default kBlack + rainbow)
