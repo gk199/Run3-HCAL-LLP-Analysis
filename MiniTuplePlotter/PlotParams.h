@@ -50,3 +50,34 @@ PlotParams P_jet0_track2Pt				= {"jet0_track2Pt", "Leading Jet - Third leading T
 //PlotParams P_jet0_track0dzToPV		= {"jet0_track0dzToPV", "Leading Jet - Leading Track #DeltaZ to PV", "#DeltaZ [cm]", MIN, MAX };
 //PlotParams P_jet0_track1dzToPV		= {"jet0_track1dzToPV", "Leading Jet - Subeading Track #DeltaZ to PV", "#DeltaZ [cm]", MIN, MAX };
 //PlotParams P_jet0_track2dzToPV		= {"jet0_track2dzToPV", "Leading Jet - Third Leading Track #DeltaZ to PV", "#DeltaZ [cm]", MIN, MAX };
+
+
+// LLP variables 
+// Leading LLP
+PlotParams P_LLP0_Eta					= {"LLP0_Eta", "LLP0 #eta", "#eta", -1.5, 1.5 };
+PlotParams P_LLP0_Phi					= {"LLP0_Phi", "LLP0 #phi", "$phi", -3.2, 3.2 };
+PlotParams P_LLP0_Pt					= {"LLP0_Pt", "LLP0 p_{T}", "p_{T} [GeV]", 0, 250 };
+PlotParams P_LLP0_E						= {"LLP0_E", "LLP0 Energy", "E [GeV]", 0, 250 };
+PlotParams P_LLP0_Beta					= {"LLP0_Beta", "LLP0 $beta", "$beta", 0, 250 };
+PlotParams P_LLP0_TravelTime			= {"LLP0_TravelTime", "LLP0 Travel Time", "Travel Time [ns]", 0, 250 };
+PlotParams P_LLP0_DecayR				= {"LLP0_DecayR", "LLP0 decay radius", "Decay R [cm]", 0, 400 };
+PlotParams P_LLP0_DecayX				= {"LLP0_DecayX", "LLP0 decay X position", "Decay X [cm]", -2000, 2000 };
+PlotParams P_LLP0_DecayY				= {"LLP0_DecayY", "LLP0 decay Y position", "Decay Y [cm]", -2000, 2000 };
+PlotParams P_LLP0_DecayZ				= {"LLP0_DecayZ", "LLP0 decay Z position", "Decay Z [cm]", -10000, 10000 };
+PlotParams P_LLP0_DecayT				= {"LLP0_DecayT", "LLP0 decay time", "Decay time [ns]", 0, 10 };
+PlotParams P_LLP0_DecayCtau				= {"LLP0_DecayCtau", "LLP0 c#tau", "c#tau [cm]", 0, 1000 };
+// Sub-leading LLP
+PlotParams P_LLP1_Eta					= {"LLP1_Eta", "LLP1 #eta", "#eta", -1.5, 1.5 };
+PlotParams P_LLP1_Phi					= {"LLP1_Phi", "LLP1 #phi", "$phi", -3.2, 3.2 };
+PlotParams P_LLP1_Pt					= {"LLP1_Pt", "LLP1 p_{T}", "p_{T} [GeV]", 0, 250 };
+PlotParams P_LLP1_E						= {"LLP1_E", "LLP1 Energy", "E [GeV]", 0, 250 };
+PlotParams P_LLP1_Beta					= {"LLP1_Beta", "LLP1 $beta", "$beta", 0, 250 };
+PlotParams P_LLP1_TravelTime			= {"LLP1_TravelTime", "LLP1 Travel Time", "Travel Time [ns]", 0, 250 };
+PlotParams P_LLP1_DecayR				= {"LLP1_DecayR", "LLP1 decay radius", "Decay R [cm]", 0, 400 };
+PlotParams P_LLP1_DecayX				= {"LLP1_DecayX", "LLP1 decay X position", "Decay X [cm]", -2000, 2000 };
+PlotParams P_LLP1_DecayY				= {"LLP1_DecayY", "LLP1 decay Y position", "Decay Y [cm]", -2000, 2000 };
+PlotParams P_LLP1_DecayZ				= {"LLP1_DecayZ", "LLP1 decay Z position", "Decay Z [cm]", -10000, 10000 };
+PlotParams P_LLP1_DecayT				= {"LLP1_DecayT", "LLP1 decay time", "Decay time [ns]", 0, 10 };
+PlotParams P_LLP1_DecayCtau				= {"LLP1_DecayCtau", "LLP1 c#tau", "c#tau [cm]", 0, 1000 };
+
+
