@@ -51,6 +51,14 @@ PlotParams P_jet0_track2Pt				= {"jet0_track2Pt", "Leading Jet - Third leading T
 //PlotParams P_jet0_track1dzToPV		= {"jet0_track1dzToPV", "Leading Jet - Subeading Track #DeltaZ to PV", "#DeltaZ [cm]", MIN, MAX };
 //PlotParams P_jet0_track2dzToPV		= {"jet0_track2dzToPV", "Leading Jet - Third Leading Track #DeltaZ to PV", "#DeltaZ [cm]", MIN, MAX };
 
+// Subleading jet
+PlotParams P_jet1_E						= {"jet1_E", "Sub-Leading Jet Energy", "E [GeV]", 0, 250 };
+PlotParams P_jet1_Pt					= {"jet1_Pt", "Sub-Leading Jet p_{T}", "p_{T} [GeV]", 0, 250 };
+
+// Event Quantities
+PlotParams P_met_Pt						= {"met_Pt", "MET p_{T}", "p_{T} [GeV]", 0, 400 };
+PlotParams P_met_Phi					= {"met_Phi", "MET #phi", "#phi", -3.2, 3.2 };
+PlotParams P_met_SumEt					= {"met_SumEt", "MET Sum E_{T}", "E_{T} [GeV]", 0, 5000 };
 
 // LLP variables 
 // Leading LLP
@@ -79,5 +87,4 @@ PlotParams P_LLP1_DecayY				= {"LLP1_DecayY", "LLP1 decay Y position", "Decay Y 
 PlotParams P_LLP1_DecayZ				= {"LLP1_DecayZ", "LLP1 decay Z position", "Decay Z [cm]", -10000, 10000 };
 PlotParams P_LLP1_DecayT				= {"LLP1_DecayT", "LLP1 decay time", "Decay time [ns]", 0, 10 };
 PlotParams P_LLP1_DecayCtau				= {"LLP1_DecayCtau", "LLP1 c#tau", "c#tau [cm]", 0, 1000 };
-
 

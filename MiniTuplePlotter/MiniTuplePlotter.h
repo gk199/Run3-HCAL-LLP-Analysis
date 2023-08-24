@@ -52,6 +52,9 @@ public :
 	bool run_fit2D  = false;
 	string fit_type = "igf_sigma tailfrac";
 
+	// TLatex text
+	string WriteSelection = "";
+
 	// Weights
 	bool use_weight = false;
 
@@ -322,6 +325,11 @@ public :
 		}	
 	}
 
+	// -------------------------------------------------------------------------------------
+	void Selection (string selection = "") {
+		WriteSelection = selection;
+	}
+
 	// =====================================================================================
 	// Plot Appearance -- Stamp Cuts, Legend, Fit Info
 	// =====================================================================================
@@ -344,6 +352,21 @@ public :
 			stamp_text.DrawLatex( x, y, Form( MiniTupleVersion+" %s -- "+GetBetterCutTitle(cuts_all), treename.c_str() ) );
 		else 
 			stamp_text.DrawLatex( x, y, stamp_string );
+
+	}
+
+	// -------------------------------------------------------------------------------------
+	void StampText( float x=0.14, float y=0.84, float textsize=0.03, string stamp_string="") {
+		if( debug) cout<<"MiniTuplePlotter::StampText()"<<endl;		
+
+		TLatex stamp_text;
+		stamp_text.SetNDC();
+		stamp_text.SetTextFont(42);
+		stamp_text.SetTextColor(kBlack);
+		stamp_text.SetTextSize(textsize);
+
+		TString stamp_Tstring(stamp_string); // convert to a TString for DrawLatex
+		stamp_text.DrawLatex( x, y, stamp_Tstring );
 
 	}
 
@@ -740,6 +763,7 @@ public :
 
 			StampCMS( "Internal", 140., 0.14, 0.84, 0.045 );
 			StampCuts( 0.1, 0.91, 0.015 );			
+			StampText( 0.7, 0.91, 0.04, WriteSelection);
 
 			if( plot_type == "ratio" ){
 				myCanvas->cd(2);

@@ -48,7 +48,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 	}
 
 	vector<string> myvars_float = {
-		//"",
+		"met_Pt", "met_Phi", "met_SumEt"
 	};
 
 	for( int i=0; i<3; i++ ) {
@@ -159,6 +159,10 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 	tree_output_vars_int["RechitN"] = n_hbheRechit;
 	tree_output_vars_int["TrackN"]	= n_track;
 	tree_output_vars_int["ecalRechitN"] = n_ecalRechit;
+
+	tree_output_vars_float["met_Pt"]	= met_Pt;
+	tree_output_vars_float["met_Phi"]	= met_Phi;
+	tree_output_vars_float["met_SumEt"]	= met_SumEt;
 
 	// for (int i = 0; i < HLT_Indices.size(); i++) { // TEMPORARY for setting up HLT efficiency work
 	//	tree_output_vars_bool[HLT_Names[i]] = HLT_Decision->at(i);
