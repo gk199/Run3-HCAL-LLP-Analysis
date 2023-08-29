@@ -729,6 +729,7 @@ public :
    virtual void   ResetGlobalEventVars();
    // OutputHelper.cxx
    virtual void   DeclareOutputTrees();
+   virtual void   ResetOutputBranches( string treename );
    virtual void   FillOutputTrees( string treename );
    virtual void   WriteOutputTrees();
    virtual void   SetHistCategories();

@@ -121,11 +121,37 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 }
 
 /* ====================================================================================================================== */
+void DisplacedHcalJetAnalyzer::ResetOutputBranches( string treename ){ 
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::ResetOutputTrees()"<<endl;
+
+	for( const auto &pair : tree_output_vars_bool )
+		tree_output_vars_bool[pair.first] = false;
+	
+	for( const auto &pair : tree_output_vars_int )
+		tree_output_vars_int[pair.first] = -999;
+
+	for( const auto &pair : tree_output_vars_float ){
+		tree_output_vars_float[pair.first] = -999.9;
+		cout<<pair.first<<endl;
+	}
+
+	for( const auto &pair : tree_output_vars_string )
+		tree_output_vars_string[pair.first] = "";
+
+}
+
+/* ====================================================================================================================== */
 void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){ 
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::FillOutputTrees()"<<endl;
 
 	if ( std::find(treenames.begin(), treenames.end(), treename) == treenames.end() ) return;
+
+	ResetOutputBranches( treename );
+
+	cout<<tree_output_vars_int["run"]<<endl;
+	return;
 
 	tree_output_vars_int["run"] 	= runNum;
 	tree_output_vars_int["lumi"] 	= lumiNum;
@@ -144,7 +170,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		// auxTDC is already unmasked in ntupler (v1) to give TDC in SOI
 		tree_output_vars_int["HBHE_Rechit_auxTDC"] = hbheRechit_auxTDC->at(i);
 	}
-	
+
 	int max_l1jets = std::min(3, n_l1jet);
 	for (int i = 0; i < max_l1jets; i++) {
 		tree_output_vars_float[Form("l1jet%d_Pt", i)]		= l1jet_Pt->at(i);
