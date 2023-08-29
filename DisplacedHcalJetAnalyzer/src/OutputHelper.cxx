@@ -121,11 +121,32 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 }
 
 /* ====================================================================================================================== */
+void DisplacedHcalJetAnalyzer::ResetOutputBranches( string treename ){ 
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::ResetOutputTrees()"<<endl;
+
+	for( const auto &pair : tree_output_vars_bool )
+		tree_output_vars_bool[pair.first] = false;
+	
+	for( const auto &pair : tree_output_vars_int )
+		tree_output_vars_int[pair.first] = -9999;
+
+	for( const auto &pair : tree_output_vars_float )
+		tree_output_vars_float[pair.first] = -9999.9;
+
+	for( const auto &pair : tree_output_vars_string )
+		tree_output_vars_string[pair.first] = "";
+
+}
+
+/* ====================================================================================================================== */
 void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){ 
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::FillOutputTrees()"<<endl;
 
 	if ( std::find(treenames.begin(), treenames.end(), treename) == treenames.end() ) return;
+
+	ResetOutputBranches( treename );
 
 	tree_output_vars_int["run"] 	= runNum;
 	tree_output_vars_int["lumi"] 	= lumiNum;
@@ -152,7 +173,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("l1jet%d_Eta", i)]		= l1jet_Eta->at(i);
 		tree_output_vars_float[Form("l1jet%d_Phi", i)]		= l1jet_Phi->at(i);
 		tree_output_vars_float[Form("l1jet%d_hwQual", i)]	= l1jet_hwQual->at(i);
-	}		
+	}
 
 	// jets are already sorted in jet Pt (not jet E!). Loop over first three jets, and save quantities in the ntuples
 	int max_jets = std::min(3, n_jet);
@@ -213,10 +234,9 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 			}
 		} // end of track matching 
 	}
-
 	for (int i = 0; i < n_gLLP; i++) {
-		float decay_radius = GetDecayRadiusHB_LLP(i); // -999 default value
-		float distance = GetDecayDistance_LLP(i);
+		float decay_radius = gLLP_DecayVtx_R.at(i); // GetDecayRadiusHB_LLP(i); // -999 default value
+		float distance = gLLP_DecayVtx_Mag.at(i); //GetDecayDistance_LLP(i);
 		vector<int> n_rechit_pt4 = GetRechitMult(i, 0.4); // GetRechitMult returns rechit multiplicity associated with LLP [0], first daughter [1], second daughter [2]
 		vector<vector<float>> energy = GetEnergyProfile(i, 0.4); // [0] is LLP, [1] is daughter 1, [2] is daughter 2, [3] is LLP only (not with decay products considered). [4] is total energies (LLP, daughter1, daughter2, LLP no decay prods)
 
@@ -254,7 +274,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 
 		tree_output_vars_float[Form("LLP%d_isTruthMatched", i)] = 0; // will be filled below, when we know if LLP is mached to a jet based on decay products
 	}
-	
+
 	for (int i = 0; i < gLLPDecay_iParticle.size(); i++) {
 		int idx_gParticle = gLLPDecay_iParticle.at(i);
 		tree_output_vars_float[Form("LLPDecay%d_Pt", i)]    = gParticle_Pt->at(idx_gParticle);
@@ -266,10 +286,12 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("LLPDecay%d_ProdZ", i)] = gParticle_ProdVtx_Z->at(idx_gParticle);
 		tree_output_vars_float[Form("LLPDecay%d_ProdR", i)] = pow( pow(gParticle_ProdVtx_X->at(idx_gParticle), 2.) + pow(gParticle_ProdVtx_Y->at(idx_gParticle), 2.), 0.5 );
 		tree_output_vars_float[Form("LLPDecay%d_isTruthMatched", i)] = LLPDecayIsTruthMatched( i );
-		if (LLPDecayIsTruthMatched( i )) tree_output_vars_float[Form("LLP%d_isTruthMatched", LLPDecayIsFromLLP( i ))] = 1; // LLPDecayIsFromLLP( i ) tells which LLP this comes from 
+		if (LLPDecayIsTruthMatched( i )) tree_output_vars_float[Form("LLP%d_isTruthMatched", gLLPDecay_iLLP.at(i))] = 1; // LLPDecayIsFromLLP( i ) tells which LLP this comes from 
 	}
 
 	tree_output[treename]->Fill();
+	
+	if( debug ) cout<<"DONE DisplacedHcalJetAnalyzer::FillOutputTrees()"<<endl;
 
 }	
 
