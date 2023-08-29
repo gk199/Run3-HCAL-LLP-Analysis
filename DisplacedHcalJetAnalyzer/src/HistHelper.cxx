@@ -243,8 +243,8 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 				double x_LLP = gLLP_DecayVtx_X->at(idx_llp);
 				double y_LLP = gLLP_DecayVtx_Y->at(idx_llp);
 				double z_LLP = gLLP_DecayVtx_Z->at(idx_llp);
-				float decay_radius = GetDecayRadiusHB_LLP(idx_llp);
-				float distance = GetDecayDistance_LLP(idx_llp);
+				float decay_radius = gLLP_DecayVtx_R.at(idx_llp); //GetDecayRadiusHB_LLP(idx_llp);
+				float distance = gLLP_DecayVtx_Mag.at(idx_llp); //GetDecayDistance_LLP(idx_llp);
 
 				// positional quantities
 				h["gen_Xdecay"]->Fill(x_LLP);
@@ -308,7 +308,7 @@ void DisplacedHcalJetAnalyzer::FillTriggerMatchHists( string cat ){
 	for( int i_llp=0; i_llp < gLLP_Pt->size(); i_llp++ ){
 		vector<int> llp_decay_indices = map_gLLP_to_gParticle_indices.at(i_llp);
 
-		float decay_radius = GetDecayRadiusHB_LLP(i_llp);
+		float decay_radius = gLLP_DecayVtx_R.at(i_llp); // GetDecayRadiusHB_LLP(i_llp);
 
 		if( abs(decay_radius) > 175 ) continue; // HB inner radius
 		if( abs(gLLP_Eta->at(i_llp)) > 1.5 ) continue;  // LLP ~in barrel 
