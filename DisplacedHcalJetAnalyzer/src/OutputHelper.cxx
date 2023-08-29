@@ -131,10 +131,8 @@ void DisplacedHcalJetAnalyzer::ResetOutputBranches( string treename ){
 	for( const auto &pair : tree_output_vars_int )
 		tree_output_vars_int[pair.first] = -9999;
 
-	for( const auto &pair : tree_output_vars_float ){
+	for( const auto &pair : tree_output_vars_float )
 		tree_output_vars_float[pair.first] = -9999.9;
-		cout<<pair.first<<endl;
-	}
 
 	for( const auto &pair : tree_output_vars_string )
 		tree_output_vars_string[pair.first] = "";
