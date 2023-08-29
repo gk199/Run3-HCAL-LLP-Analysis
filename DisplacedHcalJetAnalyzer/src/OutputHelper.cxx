@@ -129,10 +129,10 @@ void DisplacedHcalJetAnalyzer::ResetOutputBranches( string treename ){
 		tree_output_vars_bool[pair.first] = false;
 	
 	for( const auto &pair : tree_output_vars_int )
-		tree_output_vars_int[pair.first] = -999;
+		tree_output_vars_int[pair.first] = -9999;
 
 	for( const auto &pair : tree_output_vars_float ){
-		tree_output_vars_float[pair.first] = -999.9;
+		tree_output_vars_float[pair.first] = -9999.9;
 		cout<<pair.first<<endl;
 	}
 
@@ -149,9 +149,6 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 	if ( std::find(treenames.begin(), treenames.end(), treename) == treenames.end() ) return;
 
 	ResetOutputBranches( treename );
-
-	cout<<tree_output_vars_int["run"]<<endl;
-	return;
 
 	tree_output_vars_int["run"] 	= runNum;
 	tree_output_vars_int["lumi"] 	= lumiNum;
