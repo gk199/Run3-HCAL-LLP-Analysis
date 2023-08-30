@@ -43,6 +43,7 @@ def parseArgs():
 	parser.add_argument("-s", "--setup_only", action="store_true", help="Setup jobs only") 
 	parser.add_argument("-t", "--test",       action="store_true", help="Submit test job only") 
 	parser.add_argument("-d", "--debug",      action="store_true", help="Debug") 
+	parser.add_argument("-f", "--flag",		  action="store", default="", help="Flag to append to Job_ directory")
 
 	args = parser.parse_args()
 
@@ -63,6 +64,7 @@ def main():
 	setup_only 	= args.setup_only
 	test 		= args.test
 	debug 		= args.debug
+	flag        = args.flag
 
 	# ----- Get Inputs ----- #
 
@@ -91,7 +93,9 @@ def main():
 
     # ----- Make Submission Dir ----- #
 
-	submission_dir = "Jobs_"+datetime_now
+	DirFlag = ""
+	if (str(flag) != ""): DirFlag = str(flag) + "_"
+	submission_dir = "Jobs_"+DirFlag+datetime_now
 
 	if os.path.exists(submission_dir):
                 print( "ERROR:", submission_dir, "already exists. Please use another name. Check if your output directory will be overwritten! Exiting..." )
