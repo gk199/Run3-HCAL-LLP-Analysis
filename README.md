@@ -10,12 +10,6 @@ git checkout -b <your-branch>
 
 Starting from the LLP ntuple in [cms-lpc-llp](https://github.com/cms-lpc-llp/llp_ntupler/tree/run3_GKdev_2022HCAL), the MakeClass was used to initalize the `LLP_HCAL_Analyzer.*` files, and Kiley's setup for the full framework. 
 
-```
-py_setup # setup if needed for python environment 
-cd DisplacedHcalJetAnalyzer/
-source compile.sh 
-cd ../Run/
-```
 To run in compiler mode:
 ```
 cd Run/
@@ -25,7 +19,9 @@ root -q -b -l '../DisplacedHcalJetAnalyzer/util/DisplacedHcalJetAnalyzer.C("<tag
 ```
 Note that paths to ntuples must be local for running in compiler mode. To run in compiled mode (preferred method):
 ```
+py_setup # setup if needed for python environment 
 cd DisplacedHcalJetAnalyzer/
+mkdir exe
 source compile.sh 
 cd ../Run
 ./../DisplacedHcalJetAnalyzer/exe/DisplacedHcalJetAnalyzer <file_output_tag> root://cmsxrootd.fnal.gov///store/user/gkopp/<path_to_file>
@@ -41,7 +37,7 @@ cd ../Run
 For running in compiled mode, remember to input the file path as `root://cmsxrootd.fnal.gov///store/user...`.
 
 ## Condor Processing
-Follow the [instructions](https://github.com/gk199/Run3-HCAL-LLP-Analysis/tree/dev-gillian/Run/Condor) in the condor subdirectory. 
+Follow the [instructions](https://github.com/gk199/Run3-HCAL-LLP-Analysis/tree/main/Run/Condor) in the condor subdirectory. 
 
 ## Analyzer Setttings
 In `DisplacedHcalJetAnalyzer/DisplacedHcalJetAnalyzer/DisplacedHcalJetAnalyzer.h` can set the variables: `debug, print_counts, save_hists, save_trees, blind_data`. Setting `AnalysisReader.debug = true` in `DisplacedHcalJetAnalyzer.C` is very helpful for debugging. 

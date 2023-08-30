@@ -4,11 +4,8 @@
 // -------------------------------------------------------------------------------------------------
 void MiniTuplePlotter(){
 
-//	string path = "/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.0/minituple_";
-//	vector<string> filetags_example1 = { "v1_LLPskim_500k_2023_07_14", "v1_MCsignal_500k_2023_07_14" };
-
-	string path = "/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.1/minituple_";
-	vector<string> filetags_example1 = { "v1.1_LLPskim_500k_2023_08_17", "v1.1_MCsignal_500k_2023_08_17" };
+	string path = "/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.2/minituple_";
+	vector<string> filetags_example1 = { "v1.2_LLPskim_500k_2023_08_30", "v1.2_MCsignal_500k_2023_08_30" };
 
 	// ----- Example 1 -----//
 	// - Basic Booleans
@@ -20,7 +17,7 @@ void MiniTuplePlotter(){
 	class MiniTuplePlotter plotter_example1( filetags_example1, path );
 	plotter_example1.SetPlots({P_jet0_E, P_jet0_Pt, P_jet0_Eta, P_jet0_Phi}); // These "P_" variables are PlotParams structs defined in PlotParams.h
 	plotter_example1.SetTreeName( "NoSel" );	// TreeName
-	plotter_example1.SetOutputFileTag("v1.1.1"); 							// Your own special name :)
+	plotter_example1.SetOutputFileTag("v1.2"); 							// Your own special name :)
 	plotter_example1.debug  		  = false; 	// Default = false
 	plotter_example1.plot_norm 		  = false; 	// Default = true
 	plotter_example1.plot_log  		  = false; 	// Default = true
@@ -96,7 +93,7 @@ void MiniTuplePlotter(){
 	plotter_example2.SetCuts("jet0_Pt > 40 && abs(jet0_Eta) < 1.5"); 			// Apply cuts to all events
 	plotter_example2.SetComparisonCuts({Cut_Decay_preECAL, Cut_Decay_depth12}); // Apply cuts to overlay
 	plotter_example2.SetSelectiveCuts("MC", "");			// Apply this only to filetag names that include the string "data"
-	plotter_example2.SetOutputFileTag("v1.1.1"); 							// Your own special name :)
+	plotter_example2.SetOutputFileTag("v1.2"); 							// Your own special name :)
 	plotter_example2.SetLegendManual( 0.35, 0.6, 0.9, 0.9 );					// Manual Legend location
 	plotter_example2.colors = {kOrange, kOrange, kGreen+2, kGreen+2};			// Your own colors (default kBlack + rainbow)
 	plotter_example2.linestyle = {kDotted, kDashed, kDotted, kDashed}; 			// Your own linestyle (default kSolid)
