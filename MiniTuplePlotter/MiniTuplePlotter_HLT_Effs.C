@@ -5,10 +5,10 @@
 void MiniTuplePlotter_HLT_Effs(){
 
 	// List where minituples are stored
-	string path = "/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.1/minituple_";
-	vector<string> filetags_both = { "v1.1_LLPskim_500k_2023_08_22", "v1.1_MCsignal_500k_2023_08_22" };
-	vector<string> filetags_data = { "v1.1_LLPskim_500k_2023_08_22" };
-	vector<string> filetags_MC = { "v1.1_MCsignal_500k_2023_08_23" };
+	string path = "/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.2/minituple_";
+	vector<string> filetags_both = 	{ "v1.2_LLPskim_500k_2023_08_30", "v1.2_MCsignal_500k_2023_08_30" };
+	vector<string> filetags_data = 	{ "v1.2_LLPskim_500k_2023_08_30" };
+	vector<string> filetags_MC = 	{ "v1.2_MCsignal_500k_2023_08_30" };
 
 	// Setup cuts on HLT paths passed
 	TCut Cut_None			= "";
@@ -106,7 +106,7 @@ void MiniTuplePlotter_HLT_Effs(){
 	class MiniTuplePlotter plotter_HLTeff( filetags_MC, path );
 	plotter_HLTeff.SetPlots({P_jet0_E, P_jet0_Pt, P_jet1_E, P_jet1_Pt, P_jet0_Eta, P_jet0_Phi}); // These "P_" variables are PlotParams structs defined in PlotParams.h
 	plotter_HLTeff.SetTreeName( "NoSel" );	// TreeName
-	plotter_HLTeff.SetOutputFileTag("HLT_v1.1_MC"); 							// Your own special name :)
+	plotter_HLTeff.SetOutputFileTag("HLT_v1.2_MC"); 							// Your own special name :)
 
 	plotter_HLTeff.plot_norm 		  = false; 	// Default = true
 	plotter_HLTeff.plot_log_ratio   = true; 	// Default = false. Make bottom panel log scale
@@ -127,7 +127,7 @@ void MiniTuplePlotter_HLT_Effs(){
 		class MiniTuplePlotter plotter_HLTeff2( filetags_MC, path );
 		plotter_HLTeff2.SetPlots({P_jet0_Pt, P_jet1_Pt, P_met_Pt}); 
 		plotter_HLTeff2.SetTreeName( "NoSel" );
-		plotter_HLTeff2.SetOutputFileTag("HLT_v1.1_MC_" + it->second);
+		plotter_HLTeff2.SetOutputFileTag("HLT_v1.2_MC_" + it->second);
 
 		plotter_HLTeff2.plot_norm 		  = false;
 		plotter_HLTeff2.plot_log_ratio   = true; 
@@ -150,7 +150,7 @@ void MiniTuplePlotter_HLT_Effs(){
 		class MiniTuplePlotter plotter_LLP( filetags_MC, path );
 		plotter_LLP.SetPlots({P_LLP0_Pt, P_LLP0_E}); 
 		plotter_LLP.SetTreeName( "NoSel" );	
-		plotter_LLP.SetOutputFileTag("HLT_v1.1_MC_" + it->second); 							
+		plotter_LLP.SetOutputFileTag("HLT_v1.2_MC_" + it->second); 							
 
 		plotter_LLP.plot_norm 		  = false; 	
 		plotter_LLP.plot_log_ratio   = true; 	
@@ -165,7 +165,7 @@ void MiniTuplePlotter_HLT_Effs(){
 	class MiniTuplePlotter plotter_disp( filetags_MC, path );
 	plotter_disp.SetPlots({P_LLP0_DecayR}); 
 	plotter_disp.SetTreeName( "NoSel" );	
-	plotter_disp.SetOutputFileTag("HLT_v1.1_MC_LLP0inHCAL"); 							
+	plotter_disp.SetOutputFileTag("HLT_v1.2_MC_LLP0inHCAL"); 							
 
 	plotter_disp.plot_norm 		  = false; 	
 	plotter_disp.plot_log_ratio   = true; 	
