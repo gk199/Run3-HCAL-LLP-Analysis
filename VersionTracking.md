@@ -31,11 +31,12 @@ Location of minituples:
 Updates:
 * Clear variables in minituples tree
 * Truth matching for a jet done to LLP direction (decay in HCAL) or b quark (decay before HCAL)
+* LLP truth matching to a jet considers two options: match to LLP (decay in HCAL) or b quark (decay before HCAL), with option to cut on jet energy
 
 Location of minituples:
 ```
-/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.2/minituple_v1.2_MCsignal_500k_2023_08_30.root
-/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.2/minituple_v1.2_LLPskim_500k_2023_08_30.root
+/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.2/minituple_v1.2_MCsignal_500k_2023_08_31.root
+/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.2/minituple_v1.2_LLPskim_500k_2023_08_31.root
 ```
 
 ## V2

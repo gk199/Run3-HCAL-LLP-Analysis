@@ -123,7 +123,10 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("LLPDecay%d_ProdZ", i) );
 		myvars_float.push_back( Form("LLPDecay%d_ProdR", i) );
 		myvars_float.push_back( Form("LLPDecay%d_isTruthMatched", i) );
-		if (i < 2) myvars_float.push_back( Form("LLP%d_isTruthMatched", i) );
+		if (i < 2) {
+			myvars_float.push_back( Form("LLP%d_isTruthMatched", i) );
+			myvars_float.push_back( Form("LLP%d_isTruthMatched_Jet40", i) );
+		}
 	}
 
 	cout<<"Creating new trees for the following:"<<endl;
@@ -281,6 +284,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 			}
 		} // end of track matching 
 	}
+
 	for (int i = 0; i < n_gLLP; i++) {
 		float decay_radius = gLLP_DecayVtx_R.at(i); // GetDecayRadiusHB_LLP(i); // -999 default value
 		float distance = gLLP_DecayVtx_Mag.at(i); //GetDecayDistance_LLP(i);
@@ -302,7 +306,6 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("LLP%d_E", i)] = gLLP_E->at(i);
 		tree_output_vars_float[Form("LLP%d_Beta", i)] = gLLP_Beta->at(i);
 		tree_output_vars_float[Form("LLP%d_TravelTime", i)] = gLLP_TravelTime->at(i);
-
 		tree_output_vars_float[Form("LLP%d_DecayX", i)] = gLLP_DecayVtx_X->at(i);
 		tree_output_vars_float[Form("LLP%d_DecayY", i)] = gLLP_DecayVtx_Y->at(i);
 		tree_output_vars_float[Form("LLP%d_DecayZ", i)] = gLLP_DecayVtx_Z->at(i);
@@ -317,17 +320,19 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		if (energy[3][0] + energy[3][1] + energy[3][2] + energy[3][3] > 0) { // ensure there is positive energy in one depth
 			for (int depth = 0; depth < 4; depth++) tree_output_vars_float[Form("LLP%d_EnergyFracLLP_Depth%d", i, depth+1)] = energy[3][depth]; // LLP only matching. each fractional energy saved in different tree
 		}
-		tree_output_vars_float[Form("LLP%dDecay_RechitEnergy20GeV", i)] = 0;
+		// below are commented out because all output variables are reset at beginning now to default values
+		// tree_output_vars_float[Form("LLP%dDecay_RechitEnergy20GeV", i)] = 0;
+		// tree_output_vars_float[Form("LLP%d_RechitEnergy20GeV", i)] = 0;
+		//tree_output_vars_float[Form("LLP%d_isTruthMatched", i)] = 0; // will be filled below, when we know if LLP is mached to a jet based on decay products
+
 		if (energy[4][0] > 20) tree_output_vars_float[Form("LLP%dDecay_RechitEnergy20GeV", i)] = 1;
 		tree_output_vars_float[Form("LLP%dDecay_RechitEnergy", i)] = energy[4][0];
-		tree_output_vars_float[Form("LLP%d_RechitEnergy20GeV", i)] = 0;
 		if (energy[4][3] > 20) tree_output_vars_float[Form("LLP%d_RechitEnergy20GeV", i)] = 1;
 		tree_output_vars_float[Form("LLP%d_RechitEnergy", i)] = energy[4][3];
 
-		tree_output_vars_float[Form("LLP%d_isTruthMatched", i)] = 0; // will be filled below, when we know if LLP is mached to a jet based on decay products
 	}
 
-	for (int i = 0; i < gLLPDecay_iParticle.size(); i++) {
+	for (int i = 0; i < gLLPDecay_iParticle.size(); i++) { // size is 4
 		int idx_gParticle = gLLPDecay_iParticle.at(i);
 		tree_output_vars_float[Form("LLPDecay%d_Pt", i)]    = gParticle_Pt->at(idx_gParticle);
 		tree_output_vars_float[Form("LLPDecay%d_Eta", i)]   = gParticle_Eta->at(idx_gParticle);
@@ -337,8 +342,9 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("LLPDecay%d_ProdY", i)] = gParticle_ProdVtx_Y->at(idx_gParticle);
 		tree_output_vars_float[Form("LLPDecay%d_ProdZ", i)] = gParticle_ProdVtx_Z->at(idx_gParticle);
 		tree_output_vars_float[Form("LLPDecay%d_ProdR", i)] = pow( pow(gParticle_ProdVtx_X->at(idx_gParticle), 2.) + pow(gParticle_ProdVtx_Y->at(idx_gParticle), 2.), 0.5 );
-		tree_output_vars_float[Form("LLPDecay%d_isTruthMatched", i)] = LLPDecayIsTruthMatched( i );
-		if (LLPDecayIsTruthMatched( i )) tree_output_vars_float[Form("LLP%d_isTruthMatched", gLLPDecay_iLLP.at(i))] = 1; // LLPDecayIsFromLLP( i ) tells which LLP this comes from 
+		tree_output_vars_float[Form("LLPDecay%d_isTruthMatched", i)] = LLPIsTruthMatched( i );
+		if (LLPIsTruthMatched( i )) tree_output_vars_float[Form("LLP%d_isTruthMatched", gLLPDecay_iLLP.at(i))] = 1; // gLLPDecay_iLLP.at( i ) tells which LLP this comes from, and gLLPDecay_iLLP.at(i) details correspond to i in n_gLLP loop above
+		if (LLPIsTruthMatched( i, 40 )) tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet40", gLLPDecay_iLLP.at(i))] = 1; 
 	}
 
 	tree_output[treename]->Fill();

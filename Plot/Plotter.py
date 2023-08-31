@@ -200,8 +200,8 @@ def PlotSetup(infilepath):
         for rad in radius:
             if (data and (rad != "all" or obj == "LLP")): continue;
             print("Plotting radius = " + rad + " ----------------------------------------------------------------------------- for " + obj + ":")
-            Plot1D(tree, obj, rad)
-            Plot2D(tree, obj, rad)
+            #Plot1D(tree, obj, rad)
+            #Plot2D(tree, obj, rad)
 
     LLP_MatchingEfficiency(tree, "LLP")
 
@@ -515,7 +515,7 @@ def LLP_MatchingEfficiency(tree, obj_type):
     
     if (obj_type == "LLP"):
         number = ["0", "1"]
-        LLP_matching = ["Decay_RechitEnergy20GeV", "_RechitEnergy20GeV", "_isTruthMatched"] # LLP + 0 or 1 + kinematic_var = full histogram name
+        LLP_matching = ["Decay_RechitEnergy20GeV", "_RechitEnergy20GeV", "_isTruthMatched", "_isTruthMatched_Jet40"] # LLP + 0 or 1 + kinematic_var = full histogram name
         LLP_denominator = ["DecayR"]
 
         LLP_effs = {}
@@ -523,19 +523,21 @@ def LLP_MatchingEfficiency(tree, obj_type):
     
         for var in LLP_matching:
             if (data): continue
-            legend = ROOT.TLegend(0.65,0.65,0.75,0.75)
+            legend = ROOT.TLegend(0.8,0.72,0.87,0.8)
             for i in number:
                 hname_temp = obj_type + i + var
                 LLP_effs[i] = ROOT.TH1F(hname_temp, "LLP " + var + "; " + var +" efficiency by LLP decayR [cm]; Matching Efficiency", 300, 0, 300 ); 
                 hname_denom = obj_type + i + var + "_" + LLP_denominator[0]
                 LLP_denom[i] = ROOT.TH1F(hname_denom, "LLP " + var + "; " + var +" efficiency by LLP decayR [cm]; Matching Efficiency", 300, 0, 300 ); 
 
-                selection_region = GetCut(obj_type + i + var, [1,2])
+                selection_region = GetCut(obj_type + i + var, 1)        # require matching variable set
+                pT_region = GetCut(obj_type + i + "_Pt", [40,90000])    # require LLP pT is over 40 GeV
+                total_cut = selection_region + pT_region
                 canvTemp.cd()
 
                 LLP_radius = obj_type + i + "_" + LLP_denominator[0]
-                tree.Draw(LLP_radius +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
-                tree.Draw(LLP_radius +" >> "+hname_denom, "", "", tree.GetEntries(), 0 )
+                tree.Draw(LLP_radius +" >> "+hname_temp, total_cut, "", tree.GetEntries(), 0 ) # require matching variable set + LLP pt is high enough
+                tree.Draw(LLP_radius +" >> "+hname_denom, pT_region, "", tree.GetEntries(), 0 ) # require LLP pt is high enough
                 
                 if i == "1": 
                     ResetRange(LLP_effs[i])
@@ -551,8 +553,12 @@ def LLP_MatchingEfficiency(tree, obj_type):
                         mean_text.SetNDC()
                         mean_text.SetTextFont(42)
                         mean_text.SetTextSize(0.036)
-                        mean_text.DrawLatex( xpos+0.5, ypos, "mean = %.2f" %(LLP_effs[i].GetMean()))
-                        mean_text.DrawLatex( xpos+0.5, ypos-0.05, "#sigma = %.2f" %(LLP_effs[i].GetStdDev()))
+                        if (var[1] == "i"):
+                            mean_text.DrawLatex( xpos, ypos-.6, "mean = %.2f" %(LLP_effs[i].GetMean()))
+                            mean_text.DrawLatex( xpos, ypos-0.65, "#sigma = %.2f" %(LLP_effs[i].GetStdDev()))
+                        else:
+                            mean_text.DrawLatex( xpos+0.5, ypos, "mean = %.2f" %(LLP_effs[i].GetMean()))
+                            mean_text.DrawLatex( xpos+0.5, ypos-0.05, "#sigma = %.2f" %(LLP_effs[i].GetStdDev()))
 
             LegendLabel(legend)
             canv.SaveAs(folder + "/Efficiency_" + obj_type + "_" +var+".png")
