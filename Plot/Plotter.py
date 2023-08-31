@@ -200,8 +200,8 @@ def PlotSetup(infilepath):
         for rad in radius:
             if (data and (rad != "all" or obj == "LLP")): continue;
             print("Plotting radius = " + rad + " ----------------------------------------------------------------------------- for " + obj + ":")
-            #Plot1D(tree, obj, rad)
-            #Plot2D(tree, obj, rad)
+            Plot1D(tree, obj, rad)
+            Plot2D(tree, obj, rad)
 
     LLP_MatchingEfficiency(tree, "LLP")
 

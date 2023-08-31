@@ -6,9 +6,9 @@ void MiniTuplePlotter_HLT_Effs(){
 
 	// List where minituples are stored
 	string path = "/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.2/minituple_";
-	vector<string> filetags_both = 	{ "v1.2_LLPskim_500k_2023_08_30", "v1.2_MCsignal_500k_2023_08_30" };
-	vector<string> filetags_data = 	{ "v1.2_LLPskim_500k_2023_08_30" };
-	vector<string> filetags_MC = 	{ "v1.2_MCsignal_500k_2023_08_30" };
+	vector<string> filetags_both = 	{ "v1.2_LLPskim_500k_2023_08_31", "v1.2_MCsignal_500k_2023_08_31" };
+	vector<string> filetags_data = 	{ "v1.2_LLPskim_500k_2023_08_31" };
+	vector<string> filetags_MC = 	{ "v1.2_MCsignal_500k_2023_08_31" };
 
 	// Setup cuts on HLT paths passed
 	TCut Cut_None			= "";
@@ -27,6 +27,10 @@ void MiniTuplePlotter_HLT_Effs(){
 	TCut Cut_HLTpassed13 	= "HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay1nsTrackless == 1";
 	TCut Cut_HLTpassed14 	= "HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay2nsInclusive == 1"; // end of group 4 of triggers
 	TCut Cut_HLTpassed15 	= "HLT_L1SingleLLPJet == 1"; // monitoring trigger // not in v1 ntuples yet
+
+	// Setup cuts on jet matching results
+	TCut Cut_Jet0_isTruthMatched	= "jet0_isTruthMatched == 1";
+	TCut Cut_Jet1_isTruthMatched	= "jet1_isTruthMatched == 1";
 
 	// Setup cuts on LLP decay position
 	float radius_tracker[2]  = {0, 161.6};
@@ -125,18 +129,41 @@ void MiniTuplePlotter_HLT_Effs(){
 	for (it = LLP_Cuts.begin(); it != LLP_Cuts.end(); it++) {
 
 		class MiniTuplePlotter plotter_HLTeff2( filetags_MC, path );
-		plotter_HLTeff2.SetPlots({P_jet0_Pt, P_jet1_Pt, P_met_Pt}); 
+		plotter_HLTeff2.SetPlots({P_met_Pt}); 
 		plotter_HLTeff2.SetTreeName( "NoSel" );
 		plotter_HLTeff2.SetOutputFileTag("HLT_v1.2_MC_" + it->second);
-
 		plotter_HLTeff2.plot_norm 		  = false;
 		plotter_HLTeff2.plot_log_ratio   = true; 
 		plotter_HLTeff2.SetLegendManual( 0.35, 0.65, 0.9, 0.9 );
-
 		plotter_HLTeff2.SetComparisonCuts({Cut_None, Cut_HLTpassed2, Cut_HLTpassed5, Cut_HLTpassed9, Cut_HLTpassed11}); 
-		plotter_HLTeff2.SetSelectiveCuts("MC", it->first);
+		plotter_HLTeff2.SetSelectiveCuts("MC", it->first); // region for LLP decay
 		plotter_HLTeff2.Selection(it->second); // print which selection is made on the plot
 		plotter_HLTeff2.Plot("ratio");
+
+		// do jet plots with gen matching requirement 
+		class MiniTuplePlotter plotter_HLTeff3( filetags_MC, path );
+		plotter_HLTeff3.SetPlots({P_jet0_Pt}); 
+		plotter_HLTeff3.SetTreeName( "NoSel" );
+		plotter_HLTeff3.SetOutputFileTag("HLT_v1.2_MC_" + it->second);
+		plotter_HLTeff3.plot_norm 		  = false;
+		plotter_HLTeff3.plot_log_ratio   = true; 
+		plotter_HLTeff3.SetLegendManual( 0.35, 0.65, 0.9, 0.9 );
+		plotter_HLTeff3.SetComparisonCuts({Cut_None, Cut_HLTpassed2, Cut_HLTpassed5, Cut_HLTpassed9, Cut_HLTpassed11}); 
+		plotter_HLTeff3.SetSelectiveCuts("MC", Cut_Jet0_isTruthMatched && it->first); // jet matched + region for LLP decay
+		plotter_HLTeff3.Selection(it->second); // print which selection is made on the plot
+		plotter_HLTeff3.Plot("ratio");
+		
+		class MiniTuplePlotter plotter_HLTeff4( filetags_MC, path );
+		plotter_HLTeff4.SetPlots({P_jet1_Pt}); 
+		plotter_HLTeff4.SetTreeName( "NoSel" );
+		plotter_HLTeff4.SetOutputFileTag("HLT_v1.2_MC_" + it->second);
+		plotter_HLTeff4.plot_norm 		  = false;
+		plotter_HLTeff4.plot_log_ratio   = true; 
+		plotter_HLTeff4.SetLegendManual( 0.35, 0.65, 0.9, 0.9 );
+		plotter_HLTeff4.SetComparisonCuts({Cut_None, Cut_HLTpassed2, Cut_HLTpassed5, Cut_HLTpassed9, Cut_HLTpassed11}); 
+		plotter_HLTeff4.SetSelectiveCuts("MC", Cut_Jet1_isTruthMatched && it->first); // jet matched + region for LLP decay
+		plotter_HLTeff4.Selection(it->second); // print which selection is made on the plot
+		plotter_HLTeff4.Plot("ratio");
 	}
 
 	// ----- LLP kinematics -- HLT Efficiency split by LLP displacement and energy -----//
