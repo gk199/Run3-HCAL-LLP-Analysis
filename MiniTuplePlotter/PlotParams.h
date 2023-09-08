@@ -5,6 +5,17 @@ struct PlotParams{
 };
 typedef struct PlotParams PlotParams;
 
+struct Hist1_Hist2_Cut{
+	PlotParams Params1, Params2; 
+	TCut cut;	
+	Hist1_Hist2_Cut(PlotParams hist1, PlotParams hist2, TCut sel_cut)
+	{
+		Params1 = hist1;
+		Params2 = hist2;
+		cut = sel_cut;
+	}
+};
+
 // Example:
 // PlotParams P_VarName 	= {"VariableName", "Plot Title", "x label [units]", XMIN, XMAX };
 
@@ -23,9 +34,9 @@ PlotParams P_jet0_EnergyFrac_Depth3		= {"jet0_EnergyFrac_Depth3", "Leading Jet E
 PlotParams P_jet0_EnergyFrac_Depth4		= {"jet0_EnergyFrac_Depth4", "Leading Jet Energy Fraction in HCAL Depth 4", "Energy Fraction", 0, 1 };
 PlotParams P_jet0_isTruthMatched		= {"jet0_isTruthMatched", "Leading Jet is Truth Matched", "is Truth Matched", 0, 2 };
 PlotParams P_jet0_EtaSpread				= {"jet0_EtaSpread", "Leading Jet #eta Spread", "#eta Spread", 0, 0.4 };
-PlotParams P_jet0_EtaSpread_energy		= {"jet0_EtaSpread_energy", "Leading Jet #eta Spread Energy", "XAXIS [UNITS]", 0, 0.2 };
+PlotParams P_jet0_EtaSpread_energy		= {"jet0_EtaSpread_energy", "Leading Jet #eta Spread Energy", "#eta Spread (energy weighted)", 0, 0.2 };
 PlotParams P_jet0_PhiSpread				= {"jet0_PhiSpread", "Leading Jet #phi Spread", "#phi Spread", 0, 0.4 };
-PlotParams P_jet0_PhiSpread_energy		= {"jet0_PhiSpread_energy", "Leading Jet #phi Spread Energy", "XAXIS [UNITS]", 0, 0.2 };
+PlotParams P_jet0_PhiSpread_energy		= {"jet0_PhiSpread_energy", "Leading Jet #phi Spread Energy", "#phi Spread (energy weighted)", 0, 0.2 };
 PlotParams P_jet0_Track0Pt				= {"jet0_Track0Pt", "Leading Jet - Leading Track p_{T}", "p_{T} [GeV]", 0, 15 };
 PlotParams P_jet0_Track1Pt				= {"jet0_Track1Pt", "Leading Jet - Subeading Track p_{T}", "p_{T} [GeV]", 0, 5 };
 PlotParams P_jet0_Track2Pt				= {"jet0_Track2Pt", "Leading Jet - Third leading Track p_{T}", "p_{T} [GeV]", 0, 5 };
@@ -41,9 +52,9 @@ PlotParams P_jet0_energyFrac_depth2		= {"jet0_energyFrac_depth2", "Leading Jet E
 PlotParams P_jet0_energyFrac_depth3		= {"jet0_energyFrac_depth3", "Leading Jet Energy Fraction in HCAL Depth 3", "Energy Fraction", 0, 1 };
 PlotParams P_jet0_energyFrac_depth4		= {"jet0_energyFrac_depth4", "Leading Jet Energy Fraction in HCAL Depth 4", "Energy Fraction", 0, 1 };
 PlotParams P_jet0_etaSpread				= {"jet0_etaSpread", "Leading Jet #eta Spread", "#eta Spread", 0, 0.4 };
-PlotParams P_jet0_etaSpread_energy		= {"jet0_etaSpread_energy", "Leading Jet #eta Spread Energy", "XAXIS [UNITS]", 0, 0.2 };
+PlotParams P_jet0_etaSpread_energy		= {"jet0_etaSpread_energy", "Leading Jet #eta Spread Energy", "#eta Spread (energy weighted)", 0, 0.2 };
 PlotParams P_jet0_phiSpread				= {"jet0_phiSpread", "Leading Jet #phi Spread", "#phi Spread", 0, 0.4 };
-PlotParams P_jet0_phiSpread_energy		= {"jet0_phiSpread_energy", "Leading Jet #phi Spread Energy", "XAXIS [UNITS]", 0, 0.2 };
+PlotParams P_jet0_phiSpread_energy		= {"jet0_phiSpread_energy", "Leading Jet #phi Spread Energy", "#phi Spread (energy weighted)", 0, 0.2 };
 PlotParams P_jet0_track0Pt				= {"jet0_track0Pt", "Leading Jet - Leading Track p_{T}", "p_{T} [GeV]", 0, 15 };
 PlotParams P_jet0_track1Pt				= {"jet0_track1Pt", "Leading Jet - Subeading Track p_{T}", "p_{T} [GeV]", 0, 5 };
 PlotParams P_jet0_track2Pt				= {"jet0_track2Pt", "Leading Jet - Third leading Track p_{T}", "p_{T} [GeV]", 0, 5 };
@@ -52,8 +63,12 @@ PlotParams P_jet0_track2Pt				= {"jet0_track2Pt", "Leading Jet - Third leading T
 //PlotParams P_jet0_track2dzToPV		= {"jet0_track2dzToPV", "Leading Jet - Third Leading Track #DeltaZ to PV", "#DeltaZ [cm]", MIN, MAX };
 
 // Subleading jet
-PlotParams P_jet1_E						= {"jet1_E", "Sub-Leading Jet Energy", "E [GeV]", 0, 250 };
-PlotParams P_jet1_Pt					= {"jet1_Pt", "Sub-Leading Jet p_{T}", "p_{T} [GeV]", 0, 250 };
+PlotParams P_jet1_E						= {"jet1_E", "Sub-Leading Jet Energy", "E [GeV] (sub-leading jet)", 0, 250 };
+PlotParams P_jet1_Pt					= {"jet1_Pt", "Sub-Leading Jet p_{T}", "p_{T} [GeV] (sub-leading jet)", 0, 250 };
+PlotParams P_jet1_EtaSpread				= {"jet1_EtaSpread", "Sub-Leading Jet #eta Spread", "#eta Spread", 0, 0.4 };
+PlotParams P_jet1_EtaSpread_energy		= {"jet1_EtaSpread_energy", "Sub-Leading Jet #eta Spread Energy", "#eta Spread (energy weighted)", 0, 0.2 };
+PlotParams P_jet1_PhiSpread				= {"jet1_PhiSpread", "Sub-Leading Jet #phi Spread", "#phi Spread", 0, 0.4 };
+PlotParams P_jet1_PhiSpread_energy		= {"jet1_PhiSpread_energy", "Sub-Leading Jet #phi Spread Energy", "#phi Spread (energy weighted)", 0, 0.2 };
 
 // Event Quantities
 PlotParams P_met_Pt						= {"met_Pt", "MET p_{T}", "p_{T} [GeV]", 0, 400 };

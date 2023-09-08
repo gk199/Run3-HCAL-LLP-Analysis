@@ -62,12 +62,20 @@ void MiniTuplePlotter_HLT_Effs(){
 	TString LLP1inHCAL_d3 	= Form("(LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) <= %f)", 		radius_depth3[0], 	radius_depth3[1], 	HBeta);
 	TString LLP1inHCAL_d4 	= Form("(LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) <= %f)", 		radius_depth4[0], 	radius_depth4[1], 	HBeta);
 
-	TString OR		   	= (" || ");
+	// determine which LLP the two leading jets are matched to
+	TString Jet0_LLP0 		= Form("jet0_isMatchedTo == 0");
+	TString Jet0_LLP1 		= Form("jet0_isMatchedTo == 1");
+	TString Jet1_LLP0 		= Form("jet1_isMatchedTo == 0");
+	TString Jet1_LLP1 		= Form("jet1_isMatchedTo == 1");
+
+	TString OR		   	= " || ";
+	TString AND 		= " && ";
 	
 	TCut Cut_LLPinHCAL 	= (LLP0inHCAL + OR + LLP1inHCAL).Data();
 	TCut Cut_LLP0inHCAL = LLP0inHCAL.Data();
 	TCut Cut_LLP1inHCAL = LLP1inHCAL.Data();
 
+	// at least one of LLPs is in region of interest
 	TCut Cut_LLPinTracker	= (LLP0inTracker + OR + LLP1inTracker).Data();
 	TCut Cut_LLP0inTracker 	= LLP0inTracker.Data();
 	TCut Cut_LLPinECAL 		= (LLP0inECAL + OR + LLP1inECAL).Data();
@@ -79,25 +87,52 @@ void MiniTuplePlotter_HLT_Effs(){
 	TCut Cut_LLPinHCAL_d4 	= (LLP0inHCAL_d4 + OR + LLP1inHCAL_d4).Data();
 	TCut Cut_LLP0inHCAL_d4 	= LLP0inHCAL_d4.Data();
 
+	// LLP is in region of interest, and matched to a jet
+	TCut Cut_LLPinTracker_Jet0	= 	( "(" + LLP0inTracker + AND + Jet0_LLP0 + ")" + 	OR + "(" + LLP1inTracker + AND + Jet0_LLP1 + ")" ).Data();
+	TCut Cut_LLPinTracker_Jet1	= 	( "(" + LLP0inTracker + AND + Jet1_LLP0 + ")" + 	OR + "(" + LLP1inTracker + AND + Jet1_LLP1 + ")" ).Data();
+	TCut Cut_LLPinECAL_Jet0	= 		( "(" + LLP0inECAL + AND + Jet0_LLP0 + ")" + 		OR + "(" + LLP1inECAL + AND + Jet0_LLP1 + ")" ).Data();
+	TCut Cut_LLPinECAL_Jet1	= 		( "(" + LLP0inECAL + AND + Jet1_LLP0 + ")" + 		OR + "(" + LLP1inECAL + AND + Jet1_LLP1 + ")" ).Data();
+	TCut Cut_LLPinHCAL12_Jet0	= 	( "(" + LLP0inHCAL_d12 + AND + Jet0_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d12 + AND + Jet0_LLP1 + ")" ).Data();
+	TCut Cut_LLPinHCAL12_Jet1	= 	( "(" + LLP0inHCAL_d12 + AND + Jet1_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d12 + AND + Jet1_LLP1 + ")" ).Data();
+	TCut Cut_LLPinHCAL3_Jet0	= 	( "(" + LLP0inHCAL_d3 + AND + Jet0_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d3 + AND + Jet0_LLP1 + ")" ).Data();
+	TCut Cut_LLPinHCAL3_Jet1	= 	( "(" + LLP0inHCAL_d3 + AND + Jet1_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d3 + AND + Jet1_LLP1 + ")" ).Data();
+	TCut Cut_LLPinHCAL4_Jet0	= 	( "(" + LLP0inHCAL_d4 + AND + Jet0_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d4 + AND + Jet0_LLP1 + ")" ).Data();
+	TCut Cut_LLPinHCAL4_Jet1	= 	( "(" + LLP0inHCAL_d4 + AND + Jet1_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d4 + AND + Jet1_LLP1 + ")" ).Data();
+
 	// Save these cuts in a map paired with a string so they can be iterated over, to easily make same plot with lots of different cuts  :) 
-	map<TCut, string> LLP_Cuts;
+	map<TCut, string> LLP_Cuts; // either LLP position
   	LLP_Cuts.insert(pair<TCut, string>(Cut_LLPinTracker, "LLPinTracker"));
   	LLP_Cuts.insert(pair<TCut, string>(Cut_LLPinECAL, "LLPinECAL"));
   	LLP_Cuts.insert(pair<TCut, string>(Cut_LLPinHCAL_d12, "LLPinHCAL_depth12"));
   	LLP_Cuts.insert(pair<TCut, string>(Cut_LLPinHCAL_d3, "LLPinHCAL_depth3"));
   	LLP_Cuts.insert(pair<TCut, string>(Cut_LLPinHCAL_d4, "LLPinHCAL_depth4"));
 
-	map<TCut, string> LLP0_Cuts;
+	map<TCut, string> LLP0_Cuts; // leading LLP position
   	LLP0_Cuts.insert(pair<TCut, string>(Cut_LLP0inTracker, "LLP0inTracker"));
   	LLP0_Cuts.insert(pair<TCut, string>(Cut_LLP0inECAL, "LLP0inECAL"));
   	LLP0_Cuts.insert(pair<TCut, string>(Cut_LLP0inHCAL_d12, "LLP0inHCAL_depth12"));
   	LLP0_Cuts.insert(pair<TCut, string>(Cut_LLP0inHCAL_d3, "LLP0inHCAL_depth3"));
   	LLP0_Cuts.insert(pair<TCut, string>(Cut_LLP0inHCAL_d4, "LLP0inHCAL_depth4"));
 
+	map<tuple<TCut, TCut>, string> JetMatchedToLLP; // jet (0,1) is matched to a LLP in the given region // tuple could be used for more cuts as well, accessing done below
+	JetMatchedToLLP.insert(pair< tuple<TCut, TCut>, string> (make_tuple(Cut_LLPinTracker_Jet0, Cut_LLPinTracker_Jet1), "Matched_LLPinTracker"));
+	JetMatchedToLLP.insert(pair< tuple<TCut, TCut>, string> (make_tuple(Cut_LLPinECAL_Jet0, Cut_LLPinECAL_Jet1), "Matched_LLPinECAL"));
+	JetMatchedToLLP.insert(pair< tuple<TCut, TCut>, string> (make_tuple(Cut_LLPinHCAL12_Jet0, Cut_LLPinHCAL12_Jet1), "Matched_LLPinHCAL_d12"));
+	JetMatchedToLLP.insert(pair< tuple<TCut, TCut>, string> (make_tuple(Cut_LLPinHCAL3_Jet0, Cut_LLPinHCAL3_Jet1), "Matched_LLPinHCAL_d3"));
+	JetMatchedToLLP.insert(pair< tuple<TCut, TCut>, string> (make_tuple(Cut_LLPinHCAL4_Jet0, Cut_LLPinHCAL4_Jet1), "Matched_LLPinHCAL_d4"));
+
 	map<TCut, string>::iterator it;
 	for (it = LLP_Cuts.begin(); it != LLP_Cuts.end(); it++) {
 		cout << it->second << " ";
 		cout << it->first << " ";
+		cout << endl;
+	}
+
+	map<tuple<TCut, TCut>, string>::iterator it_double;
+	for (it_double = JetMatchedToLLP.begin(); it_double != JetMatchedToLLP.end(); it_double++) {
+		cout << it_double->second << " ";
+		cout << get<0>(it_double->first) << " ";
+		cout << get<1>(it_double->first) << " ";
 		cout << endl;
 	}
 
@@ -139,30 +174,32 @@ void MiniTuplePlotter_HLT_Effs(){
 		plotter_HLTeff2.SetSelectiveCuts("MC", it->first); // region for LLP decay
 		plotter_HLTeff2.Selection(it->second); // print which selection is made on the plot
 		plotter_HLTeff2.Plot("ratio");
-
+	}
+	
+	for (it_double = JetMatchedToLLP.begin(); it_double != JetMatchedToLLP.end(); it_double++) {
 		// do jet plots with gen matching requirement 
 		class MiniTuplePlotter plotter_HLTeff3( filetags_MC, path );
 		plotter_HLTeff3.SetPlots({P_jet0_Pt}); 
 		plotter_HLTeff3.SetTreeName( "NoSel" );
-		plotter_HLTeff3.SetOutputFileTag("HLT_v1.2_MC_" + it->second);
+		plotter_HLTeff3.SetOutputFileTag("HLT_v1.2_MC_" + it_double->second);
 		plotter_HLTeff3.plot_norm 		  = false;
 		plotter_HLTeff3.plot_log_ratio   = true; 
 		plotter_HLTeff3.SetLegendManual( 0.35, 0.65, 0.9, 0.9 );
 		plotter_HLTeff3.SetComparisonCuts({Cut_None, Cut_HLTpassed2, Cut_HLTpassed5, Cut_HLTpassed9, Cut_HLTpassed11}); 
-		plotter_HLTeff3.SetSelectiveCuts("MC", Cut_Jet0_isTruthMatched && it->first); // jet matched + region for LLP decay
-		plotter_HLTeff3.Selection(it->second); // print which selection is made on the plot
+		plotter_HLTeff3.SetSelectiveCuts("MC", get<0>(it_double->first));// jet matched + region for LLP decay
+		plotter_HLTeff3.Selection(it_double->second); // print which selection is made on the plot
 		plotter_HLTeff3.Plot("ratio");
 		
 		class MiniTuplePlotter plotter_HLTeff4( filetags_MC, path );
 		plotter_HLTeff4.SetPlots({P_jet1_Pt}); 
 		plotter_HLTeff4.SetTreeName( "NoSel" );
-		plotter_HLTeff4.SetOutputFileTag("HLT_v1.2_MC_" + it->second);
+		plotter_HLTeff4.SetOutputFileTag("HLT_v1.2_MC_" + it_double->second);
 		plotter_HLTeff4.plot_norm 		  = false;
 		plotter_HLTeff4.plot_log_ratio   = true; 
 		plotter_HLTeff4.SetLegendManual( 0.35, 0.65, 0.9, 0.9 );
 		plotter_HLTeff4.SetComparisonCuts({Cut_None, Cut_HLTpassed2, Cut_HLTpassed5, Cut_HLTpassed9, Cut_HLTpassed11}); 
-		plotter_HLTeff4.SetSelectiveCuts("MC", Cut_Jet1_isTruthMatched && it->first); // jet matched + region for LLP decay
-		plotter_HLTeff4.Selection(it->second); // print which selection is made on the plot
+		plotter_HLTeff4.SetSelectiveCuts("MC", get<1>(it_double->first)); // jet matched + region for LLP decay
+		plotter_HLTeff4.Selection(it_double->second); // print which selection is made on the plot
 		plotter_HLTeff4.Plot("ratio");
 	}
 
@@ -192,14 +229,66 @@ void MiniTuplePlotter_HLT_Effs(){
 	class MiniTuplePlotter plotter_disp( filetags_MC, path );
 	plotter_disp.SetPlots({P_LLP0_DecayR}); 
 	plotter_disp.SetTreeName( "NoSel" );	
-	plotter_disp.SetOutputFileTag("HLT_v1.2_MC_LLP0inHCAL"); 							
-
+	plotter_disp.SetOutputFileTag("HLT_v1.2_MC_LLP0inHCAL"); 
 	plotter_disp.plot_norm 		  = false; 	
 	plotter_disp.plot_log_ratio   = true; 	
 	plotter_disp.SetLegendManual( 0.35, 0.65, 0.9, 0.9 );
-
 	plotter_disp.SetComparisonCuts({Cut_None, Cut_HLTpassed2, Cut_HLTpassed5, Cut_HLTpassed9, Cut_HLTpassed11}); 
 	plotter_disp.SetSelectiveCuts("MC", Cut_LLP0inHCAL);
 	plotter_disp.Plot("ratio");	
 
+
+	// ----- Jet Characteristics -- If HLT passed, what are distributions in leading, subleading jets? -----//
+
+	cout<<endl;
+	cout<<" ----- HLT Study 4: Jet Characteristics -- If HLT passed, what are distributions in leading, subleading jets? ----- "<<endl;
+	cout<<endl;
+
+	// set up 2D plots, and associated cuts. Save in a std::vector of the Hist1_Hist2_Cut structure defined in PlotParams so these can be iterated over
+	std::vector<Hist1_Hist2_Cut> Jet1_Jet2;
+	Jet1_Jet2.push_back(Hist1_Hist2_Cut(P_jet0_EtaSpread, P_jet0_PhiSpread, "jet0_isMatchedTo >= 0"));
+	Jet1_Jet2.push_back(Hist1_Hist2_Cut(P_jet0_EtaSpread_energy, P_jet0_PhiSpread_energy, "jet0_isMatchedTo >= 0"));
+	Jet1_Jet2.push_back(Hist1_Hist2_Cut(P_jet1_EtaSpread, P_jet1_PhiSpread, "jet1_isMatchedTo >= 0"));
+	Jet1_Jet2.push_back(Hist1_Hist2_Cut(P_jet1_EtaSpread_energy, P_jet1_PhiSpread_energy, "jet1_isMatchedTo >= 0"));
+	Jet1_Jet2.push_back(Hist1_Hist2_Cut(P_jet0_Pt, P_jet1_Pt, "jet0_isMatchedTo >= 0 && jet1_isMatchedTo >= 0"));
+
+	for (auto group = Jet1_Jet2.begin(); group != Jet1_Jet2.end(); group++) { // iterate over the vector defined above
+		class MiniTuplePlotter jet_dist( filetags_MC, path );
+		jet_dist.SetTreeName( "NoSel" );	
+		jet_dist.SetOutputFileTag("HLT_v1.2_MC_jetDist"); 							
+		jet_dist.plot_norm 		  = false; 	
+		jet_dist.plot_log_ratio   = true; 	
+		jet_dist.SetLegendManual( 0.35, 0.65, 0.9, 0.9 );
+		jet_dist.SetComparisonCuts({Cut_None, Cut_HLTpassed2}); 
+		jet_dist.SetSelectiveCuts("MC", group->cut);
+		cout << group->cut << endl;
+		jet_dist.Plot2D(group->Params1, group->Params2);
+	}
+
+	// add jet energy distribution plots too (but likely 1D plots instead of 2D)
+
+	// ----- LLP Characteristics -- If HLT passed, what are distributions in leading, subleading LLP? -----//
+
+	cout<<endl;
+	cout<<" ----- HLT Study 5: LLP Characteristics -- If HLT passed, what are distributions in leading, subleading LLP? ----- "<<endl;
+	cout<<endl;
+
+	int jet_pt[4] = {0, 40, 70, 100}; // jet pT categories
+	for (int i = 0; i < 4; i++) {
+		class MiniTuplePlotter LLP_dist( filetags_MC, path );
+		LLP_dist.SetTreeName( "NoSel" );	
+		LLP_dist.SetOutputFileTag("HLT_v1.2_MC_LLPdist_jetPT" + to_string(jet_pt[i])); 							
+		LLP_dist.plot_norm 		  = false; 	
+		LLP_dist.plot_log_ratio   = true; 	
+		LLP_dist.SetLegendManual( 0.35, 0.65, 0.9, 0.9 );
+		LLP_dist.SetComparisonCuts({Cut_None, Cut_HLTpassed2}); 
+		// require jet is matched to a LLP, and then cut on jet energy
+		TString cut = Form("(jet0_Pt > %d && jet0_isMatchedTo >= 0)", jet_pt[i]);
+		TCut jet_cut = cut.Data();
+		LLP_dist.SetSelectiveCuts("MC", jet_cut);  
+		LLP_dist.Selection(Form("jet0_Pt > %d", jet_pt[i])); // not written on plot yet...
+		LLP_dist.Plot2D(P_LLP0_DecayR, P_LLP1_DecayR);	
+		LLP_dist.Plot2D(P_LLP0_DecayZ, P_LLP1_DecayZ);	
+	}
+	
 }

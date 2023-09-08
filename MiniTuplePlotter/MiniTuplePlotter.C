@@ -55,25 +55,26 @@ void MiniTuplePlotter(){
     float radius_depth34[2]  = {214.2, 295};
 
 	int z_pos = 425;
+	float HBeta = 1.4;
 	// depth 1 and 2 have a z position < 388, dpeth 3 and 4 have z position < 425cm
 
-	TString preECAL = Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", 		radius_preECAL[0], radius_preECAL[1], z_pos);
-	preECAL 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", 	radius_preECAL[0], radius_preECAL[1], z_pos);
-	preECAL 		+= Form(" || (LLP0_Eta == 0 && LLP0_Phi == 0 && LLP0_DecayR == 0 && jet0_isMatchedTo == -1)"); // hack for now to let data pass the cuts, want to improve later
-	TString ECAL 	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", 		radius_ECAL[0], radius_ECAL[1], z_pos);
-	ECAL 			+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", 	radius_ECAL[0], radius_ECAL[1], z_pos);
-	TString depth12 = Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", 		radius_depth12[0], radius_depth12[1], z_pos);
-	depth12 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", 	radius_depth12[0], radius_depth12[1], z_pos);
-	TString depth34 = Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", 		radius_depth34[0], radius_depth34[1], z_pos);
-	depth34 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", 	radius_depth34[0], radius_depth34[1], z_pos);
-	TString depth1	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", 		radius_depth1[0], radius_depth1[1], z_pos);
-	depth1 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", 		radius_depth1[0], radius_depth1[1], z_pos);
-	TString depth2	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", 		radius_depth2[0], radius_depth2[1], z_pos);
-	depth2 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", 		radius_depth2[0], radius_depth2[1], z_pos);
-	TString depth3	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", 		radius_depth3[0], radius_depth3[1], z_pos);
-	depth3 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", 		radius_depth3[0], radius_depth3[1], z_pos);
-	TString depth4	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_DecayZ) < %i && jet0_isMatchedTo == 0)", 		radius_depth4[0], radius_depth4[1], z_pos);
-	depth4 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_DecayZ) < %i && jet0_isMatchedTo == 1)", 		radius_depth4[0], radius_depth4[1], z_pos);
+	TString preECAL = Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) < %f && jet0_isMatchedTo == 0)", 		radius_preECAL[0], radius_preECAL[1], HBeta);
+	preECAL 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) < %f && jet0_isMatchedTo == 1)", 	radius_preECAL[0], radius_preECAL[1], HBeta);
+	preECAL 		+= Form(" || (LLP0_Eta < -9999 && LLP0_Phi < -9999 && LLP0_DecayR < -9999 && jet0_isMatchedTo == -1)"); // hack for now to let data pass the cuts, want to improve later
+	TString ECAL 	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) < %f && jet0_isMatchedTo == 0)", 		radius_ECAL[0], radius_ECAL[1], HBeta);
+	ECAL 			+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) < %f && jet0_isMatchedTo == 1)", 	radius_ECAL[0], radius_ECAL[1], HBeta);
+	TString depth12 = Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) < %f && jet0_isMatchedTo == 0)", 		radius_depth12[0], radius_depth12[1], HBeta);
+	depth12 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) < %f && jet0_isMatchedTo == 1)", 	radius_depth12[0], radius_depth12[1], HBeta);
+	TString depth34 = Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) < %f && jet0_isMatchedTo == 0)", 		radius_depth34[0], radius_depth34[1], HBeta);
+	depth34 		+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) < %f && jet0_isMatchedTo == 1)", 	radius_depth34[0], radius_depth34[1], HBeta);
+	TString depth1	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) < %f && jet0_isMatchedTo == 0)", 		radius_depth1[0], radius_depth1[1], HBeta);
+	depth1 			+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) < %f && jet0_isMatchedTo == 1)", 		radius_depth1[0], radius_depth1[1], HBeta);
+	TString depth2	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) < %f && jet0_isMatchedTo == 0)", 		radius_depth2[0], radius_depth2[1], HBeta);
+	depth2 			+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) < %f && jet0_isMatchedTo == 1)", 		radius_depth2[0], radius_depth2[1], HBeta);
+	TString depth3	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) < %f && jet0_isMatchedTo == 0)", 		radius_depth3[0], radius_depth3[1], HBeta);
+	depth3 			+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) < %f && jet0_isMatchedTo == 1)", 		radius_depth3[0], radius_depth3[1], HBeta);
+	TString depth4	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) < %f && jet0_isMatchedTo == 0)", 		radius_depth4[0], radius_depth4[1], HBeta);
+	depth4 			+= Form(" || (LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) < %f && jet0_isMatchedTo == 1)", 		radius_depth4[0], radius_depth4[1], HBeta);
 	// jet0_isMatchedTo will be 0 or 1 depending which LLP is matched to 
 
 	TCut Cut_Decay_preECAL 	= preECAL.Data();

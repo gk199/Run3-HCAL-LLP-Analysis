@@ -561,7 +561,7 @@ public :
 
 	// -------------------------------------------------------------------------------------
 	TH3F* GetHist3D( PlotParams myPlotParams_x, PlotParams myPlotParams_y, PlotParams myPlotParams_z, string filetag_treename, TCut cut_compare, string hist_tag_prepend = ""){
-		if( debug) cout<<"MiniTuplePlotter::GetHist2D()"<<endl;		
+		if( debug) cout<<"MiniTuplePlotter::GetHist3D()"<<endl;		
 
 		string hist_name_x = myPlotParams_x.hist_name;
 		string label_x 	   = myPlotParams_x.label_x;
@@ -858,8 +858,9 @@ public :
 				}
 
 				string output_file_name = myPlotParams_y.hist_name + "_vs_" + myPlotParams_x.hist_name; // GetOutputFileName(myPlotParams_x);
-				myCanvas->SaveAs( Form( "Plots/Plot2D_%s_%s_"+GetBetterCutTitle(cut_compare)+"_%s.png", filetag_treename.c_str(), output_file_name.c_str(), output_file_tag.c_str() ) );
-
+				// myCanvas->SaveAs( Form( "Plots/Plot2D_%s_%s_"+GetBetterCutTitle(cut_compare)+"_%s.png", filetag_treename.c_str(), output_file_name.c_str(), output_file_tag.c_str() ) );
+				myCanvas->SaveAs( Form( "Plots/Plot2D_%s_Cut"+GetBetterCutTitle(cut_compare)(0,24)+"_%s.png", output_file_name.c_str(), output_file_tag.c_str() ) );
+				delete myCanvas;
 			}
 		}
 
