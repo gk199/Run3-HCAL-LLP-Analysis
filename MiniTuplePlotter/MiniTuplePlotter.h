@@ -492,7 +492,7 @@ public :
 
 		TString hist_name_full = FormatMyString( Form("%stree:%s__histogram:%s__cut:"+GetBetterCutTitle( cut_compare ), hist_tag_prepend.c_str(), filetag_treename.c_str(), hist_name.c_str()  ) );
 
-		cout<<"-> Getting "<<hist_name_full<<endl;
+		if( debug ) cout<<"-> Getting "<<hist_name_full<<endl;
 
 		TH1F *h_temp;
 
@@ -830,6 +830,7 @@ public :
 
 				//StampCMS( "Internal", 140., 0.14, 0.84, 0.045 );
 				StampCuts( 0.12, 0.91, 0.02);
+				StampText( 0.7, 0.91, 0.04, WriteSelection);
 
 				TF1* fitline = new TF1("fitline", "[0]*x+[1]");
 				TLatex fittext;
@@ -858,7 +859,7 @@ public :
 				}
 
 				string output_file_name = myPlotParams_y.hist_name + "_vs_" + myPlotParams_x.hist_name; // GetOutputFileName(myPlotParams_x);
-				// myCanvas->SaveAs( Form( "Plots/Plot2D_%s_%s_"+GetBetterCutTitle(cut_compare)+"_%s.png", filetag_treename.c_str(), output_file_name.c_str(), output_file_tag.c_str() ) );
+				//myCanvas->SaveAs( Form( "Plots/Plot2D_%s_%s_"+GetBetterCutTitle(cut_compare)+"_%s.png", filetag_treename.c_str(), output_file_name.c_str(), output_file_tag.c_str() ) );
 				myCanvas->SaveAs( Form( "Plots/Plot2D_%s_Cut"+GetBetterCutTitle(cut_compare)(0,24)+"_%s.png", output_file_name.c_str(), output_file_tag.c_str() ) );
 				delete myCanvas;
 			}

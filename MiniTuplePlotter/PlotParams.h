@@ -37,12 +37,22 @@ PlotParams P_jet0_EtaSpread				= {"jet0_EtaSpread", "Leading Jet #eta Spread", "
 PlotParams P_jet0_EtaSpread_energy		= {"jet0_EtaSpread_energy", "Leading Jet #eta Spread Energy", "#eta Spread (energy weighted)", 0, 0.2 };
 PlotParams P_jet0_PhiSpread				= {"jet0_PhiSpread", "Leading Jet #phi Spread", "#phi Spread", 0, 0.4 };
 PlotParams P_jet0_PhiSpread_energy		= {"jet0_PhiSpread_energy", "Leading Jet #phi Spread Energy", "#phi Spread (energy weighted)", 0, 0.2 };
-PlotParams P_jet0_Track0Pt				= {"jet0_Track0Pt", "Leading Jet - Leading Track p_{T}", "p_{T} [GeV]", 0, 15 };
-PlotParams P_jet0_Track1Pt				= {"jet0_Track1Pt", "Leading Jet - Subeading Track p_{T}", "p_{T} [GeV]", 0, 5 };
-PlotParams P_jet0_Track2Pt				= {"jet0_Track2Pt", "Leading Jet - Third leading Track p_{T}", "p_{T} [GeV]", 0, 5 };
-//PlotParams P_jet0_Track0dzToPV		= {"jet0_Track0dzToPV", "Leading Jet - Leading Track #DeltaZ to PV", "#DeltaZ [cm]", MIN, MAX };
-//PlotParams P_jet0_Track1dzToPV		= {"jet0_Track1dzToPV", "Leading Jet - Subeading Track #DeltaZ to PV", "#DeltaZ [cm]", MIN, MAX };
-//PlotParams P_jet0_Track2dzToPV		= {"jet0_Track2dzToPV", "Leading Jet - Third Leading Track #DeltaZ to PV", "#DeltaZ [cm]", MIN, MAX };
+PlotParams P_jet0_Track0Pt				= {"jet0_Track0Pt", "Leading Jet: Leading Track p_{T}", "p_{T} [GeV]", 0, 15 };
+PlotParams P_jet0_Track1Pt				= {"jet0_Track1Pt", "Leading Jet: Subeading Track p_{T}", "p_{T} [GeV]", 0, 5 };
+PlotParams P_jet0_Track2Pt				= {"jet0_Track2Pt", "Leading Jet: Third leading Track p_{T}", "p_{T} [GeV]", 0, 5 };
+PlotParams P_jet0_Track0dxyToBS			= {"jet0_Track0dxyToBS", "Leading Jet: Leading Track d_{xy} to BS", "d_{xy} to BS", -20, 20};
+PlotParams P_jet0_Track1dxyToBS			= {"jet0_Track0dxyToBS", "Leading Jet: Subleading Track d_{xy} to BS", "d_{xy} to BS", -20, 20};
+PlotParams P_jet0_Track2dxyToBS			= {"jet0_Track2dxyToBS", "Leading Jet: Third Leading Track d_{xy} to BS", "d_{xy} to BS", -20, 20};
+PlotParams P_jet0_Track0dxyOverErr		= {"jet0_Track0dxyOverErr", "Leading Jet: Leading Track d_{xy} / error", "d_{xy} / error", 0, 40};
+PlotParams P_jet0_Track1dxyOverErr		= {"jet0_Track0dxyOverErr", "Leading Jet: Subleading Track d_{xy} / error", "d_{xy} / error", 0, 40};
+PlotParams P_jet0_Track2dxyOverErr		= {"jet0_Track2dxyOverErr", "Leading Jet: Third Leading Track d_{xy} / error", "d_{xy} / error", 0, 40};
+PlotParams P_jet0_Track0dzToPV			= {"jet0_Track0dzToPV", "Leading Jet: Leading Track #DeltaZ to PV", "#DeltaZ [cm]", -40, 40 };
+PlotParams P_jet0_Track1dzToPV			= {"jet0_Track1dzToPV", "Leading Jet: Subeading Track #DeltaZ to PV", "#DeltaZ [cm]", -40, 40 };
+PlotParams P_jet0_Track2dzToPV			= {"jet0_Track2dzToPV", "Leading Jet: Third Leading Track #DeltaZ to PV", "#DeltaZ [cm]", -40, 40 };
+PlotParams P_jet0_Track0dzOverErr		= {"jet0_Track0dzOverErr", "Leading Jet: Leading Track #DeltaZ / error", "#DeltaZ [cm] / error", 0, 100 };
+PlotParams P_jet0_Track1dzOverErr		= {"jet0_Track1dzOverErr", "Leading Jet: Subeading Track #DeltaZ / error", "#DeltaZ [cm] / error", 0, 100 };
+PlotParams P_jet0_Track2dzOverErr		= {"jet0_Track2dzOverErr", "Leading Jet: Third Leading Track #DeltaZ / error", "#DeltaZ [cm] / error", 0, 100 };
+
 // below ones are for example files, v1 minituples have changed variable names as used above
 PlotParams P_jet0_rechitN				= {"jet0_rechitN", "Number of HCAL RecHits", "N^{HCAL}_{RecHits}", 0, 200 };
 PlotParams P_jet0_energy				= {"jet0_energy", "Leading Jet Energy", "E [GeV]", 0, 250 };
@@ -55,12 +65,12 @@ PlotParams P_jet0_etaSpread				= {"jet0_etaSpread", "Leading Jet #eta Spread", "
 PlotParams P_jet0_etaSpread_energy		= {"jet0_etaSpread_energy", "Leading Jet #eta Spread Energy", "#eta Spread (energy weighted)", 0, 0.2 };
 PlotParams P_jet0_phiSpread				= {"jet0_phiSpread", "Leading Jet #phi Spread", "#phi Spread", 0, 0.4 };
 PlotParams P_jet0_phiSpread_energy		= {"jet0_phiSpread_energy", "Leading Jet #phi Spread Energy", "#phi Spread (energy weighted)", 0, 0.2 };
-PlotParams P_jet0_track0Pt				= {"jet0_track0Pt", "Leading Jet - Leading Track p_{T}", "p_{T} [GeV]", 0, 15 };
-PlotParams P_jet0_track1Pt				= {"jet0_track1Pt", "Leading Jet - Subeading Track p_{T}", "p_{T} [GeV]", 0, 5 };
-PlotParams P_jet0_track2Pt				= {"jet0_track2Pt", "Leading Jet - Third leading Track p_{T}", "p_{T} [GeV]", 0, 5 };
-//PlotParams P_jet0_track0dzToPV		= {"jet0_track0dzToPV", "Leading Jet - Leading Track #DeltaZ to PV", "#DeltaZ [cm]", MIN, MAX };
-//PlotParams P_jet0_track1dzToPV		= {"jet0_track1dzToPV", "Leading Jet - Subeading Track #DeltaZ to PV", "#DeltaZ [cm]", MIN, MAX };
-//PlotParams P_jet0_track2dzToPV		= {"jet0_track2dzToPV", "Leading Jet - Third Leading Track #DeltaZ to PV", "#DeltaZ [cm]", MIN, MAX };
+PlotParams P_jet0_track0Pt				= {"jet0_track0Pt", "Leading Jet: Leading Track p_{T}", "p_{T} [GeV]", 0, 15 };
+PlotParams P_jet0_track1Pt				= {"jet0_track1Pt", "Leading Jet: Subeading Track p_{T}", "p_{T} [GeV]", 0, 5 };
+PlotParams P_jet0_track2Pt				= {"jet0_track2Pt", "Leading Jet: Third leading Track p_{T}", "p_{T} [GeV]", 0, 5 };
+//PlotParams P_jet0_track0dzToPV		= {"jet0_track0dzToPV", "Leading Jet: Leading Track #DeltaZ to PV", "#DeltaZ [cm]", MIN, MAX };
+//PlotParams P_jet0_track1dzToPV		= {"jet0_track1dzToPV", "Leading Jet: Subeading Track #DeltaZ to PV", "#DeltaZ [cm]", MIN, MAX };
+//PlotParams P_jet0_track2dzToPV		= {"jet0_track2dzToPV", "Leading Jet: Third Leading Track #DeltaZ to PV", "#DeltaZ [cm]", MIN, MAX };
 
 // Subleading jet
 PlotParams P_jet1_E						= {"jet1_E", "Sub-Leading Jet Energy", "E [GeV] (sub-leading jet)", 0, 250 };
@@ -89,6 +99,7 @@ PlotParams P_LLP0_DecayY				= {"LLP0_DecayY", "LLP0 decay Y position", "Decay Y 
 PlotParams P_LLP0_DecayZ				= {"LLP0_DecayZ", "LLP0 decay Z position", "Decay Z [cm]", -10000, 10000 };
 PlotParams P_LLP0_DecayT				= {"LLP0_DecayT", "LLP0 decay time", "Decay time [ns]", 0, 10 };
 PlotParams P_LLP0_DecayCtau				= {"LLP0_DecayCtau", "LLP0 c#tau", "c#tau [cm]", 0, 1000 };
+
 // Sub-leading LLP
 PlotParams P_LLP1_Eta					= {"LLP1_Eta", "LLP1 #eta", "#eta", -1.5, 1.5 };
 PlotParams P_LLP1_Phi					= {"LLP1_Phi", "LLP1 #phi", "$phi", -3.2, 3.2 };
@@ -102,4 +113,3 @@ PlotParams P_LLP1_DecayY				= {"LLP1_DecayY", "LLP1 decay Y position", "Decay Y 
 PlotParams P_LLP1_DecayZ				= {"LLP1_DecayZ", "LLP1 decay Z position", "Decay Z [cm]", -10000, 10000 };
 PlotParams P_LLP1_DecayT				= {"LLP1_DecayT", "LLP1 decay time", "Decay time [ns]", 0, 10 };
 PlotParams P_LLP1_DecayCtau				= {"LLP1_DecayCtau", "LLP1 c#tau", "c#tau [cm]", 0, 1000 };
-
