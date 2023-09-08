@@ -532,12 +532,13 @@ def LLP_MatchingEfficiency(tree, obj_type):
 
                 selection_region = GetCut(obj_type + i + var, 1)        # require matching variable set
                 pT_region = GetCut(obj_type + i + "_Pt", [40,90000])    # require LLP pT is over 40 GeV
-                total_cut = selection_region + pT_region
+                eta_region = GetCut(obj_type + i + "_Eta", [-1.5,1.5])  # require LLP eta is in HB (-1.5 to 1.5)
+                total_cut = selection_region + pT_region + eta_region
                 canvTemp.cd()
 
                 LLP_radius = obj_type + i + "_" + LLP_denominator[0]
                 tree.Draw(LLP_radius +" >> "+hname_temp, total_cut, "", tree.GetEntries(), 0 ) # require matching variable set + LLP pt is high enough
-                tree.Draw(LLP_radius +" >> "+hname_denom, pT_region, "", tree.GetEntries(), 0 ) # require LLP pt is high enough
+                tree.Draw(LLP_radius +" >> "+hname_denom, pT_region + eta_region, "", tree.GetEntries(), 0 ) # require LLP pt is high enough and in HB
                 
                 if i == "1": 
                     ResetRange(LLP_effs[i])
