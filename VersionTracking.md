@@ -31,7 +31,9 @@ Location of minituples:
 Updates:
 * Clear variables in minituples tree
 * Truth matching for a jet done to LLP direction (decay in HCAL) or b quark (decay before HCAL)
-* LLP truth matching to a jet considers two options: match to LLP (decay in HCAL) or b quark (decay before HCAL), with option to cut on jet energy
+* LLP truth matching to a jet considers two options: match to LLP (decay in HCAL) or b quark (decay before HCAL), with option to cut on jet energy (jet 0, 40, 70, 100 GeV now)
+* Neutral and charged hadronic energy fraction, electromagnetic energy fraction (`NeutralHadEFrac, ChargedHadEFrac, EleEFrac`)
+* H over E, neutral over charged hadronic energy (`HoverE, HadNeutralOverCharged`)
 
 Location of minituples:
 ```

@@ -62,6 +62,11 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("jet%d_Eta", i) );
 		myvars_float.push_back( Form("jet%d_Phi", i) );
 		myvars_float.push_back( Form("jet%d_E", i) );
+		myvars_float.push_back( Form("jet%d_ChargedHadEFrac", i) );
+		myvars_float.push_back( Form("jet%d_NeutralHadEFrac", i) );
+		myvars_float.push_back( Form("jet%d_EleEFrac", i) );
+		myvars_float.push_back( Form("jet%d_HadNeutralOverCharged", i) );
+		myvars_float.push_back( Form("jet%d_HoverE", i) );
 		myvars_float.push_back( Form("jet%d_isTruthMatched", i) );
 		myvars_float.push_back( Form("jet%d_isMatchedTo", i) );
 		myvars_float.push_back( Form("jet%d_isMatchedWithDR", i) );
@@ -236,6 +241,13 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("jet%d_Eta", i)] 	= jet_Eta->at(i);
 		tree_output_vars_float[Form("jet%d_Phi", i)] 	= jet_Phi->at(i);
 		tree_output_vars_float[Form("jet%d_E", i)] 		= jet_E->at(i);
+
+		tree_output_vars_float[Form("jet%d_ChargedHadEFrac", i)] 		= jet_ChargedHadEFrac->at(i);
+		tree_output_vars_float[Form("jet%d_NeutralHadEFrac", i)] 		= jet_NeutralHadEFrac->at(i);
+		tree_output_vars_float[Form("jet%d_EleFrac", i)] 				= jet_EleEFrac->at(i);
+		tree_output_vars_float[Form("jet%d_HadNeutralOverCharged", i)] 	= jet_NeutralHadEFrac->at(i) / jet_ChargedHadEFrac->at(i);
+		tree_output_vars_float[Form("jet%d_HoverE", i)] 				= (jet_ChargedHadEFrac->at(i) + jet_NeutralHadEFrac->at(i)) / jet_EleEFrac->at(i);
+
 		tree_output_vars_float[Form("jet%d_isTruthMatched", i)] = JetIsTruthMatched( jet_Eta->at(i), jet_Phi->at(i) );
 		if (JetIsTruthMatched(jet_Eta->at(i), jet_Phi->at(i) ) == true) {
 			tree_output_vars_float[Form("jet%d_isMatchedTo",i)] = JetIsMatchedTo( jet_Eta->at(i), jet_Phi->at(i) )[0];
