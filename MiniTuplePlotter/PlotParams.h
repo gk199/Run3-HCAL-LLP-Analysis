@@ -16,6 +16,15 @@ struct Hist1_Hist2_Cut{
 	}
 };
 
+struct Hist1_Hist2{
+	PlotParams Params1, Params2; 	
+	Hist1_Hist2(PlotParams hist1, PlotParams hist2)
+	{
+		Params1 = hist1;
+		Params2 = hist2;
+	}
+};
+
 // Example:
 // PlotParams P_VarName 	= {"VariableName", "Plot Title", "x label [units]", XMIN, XMAX };
 
@@ -52,6 +61,11 @@ PlotParams P_jet0_Track2dzToPV			= {"jet0_Track2dzToPV", "Leading Jet: Third Lea
 PlotParams P_jet0_Track0dzOverErr		= {"jet0_Track0dzOverErr", "Leading Jet: Leading Track #DeltaZ / error", "#DeltaZ [cm] / error", 0, 100 };
 PlotParams P_jet0_Track1dzOverErr		= {"jet0_Track1dzOverErr", "Leading Jet: Subeading Track #DeltaZ / error", "#DeltaZ [cm] / error", 0, 100 };
 PlotParams P_jet0_Track2dzOverErr		= {"jet0_Track2dzOverErr", "Leading Jet: Third Leading Track #DeltaZ / error", "#DeltaZ [cm] / error", 0, 100 };
+PlotParams P_jet0_NeutralHadEFrac		= {"jet0_NeutralHadEFrac", "Leading Jet Neutral Hadron Energy Fraction", "Neutral Hadron Energy Fraction", 0, 1 };
+PlotParams P_jet0_ChargedHadEFrac		= {"jet0_ChargedHadEFrac", "Leading Jet Charged Hadron Energy Fraction", "Charged Hadron Energy Fraction", 0, 1 };
+PlotParams P_jet0_EleEFrac				= {"jet0_EleEFrac", "Leading Jet Electromagnetic Energy Fraction", "Electromagnetic Energy Fraction", 0, 1 };
+PlotParams P_jet0_HoverE				= {"jet0_HoverE", "Leading Jet H/E Energy Ratio", "H/E Energy Ratio", 0, 100 };
+PlotParams P_jet0_HadNeutralOverCharged	= {"jet0_HadNeutralOverCharged", "Leading Jet Neutral over Charged Hadronic Energy", "Neutral over Charged Hadron Energy", 0, 100 };
 
 // below ones are for example files, v1 minituples have changed variable names as used above
 PlotParams P_jet0_rechitN				= {"jet0_rechitN", "Number of HCAL RecHits", "N^{HCAL}_{RecHits}", 0, 200 };
@@ -79,6 +93,11 @@ PlotParams P_jet1_EtaSpread				= {"jet1_EtaSpread", "Sub-Leading Jet #eta Spread
 PlotParams P_jet1_EtaSpread_energy		= {"jet1_EtaSpread_energy", "Sub-Leading Jet #eta Spread Energy", "#eta Spread (energy weighted)", 0, 0.2 };
 PlotParams P_jet1_PhiSpread				= {"jet1_PhiSpread", "Sub-Leading Jet #phi Spread", "#phi Spread", 0, 0.4 };
 PlotParams P_jet1_PhiSpread_energy		= {"jet1_PhiSpread_energy", "Sub-Leading Jet #phi Spread Energy", "#phi Spread (energy weighted)", 0, 0.2 };
+PlotParams P_jet1_NeutralHadEFrac		= {"jet1_NeutralHadEFrac", "Sub-Leading Jet Neutral Hadron Energy Fraction", "Neutral Hadron Energy Fraction", 0, 1 };
+PlotParams P_jet1_ChargedHadEFrac		= {"jet1_ChargedHadEFrac", "Sub-Leading Jet Charged Hadron Energy Fraction", "Charged Hadron Energy Fraction", 0, 1 };
+PlotParams P_jet1_EleEFrac				= {"jet1_EleEFrac", "Sub-Leading Jet Electromagnetic Energy Fraction", "Electromagnetic Energy Fraction", 0, 1 };
+PlotParams P_jet1_HoverE				= {"jet1_HoverE", "Sub-Leading Jet H/E Energy Ratio", "H/E Energy Ratio", 0, 100 };
+PlotParams P_jet1_HadNeutralOverCharged	= {"jet1_HadNeutralOverCharged", "Sub-Leading Jet Neutral over Charged Hadronic Energy", "Neutral over Charged Hadron Energy", 0, 100 };
 
 // Event Quantities
 PlotParams P_met_Pt						= {"met_Pt", "MET p_{T}", "p_{T} [GeV]", 0, 400 };
