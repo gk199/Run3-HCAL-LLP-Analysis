@@ -64,7 +64,7 @@ PlotParams P_jet0_Track2dzOverErr		= {"jet0_Track2dzOverErr", "Leading Jet: Thir
 PlotParams P_jet0_NeutralHadEFrac		= {"jet0_NeutralHadEFrac", "Leading Jet Neutral Hadron Energy Fraction", "Neutral Hadron Energy Fraction", 0, 1 };
 PlotParams P_jet0_ChargedHadEFrac		= {"jet0_ChargedHadEFrac", "Leading Jet Charged Hadron Energy Fraction", "Charged Hadron Energy Fraction", 0, 1 };
 PlotParams P_jet0_EleEFrac				= {"jet0_EleEFrac", "Leading Jet Electromagnetic Energy Fraction", "Electromagnetic Energy Fraction", 0, 1 };
-PlotParams P_jet0_HoverE				= {"jet0_HoverE", "Leading Jet H/E Energy Ratio", "H/E Energy Ratio", 0, 100 };
+PlotParams P_jet0_HoverE				= {"jet0_HoverE", "Leading Jet H/E Energy Ratio", "H/E Energy Ratio", 0, 40 };
 PlotParams P_jet0_HadNeutralOverCharged	= {"jet0_HadNeutralOverCharged", "Leading Jet Neutral over Charged Hadronic Energy", "Neutral over Charged Hadron Energy", 0, 100 };
 
 // below ones are for example files, v1 minituples have changed variable names as used above
