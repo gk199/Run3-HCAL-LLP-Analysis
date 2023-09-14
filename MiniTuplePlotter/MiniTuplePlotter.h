@@ -30,7 +30,7 @@ public :
 	map<string,TCut> selective_cuts;
 
 	// Default Plot Options 
-	vector<Color_t> colors    = { kBlack, kMagenta-7, kRed, kOrange, kGreen+2, kAzure+7, kBlue+2 };
+	vector<Color_t> colors    = { kBlack, kMagenta-7, kRed, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4  };
 	vector<Style_t> linestyle = { kSolid, kSolid, kSolid, kSolid, kSolid, kSolid, kSolid };
 	bool plot_log  			= true; 
 	bool plot_log_x 		= false; 
@@ -39,9 +39,12 @@ public :
 	bool plot_cdf  			= false;
 	bool plot_reverse_cdf  	= false;
 	bool plot_grid 			= true; 
-	bool manual_legend 		= false;
 	bool stamp_counts 		= false; 
-	double legx1, legx2, legy1, legy2;
+	vector<string> legend_names = {};
+	double legx1 = 0.55;
+	double legy1 = 0.65;
+	double legx2 = 0.9; 
+	double legy2 = 0.9; 
 
 	Int_t NBins = 100; 
 	bool set_variable_bins = false;
@@ -255,7 +258,7 @@ public :
 		output_file_name_temp.ReplaceAll("<", "LT");	
 
 		return output_file_name_temp;
-	} 	
+	} 
 
 	// =====================================================================================
 	// Set Plots + Cuts
@@ -377,6 +380,7 @@ public :
 		TString title = cut.GetTitle(); 	
 		title.ReplaceAll("\"", "");
 		title.ReplaceAll("/", "DIV");
+		title.ReplaceAll("*", "MULT");		
 		title.ReplaceAll("(", "");
 		title.ReplaceAll(")", "");
 		return title;
@@ -390,20 +394,30 @@ public :
 		my_TString.ReplaceAll(" ", "");
 		my_TString.ReplaceAll("(", "");
 		my_TString.ReplaceAll(")", "");
+		my_TString.ReplaceAll("/", "DIV");
+		my_TString.ReplaceAll("*", "MULT");			
 
 		return my_TString;
 	}
 
 	// -------------------------------------------------------------------------------------
-	void SetLegendManual( double legx1_temp, double legx2_temp, double legy1_temp, double legy2_temp ){
-		if( debug) cout<<"MiniTuplePlotter::SetLegendManual()"<<endl;
+	void SetLegendPosition( double legx1_temp, double legy1_temp, double legx2_temp, double legy2_temp ){
+		if( debug) cout<<"MiniTuplePlotter::SetLegendPosition()"<<endl;
 
 		legx1 = legx1_temp;
-		legx2 = legx2_temp;
 		legy1 = legy1_temp;
+		legx2 = legx2_temp;
 		legy2 = legy2_temp;
-		manual_legend = true;
+
 	}
+
+	// -------------------------------------------------------------------------------------
+	void SetLegendNames( vector<string> legend_names_temp ){
+		if( debug) cout<<"MiniTuplePlotter::SetLegendNames()"<<endl;
+
+		legend_names = legend_names_temp;
+
+	}	
 
 	// -------------------------------------------------------------------------------------
 	string GetFitInfo(TH1F *h, string units = ""){
@@ -647,11 +661,16 @@ public :
 
 			if( plot_norm )
 				h->Scale( 1./h->Integral() );
+			
 
 			string legend_name = hist_tag;
+
+			if( legend_names.size() > i )
+				legend_name = legend_names.at(i);
+
 			if( stamp_counts ){
+				legend_name = Form("%s (NE=%.f,Int=%.2f)", legend_name.c_str(), h->GetEntries(), h->Integral() );
 				//legend_name = Form("%s (Mean=%.2f)", hist_tag.c_str(), h->GetMean());
-				legend_name = Form("%s (NE=%.f,Int=%.2f)", hist_tag.c_str(), h->GetEntries(), h->Integral() );
 				//if( debug ) cout<<"  Legend Name = "<<legend_name<<endl;
 			}
 
@@ -671,7 +690,7 @@ public :
 			if( run_fit ) 
 				h->SetName( Form("#splitline{%s}{%s}", legend_name.c_str(), fit_info_str.c_str() ) );	
 			else 
-				h->SetName( Form("%s", legend_name.c_str()) );	
+				h->SetName( Form("%s", legend_name.c_str()) );
 
 			hs->Add( h );	
 		}
@@ -756,10 +775,7 @@ public :
 			myCanvas->cd(1);
 			hs->Draw("nostack"); 
 
-			if( manual_legend )
-				gPad->BuildLegend(legx1,legx2,legy1,legy2,"");
-			else
-				gPad->BuildLegend(0.55,0.65,0.9,0.9,"");
+			gPad->BuildLegend(legx1,legy1,legx2, legy2,"");
 
 			StampCMS( "Internal", 140., 0.14, 0.84, 0.045 );
 			StampCuts( 0.1, 0.91, 0.015 );			
@@ -786,7 +802,7 @@ public :
 				if( plot_type != "" ){
 					myCanvas->cd(1); gPad->SetGrid();
 					myCanvas->cd(2); gPad->SetGrid();
-				}
+				} 
 			}
 
 			TString output_file_name = GetOutputFileName(PlotParams_temp, plot_type);
@@ -806,8 +822,11 @@ public :
 		GetTrees();
 		SetStyle();
 
+		int i = -1;
 		for( auto filetag_treename: filetags_treenames ){
+			if( cuts_compare.size() == 0 ) cuts_compare.push_back("");
 			for( auto cut_compare: cuts_compare ){
+				i++;
 
 				TH2F* h2 = (TH2F*)GetHist2D( myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare );
 
@@ -857,8 +876,14 @@ public :
 					fittext.Draw("SAME");
 				}
 
-				string output_file_name = myPlotParams_y.hist_name + "_vs_" + myPlotParams_x.hist_name; // GetOutputFileName(myPlotParams_x);
-				myCanvas->SaveAs( Form( "Plots/Plot2D_%s_%s_"+GetBetterCutTitle(cut_compare)+"_%s.png", filetag_treename.c_str(), output_file_name.c_str(), output_file_tag.c_str() ) );
+				TString output_file_name = FormatMyString( myPlotParams_y.hist_name + "_vs_" + myPlotParams_x.hist_name ); // GetOutputFileName(myPlotParams_x);
+
+				TString saveas_name = GetBetterCutTitle(cut_compare);
+
+				if( legend_names.size() > i )
+					saveas_name = Form("%s", legend_names.at(i).c_str() );
+
+				myCanvas->SaveAs( Form( "Plots/Plot2D_%s_"+output_file_name+"_"+saveas_name+"_%s.png", filetag_treename.c_str(), output_file_tag.c_str() ) );
 
 			}
 		}
@@ -915,11 +940,8 @@ public :
 		StampCMS( "Internal", 140., 0.14, 0.84, 0.045 );
 		leg->Draw();
 
-		if( manual_legend )
-			gPad->BuildLegend(legx1,legx2,legy1,legy2,"");
-		else
-			gPad->BuildLegend(0.55,0.65,0.9,0.9,"");	
-		
+		gPad->BuildLegend(legx1,legy1,legx2, legy2,"");
+			
 		canv->SaveAs( Form( "Plots/Plot_%s_%s.png", hist_name.c_str(), output_file_tag.c_str() ) );
 		delete canv;
 
