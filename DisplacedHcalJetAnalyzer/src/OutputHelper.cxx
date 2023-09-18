@@ -62,6 +62,12 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("jet%d_Eta", i) );
 		myvars_float.push_back( Form("jet%d_Phi", i) );
 		myvars_float.push_back( Form("jet%d_E", i) );
+		myvars_float.push_back( Form("jet%d_ChargedHadEFrac", i) );
+		myvars_float.push_back( Form("jet%d_NeutralHadEFrac", i) );
+		myvars_float.push_back( Form("jet%d_PhoEFrac", i) );
+		myvars_float.push_back( Form("jet%d_EleEFrac", i) );
+		myvars_float.push_back( Form("jet%d_MuonEFrac", i) );
+		myvars_float.push_back( Form("jet%d_HoverE", i) );
 		myvars_float.push_back( Form("jet%d_isTruthMatched", i) );
 		myvars_float.push_back( Form("jet%d_isMatchedTo", i) );
 		myvars_float.push_back( Form("jet%d_isMatchedWithDR", i) );
@@ -70,6 +76,8 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("jet%d_EtaSpread_energy", i) );
 		myvars_float.push_back( Form("jet%d_PhiSpread", i) );
 		myvars_float.push_back( Form("jet%d_PhiSpread_energy", i) );
+		myvars_float.push_back( Form("jet%d_EtaPhiQuadSpread", i) );
+		myvars_float.push_back( Form("jet%d_EtaPhiQuadSpread_energy", i) );
 		myvars_float.push_back( Form("jet%d_TDCavg", i) );
 		myvars_float.push_back( Form("jet%d_TDCavg_energyWeight", i) );
 		myvars_float.push_back( Form("jet%d_TDCnDelayed", i) );
@@ -123,7 +131,12 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("LLPDecay%d_ProdZ", i) );
 		myvars_float.push_back( Form("LLPDecay%d_ProdR", i) );
 		myvars_float.push_back( Form("LLPDecay%d_isTruthMatched", i) );
-		if (i < 2) myvars_float.push_back( Form("LLP%d_isTruthMatched", i) );
+		if (i < 2) {
+			myvars_float.push_back( Form("LLP%d_isTruthMatched", i) );
+			myvars_float.push_back( Form("LLP%d_isTruthMatched_Jet40", i) );
+			myvars_float.push_back( Form("LLP%d_isTruthMatched_Jet70", i) );
+			myvars_float.push_back( Form("LLP%d_isTruthMatched_Jet100", i) );
+		}
 	}
 
 	cout<<"Creating new trees for the following:"<<endl;
@@ -231,6 +244,14 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("jet%d_Eta", i)] 	= jet_Eta->at(i);
 		tree_output_vars_float[Form("jet%d_Phi", i)] 	= jet_Phi->at(i);
 		tree_output_vars_float[Form("jet%d_E", i)] 		= jet_E->at(i);
+
+		tree_output_vars_float[Form("jet%d_ChargedHadEFrac", i)] 		= jet_ChargedHadEFrac->at(i);
+		tree_output_vars_float[Form("jet%d_NeutralHadEFrac", i)] 		= jet_NeutralHadEFrac->at(i);
+		tree_output_vars_float[Form("jet%d_PhoEFrac", i)] 				= jet_PhoEFrac->at(i);
+		tree_output_vars_float[Form("jet%d_EleFrac", i)] 				= jet_EleEFrac->at(i);
+		tree_output_vars_float[Form("jet%d_MuonEFrac", i)] 				= jet_MuonEFrac->at(i);
+		tree_output_vars_float[Form("jet%d_HoverE", i)] 				= (jet_ChargedHadEFrac->at(i) + jet_NeutralHadEFrac->at(i)) / (jet_PhoEFrac->at(i) + jet_EleEFrac->at(i));
+
 		tree_output_vars_float[Form("jet%d_isTruthMatched", i)] = JetIsTruthMatched( jet_Eta->at(i), jet_Phi->at(i) );
 		if (JetIsTruthMatched(jet_Eta->at(i), jet_Phi->at(i) ) == true) {
 			tree_output_vars_float[Form("jet%d_isMatchedTo",i)] = JetIsMatchedTo( jet_Eta->at(i), jet_Phi->at(i) )[0];
@@ -248,10 +269,12 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 
 		for (int depth = 0; depth < 4; depth++) tree_output_vars_float[Form("jet%d_EnergyFrac_Depth%d", i, depth+1)] = energy[depth]; // each fractional energy saved in different tree
 		tree_output_vars_int[Form("jet%d_RechitN", i)] = rechitJet.size();
-		tree_output_vars_float[Form("jet%d_EtaSpread", i)] = spread_Eta_Phi[0];
-		tree_output_vars_float[Form("jet%d_EtaSpread_energy", i)] = spread_Eta_Phi[2];
-		tree_output_vars_float[Form("jet%d_PhiSpread", i)] = spread_Eta_Phi[1];
-		tree_output_vars_float[Form("jet%d_PhiSpread_energy", i)] = spread_Eta_Phi[3];
+		tree_output_vars_float[Form("jet%d_EtaSpread", i)] 					= spread_Eta_Phi[0];
+		tree_output_vars_float[Form("jet%d_EtaSpread_energy", i)] 			= spread_Eta_Phi[2];
+		tree_output_vars_float[Form("jet%d_PhiSpread", i)] 					= spread_Eta_Phi[1];
+		tree_output_vars_float[Form("jet%d_PhiSpread_energy", i)] 			= spread_Eta_Phi[3];
+		tree_output_vars_float[Form("jet%d_EtaPhiQuadSpread", i)] 			= sqrt(spread_Eta_Phi[0] * spread_Eta_Phi[0] + spread_Eta_Phi[1] * spread_Eta_Phi[1]);
+		tree_output_vars_float[Form("jet%d_EtaPhiQuadSpread_energy", i)] 	= sqrt(spread_Eta_Phi[2] * spread_Eta_Phi[2] + spread_Eta_Phi[3] * spread_Eta_Phi[3]);
 
 		tree_output_vars_float[Form("jet%d_TDCavg", i)] = TDC_TDCenergy[0];
 		tree_output_vars_float[Form("jet%d_TDCavg_energyWeight", i)] = TDC_TDCenergy[1];
@@ -281,6 +304,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 			}
 		} // end of track matching 
 	}
+
 	for (int i = 0; i < n_gLLP; i++) {
 		float decay_radius = gLLP_DecayVtx_R.at(i); // GetDecayRadiusHB_LLP(i); // -999 default value
 		float distance = gLLP_DecayVtx_Mag.at(i); //GetDecayDistance_LLP(i);
@@ -302,7 +326,6 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("LLP%d_E", i)] = gLLP_E->at(i);
 		tree_output_vars_float[Form("LLP%d_Beta", i)] = gLLP_Beta->at(i);
 		tree_output_vars_float[Form("LLP%d_TravelTime", i)] = gLLP_TravelTime->at(i);
-
 		tree_output_vars_float[Form("LLP%d_DecayX", i)] = gLLP_DecayVtx_X->at(i);
 		tree_output_vars_float[Form("LLP%d_DecayY", i)] = gLLP_DecayVtx_Y->at(i);
 		tree_output_vars_float[Form("LLP%d_DecayZ", i)] = gLLP_DecayVtx_Z->at(i);
@@ -317,17 +340,15 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		if (energy[3][0] + energy[3][1] + energy[3][2] + energy[3][3] > 0) { // ensure there is positive energy in one depth
 			for (int depth = 0; depth < 4; depth++) tree_output_vars_float[Form("LLP%d_EnergyFracLLP_Depth%d", i, depth+1)] = energy[3][depth]; // LLP only matching. each fractional energy saved in different tree
 		}
-		tree_output_vars_float[Form("LLP%dDecay_RechitEnergy20GeV", i)] = 0;
+
 		if (energy[4][0] > 20) tree_output_vars_float[Form("LLP%dDecay_RechitEnergy20GeV", i)] = 1;
 		tree_output_vars_float[Form("LLP%dDecay_RechitEnergy", i)] = energy[4][0];
-		tree_output_vars_float[Form("LLP%d_RechitEnergy20GeV", i)] = 0;
 		if (energy[4][3] > 20) tree_output_vars_float[Form("LLP%d_RechitEnergy20GeV", i)] = 1;
 		tree_output_vars_float[Form("LLP%d_RechitEnergy", i)] = energy[4][3];
 
-		tree_output_vars_float[Form("LLP%d_isTruthMatched", i)] = 0; // will be filled below, when we know if LLP is mached to a jet based on decay products
 	}
 
-	for (int i = 0; i < gLLPDecay_iParticle.size(); i++) {
+	for (int i = 0; i < gLLPDecay_iParticle.size(); i++) { // size is 4
 		int idx_gParticle = gLLPDecay_iParticle.at(i);
 		tree_output_vars_float[Form("LLPDecay%d_Pt", i)]    = gParticle_Pt->at(idx_gParticle);
 		tree_output_vars_float[Form("LLPDecay%d_Eta", i)]   = gParticle_Eta->at(idx_gParticle);
@@ -337,8 +358,11 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("LLPDecay%d_ProdY", i)] = gParticle_ProdVtx_Y->at(idx_gParticle);
 		tree_output_vars_float[Form("LLPDecay%d_ProdZ", i)] = gParticle_ProdVtx_Z->at(idx_gParticle);
 		tree_output_vars_float[Form("LLPDecay%d_ProdR", i)] = pow( pow(gParticle_ProdVtx_X->at(idx_gParticle), 2.) + pow(gParticle_ProdVtx_Y->at(idx_gParticle), 2.), 0.5 );
-		tree_output_vars_float[Form("LLPDecay%d_isTruthMatched", i)] = LLPDecayIsTruthMatched( i );
-		if (LLPDecayIsTruthMatched( i )) tree_output_vars_float[Form("LLP%d_isTruthMatched", gLLPDecay_iLLP.at(i))] = 1; // LLPDecayIsFromLLP( i ) tells which LLP this comes from 
+		tree_output_vars_float[Form("LLPDecay%d_isTruthMatched", i)] = LLPIsTruthMatched( i );
+		if (LLPIsTruthMatched( i )) tree_output_vars_float[Form("LLP%d_isTruthMatched", gLLPDecay_iLLP.at(i))] = 1; // gLLPDecay_iLLP.at( i ) tells which LLP this comes from, and gLLPDecay_iLLP.at(i) details correspond to i in n_gLLP loop above
+		if (LLPIsTruthMatched( i, 40 )) tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet40", gLLPDecay_iLLP.at(i))] = 1; 
+		if (LLPIsTruthMatched( i, 70 )) tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet70", gLLPDecay_iLLP.at(i))] = 1; 
+		if (LLPIsTruthMatched( i, 100 )) tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet100", gLLPDecay_iLLP.at(i))] = 1; 
 	}
 
 	tree_output[treename]->Fill();

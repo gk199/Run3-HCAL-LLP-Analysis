@@ -19,6 +19,7 @@ public :
 	string infile_path;
 	string infile_ext;
 	vector<PlotParams> PlotParamsList;
+	vector<Hist1_Hist2> Plot2DParamsList;
 	TString MiniTupleVersion = "";
 
 	string output_file_tag = ""; 
@@ -220,6 +221,18 @@ public :
 		if( !trees_ok ) cout<<"ERROR: Input files or trees do not exist. Check input file paths & parameters.."<<endl;
 	}
 
+	// -------------------------------------------------------------------------------------
+	void ClearFileTrees(){
+		if( debug) cout<<"MiniTuplePlotter::ClearFileTrees()"<<endl;
+
+		for( auto filetag_treename: filetags_treenames ){
+			std::cout << filetag_treename << std::endl;
+		}
+		filetags_treenames.clear();
+	}
+
+
+
 	// =====================================================================================
 	// Output File Info and Legend Format (Including Displaying Fit Info) 
 	// =====================================================================================
@@ -269,6 +282,13 @@ public :
 		if( debug) cout<<"MiniTuplePlotter::SetPlots()"<<endl;		
 
 		PlotParamsList = myPlotParamsList;
+	} 
+
+	// -------------------------------------------------------------------------------------
+	void SetPlots2D(vector<Hist1_Hist2> myPlot2DParamsList){
+		if( debug) cout<<"MiniTuplePlotter::SetPlots2D()"<<endl;		
+
+		Plot2DParamsList = myPlot2DParamsList;
 	} 
 
 	// -------------------------------------------------------------------------------------
@@ -506,7 +526,7 @@ public :
 
 		TString hist_name_full = FormatMyString( Form("%stree:%s__histogram:%s__cut:"+GetBetterCutTitle( cut_compare ), hist_tag_prepend.c_str(), filetag_treename.c_str(), hist_name.c_str()  ) );
 
-		cout<<"-> Getting "<<hist_name_full<<endl;
+		if( debug ) cout<<"-> Getting "<<hist_name_full<<endl;
 
 		TH1F *h_temp;
 
@@ -575,7 +595,7 @@ public :
 
 	// -------------------------------------------------------------------------------------
 	TH3F* GetHist3D( PlotParams myPlotParams_x, PlotParams myPlotParams_y, PlotParams myPlotParams_z, string filetag_treename, TCut cut_compare, string hist_tag_prepend = ""){
-		if( debug) cout<<"MiniTuplePlotter::GetHist2D()"<<endl;		
+		if( debug) cout<<"MiniTuplePlotter::GetHist3D()"<<endl;		
 
 		string hist_name_x = myPlotParams_x.hist_name;
 		string label_x 	   = myPlotParams_x.label_x;
@@ -816,78 +836,106 @@ public :
 	}
 
 	// -------------------------------------------------------------------------------------
+	void Draw2DPlot( PlotParams myPlotParams_x, PlotParams myPlotParams_y, string filetag_treename, TCut cut_compare, int i ) {
+		if( debug) cout<<"MiniTuplePlotter::Draw2DPlot()"<<endl;
+
+		TH2F* h2 = (TH2F*)GetHist2D( myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare );
+
+		TCanvas *myCanvas = new TCanvas("c", "c", 1300, 1200);
+		myCanvas->SetRightMargin(0.14);
+		myCanvas->SetLeftMargin(0.14);
+		myCanvas->SetTopMargin(0.12);
+		myCanvas->SetBottomMargin(0.12);
+
+		if( plot_log ) 
+			gPad->SetLogz();
+
+		if( plot_norm )
+			h2->Scale(1./h2->Integral());
+
+		if( stamp_counts )
+			h2->Draw("colz TEXT");
+		else
+			h2->Draw("colz");
+
+		//StampCMS( "Internal", 140., 0.14, 0.84, 0.045 );
+		StampCuts( 0.12, 0.91, 0.02);
+		StampText( 0.7, 0.91, 0.04, WriteSelection);
+
+		TF1* fitline = new TF1("fitline", "[0]*x+[1]");
+		TLatex fittext;
+		float m, b, corr;
+		if( run_fit2D ){
+
+			//h2->Fit( fitline );
+			m = fitline->GetParameter(0);
+			b = fitline->GetParameter(1);
+			cout<<"slope = "<<m<<endl;
+			cout<<"y-int = "<<b<<endl;
+
+			corr = h2->GetCorrelationFactor();
+			cout<<"correlation factor = "<<corr<<endl;
+		
+			//fitline->Draw("SAME"); 
+			double stamp_x = 0, stamp_y = 0;
+			if( myPlotParams_x.xmin < 0) stamp_x = myPlotParams_x.xmin*0.9;
+			else 						 stamp_x = myPlotParams_x.xmin*1.1;
+			stamp_y = myPlotParams_y.xmax*0.9;
+
+			fittext.SetTextSize(.03);
+			//fittext.DrawLatex(-4,4, Form("#splitline{Fit: y = %.4f * x + %.4f}{Correlation Factor = %.4f}", m, b, corr ));
+			fittext.DrawLatex(stamp_x, stamp_y, Form("Correlation Factor = %.4f", corr ));
+			fittext.Draw("SAME");
+		}
+
+    TString output_file_name = FormatMyString( myPlotParams_y.hist_name + "_vs_" + myPlotParams_x.hist_name ); // GetOutputFileName(myPlotParams_x);
+
+		TString saveas_name = GetBetterCutTitle(cut_compare);
+
+		if( legend_names.size() > i )
+			saveas_name = Form("%s", legend_names.at(i).c_str() );
+
+		myCanvas->SaveAs( Form( "Plots/Plot2D_%s_"+output_file_name+"_"+saveas_name+"_%s.png", filetag_treename.c_str(), output_file_tag.c_str() ) );
+        
+		delete myCanvas;
+	}
+
+	// -------------------------------------------------------------------------------------
 	void Plot2D( PlotParams myPlotParams_x, PlotParams myPlotParams_y ){
 		if( debug) cout<<"MiniTuplePlotter::Plot2D()"<<endl;		
 
 		GetTrees();
 		SetStyle();
 
-		int i = -1;
+    int i = -1;
 		for( auto filetag_treename: filetags_treenames ){
-			if( cuts_compare.size() == 0 ) cuts_compare.push_back("");
+      if( cuts_compare.size() == 0 ) cuts_compare.push_back("");
 			for( auto cut_compare: cuts_compare ){
-				i++;
-
-				TH2F* h2 = (TH2F*)GetHist2D( myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare );
-
-				TCanvas *myCanvas = new TCanvas("c", "c", 1300, 1200);
-				myCanvas->SetRightMargin(0.14);
-				myCanvas->SetLeftMargin(0.14);
-				myCanvas->SetTopMargin(0.12);
-				myCanvas->SetBottomMargin(0.12);
-
-				if( plot_log ) 
-					gPad->SetLogz();
-
-				if( plot_norm )
-					h2->Scale(1./h2->Integral());
-
-				if( stamp_counts )
-					h2->Draw("colz TEXT");
-				else
-					h2->Draw("colz");
-
-				//StampCMS( "Internal", 140., 0.14, 0.84, 0.045 );
-				StampCuts( 0.12, 0.91, 0.02);
-
-				TF1* fitline = new TF1("fitline", "[0]*x+[1]");
-				TLatex fittext;
-				float m, b, corr;
-				if( run_fit2D ){
-
-					//h2->Fit( fitline );
-					m = fitline->GetParameter(0);
-					b = fitline->GetParameter(1);
-					cout<<"slope = "<<m<<endl;
-					cout<<"y-int = "<<b<<endl;
-
-					corr = h2->GetCorrelationFactor();
-					cout<<"correlation factor = "<<corr<<endl;
-				
-					//fitline->Draw("SAME"); 
-					double stamp_x = 0, stamp_y = 0;
-					if( myPlotParams_x.xmin < 0) stamp_x = myPlotParams_x.xmin*0.9;
-					else 						 stamp_x = myPlotParams_x.xmin*1.1;
-					stamp_y = myPlotParams_y.xmax*0.9;
-
-					fittext.SetTextSize(.03);
-					//fittext.DrawLatex(-4,4, Form("#splitline{Fit: y = %.4f * x + %.4f}{Correlation Factor = %.4f}", m, b, corr ));
-					fittext.DrawLatex(stamp_x, stamp_y, Form("Correlation Factor = %.4f", corr ));
-					fittext.Draw("SAME");
-				}
-
-				TString output_file_name = FormatMyString( myPlotParams_y.hist_name + "_vs_" + myPlotParams_x.hist_name ); // GetOutputFileName(myPlotParams_x);
-
-				TString saveas_name = GetBetterCutTitle(cut_compare);
-
-				if( legend_names.size() > i )
-					saveas_name = Form("%s", legend_names.at(i).c_str() );
-
-				myCanvas->SaveAs( Form( "Plots/Plot2D_%s_"+output_file_name+"_"+saveas_name+"_%s.png", filetag_treename.c_str(), output_file_tag.c_str() ) );
-
+        i++;
+				Draw2DPlot(myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare, i);
 			}
 		}
+	}
 
+	// -------------------------------------------------------------------------------------
+	void PlotMany2D( ){
+		if( debug) cout<<"MiniTuplePlotter::PlotMany2D()"<<endl;		
+
+		GetTrees();
+		SetStyle();
+
+		for( auto filetag_treename: filetags_treenames ){
+			for( auto Plot2DParams_temp: Plot2DParamsList ){
+        int i = -1;
+				PlotParams myPlotParams_x = Plot2DParams_temp.Params1;
+				PlotParams myPlotParams_y = Plot2DParams_temp.Params2;
+        if( cuts_compare.size() == 0 ) cuts_compare.push_back("");
+				for( auto cut_compare: cuts_compare ){
+          i++;
+					Draw2DPlot(myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare, i);
+				}
+			}
+		}
 	}
 
 	// -------------------------------------------------------------------------------------

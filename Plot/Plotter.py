@@ -116,18 +116,18 @@ def GetCut_LLPmatch( variable, branch_name, branch_sel ):
     if (variable[0:3] == "LLP"):
         selection = ""
         if type(branch_sel) is int:
-		    selection = variable + branch_name + " == " + str(branch_sel)
+            selection = variable + branch_name + " == " + str(branch_sel)
         elif type(branch_sel) is list:
             if len(branch_sel) == 0:
-			    print("WARNING <GetCut_LLPmatch> : Entry error (length = 0). No cut implemented")
+                print("WARNING <GetCut_LLPmatch> : Entry error (length = 0). No cut implemented")
             elif len(branch_sel) == 1:
-			    selection = variable + branch_name + " == " + str(branch_sel[0])
+                selection = variable + branch_name + " == " + str(branch_sel[0])
             elif len(branch_sel) == 2:
-		    	selection = variable + branch_name + " >= " + str(branch_sel[0]) + " && " + variable + branch_name + " < " + str(branch_sel[1])
+                selection = variable + branch_name + " >= " + str(branch_sel[0]) + " && " + variable + branch_name + " < " + str(branch_sel[1])
             else:
-	    		print("WARNING <GetCut_LLPmatch> : 'branch_sel' input has more than two entries. Only using the first two!")
+                print("WARNING <GetCut_LLPmatch> : 'branch_sel' input has more than two entries. Only using the first two!")
         else: 
-	    	print("WARNING <GetCut_LLPmatch> : Type Error. No cut implemented")
+            print("WARNING <GetCut_LLPmatch> : Type Error. No cut implemented")
         
         if debug: print(selection + " in Get Cut (on LLP) ")
         return ROOT.TCut( selection + " " )
@@ -141,22 +141,22 @@ def GetCut_LLPmatch( variable, branch_name, branch_sel ):
         selection_1 = ""
     
         if type(branch_sel) is int:
-		    selection_0 = "LLP0" + branch_name + " == " + str(branch_sel) + " && " + jet_match_selection_0
-		    selection_1 = "LLP1" + branch_name + " == " + str(branch_sel) + " && " + jet_match_selection_1
+            selection_0 = "LLP0" + branch_name + " == " + str(branch_sel) + " && " + jet_match_selection_0
+            selection_1 = "LLP1" + branch_name + " == " + str(branch_sel) + " && " + jet_match_selection_1
     
         elif type(branch_sel) is list:
             if len(branch_sel) == 0:
                 print("WARNING <GetCut_LLPmatch> : Entry error (length = 0). No cut implemented")
             elif len(branch_sel) == 1:
-	    		selection_0 = "LLP0" + branch_name + " == " + str(branch_sel[0]) + " && " + jet_match_selection_0
-		    	selection_1 = "LLP1" + branch_name + " == " + str(branch_sel[0]) + " && " + jet_match_selection_1
+                selection_0 = "LLP0" + branch_name + " == " + str(branch_sel[0]) + " && " + jet_match_selection_0
+                selection_1 = "LLP1" + branch_name + " == " + str(branch_sel[0]) + " && " + jet_match_selection_1
             elif len(branch_sel) == 2:
-	    		selection_0 = "LLP0" + branch_name + " >= " + str(branch_sel[0]) + " && " + "LLP0" + branch_name + " < " + str(branch_sel[1]) + " && " + jet_match_selection_0
-		    	selection_1 = "LLP1" + branch_name + " >= " + str(branch_sel[0]) + " && " + "LLP1" + branch_name + " < " + str(branch_sel[1]) + " && " + jet_match_selection_1
+                selection_0 = "LLP0" + branch_name + " >= " + str(branch_sel[0]) + " && " + "LLP0" + branch_name + " < " + str(branch_sel[1]) + " && " + jet_match_selection_0
+                selection_1 = "LLP1" + branch_name + " >= " + str(branch_sel[0]) + " && " + "LLP1" + branch_name + " < " + str(branch_sel[1]) + " && " + jet_match_selection_1
             else:
-			    print("WARNING <GetCut_LLPmatch> : 'branch_sel' input has more than two entries. Only using the first two!")    
+                print("WARNING <GetCut_LLPmatch> : 'branch_sel' input has more than two entries. Only using the first two!")    
         else: 
-		    print("WARNING <GetCut_LLPmatch> : Type Error. No cut implemented")
+            print("WARNING <GetCut_LLPmatch> : Type Error. No cut implemented")
         
         if debug: print("(" + selection_0 + ") || (" + selection_1 + ")  in Get Cut (on jet) ")
         return ROOT.TCut( "(" + selection_0 + ") || (" + selection_1 + ") " )
@@ -307,9 +307,9 @@ def Plot1D(tree, obj_type, radius):
         for var in LLP_group:
             for i in number:
                 legend = ROOT.TLegend(0.65,0.65,0.75,0.75)
-                xaxis = 300
+                xaxis = int(300)
                 hname_temp = obj_type + var[0] + i
-                LLP_dist[i] = ROOT.TH2F(hname_temp, "Jet " + i + " " + var[0] + " vs. " + var[1] + "  r=" + radius + "; " + var[1] + "; " + var[0], 100, 0, xaxis, 100/2, 0, xaxis/6 ); 
+                LLP_dist[i] = ROOT.TH2F(hname_temp, "Jet " + i + " " + var[0] + " vs. " + var[1] + "  r=" + radius + "; " + var[1] + "; " + var[0], 100, 0, xaxis, int(100/2), 0, int(xaxis/6) ); 
                 legend.AddEntry(LLP_dist[i], obj_type + i)
 
                 dist1 = obj_type + i + "_" + var[0] 
@@ -515,7 +515,7 @@ def LLP_MatchingEfficiency(tree, obj_type):
     
     if (obj_type == "LLP"):
         number = ["0", "1"]
-        LLP_matching = ["Decay_RechitEnergy20GeV", "_RechitEnergy20GeV", "_isTruthMatched"] # LLP + 0 or 1 + kinematic_var = full histogram name
+        LLP_matching = ["Decay_RechitEnergy20GeV", "_RechitEnergy20GeV", "_isTruthMatched", "_isTruthMatched_Jet40", "_isTruthMatched_Jet70", "_isTruthMatched_Jet100"] # LLP + 0 or 1 + kinematic_var = full histogram name
         LLP_denominator = ["DecayR"]
 
         LLP_effs = {}
@@ -523,19 +523,22 @@ def LLP_MatchingEfficiency(tree, obj_type):
     
         for var in LLP_matching:
             if (data): continue
-            legend = ROOT.TLegend(0.65,0.65,0.75,0.75)
+            legend = ROOT.TLegend(0.8,0.72,0.87,0.8)
             for i in number:
                 hname_temp = obj_type + i + var
                 LLP_effs[i] = ROOT.TH1F(hname_temp, "LLP " + var + "; " + var +" efficiency by LLP decayR [cm]; Matching Efficiency", 300, 0, 300 ); 
                 hname_denom = obj_type + i + var + "_" + LLP_denominator[0]
                 LLP_denom[i] = ROOT.TH1F(hname_denom, "LLP " + var + "; " + var +" efficiency by LLP decayR [cm]; Matching Efficiency", 300, 0, 300 ); 
 
-                selection_region = GetCut(obj_type + i + var, [1,2])
+                selection_region = GetCut(obj_type + i + var, 1)        # require matching variable set
+                pT_region = GetCut(obj_type + i + "_Pt", [40,90000])    # require LLP pT is over 40 GeV
+                eta_region = GetCut(obj_type + i + "_Eta", [-1.5,1.5])  # require LLP eta is in HB (-1.5 to 1.5)
+                total_cut = selection_region + pT_region + eta_region
                 canvTemp.cd()
 
                 LLP_radius = obj_type + i + "_" + LLP_denominator[0]
-                tree.Draw(LLP_radius +" >> "+hname_temp, selection_region, "", tree.GetEntries(), 0 )
-                tree.Draw(LLP_radius +" >> "+hname_denom, "", "", tree.GetEntries(), 0 )
+                tree.Draw(LLP_radius +" >> "+hname_temp, total_cut, "", tree.GetEntries(), 0 ) # require matching variable set + LLP pt is high enough
+                tree.Draw(LLP_radius +" >> "+hname_denom, pT_region + eta_region, "", tree.GetEntries(), 0 ) # require LLP pt is high enough and in HB
                 
                 if i == "1": 
                     ResetRange(LLP_effs[i])
@@ -551,8 +554,12 @@ def LLP_MatchingEfficiency(tree, obj_type):
                         mean_text.SetNDC()
                         mean_text.SetTextFont(42)
                         mean_text.SetTextSize(0.036)
-                        mean_text.DrawLatex( xpos+0.5, ypos, "mean = %.2f" %(LLP_effs[i].GetMean()))
-                        mean_text.DrawLatex( xpos+0.5, ypos-0.05, "#sigma = %.2f" %(LLP_effs[i].GetStdDev()))
+                        if (var[1] == "i"):
+                            mean_text.DrawLatex( xpos, ypos-.6, "mean = %.2f" %(LLP_effs[i].GetMean()))
+                            mean_text.DrawLatex( xpos, ypos-0.65, "#sigma = %.2f" %(LLP_effs[i].GetStdDev()))
+                        else:
+                            mean_text.DrawLatex( xpos+0.5, ypos, "mean = %.2f" %(LLP_effs[i].GetMean()))
+                            mean_text.DrawLatex( xpos+0.5, ypos-0.05, "#sigma = %.2f" %(LLP_effs[i].GetStdDev()))
 
             LegendLabel(legend)
             canv.SaveAs(folder + "/Efficiency_" + obj_type + "_" +var+".png")

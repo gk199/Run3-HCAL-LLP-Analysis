@@ -721,8 +721,8 @@ public :
    virtual float  DeltaR_LLP_b( int idx_llp, int idx_llp_decay);
    virtual bool   JetIsTruthMatched( float jet_eta, float jet_phi, float deltaR_cut=0.4 );
    virtual vector<float> JetIsMatchedTo( float jet_eta, float jet_phi, float deltaR_cut=0.4 );
-   virtual bool   LLPDecayIsTruthMatched_LLP_b( int idx_gLLP, int idx_gParticle, float deltaR_cut=0.4 );
-   virtual bool   LLPDecayIsTruthMatched( int idx_gLLPDecay, float deltaR_cut=0.4 );
+   virtual bool   LLPDecayIsTruthMatched_LLP_b( int idx_gLLP, int idx_gParticle, float jetPt_cut=0, float deltaR_cut=0.4 );
+   virtual bool   LLPIsTruthMatched( int idx_gLLPDecay, float jetPt_cut=0, float deltaR_cut=0.4 );
    virtual vector<TVector3> GetLLPDecayProdCoords(int idx_llp, int idx_llp_decay, vector<float> intersection_depths); // Deprecated
    // EventHelper.cxx
    virtual float  GetEventRuntime( clock_t clock_start, Long64_t init_entry, Long64_t current_entry );

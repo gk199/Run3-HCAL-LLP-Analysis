@@ -216,50 +216,58 @@ vector<float> DisplacedHcalJetAnalyzer::JetIsMatchedTo( float jet_eta, float jet
 }
 
 /* ====================================================================================================================== */
-bool DisplacedHcalJetAnalyzer::LLPDecayIsTruthMatched_LLP_b( int idx_gLLP, int idx_gParticle, float deltaR_cut ){
+bool DisplacedHcalJetAnalyzer::LLPDecayIsTruthMatched_LLP_b( int idx_gLLP, int idx_gParticle, float jetPt_cut, float deltaR_cut ){
 	/* 
 	Description: Delivers true/false on if there is an llp decay product matched to a reco akt jet object
 	deltaR_cut: deltaR between jet and LLP decay prod (default: 0.4)	
+	jetPt_cut: cut on jet Pt that LLP or decay product is matched to
 	*/
 
 	TVector3 vec_llp;
 	vec_llp.SetXYZ( gLLP_DecayVtx_X->at(idx_gLLP), gLLP_DecayVtx_Y->at(idx_gLLP), gLLP_DecayVtx_Z->at(idx_gLLP) );
 
-	// int idx_gParticle = GetLLPDecayProductIndex( idx_gLLP, idx_llp_decay); // line was needed when function input was idx_llp_decay (0 or 1)
-
 	for( int i=0; i<jet_Pt->size(); i++){
-		TVector3 vec_jet;
-		// if( jet_Pt->at(i) < 40 ) continue;
-		vec_jet.SetPtEtaPhi( 235., jet_Eta->at(i), jet_Phi->at(i) );
-		TVector3 vec_jet_new = vec_jet - vec_llp;
+		if (jet_Pt->at(i) < jetPt_cut) continue;
+		// Check if LLP is directly matched to a jet
+		if( gLLP_DecayVtx_R.at(idx_gLLP) >= 183.6 && gLLP_DecayVtx_R.at(idx_gLLP) < 295 && fabs(gLLP_Eta->at(idx_gLLP)) <= 1.5 ) {
 
-		float dR_temp = DeltaR( gParticle_Eta->at(idx_gParticle), vec_jet_new.Eta(), gParticle_Phi->at(idx_gParticle), vec_jet_new.Phi() );
+			float dR_temp = DeltaR( gLLP_Eta->at(idx_gLLP), jet_Eta->at(i), gLLP_Phi->at(idx_gLLP), jet_Phi->at(i) );
 
-		if( dR_temp < deltaR_cut ) 
-			return true;
+			if( dR_temp < deltaR_cut ) 
+				return true;
+		}
+		// Check if LLP decay products are matched to a jet
+		else {		
+			TVector3 vec_jet;
+			vec_jet.SetPtEtaPhi( 235., jet_Eta->at(i), jet_Phi->at(i) );
+			TVector3 vec_jet_new = vec_jet - vec_llp;
+
+			float dR_temp = DeltaR( gParticle_Eta->at(idx_gParticle), vec_jet_new.Eta(), gParticle_Phi->at(idx_gParticle), vec_jet_new.Phi() );
+
+			if( dR_temp < deltaR_cut ) 
+				return true;
+		}
 	}
-
 	return false;
-
 }
 
 /* ====================================================================================================================== */
-bool DisplacedHcalJetAnalyzer::LLPDecayIsTruthMatched( int idx_gLLPDecay, float deltaR_cut ){
+bool DisplacedHcalJetAnalyzer::LLPIsTruthMatched( int idx_gLLPDecay, float jetPt_cut, float deltaR_cut ){
 	/* 
 	Description: Delivers true/false on if there is an llp decay product matched to a reco akt jet object
 	deltaR_cut: deltaR between jet and LLP decay prod (default: 0.4)	
 
-	between the two similar LLPDecayIsTruthMatched functions:
-	in LLPDecayIsTruthMatched, idx_gLLP  		=  idx_llp 			in LLPDecayIsTruthMatched_LLP_b
-	in LLPDecayIsTruthMatched, idx_gParticle  	=  idx_gParticle 	in LLPDecayIsTruthMatched_LLP_b
+	between the two similar LLPIsTruthMatched functions:
+	in LLPIsTruthMatched, idx_gLLP  		=  idx_llp 			in LLPDecayIsTruthMatched_LLP_b
+	in LLPIsTruthMatched, idx_gParticle  	=  idx_gParticle 	in LLPDecayIsTruthMatched_LLP_b
 	*/
 
 	if( idx_gLLPDecay >= gLLPDecay_iLLP.size() ) return false;
 
-	int idx_gParticle = gLLPDecay_iParticle.at(idx_gLLPDecay);
-	int idx_gLLP      = gLLPDecay_iLLP.at(idx_gLLPDecay);
+	int idx_gParticle = gLLPDecay_iParticle.at(idx_gLLPDecay); 	// index of this b-quark
+	int idx_gLLP      = gLLPDecay_iLLP.at(idx_gLLPDecay); 		// which LLP is associated to this b-quark
 
-	return LLPDecayIsTruthMatched_LLP_b(idx_gLLP, idx_gParticle, deltaR_cut); // confused on how to combine still, is idx_gParticle equivalent to GetLLPDecayProductIndex( idx_llp, idx_llp_decay), or idx_llp_decay???
+	return LLPDecayIsTruthMatched_LLP_b(idx_gLLP, idx_gParticle, jetPt_cut, deltaR_cut); 
 
 }
 

@@ -6,96 +6,11 @@ void MiniTuplePlotter_HLT_Effs(){
 
 	// List where minituples are stored
 	string path = "/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.2/minituple_";
-	vector<string> filetags_both = 	{ "v1.2_LLPskim_500k_2023_08_30", "v1.2_MCsignal_500k_2023_08_30" };
-	vector<string> filetags_data = 	{ "v1.2_LLPskim_500k_2023_08_30" };
-	vector<string> filetags_MC = 	{ "v1.2_MCsignal_500k_2023_08_30" };
+	vector<string> filetags_both = 	{ "v1.2_LLPskim_500k_2023_08_31", "v1.2_MCsignal_500k_2023_08_31" };
+	vector<string> filetags_data = 	{ "v1.2_LLPskim_500k_2023_08_31" };
+	vector<string> filetags_MC = 	{ "v1.2_MCsignal_500k_2023_08_31" };
 
-	// Setup cuts on HLT paths passed
-	TCut Cut_None			= "";
-	TCut Cut_HLTpassed1 	= "HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5 == 1"; 
-	TCut Cut_HLTpassed2 	= "HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1";
-	TCut Cut_HLTpassed3 	= "HLT_HT240_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1"; // not in v1 ntuples yet
-	TCut Cut_HLTpassed4 	= "HLT_HT280_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1"; // end of group 1 of triggers // not in v1 ntuples yet
-	TCut Cut_HLTpassed5 	= "HLT_HT170_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1"; 
-	TCut Cut_HLTpassed6 	= "HLT_HT200_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1";
-	TCut Cut_HLTpassed7 	= "HLT_HT270_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1";
-	TCut Cut_HLTpassed8 	= "HLT_HT200_L1SingleLLPJet_DisplacedDijet60_DisplacedTrack == 1"; // end of group 2 of triggers
-	TCut Cut_HLTpassed9 	= "HLT_HT320_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1";
-	TCut Cut_HLTpassed10 	= "HLT_HT420_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1"; // end of group 3 of triggers
-	TCut Cut_HLTpassed11 	= "HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay0p5nsTrackless == 1";
-	TCut Cut_HLTpassed12 	= "HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay1nsInclusive == 1"; 
-	TCut Cut_HLTpassed13 	= "HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay1nsTrackless == 1";
-	TCut Cut_HLTpassed14 	= "HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay2nsInclusive == 1"; // end of group 4 of triggers
-	TCut Cut_HLTpassed15 	= "HLT_L1SingleLLPJet == 1"; // monitoring trigger // not in v1 ntuples yet
-
-	// Setup cuts on LLP decay position
-	float radius_tracker[2]  = {0, 161.6};
-    float radius_ECAL[2]     = {161.6, 183.6}; // 22cm of ECAL
-    float radius_depth1[2]   = {183.6, 190.2};
-    float radius_depth2[2]   = {190.2, 214.2};
-    float radius_depth3[2]   = {214.2, 244.8};
-    float radius_depth4[2]   = {244.8, 295};
-    float radius_all[2]      = {0,9999};
-    float radius_inHCAL[2]   = {183.6, 295};
-    float radius_depth12[2]  = {183.6, 214.2};
-    float radius_depth34[2]  = {214.2, 295};
-
-	float HBeta = 1.4;
-	int z_pos = 425; // depth 1 and 2 have a z position < 388, depth 3 and 4 have z position < 425cm
-
-	TString LLP0inHCAL 	= Form("(LLP0_DecayR < %0.1f && abs(LLP0_Eta) <= %f)", 		radius_inHCAL[1], HBeta);
-	TString LLP1inHCAL 	= Form("(LLP1_DecayR < %0.1f && abs(LLP1_Eta) <= %f)", 		radius_inHCAL[1], HBeta);
-
-	TString LLP0inTracker 	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) <= %f)", 		radius_tracker[0], 	radius_tracker[1], 	HBeta);
-	TString LLP0inECAL 		= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) <= %f)", 		radius_ECAL[0], 	radius_ECAL[1], 	HBeta);
-	TString LLP0inHCAL_d12 	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) <= %f)", 		radius_depth12[0], 	radius_depth12[1], 	HBeta);
-	TString LLP0inHCAL_d3 	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) <= %f)", 		radius_depth3[0], 	radius_depth3[1], 	HBeta);
-	TString LLP0inHCAL_d4 	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) <= %f)", 		radius_depth4[0], 	radius_depth4[1], 	HBeta);
-	
-	TString LLP1inTracker 	= Form("(LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) <= %f)", 		radius_tracker[0], 	radius_tracker[1], 	HBeta);
-	TString LLP1inECAL 		= Form("(LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) <= %f)", 		radius_ECAL[0], 	radius_ECAL[1], 	HBeta);
-	TString LLP1inHCAL_d12 	= Form("(LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) <= %f)", 		radius_depth12[0], 	radius_depth12[1], 	HBeta);
-	TString LLP1inHCAL_d3 	= Form("(LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) <= %f)", 		radius_depth3[0], 	radius_depth3[1], 	HBeta);
-	TString LLP1inHCAL_d4 	= Form("(LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) <= %f)", 		radius_depth4[0], 	radius_depth4[1], 	HBeta);
-
-	TString OR		   	= (" || ");
-	
-	TCut Cut_LLPinHCAL 	= (LLP0inHCAL + OR + LLP1inHCAL).Data();
-	TCut Cut_LLP0inHCAL = LLP0inHCAL.Data();
-	TCut Cut_LLP1inHCAL = LLP1inHCAL.Data();
-
-	TCut Cut_LLPinTracker	= (LLP0inTracker + OR + LLP1inTracker).Data();
-	TCut Cut_LLP0inTracker 	= LLP0inTracker.Data();
-	TCut Cut_LLPinECAL 		= (LLP0inECAL + OR + LLP1inECAL).Data();
-	TCut Cut_LLP0inECAL 	= LLP0inECAL.Data();
-	TCut Cut_LLPinHCAL_d12 	= (LLP0inHCAL_d12 + OR + LLP1inHCAL_d12).Data();
-	TCut Cut_LLP0inHCAL_d12 = LLP0inHCAL_d12.Data();
-	TCut Cut_LLPinHCAL_d3 	= (LLP0inHCAL_d3 + OR + LLP1inHCAL_d3).Data();
-	TCut Cut_LLP0inHCAL_d3 	= LLP0inHCAL_d3.Data();
-	TCut Cut_LLPinHCAL_d4 	= (LLP0inHCAL_d4 + OR + LLP1inHCAL_d4).Data();
-	TCut Cut_LLP0inHCAL_d4 	= LLP0inHCAL_d4.Data();
-
-	// Save these cuts in a map paired with a string so they can be iterated over, to easily make same plot with lots of different cuts  :) 
-	map<TCut, string> LLP_Cuts;
-  	LLP_Cuts.insert(pair<TCut, string>(Cut_LLPinTracker, "LLPinTracker"));
-  	LLP_Cuts.insert(pair<TCut, string>(Cut_LLPinECAL, "LLPinECAL"));
-  	LLP_Cuts.insert(pair<TCut, string>(Cut_LLPinHCAL_d12, "LLPinHCAL_depth12"));
-  	LLP_Cuts.insert(pair<TCut, string>(Cut_LLPinHCAL_d3, "LLPinHCAL_depth3"));
-  	LLP_Cuts.insert(pair<TCut, string>(Cut_LLPinHCAL_d4, "LLPinHCAL_depth4"));
-
-	map<TCut, string> LLP0_Cuts;
-  	LLP0_Cuts.insert(pair<TCut, string>(Cut_LLP0inTracker, "LLP0inTracker"));
-  	LLP0_Cuts.insert(pair<TCut, string>(Cut_LLP0inECAL, "LLP0inECAL"));
-  	LLP0_Cuts.insert(pair<TCut, string>(Cut_LLP0inHCAL_d12, "LLP0inHCAL_depth12"));
-  	LLP0_Cuts.insert(pair<TCut, string>(Cut_LLP0inHCAL_d3, "LLP0inHCAL_depth3"));
-  	LLP0_Cuts.insert(pair<TCut, string>(Cut_LLP0inHCAL_d4, "LLP0inHCAL_depth4"));
-
-	map<TCut, string>::iterator it;
-	for (it = LLP_Cuts.begin(); it != LLP_Cuts.end(); it++) {
-		cout << it->second << " ";
-		cout << it->first << " ";
-		cout << endl;
-	}
+	#include "RegionCuts.h"
 
 	// ----- Jet kinematics split by HLT paths passed -----//
 
@@ -125,18 +40,43 @@ void MiniTuplePlotter_HLT_Effs(){
 	for (it = LLP_Cuts.begin(); it != LLP_Cuts.end(); it++) {
 
 		class MiniTuplePlotter plotter_HLTeff2( filetags_MC, path );
-		plotter_HLTeff2.SetPlots({P_jet0_Pt, P_jet1_Pt, P_met_Pt}); 
+		plotter_HLTeff2.SetPlots({P_met_Pt}); 
 		plotter_HLTeff2.SetTreeName( "NoSel" );
 		plotter_HLTeff2.SetOutputFileTag("HLT_v1.2_MC_" + it->second);
-
 		plotter_HLTeff2.plot_norm 		  = false;
 		plotter_HLTeff2.plot_log_ratio   = true; 
 		plotter_HLTeff2.SetLegendManual( 0.35, 0.65, 0.9, 0.9 );
-
 		plotter_HLTeff2.SetComparisonCuts({Cut_None, Cut_HLTpassed2, Cut_HLTpassed5, Cut_HLTpassed9, Cut_HLTpassed11}); 
-		plotter_HLTeff2.SetSelectiveCuts("MC", it->first);
+		plotter_HLTeff2.SetSelectiveCuts("MC", it->first); // region for LLP decay
 		plotter_HLTeff2.Selection(it->second); // print which selection is made on the plot
 		plotter_HLTeff2.Plot("ratio");
+	}
+	
+	for (it_double = JetMatchedToLLP.begin(); it_double != JetMatchedToLLP.end(); it_double++) {
+		// do jet plots with gen matching requirement 
+		class MiniTuplePlotter plotter_HLTeff3( filetags_MC, path );
+		plotter_HLTeff3.SetPlots({P_jet0_Pt}); 
+		plotter_HLTeff3.SetTreeName( "NoSel" );
+		plotter_HLTeff3.SetOutputFileTag("HLT_v1.2_MC_" + it_double->second);
+		plotter_HLTeff3.plot_norm 		  = false;
+		plotter_HLTeff3.plot_log_ratio   = true; 
+		plotter_HLTeff3.SetLegendManual( 0.35, 0.65, 0.9, 0.9 );
+		plotter_HLTeff3.SetComparisonCuts({Cut_None, Cut_HLTpassed2, Cut_HLTpassed5, Cut_HLTpassed9, Cut_HLTpassed11}); 
+		plotter_HLTeff3.SetSelectiveCuts("MC", get<0>(it_double->first));// jet matched + region for LLP decay
+		plotter_HLTeff3.Selection(it_double->second); // print which selection is made on the plot
+		plotter_HLTeff3.Plot("ratio");
+		
+		class MiniTuplePlotter plotter_HLTeff4( filetags_MC, path );
+		plotter_HLTeff4.SetPlots({P_jet1_Pt}); 
+		plotter_HLTeff4.SetTreeName( "NoSel" );
+		plotter_HLTeff4.SetOutputFileTag("HLT_v1.2_MC_" + it_double->second);
+		plotter_HLTeff4.plot_norm 		  = false;
+		plotter_HLTeff4.plot_log_ratio   = true; 
+		plotter_HLTeff4.SetLegendManual( 0.35, 0.65, 0.9, 0.9 );
+		plotter_HLTeff4.SetComparisonCuts({Cut_None, Cut_HLTpassed2, Cut_HLTpassed5, Cut_HLTpassed9, Cut_HLTpassed11}); 
+		plotter_HLTeff4.SetSelectiveCuts("MC", get<1>(it_double->first)); // jet matched + region for LLP decay
+		plotter_HLTeff4.Selection(it_double->second); // print which selection is made on the plot
+		plotter_HLTeff4.Plot("ratio");
 	}
 
 	// ----- LLP kinematics -- HLT Efficiency split by LLP displacement and energy -----//
@@ -165,14 +105,66 @@ void MiniTuplePlotter_HLT_Effs(){
 	class MiniTuplePlotter plotter_disp( filetags_MC, path );
 	plotter_disp.SetPlots({P_LLP0_DecayR}); 
 	plotter_disp.SetTreeName( "NoSel" );	
-	plotter_disp.SetOutputFileTag("HLT_v1.2_MC_LLP0inHCAL"); 							
-
+	plotter_disp.SetOutputFileTag("HLT_v1.2_MC_LLP0inHCAL"); 
 	plotter_disp.plot_norm 		  = false; 	
 	plotter_disp.plot_log_ratio   = true; 	
 	plotter_disp.SetLegendManual( 0.35, 0.65, 0.9, 0.9 );
-
 	plotter_disp.SetComparisonCuts({Cut_None, Cut_HLTpassed2, Cut_HLTpassed5, Cut_HLTpassed9, Cut_HLTpassed11}); 
 	plotter_disp.SetSelectiveCuts("MC", Cut_LLP0inHCAL);
 	plotter_disp.Plot("ratio");	
 
+
+	// ----- Jet Characteristics -- If HLT passed, what are distributions in leading, subleading jets? -----//
+
+	cout<<endl;
+	cout<<" ----- HLT Study 4: Jet Characteristics -- If HLT passed, what are distributions in leading, subleading jets? ----- "<<endl;
+	cout<<endl;
+
+	// set up 2D plots, and associated cuts. Save in a std::vector of the Hist1_Hist2_Cut structure defined in PlotParams so these can be iterated over
+	std::vector<Hist1_Hist2_Cut> Jet1_Jet2;
+	Jet1_Jet2.push_back(Hist1_Hist2_Cut(P_jet0_EtaSpread, P_jet0_PhiSpread, "jet0_isMatchedTo >= 0"));
+	Jet1_Jet2.push_back(Hist1_Hist2_Cut(P_jet0_EtaSpread_energy, P_jet0_PhiSpread_energy, "jet0_isMatchedTo >= 0"));
+	Jet1_Jet2.push_back(Hist1_Hist2_Cut(P_jet1_EtaSpread, P_jet1_PhiSpread, "jet1_isMatchedTo >= 0"));
+	Jet1_Jet2.push_back(Hist1_Hist2_Cut(P_jet1_EtaSpread_energy, P_jet1_PhiSpread_energy, "jet1_isMatchedTo >= 0"));
+	Jet1_Jet2.push_back(Hist1_Hist2_Cut(P_jet0_Pt, P_jet1_Pt, "jet0_isMatchedTo >= 0 && jet1_isMatchedTo >= 0"));
+
+	for (auto group = Jet1_Jet2.begin(); group != Jet1_Jet2.end(); group++) { // iterate over the vector defined above
+		class MiniTuplePlotter jet_dist( filetags_MC, path );
+		jet_dist.SetTreeName( "NoSel" );	
+		jet_dist.SetOutputFileTag("HLT_v1.2_MC_jetDist"); 							
+		jet_dist.plot_norm 		  = false; 	
+		jet_dist.plot_log_ratio   = true; 	
+		jet_dist.SetLegendManual( 0.35, 0.65, 0.9, 0.9 );
+		jet_dist.SetComparisonCuts({Cut_None, Cut_HLTpassed2}); 
+		jet_dist.SetSelectiveCuts("MC", group->cut);
+		cout << group->cut << endl;
+		jet_dist.Plot2D(group->Params1, group->Params2);
+	}
+
+	// add jet energy distribution plots too (but likely 1D plots instead of 2D)
+
+	// ----- LLP Characteristics -- If HLT passed, what are distributions in leading, subleading LLP? -----//
+
+	cout<<endl;
+	cout<<" ----- HLT Study 5: LLP Characteristics -- If HLT passed, what are distributions in leading, subleading LLP? ----- "<<endl;
+	cout<<endl;
+
+	int jet_pt[4] = {0, 40, 70, 100}; // jet pT categories
+	for (int i = 0; i < 4; i++) {
+		class MiniTuplePlotter LLP_dist( filetags_MC, path );
+		LLP_dist.SetTreeName( "NoSel" );	
+		LLP_dist.SetOutputFileTag("HLT_v1.2_MC_LLPdist_jetPT" + to_string(jet_pt[i])); 							
+		LLP_dist.plot_norm 		  = false; 	
+		LLP_dist.plot_log_ratio   = true; 	
+		LLP_dist.SetLegendManual( 0.35, 0.65, 0.9, 0.9 );
+		LLP_dist.SetComparisonCuts({Cut_None, Cut_HLTpassed2}); 
+		// require jet is matched to a LLP, and then cut on jet energy
+		TString cut = Form("(jet0_Pt > %d && jet0_isMatchedTo >= 0)", jet_pt[i]);
+		TCut jet_cut = cut.Data();
+		LLP_dist.SetSelectiveCuts("MC", jet_cut);  
+		LLP_dist.Selection(Form("jet0_Pt > %d", jet_pt[i])); // not written on plot yet...
+		LLP_dist.Plot2D(P_LLP0_DecayR, P_LLP1_DecayR);	
+		LLP_dist.Plot2D(P_LLP0_DecayZ, P_LLP1_DecayZ);	
+	}
+	
 }
