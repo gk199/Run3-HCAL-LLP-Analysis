@@ -64,8 +64,9 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("jet%d_E", i) );
 		myvars_float.push_back( Form("jet%d_ChargedHadEFrac", i) );
 		myvars_float.push_back( Form("jet%d_NeutralHadEFrac", i) );
+		myvars_float.push_back( Form("jet%d_PhoEFrac", i) );
 		myvars_float.push_back( Form("jet%d_EleEFrac", i) );
-		myvars_float.push_back( Form("jet%d_HadNeutralOverCharged", i) );
+		myvars_float.push_back( Form("jet%d_MuonEFrac", i) );
 		myvars_float.push_back( Form("jet%d_HoverE", i) );
 		myvars_float.push_back( Form("jet%d_isTruthMatched", i) );
 		myvars_float.push_back( Form("jet%d_isMatchedTo", i) );
@@ -75,6 +76,8 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("jet%d_EtaSpread_energy", i) );
 		myvars_float.push_back( Form("jet%d_PhiSpread", i) );
 		myvars_float.push_back( Form("jet%d_PhiSpread_energy", i) );
+		myvars_float.push_back( Form("jet%d_EtaPhiQuadSpread", i) );
+		myvars_float.push_back( Form("jet%d_EtaPhiQuadSpread_energy", i) );
 		myvars_float.push_back( Form("jet%d_TDCavg", i) );
 		myvars_float.push_back( Form("jet%d_TDCavg_energyWeight", i) );
 		myvars_float.push_back( Form("jet%d_TDCnDelayed", i) );
@@ -244,9 +247,10 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 
 		tree_output_vars_float[Form("jet%d_ChargedHadEFrac", i)] 		= jet_ChargedHadEFrac->at(i);
 		tree_output_vars_float[Form("jet%d_NeutralHadEFrac", i)] 		= jet_NeutralHadEFrac->at(i);
+		tree_output_vars_float[Form("jet%d_PhoEFrac", i)] 				= jet_PhoEFrac->at(i);
 		tree_output_vars_float[Form("jet%d_EleFrac", i)] 				= jet_EleEFrac->at(i);
-		tree_output_vars_float[Form("jet%d_HadNeutralOverCharged", i)] 	= jet_NeutralHadEFrac->at(i) / jet_ChargedHadEFrac->at(i);
-		tree_output_vars_float[Form("jet%d_HoverE", i)] 				= (jet_ChargedHadEFrac->at(i) + jet_NeutralHadEFrac->at(i)) / jet_EleEFrac->at(i);
+		tree_output_vars_float[Form("jet%d_MuonEFrac", i)] 				= jet_MuonEFrac->at(i);
+		tree_output_vars_float[Form("jet%d_HoverE", i)] 				= (jet_ChargedHadEFrac->at(i) + jet_NeutralHadEFrac->at(i)) / (jet_PhoEFrac->at(i) + jet_EleEFrac->at(i));
 
 		tree_output_vars_float[Form("jet%d_isTruthMatched", i)] = JetIsTruthMatched( jet_Eta->at(i), jet_Phi->at(i) );
 		if (JetIsTruthMatched(jet_Eta->at(i), jet_Phi->at(i) ) == true) {
@@ -265,10 +269,12 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 
 		for (int depth = 0; depth < 4; depth++) tree_output_vars_float[Form("jet%d_EnergyFrac_Depth%d", i, depth+1)] = energy[depth]; // each fractional energy saved in different tree
 		tree_output_vars_int[Form("jet%d_RechitN", i)] = rechitJet.size();
-		tree_output_vars_float[Form("jet%d_EtaSpread", i)] = spread_Eta_Phi[0];
-		tree_output_vars_float[Form("jet%d_EtaSpread_energy", i)] = spread_Eta_Phi[2];
-		tree_output_vars_float[Form("jet%d_PhiSpread", i)] = spread_Eta_Phi[1];
-		tree_output_vars_float[Form("jet%d_PhiSpread_energy", i)] = spread_Eta_Phi[3];
+		tree_output_vars_float[Form("jet%d_EtaSpread", i)] 					= spread_Eta_Phi[0];
+		tree_output_vars_float[Form("jet%d_EtaSpread_energy", i)] 			= spread_Eta_Phi[2];
+		tree_output_vars_float[Form("jet%d_PhiSpread", i)] 					= spread_Eta_Phi[1];
+		tree_output_vars_float[Form("jet%d_PhiSpread_energy", i)] 			= spread_Eta_Phi[3];
+		tree_output_vars_float[Form("jet%d_EtaPhiQuadSpread", i)] 			= sqrt(spread_Eta_Phi[0] * spread_Eta_Phi[0] + spread_Eta_Phi[1] * spread_Eta_Phi[1]);
+		tree_output_vars_float[Form("jet%d_EtaPhiQuadSpread_energy", i)] 	= sqrt(spread_Eta_Phi[2] * spread_Eta_Phi[2] + spread_Eta_Phi[3] * spread_Eta_Phi[3]);
 
 		tree_output_vars_float[Form("jet%d_TDCavg", i)] = TDC_TDCenergy[0];
 		tree_output_vars_float[Form("jet%d_TDCavg_energyWeight", i)] = TDC_TDCenergy[1];

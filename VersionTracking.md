@@ -32,13 +32,14 @@ Updates:
 * Clear variables in minituples tree
 * Truth matching for a jet done to LLP direction (decay in HCAL) or b quark (decay before HCAL)
 * LLP truth matching to a jet considers two options: match to LLP (decay in HCAL) or b quark (decay before HCAL), with option to cut on jet energy (jet 0, 40, 70, 100 GeV now)
-* Neutral and charged hadronic energy fraction, electromagnetic energy fraction (`NeutralHadEFrac, ChargedHadEFrac, EleEFrac`)
-* H over E, neutral over charged hadronic energy (`HoverE, HadNeutralOverCharged`)
+* Neutral and charged hadronic energy fraction, electromagnetic, photon, muon energy fraction (`NeutralHadEFrac, ChargedHadEFrac, EleEFrac, PhoEFrac, MuonEFrac`)
+* H over E computed (`HoverE` = (charged + neutral HCAL energy) / (photon + electron EM energy) )
+* Eta-Phi quadrature sum, both energy weighted and standard
 
 Location of minituples:
 ```
-/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.2/minituple_v1.2_MCsignal_500k_2023_09_11.root
-/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.2/minituple_v1.2_LLPskim_500k_2023_09_11.root
+/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.2/minituple_v1.2_MCsignal_500k_2023_09_18.root
+/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.2/minituple_v1.2_LLPskim_500k_2023_09_18.root
 ```
 
 ## V2

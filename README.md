@@ -39,6 +39,24 @@ For running in compiled mode, remember to input the file path as `root://cmsxroo
 ## Condor Processing
 Follow the [instructions](https://github.com/gk199/Run3-HCAL-LLP-Analysis/tree/main/Run/Condor) in the condor subdirectory. 
 
+## Checking File Content
+RECO files:
+```
+voms-proxy-init --voms cms
+root
+TFile *f =TFile::Open("root://xrootd-cms.infn.it///store/data/Run2023C/DisplacedJet/AOD/EXOLLPJetHCAL-PromptReco-v1/000/367/104/00000/8e5b08c6-c450-4548-8295-2d8312bc81d0.root");
+```
+in a CMSSW environment: 
+```
+edmDumpEventContent root://xrootd-cms.infn.it///store/data/Run2023C/DisplacedJet/AOD/EXOLLPJetHCAL-PromptReco-v1/000/367/104/00000/8e5b08c6-c450-4548-8295-2d8312bc81d0.root
+```
+Ntuples:
+```
+root
+TFile *f =TFile::Open("root://cmsxrootd.fnal.gov///store/user/gkopp/ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV/LLP_MC_test__20230713_102955/230713_083027/0000/output_10.root");
+```
+File contents are saved in `Ntuple_content.txt`, `edmDumpEventContent_LLPskim.txt`, and `LLPskim_content.txt` in main analysis directory for reference. 
+
 ## Analyzer Setttings
 In `DisplacedHcalJetAnalyzer/DisplacedHcalJetAnalyzer/DisplacedHcalJetAnalyzer.h` can set the variables: `debug, print_counts, save_hists, save_trees, blind_data`. Setting `AnalysisReader.debug = true` in `DisplacedHcalJetAnalyzer.C` is very helpful for debugging. 
 
