@@ -1,4 +1,4 @@
-#include "MiniTuplePlotter.h"
+#include "../MiniTuplePlotter.h"
 #include "TString.h"
 
 // -------------------------------------------------------------------------------------------------
@@ -10,7 +10,7 @@ void MiniTuplePlotter_HLT_Effs(){
 	vector<string> filetags_data = 	{ "v1.2_LLPskim_500k_2023_08_31" };
 	vector<string> filetags_MC = 	{ "v1.2_MCsignal_500k_2023_08_31" };
 
-	#include "RegionCuts.h"
+	#include "../RegionCuts.h"
 
 	// ----- Jet kinematics split by HLT paths passed -----//
 
@@ -25,7 +25,7 @@ void MiniTuplePlotter_HLT_Effs(){
 
 	plotter_HLTeff.plot_norm 		  = false; 	// Default = true
 	plotter_HLTeff.plot_log_ratio   = true; 	// Default = false. Make bottom panel log scale
-	plotter_HLTeff.SetLegendManual( 0.35, 0.65, 0.9, 0.9 );					// Manual Legend location
+	plotter_HLTeff.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );					// Manual Legend location
 	
 	plotter_HLTeff.SetComparisonCuts({Cut_None, Cut_HLTpassed2, Cut_HLTpassed5, Cut_HLTpassed9, Cut_HLTpassed11}); 
 	plotter_HLTeff.Plot("ratio");				// This is what does stuff -- arguments: None/"", "ratio", "sig"/"ssqrtb"
@@ -45,7 +45,7 @@ void MiniTuplePlotter_HLT_Effs(){
 		plotter_HLTeff2.SetOutputFileTag("HLT_v1.2_MC_" + it->second);
 		plotter_HLTeff2.plot_norm 		  = false;
 		plotter_HLTeff2.plot_log_ratio   = true; 
-		plotter_HLTeff2.SetLegendManual( 0.35, 0.65, 0.9, 0.9 );
+		plotter_HLTeff2.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
 		plotter_HLTeff2.SetComparisonCuts({Cut_None, Cut_HLTpassed2, Cut_HLTpassed5, Cut_HLTpassed9, Cut_HLTpassed11}); 
 		plotter_HLTeff2.SetSelectiveCuts("MC", it->first); // region for LLP decay
 		plotter_HLTeff2.Selection(it->second); // print which selection is made on the plot
@@ -60,7 +60,7 @@ void MiniTuplePlotter_HLT_Effs(){
 		plotter_HLTeff3.SetOutputFileTag("HLT_v1.2_MC_" + it_double->second);
 		plotter_HLTeff3.plot_norm 		  = false;
 		plotter_HLTeff3.plot_log_ratio   = true; 
-		plotter_HLTeff3.SetLegendManual( 0.35, 0.65, 0.9, 0.9 );
+		plotter_HLTeff3.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
 		plotter_HLTeff3.SetComparisonCuts({Cut_None, Cut_HLTpassed2, Cut_HLTpassed5, Cut_HLTpassed9, Cut_HLTpassed11}); 
 		plotter_HLTeff3.SetSelectiveCuts("MC", get<0>(it_double->first));// jet matched + region for LLP decay
 		plotter_HLTeff3.Selection(it_double->second); // print which selection is made on the plot
@@ -72,7 +72,7 @@ void MiniTuplePlotter_HLT_Effs(){
 		plotter_HLTeff4.SetOutputFileTag("HLT_v1.2_MC_" + it_double->second);
 		plotter_HLTeff4.plot_norm 		  = false;
 		plotter_HLTeff4.plot_log_ratio   = true; 
-		plotter_HLTeff4.SetLegendManual( 0.35, 0.65, 0.9, 0.9 );
+		plotter_HLTeff4.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
 		plotter_HLTeff4.SetComparisonCuts({Cut_None, Cut_HLTpassed2, Cut_HLTpassed5, Cut_HLTpassed9, Cut_HLTpassed11}); 
 		plotter_HLTeff4.SetSelectiveCuts("MC", get<1>(it_double->first)); // jet matched + region for LLP decay
 		plotter_HLTeff4.Selection(it_double->second); // print which selection is made on the plot
@@ -94,7 +94,7 @@ void MiniTuplePlotter_HLT_Effs(){
 
 		plotter_LLP.plot_norm 		  = false; 	
 		plotter_LLP.plot_log_ratio   = true; 	
-		plotter_LLP.SetLegendManual( 0.35, 0.65, 0.9, 0.9 );
+		plotter_LLP.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
 
 		plotter_LLP.SetComparisonCuts({Cut_None, Cut_HLTpassed2, Cut_HLTpassed5, Cut_HLTpassed9, Cut_HLTpassed11}); 
 		plotter_LLP.SetSelectiveCuts("MC", it->first);
@@ -108,7 +108,7 @@ void MiniTuplePlotter_HLT_Effs(){
 	plotter_disp.SetOutputFileTag("HLT_v1.2_MC_LLP0inHCAL"); 
 	plotter_disp.plot_norm 		  = false; 	
 	plotter_disp.plot_log_ratio   = true; 	
-	plotter_disp.SetLegendManual( 0.35, 0.65, 0.9, 0.9 );
+	plotter_disp.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
 	plotter_disp.SetComparisonCuts({Cut_None, Cut_HLTpassed2, Cut_HLTpassed5, Cut_HLTpassed9, Cut_HLTpassed11}); 
 	plotter_disp.SetSelectiveCuts("MC", Cut_LLP0inHCAL);
 	plotter_disp.Plot("ratio");	
@@ -134,7 +134,7 @@ void MiniTuplePlotter_HLT_Effs(){
 		jet_dist.SetOutputFileTag("HLT_v1.2_MC_jetDist"); 							
 		jet_dist.plot_norm 		  = false; 	
 		jet_dist.plot_log_ratio   = true; 	
-		jet_dist.SetLegendManual( 0.35, 0.65, 0.9, 0.9 );
+		jet_dist.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
 		jet_dist.SetComparisonCuts({Cut_None, Cut_HLTpassed2}); 
 		jet_dist.SetSelectiveCuts("MC", group->cut);
 		cout << group->cut << endl;
@@ -156,7 +156,7 @@ void MiniTuplePlotter_HLT_Effs(){
 		LLP_dist.SetOutputFileTag("HLT_v1.2_MC_LLPdist_jetPT" + to_string(jet_pt[i])); 							
 		LLP_dist.plot_norm 		  = false; 	
 		LLP_dist.plot_log_ratio   = true; 	
-		LLP_dist.SetLegendManual( 0.35, 0.65, 0.9, 0.9 );
+		LLP_dist.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
 		LLP_dist.SetComparisonCuts({Cut_None, Cut_HLTpassed2}); 
 		// require jet is matched to a LLP, and then cut on jet energy
 		TString cut = Form("(jet0_Pt > %d && jet0_isMatchedTo >= 0)", jet_pt[i]);
