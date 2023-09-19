@@ -56,7 +56,7 @@ void MiniTuplePlotterExample(){
 	plotter_example2.SetComparisonCuts({Cut_DecayTk, Cut_DecayHCAL}); 		// Apply cuts to overlay
 	plotter_example2.SetSelectiveCuts("5k", "jet0_energy > 200");			// Apply this only to filetag names that include the string "data"
 	plotter_example2.SetOutputFileTag("mycoolplot"); 						// Your own special name :)
-	plotter_example2.SetLegendManual( 0.35, 0.6, 0.9, 0.9 );				// Manual Legend location
+	plotter_example2.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );				// Manual Legend location
 	plotter_example2.colors = {kOrange, kOrange, kGreen+2, kGreen+2};		// Your own colors (default kBlack + rainbow)
 	plotter_example2.linestyle = {kDotted, kDashed, kDotted, kDashed}; 		// Your own linestyle (default kSolid)
 	plotter_example2.NBins = 30; 									 		// Default = 100

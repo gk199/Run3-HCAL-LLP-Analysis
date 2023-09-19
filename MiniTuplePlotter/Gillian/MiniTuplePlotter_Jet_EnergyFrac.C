@@ -1,8 +1,8 @@
-#include "MiniTuplePlotter.h"
+#include "../MiniTuplePlotter.h"
 #include "TString.h"
 
 // -------------------------------------------------------------------------------------------------
-void MiniTuplePlotter(){
+void MiniTuplePlotter_Jet_EnergyFrac(){
 
 	string path = "/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.2/minituple_";
 	vector<string> filetags_example1 = { "v1.2_LLPskim_500k_2023_08_30", "v1.2_MCsignal_500k_2023_08_30" };
@@ -95,7 +95,7 @@ void MiniTuplePlotter(){
 	plotter_example2.SetComparisonCuts({Cut_Decay_preECAL, Cut_Decay_depth12}); // Apply cuts to overlay
 	plotter_example2.SetSelectiveCuts("MC", "");			// Apply this only to filetag names that include the string "data"
 	plotter_example2.SetOutputFileTag("v1.2"); 							// Your own special name :)
-	plotter_example2.SetLegendManual( 0.35, 0.6, 0.9, 0.9 );					// Manual Legend location
+	plotter_example2.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );						// Manual Legend location
 	plotter_example2.colors = {kOrange, kOrange, kGreen+2, kGreen+2};			// Your own colors (default kBlack + rainbow)
 	plotter_example2.linestyle = {kDotted, kDashed, kDotted, kDashed}; 			// Your own linestyle (default kSolid)
 	plotter_example2.NBins = 30; 									 			// Default = 100

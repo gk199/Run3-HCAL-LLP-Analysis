@@ -31,7 +31,8 @@ public :
 	map<string,TCut> selective_cuts;
 
 	// Default Plot Options 
-	vector<Color_t> colors    = { kBlack, kMagenta-7, kRed, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4  };
+	//vector<Color_t> colors    = { kBlack, kMagenta-7, kRed, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4  };
+	vector<Color_t> colors    = { kBlack, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed  };
 	vector<Style_t> linestyle = { kSolid, kSolid, kSolid, kSolid, kSolid, kSolid, kSolid };
 	bool plot_log  			= true; 
 	bool plot_log_x 		= false; 
@@ -888,15 +889,15 @@ public :
 			fittext.Draw("SAME");
 		}
 
-    TString output_file_name = FormatMyString( myPlotParams_y.hist_name + "_vs_" + myPlotParams_x.hist_name ); // GetOutputFileName(myPlotParams_x);
+    	TString output_file_name = FormatMyString( myPlotParams_y.hist_name + "_vs_" + myPlotParams_x.hist_name ); // GetOutputFileName(myPlotParams_x);
 
 		TString saveas_name = GetBetterCutTitle(cut_compare);
 
 		if( legend_names.size() > i )
 			saveas_name = Form("%s", legend_names.at(i).c_str() );
 
-		myCanvas->SaveAs( Form( "Plots/Plot2D_%s_"+output_file_name+"_"+saveas_name+"_%s.png", filetag_treename.c_str(), output_file_tag.c_str() ) );
-        
+		//myCanvas->SaveAs( Form( "Plots/Plot2D_%s_"+output_file_name+"_"+saveas_name+"_%s.png", filetag_treename.c_str(), output_file_tag.c_str() ) );
+        myCanvas->SaveAs( Form( "Plots/Plot2D_"+output_file_name+"_Cut"+saveas_name(0,24)+"_%s.png", output_file_tag.c_str() ) );
 		delete myCanvas;
 	}
 
@@ -907,11 +908,11 @@ public :
 		GetTrees();
 		SetStyle();
 
-    int i = -1;
+    	int i = -1;
 		for( auto filetag_treename: filetags_treenames ){
-      if( cuts_compare.size() == 0 ) cuts_compare.push_back("");
+      	if( cuts_compare.size() == 0 ) cuts_compare.push_back("");
 			for( auto cut_compare: cuts_compare ){
-        i++;
+        		i++;
 				Draw2DPlot(myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare, i);
 			}
 		}
@@ -926,12 +927,12 @@ public :
 
 		for( auto filetag_treename: filetags_treenames ){
 			for( auto Plot2DParams_temp: Plot2DParamsList ){
-        int i = -1;
+        		int i = -1;
 				PlotParams myPlotParams_x = Plot2DParams_temp.Params1;
 				PlotParams myPlotParams_y = Plot2DParams_temp.Params2;
-        if( cuts_compare.size() == 0 ) cuts_compare.push_back("");
+        		if( cuts_compare.size() == 0 ) cuts_compare.push_back("");
 				for( auto cut_compare: cuts_compare ){
-          i++;
+          			i++;
 					Draw2DPlot(myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare, i);
 				}
 			}

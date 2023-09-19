@@ -45,16 +45,24 @@ TString LLP0inHCAL 	    = Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && 
 TString LLP1inHCAL 	    = Form("(LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) <= %f)", 		radius_inHCAL[0],   radius_inHCAL[1],   HBeta);
 
 TString LLP0inTracker 	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) <= %f)", 		radius_tracker[0], 	radius_tracker[1], 	HBeta);
+TString LLP0inTrackerNP = Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) <= %f)", 		controlRegion, 	    radius_tracker[1], 	HBeta);
 TString LLP0inECAL 		= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) <= %f)", 		radius_ECAL[0], 	radius_ECAL[1], 	HBeta);
-TString LLP0inHCAL_d12 	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) <= %f)", 		radius_depth12[0], 	radius_depth12[1], 	HBeta);
+TString LLP0inHCAL_d1 	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) <= %f)", 		radius_depth1[0], 	radius_depth1[1], 	HBeta);
+TString LLP0inHCAL_d2 	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) <= %f)", 		radius_depth2[0], 	radius_depth2[1], 	HBeta);
 TString LLP0inHCAL_d3 	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) <= %f)", 		radius_depth3[0], 	radius_depth3[1], 	HBeta);
 TString LLP0inHCAL_d4 	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) <= %f)", 		radius_depth4[0], 	radius_depth4[1], 	HBeta);
+TString LLP0inHCAL_d12 	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) <= %f)", 		radius_depth12[0], 	radius_depth12[1], 	HBeta);
+TString LLP0inHCAL_d34 	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) <= %f)", 		radius_depth34[0], 	radius_depth34[1], 	HBeta);
 
 TString LLP1inTracker 	= Form("(LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) <= %f)", 		radius_tracker[0], 	radius_tracker[1], 	HBeta);
+TString LLP1inTrackerNP = Form("(LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) <= %f)", 		controlRegion, 	    radius_tracker[1], 	HBeta);
 TString LLP1inECAL 		= Form("(LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) <= %f)", 		radius_ECAL[0], 	radius_ECAL[1], 	HBeta);
-TString LLP1inHCAL_d12 	= Form("(LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) <= %f)", 		radius_depth12[0], 	radius_depth12[1], 	HBeta);
+TString LLP1inHCAL_d1 	= Form("(LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) <= %f)", 		radius_depth1[0], 	radius_depth1[1], 	HBeta);
+TString LLP1inHCAL_d2 	= Form("(LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) <= %f)", 		radius_depth2[0], 	radius_depth2[1], 	HBeta);
 TString LLP1inHCAL_d3 	= Form("(LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) <= %f)", 		radius_depth3[0], 	radius_depth3[1], 	HBeta);
 TString LLP1inHCAL_d4 	= Form("(LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) <= %f)", 		radius_depth4[0], 	radius_depth4[1], 	HBeta);
+TString LLP1inHCAL_d12 	= Form("(LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) <= %f)", 		radius_depth12[0], 	radius_depth12[1], 	HBeta);
+TString LLP1inHCAL_d34 	= Form("(LLP1_DecayR >= %0.1f && LLP1_DecayR < %0.1f && abs(LLP1_Eta) <= %f)", 		radius_depth34[0], 	radius_depth34[1], 	HBeta);
 
 // determine which LLP the two leading jets are matched to
 TString Jet0_LLP0 		= Form("jet0_isMatchedTo == 0");
@@ -72,30 +80,46 @@ TCut Cut_LLP1inHCAL = LLP1inHCAL.Data();
 // at least one of LLPs is in region of interest
 TCut Cut_LLPinTracker	= (LLP0inTracker + OR + LLP1inTracker).Data();
 TCut Cut_LLP0inTracker 	= LLP0inTracker.Data();
+TCut Cut_LLPinTrackerNP	= (LLP0inTrackerNP + OR + LLP1inTrackerNP).Data();
+TCut Cut_LLP0inTrackerNP= LLP0inTrackerNP.Data();
 TCut Cut_LLPinECAL 		= (LLP0inECAL + OR + LLP1inECAL).Data();
 TCut Cut_LLP0inECAL 	= LLP0inECAL.Data();
-TCut Cut_LLPinHCAL_d12 	= (LLP0inHCAL_d12 + OR + LLP1inHCAL_d12).Data();
-TCut Cut_LLP0inHCAL_d12 = LLP0inHCAL_d12.Data();
+TCut Cut_LLPinHCAL_d1 	= (LLP0inHCAL_d1 + OR + LLP1inHCAL_d1).Data();
+TCut Cut_LLP0inHCAL_d1  = LLP0inHCAL_d1.Data();
+TCut Cut_LLPinHCAL_d2 	= (LLP0inHCAL_d2 + OR + LLP1inHCAL_d2).Data();
+TCut Cut_LLP0inHCAL_d2  = LLP0inHCAL_d2.Data();
 TCut Cut_LLPinHCAL_d3 	= (LLP0inHCAL_d3 + OR + LLP1inHCAL_d3).Data();
 TCut Cut_LLP0inHCAL_d3 	= LLP0inHCAL_d3.Data();
 TCut Cut_LLPinHCAL_d4 	= (LLP0inHCAL_d4 + OR + LLP1inHCAL_d4).Data();
 TCut Cut_LLP0inHCAL_d4 	= LLP0inHCAL_d4.Data();
+TCut Cut_LLPinHCAL_d12 	= (LLP0inHCAL_d12 + OR + LLP1inHCAL_d12).Data();
+TCut Cut_LLP0inHCAL_d12 = LLP0inHCAL_d12.Data();
+TCut Cut_LLPinHCAL_d34 	= (LLP0inHCAL_d34 + OR + LLP1inHCAL_d34).Data();
+TCut Cut_LLP0inHCAL_d34 = LLP0inHCAL_d34.Data();
 
 TCut Cut_LLPinCR	    = (LLP0inCR + OR + LLP1inCR).Data();
 
 // LLP is in region of interest, and matched to a jet
 TCut Cut_LLPinTracker_Jet0	= 	( "(" + LLP0inTracker + AND + Jet0_LLP0 + ")" + 	OR + "(" + LLP1inTracker + AND + Jet0_LLP1 + ")" ).Data();
 TCut Cut_LLPinTracker_Jet1	= 	( "(" + LLP0inTracker + AND + Jet1_LLP0 + ")" + 	OR + "(" + LLP1inTracker + AND + Jet1_LLP1 + ")" ).Data();
-TCut Cut_LLPinECAL_Jet0	= 		( "(" + LLP0inECAL + AND + Jet0_LLP0 + ")" + 		OR + "(" + LLP1inECAL + AND + Jet0_LLP1 + ")" ).Data();
-TCut Cut_LLPinECAL_Jet1	= 		( "(" + LLP0inECAL + AND + Jet1_LLP0 + ")" + 		OR + "(" + LLP1inECAL + AND + Jet1_LLP1 + ")" ).Data();
-TCut Cut_LLPinHCAL12_Jet0	= 	( "(" + LLP0inHCAL_d12 + AND + Jet0_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d12 + AND + Jet0_LLP1 + ")" ).Data();
-TCut Cut_LLPinHCAL12_Jet1	= 	( "(" + LLP0inHCAL_d12 + AND + Jet1_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d12 + AND + Jet1_LLP1 + ")" ).Data();
+TCut Cut_LLPinTrackerNP_Jet0= 	( "(" + LLP0inTrackerNP + AND + Jet0_LLP0 + ")" + 	OR + "(" + LLP1inTrackerNP + AND + Jet0_LLP1 + ")" ).Data();
+TCut Cut_LLPinTrackerNP_Jet1= 	( "(" + LLP0inTrackerNP + AND + Jet1_LLP0 + ")" + 	OR + "(" + LLP1inTrackerNP + AND + Jet1_LLP1 + ")" ).Data();
+TCut Cut_LLPinECAL_Jet0	    = 	( "(" + LLP0inECAL + AND + Jet0_LLP0 + ")" + 		OR + "(" + LLP1inECAL + AND + Jet0_LLP1 + ")" ).Data();
+TCut Cut_LLPinECAL_Jet1	    = 	( "(" + LLP0inECAL + AND + Jet1_LLP0 + ")" + 		OR + "(" + LLP1inECAL + AND + Jet1_LLP1 + ")" ).Data();
+TCut Cut_LLPinHCAL1_Jet0	= 	( "(" + LLP0inHCAL_d1 + AND + Jet0_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d1 + AND + Jet0_LLP1 + ")" ).Data();
+TCut Cut_LLPinHCAL1_Jet1	= 	( "(" + LLP0inHCAL_d1 + AND + Jet1_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d1 + AND + Jet1_LLP1 + ")" ).Data();
+TCut Cut_LLPinHCAL2_Jet0	= 	( "(" + LLP0inHCAL_d2 + AND + Jet0_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d2 + AND + Jet0_LLP1 + ")" ).Data();
+TCut Cut_LLPinHCAL2_Jet1	= 	( "(" + LLP0inHCAL_d2 + AND + Jet1_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d2 + AND + Jet1_LLP1 + ")" ).Data();
 TCut Cut_LLPinHCAL3_Jet0	= 	( "(" + LLP0inHCAL_d3 + AND + Jet0_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d3 + AND + Jet0_LLP1 + ")" ).Data();
 TCut Cut_LLPinHCAL3_Jet1	= 	( "(" + LLP0inHCAL_d3 + AND + Jet1_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d3 + AND + Jet1_LLP1 + ")" ).Data();
 TCut Cut_LLPinHCAL4_Jet0	= 	( "(" + LLP0inHCAL_d4 + AND + Jet0_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d4 + AND + Jet0_LLP1 + ")" ).Data();
 TCut Cut_LLPinHCAL4_Jet1	= 	( "(" + LLP0inHCAL_d4 + AND + Jet1_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d4 + AND + Jet1_LLP1 + ")" ).Data();
 TCut Cut_LLPinHCAL_Jet0	    = 	( "(" + LLP0inHCAL + AND + Jet0_LLP0 + ")" + 	    OR + "(" + LLP1inHCAL + AND + Jet0_LLP1 + ")" ).Data();
 TCut Cut_LLPinHCAL_Jet1	    = 	( "(" + LLP0inHCAL + AND + Jet1_LLP0 + ")" + 	    OR + "(" + LLP1inHCAL + AND + Jet1_LLP1 + ")" ).Data();
+TCut Cut_LLPinHCAL12_Jet0	= 	( "(" + LLP0inHCAL_d12 + AND + Jet0_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d12 + AND + Jet0_LLP1 + ")" ).Data();
+TCut Cut_LLPinHCAL12_Jet1	= 	( "(" + LLP0inHCAL_d12 + AND + Jet1_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d12 + AND + Jet1_LLP1 + ")" ).Data();
+TCut Cut_LLPinHCAL34_Jet0	= 	( "(" + LLP0inHCAL_d34 + AND + Jet0_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet0_LLP1 + ")" ).Data();
+TCut Cut_LLPinHCAL34_Jet1	= 	( "(" + LLP0inHCAL_d34 + AND + Jet1_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet1_LLP1 + ")" ).Data();
 
 TCut Cut_LLPinCR_Jet0	    = 	( "(" + LLP0inCR + AND + Jet0_LLP0 + ")" + 	        OR + "(" + LLP1inCR + AND + Jet0_LLP1 + ")" ).Data();
 TCut Cut_LLPinCR_Jet1	    = 	( "(" + LLP0inCR + AND + Jet1_LLP0 + ")" + 	        OR + "(" + LLP1inCR + AND + Jet1_LLP1 + ")" ).Data();
@@ -105,23 +129,32 @@ TCut Cut_LLPinCR_Jet1	    = 	( "(" + LLP0inCR + AND + Jet1_LLP0 + ")" + 	       
 map<TCut, string> LLP_Cuts; // either LLP position
 LLP_Cuts.insert(pair<TCut, string>(Cut_LLPinTracker, "LLPinTracker"));
 LLP_Cuts.insert(pair<TCut, string>(Cut_LLPinECAL, "LLPinECAL"));
-LLP_Cuts.insert(pair<TCut, string>(Cut_LLPinHCAL_d12, "LLPinHCAL_depth12"));
+LLP_Cuts.insert(pair<TCut, string>(Cut_LLPinHCAL_d1, "LLPinHCAL_depth1"));
+LLP_Cuts.insert(pair<TCut, string>(Cut_LLPinHCAL_d2, "LLPinHCAL_depth2"));
 LLP_Cuts.insert(pair<TCut, string>(Cut_LLPinHCAL_d3, "LLPinHCAL_depth3"));
 LLP_Cuts.insert(pair<TCut, string>(Cut_LLPinHCAL_d4, "LLPinHCAL_depth4"));
+LLP_Cuts.insert(pair<TCut, string>(Cut_LLPinHCAL_d12, "LLPinHCAL_depth12"));
+LLP_Cuts.insert(pair<TCut, string>(Cut_LLPinHCAL_d34, "LLPinHCAL_depth34"));
 
 map<TCut, string> LLP0_Cuts; // leading LLP position
 LLP0_Cuts.insert(pair<TCut, string>(Cut_LLP0inTracker, "LLP0inTracker"));
 LLP0_Cuts.insert(pair<TCut, string>(Cut_LLP0inECAL, "LLP0inECAL"));
-LLP0_Cuts.insert(pair<TCut, string>(Cut_LLP0inHCAL_d12, "LLP0inHCAL_depth12"));
+LLP0_Cuts.insert(pair<TCut, string>(Cut_LLP0inHCAL_d1, "LLP0inHCAL_depth1"));
+LLP0_Cuts.insert(pair<TCut, string>(Cut_LLP0inHCAL_d2, "LLP0inHCAL_depth2"));
 LLP0_Cuts.insert(pair<TCut, string>(Cut_LLP0inHCAL_d3, "LLP0inHCAL_depth3"));
 LLP0_Cuts.insert(pair<TCut, string>(Cut_LLP0inHCAL_d4, "LLP0inHCAL_depth4"));
+LLP0_Cuts.insert(pair<TCut, string>(Cut_LLP0inHCAL_d12, "LLP0inHCAL_depth12"));
+LLP0_Cuts.insert(pair<TCut, string>(Cut_LLP0inHCAL_d34, "LLP0inHCAL_depth34"));
 
 map<tuple<TCut, TCut>, string> JetMatchedToLLP; // jet (0,1) is matched to a LLP in the given region // tuple could be used for more cuts as well, accessing done below
 JetMatchedToLLP.insert(pair< tuple<TCut, TCut>, string> (make_tuple(Cut_LLPinTracker_Jet0, Cut_LLPinTracker_Jet1), "Matched_LLPinTracker"));
 JetMatchedToLLP.insert(pair< tuple<TCut, TCut>, string> (make_tuple(Cut_LLPinECAL_Jet0, Cut_LLPinECAL_Jet1), "Matched_LLPinECAL"));
-JetMatchedToLLP.insert(pair< tuple<TCut, TCut>, string> (make_tuple(Cut_LLPinHCAL12_Jet0, Cut_LLPinHCAL12_Jet1), "Matched_LLPinHCAL_d12"));
+JetMatchedToLLP.insert(pair< tuple<TCut, TCut>, string> (make_tuple(Cut_LLPinHCAL1_Jet0, Cut_LLPinHCAL1_Jet1), "Matched_LLPinHCAL_d1"));
+JetMatchedToLLP.insert(pair< tuple<TCut, TCut>, string> (make_tuple(Cut_LLPinHCAL2_Jet0, Cut_LLPinHCAL2_Jet1), "Matched_LLPinHCAL_d2"));
 JetMatchedToLLP.insert(pair< tuple<TCut, TCut>, string> (make_tuple(Cut_LLPinHCAL3_Jet0, Cut_LLPinHCAL3_Jet1), "Matched_LLPinHCAL_d3"));
 JetMatchedToLLP.insert(pair< tuple<TCut, TCut>, string> (make_tuple(Cut_LLPinHCAL4_Jet0, Cut_LLPinHCAL4_Jet1), "Matched_LLPinHCAL_d4"));
+JetMatchedToLLP.insert(pair< tuple<TCut, TCut>, string> (make_tuple(Cut_LLPinHCAL12_Jet0, Cut_LLPinHCAL12_Jet1), "Matched_LLPinHCAL_d12"));
+JetMatchedToLLP.insert(pair< tuple<TCut, TCut>, string> (make_tuple(Cut_LLPinHCAL34_Jet0, Cut_LLPinHCAL34_Jet1), "Matched_LLPinHCAL_d34"));
 
 map<TCut, string>::iterator it;
 map<tuple<TCut, TCut>, string>::iterator it_double;

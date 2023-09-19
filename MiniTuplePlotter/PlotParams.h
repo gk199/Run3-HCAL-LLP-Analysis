@@ -48,6 +48,7 @@ PlotParams P_jet0_PhiSpread				= {"jet0_PhiSpread", "Leading Jet #phi Spread", "
 PlotParams P_jet0_PhiSpread_energy		= {"jet0_PhiSpread_energy", "Leading Jet #phi Spread Energy", "#phi Spread (energy weighted)", 0, 0.2 };
 PlotParams P_jet0_EtaPhiQuadSpread		= {"jet0_EtaPhiQuadSpread", "Leading Jet #sqrt{#eta^{2} + #phi^{2}} Spread", "#sqrt{#eta^{2} + #phi^{2}} Spread", 0, 0.4 };
 PlotParams P_jet0_EtaPhiQuadSpread_energy={"jet0_EtaPhiQuadSpread_energy", "Leading Jet #sqrt{#eta^{2} + #phi^{2}} Spread Energy", "#sqrt{#eta^{2} + #phi^{2}} Spread (energy weighted)", 0, 0.2 };
+PlotParams P_jet0_Track0PtFrac			= {"jet0_Track0Pt / jet0_Pt", "Leading Jet: Leading Track p_{T} / Jet p_{T}", "Track Energy Fraction", 0, 1 };
 PlotParams P_jet0_Track0Pt				= {"jet0_Track0Pt", "Leading Jet: Leading Track p_{T}", "p_{T} [GeV]", 0, 15 };
 PlotParams P_jet0_Track1Pt				= {"jet0_Track1Pt", "Leading Jet: Subeading Track p_{T}", "p_{T} [GeV]", 0, 5 };
 PlotParams P_jet0_Track2Pt				= {"jet0_Track2Pt", "Leading Jet: Third leading Track p_{T}", "p_{T} [GeV]", 0, 5 };
@@ -69,6 +70,11 @@ PlotParams P_jet0_PhoEFrac				= {"jet0_PhoEFrac", "Leading Jet Photon Energy Fra
 PlotParams P_jet0_EleEFrac				= {"jet0_EleEFrac", "Leading Jet Electromagnetic Energy Fraction", "Electromagnetic Energy Fraction", 0, 1 };
 PlotParams P_jet0_MuonEFrac				= {"jet0_MuonEFrac", "Leading Jet Muon Energy Fraction", "Muon Energy Fraction", 0, 1 };
 PlotParams P_jet0_HoverE				= {"jet0_HoverE", "Leading Jet H/E Energy Ratio", "H/E Energy Ratio", 0, 40 };
+PlotParams P_jet0_NeutralOverChargedHad = {"jet0_NeutralHadEFrac/jet0_ChargedHadEFrac", "Leading Jet Neutral / Charged Hadronic Energy Fraction", "Neutral / Charged Hadronic Energy Fraction", 0, 100};
+PlotParams P_jet0_HCALd1_over_d2		= {"jet0_EnergyFrac_Depth1/jet0_EnergyFrac_Depth2", "HCAL Energy: Depth 1 over Depth 2", "Depth 1 over Depth 2 Energy Ratio", 0, 100};
+PlotParams P_jet0_HCALd1_over_d3		= {"jet0_EnergyFrac_Depth1/jet0_EnergyFrac_Depth3", "HCAL Energy: Depth 1 over Depth 3", "Depth 1 over Depth 3 Energy Ratio", 0, 100};
+PlotParams P_jet0_HCALd1_over_d4		= {"jet0_EnergyFrac_Depth1/jet0_EnergyFrac_Depth4", "HCAL Energy: Depth 1 over Depth 4", "Depth 1 over Depth 4 Energy Ratio", 0, 100};
+PlotParams P_jet0_HCALd12_over_d34		= {"(jet0_EnergyFrac_Depth1 + jet0_EnergyFrac_Depth2)/(jet0_EnergyFrac_Depth3 + jet0_EnergyFrac_Depth4)", "HCAL Energy: Depth 1+2 over Depth 3+4", "Depth 1+2 over Depth 3+4 Energy Ratio", 0, 100};
 
 // below ones are for example files, v1 minituples have changed variable names as used above
 PlotParams P_jet0_rechitN				= {"jet0_rechitN", "Number of HCAL RecHits", "N^{HCAL}_{RecHits}", 0, 200 };
@@ -104,6 +110,7 @@ PlotParams P_jet1_PhoEFrac				= {"jet1_PhoEFrac", "Sub-Leading Jet Photon Energy
 PlotParams P_jet1_EleEFrac				= {"jet1_EleEFrac", "Sub-Leading Jet Electromagnetic Energy Fraction", "Electromagnetic Energy Fraction", 0, 1 };
 PlotParams P_jet1_MuonEFrac				= {"jet1_MuonEFrac", "Sub-Leading Jet Muon Energy Fraction", "Muon Energy Fraction", 0, 1 };
 PlotParams P_jet1_HoverE				= {"jet1_HoverE", "Sub-Leading Jet H/E Energy Ratio", "H/E Energy Ratio", 0, 100 };
+PlotParams P_jet1_NeutralOverChargedHad = {"jet1_NeutralHadEFrac/jet0_ChargedHadEFrac", "Sub-Leading Jet Neutral / Charged Hadronic Energy Fraction", "Neutral / Charged Hadronic Energy Fraction", 0, 100};
 
 // Event Quantities
 PlotParams P_met_Pt						= {"met_Pt", "MET p_{T}", "p_{T} [GeV]", 0, 400 };
