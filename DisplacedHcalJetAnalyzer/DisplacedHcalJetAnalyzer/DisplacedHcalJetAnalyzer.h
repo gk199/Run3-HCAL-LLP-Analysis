@@ -712,6 +712,7 @@ public :
    virtual vector<vector<float>> GetEnergyProfile( int idx_llp, float deltaR_cut );
    virtual vector<float> GetMatchedHcalRechits_Jet( int idx_jet, float deltaR_cut );
    virtual vector<float> GetEnergyProfile_Jet( int idx_jet, float deltaR_cut );
+   virtual vector<float> Get3RechitE_Jet( int idx_jet, float deltaR_cut );
    virtual vector<float> GetEtaPhiSpread_Jet( int idx_jet, float deltaR_cut );
    virtual vector<float> GetTDCavg_Jet( int idx_jet, float deltaR_cut );
    // TruthInfoHelper.cxx

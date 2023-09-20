@@ -62,12 +62,39 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("jet%d_Eta", i) );
 		myvars_float.push_back( Form("jet%d_Phi", i) );
 		myvars_float.push_back( Form("jet%d_E", i) );
+		myvars_float.push_back( Form("jet%d_Mass", i) );
+		myvars_float.push_back( Form("jet%d_JetArea", i) );
+
 		myvars_float.push_back( Form("jet%d_ChargedHadEFrac", i) );
 		myvars_float.push_back( Form("jet%d_NeutralHadEFrac", i) );
 		myvars_float.push_back( Form("jet%d_PhoEFrac", i) );
 		myvars_float.push_back( Form("jet%d_EleEFrac", i) );
 		myvars_float.push_back( Form("jet%d_MuonEFrac", i) );
 		myvars_float.push_back( Form("jet%d_HoverE", i) );
+
+		myvars_int.push_back( Form("jet%d_ChargedHadMult", i) );
+		myvars_int.push_back( Form("jet%d_NeutralHadMult", i) );
+		myvars_int.push_back( Form("jet%d_PhoMult", i) );
+		myvars_int.push_back( Form("jet%d_EleMult", i) );
+		myvars_int.push_back( Form("jet%d_MuonMult", i) );
+
+		myvars_float.push_back( Form("jet%d_PtAllTracks", i) );
+		myvars_float.push_back( Form("jet%d_PtAllPVTracks", i) );
+		myvars_int.push_back( Form("jet%d_NVertexTracks", i) );
+		myvars_int.push_back( Form("jet%d_NSelectedTracks", i) );
+		myvars_int.push_back( Form("jet%d_NSV", i) );
+		myvars_int.push_back( Form("jet%d_NSVCand", i) );
+		myvars_float.push_back( Form("jet%d_SV_x", i) );
+		myvars_float.push_back( Form("jet%d_SV_y", i) );
+		myvars_float.push_back( Form("jet%d_SV_z", i) );
+		myvars_int.push_back( Form("jet%d_SV_NTracks", i) );
+		myvars_float.push_back( Form("jet%d_SV_Mass", i) );
+		myvars_float.push_back( Form("jet%d_SV_DRJet", i) );
+		myvars_float.push_back( Form("jet%d_FlightDist2D", i) );
+		myvars_float.push_back( Form("jet%d_FlightDist2DErr", i) );
+		myvars_float.push_back( Form("jet%d_FlightDist3D", i) );
+		myvars_float.push_back( Form("jet%d_FlightDist3DErr", i) );
+
 		myvars_float.push_back( Form("jet%d_isTruthMatched", i) );
 		myvars_float.push_back( Form("jet%d_isMatchedTo", i) );
 		myvars_float.push_back( Form("jet%d_isMatchedWithDR", i) );
@@ -84,14 +111,21 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("jet%d_Track0Pt", i) );
 		myvars_float.push_back( Form("jet%d_Track1Pt", i) );
 		myvars_float.push_back( Form("jet%d_Track2Pt", i) );
+
 		for (int t=0; t<3; t++) {
 			myvars_float.push_back( Form("jet%d_Track%ddzToPV", i, t) );
 			myvars_float.push_back( Form("jet%d_Track%ddxyToBS", i, t) );
 			myvars_float.push_back( Form("jet%d_Track%ddzOverErr", i, t) );
 			myvars_float.push_back( Form("jet%d_Track%ddxyOverErr", i, t) );
+			myvars_float.push_back( Form("jet%d_Track%ddR", i, t) );
 		}
 
 		for (int d=0; d<4; d++) myvars_float.push_back( Form("jet%d_EnergyFrac_Depth%d", i, d+1) );
+
+		myvars_float.push_back(Form("jet%d_LeadingRechitE", i) );
+		myvars_float.push_back(Form("jet%d_SubLeadingRechitE", i) );
+		myvars_float.push_back(Form("jet%d_SSubLeadingRechitE", i) );
+		myvars_float.push_back(Form("jet%d_AllRechitE", i) );
 
 		if (i < 2) {
 			myvars_float.push_back( Form("LLP%d_Pt", i));
@@ -134,7 +168,8 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		if (i < 2) {
 			myvars_float.push_back( Form("LLP%d_isTruthMatched", i) );
 			myvars_float.push_back( Form("LLP%d_isTruthMatched_Jet40", i) );
-			myvars_float.push_back( Form("LLP%d_isTruthMatched_Jet70", i) );
+			myvars_float.push_back( Form("LLP%d_isTruthMatched_Jet60", i) );
+			myvars_float.push_back( Form("LLP%d_isTruthMatched_Jet80", i) );
 			myvars_float.push_back( Form("LLP%d_isTruthMatched_Jet100", i) );
 		}
 	}
@@ -202,18 +237,18 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 	//	tree_output_vars_bool[HLT_Names[i]] = HLT_Decision->at(i);
 	// }
 	// TEMPORARY for setting up HLT efficiency work
-	tree_output_vars_bool["HLT_HT170_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack"] = HLT_Decision->at(0);
-	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack"] = HLT_Decision->at(1);
-	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DisplacedDijet60_DisplacedTrack"] = HLT_Decision->at(2);
-	tree_output_vars_bool["HLT_HT270_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack"] = HLT_Decision->at(3);
-	tree_output_vars_bool["HLT_HT320_L1SingleLLPJet_DisplacedDijet60_Inclusive"] = HLT_Decision->at(4);
-	tree_output_vars_bool["HLT_HT420_L1SingleLLPJet_DisplacedDijet60_Inclusive"] = HLT_Decision->at(5);
-	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay1nsTrackless"] = HLT_Decision->at(6);
-	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay2nsInclusive"] = HLT_Decision->at(7);
-	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay0p5nsTrackless"] = HLT_Decision->at(8);
-	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay1nsInclusive"] = HLT_Decision->at(9);
-	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5"] = HLT_Decision->at(10);
-	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5"] = HLT_Decision->at(11);
+	tree_output_vars_bool["HLT_HT170_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack"] 			= HLT_Decision->at(0);
+	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack"] 			= HLT_Decision->at(1);
+	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DisplacedDijet60_DisplacedTrack"] 			= HLT_Decision->at(2);
+	tree_output_vars_bool["HLT_HT270_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack"] 			= HLT_Decision->at(3);
+	tree_output_vars_bool["HLT_HT320_L1SingleLLPJet_DisplacedDijet60_Inclusive"] 				= HLT_Decision->at(4);
+	tree_output_vars_bool["HLT_HT420_L1SingleLLPJet_DisplacedDijet60_Inclusive"] 				= HLT_Decision->at(5);
+	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay1nsTrackless"] 		= HLT_Decision->at(6);
+	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay2nsInclusive"] 		= HLT_Decision->at(7);
+	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay0p5nsTrackless"] 	= HLT_Decision->at(8);
+	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay1nsInclusive"] 		= HLT_Decision->at(9);
+	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5"]	= HLT_Decision->at(10);
+	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5"] 	= HLT_Decision->at(11);
 
 	tree_output_vars_int["RechitN_1GeV"] = 0; 
 	tree_output_vars_int["RechitN_5GeV"] = 0; 
@@ -244,13 +279,38 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("jet%d_Eta", i)] 	= jet_Eta->at(i);
 		tree_output_vars_float[Form("jet%d_Phi", i)] 	= jet_Phi->at(i);
 		tree_output_vars_float[Form("jet%d_E", i)] 		= jet_E->at(i);
+		tree_output_vars_float[Form("jet%d_Mass", i)] 	= jet_Mass->at(i);
+		tree_output_vars_float[Form("jet%d_JetArea", i)]= jet_JetArea->at(i);
 
 		tree_output_vars_float[Form("jet%d_ChargedHadEFrac", i)] 		= jet_ChargedHadEFrac->at(i);
 		tree_output_vars_float[Form("jet%d_NeutralHadEFrac", i)] 		= jet_NeutralHadEFrac->at(i);
 		tree_output_vars_float[Form("jet%d_PhoEFrac", i)] 				= jet_PhoEFrac->at(i);
 		tree_output_vars_float[Form("jet%d_EleFrac", i)] 				= jet_EleEFrac->at(i);
 		tree_output_vars_float[Form("jet%d_MuonEFrac", i)] 				= jet_MuonEFrac->at(i);
-		tree_output_vars_float[Form("jet%d_HoverE", i)] 				= (jet_ChargedHadEFrac->at(i) + jet_NeutralHadEFrac->at(i)) / (jet_PhoEFrac->at(i) + jet_EleEFrac->at(i));
+		tree_output_vars_float[Form("jet%d_HoverE", i)] 				= (jet_ChargedHadEFrac->at(i)) / (jet_NeutralHadEFrac->at(i) + jet_PhoEFrac->at(i) + jet_EleEFrac->at(i));
+
+		tree_output_vars_int[Form("jet%d_ChargedHadMult", i)] 			= jet_ChargedHadMult->at(i);
+		tree_output_vars_int[Form("jet%d_NeutralHadMult", i)] 			= jet_NeutralHadMult->at(i);
+		tree_output_vars_int[Form("jet%d_PhoMult", i)] 					= jet_PhoMult->at(i);
+		tree_output_vars_int[Form("jet%d_EleMult", i)] 					= jet_EleMult->at(i);
+		tree_output_vars_int[Form("jet%d_MuonMult", i)] 				= jet_MuonMult->at(i);
+
+		tree_output_vars_float[Form("jet%d_PtAllTracks", i)] 			= jet_PtAllTracks->at(i);
+		tree_output_vars_float[Form("jet%d_PtAllPVTracks", i)] 			= jet_PtAllPVTracks->at(i);
+		tree_output_vars_int[Form("jet%d_NVertexTracks", i)] 			= jet_NVertexTracks->at(i);
+		tree_output_vars_int[Form("jet%d_NSelectedTracks", i)] 			= jet_NSelectedTracks->at(i);
+		tree_output_vars_int[Form("jet%d_NSV", i)] 						= jet_NSV->at(i);
+		tree_output_vars_int[Form("jet%d_NSVCand", i)] 					= jet_NSVCand->at(i);
+		tree_output_vars_float[Form("jet%d_SV_x", i)] 					= jet_SV_x->at(i);
+		tree_output_vars_float[Form("jet%d_SV_y", i)] 					= jet_SV_y->at(i);
+		tree_output_vars_float[Form("jet%d_SV_z", i)] 					= jet_SV_z->at(i);
+		tree_output_vars_int[Form("jet%d_SV_NTracks", i)] 				= jet_SV_NTracks->at(i);
+		tree_output_vars_float[Form("jet%d_SV_Mass", i)] 				= jet_SV_Mass->at(i);
+		tree_output_vars_float[Form("jet%d_SV_DRJet", i)] 				= jet_SV_DRJet->at(i);
+		tree_output_vars_float[Form("jet%d_FlightDist2D", i)] 			= jet_FlightDist2D->at(i);
+		tree_output_vars_float[Form("jet%d_FlightDist2DErr", i)] 		= jet_FlightDist2DErr->at(i);
+		tree_output_vars_float[Form("jet%d_FlightDist3D", i)] 			= jet_FlightDist3D->at(i);
+		tree_output_vars_float[Form("jet%d_FlightDist3DErr", i)] 		= jet_FlightDist3DErr->at(i);
 
 		tree_output_vars_float[Form("jet%d_isTruthMatched", i)] = JetIsTruthMatched( jet_Eta->at(i), jet_Phi->at(i) );
 		if (JetIsTruthMatched(jet_Eta->at(i), jet_Phi->at(i) ) == true) {
@@ -265,10 +325,15 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		vector<float> rechitJet = GetMatchedHcalRechits_Jet(i, 0.4);
 		vector<float> energy = GetEnergyProfile_Jet(i, 0.4);
 		vector<float> spread_Eta_Phi = GetEtaPhiSpread_Jet(i, 0.4); // eta, phi (average); eta, phi (energy weighted)
+		vector<float> energeticRechits = Get3RechitE_Jet(i, 0.4); // three highest rechit energies in the , and total energy
 		vector<float> TDC_TDCenergy = GetTDCavg_Jet(i, 0.4); // TDC average, energy weighted TDC
 
 		for (int depth = 0; depth < 4; depth++) tree_output_vars_float[Form("jet%d_EnergyFrac_Depth%d", i, depth+1)] = energy[depth]; // each fractional energy saved in different tree
-		tree_output_vars_int[Form("jet%d_RechitN", i)] = rechitJet.size();
+		tree_output_vars_float[Form("jet%d_LeadingRechitE", i)] 			= energeticRechits[0];
+		tree_output_vars_float[Form("jet%d_SubLeadingRechitE", i)] 			= energeticRechits[1];
+		tree_output_vars_float[Form("jet%d_SSubLeadingRechitE", i)] 		= energeticRechits[2];
+		tree_output_vars_float[Form("jet%d_AllRechitE", i)] 				= energeticRechits[3];
+		tree_output_vars_int[Form("jet%d_RechitN", i)] 						= rechitJet.size();
 		tree_output_vars_float[Form("jet%d_EtaSpread", i)] 					= spread_Eta_Phi[0];
 		tree_output_vars_float[Form("jet%d_EtaSpread_energy", i)] 			= spread_Eta_Phi[2];
 		tree_output_vars_float[Form("jet%d_PhiSpread", i)] 					= spread_Eta_Phi[1];
@@ -295,12 +360,13 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 			std::sort (track_pt_index.begin(), track_pt_index.end(), greater<pair<float, float>>()); // sort to find highest pt tracks
 			int n_track = std::min(3, (int) jet_track_index.size());
 			for (int track = 0; track < n_track; track++) {
-				tree_output_vars_float[Form("jet%d_Track%dPt", i, track)] = track_pt_index[track].first;
+				tree_output_vars_float[Form("jet%d_Track%dPt", i, track)] 			= track_pt_index[track].first;
 				int track_num = track_pt_index[track].second;
-				tree_output_vars_float[Form("jet%d_Track%ddzToPV", i, track)] = track_dzToPV->at(track_num); 
-				tree_output_vars_float[Form("jet%d_Track%ddxyToBS", i, track)] = track_dxyToBS->at(track_num); 
-				tree_output_vars_float[Form("jet%d_Track%ddzOverErr", i, track)] = track_dzToPV->at(track_num) / track_dzErr->at(track_num); 
-				tree_output_vars_float[Form("jet%d_Track%ddxyOverErr", i, track)] = track_dxyToBS->at(track_num) / track_dxyErr->at(track_num); 
+				tree_output_vars_float[Form("jet%d_Track%ddzToPV", i, track)] 		= track_dzToPV->at(track_num); 
+				tree_output_vars_float[Form("jet%d_Track%ddxyToBS", i, track)] 		= track_dxyToBS->at(track_num); 
+				tree_output_vars_float[Form("jet%d_Track%ddzOverErr", i, track)]	= track_dzToPV->at(track_num) / track_dzErr->at(track_num); 
+				tree_output_vars_float[Form("jet%d_Track%ddxyOverErr", i, track)] 	= track_dxyToBS->at(track_num) / track_dxyErr->at(track_num); 
+				tree_output_vars_float[Form("jet%d_Track%ddR", i, track)] 			= DeltaR( jet_Eta->at(i), track_Eta->at(track_num), jet_Phi->at(i), track_Phi->at(track_num) ); 
 			}
 		} // end of track matching 
 	}
@@ -345,7 +411,6 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("LLP%dDecay_RechitEnergy", i)] = energy[4][0];
 		if (energy[4][3] > 20) tree_output_vars_float[Form("LLP%d_RechitEnergy20GeV", i)] = 1;
 		tree_output_vars_float[Form("LLP%d_RechitEnergy", i)] = energy[4][3];
-
 	}
 
 	for (int i = 0; i < gLLPDecay_iParticle.size(); i++) { // size is 4
@@ -361,7 +426,8 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("LLPDecay%d_isTruthMatched", i)] = LLPIsTruthMatched( i );
 		if (LLPIsTruthMatched( i )) tree_output_vars_float[Form("LLP%d_isTruthMatched", gLLPDecay_iLLP.at(i))] = 1; // gLLPDecay_iLLP.at( i ) tells which LLP this comes from, and gLLPDecay_iLLP.at(i) details correspond to i in n_gLLP loop above
 		if (LLPIsTruthMatched( i, 40 )) tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet40", gLLPDecay_iLLP.at(i))] = 1; 
-		if (LLPIsTruthMatched( i, 70 )) tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet70", gLLPDecay_iLLP.at(i))] = 1; 
+		if (LLPIsTruthMatched( i, 60 )) tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet60", gLLPDecay_iLLP.at(i))] = 1; 
+		if (LLPIsTruthMatched( i, 80 )) tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet80", gLLPDecay_iLLP.at(i))] = 1; 
 		if (LLPIsTruthMatched( i, 100 )) tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet100", gLLPDecay_iLLP.at(i))] = 1; 
 	}
 
