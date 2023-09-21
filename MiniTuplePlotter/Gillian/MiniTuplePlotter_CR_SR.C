@@ -6,10 +6,10 @@ void MiniTuplePlotter_CR_SR(){
 
 
 	// List where minituples are stored
-	string path = "/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.2/minituple_";
-	vector<string> filetags_both = 	{ "v1.2_LLPskim_500k_2023_09_18", "v1.2_MCsignal_500k_2023_09_18" };
-	vector<string> filetags_data = 	{ "v1.2_LLPskim_500k_2023_09_18" };
-	vector<string> filetags_MC = 	{ "v1.2_MCsignal_500k_2023_09_18" };
+	string path = "/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.3/minituple_";
+	vector<string> filetags_both = 	{ "v1.3_LLPskim_500k_2023_09_20", "v1.3_MCsignal_500k_2023_09_20" };
+	vector<string> filetags_data = 	{ "v1.3_LLPskim_500k_2023_09_20" };
+	vector<string> filetags_MC = 	{ "v1.3_MCsignal_500k_2023_09_20" };
 
 
 	#include "../RegionCuts.h"
@@ -27,22 +27,27 @@ void MiniTuplePlotter_CR_SR(){
 								P_jet0_EtaSpread, P_jet0_PhiSpread, P_jet0_EtaSpread_energy, P_jet0_PhiSpread_energy, 						// eta - phi spread
 								P_jet0_EtaPhiQuadSpread, P_jet0_EtaPhiQuadSpread_energy,
 								P_jet0_EnergyFrac_Depth1, P_jet0_EnergyFrac_Depth2, P_jet0_EnergyFrac_Depth3, P_jet0_EnergyFrac_Depth4,		// depth ratios
-								P_jet0_HoverE, P_jet0_NeutralOverChargedHad, 										 					 	// H/E and neutral / charged hadron
+								P_jet0_HoverE, P_jet0_NeutralOverChargedHad, P_jet0_ChargedHad,												// H/E and neutral / charged hadron
+								P_jet0_NeutralHad, P_jet0_PhoEFrac, P_jet0_EleEFrac, P_jet0_NeutralElePhoEFrac, P_jet0_NeutralPhoEFrac,
 								P_jet0_HCALd1_over_d2, P_jet0_HCALd1_over_d3, P_jet0_HCALd1_over_d4, P_jet0_HCALd12_over_d34 } );
 	plotter_JetVars.SetTreeName( "NoSel" );	
-	plotter_JetVars.SetOutputFileTag("CR_SR_v1.2_MC"); 	
-	plotter_JetVars.SetComparisonCuts({Cut_LLPinCR_Jet0, Cut_LLPinTrackerNP_Jet0, Cut_LLPinECAL_Jet0, Cut_LLPinHCAL12_Jet0, Cut_LLPinHCAL34_Jet0}); // , Cut_LLPinHCAL4_Jet0});
-	plotter_JetVars.plot_log_ratio    = true; 
-	plotter_JetVars.SetLegendNames({"Prompt", "Tracker-NonPrompt", "ECAL", "HCAL-L12", "HCAL-L34"});
+	plotter_JetVars.SetOutputFileTag("CR_SR_v1.3_MC"); 	
+	plotter_JetVars.SetComparisonCuts({Cut_LLPinCR_Jet0, Cut_LLPinTrackerNP_Jet0, Cut_LLPinECAL_Jet0, Cut_LLPinHCAL1_Jet0, Cut_LLPinHCAL2_Jet0, Cut_LLPinHCAL34_Jet0}); // , Cut_LLPinHCAL4_Jet0});
+	plotter_JetVars.plot_log_ratio    = false; 
+	plotter_JetVars.SetLegendNames({"Prompt", "Tracker-NonPrompt", "ECAL", "HCAL-L1", "HCAL-L2", "HCAL-L34"});
 	plotter_JetVars.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+	//plotter_JetVars.plot_cdf = true;
+	//plotter_JetVars.plot_reverse_cdf = true;
+	plotter_JetVars.SetOutputDirectory("CR_SR");
 	plotter_JetVars.Plot("ratio");
 
 	// 2D spread of eta - phi, for leading and subleading jet
 	class MiniTuplePlotter plotter_JetVars2D_etaphi( filetags_MC, path );
 	plotter_JetVars2D_etaphi.SetTreeName( "NoSel" );	
-	plotter_JetVars2D_etaphi.SetOutputFileTag("CR_SR_v1.2_MC"); 	
+	plotter_JetVars2D_etaphi.SetOutputFileTag("CR_SR_v1.3_MC"); 	
 	plotter_JetVars2D_etaphi.SetComparisonCuts({Cut_LLPinCR_Jet0, Cut_LLPinHCAL_Jet0});
 	plotter_JetVars2D_etaphi.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );			
+	plotter_JetVars2D_etaphi.SetOutputDirectory("2D");
     plotter_JetVars2D_etaphi.SetPlots2D({Hist1_Hist2(P_jet0_EtaSpread, P_jet0_PhiSpread), Hist1_Hist2(P_jet0_EtaSpread_energy, P_jet0_PhiSpread_energy) });
 	plotter_JetVars2D_etaphi.PlotMany2D();
 	plotter_JetVars2D_etaphi.SetComparisonCuts({Cut_LLPinCR_Jet1, Cut_LLPinHCAL_Jet1});
@@ -53,7 +58,7 @@ void MiniTuplePlotter_CR_SR(){
 	class MiniTuplePlotter plotter_Jet1Vars2D_etaphi( filetags_MC, path );
 	plotter_Jet1Vars2D_etaphi.SetPlots({P_jet1_E, P_jet1_Pt}); 
 	plotter_Jet1Vars2D_etaphi.SetTreeName( "NoSel" );	
-	plotter_Jet1Vars2D_etaphi.SetOutputFileTag("CR_SR_v1.2_MC"); 	
+	plotter_Jet1Vars2D_etaphi.SetOutputFileTag("CR_SR_v1.3_MC"); 	
 	plotter_Jet1Vars2D_etaphi.SetComparisonCuts({Cut_LLPinCR_Jet1, Cut_LLPinHCAL_Jet1});
 	plotter_Jet1Vars2D_etaphi.plot_log_ratio    = true;
 	plotter_Jet1Vars2D_etaphi.SetLegendNames({"Prompt", "HCAL-L1234"});

@@ -23,6 +23,7 @@ public :
 	TString MiniTupleVersion = "";
 
 	string output_file_tag = ""; 
+	TString output_directory = "Plots";
 
 	// Cuts
 	TCut cuts_all;
@@ -233,7 +234,6 @@ public :
 	}
 
 
-
 	// =====================================================================================
 	// Output File Info and Legend Format (Including Displaying Fit Info) 
 	// =====================================================================================
@@ -243,6 +243,13 @@ public :
 		if( debug) cout<<"MiniTuplePlotter::SetOutputFileTag()"<<endl;
 
 		output_file_tag = output_file_tag_tmp;
+	}
+
+	// -------------------------------------------------------------------------------------
+	void SetOutputDirectory(string output_directory_tmp){
+		if( debug) cout<<"MiniTuplePlotter::SetOutputDirectory()"<<endl;
+
+		output_directory += Form("/%s", output_directory_tmp.c_str() );
 	}
 
 	// -------------------------------------------------------------------------------------
@@ -829,7 +836,7 @@ public :
 			TString output_file_name = GetOutputFileName(PlotParams_temp, plot_type);
 			//fout->cd();
 			//myCanvas->Write();
-			myCanvas->SaveAs( "Plots/"+output_file_name+".png", "png" );
+			myCanvas->SaveAs( output_directory+"/"+output_file_name+".png", "png" );
 			delete myCanvas;
 
 		}
@@ -896,8 +903,9 @@ public :
 		if( legend_names.size() > i )
 			saveas_name = Form("%s", legend_names.at(i).c_str() );
 
-		//myCanvas->SaveAs( Form( "Plots/Plot2D_%s_"+output_file_name+"_"+saveas_name+"_%s.png", filetag_treename.c_str(), output_file_tag.c_str() ) );
-        myCanvas->SaveAs( Form( "Plots/Plot2D_"+output_file_name+"_Cut"+saveas_name(0,24)+"_%s.png", output_file_tag.c_str() ) );
+		//myCanvas->SaveAs( Form( output_directory+"/Plot2D_%s_"+output_file_name+"_"+saveas_name+"_%s.png", filetag_treename.c_str(), output_file_tag.c_str() ) );
+        myCanvas->SaveAs( Form( output_directory+"/Plot2D_"+output_file_name+"_Cut"+saveas_name(0,24)+"_%s.png", output_file_tag.c_str() ) );
+		
 		delete myCanvas;
 	}
 
@@ -991,7 +999,7 @@ public :
 
 		gPad->BuildLegend(legx1,legy1,legx2, legy2,"");
 			
-		canv->SaveAs( Form( "Plots/Plot_%s_%s.png", hist_name.c_str(), output_file_tag.c_str() ) );
+		canv->SaveAs( Form( output_directory+"/Plot_%s_%s.png", hist_name.c_str(), output_file_tag.c_str() ) );
 		delete canv;
 
 	}
