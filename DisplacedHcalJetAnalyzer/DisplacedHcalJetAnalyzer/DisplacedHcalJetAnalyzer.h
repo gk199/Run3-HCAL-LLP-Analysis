@@ -707,12 +707,12 @@ public :
    // Object Helper.cxx
    virtual float  DeltaR( float eta1, float eta2, float phi1, float phi2);
    virtual double deltaPhi( double phi1, double phi2);
-   virtual double deltaR( double eta1, double phi1, double eta2, double phi2);
+   // virtual double deltaR( double eta1, double phi1, double eta2, double phi2);
    virtual vector<int> GetRechitMult( int idx_llp, float deltaR_cut );
    virtual vector<vector<float>> GetEnergyProfile( int idx_llp, float deltaR_cut );
    virtual vector<float> GetMatchedHcalRechits_Jet( int idx_jet, float deltaR_cut );
    virtual vector<float> GetEnergyProfile_Jet( int idx_jet, float deltaR_cut );
-   virtual vector<float> Get3RechitE_Jet( int idx_jet, float deltaR_cut );
+   virtual vector<pair<float,int>> Get3RechitE_Jet( int idx_jet, float deltaR_cut );
    virtual vector<float> GetEtaPhiSpread_Jet( int idx_jet, float deltaR_cut );
    virtual vector<float> GetTDCavg_Jet( int idx_jet, float deltaR_cut );
    // TruthInfoHelper.cxx

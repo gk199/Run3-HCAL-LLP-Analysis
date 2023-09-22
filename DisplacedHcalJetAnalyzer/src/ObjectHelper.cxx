@@ -22,11 +22,11 @@ double DisplacedHcalJetAnalyzer::deltaPhi(double phi1, double phi2) {  // calcul
   return result;
 }
 
-double DisplacedHcalJetAnalyzer::deltaR(double eta1, double phi1, double eta2, double phi2) { // calculate deltaR given two eta and phi values
-  double deta = eta1 - eta2;
-  double dphi = deltaPhi(phi1, phi2);
-  return sqrt(deta*deta + dphi*dphi);
-}
+// double DisplacedHcalJetAnalyzer::deltaR(double eta1, double phi1, double eta2, double phi2) { // calculate deltaR given two eta and phi values
+//   double deta = eta1 - eta2;
+//   double dphi = deltaPhi(phi1, phi2);
+//   return sqrt(deta*deta + dphi*dphi);
+// }
 
 /* ====================================================================================================================== */
 vector<int> DisplacedHcalJetAnalyzer::GetRechitMult(int idx_llp, float deltaR_cut) { // given a LLP, find how many associated HB rechits there are (rechits for LLP total, first daughter, second daughter)
@@ -158,35 +158,46 @@ vector<float> DisplacedHcalJetAnalyzer::GetEnergyProfile_Jet(int idx_jet, float 
 
 
 /* ====================================================================================================================== */
-vector<float> DisplacedHcalJetAnalyzer::Get3RechitE_Jet(int idx_jet, float deltaR_cut) { // given a jet, find the 3 highest energy HB rechits
+vector<pair<float,int>> DisplacedHcalJetAnalyzer::Get3RechitE_Jet(int idx_jet, float deltaR_cut) { // given a jet, find the 3 highest energy HB rechits
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::Get3RechitE_Jet()"<<endl;
 
 	// vectors to fill with highest three rechit energies for those matched to jet. Last entry is the total energy of all matched rechits
-	vector<float> RechitE = {0,0,0,0};
+	pair<float,int> p1 = make_pair(0.0, 0); // leading energy rechit
+	pair<float,int> p2 = make_pair(0.0, 0); // sub-leading rechit
+	pair<float,int> p3 = make_pair(0.0, 0); // ssub-leading
+	pair<float,int> p4 = make_pair(0.0, 0); // total energy
+	vector<pair<float,int>> RechitE_D = {p1, p2, p3, p4};
 	float totalE = 0;
 
 	vector<float> matchedRechit = GetMatchedHcalRechits_Jet(idx_jet, deltaR_cut);
 	
 	for (int i = 0; i < matchedRechit.size(); i++) {
 		float currentE = hbheRechit_E->at(matchedRechit[i]);
+		float currentD = hbheRechit_depth->at(matchedRechit[i]);
 		totalE += currentE;
-		if (currentE > RechitE[0]) {
-			RechitE[2] = RechitE[1];
-			RechitE[1] = RechitE[0];
-			RechitE[0] = currentE;
+		if (currentE > RechitE_D[0].first) {
+			RechitE_D[2].first = RechitE_D[1].first;
+			RechitE_D[1].first = RechitE_D[0].first;
+			RechitE_D[0].first = currentE;
+			RechitE_D[2].second = RechitE_D[1].second;
+			RechitE_D[1].second = RechitE_D[0].second;
+			RechitE_D[0].second = currentD;
 		}
-		else if (currentE > RechitE[1]) {
-			RechitE[2] = RechitE[1];
-			RechitE[1] = currentE;
+		else if (currentE > RechitE_D[1].first) {
+			RechitE_D[2].first = RechitE_D[1].first;
+			RechitE_D[1].first = currentE;
+			RechitE_D[2].second = RechitE_D[1].second;
+			RechitE_D[1].second = currentD;
 		}
-		else if (currentE > RechitE[2]) {
-			RechitE[2] = currentE;
+		else if (currentE > RechitE_D[2].first) {
+			RechitE_D[2].first = currentE;
+			RechitE_D[2].second = currentD;
 		}
 	}
-	RechitE[3] = totalE;
+	RechitE_D[3].first = totalE;
 
-	return RechitE;
+	return RechitE_D;
 }
 
 /* ====================================================================================================================== */

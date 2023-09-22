@@ -118,7 +118,10 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 			myvars_float.push_back( Form("jet%d_Track%ddzOverErr", i, t) );
 			myvars_float.push_back( Form("jet%d_Track%ddxyOverErr", i, t) );
 			myvars_float.push_back( Form("jet%d_Track%ddR", i, t) );
+			myvars_float.push_back( Form("jet%d_Track%ddEta", i, t) );
+			myvars_float.push_back( Form("jet%d_Track%ddPhi", i, t) );
 		}
+		myvars_float.push_back( Form("jet%d_Tracks_dR", i) );
 
 		for (int d=0; d<4; d++) myvars_float.push_back( Form("jet%d_EnergyFrac_Depth%d", i, d+1) );
 
@@ -126,6 +129,9 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back(Form("jet%d_SubLeadingRechitE", i) );
 		myvars_float.push_back(Form("jet%d_SSubLeadingRechitE", i) );
 		myvars_float.push_back(Form("jet%d_AllRechitE", i) );
+		myvars_int.push_back(Form("jet%d_LeadingRechitD", i) );
+		myvars_int.push_back(Form("jet%d_SubLeadingRechitD", i) );
+		myvars_int.push_back(Form("jet%d_SSubLeadingRechitD", i) );
 
 		if (i < 2) {
 			myvars_float.push_back( Form("LLP%d_Pt", i));
@@ -325,14 +331,17 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		vector<float> rechitJet = GetMatchedHcalRechits_Jet(i, 0.4);
 		vector<float> energy = GetEnergyProfile_Jet(i, 0.4);
 		vector<float> spread_Eta_Phi = GetEtaPhiSpread_Jet(i, 0.4); // eta, phi (average); eta, phi (energy weighted)
-		vector<float> energeticRechits = Get3RechitE_Jet(i, 0.4); // three highest rechit energies in the , and total energy
+		vector<pair<float,int>> energeticRechits = Get3RechitE_Jet(i, 0.4); // three highest rechit energies in the , and total energy
 		vector<float> TDC_TDCenergy = GetTDCavg_Jet(i, 0.4); // TDC average, energy weighted TDC
 
 		for (int depth = 0; depth < 4; depth++) tree_output_vars_float[Form("jet%d_EnergyFrac_Depth%d", i, depth+1)] = energy[depth]; // each fractional energy saved in different tree
-		tree_output_vars_float[Form("jet%d_LeadingRechitE", i)] 			= energeticRechits[0];
-		tree_output_vars_float[Form("jet%d_SubLeadingRechitE", i)] 			= energeticRechits[1];
-		tree_output_vars_float[Form("jet%d_SSubLeadingRechitE", i)] 		= energeticRechits[2];
-		tree_output_vars_float[Form("jet%d_AllRechitE", i)] 				= energeticRechits[3];
+		tree_output_vars_float[Form("jet%d_LeadingRechitE", i)] 			= energeticRechits[0].first;
+		tree_output_vars_float[Form("jet%d_SubLeadingRechitE", i)] 			= energeticRechits[1].first;
+		tree_output_vars_float[Form("jet%d_SSubLeadingRechitE", i)] 		= energeticRechits[2].first;
+		tree_output_vars_float[Form("jet%d_AllRechitE", i)] 				= energeticRechits[3].first;
+		tree_output_vars_int[Form("jet%d_LeadingRechitD", i)] 				= energeticRechits[0].second;
+		tree_output_vars_int[Form("jet%d_SubLeadingRechitD", i)] 			= energeticRechits[1].second;
+		tree_output_vars_int[Form("jet%d_SSubLeadingRechitD", i)] 			= energeticRechits[2].second;
 		tree_output_vars_int[Form("jet%d_RechitN", i)] 						= rechitJet.size();
 		tree_output_vars_float[Form("jet%d_EtaSpread", i)] 					= spread_Eta_Phi[0];
 		tree_output_vars_float[Form("jet%d_EtaSpread_energy", i)] 			= spread_Eta_Phi[2];
@@ -367,6 +376,11 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 				tree_output_vars_float[Form("jet%d_Track%ddzOverErr", i, track)]	= track_dzToPV->at(track_num) / track_dzErr->at(track_num); 
 				tree_output_vars_float[Form("jet%d_Track%ddxyOverErr", i, track)] 	= track_dxyToBS->at(track_num) / track_dxyErr->at(track_num); 
 				tree_output_vars_float[Form("jet%d_Track%ddR", i, track)] 			= DeltaR( jet_Eta->at(i), track_Eta->at(track_num), jet_Phi->at(i), track_Phi->at(track_num) ); 
+				tree_output_vars_float[Form("jet%d_Track%ddEta", i, track)] 		= fabs(jet_Eta->at(i) - track_Eta->at(track_num));
+				tree_output_vars_float[Form("jet%d_Track%ddPhi", i, track)] 		= fabs(deltaPhi( jet_Phi->at(i), track_Phi->at(track_num) )); 
+				if (track == 1) {													// dR for two leading tracks
+					tree_output_vars_float[Form("jet%d_Tracks_dR", i)] 				= DeltaR( track_Eta->at(track_pt_index[0].second), track_Eta->at(track_num), track_Phi->at(track_pt_index[0].second), track_Phi->at(track_num) );
+				}
 			}
 		} // end of track matching 
 	}

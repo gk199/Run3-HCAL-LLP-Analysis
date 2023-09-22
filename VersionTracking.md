@@ -47,13 +47,13 @@ Updates:
 * Fix H/E (`HoverE` = (charged hadron energy) / (neutral hadron energy + photon + electron energy) ) -- note, ele is 0 now! 
 * Add additional jet variables (mass, object multiplicities, tracks, SV info, flight distance) -- note, PtAllTracks, PtAllPVTracks, NVertexTracks, NSelectedTracks is 0 now! 
 * LLP truth matching to a jet with jet energy of 0, 40, 60, 80, 100 GeV
-* dR between jet and associated tracks
-* Save energy of top three HCAL rechits associated to a jet, and total energy of rechits (with `Get3RechitE_Jet`)
+* dR, dEta, dPhi between jet and associated tracks. dR between two leading tracks
+* Save energy and depth of top three HCAL rechits associated to a jet, and total energy of rechits (with `Get3RechitE_Jet`)
 
 Location of minituples:
 ```
-/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.2/minituple_v1.2_MCsignal_500k_2023_09_20.root
-/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.2/minituple_v1.2_LLPskim_500k_2023_09_20.root
+/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.2/minituple_v1.2_MCsignal_500k_2023_09_22.root
+/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.2/minituple_v1.2_LLPskim_500k_2023_09_22.root
 ```
 
 ## V2
