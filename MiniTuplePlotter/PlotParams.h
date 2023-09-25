@@ -36,7 +36,7 @@ PlotParams P_jet0_RechitN				= {"jet0_RechitN", "Number of HCAL RecHits", "N^{HC
 PlotParams P_jet0_E						= {"jet0_E", "Leading Jet Energy", "E [GeV]", 0, 250 };
 PlotParams P_jet0_Pt					= {"jet0_Pt", "Leading Jet p_{T}", "p_{T} [GeV]", 0, 250 };
 PlotParams P_jet0_Eta					= {"jet0_Eta", "Leading Jet #eta", "#eta", -1.5, 1.5 };
-PlotParams P_jet0_Phi					= {"jet0_Phi", "Leading Jet #phi", "$phi", -3.2, 3.2 };
+PlotParams P_jet0_Phi					= {"jet0_Phi", "Leading Jet #phi", "#phi", -3.2, 3.2 };
 PlotParams P_jet0_Mass					= {"jet0_Mass", "Leading Jet Mass", "Mass", 0, 40 };
 PlotParams P_jet0_JetArea				= {"jet0_JetArea", "Leading Jet Area", "Area", 0, 1 };
 // spread
@@ -63,7 +63,7 @@ PlotParams P_jet0_Track2dzToPV			= {"jet0_Track2dzToPV", "Leading Jet: Third Lea
 PlotParams P_jet0_Track0dzOverErr		= {"jet0_Track0dzOverErr", "Leading Jet: Leading Track #DeltaZ / error", "#DeltaZ [cm] / error", 0, 100 };
 PlotParams P_jet0_Track1dzOverErr		= {"jet0_Track1dzOverErr", "Leading Jet: Subeading Track #DeltaZ / error", "#DeltaZ [cm] / error", 0, 100 };
 PlotParams P_jet0_Track2dzOverErr		= {"jet0_Track2dzOverErr", "Leading Jet: Third Leading Track #DeltaZ / error", "#DeltaZ [cm] / error", 0, 100 };
-PlotParams P_jet0_Tracks_dR				= {"jet0_Tracks_dR", "Leading Jet: Leading Track to Sub-leading Track #DeltaR", "#DeltaR (leading, subleading track)", 0, 0.6 };
+PlotParams P_jet0_Tracks_dR				= {"jet0_Tracks_dR", "Leading Jet: Leading Track to Sub-leading Track #DeltaR", "#DeltaR (leading, subleading track)", 0, 1.1 };
 PlotParams P_jet0_Track0dR				= {"jet0_Track0dR", "Leading Jet to Leading Track #DeltaR", "#DeltaR", 0, 0.6 };
 PlotParams P_jet0_Track1dR				= {"jet0_Track1dR", "Leading Jet to Subleading Track #DeltaR", "#DeltaR", 0, 0.6 };
 PlotParams P_jet0_Track2dR				= {"jet0_Track2dR", "Leading Jet to Third Leading Track #DeltaR", "#DeltaR", 0, 0.6 };
@@ -98,6 +98,7 @@ PlotParams P_jet0_AllRechitE			= {"jet0_AllRechitE", "Leading Jet: Sum of HB Rec
 PlotParams P_jet0_3RechitFracE			= {"(jet0_LeadingRechitE + jet0_SubLeadingRechitE + jet0_SSubLeadingRechitE) / jet0_AllRechitE", "Leading Jet: Fraction of Energy in Leading 3 Rechits", "Fraction of Energy", 0, 1 };
 PlotParams P_jet0_LeadingRechitEFrac	= {"jet0_LeadingRechitE / jet0_E", "Leading Jet: Leading Rechit Energy / Jet Energy", "Energy Fraction", 0, 1 };
 PlotParams P_jet0_LeadingRechitJetEDiff	= {"jet0_E - jet0_LeadingRechitE", "Leading Jet - Leading Rechit Energy", "Energy Difference", 0, 200 };
+PlotParams P_jet0_LeadingSubRechitEQuad	= {"sqrt(jet0_LeadingRechitE * jet0_LeadingRechitE + jet0_SubLeadingRechitE * jet0_SubLeadingRechitE)", "Leading Jet: #sqrt{E_{leading rechit}^{2} + E_{sub-leading rechit}^{2}}", "#sqrt{E_{leading rechit}^{2} + E_{sub-leading rechit}^{2}} [GeV]", 0, 100 };
 PlotParams P_jet0_LeadingRechitD		= {"jet0_LeadingRechitD", "Leading Jet: Leading Rechit Depth", "HCAL Depth", 0, 5 };
 PlotParams P_jet0_SubLeadingRechitD		= {"jet0_SubLeadingRechitD", "Leading Jet: Subleading Rechit Depth", "HCAL Depth", 0, 5 };
 PlotParams P_jet0_SSubLeadingRechitD	= {"jet0_SSubLeadingRechitD", "Leading Jet: Third Leading Rechit Depth", "HCAL Depth", 0, 5 };
@@ -179,7 +180,7 @@ PlotParams P_met_SumEt					= {"met_SumEt", "MET Sum E_{T}", "E_{T} [GeV]", 0, 50
 // LLP variables 
 // Leading LLP
 PlotParams P_LLP0_Eta					= {"LLP0_Eta", "LLP0 #eta", "#eta", -1.5, 1.5 };
-PlotParams P_LLP0_Phi					= {"LLP0_Phi", "LLP0 #phi", "$phi", -3.2, 3.2 };
+PlotParams P_LLP0_Phi					= {"LLP0_Phi", "LLP0 #phi", "#phi", -3.2, 3.2 };
 PlotParams P_LLP0_Pt					= {"LLP0_Pt", "LLP0 p_{T}", "p_{T} [GeV]", 0, 250 };
 PlotParams P_LLP0_E						= {"LLP0_E", "LLP0 Energy", "E [GeV]", 0, 250 };
 PlotParams P_LLP0_Beta					= {"LLP0_Beta", "LLP0 $beta", "$beta", 0, 250 };
@@ -193,7 +194,7 @@ PlotParams P_LLP0_DecayCtau				= {"LLP0_DecayCtau", "LLP0 c#tau", "c#tau [cm]", 
 
 // Sub-leading LLP
 PlotParams P_LLP1_Eta					= {"LLP1_Eta", "LLP1 #eta", "#eta", -1.5, 1.5 };
-PlotParams P_LLP1_Phi					= {"LLP1_Phi", "LLP1 #phi", "$phi", -3.2, 3.2 };
+PlotParams P_LLP1_Phi					= {"LLP1_Phi", "LLP1 #phi", "#phi", -3.2, 3.2 };
 PlotParams P_LLP1_Pt					= {"LLP1_Pt", "LLP1 p_{T}", "p_{T} [GeV]", 0, 250 };
 PlotParams P_LLP1_E						= {"LLP1_E", "LLP1 Energy", "E [GeV]", 0, 250 };
 PlotParams P_LLP1_Beta					= {"LLP1_Beta", "LLP1 $beta", "$beta", 0, 250 };

@@ -515,7 +515,7 @@ def LLP_MatchingEfficiency(tree, obj_type):
     
     if (obj_type == "LLP"):
         number = ["0", "1"]
-        LLP_matching = ["Decay_RechitEnergy20GeV", "_RechitEnergy20GeV", "_isTruthMatched", "_isTruthMatched_Jet40", "_isTruthMatched_Jet70", "_isTruthMatched_Jet100"] # LLP + 0 or 1 + kinematic_var = full histogram name
+        LLP_matching = ["Decay_RechitEnergy20GeV", "_RechitEnergy20GeV", "_isTruthMatched", "_isTruthMatched_Jet40", "_isTruthMatched_Jet60", "_isTruthMatched_Jet80", "_isTruthMatched_Jet100"] # LLP + 0 or 1 + kinematic_var = full histogram name
         LLP_denominator = ["DecayR"]
 
         LLP_effs = {}

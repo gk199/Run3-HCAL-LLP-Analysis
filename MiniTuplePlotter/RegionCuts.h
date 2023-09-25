@@ -158,3 +158,11 @@ JetMatchedToLLP.insert(pair< tuple<TCut, TCut>, string> (make_tuple(Cut_LLPinHCA
 
 map<TCut, string>::iterator it;
 map<tuple<TCut, TCut>, string>::iterator it_double;
+
+
+// cuts for bins of neutral hadron fraction
+TCut Cut_NHadpt1 	= "jet0_NeutralHadEFrac < 0.1";
+TCut Cut_NHadpt2 	= "jet0_NeutralHadEFrac >= 0.1 && jet0_NeutralHadEFrac < 0.2";
+TCut Cut_NHadpt4 	= "jet0_NeutralHadEFrac >= 0.2 && jet0_NeutralHadEFrac < 0.4";
+TCut Cut_NHadpt6 	= "jet0_NeutralHadEFrac >= 0.4 && jet0_NeutralHadEFrac < 0.6";
+TCut Cut_NHad1 	    = "jet0_NeutralHadEFrac >= 0.6 && jet0_NeutralHadEFrac <= 1";
