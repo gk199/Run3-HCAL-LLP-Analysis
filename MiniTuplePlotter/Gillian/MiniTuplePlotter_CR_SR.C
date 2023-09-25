@@ -146,12 +146,12 @@ void MiniTuplePlotter_CR_SR(){
 	class MiniTuplePlotter plotter_JetVars_Bins( filetags_data, path );
 	plotter_JetVars_Bins.SetPlots(rechitVars);
 	plotter_JetVars_Bins.SetTreeName( "NoSel" );	
-	plotter_JetVars_Bins.SetOutputFileTag("NeutralHadBins_Jet40_Data_v1.3_MC"); 	
+	plotter_JetVars_Bins.SetOutputFileTag("NeutralHadBins_Jet40_v1.3_DataBLINDED"); 	
 	plotter_JetVars_Bins.SetComparisonCuts({Cut_NHadpt1, Cut_NHadpt2, Cut_NHadpt4, Cut_NHadpt6, Cut_NHad1}); 
 	plotter_JetVars_Bins.plot_log_ratio    = false; 
 	plotter_JetVars_Bins.SetLegendNames({"Data - Neutral Hadron 0-0.1", "Data - Neutral Hadron 0.1-0.2", "Data - Neutral Hadron 0.2-0.4", "Data - Neutral Hadron 0.4-0.6", "Data - Neutral Hadron 0.6-1"});
 	plotter_JetVars_Bins.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
-	plotter_JetVars_Bins.SetCuts("jet0_Pt > 40 && P_jet0_Track0PtFrac > 0.1");  // 40 GeV jet cut on all plots!  BLINDED with track energy fraction
+	plotter_JetVars_Bins.SetCuts("jet0_Pt > 40 && jet0_Track0Pt / jet0_Pt > 0.1");  // 40 GeV jet cut on all plots!  BLINDED with track energy fraction
 	plotter_JetVars_Bins.SetOutputDirectory("Data");
 	plotter_JetVars_Bins.Plot("ratio");
 }
