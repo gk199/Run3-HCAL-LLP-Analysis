@@ -98,6 +98,7 @@ TCut Cut_LLPinHCAL_d34 	= (LLP0inHCAL_d34 + OR + LLP1inHCAL_d34).Data();
 TCut Cut_LLP0inHCAL_d34 = LLP0inHCAL_d34.Data();
 
 TCut Cut_LLPinCR	    = (LLP0inCR + OR + LLP1inCR).Data();
+TCut Cut_LLP0inCR       = (LLP0inCR).Data();
 
 // LLP is in region of interest, and matched to a jet
 TCut Cut_LLPinTracker_Jet0	= 	( "(" + LLP0inTracker + AND + Jet0_LLP0 + ")" + 	OR + "(" + LLP1inTracker + AND + Jet0_LLP1 + ")" ).Data();

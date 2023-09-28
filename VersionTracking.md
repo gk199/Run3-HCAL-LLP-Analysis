@@ -46,7 +46,9 @@ Location of minituples:
 Updates:
 * Fix H/E (`HoverE` = (charged hadron energy) / (neutral hadron energy + photon + electron energy) ) -- note, ele is 0 now! 
 * Add additional jet variables (mass, object multiplicities, tracks, SV info, flight distance) -- note, PtAllTracks, PtAllPVTracks, NVertexTracks, NSelectedTracks is 0 now! 
+* Merged jet truth matching functions: now only have JetIsMatchedTo (giving LLP number and dR), simply check if `JetIsMatchedTo[0] > -1` to know if `JetIsTruthMatched` (removed)
 * LLP truth matching to a jet with jet energy of 0, 40, 60, 80, 100 GeV
+* LLP decay R of the LLP matched to leading / sub / ssub jet
 * dR, dEta, dPhi between jet and associated tracks. dR between two leading tracks
 * Save energy and depth of top three HCAL rechits associated to a jet, and total energy of rechits (with `Get3RechitE_Jet`)
 

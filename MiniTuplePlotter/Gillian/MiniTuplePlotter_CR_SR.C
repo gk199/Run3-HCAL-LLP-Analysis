@@ -7,9 +7,9 @@ void MiniTuplePlotter_CR_SR(){
 
 	// List where minituples are stored
 	string path = "/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.3/minituple_";
-	vector<string> filetags_both 	= { "v1.3_LLPskim_500k_2023_09_22", "v1.3_MCsignal_500k_2023_09_22" };
+	vector<string> filetags_both 	= { "v1.3_LLPskim_500k_2023_09_22", "v1.3_MCsignal_500k_2023_09_28" };
 	vector<string> filetags_data 	= { "v1.3_LLPskim_500k_2023_09_22" };
-	vector<string> filetags_MC 		= { "v1.3_MCsignal_500k_2023_09_22" };
+	vector<string> filetags_MC 		= { "v1.3_MCsignal_500k_2023_09_28" };
 
 	vector<PlotParams> jetPlots0	= {P_jet0_E, P_jet0_Pt}; // dont apply a 40 GeV jet cut on these
 	vector<PlotParams> jetPlots1	= {P_jet1_E, P_jet1_Pt}; // dont apply a 40 GeV jet cut on these
@@ -18,6 +18,7 @@ void MiniTuplePlotter_CR_SR(){
 										P_jet0_EtaPhiQuadSpread, P_jet0_EtaPhiQuadSpread_energy,
 										P_jet0_Track0Pt, P_jet0_Track0PtFrac, P_jet0_Track0dR, 					 											// track vars
 										P_jet0_Track0dEta, P_jet0_Track0dPhi, P_jet0_Tracks_dR, 
+										P_jet0_MatchedLLP_DecayR,
 //										P_jet0_Track0dzToPV, P_jet0_Track0dxyToBS, P_jet0_Track0dzOverErr, P_jet0_Track0dxyOverErr,
 //										P_jet0_NSV, P_jet0_NSVCand, P_jet0_SV_x, P_jet0_SV_y, P_jet0_SV_z, P_jet0_SV_NTracks, P_jet0_SV_Mass, 				// SV
 //										P_jet0_FlightDist2D, P_jet0_FlightDist2DErr, P_jet0_FlightDist3D, P_jet0_FlightDist3DErr,
@@ -189,4 +190,34 @@ void MiniTuplePlotter_CR_SR(){
 	plotter_LRechit_Bins.SetOutputDirectory("LeadingRechitStudy");
 	plotter_LRechit_Bins.Plot();
 */
+
+	cout<<endl;
+	cout<<" ---------- MC Study 6: LLP - jet match ---------- "<<endl;
+	cout<<endl;
+
+	class MiniTuplePlotter plotter_LLP_Jet_PtDiff( filetags_MC, path );
+	plotter_LLP_Jet_PtDiff.SetPlots({P_jet0_llp0_ptDiff});
+	plotter_LLP_Jet_PtDiff.SetTreeName( "NoSel" );	
+	plotter_LLP_Jet_PtDiff.SetOutputFileTag("Jet40_v1.3_MC"); 	
+	plotter_LLP_Jet_PtDiff.SetComparisonCuts({Cut_LLP0inCR, Cut_LLP0inTrackerNP, Cut_LLP0inECAL, Cut_LLPinHCAL_d1, Cut_LLP0inHCAL_d2, Cut_LLP0inHCAL_d34}); 
+	plotter_LLP_Jet_PtDiff.plot_log_ratio    = false; 
+	plotter_LLP_Jet_PtDiff.SetLegendNames({"LLP0: Prompt", "LLP0: Tracker-NonPrompt", "LLP0: ECAL", "LLP0: HCAL-D1", "LLP0: HCAL-D2", "LLP0: HCAL-D34"});
+	plotter_LLP_Jet_PtDiff.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+	plotter_LLP_Jet_PtDiff.SetCuts("jet0_Pt > 40 && jet0_isMatchedTo == 0");  
+	plotter_LLP_Jet_PtDiff.SetOutputDirectory("LLP_Jet_Match");
+	plotter_LLP_Jet_PtDiff.Plot();	
+
+	class MiniTuplePlotter plotter_LLP_Jet_Match( filetags_MC, path );
+	plotter_LLP_Jet_Match.SetPlots({P_LLP0_DecayR});
+	plotter_LLP_Jet_Match.SetTreeName( "NoSel" );	
+	plotter_LLP_Jet_Match.SetOutputFileTag("Jet40_v1.3_MC"); 	
+	plotter_LLP_Jet_Match.SetComparisonCuts({"", "LLP0_isTruthMatched == 1", "LLP0_isTruthMatched_Jet40 == 1", "LLP0_isTruthMatched_Jet60 == 1", "LLP0_isTruthMatched_Jet80 == 1", "LLP0_isTruthMatched_Jet100 == 1"}); 
+	plotter_LLP_Jet_Match.plot_log_ratio    = false; 
+	plotter_LLP_Jet_Match.plot_norm 		= false;
+	plotter_LLP_Jet_Match.SetLegendNames({"LLP0 Decay Position", "LLP0 Matched, Jet p_{T} > 0", "LLP0 Matched, Jet p_{T} > 40", "LLP0 Matched, Jet p_{T} > 60", "LLP0 Matched, Jet p_{T} > 80", "LLP0 Matched, Jet p_{T} > 100"});
+	plotter_LLP_Jet_Match.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+	plotter_LLP_Jet_Match.SetCuts("LLP0_Pt > 40 && abs(LLP0_Eta) < 1.5");  // jet0_isMatchedTo == 0 && 
+	plotter_LLP_Jet_Match.SetOutputDirectory("LLP_Jet_Match");
+	plotter_LLP_Jet_Match.Plot("ratio");
+
 }
