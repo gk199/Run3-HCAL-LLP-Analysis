@@ -140,52 +140,10 @@ float DisplacedHcalJetAnalyzer::DeltaR_LLP_b( int idx_llp, int idx_llp_decay){
 }
 
 /* ====================================================================================================================== */
-bool DisplacedHcalJetAnalyzer::JetIsTruthMatched( float jet_eta, float jet_phi, float deltaR_cut ){
-	/* 
-	Description: Delivers true/false on if there is an llp decay product matched to a reco jet object
-	deltaR_cut: deltaR between jet and LLP decay prod (default: 0.4)	
-	*/
-
-	// Check if matched to LLP
-
-	for( int i_llp=0; i_llp<gLLP_Pt->size(); i_llp++ ){
-
-		// Require decay in HB
-		if( gLLP_DecayVtx_R.at(i_llp) < 183.6 || gLLP_DecayVtx_R.at(i_llp) > 295 || fabs(gLLP_Eta->at(i_llp)) > 1.5 )
-			continue;
-
-		float dR_temp = DeltaR( gLLP_Eta->at(i_llp), jet_eta, gLLP_Phi->at(i_llp), jet_phi );
-
-		if( dR_temp < deltaR_cut ) 
-			return true;
-	}
-
-	// Check if matched to LLP decay product
-
-	TVector3 vec_jet;
-	vec_jet.SetPtEtaPhi( 235., jet_eta, jet_phi );
-
-	for( int i_tru=0; i_tru < gLLPDecay_iParticle.size(); i_tru++ ){
-		int idx_llp = gLLPDecay_iLLP.at(i_tru);
-
-		TVector3 vec_llp;
-		vec_llp.SetXYZ( gLLP_DecayVtx_X->at(idx_llp), gLLP_DecayVtx_Y->at(idx_llp), gLLP_DecayVtx_Z->at(idx_llp) );
-		TVector3 vec_jet_new = vec_jet - vec_llp;
-
-		int idx_gParticle = gLLPDecay_iParticle.at(i_tru);
-		float dR_temp     = DeltaR( gParticle_Eta->at(idx_gParticle), vec_jet_new.Eta(), gParticle_Phi->at(idx_gParticle), vec_jet_new.Phi() );
-
-		if( dR_temp < deltaR_cut ) 
-			return true;
-	}
-
-	return false;
-}
-
-/* ====================================================================================================================== */
 vector<float> DisplacedHcalJetAnalyzer::JetIsMatchedTo( float jet_eta, float jet_phi, float deltaR_cut ){
 	/* 
 	Description: Delivers idx_llp and dR (jet, LLP) if there is an llp decay product matched to a reco jet object
+	Merged this and the old JetIsTruthMatched function. To determine if jet is truth matched, just check if JetIsMatchedTo[0] is > -1
 	deltaR_cut: deltaR between jet and LLP decay prod (default: 0.4)	
 	*/
 
@@ -194,6 +152,23 @@ vector<float> DisplacedHcalJetAnalyzer::JetIsMatchedTo( float jet_eta, float jet
 
 	vector<float> idx_llp_dR;
 
+	// check if matched to LLP
+	for( int i_llp=0; i_llp<gLLP_Pt->size(); i_llp++ ){
+
+		// Require decay in HB
+		if( gLLP_DecayVtx_R.at(i_llp) < 183.6 || gLLP_DecayVtx_R.at(i_llp) > 295 || fabs(gLLP_Eta->at(i_llp)) > 1.5 )
+			continue;
+
+		float dR_temp = DeltaR( gLLP_Eta->at(i_llp), jet_eta, gLLP_Phi->at(i_llp), jet_phi );
+
+		if( dR_temp < deltaR_cut ) {
+			idx_llp_dR.push_back(i_llp);
+			idx_llp_dR.push_back(dR_temp);
+			return idx_llp_dR;
+		}
+	}
+
+	// Check if matched to LLP decay product
 	for( int i_tru=0; i_tru < gLLPDecay_iParticle.size(); i_tru++ ){
 		int idx_llp = gLLPDecay_iLLP.at(i_tru);
 

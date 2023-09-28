@@ -98,6 +98,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("jet%d_isTruthMatched", i) );
 		myvars_float.push_back( Form("jet%d_isMatchedTo", i) );
 		myvars_float.push_back( Form("jet%d_isMatchedWithDR", i) );
+		myvars_float.push_back( Form("jet%d_MatchedLLP_DecayR", i) );
 
 		myvars_float.push_back( Form("jet%d_EtaSpread", i) );
 		myvars_float.push_back( Form("jet%d_EtaSpread_energy", i) );
@@ -318,14 +319,15 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("jet%d_FlightDist3D", i)] 			= jet_FlightDist3D->at(i);
 		tree_output_vars_float[Form("jet%d_FlightDist3DErr", i)] 		= jet_FlightDist3DErr->at(i);
 
-		tree_output_vars_float[Form("jet%d_isTruthMatched", i)] = JetIsTruthMatched( jet_Eta->at(i), jet_Phi->at(i) );
-		if (JetIsTruthMatched(jet_Eta->at(i), jet_Phi->at(i) ) == true) {
-			tree_output_vars_float[Form("jet%d_isMatchedTo",i)] = JetIsMatchedTo( jet_Eta->at(i), jet_Phi->at(i) )[0];
-			tree_output_vars_float[Form("jet%d_isMatchedWithDR",i)] = JetIsMatchedTo( jet_Eta->at(i), jet_Phi->at(i) )[1];
-		}
-		else {
-			tree_output_vars_float[Form("jet%d_isMatchedTo",i)] = -1;
-			tree_output_vars_float[Form("jet%d_isMatchedWithDR",i)] = -1;
+		tree_output_vars_float[Form("jet%d_isTruthMatched", i)] = 0;
+		vector<float> matchedInfo = JetIsMatchedTo( jet_Eta->at(i), jet_Phi->at(i) );
+		float matchedLLP = matchedInfo[0];
+		float matchedDR = matchedInfo[1];
+		if (matchedLLP > -1) { // if jet is matched to a LLP or LLP decay product
+			tree_output_vars_float[Form("jet%d_isTruthMatched", i)] = 1;
+			tree_output_vars_float[Form("jet%d_isMatchedTo",i)] = matchedLLP;
+			tree_output_vars_float[Form("jet%d_isMatchedWithDR",i)] = matchedDR;
+			tree_output_vars_float[Form("jet%d_MatchedLLP_DecayR",i)] = gLLP_DecayVtx_R.at(matchedLLP); // what is the decay R for the LLP matched to this jet?
 		}
 
 		vector<float> rechitJet = GetMatchedHcalRechits_Jet(i, 0.4);
