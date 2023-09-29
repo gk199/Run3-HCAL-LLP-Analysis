@@ -167,3 +167,10 @@ TCut Cut_NHadpt2 	= "jet0_NeutralHadEFrac >= 0.1 && jet0_NeutralHadEFrac < 0.2";
 TCut Cut_NHadpt3 	= "jet0_NeutralHadEFrac >= 0.2 && jet0_NeutralHadEFrac < 0.3";
 TCut Cut_NHadpt4 	= "jet0_NeutralHadEFrac >= 0.3 && jet0_NeutralHadEFrac < 0.4";
 TCut Cut_NHadpt6 	= "jet0_NeutralHadEFrac >= 0.4 && jet0_NeutralHadEFrac <= 0.6";
+
+// cuts for bins of jet pT
+TCut Cut_JetPt40 	= "jet0_Pt >= 40 && jet0_Pt < 80";
+TCut Cut_JetPt80 	= "jet0_Pt >= 80 && jet0_Pt < 120";
+TCut Cut_JetPt120 	= "jet0_Pt >= 120 && jet0_Pt < 160";
+TCut Cut_JetPt160 	= "jet0_Pt >= 160 && jet0_Pt < 200";
+TCut Cut_JetPt200 	= "jet0_Pt >= 200";

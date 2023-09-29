@@ -134,6 +134,7 @@ PlotParams P_jet0_HCALd12_over_d34		= {"(jet0_EnergyFrac_Depth1 + jet0_EnergyFra
 PlotParams P_jet0_isTruthMatched		= {"jet0_isTruthMatched", "Leading Jet is Truth Matched", "is Truth Matched", 0, 2 };
 PlotParams P_jet0_isMatchedTo			= {"jet0_isMatchedTo", "Leading Jet is Matched to LLP", "is Matched to LLP", 0, 2 };
 PlotParams P_jet0_MatchedLLP_DecayR		= {"jet0_MatchedLLP_DecayR", "Leading Jet Matched LLP Decay R", "Decay R [cm]", 0, 350 };
+PlotParams P_jet0_MatchedLLP_Eta		= {"jet0_MatchedLLP_Eta", "Leading Jet Matched LLP #eta", "#eta", -1.5, 1.5 };
 PlotParams P_jet0_llp0_ptDiff			= {"(jet0_Pt - LLP0_Pt) / LLP0_Pt", "Leading Jet Pt - LLP0 Pt / LLP 0 Pt", "Pt Match (LLP0)", -2, 5 };
 PlotParams P_jet0_llp1_ptDiff			= {"(jet0_Pt - LLP1_Pt) / LLP1_Pt", "Leading Jet Pt - LLP1 Pt / LLP 1 Pt", "Pt Match (LLP1)", -2, 5 };
 

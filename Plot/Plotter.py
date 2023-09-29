@@ -532,7 +532,7 @@ def LLP_MatchingEfficiency(tree, obj_type):
 
                 selection_region = GetCut(obj_type + i + var, 1)        # require matching variable set
                 pT_region = GetCut(obj_type + i + "_Pt", [40,90000])    # require LLP pT is over 40 GeV
-                eta_region = GetCut(obj_type + i + "_Eta", [-1.5,1.5])  # require LLP eta is in HB (-1.5 to 1.5)
+                eta_region = GetCut(obj_type + i + "_Eta", [-1.4,1.4])  # require LLP eta is in HB (-1.4 to 1.4)
                 total_cut = selection_region + pT_region + eta_region
                 canvTemp.cd()
 
