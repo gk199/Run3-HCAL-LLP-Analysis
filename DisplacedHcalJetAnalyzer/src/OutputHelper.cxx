@@ -99,6 +99,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("jet%d_isMatchedTo", i) );
 		myvars_float.push_back( Form("jet%d_isMatchedWithDR", i) );
 		myvars_float.push_back( Form("jet%d_MatchedLLP_DecayR", i) );
+		myvars_float.push_back( Form("jet%d_MatchedLLP_Eta", i) );
 
 		myvars_float.push_back( Form("jet%d_EtaSpread", i) );
 		myvars_float.push_back( Form("jet%d_EtaSpread_energy", i) );
@@ -328,6 +329,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 			tree_output_vars_float[Form("jet%d_isMatchedTo",i)] = matchedLLP;
 			tree_output_vars_float[Form("jet%d_isMatchedWithDR",i)] = matchedDR;
 			tree_output_vars_float[Form("jet%d_MatchedLLP_DecayR",i)] = gLLP_DecayVtx_R.at(matchedLLP); // what is the decay R for the LLP matched to this jet?
+			tree_output_vars_float[Form("jet%d_MatchedLLP_Eta",i)] = gLLP_Eta->at(matchedLLP); // what is the decay eta for the LLP matched to this jet?
 		}
 
 		vector<float> rechitJet = GetMatchedHcalRechits_Jet(i, 0.4);
