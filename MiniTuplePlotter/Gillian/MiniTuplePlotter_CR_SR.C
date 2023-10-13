@@ -38,7 +38,7 @@ void MiniTuplePlotter_CR_SR(){
 	vector<PlotParams> rechitVars 	= {P_jet0_LeadingRechitE, P_jet0_SubLeadingRechitE, P_jet0_SSubLeadingRechitE, P_jet0_AllRechitE, P_jet0_3RechitFracE,	// HB rechits
 										P_jet0_LeadingRechitD, P_jet0_SubLeadingRechitD, P_jet0_SSubLeadingRechitD, 
 										P_jet0_LeadingRechitEFrac, P_jet0_LeadingRechitEFracJet, P_jet0_LeadingRechitJetEDiff, 
-										P_jet0_LeadingSubRechitEQuad, 
+										P_jet0_LeadingSubRechitEQuad, P_jet0_EtaPhiQuadSpread, P_jet0_EtaPhiQuadSpread_energy,
 										P_jet0_EnergyFrac_Depth1, P_jet0_EnergyFrac_Depth2, P_jet0_EnergyFrac_Depth3, P_jet0_EnergyFrac_Depth4 };			// depth ratios
 	
 	#include "../RegionCuts.h"
@@ -56,7 +56,7 @@ void MiniTuplePlotter_CR_SR(){
 	plotter_JetVars.SetOutputFileTag("Jet40_CR_SR_v1.3_MC"); 	
 	plotter_JetVars.SetComparisonCuts({Cut_LLPinCR_Jet0, Cut_LLPinTrackerNP_Jet0, Cut_LLPinECAL_Jet0, Cut_LLPinHCAL1_Jet0, Cut_LLPinHCAL2_Jet0, Cut_LLPinHCAL34_Jet0}); // , Cut_LLPinHCAL4_Jet0});
 	plotter_JetVars.plot_log_ratio    = false; 
-	plotter_JetVars.SetLegendNames({"Prompt", "Tracker-NonPrompt", "ECAL", "HCAL-D1", "HCAL-D2", "HCAL-D34"});
+	plotter_JetVars.SetLegendNames({"Tracker: R < 10cm", "Tracker: R > 10cm", "ECAL", "HCAL-D1", "HCAL-D2", "HCAL-D34"});
 	plotter_JetVars.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
 	//plotter_JetVars.plot_cdf = true;
 	//plotter_JetVars.plot_reverse_cdf = true;
@@ -71,7 +71,7 @@ void MiniTuplePlotter_CR_SR(){
 	plotter_TrackVars.SetOutputFileTag("Jet40_Track4_CR_SR_v1.3_MC"); 	
 	plotter_TrackVars.SetComparisonCuts({Cut_LLPinCR_Jet0, Cut_LLPinTrackerNP_Jet0, Cut_LLPinECAL_Jet0, Cut_LLPinHCAL1_Jet0, Cut_LLPinHCAL2_Jet0, Cut_LLPinHCAL34_Jet0}); // , Cut_LLPinHCAL4_Jet0});
 	plotter_TrackVars.plot_log_ratio    = false; 
-	plotter_TrackVars.SetLegendNames({"Prompt", "Tracker-NonPrompt", "ECAL", "HCAL-D1", "HCAL-D2", "HCAL-D34"});
+	plotter_TrackVars.SetLegendNames({"Tracker: R < 10cm", "Tracker: R > 10cm", "ECAL", "HCAL-D1", "HCAL-D2", "HCAL-D34"});
 	plotter_TrackVars.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
 	plotter_TrackVars.SetCuts("jet0_Pt >= 40 && jet0_Track0Pt < 4");
 	plotter_TrackVars.SetOutputDirectory("MC_CR_SR_TrackStudy");
@@ -84,7 +84,7 @@ void MiniTuplePlotter_CR_SR(){
 	plotter_RechitVars.SetOutputFileTag("Jet40_JetHBtight_CR_SR_v1.3_MC"); 	
 	plotter_RechitVars.SetComparisonCuts({Cut_LLPinCR_Jet0, Cut_LLPinTrackerNP_Jet0, Cut_LLPinECAL_Jet0, Cut_LLPinHCAL1_Jet0, Cut_LLPinHCAL2_Jet0, Cut_LLPinHCAL34_Jet0}); // , Cut_LLPinHCAL4_Jet0});
 	plotter_RechitVars.plot_log_ratio    = false; 
-	plotter_RechitVars.SetLegendNames({"Prompt", "Tracker-NonPrompt", "ECAL", "HCAL-D1", "HCAL-D2", "HCAL-D34"});
+	plotter_RechitVars.SetLegendNames({"Tracker: R < 10cm", "Tracker: R > 10cm", "ECAL", "HCAL-D1", "HCAL-D2", "HCAL-D34"});
 	plotter_RechitVars.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
 	plotter_RechitVars.SetCuts("jet0_Pt >= 40 && abs(jet0_Eta) < 1.25");  // 40 GeV jet cut on all plots! 
 	plotter_RechitVars.SetOutputDirectory("MC_CR_SR_LeadingRechitStudy");
@@ -118,7 +118,7 @@ void MiniTuplePlotter_CR_SR(){
 	plotter_CutBased.SetOutputFileTag("NeutralHadpt6_Jet40_CR_SR_v1.3_MC"); 	
 	plotter_CutBased.SetComparisonCuts({Cut_LLPinCR_Jet0, Cut_LLPinTrackerNP_Jet0, Cut_LLPinECAL_Jet0, Cut_LLPinHCAL1_Jet0, Cut_LLPinHCAL2_Jet0, Cut_LLPinHCAL34_Jet0}); // , Cut_LLPinHCAL4_Jet0});
 	plotter_CutBased.plot_log_ratio    = false; 
-	plotter_CutBased.SetLegendNames({"Prompt", "Tracker-NonPrompt", "ECAL", "HCAL-D1", "HCAL-D2", "HCAL-D34"});
+	plotter_CutBased.SetLegendNames({"Tracker: R < 10cm", "Tracker: R > 10cm", "ECAL", "HCAL-D1", "HCAL-D2", "HCAL-D34"});
 	plotter_CutBased.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
 	plotter_CutBased.SetCuts("jet0_Pt >= 40 && jet0_NeutralHadEFrac > 0.6"); 
 	plotter_CutBased.SetOutputDirectory("MC_CR_SR_NeutralHadCut");
@@ -137,7 +137,7 @@ void MiniTuplePlotter_CR_SR(){
 	plotter_Jet0KinematicVars.SetOutputFileTag("CR_SR_v1.3_MC"); 	
 	plotter_Jet0KinematicVars.SetComparisonCuts({Cut_LLPinCR_Jet0, Cut_LLPinHCAL_Jet0});
 	plotter_Jet0KinematicVars.plot_log_ratio    = true;
-	plotter_Jet0KinematicVars.SetLegendNames({"Prompt", "HCAL-D1234"});
+	plotter_Jet0KinematicVars.SetLegendNames({"Tracker: R < 10cm", "HCAL-D1234"});
 	plotter_Jet0KinematicVars.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
 	plotter_Jet0KinematicVars.Plot("ratio");	
 	
@@ -147,7 +147,7 @@ void MiniTuplePlotter_CR_SR(){
 	plotter_Jet1KinematicVars.SetOutputFileTag("CR_SR_v1.3_MC"); 	
 	plotter_Jet1KinematicVars.SetComparisonCuts({Cut_LLPinCR_Jet1, Cut_LLPinHCAL_Jet1});
 	plotter_Jet1KinematicVars.plot_log_ratio    = true;
-	plotter_Jet1KinematicVars.SetLegendNames({"Prompt", "HCAL-D1234"});
+	plotter_Jet1KinematicVars.SetLegendNames({"Tracker: R < 10cm", "HCAL-D1234"});
 	plotter_Jet1KinematicVars.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
 	plotter_Jet1KinematicVars.Plot("ratio");
 
@@ -158,7 +158,7 @@ void MiniTuplePlotter_CR_SR(){
 	cout<<endl;
 
 	class MiniTuplePlotter plotter_RechitVars_NHBins( filetags_data, path );
-	plotter_RechitVars_NHBins.SetPlots(rechitVars);
+	plotter_RechitVars_NHBins.SetPlots(allPlots); //rechitVars);
 	plotter_RechitVars_NHBins.SetTreeName( "NoSel" );	
 	plotter_RechitVars_NHBins.SetOutputFileTag("NeutralHadBins_Jet40_v1.3_DataBLINDED"); 	
 	plotter_RechitVars_NHBins.SetComparisonCuts({Cut_NHadpt1, Cut_NHadpt2, Cut_NHadpt3, Cut_NHadpt4, Cut_NHadpt6}); 
@@ -218,7 +218,7 @@ void MiniTuplePlotter_CR_SR(){
 	plotter_LRechit_Bins.Plot();
 
 	class MiniTuplePlotter plotter_LRechit_Bins2D( filetags_MC, path );
-	plotter_LRechit_Bins2D.SetPlots(allPlots);
+	//plotter_LRechit_Bins2D.SetPlots(allPlots);
 	plotter_LRechit_Bins2D.SetTreeName( "NoSel" );	
 	plotter_LRechit_Bins2D.SetOutputFileTag("LRechit8_Jet40_v1.3_MC"); 	
 	plotter_LRechit_Bins2D.SetComparisonCuts({"jet0_LeadingRechitE < 8", Cut_LLPinHCAL34_Jet0 + "jet0_LeadingRechitE < 8", "jet0_LeadingRechitE >= 8"}); 
@@ -238,7 +238,7 @@ void MiniTuplePlotter_CR_SR(){
 	plotter_LLP_Jet_PtDiff.SetOutputFileTag("Jet40_v1.3_MC"); 	
 	plotter_LLP_Jet_PtDiff.SetComparisonCuts({Cut_LLP0inCR, Cut_LLP0inTrackerNP, Cut_LLP0inECAL, Cut_LLPinHCAL_d1, Cut_LLP0inHCAL_d2, Cut_LLP0inHCAL_d34}); 
 	plotter_LLP_Jet_PtDiff.plot_log_ratio    = false; 
-	plotter_LLP_Jet_PtDiff.SetLegendNames({"LLP0: Prompt", "LLP0: Tracker-NonPrompt", "LLP0: ECAL", "LLP0: HCAL-D1", "LLP0: HCAL-D2", "LLP0: HCAL-D34"});
+	plotter_LLP_Jet_PtDiff.SetLegendNames({"LLP0: Tracker: R < 10cm", "LLP0: Tracker: R > 10cm", "LLP0: ECAL", "LLP0: HCAL-D1", "LLP0: HCAL-D2", "LLP0: HCAL-D34"});
 	plotter_LLP_Jet_PtDiff.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
 	plotter_LLP_Jet_PtDiff.SetCuts("jet0_Pt >= 40 && jet0_isMatchedTo == 0");  
 	plotter_LLP_Jet_PtDiff.SetOutputDirectory("MC_LLP_Jet_Match");

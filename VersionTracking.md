@@ -55,8 +55,8 @@ Updates:
 
 Location of minituples:
 ```
-/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.2/minituple_v1.2_MCsignal_500k_2023_09_29.root
-/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.2/minituple_v1.2_LLPskim_500k_2023_09_28.root
+/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.3/minituple_v1.3_MCsignal_500k_2023_09_29.root
+/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.3/minituple_v1.3_LLPskim_500k_2023_09_28.root
 ```
 
 ## V2
