@@ -156,7 +156,7 @@ vector<float> DisplacedHcalJetAnalyzer::JetIsMatchedTo( float jet_eta, float jet
 	for( int i_llp=0; i_llp<gLLP_Pt->size(); i_llp++ ){
 
 		// Require decay in HB to match to LLP directly
-		if( gLLP_DecayVtx_R.at(i_llp) < 183.6 || gLLP_DecayVtx_R.at(i_llp) >= 295 || fabs(gLLP_Eta->at(i_llp)) > 1.4 )
+		if( gLLP_DecayVtx_R.at(i_llp) < 183.6 || gLLP_DecayVtx_R.at(i_llp) >= 295 || fabs(gLLP_Eta->at(i_llp)) > 1.26 )
 			continue;
 
 		float dR_temp = DeltaR( gLLP_Eta->at(i_llp), jet_eta, gLLP_Phi->at(i_llp), jet_phi );
@@ -173,7 +173,7 @@ vector<float> DisplacedHcalJetAnalyzer::JetIsMatchedTo( float jet_eta, float jet
 		int idx_llp = gLLPDecay_iLLP.at(i_tru);
 
 		// Require decay not HB, such that it makes sense to match to decay products instead
-		if( gLLP_DecayVtx_R.at(idx_llp) >= 183.6 && gLLP_DecayVtx_R.at(idx_llp) < 295 && fabs(gLLP_Eta->at(idx_llp)) <= 1.4 )
+		if( gLLP_DecayVtx_R.at(idx_llp) >= 183.6 && gLLP_DecayVtx_R.at(idx_llp) < 295 && fabs(gLLP_Eta->at(idx_llp)) <= 1.26 )
 			continue;
 
 		TVector3 vec_llp;
@@ -195,7 +195,7 @@ vector<float> DisplacedHcalJetAnalyzer::JetIsMatchedTo( float jet_eta, float jet
 }
 
 /* ====================================================================================================================== */
-bool DisplacedHcalJetAnalyzer::LLPDecayIsTruthMatched_LLP_b( int idx_gLLP, int idx_gParticle, float jetPt_cut, float deltaR_cut ){
+pair<bool,float> DisplacedHcalJetAnalyzer::LLPDecayIsTruthMatched_LLP_b( int idx_gLLP, int idx_gParticle, float jetPt_cut, float deltaR_cut ){
 	/* 
 	Description: Delivers true/false on if there is an llp decay product matched to a reco akt jet object
 	deltaR_cut: deltaR between jet and LLP decay prod (default: 0.4)	
@@ -208,12 +208,14 @@ bool DisplacedHcalJetAnalyzer::LLPDecayIsTruthMatched_LLP_b( int idx_gLLP, int i
 	for( int i=0; i<jet_Pt->size(); i++){
 		if (jet_Pt->at(i) < jetPt_cut) continue;
 		// Check if LLP is directly matched to a jet
-		if( gLLP_DecayVtx_R.at(idx_gLLP) >= 183.6 && gLLP_DecayVtx_R.at(idx_gLLP) < 295 && fabs(gLLP_Eta->at(idx_gLLP)) <= 1.4 ) {
+		if( gLLP_DecayVtx_R.at(idx_gLLP) >= 183.6 && gLLP_DecayVtx_R.at(idx_gLLP) < 295 && fabs(gLLP_Eta->at(idx_gLLP)) <= 1.26 ) {
 
 			float dR_temp = DeltaR( gLLP_Eta->at(idx_gLLP), jet_Eta->at(i), gLLP_Phi->at(idx_gLLP), jet_Phi->at(i) );
 
-			if( dR_temp < deltaR_cut ) 
-				return true;
+			if( dR_temp < deltaR_cut ) {
+				pair<bool,float> matchedLLP_eta = make_pair(true, jet_Eta->at(i));
+				return matchedLLP_eta;
+			}
 		}
 		// Check if LLP decay products are matched to a jet
 		else {		
@@ -223,15 +225,18 @@ bool DisplacedHcalJetAnalyzer::LLPDecayIsTruthMatched_LLP_b( int idx_gLLP, int i
 
 			float dR_temp = DeltaR( gParticle_Eta->at(idx_gParticle), vec_jet_new.Eta(), gParticle_Phi->at(idx_gParticle), vec_jet_new.Phi() );
 
-			if( dR_temp < deltaR_cut ) 
-				return true;
+			if( dR_temp < deltaR_cut ) {
+				pair<bool,float> matchedDecay_eta = make_pair(true, jet_Eta->at(i));
+				return matchedDecay_eta;
+			}
 		}
 	}
-	return false;
+	pair<bool,float> unmatched_eta = make_pair(false, -99.0);
+	return unmatched_eta;
 }
 
 /* ====================================================================================================================== */
-bool DisplacedHcalJetAnalyzer::LLPIsTruthMatched( int idx_gLLPDecay, float jetPt_cut, float deltaR_cut ){
+pair<bool,float> DisplacedHcalJetAnalyzer::LLPIsTruthMatched( int idx_gLLPDecay, float jetPt_cut, float deltaR_cut ){
 	/* 
 	Description: Delivers true/false on if there is an llp decay product matched to a reco akt jet object
 	deltaR_cut: deltaR between jet and LLP decay prod (default: 0.4)	
@@ -241,7 +246,7 @@ bool DisplacedHcalJetAnalyzer::LLPIsTruthMatched( int idx_gLLPDecay, float jetPt
 	in LLPIsTruthMatched, idx_gParticle  	=  idx_gParticle 	in LLPDecayIsTruthMatched_LLP_b
 	*/
 
-	if( idx_gLLPDecay >= gLLPDecay_iLLP.size() ) return false;
+	if( idx_gLLPDecay >= gLLPDecay_iLLP.size() ) return make_pair(false, -99.0);
 
 	int idx_gParticle = gLLPDecay_iParticle.at(idx_gLLPDecay); 	// index of this b-quark
 	int idx_gLLP      = gLLPDecay_iLLP.at(idx_gLLPDecay); 		// which LLP is associated to this b-quark

@@ -173,12 +173,18 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("LLPDecay%d_ProdZ", i) );
 		myvars_float.push_back( Form("LLPDecay%d_ProdR", i) );
 		myvars_float.push_back( Form("LLPDecay%d_isTruthMatched", i) );
+		myvars_float.push_back( Form("LLPDecay%d_isTruthMatched_Eta", i) );
 		if (i < 2) {
 			myvars_float.push_back( Form("LLP%d_isTruthMatched", i) );
 			myvars_float.push_back( Form("LLP%d_isTruthMatched_Jet40", i) );
 			myvars_float.push_back( Form("LLP%d_isTruthMatched_Jet60", i) );
 			myvars_float.push_back( Form("LLP%d_isTruthMatched_Jet80", i) );
 			myvars_float.push_back( Form("LLP%d_isTruthMatched_Jet100", i) );
+			myvars_float.push_back( Form("LLP%d_isTruthMatched_Eta", i) );
+			myvars_float.push_back( Form("LLP%d_isTruthMatched_Jet40Eta", i) );
+			myvars_float.push_back( Form("LLP%d_isTruthMatched_Jet60Eta", i) );
+			myvars_float.push_back( Form("LLP%d_isTruthMatched_Jet80Eta", i) );
+			myvars_float.push_back( Form("LLP%d_isTruthMatched_Jet100Eta", i) );
 		}
 	}
 
@@ -441,12 +447,19 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("LLPDecay%d_ProdY", i)] = gParticle_ProdVtx_Y->at(idx_gParticle);
 		tree_output_vars_float[Form("LLPDecay%d_ProdZ", i)] = gParticle_ProdVtx_Z->at(idx_gParticle);
 		tree_output_vars_float[Form("LLPDecay%d_ProdR", i)] = pow( pow(gParticle_ProdVtx_X->at(idx_gParticle), 2.) + pow(gParticle_ProdVtx_Y->at(idx_gParticle), 2.), 0.5 );
-		tree_output_vars_float[Form("LLPDecay%d_isTruthMatched", i)] = LLPIsTruthMatched( i );
-		if (LLPIsTruthMatched( i )) tree_output_vars_float[Form("LLP%d_isTruthMatched", gLLPDecay_iLLP.at(i))] = 1; // gLLPDecay_iLLP.at( i ) tells which LLP this comes from, and gLLPDecay_iLLP.at(i) details correspond to i in n_gLLP loop above
-		if (LLPIsTruthMatched( i, 40 )) tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet40", gLLPDecay_iLLP.at(i))] = 1; 
-		if (LLPIsTruthMatched( i, 60 )) tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet60", gLLPDecay_iLLP.at(i))] = 1; 
-		if (LLPIsTruthMatched( i, 80 )) tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet80", gLLPDecay_iLLP.at(i))] = 1; 
-		if (LLPIsTruthMatched( i, 100 )) tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet100", gLLPDecay_iLLP.at(i))] = 1; 
+		tree_output_vars_float[Form("LLPDecay%d_isTruthMatched", i)] = LLPIsTruthMatched( i ).first;
+		tree_output_vars_float[Form("LLPDecay%d_isTruthMatched_Eta", i)] = LLPIsTruthMatched( i ).second;
+
+		tree_output_vars_float[Form("LLP%d_isTruthMatched", gLLPDecay_iLLP.at(i))] = LLPIsTruthMatched( i ).first; // gLLPDecay_iLLP.at( i ) tells which LLP this comes from, and gLLPDecay_iLLP.at(i) details correspond to i in n_gLLP loop above
+		tree_output_vars_float[Form("LLP%d_isTruthMatched_Eta", gLLPDecay_iLLP.at(i))] = LLPIsTruthMatched( i ).second;
+		tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet40", gLLPDecay_iLLP.at(i))] = LLPIsTruthMatched( i, 40 ).first; 
+		tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet40Eta", gLLPDecay_iLLP.at(i))] = LLPIsTruthMatched( i, 40 ).second;
+		tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet60", gLLPDecay_iLLP.at(i))] = LLPIsTruthMatched( i, 60 ).first; 
+		tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet60Eta", gLLPDecay_iLLP.at(i))] = LLPIsTruthMatched( i, 60 ).second;
+		tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet80", gLLPDecay_iLLP.at(i))] = LLPIsTruthMatched( i, 80 ).first; 
+		tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet80Eta", gLLPDecay_iLLP.at(i))] = LLPIsTruthMatched( i, 80 ).second;
+		tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet100", gLLPDecay_iLLP.at(i))] = LLPIsTruthMatched( i, 100 ).first; 
+		tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet100Eta", gLLPDecay_iLLP.at(i))] = LLPIsTruthMatched( i, 100 ).second;
 	}
 
 	tree_output[treename]->Fill();
