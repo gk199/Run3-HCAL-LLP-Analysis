@@ -16,10 +16,11 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 	vector<string> myvars_bool = {
 		//"",
 	};
-	// for (int i = 0; i < HLT_Indices.size(); i++) { // TEMPORARY for setting up HLT efficiency work
-	//	myvars_bool.push_back(HLT_Names[i]);
-	// }
+	for (int i = 0; i < HLT_Indices.size(); i++) { // TEMPORARY for setting up HLT efficiency work
+		myvars_bool.push_back(HLT_Names[i]);
+	}
 	// TEMPORARY for setting up HLT efficiency work. We know the order of the HLT trigger names in the Ntuples:
+	/*
 	myvars_bool.push_back("HLT_HT170_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack");
 	myvars_bool.push_back("HLT_HT200_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack");
 	myvars_bool.push_back("HLT_HT200_L1SingleLLPJet_DisplacedDijet60_DisplacedTrack");
@@ -32,6 +33,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 	myvars_bool.push_back("HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay1nsInclusive");
 	myvars_bool.push_back("HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5");
 	myvars_bool.push_back("HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5");
+	*/
 
 	vector<string> myvars_int = {
 		"run","lumi","event",
@@ -247,10 +249,11 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 	tree_output_vars_float["met_Phi"]	= met_Phi;
 	tree_output_vars_float["met_SumEt"]	= met_SumEt;
 
-	// for (int i = 0; i < HLT_Indices.size(); i++) { // TEMPORARY for setting up HLT efficiency work
-	//	tree_output_vars_bool[HLT_Names[i]] = HLT_Decision->at(i);
-	// }
+	for (int i = 0; i < HLT_Indices.size(); i++) { // TEMPORARY for setting up HLT efficiency work
+		tree_output_vars_bool[HLT_Names[i]] = HLT_Decision->at(i);
+	}
 	// TEMPORARY for setting up HLT efficiency work
+	/*
 	tree_output_vars_bool["HLT_HT170_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack"] 			= HLT_Decision->at(0);
 	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack"] 			= HLT_Decision->at(1);
 	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DisplacedDijet60_DisplacedTrack"] 			= HLT_Decision->at(2);
@@ -263,6 +266,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay1nsInclusive"] 		= HLT_Decision->at(9);
 	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5"]	= HLT_Decision->at(10);
 	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5"] 	= HLT_Decision->at(11);
+	*/
 
 	tree_output_vars_int["RechitN_1GeV"] = 0; 
 	tree_output_vars_int["RechitN_5GeV"] = 0; 

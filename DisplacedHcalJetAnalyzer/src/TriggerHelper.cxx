@@ -3,8 +3,7 @@ void DisplacedHcalJetAnalyzer::SetTriggerNames( string infilepath, string hist_n
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::SetTriggerNames()"<<endl;
 
-//	TFile *f = new TFile( Form("%s", infilepath.c_str() ) ); // issue reading in remote file with current trigger structure
-	TFile *f = TFile::Open( Form("%s", infilepath.c_str() ) ); // SOLVED issue reading in remote file, use TFile::Open instead of TFile constructor 
+	TFile *f = TFile::Open( Form("%s", infilepath.c_str() ) ); // issue reading in remote file, solved with TFile::Open instead of TFile constructor 
 	
 	TH1F  *h_hlt = (TH1F*) f->Get( Form( "%s", hist_name.c_str() ) );
 

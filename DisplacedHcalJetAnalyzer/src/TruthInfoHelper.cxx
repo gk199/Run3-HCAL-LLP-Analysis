@@ -61,6 +61,15 @@ void DisplacedHcalJetAnalyzer::SetLLPVariables(){
 }
 
 /* ====================================================================================================================== */
+bool DisplacedHcalJetAnalyzer::isRechitValid(float RechitEnergy, int RechitDepth) {
+	vector<float> energy_cuts_2022initial = {0.1, 0.2, 0.3, 0.3};
+	vector<float> energy_cuts_2022rereco = 	{0.25, 0.25, 0.3, 0.3}; // best agreement with MC
+	vector<float> energy_cuts_2023 = 		{0.25, 0.3, 0.3, 0.3};
+	if (RechitEnergy >= energy_cuts_2023[RechitDepth-1]) return true;
+	else return false;
+}
+
+/* ====================================================================================================================== */
 vector<float> DisplacedHcalJetAnalyzer::GetMatchedHcalRechits_LLPDecay( int idx_llp, int idx_llp_decay, float deltaR_cut ){
 	/* 
 	Description: Delivers vector of indices of matched hcal rechits (in hbheRechit)
@@ -79,6 +88,8 @@ vector<float> DisplacedHcalJetAnalyzer::GetMatchedHcalRechits_LLPDecay( int idx_
 	vector<float> hbhe_matched_indices;
 
 	for( int i=0; i<hbheRechit_E->size(); i++ ){
+		if (!isRechitValid(hbheRechit_E->at(i), hbheRechit_depth->at(i))) continue;
+
 		TVector3 vec_rechit;
 		vec_rechit.SetXYZ( hbheRechit_X->at(i), hbheRechit_Y->at(i), hbheRechit_Z->at(i) );
 
@@ -110,6 +121,8 @@ vector<float> DisplacedHcalJetAnalyzer::GetMatchedHcalRechits_LLP( int idx_llp, 
 	vector<float> hbhe_matched_indices;
 
 	for( int i=0; i<hbheRechit_E->size(); i++ ){
+		if (!isRechitValid(hbheRechit_E->at(i), hbheRechit_depth->at(i))) continue;
+
 		TVector3 vec_rechit;
 		vec_rechit.SetXYZ( hbheRechit_X->at(i), hbheRechit_Y->at(i), hbheRechit_Z->at(i) );
 

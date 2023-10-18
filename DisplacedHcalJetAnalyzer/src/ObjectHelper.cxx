@@ -123,6 +123,8 @@ vector<float> DisplacedHcalJetAnalyzer::GetMatchedHcalRechits_Jet( int idx_jet, 
 
 	for( int j=0; j<hbheRechit_E->size(); j++ ){
 
+		if (!isRechitValid(hbheRechit_E->at(j), hbheRechit_depth->at(j))) continue;
+
 		// q: for LLP matching, had to consider right depth, for jet should take all depths? 		
 			
 		float dR_temp = DeltaR( jet_Eta->at(idx_jet), hbheRechit_Eta->at(j), jet_Phi->at(idx_jet), hbheRechit_Phi->at(j) );
@@ -142,7 +144,7 @@ vector<float> DisplacedHcalJetAnalyzer::GetEnergyProfile_Jet(int idx_jet, float 
 	// vectors to fill with energy in each depth
 	vector<float> energy_jet = {0,0,0,0};
 
-	vector<float> matchedRechit = GetMatchedHcalRechits_Jet(idx_jet, deltaR_cut);
+	vector<float> matchedRechit = GetMatchedHcalRechits_Jet(idx_jet, deltaR_cut); // already accounts for valid rechits
 	
 	for (int i = 0; i < matchedRechit.size(); i++) {
 		energy_jet[hbheRechit_depth->at(matchedRechit[i]) - 1] += hbheRechit_E->at(matchedRechit[i]);

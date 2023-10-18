@@ -717,6 +717,7 @@ public :
    virtual vector<float> GetTDCavg_Jet( int idx_jet, float deltaR_cut );
    // TruthInfoHelper.cxx
    virtual void   SetLLPVariables();
+   virtual bool   isRechitValid(float RechitEnergy, int RechitDepth);
    virtual vector<float> GetMatchedHcalRechits_LLPDecay( int idx_llp, int idx_llp_decay, float deltaR_cut=0.4 );
    virtual vector<float> GetMatchedHcalRechits_LLP( int idx_llp, float deltaR_cut=0.4 );
    virtual float  DeltaR_LLP_b( int idx_llp, int idx_llp_decay);
