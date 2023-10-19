@@ -198,6 +198,8 @@ PlotParams P_LLP0_DecayZ				= {"LLP0_DecayZ", "LLP0 decay Z position", "Decay Z 
 PlotParams P_LLP0_DecayT				= {"LLP0_DecayT", "LLP0 decay time", "Decay time [ns]", 0, 10 };
 PlotParams P_LLP0_DecayCtau				= {"LLP0_DecayCtau", "LLP0 c#tau", "c#tau [cm]", 0, 1000 };
 
+PlotParams P_LLP0_isTruthMatched_Eta	= {"LLP0_isTruthMatched_Eta", "#eta of Jet Matched to LLP0", "#eta", -1.5, 1.5};
+
 // Sub-leading LLP
 PlotParams P_LLP1_Eta					= {"LLP1_Eta", "LLP1 #eta", "#eta", -1.5, 1.5 };
 PlotParams P_LLP1_Phi					= {"LLP1_Phi", "LLP1 #phi", "#phi", -3.2, 3.2 };

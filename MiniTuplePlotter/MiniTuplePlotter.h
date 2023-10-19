@@ -28,6 +28,8 @@ public :
 	// Cuts
 	TCut cuts_all;
 	vector<TCut> cuts_compare = {""};
+	vector<TCut> file_cuts_compare = {""};
+	string cuts_compare_filetag_or_treename = "";
 	map<string,TCut> selective_cuts_preprocessed;
 	map<string,TCut> selective_cuts;
 
@@ -321,13 +323,16 @@ public :
 	}
 
 	// -------------------------------------------------------------------------------------
-	void SetComparisonCuts( vector<TCut> cuts_compare_input ){
+	void SetComparisonCuts( vector<TCut> cuts_compare_input, string match_filetag_or_treename = "" ){
+		// by default, SetComparisonCuts applies to all treenames / filetags that are plotted. Added option to pass a second argument to specify to only apply cuts on a specific filetag
 		if( debug) cout<<"MiniTuplePlotter::SetComparisonCuts()"<<endl;		
 
 		if( cuts_compare_input.size() == 0 )
 			cuts_compare = {""};
-		else
+		else {
 			cuts_compare = cuts_compare_input; 
+			cuts_compare_filetag_or_treename = match_filetag_or_treename;
+		}
 	}	
 
 	// -------------------------------------------------------------------------------------
@@ -339,7 +344,6 @@ public :
 			selective_cuts_preprocessed[match_filetag_or_treename] = cut;
 		else
 			selective_cuts_preprocessed[match_filetag_or_treename] = selective_cuts_preprocessed[match_filetag_or_treename] && cut;
-
 	}
 
 	// -------------------------------------------------------------------------------------
@@ -351,7 +355,6 @@ public :
 
 				if( filetag_treename.find( match_filetag_or_treename ) != string::npos )
 					selective_cuts[filetag_treename] = selective_cuts[filetag_treename] && cut;
-				
 			}
 		}	
 	}
@@ -651,7 +654,12 @@ public :
 
 		int i = 0;
 		for( auto filetag_treename: filetags_treenames ){
-			for( auto cut_compare: cuts_compare ){
+
+			if (cuts_compare_filetag_or_treename.length() > 0 && filetag_treename.find( cuts_compare_filetag_or_treename ) == string::npos) // if filetag is specified, and if this filetag is not matched to current filetag, continue
+				file_cuts_compare = {""};
+			else
+				file_cuts_compare = cuts_compare;
+			for( auto cut_compare: file_cuts_compare ){
 
 				TH1F* h = (TH1F*)GetHist1D( myPlotParams, filetag_treename, cut_compare);
 
@@ -918,8 +926,12 @@ public :
 
     	int i = -1;
 		for( auto filetag_treename: filetags_treenames ){
-      	if( cuts_compare.size() == 0 ) cuts_compare.push_back("");
-			for( auto cut_compare: cuts_compare ){
+      		if( cuts_compare.size() == 0 ) cuts_compare.push_back("");
+			if (cuts_compare_filetag_or_treename.length() > 0 && filetag_treename.find( cuts_compare_filetag_or_treename ) == string::npos) // if filetag is specified, and if this filetag is not matched to current filetag, continue
+				file_cuts_compare = {""};
+			else
+				file_cuts_compare = cuts_compare;
+			for( auto cut_compare: file_cuts_compare ){
         		i++;
 				Draw2DPlot(myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare, i);
 			}
@@ -939,7 +951,11 @@ public :
 				PlotParams myPlotParams_x = Plot2DParams_temp.Params1;
 				PlotParams myPlotParams_y = Plot2DParams_temp.Params2;
         		if( cuts_compare.size() == 0 ) cuts_compare.push_back("");
-				for( auto cut_compare: cuts_compare ){
+				if (cuts_compare_filetag_or_treename.length() > 0 && filetag_treename.find( cuts_compare_filetag_or_treename ) == string::npos) // if filetag is specified, and if this filetag is not matched to current filetag, continue
+					file_cuts_compare = {""};
+				else
+					file_cuts_compare = cuts_compare;
+				for( auto cut_compare: file_cuts_compare ){
           			i++;
 					Draw2DPlot(myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare, i);
 				}

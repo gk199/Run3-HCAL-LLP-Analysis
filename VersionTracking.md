@@ -70,7 +70,7 @@ Location of minituples:
 ```
 /eos/user/g/gkopp/LLP_Analysis/MiniTuples/v2.0/minituple_v2.0_MCsignalLLP_500k_2023_10_18.root
 /eos/user/g/gkopp/LLP_Analysis/MiniTuples/v2.0/minituple_v2.0_LLPskimRun2023C_500k_2023_10_18.root
-/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v2.0/minituple_v2.0_MC_QCD_100k_2023_10_18.root
+/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v2.0/minituple_v2.0_MC_QCD_250k_2023_10_18.root
 ```
 
 ### v2.1
