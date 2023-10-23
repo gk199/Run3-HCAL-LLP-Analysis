@@ -64,6 +64,7 @@ Location of minituples:
 Updates:
 * `FillTriggerBranches` ntuples function is now working, so HLT names are filled properly (temporary fix removed)
 * Restrict HB rechit use to those above the PF cut thresholds, which are depth dependent. All `GetMatchedHcalRechits_*` functions now use `isRechitValid` to check if rechit should be included in computations
+* Save dR, dEta, dPhi between LLP and decay products, and between the two decay products
 
 ### v2.0
 Location of minituples:
@@ -71,6 +72,12 @@ Location of minituples:
 /eos/user/g/gkopp/LLP_Analysis/MiniTuples/v2.0/minituple_v2.0_MCsignalLLP_500k_2023_10_18.root
 /eos/user/g/gkopp/LLP_Analysis/MiniTuples/v2.0/minituple_v2.0_LLPskimRun2023C_500k_2023_10_18.root
 /eos/user/g/gkopp/LLP_Analysis/MiniTuples/v2.0/minituple_v2.0_MC_QCD_250k_2023_10_18.root
+```
+Also copied to LPC space:
+```
+/uscms/home/gkopp/LLP_Analysis_HCALdepth/Minituples/v2.0/minituple_v2.0_LLPskimRun2023C_500k_2023_10_18.root
+/uscms/home/gkopp/LLP_Analysis_HCALdepth/Minituples/v2.0/minituple_v2.0_MC_QCD_250k_2023_10_18.root
+/uscms/home/gkopp/LLP_Analysis_HCALdepth/Minituples/v2.0/minituple_v2.0_MCsignalLLP_500k_2023_10_18.root
 ```
 
 ### v2.1

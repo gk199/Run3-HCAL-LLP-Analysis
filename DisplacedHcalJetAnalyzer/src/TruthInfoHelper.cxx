@@ -149,7 +149,32 @@ float DisplacedHcalJetAnalyzer::DeltaR_LLP_b( int idx_llp, int idx_llp_decay){
 
 	int idx_gParticle = map_gLLP_to_gParticle_indices.at(idx_llp).at(idx_llp_decay);
 	return DeltaR( gLLP_Eta->at(idx_llp), gParticle_Eta->at(idx_gParticle), gLLP_Phi->at(idx_llp), gParticle_Phi->at(idx_gParticle) );
+}
 
+/* ====================================================================================================================== */
+float DisplacedHcalJetAnalyzer::DeltaR_b( int idx_llp){
+	/* 
+	Description: Delivers delta R between LLP and b quarks
+	Inputs: idx_llp: 		LLP index (generally either 0 or 1)
+	*/
+
+	int idx_gParticle1 = map_gLLP_to_gParticle_indices.at(idx_llp).at(0);
+	int idx_gParticle2 = map_gLLP_to_gParticle_indices.at(idx_llp).at(1);
+	return DeltaR( gParticle_Eta->at(idx_gParticle1), gParticle_Eta->at(idx_gParticle2), gParticle_Phi->at(idx_gParticle1), gParticle_Phi->at(idx_gParticle2) );
+}
+
+/* ====================================================================================================================== */
+vector<float> DisplacedHcalJetAnalyzer::DeltaEta_Phi_b( int idx_llp){
+	/* 
+	Description: Delivers delta R between LLP and b quarks
+	Inputs: idx_llp: 		LLP index (generally either 0 or 1)
+	*/
+	vector<float> delta_eta_phi;
+	int idx_gParticle1 = map_gLLP_to_gParticle_indices.at(idx_llp).at(0);
+	int idx_gParticle2 = map_gLLP_to_gParticle_indices.at(idx_llp).at(1);
+	delta_eta_phi.push_back( abs(gParticle_Eta->at(idx_gParticle1) - gParticle_Eta->at(idx_gParticle2)) );
+	delta_eta_phi.push_back(deltaPhi(gParticle_Phi->at(idx_gParticle1), gParticle_Phi->at(idx_gParticle2)));
+	return delta_eta_phi;
 }
 
 /* ====================================================================================================================== */

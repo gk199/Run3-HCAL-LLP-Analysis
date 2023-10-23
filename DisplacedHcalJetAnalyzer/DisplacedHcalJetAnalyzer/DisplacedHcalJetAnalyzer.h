@@ -721,6 +721,8 @@ public :
    virtual vector<float> GetMatchedHcalRechits_LLPDecay( int idx_llp, int idx_llp_decay, float deltaR_cut=0.4 );
    virtual vector<float> GetMatchedHcalRechits_LLP( int idx_llp, float deltaR_cut=0.4 );
    virtual float  DeltaR_LLP_b( int idx_llp, int idx_llp_decay);
+   virtual float  DeltaR_b( int idx_llp );
+   virtual vector<float> DeltaEta_Phi_b( int idx_llp );
    virtual vector<float> JetIsMatchedTo( float jet_eta, float jet_phi, float deltaR_cut=0.4 );
    virtual pair<bool,float> LLPDecayIsTruthMatched_LLP_b( int idx_gLLP, int idx_gParticle, float jetPt_cut=0, float deltaR_cut=0.4 );
    virtual pair<bool,float> LLPIsTruthMatched( int idx_gLLPDecay, float jetPt_cut=0, float deltaR_cut=0.4 );

@@ -160,7 +160,10 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 			for (int d=0; d<4; d++) myvars_float.push_back( Form("LLP%d_EnergyFracLLP_Depth%d", i, d+1));
 			myvars_float.push_back( Form("LLP%d_Eta", i));
 			myvars_float.push_back( Form("LLP%d_Phi", i));
-			myvars_float.push_back( Form("LLP%d_dR_b", i));
+			myvars_float.push_back( Form("LLP%d_dR_LLP_to_b", i));
+			myvars_float.push_back( Form("LLP%d_dR_b_to_b", i));
+			myvars_float.push_back( Form("LLP%d_dEta_b_to_b", i));
+			myvars_float.push_back( Form("LLP%d_dPhi_b_to_b", i));
 		}
 
 	}
@@ -426,7 +429,10 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("LLP%d_DecayD", i)] = distance;
 		tree_output_vars_float[Form("LLP%d_DecayT", i)] = distance * ( 1 / gLLP_Beta->at(i) - 1) * 0.03336; // 1/c in ns / cm to give answer in ns
 		tree_output_vars_float[Form("LLP%d_DecayCtau", i)] = distance * (sqrt( 1 / pow(gLLP_Beta->at(i),2) - 1)); 
-		for (int b = 0; b < 2; b++) tree_output_vars_float[Form("LLP%d_dR_b", i)] = DeltaR_LLP_b(i, b); 
+		for (int b = 0; b < 2; b++) tree_output_vars_float[Form("LLP%d_dR_LLP_to_b", i)] = DeltaR_LLP_b(i, b); 
+		tree_output_vars_float[Form("LLP%d_dR_b_to_b", i)] = DeltaR_b(i);
+		tree_output_vars_float[Form("LLP%d_dEta_b_to_b", i)] = DeltaEta_Phi_b(i)[0];
+		tree_output_vars_float[Form("LLP%d_dPhi_b_to_b", i)] = DeltaEta_Phi_b(i)[1];
 
 		if (energy[0][0] + energy[0][1] + energy[0][2] + energy[0][3] > 0) { // ensure there is positive energy in one depth
 			for (int depth = 0; depth < 4; depth++) tree_output_vars_float[Form("LLP%d_EnergyFrac_Depth%d", i, depth+1)] = energy[0][depth]; // LLP from b matching. each fractional energy saved in different tree
