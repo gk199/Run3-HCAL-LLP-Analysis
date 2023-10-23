@@ -98,6 +98,7 @@ TCut Cut_LLPinHCAL_d34 	= (LLP0inHCAL_d34 + OR + LLP1inHCAL_d34).Data();
 TCut Cut_LLP0inHCAL_d34 = LLP0inHCAL_d34.Data();
 
 TCut Cut_LLPinCR	    = (LLP0inCR + OR + LLP1inCR).Data();
+TCut Cut_LLP0inCR       = (LLP0inCR).Data();
 
 // LLP is in region of interest, and matched to a jet
 TCut Cut_LLPinTracker_Jet0	= 	( "(" + LLP0inTracker + AND + Jet0_LLP0 + ")" + 	OR + "(" + LLP1inTracker + AND + Jet0_LLP1 + ")" ).Data();
@@ -158,3 +159,19 @@ JetMatchedToLLP.insert(pair< tuple<TCut, TCut>, string> (make_tuple(Cut_LLPinHCA
 
 map<TCut, string>::iterator it;
 map<tuple<TCut, TCut>, string>::iterator it_double;
+
+
+// cuts for bins of neutral hadron fraction
+TCut Cut_NHadpt1 	= "jet0_NeutralHadEFrac < 0.1";
+TCut Cut_NHadpt2 	= "jet0_NeutralHadEFrac >= 0.1 && jet0_NeutralHadEFrac < 0.2";
+TCut Cut_NHadpt3 	= "jet0_NeutralHadEFrac >= 0.2 && jet0_NeutralHadEFrac < 0.3";
+TCut Cut_NHadpt4 	= "jet0_NeutralHadEFrac >= 0.3 && jet0_NeutralHadEFrac < 0.4";
+TCut Cut_NHadpt6 	= "jet0_NeutralHadEFrac >= 0.4 && jet0_NeutralHadEFrac < 0.6";
+TCut Cut_NHad1 	    = "jet0_NeutralHadEFrac >= 0.6";
+
+// cuts for bins of jet pT
+TCut Cut_JetPt40 	= "jet0_Pt >= 40 && jet0_Pt < 80";
+TCut Cut_JetPt80 	= "jet0_Pt >= 80 && jet0_Pt < 120";
+TCut Cut_JetPt120 	= "jet0_Pt >= 120 && jet0_Pt < 160";
+TCut Cut_JetPt160 	= "jet0_Pt >= 160 && jet0_Pt < 200";
+TCut Cut_JetPt200 	= "jet0_Pt >= 200";

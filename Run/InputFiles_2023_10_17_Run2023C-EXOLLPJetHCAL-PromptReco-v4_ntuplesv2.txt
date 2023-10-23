@@ -1,0 +1,15 @@
+root://cmsxrootd.fnal.gov///store/user/gkopp/DisplacedJet/Run2023C-EXOLLPJetHCAL-PromptReco-v4_AOD_20231017_175654/231017_155703/0000/output_1-10.root
+root://cmsxrootd.fnal.gov///store/user/gkopp/DisplacedJet/Run2023C-EXOLLPJetHCAL-PromptReco-v4_AOD_20231017_175654/231017_155703/0000/output_1-11.root
+root://cmsxrootd.fnal.gov///store/user/gkopp/DisplacedJet/Run2023C-EXOLLPJetHCAL-PromptReco-v4_AOD_20231017_175654/231017_155703/0000/output_1-12.root
+root://cmsxrootd.fnal.gov///store/user/gkopp/DisplacedJet/Run2023C-EXOLLPJetHCAL-PromptReco-v4_AOD_20231017_175654/231017_155703/0000/output_1-13.root
+root://cmsxrootd.fnal.gov///store/user/gkopp/DisplacedJet/Run2023C-EXOLLPJetHCAL-PromptReco-v4_AOD_20231017_175654/231017_155703/0000/output_1-14.root
+root://cmsxrootd.fnal.gov///store/user/gkopp/DisplacedJet/Run2023C-EXOLLPJetHCAL-PromptReco-v4_AOD_20231017_175654/231017_155703/0000/output_1-15.root
+root://cmsxrootd.fnal.gov///store/user/gkopp/DisplacedJet/Run2023C-EXOLLPJetHCAL-PromptReco-v4_AOD_20231017_175654/231017_155703/0000/output_1-16.root
+root://cmsxrootd.fnal.gov///store/user/gkopp/DisplacedJet/Run2023C-EXOLLPJetHCAL-PromptReco-v4_AOD_20231017_175654/231017_155703/0000/output_1-2.root
+root://cmsxrootd.fnal.gov///store/user/gkopp/DisplacedJet/Run2023C-EXOLLPJetHCAL-PromptReco-v4_AOD_20231017_175654/231017_155703/0000/output_1-3.root
+root://cmsxrootd.fnal.gov///store/user/gkopp/DisplacedJet/Run2023C-EXOLLPJetHCAL-PromptReco-v4_AOD_20231017_175654/231017_155703/0000/output_1-4.root
+root://cmsxrootd.fnal.gov///store/user/gkopp/DisplacedJet/Run2023C-EXOLLPJetHCAL-PromptReco-v4_AOD_20231017_175654/231017_155703/0000/output_1-5.root
+root://cmsxrootd.fnal.gov///store/user/gkopp/DisplacedJet/Run2023C-EXOLLPJetHCAL-PromptReco-v4_AOD_20231017_175654/231017_155703/0000/output_1-6.root
+root://cmsxrootd.fnal.gov///store/user/gkopp/DisplacedJet/Run2023C-EXOLLPJetHCAL-PromptReco-v4_AOD_20231017_175654/231017_155703/0000/output_1-7.root
+root://cmsxrootd.fnal.gov///store/user/gkopp/DisplacedJet/Run2023C-EXOLLPJetHCAL-PromptReco-v4_AOD_20231017_175654/231017_155703/0000/output_1-8.root
+root://cmsxrootd.fnal.gov///store/user/gkopp/DisplacedJet/Run2023C-EXOLLPJetHCAL-PromptReco-v4_AOD_20231017_175654/231017_155703/0000/output_1-9.root

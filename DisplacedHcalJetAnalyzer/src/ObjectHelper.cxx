@@ -22,11 +22,11 @@ double DisplacedHcalJetAnalyzer::deltaPhi(double phi1, double phi2) {  // calcul
   return result;
 }
 
-double DisplacedHcalJetAnalyzer::deltaR(double eta1, double phi1, double eta2, double phi2) { // calculate deltaR given two eta and phi values
-  double deta = eta1 - eta2;
-  double dphi = deltaPhi(phi1, phi2);
-  return sqrt(deta*deta + dphi*dphi);
-}
+// double DisplacedHcalJetAnalyzer::deltaR(double eta1, double phi1, double eta2, double phi2) { // calculate deltaR given two eta and phi values
+//   double deta = eta1 - eta2;
+//   double dphi = deltaPhi(phi1, phi2);
+//   return sqrt(deta*deta + dphi*dphi);
+// }
 
 /* ====================================================================================================================== */
 vector<int> DisplacedHcalJetAnalyzer::GetRechitMult(int idx_llp, float deltaR_cut) { // given a LLP, find how many associated HB rechits there are (rechits for LLP total, first daughter, second daughter)
@@ -123,6 +123,8 @@ vector<float> DisplacedHcalJetAnalyzer::GetMatchedHcalRechits_Jet( int idx_jet, 
 
 	for( int j=0; j<hbheRechit_E->size(); j++ ){
 
+		if (!isRechitValid(hbheRechit_E->at(j), hbheRechit_depth->at(j))) continue;
+
 		// q: for LLP matching, had to consider right depth, for jet should take all depths? 		
 			
 		float dR_temp = DeltaR( jet_Eta->at(idx_jet), hbheRechit_Eta->at(j), jet_Phi->at(idx_jet), hbheRechit_Phi->at(j) );
@@ -142,7 +144,7 @@ vector<float> DisplacedHcalJetAnalyzer::GetEnergyProfile_Jet(int idx_jet, float 
 	// vectors to fill with energy in each depth
 	vector<float> energy_jet = {0,0,0,0};
 
-	vector<float> matchedRechit = GetMatchedHcalRechits_Jet(idx_jet, deltaR_cut);
+	vector<float> matchedRechit = GetMatchedHcalRechits_Jet(idx_jet, deltaR_cut); // already accounts for valid rechits
 	
 	for (int i = 0; i < matchedRechit.size(); i++) {
 		energy_jet[hbheRechit_depth->at(matchedRechit[i]) - 1] += hbheRechit_E->at(matchedRechit[i]);
@@ -154,6 +156,50 @@ vector<float> DisplacedHcalJetAnalyzer::GetEnergyProfile_Jet(int idx_jet, float 
 	if (totalE_jet > 0) for (int i=0; i<energy_jet.size(); i++) energy_jet[i] = energy_jet[i] / totalE_jet;
 
 	return energy_jet;
+}
+
+
+/* ====================================================================================================================== */
+vector<pair<float,int>> DisplacedHcalJetAnalyzer::Get3RechitE_Jet(int idx_jet, float deltaR_cut) { // given a jet, find the 3 highest energy HB rechits
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::Get3RechitE_Jet()"<<endl;
+
+	// vectors to fill with highest three rechit energies for those matched to jet. Last entry is the total energy of all matched rechits
+	pair<float,int> p1 = make_pair(0.0, 0); // leading energy rechit
+	pair<float,int> p2 = make_pair(0.0, 0); // sub-leading rechit
+	pair<float,int> p3 = make_pair(0.0, 0); // ssub-leading
+	pair<float,int> p4 = make_pair(0.0, 0); // total energy
+	vector<pair<float,int>> RechitE_D = {p1, p2, p3, p4};
+	float totalE = 0;
+
+	vector<float> matchedRechit = GetMatchedHcalRechits_Jet(idx_jet, deltaR_cut);
+	
+	for (int i = 0; i < matchedRechit.size(); i++) {
+		float currentE = hbheRechit_E->at(matchedRechit[i]);
+		float currentD = hbheRechit_depth->at(matchedRechit[i]);
+		totalE += currentE;
+		if (currentE > RechitE_D[0].first) {
+			RechitE_D[2].first = RechitE_D[1].first;
+			RechitE_D[1].first = RechitE_D[0].first;
+			RechitE_D[0].first = currentE;
+			RechitE_D[2].second = RechitE_D[1].second;
+			RechitE_D[1].second = RechitE_D[0].second;
+			RechitE_D[0].second = currentD;
+		}
+		else if (currentE > RechitE_D[1].first) {
+			RechitE_D[2].first = RechitE_D[1].first;
+			RechitE_D[1].first = currentE;
+			RechitE_D[2].second = RechitE_D[1].second;
+			RechitE_D[1].second = currentD;
+		}
+		else if (currentE > RechitE_D[2].first) {
+			RechitE_D[2].first = currentE;
+			RechitE_D[2].second = currentD;
+		}
+	}
+	RechitE_D[3].first = totalE;
+
+	return RechitE_D;
 }
 
 /* ====================================================================================================================== */

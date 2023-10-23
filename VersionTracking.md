@@ -7,6 +7,7 @@ Updates:
 * Use unpacked TDC
 * Variable names match ntupler
 
+### v1.0
 Location of minituples:
 ```
 /eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.0/minituple_v1_MCsignal_500k_2023_07_14.root
@@ -32,14 +33,51 @@ Updates:
 * Clear variables in minituples tree
 * Truth matching for a jet done to LLP direction (decay in HCAL) or b quark (decay before HCAL)
 * LLP truth matching to a jet considers two options: match to LLP (decay in HCAL) or b quark (decay before HCAL), with option to cut on jet energy (jet 0, 40, 70, 100 GeV now)
-* Neutral and charged hadronic energy fraction, electromagnetic, photon, muon energy fraction (`NeutralHadEFrac, ChargedHadEFrac, EleEFrac, PhoEFrac, MuonEFrac`)
-* H over E computed (`HoverE` = (charged + neutral HCAL energy) / (photon + electron EM energy) )
+* Neutral and charged hadron, electron, photon, muon energy fraction (`NeutralHadEFrac, ChargedHadEFrac, EleEFrac, PhoEFrac, MuonEFrac`)
+* H over E computed (`HoverE` = (charged + neutral hadron energy) / (photon + electron energy) )
 * Eta-Phi quadrature sum, both energy weighted and standard
 
 Location of minituples:
 ```
 /eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.2/minituple_v1.2_MCsignal_500k_2023_09_18.root
-/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.2/minituple_v1.2_LLPskim_500k_2023_09_18.root
+/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.2/minituple_v1.2_LLPskim_500k_2023_09_11.root (note, missing all EFrac quantities)
+```
+
+### v1.3
+Updates:
+* Fix H/E (`HoverE` = (charged hadron energy) / (neutral hadron energy + photon + electron energy) ) 
+* Add additional jet variables (mass, object multiplicities, tracks, SV info, flight distance) -- note, PtAllTracks, PtAllPVTracks, NVertexTracks, NSelectedTracks is 0 now! 
+* Merged jet truth matching functions: now only have JetIsMatchedTo (giving LLP number and dR), simply check if `JetIsMatchedTo[0] > -1` to know if `JetIsTruthMatched` (removed). Previously was undermatching to LLPs by only looking at decay products. 
+* Added LLP eta cuts of 1.26 to match more accurately with the HB geometry
+* LLP truth matching to a jet with jet energy of 0, 40, 60, 80, 100 GeV. Savev result of truth matching (true / false) and matched jet eta. 
+* LLP decay R, eta, of the LLP matched to leading / sub / ssub jet
+* dR, dEta, dPhi between jet and associated tracks. dR between two leading tracks
+* Save energy and depth of top three HCAL rechits associated to a jet, and total energy of rechits (with `Get3RechitE_Jet`)
+
+Location of minituples:
+```
+/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.3/minituple_v1.3_MCsignal_500k_2023_10_16.root
+/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.3/minituple_v1.3_LLPskim_500k_2023_09_28.root
 ```
 
 ## V2
+Updates:
+* `FillTriggerBranches` ntuples function is now working, so HLT names are filled properly (temporary fix removed)
+* Restrict HB rechit use to those above the PF cut thresholds, which are depth dependent. All `GetMatchedHcalRechits_*` functions now use `isRechitValid` to check if rechit should be included in computations
+* Save dR, dEta, dPhi between LLP and decay products, and between the two decay products
+
+### v2.0
+Location of minituples:
+```
+/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v2.0/minituple_v2.0_MCsignalLLP_500k_2023_10_18.root
+/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v2.0/minituple_v2.0_LLPskimRun2023C_500k_2023_10_18.root
+/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v2.0/minituple_v2.0_MC_QCD_250k_2023_10_18.root
+```
+Also copied to LPC space:
+```
+/uscms/home/gkopp/LLP_Analysis_HCALdepth/Minituples/v2.0/minituple_v2.0_LLPskimRun2023C_500k_2023_10_18.root
+/uscms/home/gkopp/LLP_Analysis_HCALdepth/Minituples/v2.0/minituple_v2.0_MC_QCD_250k_2023_10_18.root
+/uscms/home/gkopp/LLP_Analysis_HCALdepth/Minituples/v2.0/minituple_v2.0_MCsignalLLP_500k_2023_10_18.root
+```
+
+### v2.1
