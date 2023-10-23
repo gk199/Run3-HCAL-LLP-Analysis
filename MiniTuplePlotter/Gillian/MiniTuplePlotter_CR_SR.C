@@ -38,6 +38,7 @@ void MiniTuplePlotter_CR_SR(){
 										P_jet0_NeutralHadMult, P_jet0_ChargedHadMult, P_jet0_PhoMult, P_jet0_EleMult, 
 										P_jet0_EnergyFrac_Depth1, P_jet0_EnergyFrac_Depth2, P_jet0_EnergyFrac_Depth3, P_jet0_EnergyFrac_Depth4,				// depth ratios
 										P_jet0_HCALd1_over_d2, P_jet0_HCALd1_over_d3, P_jet0_HCALd1_over_d4, P_jet0_HCALd12_over_d34 };
+	vector<PlotParams> MC_allPlots	= { P_LLP0_dR_b_to_b, P_LLP0_dEta_b_to_b, P_LLP0_dPhi_b_to_b, P_LLP0_dR_LLP_to_b };										// LLP decay kinematic variables
 	vector<PlotParams> trackVars	= {	P_jet0_Track0Pt, P_jet0_Track0PtFrac, P_jet0_Track0dR, 					 											// track vars
 										P_jet0_Track0dEta, P_jet0_Track0dPhi, P_jet0_Tracks_dR}; 
 //										P_jet0_Track0dzToPV, P_jet0_Track0dxyToBS, P_jet0_Track0dzOverErr, P_jet0_Track0dxyOverErr };
@@ -50,6 +51,8 @@ void MiniTuplePlotter_CR_SR(){
 										P_jet0_EtaPhiQuadSpread_energy, P_jet0_EtaPhiQuadSpread, P_jet0_LeadingRechitEFracJet, P_jet0_EnergyFrac_Depth3,
 										P_jet0_EtaSpread, P_jet0_PhiSpread, P_jet0_EtaSpread_energy, P_jet0_PhiSpread_energy};
 	
+	MC_allPlots.insert(MC_allPlots.begin(), allPlots.begin(), allPlots.end());
+
 	#include "../RegionCuts.h"
 
 	// ----- Jet kinematics in control and signal regions -----//
@@ -60,7 +63,7 @@ void MiniTuplePlotter_CR_SR(){
 
 	// leading jet, all jet variables
 	class MiniTuplePlotter plotter_JetVars( filetags_LLP, path );
-	plotter_JetVars.SetPlots(allPlots);
+	plotter_JetVars.SetPlots(MC_allPlots);
 	plotter_JetVars.SetTreeName( "NoSel" );	
 	plotter_JetVars.SetOutputFileTag("Jet40_CR_SR_v2.0_MC"); 	
 	plotter_JetVars.SetComparisonCuts({Cut_LLPinCR_Jet0, Cut_LLPinTrackerNP_Jet0, Cut_LLPinECAL_Jet0, Cut_LLPinHCAL1_Jet0, Cut_LLPinHCAL2_Jet0, Cut_LLPinHCAL34_Jet0});
@@ -96,8 +99,7 @@ void MiniTuplePlotter_CR_SR(){
 	plotter_JetVars2D_etaphi.SetOutputDirectory("2D");
     plotter_JetVars2D_etaphi.SetPlots2D({Hist1_Hist2(P_jet0_EtaSpread, P_jet0_PhiSpread), Hist1_Hist2(P_jet0_EtaSpread_energy, P_jet0_PhiSpread_energy), Hist1_Hist2(P_jet0_LeadingRechitE, P_jet0_SubLeadingRechitE) });
 	plotter_JetVars2D_etaphi.PlotMany2D();
-	plotter_JetVars2D_etaphi.SetComparisonCuts({Cut_LLPinCR_Jet1, Cut_LLPinHCAL_Jet1});
-	plotter_JetVars2D_etaphi.SetCuts("jet1_Pt > 40 && abs(jet0_Eta) <= 1.26");
+	plotter_JetVars2D_etaphi.SetCuts("jet1_Pt >= 40 && abs(jet1_Eta) <= 1.26");
     plotter_JetVars2D_etaphi.SetPlots2D({Hist1_Hist2(P_jet1_EtaSpread, P_jet1_PhiSpread), Hist1_Hist2(P_jet1_EtaSpread_energy, P_jet1_PhiSpread_energy) });
 	plotter_JetVars2D_etaphi.ClearFileTrees();
 	plotter_JetVars2D_etaphi.PlotMany2D();
@@ -150,7 +152,7 @@ void MiniTuplePlotter_CR_SR(){
 	plotter_RechitVars_NHBinsData.Plot("ratio");
 
 	class MiniTuplePlotter plotter_RechitVars_NHBins( filetags_LLP, path );
-	plotter_RechitVars_NHBins.SetPlots(allPlots);
+	plotter_RechitVars_NHBins.SetPlots(MC_allPlots);
 	plotter_RechitVars_NHBins.SetTreeName( "NoSel" );	
 	plotter_RechitVars_NHBins.SetOutputFileTag("NeutralHadBins_Jet40_v2.0_MC"); 	
 	plotter_RechitVars_NHBins.SetComparisonCuts({Cut_NHadpt1, Cut_NHadpt2, Cut_NHadpt3, Cut_NHadpt4, Cut_NHadpt6, Cut_NHad1}); 
@@ -181,7 +183,7 @@ void MiniTuplePlotter_CR_SR(){
 	plotter_allVars_JetBinsData.Plot("ratio");
 
 	class MiniTuplePlotter plotter_allVars_JetBins( filetags_LLP, path );
-	plotter_allVars_JetBins.SetPlots(allPlots);
+	plotter_allVars_JetBins.SetPlots(MC_allPlots);
 	plotter_allVars_JetBins.SetTreeName( "NoSel" );	
 	plotter_allVars_JetBins.SetOutputFileTag("JetpTBins_Jet40_v2.0_MC"); 	
 	plotter_allVars_JetBins.SetComparisonCuts({Cut_JetPt40, Cut_JetPt80, Cut_JetPt120, Cut_JetPt160, Cut_JetPt200}); 
@@ -211,6 +213,18 @@ void MiniTuplePlotter_CR_SR(){
 	// plotter_overlay.SetSelectiveCuts("LLPskim", "jet0_NeutralHadEFrac < 0.6");  // BLINDED with track energy fraction (jet0_Track0Pt / jet0_Pt > 0.1) or neutral hadron fraction (jet0_NeutralHadEFrac < 0.6)
 	plotter_overlay.SetOutputDirectory("Overlay");
 	plotter_overlay.Plot("ratio");
+
+	// 2D spread of eta - phi, for leading and subleading jet
+	class MiniTuplePlotter plotter_overlay2D( filetags_all, path );
+	plotter_overlay2D.SetTreeName( "NoSel" );	
+	plotter_overlay2D.SetOutputFileTag("Overlay_v2.0"); 	
+	plotter_overlay2D.SetComparisonCuts({Cut_LLPinCR_Jet0, Cut_LLPinHCAL_Jet0}, "MCsignalLLP");
+	plotter_overlay2D.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );			
+	plotter_overlay2D.SetCuts("abs(jet0_Eta) <= 1.26");
+	plotter_overlay2D.SetOutputDirectory("Overlay/2D");
+	plotter_overlay2D.SetPlots2D({Hist1_Hist2(P_jet0_Pt, P_jet0_EtaPhiQuadSpread), Hist1_Hist2(P_jet0_Pt, P_jet0_EtaPhiQuadSpread_energy) });
+	plotter_overlay2D.PlotMany2D();
+	plotter_overlay2D.SetComparisonCuts({Cut_LLPinCR_Jet1, Cut_LLPinHCAL_Jet1});
 
 	// ----- LLP to jet matching efficiencies -----//
 

@@ -877,6 +877,7 @@ public :
 		//StampCMS( "Internal", 140., 0.14, 0.84, 0.045 );
 		StampCuts( 0.12, 0.91, 0.02);
 		StampText( 0.7, 0.91, 0.04, WriteSelection);
+		StampText( 0.55, 0.91, 0.03, (filetag_treename.substr(0,27)).c_str()); // this lists what filetag it came from (MC, QCD, skim)
 
 		TF1* fitline = new TF1("fitline", "[0]*x+[1]");
 		TLatex fittext;
@@ -912,7 +913,8 @@ public :
 			saveas_name = Form("%s", legend_names.at(i).c_str() );
 
 		//myCanvas->SaveAs( Form( output_directory+"/Plot2D_%s_"+output_file_name+"_"+saveas_name+"_%s.png", filetag_treename.c_str(), output_file_tag.c_str() ) );
-        myCanvas->SaveAs( Form( output_directory+"/Plot2D_"+output_file_name+"_Cut"+saveas_name(0,24)+"_%s.png", output_file_tag.c_str() ) );
+		myCanvas->SaveAs( Form( output_directory+"/Plot2D_%s_"+output_file_name+"_"+saveas_name(0,24)+"_%s.png", (filetag_treename.substr(0,11)).c_str(), output_file_tag.c_str() ) );
+        //myCanvas->SaveAs( Form( output_directory+"/Plot2D_"+output_file_name+"_Cut"+saveas_name(0,24)+"_%s.png", output_file_tag.c_str() ) );
 		
 		delete myCanvas;
 	}
