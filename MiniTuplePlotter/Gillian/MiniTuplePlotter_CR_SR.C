@@ -224,7 +224,6 @@ void MiniTuplePlotter_CR_SR(){
 	plotter_overlay2D.SetOutputDirectory("Overlay/2D");
 	plotter_overlay2D.SetPlots2D({Hist1_Hist2(P_jet0_Pt, P_jet0_EtaPhiQuadSpread), Hist1_Hist2(P_jet0_Pt, P_jet0_EtaPhiQuadSpread_energy) });
 	plotter_overlay2D.PlotMany2D();
-	plotter_overlay2D.SetComparisonCuts({Cut_LLPinCR_Jet1, Cut_LLPinHCAL_Jet1});
 
 	// ----- LLP to jet matching efficiencies -----//
 
