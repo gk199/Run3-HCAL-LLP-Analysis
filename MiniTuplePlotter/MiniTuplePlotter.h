@@ -98,7 +98,7 @@ public :
 			TObjArray *tarr = (TObjArray*)infile_path_tstr.Tokenize("/");
 			for( Int_t i=0; i<tarr->GetEntries(); i++){
 				TString element = ((TObjString *)(tarr->At(i)))->String();
-				if( element.Contains("v") ){
+				if( element.Contains("v") && !(element.Contains("gov") || element.Contains("longlived")) ){ // handle case when xrd redirector used for LPC space
 					MiniTupleVersion = element;
 					break;
 				}
@@ -192,7 +192,8 @@ public :
 		}
 
 		cout<<"Reading in "<<filename<<endl;
-		TFile* file = new TFile( filename, "READ");
+		//TFile* file = new TFile( filename, "READ");
+	 	TFile *file = TFile::Open( filename ); // issue reading in remote file, solved with TFile::Open instead of TFile constructor 
 
 		if( !file->GetListOfKeys()->Contains( Form("%s", treename.c_str()) ) ){
 			cout<<"ERROR: Tree "<<treename<<" does not exist in "<<filename<<endl;
