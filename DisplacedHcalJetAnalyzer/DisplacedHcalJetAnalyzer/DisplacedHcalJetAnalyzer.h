@@ -715,6 +715,7 @@ public :
    virtual vector<pair<float,int>> Get3RechitE_Jet( int idx_jet, float deltaR_cut );
    virtual vector<float> GetEtaPhiSpread_Jet( int idx_jet, float deltaR_cut );
    virtual vector<float> GetTDCavg_Jet( int idx_jet, float deltaR_cut );
+   virtual bool W_jets_event( int n_jet, int n_ele, int n_muon );
    // TruthInfoHelper.cxx
    virtual void   SetLLPVariables();
    virtual bool   isRechitValid(float RechitEnergy, int RechitDepth);

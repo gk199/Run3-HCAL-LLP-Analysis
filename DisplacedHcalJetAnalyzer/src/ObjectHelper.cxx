@@ -279,3 +279,54 @@ vector<float> DisplacedHcalJetAnalyzer::GetTDCavg_Jet(int idx_jet, float deltaR_
 
 	return TDC_TDCenergy;
 }
+
+/* ====================================================================================================================== */
+bool DisplacedHcalJetAnalyzer::W_jets_event(int n_jet, int n_ele, int n_muon) {
+	// given a event, determine if it is a W + jets event, based off of lepton and jet selections
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::W_jets_event()"<<endl;
+
+	bool electron = false;
+	bool muon = false;
+	int sel_ele = -1;
+	int sel_muon = -1;
+
+	for (int i = 0; i < n_ele; i++) {
+		if (ele_Pt->at(i) > 35 && abs(ele_Eta->at(i)) < 2.4 && ele_passCutBasedIDTight->at(i) == 1) {
+			electron = true;
+			sel_ele = i;
+		}
+	}
+
+	for (int i = 0; i < n_muon; i++) {
+		if (muon_Pt->at(i) > 35 && abs(muon_Eta->at(i)) < 2.4 && muon_IsTight->at(i) == 1) {
+			muon = true;
+			sel_muon = i;
+		}
+	}
+	// how to check if these leptons are isolated? 
+
+	int jet_veto = 0;
+	double jet_lepton_dPhi_ele = -999; 
+	double jet_lepton_dPhi_muon = -999;
+	bool matched_jet = false;
+
+	if (electron || muon) {
+		// only check jets once we know a lepton has been found
+		for (int i = 0; i < n_jet; i++) {
+			if (jet_Pt->at(i) > 30 && abs(jet_Eta->at(i)) < 2.4 ) {
+				jet_veto += 1;
+				if (electron) jet_lepton_dPhi_ele = deltaPhi(jet_Phi->at(i), ele_Phi->at(sel_ele));
+				if (muon) jet_lepton_dPhi_muon = deltaPhi(jet_Phi->at(i), muon_Phi->at(sel_muon));
+				std::cout << "jet_veto = " << jet_veto << " with dPhi = " << jet_lepton_dPhi_ele << ", " << jet_lepton_dPhi_muon << std::endl;
+				if ( (electron && abs(jet_lepton_dPhi_ele) > 3) || (muon && abs(jet_lepton_dPhi_muon) > 3) ) matched_jet = true;
+				if (matched_jet) std::cout << "found a jet back to back with lepton!" << std::endl;
+			}
+		}
+	}
+
+	// is jet back to back with lepton? 
+	// how many high energy jets do we have?
+	if ( jet_veto == 1 && matched_jet ) return true;
+	else return false;
+}

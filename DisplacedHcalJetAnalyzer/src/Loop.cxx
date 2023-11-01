@@ -23,8 +23,7 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 
 	// check HLT results for these triggers
 	int passedHLT = 0;
-	// for (int i = 0; i < HLT_Indices.size(); i++) { // TEMPORARY for setting up HLT efficiency work
-	for (int i = 0; i < 12; i++) {					  // TEMPORARY for setting up HLT efficiency work
+	for (int i = 0; i < HLT_Indices.size(); i++) {
 		if (HLT_Decision->at(i) > 0) {
 			if (debug) cout << HLT_Decision->at(i) << " for the trigger " << HLT_Names[i] << "\n" << endl;
 			passedHLT += 1;
@@ -42,6 +41,9 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 
 	// fill output trees in minituples
 	FillOutputTrees("NoSel");
+	if (W_jets_event(n_jet, n_ele, n_muon)) {
+		FillOutputTrees("W_plus_Jets");
+	}
 
 	return;
 
