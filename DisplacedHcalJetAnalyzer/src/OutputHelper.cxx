@@ -11,7 +11,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 
 	cout<<"Declaring Output Trees..."<<endl;	
 
-	treenames = { "NoSel", "W_plus_Jets" }; 
+	treenames = { "NoSel", "WPlusJets" }; 
 
 	vector<string> myvars_bool = {
 		//"",

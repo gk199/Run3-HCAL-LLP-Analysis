@@ -41,9 +41,7 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 
 	// fill output trees in minituples
 	FillOutputTrees("NoSel");
-	if (W_jets_event(n_jet, n_ele, n_muon)) {
-		FillOutputTrees("W_plus_Jets");
-	}
+	if (PassWPlusJetsSelection()) FillOutputTrees("WPlusJets");
 
 	return;
 
