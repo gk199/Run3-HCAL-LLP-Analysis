@@ -106,6 +106,7 @@ public :
    UInt_t          lumiNum;
    ULong64_t       eventNum;
    UInt_t          eventTime;
+   Float_t         fixedGridRhoFastjetAll;
    Int_t           n_PV;
    Float_t         PV_X;
    Float_t         PV_Y;
@@ -135,9 +136,14 @@ public :
    vector<float>   *ele_dZ;
    vector<float>   *ele_dEta;
    vector<float>   *ele_dPhi;
+   vector<float>   *ele_EtaSC;
    vector<bool>    *ele_passCutBasedIDLoose;
    vector<bool>    *ele_passCutBasedIDMedium;
    vector<bool>    *ele_passCutBasedIDTight;
+	vector<float>   *ele_pileupIso;
+	vector<float>   *ele_chargedIso;
+	vector<float>   *ele_photonIso;
+	vector<float>   *ele_neutralHadIso;
    vector<vector<unsigned int> > *ele_EcalRechitIDs;
    vector<vector<unsigned int> > *ele_EcalRechitIndices;
    vector<unsigned int> *ele_SeedRechitID;
@@ -153,6 +159,11 @@ public :
    vector<bool>    *muon_IsLoose;
    vector<bool>    *muon_IsMedium;
    vector<bool>    *muon_IsTight;
+   vector<float>   *muon_pileupIso;
+	vector<float>   *muon_chargedIso;
+	vector<float>   *muon_photonIso;
+	vector<float>   *muon_neutralHadIso;
+	vector<float>   *muon_ip3dSignificance;
    Int_t           n_tau;
    vector<float>   *tau_E;
    vector<float>   *tau_Pt;
@@ -400,6 +411,7 @@ public :
    TBranch        *b_lumiNum;   //!
    TBranch        *b_eventNum;   //!
    TBranch        *b_eventTime;   //!
+   TBranch        *b_fixedGridRhoFastjetAll;
    TBranch        *b_n_PV;   //!
    TBranch        *b_PV_X;   //!
    TBranch        *b_PV_Y;   //!
@@ -429,9 +441,14 @@ public :
    TBranch        *b_ele_dZ;   //!
    TBranch        *b_ele_dEta;   //!
    TBranch        *b_ele_dPhi;   //!
+   TBranch        *b_ele_EtaSC;   //!
    TBranch        *b_ele_passCutBasedIDLoose;   //!
    TBranch        *b_ele_passCutBasedIDMedium;   //!
    TBranch        *b_ele_passCutBasedIDTight;   //!
+   TBranch        *b_ele_pileupIso;   //!
+   TBranch        *b_ele_chargedIso;   //!
+   TBranch        *b_ele_photonIso;   //!
+   TBranch        *b_ele_neutralHadIso;   //!
    TBranch        *b_ele_EcalRechitIDs;   //!
    TBranch        *b_ele_EcalRechitIndices;   //!
    TBranch        *b_ele_SeedRechitID;   //!
@@ -447,6 +464,11 @@ public :
    TBranch        *b_muon_IsLoose;   //!
    TBranch        *b_muon_IsMedium;   //!
    TBranch        *b_muon_IsTight;   //!
+   TBranch        *b_muon_pileupIso;
+   TBranch        *b_muon_chargedIso;
+   TBranch        *b_muon_photonIso;
+   TBranch        *b_muon_neutralHadIso;
+	TBranch        *b_muon_ip3dSignificance;
    TBranch        *b_n_tau;   //!
    TBranch        *b_tau_E;   //!
    TBranch        *b_tau_Pt;   //!
@@ -715,6 +737,9 @@ public :
    virtual vector<pair<float,int>> Get3RechitE_Jet( int idx_jet, float deltaR_cut );
    virtual vector<float> GetEtaPhiSpread_Jet( int idx_jet, float deltaR_cut );
    virtual vector<float> GetTDCavg_Jet( int idx_jet, float deltaR_cut );
+   virtual bool IsMuonIsolatedTight( int muon_index ); 
+   virtual float GetElectronEffectiveAreaMean( int ele_index );
+   virtual bool IsElectronIsolatedTight( int ele_index );
    // TruthInfoHelper.cxx
    virtual void   SetLLPVariables();
    virtual bool   isRechitValid(float RechitEnergy, int RechitDepth);
@@ -814,9 +839,14 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    ele_dZ = 0;
    ele_dEta = 0;
    ele_dPhi = 0;
+   ele_EtaSC = 0;
    ele_passCutBasedIDLoose = 0;
    ele_passCutBasedIDMedium = 0;
    ele_passCutBasedIDTight = 0;
+   ele_pileupIso = 0;
+   ele_chargedIso = 0;
+   ele_photonIso = 0;
+   ele_neutralHadIso = 0;
    ele_EcalRechitIDs = 0;
    ele_EcalRechitIndices = 0;
    ele_SeedRechitID = 0;
@@ -831,6 +861,11 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    muon_IsLoose = 0;
    muon_IsMedium = 0;
    muon_IsTight = 0;
+   muon_pileupIso = 0;
+   muon_chargedIso = 0;
+   muon_photonIso = 0;
+   muon_neutralHadIso = 0;
+   muon_ip3dSignificance = 0;
    tau_E = 0;
    tau_Pt = 0;
    tau_Eta = 0;
@@ -1067,6 +1102,7 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("lumiNum", &lumiNum, &b_lumiNum);
    fChain->SetBranchAddress("eventNum", &eventNum, &b_eventNum);
    fChain->SetBranchAddress("eventTime", &eventTime, &b_eventTime);
+   fChain->SetBranchAddress("fixedGridRhoFastjetAll", &fixedGridRhoFastjetAll, &b_fixedGridRhoFastjetAll);
    fChain->SetBranchAddress("n_PV", &n_PV, &b_n_PV);
    fChain->SetBranchAddress("PV_X", &PV_X, &b_PV_X);
    fChain->SetBranchAddress("PV_Y", &PV_Y, &b_PV_Y);
@@ -1097,9 +1133,14 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("ele_dZ", &ele_dZ, &b_ele_dZ);
    fChain->SetBranchAddress("ele_dEta", &ele_dEta, &b_ele_dEta);
    fChain->SetBranchAddress("ele_dPhi", &ele_dPhi, &b_ele_dPhi);
+   fChain->SetBranchAddress("ele_EtaSC", &ele_EtaSC, &b_ele_EtaSC);
    fChain->SetBranchAddress("ele_passCutBasedIDLoose", &ele_passCutBasedIDLoose, &b_ele_passCutBasedIDLoose);
    fChain->SetBranchAddress("ele_passCutBasedIDMedium", &ele_passCutBasedIDMedium, &b_ele_passCutBasedIDMedium);
    fChain->SetBranchAddress("ele_passCutBasedIDTight", &ele_passCutBasedIDTight, &b_ele_passCutBasedIDTight);
+   fChain->SetBranchAddress("ele_pileupIso", &ele_pileupIso, &b_ele_pileupIso);
+   fChain->SetBranchAddress("ele_chargedIso", &ele_chargedIso, &b_ele_chargedIso);
+   fChain->SetBranchAddress("ele_photonIso", &ele_photonIso, &b_ele_photonIso);
+   fChain->SetBranchAddress("ele_neutralHadIso", &ele_neutralHadIso, &b_ele_neutralHadIso);
    fChain->SetBranchAddress("ele_EcalRechitIDs", &ele_EcalRechitIDs, &b_ele_EcalRechitIDs);
    fChain->SetBranchAddress("ele_EcalRechitIndices", &ele_EcalRechitIndices, &b_ele_EcalRechitIndices);
    fChain->SetBranchAddress("ele_SeedRechitID", &ele_SeedRechitID, &b_ele_SeedRechitID);
@@ -1115,6 +1156,11 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("muon_IsLoose", &muon_IsLoose, &b_muon_IsLoose);
    fChain->SetBranchAddress("muon_IsMedium", &muon_IsMedium, &b_muon_IsMedium);
    fChain->SetBranchAddress("muon_IsTight", &muon_IsTight, &b_muon_IsTight);
+   fChain->SetBranchAddress("muon_pileupIso", &muon_pileupIso, &b_muon_pileupIso);
+   fChain->SetBranchAddress("muon_chargedIso", &muon_chargedIso, &b_muon_chargedIso);
+   fChain->SetBranchAddress("muon_photonIso", &muon_photonIso, &b_muon_photonIso);
+   fChain->SetBranchAddress("muon_neutralHadIso", &muon_neutralHadIso, &b_muon_neutralHadIso);   
+   fChain->SetBranchAddress("muon_ip3dSignificance", &muon_ip3dSignificance, &b_muon_ip3dSignificance);   
    fChain->SetBranchAddress("n_tau", &n_tau, &b_n_tau);
    fChain->SetBranchAddress("tau_E", &tau_E, &b_tau_E);
    fChain->SetBranchAddress("tau_Pt", &tau_Pt, &b_tau_Pt);

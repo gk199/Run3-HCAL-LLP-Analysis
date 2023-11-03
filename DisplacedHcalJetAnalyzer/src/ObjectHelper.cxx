@@ -279,3 +279,64 @@ vector<float> DisplacedHcalJetAnalyzer::GetTDCavg_Jet(int idx_jet, float deltaR_
 
 	return TDC_TDCenergy;
 }
+
+/* ====================================================================================================================== */
+bool DisplacedHcalJetAnalyzer::IsMuonIsolatedTight(int muon_index) {
+	// given a muon, determine if it is isolated (tight)
+	// https://github.com/cms-lpc-llp/llp_analyzer/blob/master/src/RazorAnalyzer.cc#L2336C32-L2336C32 and https://cds.cern.ch/record/2815162/files/SMP-21-005-pas.pdf 
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::IsMuonIsolatedTight()"<<endl;
+
+	if ( ( (muon_chargedIso->at(muon_index) + fmax(0.0,  muon_photonIso->at(muon_index) + muon_neutralHadIso->at(muon_index) - 0.5*muon_pileupIso->at(muon_index))) / muon_Pt->at(muon_index) < 0.15) ) return true;
+	else return false;
+}
+
+/* ====================================================================================================================== */
+float DisplacedHcalJetAnalyzer::GetElectronEffectiveAreaMean(int i) {
+	// given an electron, return the effective area for the isolation calculation
+	// from https://github.com/cms-lpc-llp/llp_analyzer/blob/master/src/RazorAnalyzer.cc#L1885-L1905
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetElectronEffectiveAreaMean()"<<endl;
+
+    float effArea = 0.0;
+	float eta = ele_EtaSC->at(i);
+    //Effective areas below are for the sum of Neutral Hadrons + Photons
+    if (fabs(eta) < 1.0) {
+        effArea = 0.1440;
+    } else if (fabs(eta) < 1.479) {
+        effArea = 0.1562;
+    } else if (fabs(eta) < 2.0) {
+        effArea = 0.1032;
+    } else if (fabs(eta) < 2.2) {
+        effArea = 0.0859;
+    } else if (fabs(eta) < 2.3) {
+		effArea = 0.1116;
+    } else if (fabs(eta) < 2.4) {
+        effArea = 0.1321;
+    } else if (fabs(eta) < 2.5) {
+        effArea = 0.1654;
+    }
+    return effArea;
+}
+
+/* ====================================================================================================================== */
+bool DisplacedHcalJetAnalyzer::IsElectronIsolatedTight(int ele_index) {
+	// given an electron, determine if iit is isolated (tight)
+	// https://github.com/cms-lpc-llp/llp_analyzer/blob/master/src/RazorAnalyzer.cc#L1885-L1905 and https://cds.cern.ch/record/2815162/files/SMP-21-005-pas.pdf 
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::IsElectronIsolatedTight()"<<endl;
+
+	float combined_iso = (ele_chargedIso->at(ele_index) + fmax(0.0,  ele_photonIso->at(ele_index) + ele_neutralHadIso->at(ele_index) - GetElectronEffectiveAreaMean(ele_index)*fixedGridRhoFastjetAll)) / ele_Pt->at(ele_index);
+	bool pass = false;
+
+	if (fabs(ele_EtaSC->at(ele_index)) < 1.479) {
+    	if ( combined_iso < 0.0695) {
+            pass = true;
+        }
+    } else {
+        if ( combined_iso < 0.0821) {
+            pass = true;
+        }
+    }
+    return pass;
+}
