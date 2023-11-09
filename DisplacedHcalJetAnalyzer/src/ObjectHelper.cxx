@@ -340,3 +340,23 @@ bool DisplacedHcalJetAnalyzer::IsElectronIsolatedTight(int ele_index) {
     }
     return pass;
 }
+
+/* ====================================================================================================================== */
+float DisplacedHcalJetAnalyzer::TransverseLeptonMass(float pT, float phi) {
+	// given a lepton, find the transverse mass
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::transverseLeptonMass()"<<endl;
+
+	float transverseM = sqrt( 2 * pT * met_Pt * (1 - cos( phi - met_Phi ) ) ); 
+	return transverseM;
+}
+
+/* ====================================================================================================================== */
+float DisplacedHcalJetAnalyzer::PhiVectorSum(float pT, float phi) {
+	// given a lepton, find the phi vector sum of it and the event MET
+
+	float x_vector = pT * cos(phi) + met_Pt * cos(met_Phi);
+	float y_vector = pT * sin(phi) + met_Pt * sin(met_Phi);
+	float phiVectorSum = atan2(y_vector, x_vector);
+	return phiVectorSum;
+}

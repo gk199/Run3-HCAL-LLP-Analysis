@@ -740,6 +740,8 @@ public :
    virtual bool IsMuonIsolatedTight( int muon_index ); 
    virtual float GetElectronEffectiveAreaMean( int ele_index );
    virtual bool IsElectronIsolatedTight( int ele_index );
+   virtual float TransverseLeptonMass( float pT, float phi );
+   virtual float PhiVectorSum( float pT, float phi );
    // TruthInfoHelper.cxx
    virtual void   SetLLPVariables();
    virtual bool   isRechitValid(float RechitEnergy, int RechitDepth);
@@ -756,6 +758,7 @@ public :
    virtual float  GetEventRuntime( clock_t clock_start, Long64_t init_entry, Long64_t current_entry );
    virtual void   ResetGlobalEventVars();
    virtual bool   PassWPlusJetsSelection();
+   virtual float  EventHT();
    // OutputHelper.cxx
    virtual void   DeclareOutputTrees();
    virtual void   ResetOutputBranches( string treename );
