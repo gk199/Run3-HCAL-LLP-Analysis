@@ -46,6 +46,10 @@ PlotParams P_jet0_PhiSpread				= {"jet0_PhiSpread", "Leading Jet #phi Spread", "
 PlotParams P_jet0_PhiSpread_energy		= {"jet0_PhiSpread_energy", "Leading Jet #phi Spread Energy", "#phi Spread (energy weighted)", 0, 0.2 };
 PlotParams P_jet0_EtaPhiQuadSpread		= {"jet0_EtaPhiQuadSpread", "Leading Jet #sqrt{#Delta#eta^{2} + #Delta#phi^{2}} Spread", "#sqrt{#Delta#eta^{2} + #Delta#phi^{2}} Spread", 0, 0.4 };
 PlotParams P_jet0_EtaPhiQuadSpread_energy={"jet0_EtaPhiQuadSpread_energy", "Leading Jet #sqrt{#Delta#eta^{2} + #Delta#phi^{2}} Spread Energy", "#sqrt{#Delta#eta^{2} + #Delta#phi^{2}} Spread (energy weighted)", 0, 0.2 };
+
+PlotParams P_jet0_Smajor 				={"(jet0_S_etaeta * jet0_S_phiphi + sqrt( (jet0_S_etaeta - jet0_S_phiphi)*(jet0_S_etaeta - jet0_S_phiphi) + 4*jet0_S_etaphi )) / 2", "Leading Jet S major", "S major", 0, 0.3 };
+PlotParams P_jet0_Sminor 				={"(jet0_S_etaeta * jet0_S_phiphi - sqrt( (jet0_S_etaeta - jet0_S_phiphi)*(jet0_S_etaeta - jet0_S_phiphi) + 4*jet0_S_etaphi )) / 2", "Leading Jet S minor", "S minor", -0.3, 0 };
+PlotParams P_jet0_SminorSmajor			={"((jet0_S_etaeta * jet0_S_phiphi + sqrt( (jet0_S_etaeta - jet0_S_phiphi)*(jet0_S_etaeta - jet0_S_phiphi) + 4*jet0_S_etaphi )) / 2) * ((jet0_S_etaeta * jet0_S_phiphi - sqrt( (jet0_S_etaeta - jet0_S_phiphi)*(jet0_S_etaeta - jet0_S_phiphi) + 4*jet0_S_etaphi )) / 2)", "Leading Jet S minor * S major", "S minor * S major", -0.3, 0 };
 // tracks
 PlotParams P_jet0_Track0PtFrac			= {"jet0_Track0Pt / jet0_Pt", "Leading Jet: Leading Track p_{T} / Jet p_{T}", "Track Energy Fraction", 0, 1 };
 PlotParams P_jet0_Track0Pt				= {"jet0_Track0Pt", "Leading Jet: Leading Track p_{T}", "p_{T} [GeV]", 0, 15 };

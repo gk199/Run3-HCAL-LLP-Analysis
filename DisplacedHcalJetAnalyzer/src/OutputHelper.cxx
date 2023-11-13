@@ -94,6 +94,9 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("jet%d_PhiSpread_energy", i) );
 		myvars_float.push_back( Form("jet%d_EtaPhiQuadSpread", i) );
 		myvars_float.push_back( Form("jet%d_EtaPhiQuadSpread_energy", i) );
+		myvars_float.push_back( Form("jet%d_S_etaeta", i) );
+		myvars_float.push_back( Form("jet%d_S_phiphi", i) );
+		myvars_float.push_back( Form("jet%d_S_etaphi", i) );
 		myvars_float.push_back( Form("jet%d_TDCavg", i) );
 		myvars_float.push_back( Form("jet%d_TDCavg_energyWeight", i) );
 		myvars_float.push_back( Form("jet%d_TDCnDelayed", i) );
@@ -319,7 +322,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 
 		vector<float> rechitJet = GetMatchedHcalRechits_Jet(i, 0.4);
 		vector<float> energy = GetEnergyProfile_Jet(i, 0.4);
-		vector<float> spread_Eta_Phi = GetEtaPhiSpread_Jet(i, 0.4); // eta, phi (average); eta, phi (energy weighted)
+		vector<float> spread_Eta_Phi = GetEtaPhiSpread_Jet(i, 0.4); // eta, phi (average); eta, phi (energy weighted); S_ee, S_pp, S_ep
 		vector<pair<float,int>> energeticRechits = Get3RechitE_Jet(i, 0.4); // three highest rechit energies in the , and total energy
 		vector<float> TDC_TDCenergy = GetTDCavg_Jet(i, 0.4); // TDC average, energy weighted TDC
 
@@ -338,6 +341,9 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("jet%d_PhiSpread_energy", i)] 			= spread_Eta_Phi[3];
 		tree_output_vars_float[Form("jet%d_EtaPhiQuadSpread", i)] 			= sqrt(spread_Eta_Phi[0] * spread_Eta_Phi[0] + spread_Eta_Phi[1] * spread_Eta_Phi[1]);
 		tree_output_vars_float[Form("jet%d_EtaPhiQuadSpread_energy", i)] 	= sqrt(spread_Eta_Phi[2] * spread_Eta_Phi[2] + spread_Eta_Phi[3] * spread_Eta_Phi[3]);
+		tree_output_vars_float[Form("jet%d_S_etaeta", i)]					= spread_Eta_Phi[4];
+		tree_output_vars_float[Form("jet%d_S_phiphi", i)]					= spread_Eta_Phi[5];
+		tree_output_vars_float[Form("jet%d_S_etaphi", i)]					= spread_Eta_Phi[6];
 
 		tree_output_vars_float[Form("jet%d_TDCavg", i)] = TDC_TDCenergy[0];
 		tree_output_vars_float[Form("jet%d_TDCavg_energyWeight", i)] = TDC_TDCenergy[1];

@@ -205,6 +205,7 @@ vector<pair<float,int>> DisplacedHcalJetAnalyzer::Get3RechitE_Jet(int idx_jet, f
 /* ====================================================================================================================== */
 vector<float> DisplacedHcalJetAnalyzer::GetEtaPhiSpread_Jet(int idx_jet, float deltaR_cut) { 
 	// given a jet, find the normalized energy profile from associated HB rechits 
+	// returns eta, phi spread (not energy weighted), eta, phi spread (energy weighted), S_eta eta, S_phi phi, S_eta phi
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetEtaPhiSpread_Jet()"<<endl;
 
@@ -214,6 +215,7 @@ vector<float> DisplacedHcalJetAnalyzer::GetEtaPhiSpread_Jet(int idx_jet, float d
 	vector<float> matchedRechit = GetMatchedHcalRechits_Jet(idx_jet, deltaR_cut);
 
 	float spread_Eta = 0, spread_Phi = 0, spread_Eta_E = 0, spread_Phi_E = 0, totalE = 0;
+	float S_ee = 0, S_pp = 0, S_ep = 0;
 	for (int i = 0; i < matchedRechit.size(); i++) {
 		float delta_Eta = hbheRechit_Eta->at(matchedRechit[i]) - jet_Eta->at(idx_jet);
 		float delta_Phi = deltaPhi(hbheRechit_Phi->at(matchedRechit[i]), jet_Phi->at(idx_jet));
@@ -223,13 +225,22 @@ vector<float> DisplacedHcalJetAnalyzer::GetEtaPhiSpread_Jet(int idx_jet, float d
 		spread_Eta_E 	+= pow(delta_Eta * hbheRechit_E->at(matchedRechit[i]),2);
 		spread_Phi_E 	+= pow(delta_Phi * hbheRechit_E->at(matchedRechit[i]),2);
 		totalE 			+= hbheRechit_E->at(matchedRechit[i]);
+
+		// second moment calculation
+		S_ee 		+= delta_Eta * delta_Eta * hbheRechit_E->at(matchedRechit[i]);
+		S_pp 		+= delta_Phi * delta_Phi * hbheRechit_E->at(matchedRechit[i]);
+		S_ep 		+= abs(delta_Eta) * abs(delta_Phi) * hbheRechit_E->at(matchedRechit[i]);
 	}
 	spread_Eta = spread_Eta / matchedRechit.size();
 	spread_Phi = spread_Phi / matchedRechit.size();
 	spread_Eta_E = sqrt(spread_Eta_E) / totalE;
 	spread_Phi_E = sqrt(spread_Phi_E) / totalE;
 
-	vector<float> spread_Eta_Phi = {spread_Eta, spread_Phi, spread_Eta_E, spread_Phi_E};
+	S_ee = S_ee / totalE;
+	S_pp = S_pp / totalE;
+	S_ep = S_ep / totalE;
+
+	vector<float> spread_Eta_Phi = {spread_Eta, spread_Phi, spread_Eta_E, spread_Phi_E, S_ee, S_pp, S_ep};
 
 	return spread_Eta_Phi;
 }
