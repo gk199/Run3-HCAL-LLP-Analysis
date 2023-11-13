@@ -88,4 +88,13 @@ And CERN EOS phy_exotica space:
 /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v2.0/minituple_v2.0_MCsignalLLP_500k_2023_10_18.root
 ```
 
-### v2.1
+## V3
+Updates:
+* New tree filled with W+jets flagged events
+* W+jets selection implemented in EventHelper, with tight lepton isolation selection, in ObjectHelper
+* Compute event HT in the minituples
+
+### v3.0
+```
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.0/minituple_v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_09.root
+```

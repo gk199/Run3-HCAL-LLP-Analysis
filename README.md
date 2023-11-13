@@ -60,7 +60,7 @@ File contents are saved in `Ntuple_content.txt`, `edmDumpEventContent_LLPskim.tx
 ## Analyzer Setttings
 In `DisplacedHcalJetAnalyzer/DisplacedHcalJetAnalyzer/DisplacedHcalJetAnalyzer.h` can set the variables: `debug, print_counts, save_hists, save_trees, blind_data`. Setting `AnalysisReader.debug = true` in `DisplacedHcalJetAnalyzer.C` is very helpful for debugging. 
 
-In `HistHelper.cxx` set what histograms are filled (plotted with the outdated Kinematic plotters), and categories are selected. Requirements for when each category is filled are listed in `Loop.cxx`.
+In `HistHelper.cxx` set what histograms are filled (plotted with the outdated Kinematic plotters), and categories are selected. Requirements for when each category is filled are listed in `Loop.cxx`. NOTE: for running over v2 ntuples for LLP MC, the variables for lepton isolation are not avaliable. Thus, a workaround is to comment out the W+Jets tree (`if (PassWPlusJetsSelection()) FillOutputTrees("WPlusJets");`) such that only the NoSel tree is filled. Careful to submit only Condor jobs for the correct configuration though! 
 
 `OutputHelper.cxx` is the main file to edit, where output trees are booked and filled. 
 
