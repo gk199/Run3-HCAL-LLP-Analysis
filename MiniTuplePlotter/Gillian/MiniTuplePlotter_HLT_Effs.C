@@ -1,6 +1,8 @@
 #include "../MiniTuplePlotter.h"
 #include "TString.h"
 
+// Goals of this study: use the LLP MC sample, understand efficiency of each HLT passed, as a function of various kinematic (jet) variables
+// Mostly worked on during September.
 // -------------------------------------------------------------------------------------------------
 void MiniTuplePlotter_HLT_Effs(){
 

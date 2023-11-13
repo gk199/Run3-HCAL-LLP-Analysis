@@ -1,6 +1,8 @@
 #include "../MiniTuplePlotter.h"
 #include "TString.h"
 
+// Goals of this study: familiarize with framework, set up studies, and overlay energy fractions in each HCAL depth. In later studies, most selections / cuts are done using "RegionCuts.h"
+// Mostly worked on during August.
 // -------------------------------------------------------------------------------------------------
 void MiniTuplePlotter_Jet_EnergyFrac(){
 
