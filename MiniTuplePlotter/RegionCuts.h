@@ -1,3 +1,6 @@
+TString OR		   	= " || ";
+TString AND 		= " && ";
+
 // Setup cuts on HLT paths passed
 TCut Cut_None			= "";
 // TCut Cut_HLTpassed1 	= "HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5 == 1";
@@ -17,6 +20,11 @@ TCut Cut_HLTpassed14 	= "HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay2nsInc
 TCut Cut_HLTpassed15 	= "HLT_L1SingleLLPJet == 1"; // monitoring trigger // not in v1 ntuples yet
 
 TCut Cut_AnyLLP_HLT     = "HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT240_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT280_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT170_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT270_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet60_DisplacedTrack == 1 || HLT_HT320_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 || HLT_HT420_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay0p5nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay1nsInclusive == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay1nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay2nsInclusive == 1";
+
+TCut Cut_HLT_dijet_1promptTrack         = Cut_HLTpassed4 || Cut_HLTpassed3 || Cut_HLTpassed2;                            // displaced dijet with at most 1 associated prompt track
+TCut Cut_HLT_dijet_1displacedTrack      = Cut_HLTpassed5 || Cut_HLTpassed6 || Cut_HLTpassed7 || Cut_HLTpassed8;          // displaced dijet, one displaced track
+TCut Cut_HLT_dijet_2promptTrack         = Cut_HLTpassed9 || Cut_HLTpassed10;                                             // displaced dijet, allow for 2 prompt tracks (higher jet and HT energies)
+TCut Cut_HLT_delayedjet_ECALtiming      = Cut_HLTpassed11 || Cut_HLTpassed12 || Cut_HLTpassed13 || Cut_HLTpassed14;      // delayed jet, ECAL timing
 
 // Setup cuts on jet matching results
 TCut Cut_Jet0_isTruthMatched	= "jet0_isTruthMatched == 1";
@@ -71,9 +79,6 @@ TString Jet0_LLP0 		= Form("jet0_isMatchedTo == 0");
 TString Jet0_LLP1 		= Form("jet0_isMatchedTo == 1");
 TString Jet1_LLP0 		= Form("jet1_isMatchedTo == 0");
 TString Jet1_LLP1 		= Form("jet1_isMatchedTo == 1");
-
-TString OR		   	= " || ";
-TString AND 		= " && ";
 
 TCut Cut_LLPinHCAL 	= (LLP0inHCAL + OR + LLP1inHCAL).Data();
 TCut Cut_LLP0inHCAL = LLP0inHCAL.Data();

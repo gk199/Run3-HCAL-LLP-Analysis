@@ -47,9 +47,17 @@ PlotParams P_jet0_PhiSpread_energy		= {"jet0_PhiSpread_energy", "Leading Jet #ph
 PlotParams P_jet0_EtaPhiQuadSpread		= {"jet0_EtaPhiQuadSpread", "Leading Jet #sqrt{#Delta#eta^{2} + #Delta#phi^{2}} Spread", "#sqrt{#Delta#eta^{2} + #Delta#phi^{2}} Spread", 0, 0.4 };
 PlotParams P_jet0_EtaPhiQuadSpread_energy={"jet0_EtaPhiQuadSpread_energy", "Leading Jet #sqrt{#Delta#eta^{2} + #Delta#phi^{2}} Spread Energy", "#sqrt{#Delta#eta^{2} + #Delta#phi^{2}} Spread (energy weighted)", 0, 0.2 };
 
+PlotParams P_jet0_Setaeta 				={"jet0_S_etaeta", "Leading Jet S #eta#eta", "S #eta#eta", 0, 0.15 };
+PlotParams P_jet0_Sphiphi 				={"jet0_S_phiphi", "Leading Jet S #phi#phi", "S #phi#phi", 0, 0.15 };
+PlotParams P_jet0_Setaphi 				={"jet0_S_etaphi", "Leading Jet S #eta#phi", "S #eta#phi", 0, 0.15 };
 PlotParams P_jet0_Smajor 				={"(jet0_S_etaeta * jet0_S_phiphi + sqrt( (jet0_S_etaeta - jet0_S_phiphi)*(jet0_S_etaeta - jet0_S_phiphi) + 4*jet0_S_etaphi )) / 2", "Leading Jet S major", "S major", 0, 0.3 };
-PlotParams P_jet0_Sminor 				={"(jet0_S_etaeta * jet0_S_phiphi - sqrt( (jet0_S_etaeta - jet0_S_phiphi)*(jet0_S_etaeta - jet0_S_phiphi) + 4*jet0_S_etaphi )) / 2", "Leading Jet S minor", "S minor", -0.3, 0 };
-PlotParams P_jet0_SminorSmajor			={"((jet0_S_etaeta * jet0_S_phiphi + sqrt( (jet0_S_etaeta - jet0_S_phiphi)*(jet0_S_etaeta - jet0_S_phiphi) + 4*jet0_S_etaphi )) / 2) * ((jet0_S_etaeta * jet0_S_phiphi - sqrt( (jet0_S_etaeta - jet0_S_phiphi)*(jet0_S_etaeta - jet0_S_phiphi) + 4*jet0_S_etaphi )) / 2)", "Leading Jet S minor * S major", "S minor * S major", -0.3, 0 };
+PlotParams P_jet0_Sminor 				={"-1 * (jet0_S_etaeta * jet0_S_phiphi - sqrt( (jet0_S_etaeta - jet0_S_phiphi)*(jet0_S_etaeta - jet0_S_phiphi) + 4*jet0_S_etaphi )) / 2", "Leading Jet S minor", "abs(S minor)", 0, 0.3 };
+PlotParams P_jet0_SminorSmajor			={"-1 * ((jet0_S_etaeta * jet0_S_phiphi + sqrt( (jet0_S_etaeta - jet0_S_phiphi)*(jet0_S_etaeta - jet0_S_phiphi) + 4*jet0_S_etaphi )) / 2) * ((jet0_S_etaeta * jet0_S_phiphi - sqrt( (jet0_S_etaeta - jet0_S_phiphi)*(jet0_S_etaeta - jet0_S_phiphi) + 4*jet0_S_etaphi )) / 2)", "Leading Jet S minor * S major", "S minor * S major", 0, 0.15 };
+// timing 
+PlotParams P_jet0_TDCaverage 			={"jet0_TDCavg", "Leading Jet Average TDC (2 bits)", "Average TDC", -0.5, 2.5 };
+PlotParams P_jet0_TDCaverage_Eweight	={"jet0_TDCavg_energyWeight", "Leading Jet Average TDC, energy weighted (2 bits)", "Average TDC (energy weighted)", -0.5, 2.5 };
+PlotParams P_jet0_TDCnDelayed			={"jet0_TDCnDelayed", "Leading Jet Number of Delayed HCAL Cells", "Number of Delayed Cells", 0, 15 };
+
 // tracks
 PlotParams P_jet0_Track0PtFrac			= {"jet0_Track0Pt / jet0_Pt", "Leading Jet: Leading Track p_{T} / Jet p_{T}", "Track Energy Fraction", 0, 1 };
 PlotParams P_jet0_Track0Pt				= {"jet0_Track0Pt", "Leading Jet: Leading Track p_{T}", "p_{T} [GeV]", 0, 15 };

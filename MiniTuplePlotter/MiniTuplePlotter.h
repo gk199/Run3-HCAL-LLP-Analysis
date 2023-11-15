@@ -723,6 +723,7 @@ public :
 			h->SetLineStyle( linestyle[i] );
 			h->SetLineWidth(4);
 			h->SetFillColor(0);
+			//h->SetFillColor( colors[i] ); // for the bar histograms, this sets color of each bar. Also needed for error bar filling. 0 is white
 
 			if( run_fit ) 
 				h->SetName( Form("#splitline{%s}{%s}", legend_name.c_str(), fit_info_str.c_str() ) );	
@@ -811,6 +812,8 @@ public :
 			THStack* hs = GetStackHist( hists, PlotParams_temp );
 			myCanvas->cd(1);
 			hs->Draw("nostack"); 
+			//hs->Draw(); // stacked histograms, with points for each (not bar)
+			//hs->Draw("bar"); // stacked histograms, with bars for each. Use with "h->SetFillColor( colors[i] )"
 
 			gPad->BuildLegend(legx1,legy1,legx2, legy2,"");
 
@@ -843,6 +846,12 @@ public :
 			}
 
 			TString output_file_name = GetOutputFileName(PlotParams_temp, plot_type);
+			// handle long Smajor Sminor filenames! 
+			if (output_file_name == "Plotratio_-1 MULT jet0_S_etaeta MULT jet0_S_phiphi + sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2 MULT jet0_S_etaeta MULT jet0_S_phiphi - sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2_norm_log_Rcdf_Overlay_v3.0") output_file_name = "Plotratio_jet0_Smajor_Sminor_norm_log_Rcdf_Overlay_v3.0";
+			if (output_file_name == "Plotratio_-1 MULT jet0_S_etaeta MULT jet0_S_phiphi + sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2 MULT jet0_S_etaeta MULT jet0_S_phiphi - sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2_norm_log_cdf_Overlay_v3.0") output_file_name = "Plotratio_jet0_Smajor_Sminor_norm_log_cdf_Overlay_v3.0";
+			if (output_file_name == "Plotratio_-1 MULT jet0_S_etaeta MULT jet0_S_phiphi + sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2 MULT jet0_S_etaeta MULT jet0_S_phiphi - sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2_norm_log_Overlay_v3.0") output_file_name = "Plotratio_jet0_Smajor_Sminor_norm_log_Overlay_v3.0";
+			if (output_file_name == "Plotratio_-1 MULT jet0_S_etaeta MULT jet0_S_phiphi + sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2 MULT jet0_S_etaeta MULT jet0_S_phiphi - sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2_norm_log_JetpTBins_Jet40_v3.0_MC") output_file_name = "Plotratio_jet0_Smajor_Sminor_norm_log_JetpTBins_Jet40_v3.0_MC";
+			if (output_file_name == "Plotratio_-1 MULT jet0_S_etaeta MULT jet0_S_phiphi + sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2 MULT jet0_S_etaeta MULT jet0_S_phiphi - sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2_norm_log_JetpTBins_Jet40_v3.0") output_file_name = "Plotratio_jet0_Smajor_Sminor_norm_log_JetpTBins_Jet40_v3.0";
 			//fout->cd();
 			//myCanvas->Write();
 			myCanvas->SaveAs( output_directory+"/"+output_file_name+".png", "png" );
@@ -863,6 +872,8 @@ public :
 		myCanvas->SetLeftMargin(0.14);
 		myCanvas->SetTopMargin(0.12);
 		myCanvas->SetBottomMargin(0.12);
+
+		gStyle->SetPalette(kCool);
 
 		if( plot_log ) 
 			gPad->SetLogz();

@@ -2,7 +2,7 @@
 #include "TString.h"
 
 // Goals of this study: use the LLP MC sample, split into different regions to understand how variables change by region. Also started overlaying LLP skim data variables.
-// Mostly worked on during October.
+// Mostly worked on during October - November 2023.
 // -------------------------------------------------------------------------------------------------
 void MiniTuplePlotter_CR_SR(){
 
@@ -50,18 +50,20 @@ void MiniTuplePlotter_CR_SR(){
 	vector<PlotParams> analysisVars	= {P_jet0_NeutralHadEFrac, P_jet0_LogNeutralOverChargedHad, P_jet0_Track0PtFrac,
 										P_jet0_EtaPhiQuadSpread_energy, P_jet0_EtaPhiQuadSpread, P_jet0_LeadingRechitEFracJet, 
 										P_jet0_EnergyFrac_Depth1, P_jet0_EnergyFrac_Depth2, P_jet0_EnergyFrac_Depth3, P_jet0_EnergyFrac_Depth4,
-										P_jet0_Smajor, P_jet0_Sminor, P_jet0_SminorSmajor}; 																// only in newest v3.0 minituples
-										// P_jet0_EtaSpread, P_jet0_PhiSpread, P_jet0_EtaSpread_energy, P_jet0_PhiSpread_energy};
+										P_jet0_Smajor, P_jet0_Sminor, P_jet0_SminorSmajor, P_jet0_Setaeta, P_jet0_Sphiphi, P_jet0_Setaphi,	 				// only in newest v3.0 minituples
+										P_jet0_EtaSpread, P_jet0_PhiSpread, P_jet0_EtaSpread_energy, P_jet0_PhiSpread_energy,
+										//P_jet0_TDCaverage, P_jet0_TDCaverage_Eweight, P_jet0_TDCnDelayed, 
+										P_jet0_Track0dR};
 	
 	MC_allPlots.insert(MC_allPlots.begin(), allPlots.begin(), allPlots.end());
 
 	#include "../RegionCuts.h"
 
-	bool LLP_WJets = false;				// analysis variables for LLP and W+Jets overlayed
+	bool LLP_WJets = true;				// analysis variables for LLP and W+Jets overlayed
 	bool LLP_all = false;				// all variables, track vars with leading track < 4 study, eta-phi spread
 	bool Jet_vars = false; 				// jet kinematics without a pT cut
 	bool NH_bins = false;				// bin in neutral hadron fraction
-	bool Jet_bins = true;				// bin in jet pT
+	bool Jet_bins = false;				// bin in jet pT
 	bool Overlay_all = false;			// overlay LLP MC, QCD MC, LLP skim
 	bool Matching_efficiency = false;	// LLP - jet matching efficiency
 
@@ -79,7 +81,7 @@ void MiniTuplePlotter_CR_SR(){
 		plotter_Depth_Data_LLP.SetOutputFileTag("Overlay_v3.0");
 		plotter_Depth_Data_LLP.plot_log_ratio    = false; 
 		//plotter_Depth_Data_LLP.plot_cdf 		 = true;
-		//plotter_Depth_Data_LLP.plot_reverse_cdf  = true;
+		plotter_Depth_Data_LLP.plot_reverse_cdf  = true;
 		plotter_Depth_Data_LLP.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
 		plotter_Depth_Data_LLP.SetLegendNames({"LLP skim - W+jets selection", "Tracker: R > 10cm", "ECAL", "HCAL-D1", "HCAL-D2", "HCAL-D34"});
 		plotter_Depth_Data_LLP.colors = { kBlack, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed };
