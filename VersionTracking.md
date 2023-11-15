@@ -60,6 +60,8 @@ Location of minituples:
 /eos/user/g/gkopp/LLP_Analysis/MiniTuples/v1.3/minituple_v1.3_LLPskim_500k_2023_09_28.root
 ```
 
+All v1.* minituples are also copied on to the LPC space in various sub-directories in `/eos/uscms/store/group/lpclonglived/gkopp/HCAL_LLP_Analysis/MiniTuples/v*`.
+
 ## V2
 Updates:
 * `FillTriggerBranches` ntuples function is now working, so HLT names are filled properly (temporary fix removed)
@@ -75,9 +77,24 @@ Location of minituples:
 ```
 Also copied to LPC space:
 ```
-/uscms/home/gkopp/LLP_Analysis_HCALdepth/Minituples/v2.0/minituple_v2.0_LLPskimRun2023C_500k_2023_10_18.root
-/uscms/home/gkopp/LLP_Analysis_HCALdepth/Minituples/v2.0/minituple_v2.0_MC_QCD_250k_2023_10_18.root
-/uscms/home/gkopp/LLP_Analysis_HCALdepth/Minituples/v2.0/minituple_v2.0_MCsignalLLP_500k_2023_10_18.root
+/eos/uscms/store/group/lpclonglived/gkopp/HCAL_LLP_Analysis/MiniTuples/v2.0/minituple_v2.0_LLPskimRun2023C_500k_2023_10_18.root
+/eos/uscms/store/group/lpclonglived/gkopp/HCAL_LLP_Analysis/MiniTuples/v2.0/minituple_v2.0_MC_QCD_250k_2023_10_18.root
+/eos/uscms/store/group/lpclonglived/gkopp/HCAL_LLP_Analysis/MiniTuples/v2.0/minituple_v2.0_MCsignalLLP_500k_2023_10_18.root
+```
+And CERN EOS phy_exotica space:
+```
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v2.0/minituple_v2.0_LLPskimRun2023C_500k_2023_10_18.root
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v2.0/minituple_v2.0_MC_QCD_250k_2023_10_18.root
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v2.0/minituple_v2.0_MCsignalLLP_500k_2023_10_18.root
 ```
 
-### v2.1
+## V3
+Updates:
+* New tree filled with W+jets flagged events
+* W+jets selection implemented in EventHelper, with tight lepton isolation selection, in ObjectHelper
+* Compute event HT in the minituples
+
+### v3.0
+```
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.0/minituple_v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_09.root
+```

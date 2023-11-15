@@ -11,29 +11,14 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 
 	cout<<"Declaring Output Trees..."<<endl;	
 
-	treenames = { "NoSel" }; 
+	treenames = { "NoSel", "WPlusJets" }; 
 
 	vector<string> myvars_bool = {
 		//"",
 	};
-	for (int i = 0; i < HLT_Indices.size(); i++) { // TEMPORARY for setting up HLT efficiency work
+	for (int i = 0; i < HLT_Indices.size(); i++) {
 		myvars_bool.push_back(HLT_Names[i]);
 	}
-	// TEMPORARY for setting up HLT efficiency work. We know the order of the HLT trigger names in the Ntuples:
-	/*
-	myvars_bool.push_back("HLT_HT170_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack");
-	myvars_bool.push_back("HLT_HT200_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack");
-	myvars_bool.push_back("HLT_HT200_L1SingleLLPJet_DisplacedDijet60_DisplacedTrack");
-	myvars_bool.push_back("HLT_HT270_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack");
-	myvars_bool.push_back("HLT_HT320_L1SingleLLPJet_DisplacedDijet60_Inclusive");
-	myvars_bool.push_back("HLT_HT420_L1SingleLLPJet_DisplacedDijet60_Inclusive");
-	myvars_bool.push_back("HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay1nsTrackless");
-	myvars_bool.push_back("HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay2nsInclusive");
-	myvars_bool.push_back("HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay0p5nsTrackless");
-	myvars_bool.push_back("HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay1nsInclusive");
-	myvars_bool.push_back("HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5");
-	myvars_bool.push_back("HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5");
-	*/
 
 	vector<string> myvars_int = {
 		"run","lumi","event",
@@ -50,7 +35,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 	}
 
 	vector<string> myvars_float = {
-		"met_Pt", "met_Phi", "met_SumEt"
+		"met_Pt", "met_Phi", "met_SumEt", "eventHT"
 	};
 
 	for( int i=0; i<3; i++ ) {
@@ -109,6 +94,9 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("jet%d_PhiSpread_energy", i) );
 		myvars_float.push_back( Form("jet%d_EtaPhiQuadSpread", i) );
 		myvars_float.push_back( Form("jet%d_EtaPhiQuadSpread_energy", i) );
+		myvars_float.push_back( Form("jet%d_S_etaeta", i) );
+		myvars_float.push_back( Form("jet%d_S_phiphi", i) );
+		myvars_float.push_back( Form("jet%d_S_etaphi", i) );
 		myvars_float.push_back( Form("jet%d_TDCavg", i) );
 		myvars_float.push_back( Form("jet%d_TDCavg_energyWeight", i) );
 		myvars_float.push_back( Form("jet%d_TDCnDelayed", i) );
@@ -252,24 +240,11 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 	tree_output_vars_float["met_Phi"]	= met_Phi;
 	tree_output_vars_float["met_SumEt"]	= met_SumEt;
 
-	for (int i = 0; i < HLT_Indices.size(); i++) { // TEMPORARY for setting up HLT efficiency work
+	tree_output_vars_float["eventHT"]   = EventHT();
+
+	for (int i = 0; i < HLT_Indices.size(); i++) { 
 		tree_output_vars_bool[HLT_Names[i]] = HLT_Decision->at(i);
 	}
-	// TEMPORARY for setting up HLT efficiency work
-	/*
-	tree_output_vars_bool["HLT_HT170_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack"] 			= HLT_Decision->at(0);
-	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack"] 			= HLT_Decision->at(1);
-	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DisplacedDijet60_DisplacedTrack"] 			= HLT_Decision->at(2);
-	tree_output_vars_bool["HLT_HT270_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack"] 			= HLT_Decision->at(3);
-	tree_output_vars_bool["HLT_HT320_L1SingleLLPJet_DisplacedDijet60_Inclusive"] 				= HLT_Decision->at(4);
-	tree_output_vars_bool["HLT_HT420_L1SingleLLPJet_DisplacedDijet60_Inclusive"] 				= HLT_Decision->at(5);
-	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay1nsTrackless"] 		= HLT_Decision->at(6);
-	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay2nsInclusive"] 		= HLT_Decision->at(7);
-	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay0p5nsTrackless"] 	= HLT_Decision->at(8);
-	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay1nsInclusive"] 		= HLT_Decision->at(9);
-	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5"]	= HLT_Decision->at(10);
-	tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5"] 	= HLT_Decision->at(11);
-	*/
 
 	tree_output_vars_int["RechitN_1GeV"] = 0; 
 	tree_output_vars_int["RechitN_5GeV"] = 0; 
@@ -347,7 +322,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 
 		vector<float> rechitJet = GetMatchedHcalRechits_Jet(i, 0.4);
 		vector<float> energy = GetEnergyProfile_Jet(i, 0.4);
-		vector<float> spread_Eta_Phi = GetEtaPhiSpread_Jet(i, 0.4); // eta, phi (average); eta, phi (energy weighted)
+		vector<float> spread_Eta_Phi = GetEtaPhiSpread_Jet(i, 0.4); // eta, phi (average); eta, phi (energy weighted); S_ee, S_pp, S_ep
 		vector<pair<float,int>> energeticRechits = Get3RechitE_Jet(i, 0.4); // three highest rechit energies in the , and total energy
 		vector<float> TDC_TDCenergy = GetTDCavg_Jet(i, 0.4); // TDC average, energy weighted TDC
 
@@ -366,6 +341,9 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("jet%d_PhiSpread_energy", i)] 			= spread_Eta_Phi[3];
 		tree_output_vars_float[Form("jet%d_EtaPhiQuadSpread", i)] 			= sqrt(spread_Eta_Phi[0] * spread_Eta_Phi[0] + spread_Eta_Phi[1] * spread_Eta_Phi[1]);
 		tree_output_vars_float[Form("jet%d_EtaPhiQuadSpread_energy", i)] 	= sqrt(spread_Eta_Phi[2] * spread_Eta_Phi[2] + spread_Eta_Phi[3] * spread_Eta_Phi[3]);
+		tree_output_vars_float[Form("jet%d_S_etaeta", i)]					= spread_Eta_Phi[4];
+		tree_output_vars_float[Form("jet%d_S_phiphi", i)]					= spread_Eta_Phi[5];
+		tree_output_vars_float[Form("jet%d_S_etaphi", i)]					= spread_Eta_Phi[6];
 
 		tree_output_vars_float[Form("jet%d_TDCavg", i)] = TDC_TDCenergy[0];
 		tree_output_vars_float[Form("jet%d_TDCavg_energyWeight", i)] = TDC_TDCenergy[1];

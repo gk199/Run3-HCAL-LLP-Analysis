@@ -205,6 +205,7 @@ vector<pair<float,int>> DisplacedHcalJetAnalyzer::Get3RechitE_Jet(int idx_jet, f
 /* ====================================================================================================================== */
 vector<float> DisplacedHcalJetAnalyzer::GetEtaPhiSpread_Jet(int idx_jet, float deltaR_cut) { 
 	// given a jet, find the normalized energy profile from associated HB rechits 
+	// returns eta, phi spread (not energy weighted), eta, phi spread (energy weighted), S_eta eta, S_phi phi, S_eta phi
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetEtaPhiSpread_Jet()"<<endl;
 
@@ -214,6 +215,7 @@ vector<float> DisplacedHcalJetAnalyzer::GetEtaPhiSpread_Jet(int idx_jet, float d
 	vector<float> matchedRechit = GetMatchedHcalRechits_Jet(idx_jet, deltaR_cut);
 
 	float spread_Eta = 0, spread_Phi = 0, spread_Eta_E = 0, spread_Phi_E = 0, totalE = 0;
+	float S_ee = 0, S_pp = 0, S_ep = 0;
 	for (int i = 0; i < matchedRechit.size(); i++) {
 		float delta_Eta = hbheRechit_Eta->at(matchedRechit[i]) - jet_Eta->at(idx_jet);
 		float delta_Phi = deltaPhi(hbheRechit_Phi->at(matchedRechit[i]), jet_Phi->at(idx_jet));
@@ -223,13 +225,22 @@ vector<float> DisplacedHcalJetAnalyzer::GetEtaPhiSpread_Jet(int idx_jet, float d
 		spread_Eta_E 	+= pow(delta_Eta * hbheRechit_E->at(matchedRechit[i]),2);
 		spread_Phi_E 	+= pow(delta_Phi * hbheRechit_E->at(matchedRechit[i]),2);
 		totalE 			+= hbheRechit_E->at(matchedRechit[i]);
+
+		// second moment calculation
+		S_ee 		+= delta_Eta * delta_Eta * hbheRechit_E->at(matchedRechit[i]);
+		S_pp 		+= delta_Phi * delta_Phi * hbheRechit_E->at(matchedRechit[i]);
+		S_ep 		+= abs(delta_Eta) * abs(delta_Phi) * hbheRechit_E->at(matchedRechit[i]);
 	}
 	spread_Eta = spread_Eta / matchedRechit.size();
 	spread_Phi = spread_Phi / matchedRechit.size();
 	spread_Eta_E = sqrt(spread_Eta_E) / totalE;
 	spread_Phi_E = sqrt(spread_Phi_E) / totalE;
 
-	vector<float> spread_Eta_Phi = {spread_Eta, spread_Phi, spread_Eta_E, spread_Phi_E};
+	S_ee = S_ee / totalE;
+	S_pp = S_pp / totalE;
+	S_ep = S_ep / totalE;
+
+	vector<float> spread_Eta_Phi = {spread_Eta, spread_Phi, spread_Eta_E, spread_Phi_E, S_ee, S_pp, S_ep};
 
 	return spread_Eta_Phi;
 }
@@ -278,4 +289,85 @@ vector<float> DisplacedHcalJetAnalyzer::GetTDCavg_Jet(int idx_jet, float deltaR_
 	vector<float> TDC_TDCenergy = {avgTDC,avgTDCenergy,nDelayedTDC};
 
 	return TDC_TDCenergy;
+}
+
+/* ====================================================================================================================== */
+bool DisplacedHcalJetAnalyzer::IsMuonIsolatedTight(int muon_index) {
+	// given a muon, determine if it is isolated (tight)
+	// https://github.com/cms-lpc-llp/llp_analyzer/blob/master/src/RazorAnalyzer.cc#L2336C32-L2336C32 and https://cds.cern.ch/record/2815162/files/SMP-21-005-pas.pdf 
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::IsMuonIsolatedTight()"<<endl;
+
+	if ( ( (muon_chargedIso->at(muon_index) + fmax(0.0,  muon_photonIso->at(muon_index) + muon_neutralHadIso->at(muon_index) - 0.5*muon_pileupIso->at(muon_index))) / muon_Pt->at(muon_index) < 0.15) ) return true;
+	else return false;
+}
+
+/* ====================================================================================================================== */
+float DisplacedHcalJetAnalyzer::GetElectronEffectiveAreaMean(int i) {
+	// given an electron, return the effective area for the isolation calculation
+	// from https://github.com/cms-lpc-llp/llp_analyzer/blob/master/src/RazorAnalyzer.cc#L1885-L1905
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetElectronEffectiveAreaMean()"<<endl;
+
+    float effArea = 0.0;
+	float eta = ele_EtaSC->at(i);
+    //Effective areas below are for the sum of Neutral Hadrons + Photons
+    if (fabs(eta) < 1.0) {
+        effArea = 0.1440;
+    } else if (fabs(eta) < 1.479) {
+        effArea = 0.1562;
+    } else if (fabs(eta) < 2.0) {
+        effArea = 0.1032;
+    } else if (fabs(eta) < 2.2) {
+        effArea = 0.0859;
+    } else if (fabs(eta) < 2.3) {
+		effArea = 0.1116;
+    } else if (fabs(eta) < 2.4) {
+        effArea = 0.1321;
+    } else if (fabs(eta) < 2.5) {
+        effArea = 0.1654;
+    }
+    return effArea;
+}
+
+/* ====================================================================================================================== */
+bool DisplacedHcalJetAnalyzer::IsElectronIsolatedTight(int ele_index) {
+	// given an electron, determine if iit is isolated (tight)
+	// https://github.com/cms-lpc-llp/llp_analyzer/blob/master/src/RazorAnalyzer.cc#L1885-L1905 and https://cds.cern.ch/record/2815162/files/SMP-21-005-pas.pdf 
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::IsElectronIsolatedTight()"<<endl;
+
+	float combined_iso = (ele_chargedIso->at(ele_index) + fmax(0.0,  ele_photonIso->at(ele_index) + ele_neutralHadIso->at(ele_index) - GetElectronEffectiveAreaMean(ele_index)*fixedGridRhoFastjetAll)) / ele_Pt->at(ele_index);
+	bool pass = false;
+
+	if (fabs(ele_EtaSC->at(ele_index)) < 1.479) {
+    	if ( combined_iso < 0.0695) {
+            pass = true;
+        }
+    } else {
+        if ( combined_iso < 0.0821) {
+            pass = true;
+        }
+    }
+    return pass;
+}
+
+/* ====================================================================================================================== */
+float DisplacedHcalJetAnalyzer::TransverseLeptonMass(float pT, float phi) {
+	// given a lepton, find the transverse mass
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::transverseLeptonMass()"<<endl;
+
+	float transverseM = sqrt( 2 * pT * met_Pt * (1 - cos( phi - met_Phi ) ) ); 
+	return transverseM;
+}
+
+/* ====================================================================================================================== */
+float DisplacedHcalJetAnalyzer::PhiVectorSum(float pT, float phi) {
+	// given a lepton, find the phi vector sum of it and the event MET
+
+	float x_vector = pT * cos(phi) + met_Pt * cos(met_Phi);
+	float y_vector = pT * sin(phi) + met_Pt * sin(met_Phi);
+	float phiVectorSum = atan2(y_vector, x_vector);
+	return phiVectorSum;
 }

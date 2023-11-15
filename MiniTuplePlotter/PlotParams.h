@@ -33,12 +33,12 @@ struct Hist1_Hist2{
 // Leading Jet 
 // kinematics
 PlotParams P_jet0_RechitN				= {"jet0_RechitN", "Number of HCAL RecHits", "N^{HCAL}_{RecHits}", 0, 60 };
-PlotParams P_jet0_E						= {"jet0_E", "Leading Jet Energy", "E [GeV]", 0, 250 };
-PlotParams P_jet0_Pt					= {"jet0_Pt", "Leading Jet p_{T}", "p_{T} [GeV]", 0, 250 };
-PlotParams P_jet0_Eta					= {"jet0_Eta", "Leading Jet #eta", "#eta", -1.5, 1.5 };
-PlotParams P_jet0_Phi					= {"jet0_Phi", "Leading Jet #phi", "#phi", -3.2, 3.2 };
-PlotParams P_jet0_Mass					= {"jet0_Mass", "Leading Jet Mass", "Mass", 0, 40 };
-PlotParams P_jet0_JetArea				= {"jet0_JetArea", "Leading Jet Area", "Area", 0, 1 };
+PlotParams P_jet0_E						= {"jet0_E", "Leading Jet Energy", "Jet E [GeV]", 0, 250 };
+PlotParams P_jet0_Pt					= {"jet0_Pt", "Leading Jet p_{T}", "Jet p_{T} [GeV]", 0, 250 };
+PlotParams P_jet0_Eta					= {"jet0_Eta", "Leading Jet #eta", "Jet #eta", -1.5, 1.5 };
+PlotParams P_jet0_Phi					= {"jet0_Phi", "Leading Jet #phi", "Jet #phi", -3.2, 3.2 };
+PlotParams P_jet0_Mass					= {"jet0_Mass", "Leading Jet Mass", "Jet Mass", 0, 40 };
+PlotParams P_jet0_JetArea				= {"jet0_JetArea", "Leading Jet Area", "Jet Area", 0, 1 };
 // spread
 PlotParams P_jet0_EtaSpread				= {"jet0_EtaSpread", "Leading Jet #eta Spread", "#eta Spread", 0, 0.4 };
 PlotParams P_jet0_EtaSpread_energy		= {"jet0_EtaSpread_energy", "Leading Jet #eta Spread Energy", "#eta Spread (energy weighted)", 0, 0.2 };
@@ -46,6 +46,18 @@ PlotParams P_jet0_PhiSpread				= {"jet0_PhiSpread", "Leading Jet #phi Spread", "
 PlotParams P_jet0_PhiSpread_energy		= {"jet0_PhiSpread_energy", "Leading Jet #phi Spread Energy", "#phi Spread (energy weighted)", 0, 0.2 };
 PlotParams P_jet0_EtaPhiQuadSpread		= {"jet0_EtaPhiQuadSpread", "Leading Jet #sqrt{#Delta#eta^{2} + #Delta#phi^{2}} Spread", "#sqrt{#Delta#eta^{2} + #Delta#phi^{2}} Spread", 0, 0.4 };
 PlotParams P_jet0_EtaPhiQuadSpread_energy={"jet0_EtaPhiQuadSpread_energy", "Leading Jet #sqrt{#Delta#eta^{2} + #Delta#phi^{2}} Spread Energy", "#sqrt{#Delta#eta^{2} + #Delta#phi^{2}} Spread (energy weighted)", 0, 0.2 };
+
+PlotParams P_jet0_Setaeta 				={"jet0_S_etaeta", "Leading Jet S #eta#eta", "S #eta#eta", 0, 0.15 };
+PlotParams P_jet0_Sphiphi 				={"jet0_S_phiphi", "Leading Jet S #phi#phi", "S #phi#phi", 0, 0.15 };
+PlotParams P_jet0_Setaphi 				={"jet0_S_etaphi", "Leading Jet S #eta#phi", "S #eta#phi", 0, 0.15 };
+PlotParams P_jet0_Smajor 				={"(jet0_S_etaeta * jet0_S_phiphi + sqrt( (jet0_S_etaeta - jet0_S_phiphi)*(jet0_S_etaeta - jet0_S_phiphi) + 4*jet0_S_etaphi )) / 2", "Leading Jet S major", "S major", 0, 0.3 };
+PlotParams P_jet0_Sminor 				={"-1 * (jet0_S_etaeta * jet0_S_phiphi - sqrt( (jet0_S_etaeta - jet0_S_phiphi)*(jet0_S_etaeta - jet0_S_phiphi) + 4*jet0_S_etaphi )) / 2", "Leading Jet S minor", "abs(S minor)", 0, 0.3 };
+PlotParams P_jet0_SminorSmajor			={"-1 * ((jet0_S_etaeta * jet0_S_phiphi + sqrt( (jet0_S_etaeta - jet0_S_phiphi)*(jet0_S_etaeta - jet0_S_phiphi) + 4*jet0_S_etaphi )) / 2) * ((jet0_S_etaeta * jet0_S_phiphi - sqrt( (jet0_S_etaeta - jet0_S_phiphi)*(jet0_S_etaeta - jet0_S_phiphi) + 4*jet0_S_etaphi )) / 2)", "Leading Jet S minor * S major", "S minor * S major", 0, 0.15 };
+// timing 
+PlotParams P_jet0_TDCaverage 			={"jet0_TDCavg", "Leading Jet Average TDC (2 bits)", "Average TDC", -0.5, 2.5 };
+PlotParams P_jet0_TDCaverage_Eweight	={"jet0_TDCavg_energyWeight", "Leading Jet Average TDC, energy weighted (2 bits)", "Average TDC (energy weighted)", -0.5, 2.5 };
+PlotParams P_jet0_TDCnDelayed			={"jet0_TDCnDelayed", "Leading Jet Number of Delayed HCAL Cells", "Number of Delayed Cells", 0, 15 };
+
 // tracks
 PlotParams P_jet0_Track0PtFrac			= {"jet0_Track0Pt / jet0_Pt", "Leading Jet: Leading Track p_{T} / Jet p_{T}", "Track Energy Fraction", 0, 1 };
 PlotParams P_jet0_Track0Pt				= {"jet0_Track0Pt", "Leading Jet: Leading Track p_{T}", "p_{T} [GeV]", 0, 15 };
@@ -91,10 +103,10 @@ PlotParams P_jet0_FlightDist2DErr		= {"jet0_FlightDist2DErr", "Leading Jet: Flig
 PlotParams P_jet0_FlightDist3D			= {"jet0_FlightDist3D", "Leading Jet: Flight Distance 3D", "Flight Distance 3D", 0, 5 };
 PlotParams P_jet0_FlightDist3DErr		= {"jet0_FlightDist3DErr", "Leading Jet: Flight Distance 3D Error", "Flight Distance 3D Error", 0, 1.5 };
 // HB rechits
-PlotParams P_jet0_LeadingRechitE		= {"jet0_LeadingRechitE", "Leading Jet: Leading Rechit Energy", "Energy [GeV]", 0, 100 };
-PlotParams P_jet0_SubLeadingRechitE		= {"jet0_SubLeadingRechitE", "Leading Jet: Subleading Rechit Energy", "Energy [GeV]", 0, 100 };
-PlotParams P_jet0_SSubLeadingRechitE	= {"jet0_SSubLeadingRechitE", "Leading Jet: Third Leading Rechit Energy", "Energy [GeV]", 0, 100 };
-PlotParams P_jet0_AllRechitE			= {"jet0_AllRechitE", "Leading Jet: Sum of HB Rechit Energy", "Energy [GeV]", 0, 300 };
+PlotParams P_jet0_LeadingRechitE		= {"jet0_LeadingRechitE", "Leading Jet: Leading Rechit Energy", "Leading Rechit Energy [GeV]", 0, 100 };
+PlotParams P_jet0_SubLeadingRechitE		= {"jet0_SubLeadingRechitE", "Leading Jet: Subleading Rechit Energy", "Sub-Leading Rechit Energy [GeV]", 0, 100 };
+PlotParams P_jet0_SSubLeadingRechitE	= {"jet0_SSubLeadingRechitE", "Leading Jet: Third Leading Rechit Energy", "Third-Leading Rechit Energy [GeV]", 0, 100 };
+PlotParams P_jet0_AllRechitE			= {"jet0_AllRechitE", "Leading Jet: Sum of HB Rechit Energy", "Sum of HB Rechit Energy [GeV]", 0, 300 };
 PlotParams P_jet0_3RechitFracE			= {"(jet0_LeadingRechitE + jet0_SubLeadingRechitE + jet0_SSubLeadingRechitE) / jet0_AllRechitE", "Leading Jet: Fraction of Energy in Leading 3 Rechits", "Fraction of Energy", 0, 1 };
 PlotParams P_jet0_LeadingRechitEFracJet	= {"jet0_LeadingRechitE / jet0_E", "Leading Jet: Leading Rechit Energy / Jet Energy", "Energy Fraction", 0, 1 };
 PlotParams P_jet0_LeadingRechitEFrac	= {"jet0_LeadingRechitE / jet0_AllRechitE", "Leading Jet: Leading Rechit Energy / Sum of HB Rechit Energy", "Energy Fraction", 0, 1 };
