@@ -154,6 +154,7 @@ vector<float> DisplacedHcalJetAnalyzer::GetEnergyProfile_Jet(int idx_jet, float 
 	for (int i = 0; i < energy_jet.size(); i++) totalE_jet += energy_jet[i]; // total energy calculation
 	// energy normalization
 	if (totalE_jet > 0) for (int i=0; i<energy_jet.size(); i++) energy_jet[i] = energy_jet[i] / totalE_jet;
+	else energy_jet = {-1, -1, -1, -1}; // default if no matched rechits
 
 	return energy_jet;
 }
@@ -231,14 +232,20 @@ vector<float> DisplacedHcalJetAnalyzer::GetEtaPhiSpread_Jet(int idx_jet, float d
 		S_pp 		+= delta_Phi * delta_Phi * hbheRechit_E->at(matchedRechit[i]);
 		S_ep 		+= abs(delta_Eta) * abs(delta_Phi) * hbheRechit_E->at(matchedRechit[i]);
 	}
-	spread_Eta = spread_Eta / matchedRechit.size();
-	spread_Phi = spread_Phi / matchedRechit.size();
-	spread_Eta_E = sqrt(spread_Eta_E) / totalE;
-	spread_Phi_E = sqrt(spread_Phi_E) / totalE;
+	
+	if (matchedRechit.size() > 0) {
+		spread_Eta = spread_Eta / matchedRechit.size();
+		spread_Phi = spread_Phi / matchedRechit.size();
+		spread_Eta_E = sqrt(spread_Eta_E) / totalE;
+		spread_Phi_E = sqrt(spread_Phi_E) / totalE;
 
-	S_ee = S_ee / totalE;
-	S_pp = S_pp / totalE;
-	S_ep = S_ep / totalE;
+		S_ee = S_ee / totalE;
+		S_pp = S_pp / totalE;
+		S_ep = S_ep / totalE;
+	}
+	else {
+		spread_Eta = spread_Phi = spread_Eta_E = spread_Phi_E = S_ee = S_pp = S_ep = -1; // default if no matched rechits! 
+	}
 
 	vector<float> spread_Eta_Phi = {spread_Eta, spread_Phi, spread_Eta_E, spread_Phi_E, S_ee, S_pp, S_ep};
 
