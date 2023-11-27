@@ -35,7 +35,7 @@ void DisplacedHcalJetAnalyzer::SetLLPVariables(){
 		for( int i_tp=0; i_tp<gParticle_Pt->size(); i_tp++ ){
 
 			// Require parent is LLP
-			if( abs(gParticle_ParentId->at(i_tp)) != 9000006) continue; 
+			if( abs(gParticle_ParentId->at(i_tp)) != 9000006 && abs(gParticle_ParentId->at(i_tp)) != 6000113 ) continue; 
 
 			// Require production is decay vtx of LLP
 			if( gParticle_ProdVtx_X->at(i_tp) != gLLP_DecayVtx_X->at(i_llp) || gParticle_ProdVtx_Y->at(i_tp) != gLLP_DecayVtx_Y->at(i_llp) || gParticle_ProdVtx_Z->at(i_tp) != gLLP_DecayVtx_Z->at(i_llp) ) 
@@ -328,7 +328,7 @@ vector<TVector3> DisplacedHcalJetAnalyzer::GetLLPDecayProdCoords(int idx_llp, in
 		if( gParticle_ProdVtx_Y->at(i) != gLLP_DecayVtx_Y->at(idx_llp) ) continue;
 		if( gParticle_ProdVtx_Z->at(i) != gLLP_DecayVtx_Z->at(idx_llp) ) continue;
 		if (debug) std::cout << gParticle_ParentId->at(i) << " = gParticle_ParentId->at(i)" << std::endl;
-		if( abs(gParticle_ParentId->at(i)) != 9000006) continue; // require parent is LLP
+		if( abs(gParticle_ParentId->at(i)) != 9000006  && abs(gParticle_ParentId->at(i)) != 6000113 ) continue; // require parent is LLP
 		llp_decay_indices.push_back( i );
 	}
 
