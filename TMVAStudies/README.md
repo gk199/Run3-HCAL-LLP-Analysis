@@ -24,3 +24,5 @@ source display_gui.sh
 [Tutorial](https://twiki.cern.ch/twiki/bin/view/TMVA) (what code is based on): 
 
 Some [helpful slides](https://agenda.infn.it/event/13733/contributions/20520/attachments/14642/16541/MVATutorial.pdf)
+
+Note that any redundancy in the variables input to the TMVA training will cause issues! Depth 1,2,3,4 HCAL energy fractions are redundant (since they must add to 1).

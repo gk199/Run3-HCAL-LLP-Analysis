@@ -185,15 +185,17 @@ int runClassification( TString dir, TString sigTag, TString bkgTag )
    //TCut selections_safety = "jet0_EtaSpread > 0 && jet0_NeutralHadEFrac >= 0 && jet0_ChargedHadEFrac >= 0 && jet0_Track0Pt > 0 && jet0_Track0dR > 0 && jet0_EnergyFrac_Depth1 + jet0_EnergyFrac_Depth2 + jet0_EnergyFrac_Depth3 + jet0_EnergyFrac_Depth4 > 0 && jet0_EnergyFrac_Depth1 + jet0_EnergyFrac_Depth2 + jet0_EnergyFrac_Depth3 + jet0_EnergyFrac_Depth4 <= 1 && jet0_S_phiphi > 0 && jet0_LeadingRechitE > 0 ";
    // above safety selections works! (gives warnings though)
 
-   TCut selections_jetSimple = "jet0_Pt > 0";
-   TCut selections_jetBasics = "jet0_Phi > -1 && jet0_Phi < 73 && jet0_E > 0 && jet0_E < 900";
+   TCut selections_NaN_depth1 = "!(TMath::IsNaN(jet0_EnergyFrac_Depth1)) && jet0_EnergyFrac_Depth1 >= 0 && jet0_EnergyFrac_Depth1 <= 1";
+   TCut selections_NaN_depth2 = "!(TMath::IsNaN(jet0_EnergyFrac_Depth2)) && jet0_EnergyFrac_Depth2 >= 0 && jet0_EnergyFrac_Depth2 <= 1";
+   TCut selections_NaN_depth3 = "!(TMath::IsNaN(jet0_EnergyFrac_Depth3)) && jet0_EnergyFrac_Depth3 >= 0 && jet0_EnergyFrac_Depth3 <= 1";
+   TCut selections_NaN_depth4 = "!(TMath::IsNaN(jet0_EnergyFrac_Depth4)) && jet0_EnergyFrac_Depth4 >= 0 && jet0_EnergyFrac_Depth4 <= 1";
+   //TCut selections_NaN_Sphiphi = "!(TMath::IsNaN(jet0_S_phiphi))"; // any cut on S_phiphi breaks the MVA, implies major issues with this variable 
+   //TCut selections_jetBasics = "jet0_Phi > -1 && jet0_Phi < 73 && jet0_E > 0 && jet0_E < 900";
    TCut selections_jetEnergy = "jet0_ChargedHadEFrac >= 0 && jet0_ChargedHadEFrac <= 1 && jet0_NeutralHadEFrac >= 0 && jet0_NeutralHadEFrac <= 1";
    TCut selections_trackVars = "jet0_Track0Pt > 0 && jet0_Track0Pt < 900 && jet0_Track0dR >= 0 && jet0_Track0dR < 1";
-   TCut selections_rechitVar1= "jet0_EnergyFrac_Depth1 > 0 && jet0_EnergyFrac_Depth2 > 0 && jet0_EnergyFrac_Depth3 > 0 && jet0_EnergyFrac_Depth4 > 0 && jet0_EnergyFrac_Depth1 < 1 && jet0_EnergyFrac_Depth2 < 1 && jet0_EnergyFrac_Depth3 < 1 && jet0_EnergyFrac_Depth4 < 1";
+   TCut selections_rechitVar1= selections_NaN_depth1 + selections_NaN_depth2 + selections_NaN_depth3 + selections_NaN_depth4;
    TCut selections_rechitVar2= "jet0_S_phiphi > 0 && jet0_S_phiphi < 900 && jet0_LeadingRechitE > 0 && jet0_LeadingRechitE < 900";
-   TCut selections_safety = selections_jetSimple;
-   //TCut selections_safety = selections_rechitVar1 + selections_trackVars; // minimum number of selections needed to run now, still gives warnings about depth energy fractions. Errors if do sum of energy frac vars now..
-   //TCut selections_safety = selections_jetBasics + selections_jetEnergy + selections_trackVars + selections_rechitVars;
+   TCut selections_safety = selections_rechitVar1;
    // above safety selections works! (gives warnings though)
 
    // using "jet0_EnergyFrac_Depth4 > 0" causes the fatal error of "<GetSeparation> signal and background histograms have different or invalid dimensions". >= is more ok...
@@ -265,31 +267,21 @@ int runClassification( TString dir, TString sigTag, TString bkgTag )
    // track-based variables // *************************
    dataloader->AddVariable( "jet0_ChargedHadEFrac", "jet0_ChargedHadEFrac", "", 'F' );
    dataloader->AddVariable( "jet0_NeutralHadEFrac", "jet0_NeutralHadEFrac", "", 'F' );
-   dataloader->AddVariable( "jet0_NeutralHadEFrac/jet0_ChargedHadEFrac", "jet0_HadNeutralOverCharged", "", 'F');
    dataloader->AddVariable( "jet0_Track0Pt", "jet0_Track0Pt", "GeV", 'F' );
    //dataloader->AddVariable( "jet0_Track1Pt", "jet0_Track1Pt", "GeV", 'F' );
    //dataloader->AddVariable( "jet0_Track2Pt", "jet0_Track2Pt", "GeV", 'F' );
-   dataloader->AddVariable( "jet0_Track0Pt/jet0_Pt", "jet0_Track0PtFrac", "", 'F' );
-   //dataloader->AddVariable( "jet0_Track1Pt/jet0_Pt", "jet0_Track1PtFrac", "", 'F' );
-   //dataloader->AddVariable( "jet0_Track2Pt/jet0_Pt", "jet0_Track2PtFrac", "", 'F' );
    dataloader->AddVariable( "jet0_Track0dR", "jet0_Track0dR", "", 'F' );
    //dataloader->AddVariable( "jet0_EleEFrac", "jet0_EleEFrac", "", 'F' );
    //dataloader->AddVariable( "jet0_HoverE", "jet0_HoverE", "", 'F' );
    //dataloader->AddVariable( "log(jet0_HoverE)", "jet0_LogHoverE", "", 'F' );
+   // dataloader->AddVariable( "jet0_NeutralHadEFrac/jet0_ChargedHadEFrac", "jet0_HadNeutralOverCharged", "", 'F');
    // rechit-based variables // *************************
-   /*
-   dataloader->AddVariable( "jet0_EnergyFrac_Depth1", "jet0_EnergyFrac_Depth1", "", 'F' );
+   dataloader->AddVariable( "jet0_EnergyFrac_Depth1", "jet0_EnergyFrac_Depth1", "", 'F' ); // got warnings on decorrelation matrix with this one, with and without NaN
    dataloader->AddVariable( "jet0_EnergyFrac_Depth2", "jet0_EnergyFrac_Depth2", "", 'F' );
    dataloader->AddVariable( "jet0_EnergyFrac_Depth3", "jet0_EnergyFrac_Depth3", "", 'F' );
-   dataloader->AddVariable( "jet0_EnergyFrac_Depth4", "jet0_EnergyFrac_Depth4", "", 'F' );
+   //dataloader->AddVariable( "jet0_EnergyFrac_Depth4", "jet0_EnergyFrac_Depth4", "", 'F' );
    dataloader->AddVariable( "jet0_S_phiphi", "jet0_S_phiphi", "", 'F' ); // very problematic!!!!
-   dataloader->AddVariable( "jet0_LeadingRechitE / jet0_E", "jet0_LeadingRechtEFrac", "", 'F' );
    dataloader->AddVariable( "jet0_LeadingRechitE", "jet0_LeadingRechtE", "", 'F' );
-   */
-   //dataloader->AddVariable( "jet0_EtaSpread", "jet0_EtaSpread", "", 'F' );
-   //dataloader->AddVariable( "jet0_EtaSpread_energy", "jet0_EtaSpread_energy", "", 'F' );
-   //dataloader->AddVariable( "jet0_PhiSpread", "jet0_PhiSpread", "", 'F' );
-   //dataloader->AddVariable( "jet0_PhiSpread_energy", "jet0_PhiSpread_energy", "", 'F' );
 
    // You can add so-called "Spectator variables", which are not used in the MVA training,
    // but will appear in the final "TestTree" produced by TMVA. This TestTree will contain the
@@ -660,8 +652,9 @@ int LLP_WPlusJets_Classification()
    vector<TString> sigTagList;
    TString dir = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.0/";
 
-   sigTagList.push_back("v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_11");
-   TString bkgTag = "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_11";
+   sigTagList.push_back("v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23");
+   //sigTagList.push_back("v3.0_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2023_11_29");
+   TString bkgTag = "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23";
 
    for (auto tag: sigTagList){
      runClassification(dir, tag, bkgTag);
