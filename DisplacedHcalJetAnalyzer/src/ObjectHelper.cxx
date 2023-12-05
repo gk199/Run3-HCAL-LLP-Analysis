@@ -153,7 +153,9 @@ vector<float> DisplacedHcalJetAnalyzer::GetEnergyProfile_Jet(int idx_jet, float 
 	float totalE_jet = 0;
 	for (int i = 0; i < energy_jet.size(); i++) totalE_jet += energy_jet[i]; // total energy calculation
 	// energy normalization
-	if (totalE_jet > 0) for (int i=0; i<energy_jet.size(); i++) energy_jet[i] = energy_jet[i] / totalE_jet;
+	if (totalE_jet > 0) { 
+		for (int i=0; i<energy_jet.size(); i++) energy_jet[i] = energy_jet[i] / totalE_jet;
+	}
 	else energy_jet = {-1, -1, -1, -1}; // default if no matched rechits
 
 	return energy_jet;
