@@ -13,9 +13,9 @@ void MiniTuplePlotter_CR_SR(){
 //	vector<string> filetags_dataLLP	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23"};
 	vector<string> filetags_dataLLP	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2023_11_29"};
 
-	vector<string> filetags_all 	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_11", "v2.0_MC_QCD_250k_2023_10_18", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_11"};
-	vector<string> filetags_data 	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_11" };
-	vector<string> filetags_LLP 	= { "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_11" };	
+	vector<string> filetags_all 	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v2.0_MC_QCD_250k_2023_10_18", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23"};
+	vector<string> filetags_data 	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23" };
+	vector<string> filetags_LLP 	= { "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23" };	
 	vector<string> filetags_QCD 	= { "v2.0_MC_QCD_250k_2023_10_18" };	
 
 	vector<PlotParams> jetPlots0	= {P_jet0_E, P_jet0_Pt}; 																				// dont apply a 40 GeV jet cut on these
