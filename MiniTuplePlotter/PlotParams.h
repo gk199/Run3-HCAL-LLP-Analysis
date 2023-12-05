@@ -53,6 +53,7 @@ PlotParams P_jet0_Setaphi 				={"jet0_S_etaphi", "Leading Jet S #eta#phi", "S #e
 PlotParams P_jet0_Smajor 				={"(jet0_S_etaeta * jet0_S_phiphi + sqrt( (jet0_S_etaeta - jet0_S_phiphi)*(jet0_S_etaeta - jet0_S_phiphi) + 4*jet0_S_etaphi )) / 2", "Leading Jet S major", "S major", 0, 0.3 };
 PlotParams P_jet0_Sminor 				={"-1 * (jet0_S_etaeta * jet0_S_phiphi - sqrt( (jet0_S_etaeta - jet0_S_phiphi)*(jet0_S_etaeta - jet0_S_phiphi) + 4*jet0_S_etaphi )) / 2", "Leading Jet S minor", "abs(S minor)", 0, 0.3 };
 PlotParams P_jet0_SminorSmajor			={"-1 * ((jet0_S_etaeta * jet0_S_phiphi + sqrt( (jet0_S_etaeta - jet0_S_phiphi)*(jet0_S_etaeta - jet0_S_phiphi) + 4*jet0_S_etaphi )) / 2) * ((jet0_S_etaeta * jet0_S_phiphi - sqrt( (jet0_S_etaeta - jet0_S_phiphi)*(jet0_S_etaeta - jet0_S_phiphi) + 4*jet0_S_etaphi )) / 2)", "Leading Jet S minor * S major", "S minor * S major", 0, 0.15 };
+// Sminor can be negatiive if S_etaeta S_phiphi < S_etaphi
 // timing 
 PlotParams P_jet0_TDCaverage 			={"jet0_TDCavg", "Leading Jet Average TDC (2 bits)", "Average TDC", -0.5, 2.5 };
 PlotParams P_jet0_TDCaverage_Eweight	={"jet0_TDCavg_energyWeight", "Leading Jet Average TDC, energy weighted (2 bits)", "Average TDC (energy weighted)", -0.5, 2.5 };

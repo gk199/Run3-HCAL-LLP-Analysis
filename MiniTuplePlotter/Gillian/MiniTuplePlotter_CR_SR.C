@@ -10,11 +10,12 @@ void MiniTuplePlotter_CR_SR(){
 	
 	// string path = "/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v3.0/minituple_";
 	string path = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.0/minituple_";
-	vector<string> filetags_dataLLP	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_11", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_11"};
+//	vector<string> filetags_dataLLP	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23"};
+	vector<string> filetags_dataLLP	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2023_11_29"};
 
-	vector<string> filetags_all 	= { "v2.0_LLPskimRun2023C_500k_2023_10_18", "v2.0_MC_QCD_250k_2023_10_18", "v2.0_MCsignalLLP_500k_2023_10_18"};
-	vector<string> filetags_data 	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_11" };
-	vector<string> filetags_LLP 	= { "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_11" };	
+	vector<string> filetags_all 	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v2.0_MC_QCD_250k_2023_10_18", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23"};
+	vector<string> filetags_data 	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23" };
+	vector<string> filetags_LLP 	= { "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23" };	
 	vector<string> filetags_QCD 	= { "v2.0_MC_QCD_250k_2023_10_18" };	
 
 	vector<PlotParams> jetPlots0	= {P_jet0_E, P_jet0_Pt}; 																				// dont apply a 40 GeV jet cut on these
@@ -81,13 +82,14 @@ void MiniTuplePlotter_CR_SR(){
 		plotter_Depth_Data_LLP.SetOutputFileTag("Overlay_v3.0");
 		plotter_Depth_Data_LLP.plot_log_ratio    = false; 
 		//plotter_Depth_Data_LLP.plot_cdf 		 = true;
-		plotter_Depth_Data_LLP.plot_reverse_cdf  = true;
+		//plotter_Depth_Data_LLP.plot_reverse_cdf  = true;
 		plotter_Depth_Data_LLP.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
 		plotter_Depth_Data_LLP.SetLegendNames({"LLP skim - W+jets selection", "Tracker: R > 10cm", "ECAL", "HCAL-D1", "HCAL-D2", "HCAL-D34"});
 		plotter_Depth_Data_LLP.colors = { kBlack, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed };
 		plotter_Depth_Data_LLP.SetCuts("jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26");
 		plotter_Depth_Data_LLP.SetComparisonCuts({Cut_LLPinTrackerNP_Jet0, Cut_LLPinECAL_Jet0, Cut_LLPinHCAL1_Jet0, Cut_LLPinHCAL2_Jet0, Cut_LLPinHCAL34_Jet0}, "LLP_MC");
 		//plotter_Depth_Data_LLP.SetSelectiveCuts("LLPskim", "jet0_NeutralHadEFrac < 0.6");  // BLINDED with track energy fraction (jet0_Track0Pt / jet0_Pt > 0.1) or neutral hadron fraction (jet0_NeutralHadEFrac < 0.6)
+		plotter_Depth_Data_LLP.SetSelectiveCuts("LLPskim", "jet1_Pt < 30"); // for stronger W+jets selection
 		plotter_Depth_Data_LLP.SetOutputDirectory("Overlay");
 		plotter_Depth_Data_LLP.Plot("ratio");
 	}

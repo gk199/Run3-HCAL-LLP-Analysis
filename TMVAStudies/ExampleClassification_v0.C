@@ -165,7 +165,7 @@ int runClassification( TString dir, TString sigTag )
    //
    // Boosted Decision Trees
    Use["BDT"]             = 0; // uses Adaptive Boost
-   Use["BDTG"]            = 0; // uses Gradient Boost
+   Use["BDTG"]            = 1; // uses Gradient Boost
    Use["BDTB"]            = 0; // uses Bagging
    Use["BDTD"]            = 0; // decorrelation + Adaptive Boost
    Use["BDTF"]            = 0; // allow usage of fisher discriminant for node splitting
@@ -649,13 +649,13 @@ int runClassification( TString dir, TString sigTag )
    return 0;
 }
 
-int ExampleClassification()
+int ExampleClassification_v0()
 {
    // Select methods (don't look at this code - not of interest)
    //std::cout << "print" << std::endl;
 
    vector<TString> sigTagList;
-   TString dir = "../MiniTuples/v1.2/";
+   TString dir = "/afs/cern.ch/work/g/gkopp/public/forKiley/v1.2/";
 
    sigTagList.push_back("v1.2_MCsignal_500k_2023_09_11");
 

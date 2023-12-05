@@ -253,8 +253,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		if (hbheRechit_E->at(i) > 1) tree_output_vars_int["RechitN_1GeV"] += 1;
 		if (hbheRechit_E->at(i) > 5) tree_output_vars_int["RechitN_5GeV"] += 5;
 		if (hbheRechit_E->at(i) > 10) tree_output_vars_int["RechitN_10GeV"] += 10;
-		// auxTDC is already unmasked in ntupler (v1) to give TDC in SOI
-		tree_output_vars_int["HBHE_Rechit_auxTDC"] = hbheRechit_auxTDC->at(i);
+		tree_output_vars_int["HBHE_Rechit_auxTDC"] = hbheRechit_auxTDC->at(i);			// auxTDC is already unmasked in ntupler (v1) to give TDC in SOI
 	}
 
 	int max_l1jets = std::min(3, n_l1jet);

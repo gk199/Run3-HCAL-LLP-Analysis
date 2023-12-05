@@ -93,8 +93,21 @@ Updates:
 * New tree filled with W+jets flagged events
 * W+jets selection implemented in EventHelper, with tight lepton isolation selection, in ObjectHelper
 * Compute event HT in the minituples
+* S major, S minor jet spread variables calculated
 
 ### v3.0
 ```
-/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.0/minituple_v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_09.root
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.0/minituple_v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23.root
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.0/minituple_v3.0_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2023_11_29.root
+
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.0/minituple_v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23.root
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.0/minituple_v3.0_LLPskim_Run2023*_2023_11_22.root                                          # Cv4 is a very large sample 40M total events
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.0/minituple_v3.0_LLPskim_Run2023Bv1_Cv1_Cv2_Cv3_Cv4_Dv1_Dv2_2023_11_17.root                # does not yet have Sphiphi fix yet! 
 ```
+These are hadd-ed from 
+```
+/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v3.0/* 
+```
+with `* = minituple_v3.0_LLPskimRun2023Bv1_2023_11_09.root, minituple_v3.0_LLPskimRun2023Cv1_2023_11_14.root, minituple_v3.0_LLPskimRun2023Cv3_2023_11_15.root, minituple_v3.0_LLPskimRun2023Cv4_2023_11_16.root, minituple_v3.0_LLPskimRun2023Dv1_2023_11_16.root, minituple_v3.0_LLPskimRun2023Dv2_2023_11_16.root`.
+
+Note that v3 minituples for LLP MC (125GeV) are currently run over v2 ntuples (which don't have the isolation variables, but those are only needed for W+Jets). The W+Jets tree must be commented out for these. The fix for Sphiphi has been added to these minituples as well. 
