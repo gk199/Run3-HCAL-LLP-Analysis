@@ -3,7 +3,7 @@ TString AND 		= " && ";
 
 // Setup cuts on HLT paths passed
 TCut Cut_None			= "";
-// TCut Cut_HLTpassed1 	= "HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5 == 1";
+TCut Cut_HLTpassed1 	= "HLT_L1SingleLLPJet == 1"; // monitoring trigger // not in v1 ntuples yet
 TCut Cut_HLTpassed2 	= "HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1";
 TCut Cut_HLTpassed3 	= "HLT_HT240_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1"; // not in v1 ntuples yet
 TCut Cut_HLTpassed4 	= "HLT_HT280_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1"; // end of group 1 of triggers // not in v1 ntuples yet
@@ -17,7 +17,6 @@ TCut Cut_HLTpassed11 	= "HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay0p5nsT
 TCut Cut_HLTpassed12 	= "HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay1nsInclusive == 1"; 
 TCut Cut_HLTpassed13 	= "HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay1nsTrackless == 1";
 TCut Cut_HLTpassed14 	= "HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay2nsInclusive == 1"; // end of group 4 of triggers
-TCut Cut_HLTpassed15 	= "HLT_L1SingleLLPJet == 1"; // monitoring trigger // not in v1 ntuples yet
 
 TCut Cut_AnyLLP_HLT     = "HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT240_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT280_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT170_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT270_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet60_DisplacedTrack == 1 || HLT_HT320_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 || HLT_HT420_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay0p5nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay1nsInclusive == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay1nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay2nsInclusive == 1";
 
@@ -42,13 +41,16 @@ float radius_inHCAL[2]   = {183.6, 295};
 float radius_depth12[2]  = {183.6, 214.2};
 float radius_depth34[2]  = {214.2, 295};
 
-float HBeta = 1.4;
+float HBeta = 1.26;
 int z_pos = 425; // depth 1 and 2 have a z position < 388, depth 3 and 4 have z position < 425cm
 
 // use prompt LLP as CR for now
 float controlRegion = 10.0;
 TString LLP0inCR 	= Form("(LLP0_DecayR < %0.1f && abs(LLP0_Eta) <= %f)", 		controlRegion, HBeta);
 TString LLP1inCR 	= Form("(LLP1_DecayR < %0.1f && abs(LLP1_Eta) <= %f)", 		controlRegion, HBeta);
+
+TString LLP0inSR 	= Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR <= %0.1f && abs(LLP0_Eta) <= %f)", 		controlRegion, radius_depth34[1], HBeta);
+TString LLP1inSR 	= Form("(LLP1_DecayR >= %0.1f && LLP1_DecayR <= %0.1f && abs(LLP1_Eta) <= %f)", 		controlRegion, radius_depth34[1], HBeta);
 
 // LLP decaying further in detector is SR
 TString LLP0inHCAL 	    = Form("(LLP0_DecayR >= %0.1f && LLP0_DecayR < %0.1f && abs(LLP0_Eta) <= %f)", 	    radius_inHCAL[0],   radius_inHCAL[1],   HBeta);
@@ -131,6 +133,10 @@ TCut Cut_LLPinHCAL34_Jet1	= 	( "(" + LLP0inHCAL_d34 + AND + Jet1_LLP0 + ")" + 	O
 
 TCut Cut_LLPinCR_Jet0	    = 	( "(" + LLP0inCR + AND + Jet0_LLP0 + ")" + 	        OR + "(" + LLP1inCR + AND + Jet0_LLP1 + ")" ).Data();
 TCut Cut_LLPinCR_Jet1	    = 	( "(" + LLP0inCR + AND + Jet1_LLP0 + ")" + 	        OR + "(" + LLP1inCR + AND + Jet1_LLP1 + ")" ).Data();
+
+TCut Cut_LLPinCalo_Jet0	    = 	( "((" + LLP0inECAL + OR + LLP0inHCAL + ")" + AND + Jet0_LLP0 + ")" + 	        OR + "((" + LLP1inECAL + OR + LLP1inHCAL + ")" + AND + Jet0_LLP1 + ")" ).Data();
+TCut Cut_LLPinSR_Jet0	    = 	( "(" + LLP0inSR + AND + Jet0_LLP0 + ")" + 	        OR + "(" + LLP1inSR + AND + Jet0_LLP1 + ")" ).Data();
+TCut Cut_LLPinSR            = (LLP0inTrackerNP + OR + LLP0inECAL + OR + LLP0inHCAL + OR + LLP1inTrackerNP + OR + LLP1inECAL + OR + LLP1inHCAL).Data();
 
 // Save these cuts in a map paired with a string so they can be iterated over, to easily make same plot with lots of different cuts  :) 
 // used in MiniTuplePlotter_HLT_Effs.C
