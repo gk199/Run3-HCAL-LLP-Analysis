@@ -10,6 +10,7 @@ using namespace std;
 #include "../src/ObjectHelper.cxx"
 #include "../src/HistHelper.cxx"
 #include "../src/OutputHelper.cxx"
+#include "../src/BDTHelper.cxx"
 #include "../src/TruthInfoHelper.cxx"
 
 /* ====================================================================================================================== */
@@ -23,6 +24,8 @@ void DisplacedHcalJetAnalyzer::Initialize( string infiletag, string infilepath )
 	// Set Categories
 	SetHistCategories();
 
+	// Initialize TMVA Reader
+	DeclareTMVAReader();
 
 	return;
 }
@@ -31,6 +34,8 @@ void DisplacedHcalJetAnalyzer::Initialize( string infiletag, string infilepath )
 void DisplacedHcalJetAnalyzer( string infiletag = "", string infilepath = "" ){
 
 	clock_t start_clock = clock();
+
+	gSystem->Load("/Users/kiley/Documents/CMS/WorkingDir/Run3-HCAL-LLP-Analysis/pugixml/pugixml_cpp.so");
 	
 	// ----- Get Infile ----- //
 	// NEED TO FIX 
@@ -100,7 +105,7 @@ void DisplacedHcalJetAnalyzer( string infiletag = "", string infilepath = "" ){
 	AnalysisReader.Initialize( infiletag, infilepath ); 
 	
 	//TString outfilename = Form( "minituple_%s.root", infiletag.c_str() ); // Not yet
-	TString outfilename = Form( "hists_%s.root", infiletag.c_str() );
+	TString outfilename = Form( "minituple_%s.root", infiletag.c_str() );
 	TFile *fout = new TFile( outfilename, "RECREATE" );
 
 	// ----- Run!!! ----- // 
