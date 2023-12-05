@@ -38,6 +38,13 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		"met_Pt", "met_Phi", "met_SumEt", "eventHT"
 	};
 
+	// Add BDT Scores //
+	for( auto bdt_tag: bdt_tags ){
+		myvars_float.push_back( Form("bdtscore_%s", bdt_tag.c_str()) );
+	}
+
+	// Add Physics Variables //
+
 	for( int i=0; i<3; i++ ) {
 		myvars_float.push_back( Form("l1jet%d_Pt", i) );
 		myvars_float.push_back( Form("l1jet%d_E", i) );
@@ -448,6 +455,10 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet100", gLLPDecay_iLLP.at(i))] = LLPIsTruthMatched( i, 100 ).first; 
 		tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet100Eta", gLLPDecay_iLLP.at(i))] = LLPIsTruthMatched( i, 100 ).second;
 	}
+
+	if( EventValidForBDTEval() ){
+		for( auto bdt_tag: bdt_tags ) tree_output_vars_float[Form("bdtscore_%s", bdt_tag.c_str())] = GetBDTScores(bdt_tag);
+	} 
 
 	tree_output[treename]->Fill();
 	

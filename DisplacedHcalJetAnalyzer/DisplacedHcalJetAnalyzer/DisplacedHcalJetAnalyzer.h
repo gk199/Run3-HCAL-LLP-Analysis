@@ -31,21 +31,29 @@
 //#include "Math/GSLMinimizer.h"
 //#include "Minuit2/Minuit2Minimizer.h"
 //#include <Math/Functor.h>
-//#include <TMVA/Reader.h>
+#include <TMVA/Reader.h>
 
 #include <vector>
-#include<algorithm>
+#include <algorithm>
+
 #ifdef __ROOTCLING__
 #pragma link C++ class vector<vector <float> >+;
 #pragma link C++ class vector<vector <int> >+;
 #endif
+
+// TODO: Load bdt variables from xml file manually
+// #include "../../pugixml/pugixml.hpp"
+//gSystem->Load("../../pugixml/pugixml.hpp") //"$PROJECT/lib/libCustomClass.so")
+//R__LOAD_LIBRARY(../../pugixml/pugixml.hpp)
+// R__LOAD_LIBRARY($PROJECT/lib/libCustomClass.so)
+//using namespace pugi;
+
 
 // Header file for the classes stored in the TTree if any.
 #include "vector"
 #include "map"
 #include "iostream"
 #include "iomanip" 
-
 
 class DisplacedHcalJetAnalyzer {
 public :
@@ -54,11 +62,12 @@ public :
 
    // ----- Settings ----- //
 
-   bool debug         = false; 
-   bool print_counts  = false; 
-   bool save_hists    = true;
-   bool save_trees    = true;
-   bool blind_data    = false;
+   bool debug          = false; 
+   bool print_counts   = false; 
+   bool save_hists     = false;
+   bool save_trees     = true;
+   bool save_bdtscores = true;
+   bool blind_data     = false;
 
    float weight = 1;
 
@@ -74,6 +83,13 @@ public :
    map<string, TH1F*> h;
    map<string, TH2F*> h2;
    map<string, TProfile*> hp;
+
+   // ----- TMVA Reader ----- //
+
+   vector<string> bdt_tags;
+   map<string,TMVA::Reader*> bdt_reader;
+   map<string,vector<string>> bdt_var_names;
+   map<string,Float_t> bdt_vars;   
 
    // ----- My Output Tree ----- //
    
@@ -759,6 +775,11 @@ public :
    virtual void   ResetGlobalEventVars();
    virtual bool   PassWPlusJetsSelection();
    virtual float  EventHT();
+   // BDTHelper.cxx
+   virtual void   DeclareTMVAReader();
+   virtual float  GetBDTScores( string bdt_tag );
+   virtual bool   EventValidForBDTEval();
+   vector<string> GetBDTVariableNamesXML( string filepath, bool isSpectator );
    // OutputHelper.cxx
    virtual void   DeclareOutputTrees();
    virtual void   ResetOutputBranches( string treename );
@@ -768,7 +789,7 @@ public :
    virtual void   BookHists();
    virtual void   FillHists(string cat = "");
    virtual void   FillTriggerMatchHists(string cat = "");
-   virtual void   WriteHists();   
+   virtual void   WriteHists(); 
 };
 
 #endif
