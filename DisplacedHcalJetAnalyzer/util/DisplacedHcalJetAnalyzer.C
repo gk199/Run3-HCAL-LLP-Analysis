@@ -13,6 +13,8 @@ using namespace std;
 #include "../src/BDTHelper.cxx"
 #include "../src/TruthInfoHelper.cxx"
 
+gSystem->Load("/Users/kiley/Documents/CMS/WorkingDir/Run3-HCAL-LLP-Analysis/pugixml/pugixml_cpp.so");
+
 /* ====================================================================================================================== */
 void DisplacedHcalJetAnalyzer::Initialize( string infiletag, string infilepath ){
 
@@ -35,7 +37,7 @@ void DisplacedHcalJetAnalyzer( string infiletag = "", string infilepath = "" ){
 
 	clock_t start_clock = clock();
 
-	gSystem->Load("/Users/kiley/Documents/CMS/WorkingDir/Run3-HCAL-LLP-Analysis/pugixml/pugixml_cpp.so");
+	//gSystem->Load("/Users/kiley/Documents/CMS/WorkingDir/Run3-HCAL-LLP-Analysis/pugixml/pugixml_cpp.so");
 	
 	// ----- Get Infile ----- //
 	// NEED TO FIX 
