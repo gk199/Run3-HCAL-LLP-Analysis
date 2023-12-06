@@ -130,6 +130,7 @@ TCut Cut_LLPinHCAL12_Jet0	= 	( "(" + LLP0inHCAL_d12 + AND + Jet0_LLP0 + ")" + 	O
 TCut Cut_LLPinHCAL12_Jet1	= 	( "(" + LLP0inHCAL_d12 + AND + Jet1_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d12 + AND + Jet1_LLP1 + ")" ).Data();
 TCut Cut_LLPinHCAL34_Jet0	= 	( "(" + LLP0inHCAL_d34 + AND + Jet0_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet0_LLP1 + ")" ).Data();
 TCut Cut_LLPinHCAL34_Jet1	= 	( "(" + LLP0inHCAL_d34 + AND + Jet1_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet1_LLP1 + ")" ).Data();
+TCut Cut_LLPinHCAL123_Jet0	= 	( "( (" + LLP0inHCAL_d2 + OR + LLP0inHCAL_d34 + ")" + AND + Jet0_LLP0 + ")" + 	OR + "( (" + LLP1inHCAL_d2 + OR + LLP1inHCAL_d34 + ")" + AND + Jet0_LLP1 + ")" ).Data();
 
 TCut Cut_LLPinCR_Jet0	    = 	( "(" + LLP0inCR + AND + Jet0_LLP0 + ")" + 	        OR + "(" + LLP1inCR + AND + Jet0_LLP1 + ")" ).Data();
 TCut Cut_LLPinCR_Jet1	    = 	( "(" + LLP0inCR + AND + Jet1_LLP0 + ")" + 	        OR + "(" + LLP1inCR + AND + Jet1_LLP1 + ")" ).Data();
