@@ -111,3 +111,8 @@ These are hadd-ed from
 with `* = minituple_v3.0_LLPskimRun2023Bv1_2023_11_09.root, minituple_v3.0_LLPskimRun2023Cv1_2023_11_14.root, minituple_v3.0_LLPskimRun2023Cv3_2023_11_15.root, minituple_v3.0_LLPskimRun2023Cv4_2023_11_16.root, minituple_v3.0_LLPskimRun2023Dv1_2023_11_16.root, minituple_v3.0_LLPskimRun2023Dv2_2023_11_16.root`.
 
 Note that v3 minituples for LLP MC (125GeV) are currently run over v2 ntuples (which don't have the isolation variables, but those are only needed for W+Jets). The W+Jets tree must be commented out for these. The fix for Sphiphi has been added to these minituples as well. 
+
+## V4
+Updates:
+* BDT score added to minituples, based off of BDT weight files in the directory `Run3-HCAL-LLP-Analysis/BDTWeightFiles/v*`
+* Fix for default values of S phi, S eta, and HCAL depth energy fractions (avoid NaN, different default value vs no energy)
