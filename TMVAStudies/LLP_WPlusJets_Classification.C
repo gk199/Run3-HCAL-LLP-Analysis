@@ -374,12 +374,13 @@ int runClassification( TString dir, TString sigTag, TString bkgTag )
    //TCut mycuta; // = "abs(2DSliceRZ_Vr) < 1050 && abs(2DSliceRZ_Vz) < 3000"; // && ph_detector_region == \"BB\"";
    //TCut mycutb = "2DSliceRZ_Vr>0 && abs(ph1_t)<12 && abs(ph2_t)<12 && Hcand_M>60"; // for example: TCut mycutb = "abs(var1)<0.5";
    TCut mycuts = ""; //mycuta && mycutb;
+   TCut mycutb = "";
    // Tell the dataloader how to use the training and testing events
    //
    // If no numbers of events are given, half of the events in the tree are used
    // for training, and the other half for testing:
    //
-   dataloader->PrepareTrainingAndTestTree( mycuts, "SplitMode=random:!V" );
+   // dataloader->PrepareTrainingAndTestTree( mycuts, "SplitMode=random:!V" );
    //
    // To also specify the number of testing events, use:
    //
@@ -387,6 +388,7 @@ int runClassification( TString dir, TString sigTag, TString bkgTag )
    //         "NSigTrain=3000:NBkgTrain=3000:NSigTest=3000:NBkgTest=3000:SplitMode=Random:!V" );
    //    dataloader->PrepareTrainingAndTestTree( mycuts, mycutb,
    //                                     "nTrain_Signal=1000:nTrain_Background=1000:SplitMode=Random:NormMode=NumEvents:!V" );
+   dataloader->PrepareTrainingAndTestTree( mycuts, mycutb, "nTrain_Signal=29000:nTrain_Background=24000:SplitMode=Random:NormMode=NumEvents:!V" );
 
    // ### Book MVA methods
    //
@@ -654,7 +656,8 @@ int LLP_WPlusJets_Classification()
 
    sigTagList.push_back("v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23");
    //sigTagList.push_back("v3.0_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2023_11_29");
-   TString bkgTag = "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23";
+   //TString bkgTag = "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23";
+   TString bkgTag = "v3.0_LLPskim_2023Cv4_2023_11_22";
 
    for (auto tag: sigTagList){
      runClassification(dir, tag, bkgTag);
