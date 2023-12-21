@@ -4,7 +4,8 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader(){
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::DeclareTMVAReader()"<<endl;	
 
 	bdt_tags = {
-		"test"
+		"350GeV", "125GeV"
+		//"test" // name of file in "BDTWeightFiles/v0.0/weights_*"
 	};
 
 	if( !save_bdtscores ) bdt_tags.clear();
@@ -36,7 +37,7 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader(){
 		bdt_var_names[bdt_tag] = {
 			"jet0_Pt",
 			"jet0_Eta",
-			"jet0_Phi",
+			//"jet0_Phi",
 			"jet0_E",
 			"jet0_ChargedHadEFrac",
 			"jet0_NeutralHadEFrac",
@@ -59,14 +60,14 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader(){
 		// Read in spectators (to do... remove!)
 
 		vector<string> bdt_var_spectators = {
-			"LLP0_Pt",
-			"LLP0_E",
-			"LLP0_Beta",
-			"LLP0_TravelTime",
-			"LLP0_DecayR",
-			"LLP0_DecayX",
-			"LLP0_DecayY",
-			"LLP0_DecayZ"
+			// "LLP0_Pt",
+			// "LLP0_E",
+			// "LLP0_Beta",
+			// "LLP0_TravelTime",
+			// "LLP0_DecayR",
+			// "LLP0_DecayX",
+			// "LLP0_DecayY",
+			// "LLP0_DecayZ"
 		};
 
 		// TODO bdt_var_names[bdt_tag] = GetBDTVariableNamesXML( filename, true );

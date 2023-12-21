@@ -181,24 +181,18 @@ int runClassification( TString dir, TString sigTag, TString bkgTag )
    // Define Selections
 
    TCut selections_all = "jet0_Pt > 40 && abs(jet0_Eta) < 1.26";
-   //TCut selections_safety = "jet0_EtaSpread > 0 && jet0_NeutralHadEFrac/jet0_ChargedHadEFrac > 0 && jet0_NeutralHadEFrac/jet0_ChargedHadEFrac < 1e9 && jet0_EnergyFrac_Depth1 > 0 && jet0_EnergyFrac_Depth1 < 1 && jet0_Track1Pt > 0";
-   //TCut selections_safety = "jet0_EtaSpread > 0 && jet0_NeutralHadEFrac >= 0 && jet0_ChargedHadEFrac >= 0 && jet0_Track0Pt > 0 && jet0_Track0dR > 0 && jet0_EnergyFrac_Depth1 + jet0_EnergyFrac_Depth2 + jet0_EnergyFrac_Depth3 + jet0_EnergyFrac_Depth4 > 0 && jet0_EnergyFrac_Depth1 + jet0_EnergyFrac_Depth2 + jet0_EnergyFrac_Depth3 + jet0_EnergyFrac_Depth4 <= 1 && jet0_S_phiphi > 0 && jet0_LeadingRechitE > 0 ";
-   // above safety selections works! (gives warnings though)
 
-   TCut selections_NaN_depth1 = "!(TMath::IsNaN(jet0_EnergyFrac_Depth1)) && jet0_EnergyFrac_Depth1 >= 0 && jet0_EnergyFrac_Depth1 <= 1";
-   TCut selections_NaN_depth2 = "!(TMath::IsNaN(jet0_EnergyFrac_Depth2)) && jet0_EnergyFrac_Depth2 >= 0 && jet0_EnergyFrac_Depth2 <= 1";
-   TCut selections_NaN_depth3 = "!(TMath::IsNaN(jet0_EnergyFrac_Depth3)) && jet0_EnergyFrac_Depth3 >= 0 && jet0_EnergyFrac_Depth3 <= 1";
-   TCut selections_NaN_depth4 = "!(TMath::IsNaN(jet0_EnergyFrac_Depth4)) && jet0_EnergyFrac_Depth4 >= 0 && jet0_EnergyFrac_Depth4 <= 1";
-   //TCut selections_NaN_Sphiphi = "!(TMath::IsNaN(jet0_S_phiphi))"; // any cut on S_phiphi breaks the MVA, implies major issues with this variable 
-   //TCut selections_jetBasics = "jet0_Phi > -1 && jet0_Phi < 73 && jet0_E > 0 && jet0_E < 900";
-   TCut selections_jetEnergy = "jet0_ChargedHadEFrac >= 0 && jet0_ChargedHadEFrac <= 1 && jet0_NeutralHadEFrac >= 0 && jet0_NeutralHadEFrac <= 1";
-   TCut selections_trackVars = "jet0_Track0Pt > 0 && jet0_Track0Pt < 900 && jet0_Track0dR >= 0 && jet0_Track0dR < 1";
-   TCut selections_rechitVar1= selections_NaN_depth1 + selections_NaN_depth2 + selections_NaN_depth3 + selections_NaN_depth4;
-   TCut selections_rechitVar2= "jet0_S_phiphi > 0 && jet0_S_phiphi < 900 && jet0_LeadingRechitE > 0 && jet0_LeadingRechitE < 900";
+   TCut selections_depth1 = "jet0_EnergyFrac_Depth1 >= 0 && jet0_EnergyFrac_Depth1 <= 1";
+   TCut selections_depth2 = "jet0_EnergyFrac_Depth2 >= 0 && jet0_EnergyFrac_Depth2 <= 1";
+   TCut selections_depth3 = "jet0_EnergyFrac_Depth3 >= 0 && jet0_EnergyFrac_Depth3 <= 1";
+   TCut selections_depth4 = "jet0_EnergyFrac_Depth4 >= 0 && jet0_EnergyFrac_Depth4 <= 1";
+   TCut selection_Sphiphi = "jet0_S_phiphi > 0";
+   TCut selections_rechitVar1= selections_depth1 + selections_depth2 + selections_depth3 + selections_depth4 + selection_Sphiphi;
    TCut selections_safety = selections_rechitVar1;
-   // above safety selections works! (gives warnings though)
 
-   // using "jet0_EnergyFrac_Depth4 > 0" causes the fatal error of "<GetSeparation> signal and background histograms have different or invalid dimensions". >= is more ok...
+   TCut selections_trackVars = "jet0_Track0Pt > 0 && jet0_Track0Pt < 900 && jet0_Track0dR >= 0 && jet0_Track0dR < 1";
+   TCut selections_rechitVar2= "jet0_S_phiphi > 0 && jet0_S_phiphi < 900 && jet0_LeadingRechitE > 0 && jet0_LeadingRechitE < 900";
+
    TCut selections_background = selections_all + selections_safety;
    TCut selections_signal = selections_all + selections_safety + Cut_LLPinHCAL_Jet0; // LLP decays in HCAL and is matched to jet 0
 
@@ -262,39 +256,39 @@ int runClassification( TString dir, TString sigTag, TString bkgTag )
    // jet kinematics // *************************
    dataloader->AddVariable( "jet0_Pt", "jet0_Pt", "GeV", 'F' );
    dataloader->AddVariable( "jet0_Eta", "jet0_Eta", "", 'F' );
-   dataloader->AddVariable( "jet0_Phi", "jet0_Phi", "", 'F' );
+   // dataloader->AddVariable( "jet0_Phi", "jet0_Phi", "", 'F' );                                 // removing because there is a difference in pi and -pi in data (W+jets)
    dataloader->AddVariable( "jet0_E", "jet0_E", "GeV", 'F' );
    // track-based variables // *************************
    dataloader->AddVariable( "jet0_ChargedHadEFrac", "jet0_ChargedHadEFrac", "", 'F' );
    dataloader->AddVariable( "jet0_NeutralHadEFrac", "jet0_NeutralHadEFrac", "", 'F' );
    dataloader->AddVariable( "jet0_Track0Pt", "jet0_Track0Pt", "GeV", 'F' );
+   dataloader->AddVariable( "jet0_Track0dR", "jet0_Track0dR", "", 'F' );
    //dataloader->AddVariable( "jet0_Track1Pt", "jet0_Track1Pt", "GeV", 'F' );
    //dataloader->AddVariable( "jet0_Track2Pt", "jet0_Track2Pt", "GeV", 'F' );
-   dataloader->AddVariable( "jet0_Track0dR", "jet0_Track0dR", "", 'F' );
    //dataloader->AddVariable( "jet0_EleEFrac", "jet0_EleEFrac", "", 'F' );
    //dataloader->AddVariable( "jet0_HoverE", "jet0_HoverE", "", 'F' );
    //dataloader->AddVariable( "log(jet0_HoverE)", "jet0_LogHoverE", "", 'F' );
-   // dataloader->AddVariable( "jet0_NeutralHadEFrac/jet0_ChargedHadEFrac", "jet0_HadNeutralOverCharged", "", 'F');
    // rechit-based variables // *************************
-   dataloader->AddVariable( "jet0_EnergyFrac_Depth1", "jet0_EnergyFrac_Depth1", "", 'F' ); // got warnings on decorrelation matrix with this one, with and without NaN
+   dataloader->AddVariable( "jet0_EnergyFrac_Depth1", "jet0_EnergyFrac_Depth1", "", 'F' );
    dataloader->AddVariable( "jet0_EnergyFrac_Depth2", "jet0_EnergyFrac_Depth2", "", 'F' );
    dataloader->AddVariable( "jet0_EnergyFrac_Depth3", "jet0_EnergyFrac_Depth3", "", 'F' );
-   //dataloader->AddVariable( "jet0_EnergyFrac_Depth4", "jet0_EnergyFrac_Depth4", "", 'F' );
-   dataloader->AddVariable( "jet0_S_phiphi", "jet0_S_phiphi", "", 'F' ); // very problematic!!!!
+   //dataloader->AddVariable( "jet0_EnergyFrac_Depth4", "jet0_EnergyFrac_Depth4", "", 'F' );       // redundant! 
+   dataloader->AddVariable( "jet0_S_phiphi", "jet0_S_phiphi", "", 'F' );
    dataloader->AddVariable( "jet0_LeadingRechitE", "jet0_LeadingRechtE", "", 'F' );
 
    // You can add so-called "Spectator variables", which are not used in the MVA training,
    // but will appear in the final "TestTree" produced by TMVA. This TestTree will contain the
    // input variables, the response values of all trained MVAs, and the spectator variables
 
-   dataloader->AddSpectator( "LLP0_Pt", "LLP0_Pt", "GeV", 'F' );
-   dataloader->AddSpectator( "LLP0_E", "LLP0_E", "GeV", 'F' );
-   dataloader->AddSpectator( "LLP0_Beta", "LLP0_Beta", "", 'F' );
-   dataloader->AddSpectator( "LLP0_TravelTime", "LLP0_TravelTime", "ns", 'F' );
-   dataloader->AddSpectator( "LLP0_DecayR", "LLP0_DecayR", "cm", 'F' );
-   dataloader->AddSpectator( "LLP0_DecayX", "LLP0_DecayX", "cm", 'F' );
-   dataloader->AddSpectator( "LLP0_DecayY", "LLP0_DecayY", "cm", 'F' );
-   dataloader->AddSpectator( "LLP0_DecayZ", "LLP0_DecayZ", "cm", 'F' );
+   // removing spectator variables 
+   // dataloader->AddSpectator( "LLP0_Pt", "LLP0_Pt", "GeV", 'F' );
+   // dataloader->AddSpectator( "LLP0_E", "LLP0_E", "GeV", 'F' );
+   // dataloader->AddSpectator( "LLP0_Beta", "LLP0_Beta", "", 'F' );
+   // dataloader->AddSpectator( "LLP0_TravelTime", "LLP0_TravelTime", "ns", 'F' );
+   // dataloader->AddSpectator( "LLP0_DecayR", "LLP0_DecayR", "cm", 'F' );
+   // dataloader->AddSpectator( "LLP0_DecayX", "LLP0_DecayX", "cm", 'F' );
+   // dataloader->AddSpectator( "LLP0_DecayY", "LLP0_DecayY", "cm", 'F' );
+   // dataloader->AddSpectator( "LLP0_DecayZ", "LLP0_DecayZ", "cm", 'F' );
 
    // global event weights per tree (see below for setting event-wise weights)
    // Double_t signalTestWeight     = 1.0;
@@ -380,7 +374,7 @@ int runClassification( TString dir, TString sigTag, TString bkgTag )
    // If no numbers of events are given, half of the events in the tree are used
    // for training, and the other half for testing:
    //
-   // dataloader->PrepareTrainingAndTestTree( mycuts, "SplitMode=random:!V" );
+   dataloader->PrepareTrainingAndTestTree( mycuts, "SplitMode=random:!V" );
    //
    // To also specify the number of testing events, use:
    //
@@ -388,7 +382,7 @@ int runClassification( TString dir, TString sigTag, TString bkgTag )
    //         "NSigTrain=3000:NBkgTrain=3000:NSigTest=3000:NBkgTest=3000:SplitMode=Random:!V" );
    //    dataloader->PrepareTrainingAndTestTree( mycuts, mycutb,
    //                                     "nTrain_Signal=1000:nTrain_Background=1000:SplitMode=Random:NormMode=NumEvents:!V" );
-   dataloader->PrepareTrainingAndTestTree( mycuts, mycutb, "nTrain_Signal=29000:nTrain_Background=24000:SplitMode=Random:NormMode=NumEvents:!V" );
+   // dataloader->PrepareTrainingAndTestTree( mycuts, mycutb, "nTrain_Signal=29000:nTrain_Background=24000:SplitMode=Random:NormMode=NumEvents:!V" );
 
    // ### Book MVA methods
    //
