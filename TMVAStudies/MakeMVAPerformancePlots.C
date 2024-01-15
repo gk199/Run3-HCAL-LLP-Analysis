@@ -1,4 +1,3 @@
-// root -l /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/MakeMVAPerformancePlots.C+'("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/Run/minituple_350GeV.root","All",-1)'
 // root -l /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/MakeMVAPerformancePlots.C+'("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_mh350.root","All",-1)'
 
 // void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option)
@@ -35,6 +34,7 @@
 #include <sstream>                  // class for parsing strings
 #include "TLegend.h"
 #include "TEfficiency.h"
+#include "THStack.h"
 
 #endif
 
@@ -68,7 +68,6 @@ TTree* getTreeFromFile(const char* infname, const char* tname)
   }
   assert(t);
 
-
   if (verbose) {
     cout << "---\tRecovered tree " << t->GetName()
 	 << " with "<< t->GetEntries() << " entries" << endl;
@@ -76,7 +75,6 @@ TTree* getTreeFromFile(const char* infname, const char* tname)
   
   return t;
 }
-
 
 //*************************************************************************************************
 //
@@ -114,7 +112,6 @@ TGraphAsymmErrors* MakeSigEffVsBkgEffGraph(TH1F* signalHist, TH1F* bkgHist, stri
     n2 = TMath::Nint(NSigTotal);
     ratio = n1/n2;
 
-
     SigEff[b] = ratio;
     SigEffErrLow[b] = 0;
     SigEffErrHigh[b] = 0;
@@ -144,8 +141,6 @@ TGraphAsymmErrors* MakeSigEffVsBkgEffGraph(TH1F* signalHist, TH1F* bkgHist, stri
 //
 //*************************************************************************************************
 Double_t FindCutValueAtFixedEfficiency(TH1F* signalHist, Double_t targetSignalEff ) {
-  //Make Met Plots
-
 
   Double_t targetCutValue = -9999;
   Double_t bestCurrentSignalEff = 0;
@@ -155,7 +150,6 @@ Double_t FindCutValueAtFixedEfficiency(TH1F* signalHist, Double_t targetSignalEf
   for (UInt_t q=0; q < nPoints+2; ++q) {
     NSigTotal += signalHist->GetBinContent(q);
   }
-
 
   for(UInt_t b=0; b < nPoints; ++b) {
     Double_t nsig = 0;
@@ -175,13 +169,10 @@ Double_t FindCutValueAtFixedEfficiency(TH1F* signalHist, Double_t targetSignalEf
   return targetCutValue;
 }
 
-
 //*************************************************************************************************
 //
 //*************************************************************************************************
 Double_t FindBkgEffAtFixedSignalEfficiency(TH1F* signalHist, TH1F* bkgHist, Double_t targetSignalEff ) {
-  //Make Met Plots
-
 
   Double_t targetBkgEff = 0;
   Double_t bestCurrentSignalEff = 0;
@@ -193,7 +184,6 @@ Double_t FindBkgEffAtFixedSignalEfficiency(TH1F* signalHist, TH1F* bkgHist, Doub
     NSigTotal += signalHist->GetBinContent(q);
     NBkgTotal += bkgHist->GetBinContent(q);
   }
-
 
   for(UInt_t b=0; b < nPoints; ++b) {
     Double_t nsig = 0;
@@ -219,12 +209,10 @@ Double_t FindBkgEffAtFixedSignalEfficiency(TH1F* signalHist, TH1F* bkgHist, Doub
   return targetBkgEff;
 }
 
-
 //*************************************************************************************************
 //
 //*************************************************************************************************
 Double_t FindSigEffAtFixedBkgEfficiency(TH1F* signalHist, TH1F* bkgHist, Double_t targetBkgEff ) {
-  //Make Met Plots
 
   Double_t targetSignalEff = 0;
   Double_t bestCurrentBkgEff = 0;
@@ -236,7 +224,6 @@ Double_t FindSigEffAtFixedBkgEfficiency(TH1F* signalHist, TH1F* bkgHist, Double_
     NSigTotal += signalHist->GetBinContent(q);
     NBkgTotal += bkgHist->GetBinContent(q);
   }
-
 
   for(UInt_t b=0; b < nPoints; ++b) {
     Double_t nsig = 0;
@@ -273,34 +260,16 @@ void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option)
   //--------------------------------------------------------------------------------------------------------------
   // Histograms
   //==============================================================================================================  
-  TH1F *Signal_MVA = new TH1F(("Signal_MVA"+label).c_str(), "; IDMVATrig ; Number of Events ",  10000, -2 , 2);
-  TH1F *EleIDMVANonTrig_Real = new TH1F(("EleIDMVANonTrig_Real"+label).c_str(), "; IDMVANonTrig ; Number of Events ",  10000, -2 , 2);
-  TH1F *Background_MVA = new TH1F(("Background_MVA"+label).c_str(), "; IDMVATrig ; Number of Events ",  10000, -2 , 2);
-  TH1F *EleIDMVANonTrig_Fake = new TH1F(("EleIDMVANonTrig_Fake"+label).c_str(), "; IDMVANonTrig ; Number of Events ",  10000, -2 , 2);
+  TH1F *Signal_MVA = new TH1F(("Signal_MVA"+label).c_str(), "LLP Signal ; MVA (BDT) score for LLP signal ; Number of Events ",  5500, -1.1 , 1.1);
+  TH1F *Background_MVA = new TH1F(("Background_MVA"+label).c_str(), "W+Jets Background ; MVA (BDT) score for W+jets background ; Number of Events ",  5500, -1.1 , 1.1);
 
   Double_t RealElectrons = 0;
   Double_t FakeElectrons = 0;
   Double_t RealElectronPassCSA14Tight = 0;
   Double_t FakeElectronPassCSA14Tight = 0;
-  Double_t RealElectronPassCSA14Loose = 0;
-  Double_t FakeElectronPassCSA14Loose = 0;
-  Double_t RealElectronPassCSA14Veto = 0;
-  Double_t FakeElectronPassCSA14Veto = 0;
-
-  Double_t RealElectronPassIDMVANonTrigVeto = 0;
-  Double_t FakeElectronPassIDMVANonTrigVeto = 0;
-  Double_t RealElectronPassIDMVATrigTight = 0;
-  Double_t FakeElectronPassIDMVATrigTight = 0;
 
   //*****************************************************************************************
   //*****************************************************************************************
-  //TTree *tree = (TTree*)(InputFile.c_str()).Get("NoSel");
-  // TTree *tree = getTreeFromFile(InputFile.c_str(), "NoSel"); // this is tree name, branches of interest (bdt score) are in this tree
-  // float score350;
-  // float score125;
-  // tree->SetBranchAddress("bdtscore_350GeV", &score350);
-  // tree->SetBranchAddress("bdtscore_125GeV", &score125);
-
   TTree *tree = getTreeFromFile(InputFile.c_str(), "TestTree"); // TTree options are TestTree and TrainTree. BDTWeightFilesTest is a TDirectoryFile
 
   int sig_bkg;
@@ -332,7 +301,6 @@ void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option)
 
   } 
   
-  
 //   //*****************************************************************************************
 //   //Current Working Points
 //   //*****************************************************************************************
@@ -340,77 +308,39 @@ void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option)
 //   cout << "CSA14 Tight Fake Electron Efficiency : " << FakeElectronPassCSA14Tight << " / " << FakeElectrons << " = " << FakeElectronPassCSA14Tight/FakeElectrons << endl;
 //   TGraphAsymmErrors* ROC_CSA14TightWP = MakeCurrentWPSigEffVsBkgEffGraph(RealElectronPassCSA14Tight/RealElectrons , FakeElectronPassCSA14Tight/FakeElectrons, "ROC_CSA14TightWP"+label);
 
-//   cout << "CSA14 Loose Real Electron Efficiency : " << RealElectronPassCSA14Loose << " / " << RealElectrons << " = " << RealElectronPassCSA14Loose/RealElectrons << endl;
-//   cout << "CSA14 Loose Fake Electron Efficiency : " << FakeElectronPassCSA14Loose << " / " << FakeElectrons << " = " << FakeElectronPassCSA14Loose/FakeElectrons << endl;
-//   TGraphAsymmErrors* ROC_CSA14LooseWP = MakeCurrentWPSigEffVsBkgEffGraph(RealElectronPassCSA14Loose/RealElectrons , FakeElectronPassCSA14Loose/FakeElectrons, "ROC_CSA14LooseWP"+label);
-
-//   cout << "CSA14 Veto Real Electron Efficiency : " << RealElectronPassCSA14Veto << " / " << RealElectrons << " = " << RealElectronPassCSA14Veto/RealElectrons << endl;
-//   cout << "CSA14 Veto Fake Electron Efficiency : " << FakeElectronPassCSA14Veto << " / " << FakeElectrons << " = " << FakeElectronPassCSA14Veto/FakeElectrons << endl;
-//   TGraphAsymmErrors* ROC_CSA14VetoWP = MakeCurrentWPSigEffVsBkgEffGraph(RealElectronPassCSA14Veto/RealElectrons , FakeElectronPassCSA14Veto/FakeElectrons, "ROC_CSA14VetoWP"+label);
-
-
 //   Double_t BkgEffCSA14Tight = FakeElectronPassCSA14Tight/FakeElectrons;
 //   Double_t SigEffCSA14Tight = RealElectronPassCSA14Tight/RealElectrons;
-//   Double_t BkgEffCSA14Veto = FakeElectronPassCSA14Veto/FakeElectrons;
-//   Double_t SigEffCSA14Veto = RealElectronPassCSA14Veto/RealElectrons;
 
 //   cout << "**********************\n";
 //   Double_t SigEffIDMVATrig_AtTightBkgEff = FindSigEffAtFixedBkgEfficiency(Signal_MVA, Background_MVA, BkgEffCSA14Tight);
-//   Double_t SigEffIDMVANonTrig_AtTightBkgEff = FindSigEffAtFixedBkgEfficiency(EleIDMVANonTrig_Real, EleIDMVANonTrig_Fake, BkgEffCSA14Tight);
 //   Double_t BkgEffIDMVATrig_AtTightSigEff = FindBkgEffAtFixedSignalEfficiency(Signal_MVA, Background_MVA, SigEffCSA14Tight);
-//   Double_t BkgEffIDMVANonTrig_AtTightSigEff = FindBkgEffAtFixedSignalEfficiency(EleIDMVANonTrig_Real, EleIDMVANonTrig_Fake, SigEffCSA14Tight);
 //   cout << "Signal Efficiency (wrt CSA14Tight Cut-based) for : same bkg \n";
 //   cout << "IDMVATrig : " << SigEffIDMVATrig_AtTightBkgEff/SigEffCSA14Tight <<  endl;
-//   cout << "IDMVANonTrig : " << SigEffIDMVANonTrig_AtTightBkgEff/SigEffCSA14Tight <<  endl;
 //   cout << "Bkg Efficiency (wrt CSA14Veto Cut-based) for same sig eff \n";
 //   cout << "IDMVATrig : " << BkgEffIDMVATrig_AtTightSigEff/BkgEffCSA14Tight << endl;
-//   cout << "IDMVANonTrig : " << BkgEffIDMVANonTrig_AtTightSigEff/BkgEffCSA14Tight << endl;
 //   cout << "**********************\n";
 
 //   cout << "**********************\n";
 //   Double_t BkgEffIDMVATrig_AtVetoSigEff = FindBkgEffAtFixedSignalEfficiency(Signal_MVA, Background_MVA, SigEffCSA14Veto);
-//   Double_t BkgEffIDMVANonTrig_AtVetoSigEff = FindBkgEffAtFixedSignalEfficiency(EleIDMVANonTrig_Real, EleIDMVANonTrig_Fake, SigEffCSA14Veto);
 //   Double_t SigEffIDMVATrig_AtVetoBkgEff = FindSigEffAtFixedBkgEfficiency(Signal_MVA, Background_MVA, BkgEffCSA14Veto);
-//   Double_t SigEffIDMVANonTrig_AtVetoBkgEff = FindSigEffAtFixedBkgEfficiency(EleIDMVANonTrig_Real, EleIDMVANonTrig_Fake, BkgEffCSA14Veto);
 //   cout << "Sig Efficiency (wrt CSA14Veto Cut-based) for same bkg eff \n";
 //   cout << "IDMVATrig : " << SigEffIDMVATrig_AtVetoBkgEff/SigEffCSA14Veto << endl;
-//   cout << "IDMVANonTrig : " << SigEffIDMVANonTrig_AtVetoBkgEff/SigEffCSA14Veto << endl;
 //   cout << "Bkg Efficiency (wrt CSA14Veto Cut-based) for same sig eff \n";
 //   cout << "IDMVATrig : " << BkgEffIDMVATrig_AtVetoSigEff/BkgEffCSA14Veto << endl;
-//   cout << "IDMVANonTrig : " << BkgEffIDMVANonTrig_AtVetoSigEff/BkgEffCSA14Veto << endl;
 //   cout << "**********************\n";
-
-//   cout << "IDMVANonTrig Veto Real Electron Efficiency : " << RealElectronPassIDMVANonTrigVeto << " / " << RealElectrons << " = " << RealElectronPassIDMVANonTrigVeto/RealElectrons << endl;
-//   cout << "IDMVANonTrig Veto Fake Electron Efficiency : " << FakeElectronPassIDMVANonTrigVeto << " / " << FakeElectrons << " = " << FakeElectronPassIDMVANonTrigVeto/FakeElectrons << endl;
-//   TGraphAsymmErrors* ROC_IDMVANonTrigVetoWP = MakeCurrentWPSigEffVsBkgEffGraph(RealElectronPassIDMVANonTrigVeto/RealElectrons , FakeElectronPassIDMVANonTrigVeto/FakeElectrons, "ROC_IDMVANonTrigVetoWP"+label);
-
-//   cout << "IDMVATrig Tight Real Electron Efficiency : " << RealElectronPassIDMVATrigTight << " / " << RealElectrons << " = " << RealElectronPassIDMVATrigTight/RealElectrons << endl;
-//   cout << "IDMVATrig Tight Veto Fake Electron Efficiency : " << FakeElectronPassIDMVATrigTight << " / " << FakeElectrons << " = " << FakeElectronPassIDMVATrigTight/FakeElectrons << endl;
-//   TGraphAsymmErrors* ROC_IDMVATrigTightWP = MakeCurrentWPSigEffVsBkgEffGraph(RealElectronPassIDMVATrigTight/RealElectrons , FakeElectronPassIDMVATrigTight/FakeElectrons, "ROC_IDMVATrigTightWP"+label);
-
 
    //*****************************************************************************************
    //Make ROC curves
    //*****************************************************************************************
-   TGraphAsymmErrors* ROC_IDMVATrig = MakeSigEffVsBkgEffGraph(Signal_MVA, Background_MVA, "ROC_IDMVATrig"+label );
-//   TGraphAsymmErrors* ROC_IDMVANonTrig = MakeSigEffVsBkgEffGraph(EleIDMVANonTrig_Real, EleIDMVANonTrig_Fake, "ROC_IDMVANonTrig"+label );
-
+   TGraphAsymmErrors* ROC_MVA_LLPWjets = MakeSigEffVsBkgEffGraph(Signal_MVA, Background_MVA, "ROC_MVA_LLP_W+jets"+label );
 
 //   //*****************************************************************************************
-//   //Find Cut with same signal efficiency Make ROC curves
+//   //Find Cut with same signal efficiency
 //   //*****************************************************************************************
 //   Double_t CutValue_IDMVATrig_SameSig = FindCutValueAtFixedEfficiency(Signal_MVA, SigEffCSA14Tight );
 //   Double_t CutValue_IDMVATrig_SameBkg = FindCutValueAtFixedEfficiency(Background_MVA, BkgEffCSA14Tight );
 //   cout << "IDMVATrig Cut Value @ Same Cut-Based Tight Sig Eff: " << CutValue_IDMVATrig_SameSig << endl;
 //   cout << "IDMVATrig Cut Value @ Same Cut-Based Tight Bkg Eff: " << CutValue_IDMVATrig_SameBkg << endl;
-
-//   Double_t CutValue_IDMVANonTrig_SameSig = FindCutValueAtFixedEfficiency(EleIDMVANonTrig_Real, SigEffCSA14Veto );
-//   Double_t CutValue_IDMVANonTrig_SameBkg = FindCutValueAtFixedEfficiency(EleIDMVANonTrig_Fake, BkgEffCSA14Veto );
-//   cout << "IDMVANonTrig Cut Value @ Same Cut-Based Veto Sig Eff: " << CutValue_IDMVANonTrig_SameSig << endl;
-//   cout << "IDMVANonTrig Cut Value @ Same Cut-Based Veto Bkg Eff: " << CutValue_IDMVANonTrig_SameBkg << endl;
-
-//   Double_t CutValue_IDMVANonTrig_HalfBkg = FindCutValueAtFixedEfficiency(EleIDMVANonTrig_Fake, 0.5*FakeElectronPassIDMVANonTrigVeto/FakeElectrons );
-//   cout << "IDMVANonTrig Cut Value @ 50% IDMVA NonTrig Veto Bkg Eff: " << CutValue_IDMVANonTrig_HalfBkg << endl;
 
   TLegend* legend;
   TCanvas* cv;
@@ -429,13 +359,9 @@ void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option)
   GraphLabels.clear();
   plotname = "LLP_WJets_MVA"+label;
 
-  ROCGraphs.push_back(ROC_IDMVATrig);
-  GraphLabels.push_back("IDMVATrig");
+  ROCGraphs.push_back(ROC_MVA_LLPWjets);
+  GraphLabels.push_back("MVA LLP vs W+jets");
   colors.push_back(kBlue);
-  
-  // ROCGraphs.push_back(ROC_IDMVANonTrig);
-  // GraphLabels.push_back("IDMVANonTrig");
-  // colors.push_back(kGreen+2);
 
   //*****************************************************************************************
   Double_t xmin = 0.0;
@@ -465,30 +391,29 @@ void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option)
     }
   }
 
-  // legend->AddEntry(ROC_CSA14LooseWP, "CSA14Loose WP", "P");
-  // ROC_CSA14LooseWP->SetFillColor(kBlue);
-  // ROC_CSA14LooseWP->SetMarkerColor(kBlue);
-  // ROC_CSA14LooseWP->SetMarkerStyle(34);
-  // ROC_CSA14LooseWP->SetMarkerSize(2.5);
-  // ROC_CSA14LooseWP->Draw("Psame");
-
-  // legend->AddEntry(ROC_CSA14VetoWP, "CSA14Veto WP", "P");
-  // ROC_CSA14VetoWP->SetFillColor(kGreen+3);
-  // ROC_CSA14VetoWP->SetMarkerColor(kGreen+3);
-  // ROC_CSA14VetoWP->SetMarkerStyle(34);
-  // ROC_CSA14VetoWP->SetMarkerSize(2.5);
-  // ROC_CSA14VetoWP->Draw("Psame");
-
-  //  legend->AddEntry(ROC_IDMVANonTrigVetoWP, "IDMVANonTrigVeto WP", "P");
-  //  ROC_IDMVANonTrigVetoWP->SetFillColor(kBlack);
-  //  ROC_IDMVANonTrigVetoWP->SetMarkerColor(kBlack);
-  //  ROC_IDMVANonTrigVetoWP->SetMarkerStyle(34);
-  //  ROC_IDMVANonTrigVetoWP->SetMarkerSize(2.5);
-  //  ROC_IDMVANonTrigVetoWP->Draw("Psame");
+  // legend->AddEntry(ROC_CSA14TightWP, "CSA14Tight WP", "P");
+  // ROC_CSA14TightWP->SetFillColor(kBlue);
+  // ROC_CSA14TightWP->SetMarkerColor(kBlue);
+  // ROC_CSA14TightWP->SetMarkerStyle(34);
+  // ROC_CSA14TightWP->SetMarkerSize(2.5);
+  // ROC_CSA14TightWP->Draw("Psame");
 
   legend->Draw();
   
-  cv->SaveAs(("ROCGraphs_" + plotname + ".gif").c_str());
+  cv->SaveAs(("ROCGraphs_" + plotname + ".png").c_str());
 
-//   gBenchmark->Show("WWTemplate");       
+  //*****************************************************************************************
+  // Overlay signal and background BDT scores
+  //*****************************************************************************************
+  THStack *hs = new THStack("hs", "Signal and Background BDT Scores ; BDT Score ; Number of Entries");
+  Signal_MVA->SetFillColor(kBlue);
+  Background_MVA->SetFillColor(kRed);
+  Signal_MVA->Rebin(20);
+  Background_MVA->Rebin(20);
+  hs->Add(Signal_MVA);
+  hs->Add(Background_MVA);
+  hs->Draw("bar1 nostack");
+  gPad->BuildLegend(0.65,0.65,0.85,0.85,"");
+  cv->SaveAs(("BDTscore_" + plotname + ".png").c_str());
+
 } 
