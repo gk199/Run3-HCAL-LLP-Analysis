@@ -20,12 +20,12 @@ source display_gui.sh
 
 **4. Plot Output:**
 
-Run the plotting script over the output root file from TMVA in `BDTWeightFilesTest/Test.root`. The script plots the BDT scores (overlayed for signal and background), and a ROC curve (with and without background in log scale). Printouts are also made to quantify efficiencies at given backgrounds, etc. 
-```
-root -l /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/MakeMVAPerformancePlots.C+'("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_mh350.root","mh350",-1)'
-```
-Improvements to be made: overlay plots for 125 and 350 GeV. 
+Run the plotting script over the output root file from TMVA in `BDTWeightFilesTest/Test.root`. The script plots the BDT scores (overlayed for signal and background), and a ROC curve (with and without background in log scale). The ROC curve is made for each input file, and overlayed for both of them. Printouts are also made to quantify efficiencies at given backgrounds, etc. Arguments are:
 
+Input file 1, label 1, color 1, input file 2, label 2, color 2. An example of running is:
+```
+root -l /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/MakeMVAPerformancePlots.C+'("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_mh350.root","350",30,"/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_mh125.root","125",38)'
+```
 
 ## Documentation
 [Official documentation](https://root.cern.ch/download/doc/tmva/TMVAUsersGuide.pdf)

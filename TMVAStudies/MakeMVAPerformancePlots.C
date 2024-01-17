@@ -1,6 +1,6 @@
-// root -l /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/MakeMVAPerformancePlots.C+'("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_mh350.root","All",-1)'
+// root -l /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/MakeMVAPerformancePlots.C+'("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_mh350.root","350",30,"/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_mh125.root","125",38)'
 
-// void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option)
+// void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option, string InputFile2, string Label2, Int_t Option2)
 //================================================================================================
 //
 // HWW selection macro
@@ -253,9 +253,30 @@ Double_t FindSigEffAtFixedBkgEfficiency(TH1F* signalHist, TH1F* bkgHist, Double_
   return targetSignalEff;
 }
 
+vector<TGraphAsymmErrors*> ROCGraphs;
+vector<string> GraphLabels;
+vector<Int_t> colors;
+vector<string> PlotnameSpecific;
+TLegend* legend;
+TCanvas* cv;
+
+void SetupPlots()
+{
+  ROCGraphs.clear();
+  GraphLabels.clear();
+  PlotnameSpecific.clear();
+
+  legend = new TLegend(0.5,0.14,0.94,0.44);
+  legend->SetTextSize(0.03);
+  legend->SetBorderSize(0);
+  legend->SetFillStyle(0);
+
+  cv = new TCanvas("cv", "cv", 800, 600);
+}
+
 //*************************************************************************************************
 //*************************************************************************************************
-void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option)
+void BDTPerformancePlots(string InputFile, string Label, Int_t Option)
 {  
 
   string label = "";
@@ -307,6 +328,7 @@ void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option)
   //*****************************************************************************************
   // Current Working Points
   //*****************************************************************************************
+  cout << "Efficiencies for label = " << Label << endl;
   cout << "Signal efficiency at background of 0.001  : " << FindSigEffAtFixedBkgEfficiency(Signal_MVA, Background_MVA, 0.001) <<  endl;
   cout << "Signal efficiency at background of 0.0001  : " << FindSigEffAtFixedBkgEfficiency(Signal_MVA, Background_MVA, 0.0001) <<  endl;
   cout << "Signal efficiency at background of 0.00001  : " << FindSigEffAtFixedBkgEfficiency(Signal_MVA, Background_MVA, 0.00001) <<  endl;
@@ -326,48 +348,50 @@ void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option)
    // return a vector of TGraphAsymmErrors, sig vs bkg, sig vs bkg rej, sig vs inverse bkg eff
    TGraphAsymmErrors* ROC_sigEffBkgEff = MakeSigEffVsBkgEffGraph(Signal_MVA, Background_MVA, "ROC_MVA_LLP_W+jets"+label );
 
-  TLegend* legend;
-  TCanvas* cv;
+  TLegend* legend_indiv;
+  TCanvas* cv_indiv;
   string plotname;
 
-  cv = new TCanvas("cv", "cv", 800, 600);
+  cv_indiv = new TCanvas("cv_indiv", "cv_indiv", 800, 600);
 
-  legend = new TLegend(0.54,0.14,0.94,0.44);
-  legend->SetTextSize(0.03);
-  legend->SetBorderSize(0);
-  legend->SetFillStyle(0);
+  legend_indiv = new TLegend(0.5,0.14,0.94,0.44);
+  legend_indiv->SetTextSize(0.03);
+  legend_indiv->SetBorderSize(0);
+  legend_indiv->SetFillStyle(0);
 
   plotname = "LLP_WJets_MVA"+label;
 
   //*****************************************************************************************
   // Overlay signal and background BDT scores
   //*****************************************************************************************
-  THStack *hs = new THStack("hs", "Signal and Background BDT Scores ; BDT Score ; Number of Entries");
+  THStack *hs = new THStack("hs", Form("Signal and Background BDT Scores (mH=%s) ; BDT Score ; Number of Entries",Label.c_str()));
   Signal_MVA->SetFillColor(kBlue);
   Background_MVA->SetFillColor(kRed);
   Signal_MVA->Rebin(20);
   Background_MVA->Rebin(20);
   hs->Add(Signal_MVA);
   hs->Add(Background_MVA);
+  cv_indiv->cd();
   hs->Draw("bar1 nostack");
   gPad->BuildLegend(0.65,0.65,0.85,0.85,"");
-  cv->SaveAs(("BDTscore_" + plotname + ".png").c_str());
+  cv_indiv->SaveAs(("BDTscore_" + plotname + ".png").c_str());
+  cv_indiv->Clear();
 
   //*****************************************************************************************
   //Plot ROC Curves
   //*****************************************************************************************
-  vector<TGraphAsymmErrors*> ROCGraphs;
-  vector<string> GraphLabels;
-  vector<Int_t> colors;
-  vector<string> PlotnameSpecific;
+  // vector<TGraphAsymmErrors*> ROCGraphs;
+  // vector<string> GraphLabels;
+  // vector<Int_t> colors;
+  // vector<string> PlotnameSpecific;
 
-  ROCGraphs.clear();
-  GraphLabels.clear();
-  PlotnameSpecific.clear();
+  // ROCGraphs.clear();
+  // GraphLabels.clear();
+  // PlotnameSpecific.clear();
 
   ROCGraphs.push_back(ROC_sigEffBkgEff);
-  GraphLabels.push_back("MVA LLP vs. W+jets");
-  colors.push_back(kBlue);
+  GraphLabels.push_back("MVA LLP (mh=" + Label + ") vs. W+jets");
+  colors.push_back(Option);
   PlotnameSpecific.push_back(plotname);
 
   Double_t xmin = 0.0;
@@ -375,12 +399,12 @@ void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option)
   Double_t ymin = 0.0;
   Double_t ymax = 1.0;
 
-  bool overlay = false;
+  bool overlay = true;
 
   //*****************************************************************************************
 
   for (UInt_t i=0; i<GraphLabels.size(); ++i) {
-    legend->AddEntry(ROCGraphs[i],GraphLabels[i].c_str(), "LP");
+    if (i == GraphLabels.size() - 1) legend->AddEntry(ROCGraphs[i],GraphLabels[i].c_str(), "LP");
 
     ROCGraphs[i]->SetMarkerColor(colors[i]);
     ROCGraphs[i]->SetLineColor(colors[i]);
@@ -390,22 +414,25 @@ void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option)
     ROCGraphs[i]->GetYaxis()->SetRangeUser(ymin,ymax);    
     
     if (overlay) {
+      cv->cd();
       if (i==0) {
         ROCGraphs[i]->Draw("AP");
       } else {
         ROCGraphs[i]->Draw("Psame");
       }
+      ROCGraphs[i]->GetXaxis()->SetLimits(0.00001,1);
     }
-    else {  // if want to save each ROC curve individually:
+    if (i == GraphLabels.size() - 1) {  // if want to save each ROC curve individually, only do last (most recently added) in list
+      cv_indiv->cd();
+      legend_indiv->AddEntry(ROCGraphs[i],GraphLabels[i].c_str(), "LP");
       ROCGraphs[i]->Draw("AP");
-      legend->Draw();
-      cv->SaveAs(("ROCGraphs_" + PlotnameSpecific[i] + ".png").c_str());
+      legend_indiv->Draw();
+      cv_indiv->SaveAs(("ROCGraphs_" + PlotnameSpecific[i] + ".png").c_str());
       ROCGraphs[i]->GetXaxis()->SetLimits(0.00001,1); // set non-zero lower value such that a log shows the lowest signal efficiency values too (if 0, minimum is 10^-3 below maximum)
       gPad->SetLogx();
-      cv->SaveAs(("ROCGraphs_" + PlotnameSpecific[i] + "_logx.png").c_str());
+      cv_indiv->SaveAs(("ROCGraphs_" + PlotnameSpecific[i] + "_logx.png").c_str());
 
-      cv->Clear();
-      legend->Clear();
+      legend_indiv->Clear();
       gPad->SetLogx(1);
     }
   }
@@ -419,8 +446,19 @@ void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option)
 
   // overlay multiple ROC curves -- useful if comparing 125 vs. 350 for instance
   if (overlay) {
+    cv->cd();
+    gPad->SetLogx();
     legend->Draw();
-    cv->SaveAs(("ROCGraphs_" + plotname + ".png").c_str());
+    cv->SaveAs(("ROCGraphs_" + plotname + "_overlay.png").c_str());
   }
-
 } 
+
+//*************************************************************************************************
+//*************************************************************************************************
+void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option, string InputFile2, string Label2, Int_t Option2)
+{  
+  SetupPlots();
+
+  BDTPerformancePlots(InputFile, Label, Option);
+  BDTPerformancePlots(InputFile2, Label2, Option2);
+}
