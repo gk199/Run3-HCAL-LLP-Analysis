@@ -79,8 +79,8 @@ TTree* getTreeFromFile(const char* infname, const char* tname)
 //*************************************************************************************************
 //
 //*************************************************************************************************
-// return a vector of TGraphAsymmErrors, sig vs bkg, sig vs bkg rej, sig vs inverse bkg eff
-vector<TGraphAsymmErrors*> MakeSigEffVsBkgEffGraph(TH1F* signalHist, TH1F* bkgHist, string name ) {
+// return a TGraphAsymmErrors, sig vs bkg
+TGraphAsymmErrors* MakeSigEffVsBkgEffGraph(TH1F* signalHist, TH1F* bkgHist, string name ) {
   //Make Met Plots
   const UInt_t nPoints = signalHist->GetXaxis()->GetNbins();
   double SigEff[nPoints];
@@ -123,14 +123,9 @@ vector<TGraphAsymmErrors*> MakeSigEffVsBkgEffGraph(TH1F* signalHist, TH1F* bkgHi
     n2 = TMath::Nint(NBkgTotal);
     ratio = n1/n2;
     BkgEff[b] = ratio;
-    BkgRej[b] = 1-ratio;
-    BkgEffInverse[b] = 1/ratio;
     BkgEffErrLow[b] = 0;
     BkgEffErrHigh[b] = 0;
   }
-
-  vector<TGraphAsymmErrors*> Sig_Bkg_Graphs;
-  Sig_Bkg_Graphs.clear();
 
   TGraphAsymmErrors *tmpSigEffVsBkgEff = new TGraphAsymmErrors (nPoints, BkgEff, SigEff, BkgEffErrLow, BkgEffErrHigh, SigEffErrLow, SigEffErrHigh );
   tmpSigEffVsBkgEff->SetName(name.c_str());
@@ -143,34 +138,7 @@ vector<TGraphAsymmErrors*> MakeSigEffVsBkgEffGraph(TH1F* signalHist, TH1F* bkgHi
   tmpSigEffVsBkgEff->SetMarkerSize(0.5);
   tmpSigEffVsBkgEff->SetMarkerStyle(20);
 
-  Sig_Bkg_Graphs.push_back(tmpSigEffVsBkgEff);
-
-  TGraphAsymmErrors *tmpSigEffVsBkgRej = new TGraphAsymmErrors (nPoints, BkgRej, SigEff, BkgEffErrLow, BkgEffErrHigh, SigEffErrLow, SigEffErrHigh );
-  tmpSigEffVsBkgRej->SetName(name.c_str());
-  tmpSigEffVsBkgRej->SetTitle("");
-  tmpSigEffVsBkgRej->GetXaxis()->SetTitle("Bkg Rejection");
-  tmpSigEffVsBkgRej->GetYaxis()->SetTitle("Signal Eff");
-  tmpSigEffVsBkgRej->GetYaxis()->SetTitleOffset(1.1);
-  tmpSigEffVsBkgRej->GetXaxis()->SetTitleOffset(1.05);
-  tmpSigEffVsBkgRej->SetMarkerSize(0.5);
-  tmpSigEffVsBkgRej->SetMarkerStyle(20);
-
-  Sig_Bkg_Graphs.push_back(tmpSigEffVsBkgRej);
-
-  TGraphAsymmErrors *tmpSigEffVsBkgEffInverse = new TGraphAsymmErrors (nPoints, BkgEffInverse, SigEff, BkgEffErrLow, BkgEffErrHigh, SigEffErrLow, SigEffErrHigh );
-  tmpSigEffVsBkgEffInverse->SetName(name.c_str());
-  tmpSigEffVsBkgEffInverse->SetTitle("");
-  tmpSigEffVsBkgEffInverse->GetXaxis()->SetTitle("Bkg Eff (inverse)");
-  tmpSigEffVsBkgEffInverse->GetYaxis()->SetTitle("Signal Eff");
-  tmpSigEffVsBkgEffInverse->GetYaxis()->SetTitleOffset(1.1);
-  tmpSigEffVsBkgEffInverse->GetXaxis()->SetTitleOffset(1.05);
-  tmpSigEffVsBkgEffInverse->SetMarkerSize(0.5);
-  tmpSigEffVsBkgEffInverse->SetMarkerStyle(20);
-
-  Sig_Bkg_Graphs.push_back(tmpSigEffVsBkgEffInverse);
-
-//  return tmpSigEffVsBkgEff;
-  return Sig_Bkg_Graphs;
+  return tmpSigEffVsBkgEff;
 }
 
 //*************************************************************************************************
@@ -356,11 +324,7 @@ void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option)
    // Make ROC curves
    //*****************************************************************************************
    // return a vector of TGraphAsymmErrors, sig vs bkg, sig vs bkg rej, sig vs inverse bkg eff
-   vector<TGraphAsymmErrors*> ROC_MVA_LLPWjets = MakeSigEffVsBkgEffGraph(Signal_MVA, Background_MVA, "ROC_MVA_LLP_W+jets"+label );
-   TGraphAsymmErrors* ROC_sigEffBkgEff = ROC_MVA_LLPWjets[0];
-   TGraphAsymmErrors* ROC_sigEffBkgRej = ROC_MVA_LLPWjets[1];
-   TGraphAsymmErrors* ROC_sigEffBkgEffInverse = ROC_MVA_LLPWjets[2];
-   //TGraphAsymmErrors* ROC_MVA_LLPWjets = MakeSigEffVsBkgEffGraph(Signal_MVA, Background_MVA, "ROC_MVA_LLP_W+jets"+label );
+   TGraphAsymmErrors* ROC_sigEffBkgEff = MakeSigEffVsBkgEffGraph(Signal_MVA, Background_MVA, "ROC_MVA_LLP_W+jets"+label );
 
   TLegend* legend;
   TCanvas* cv;
@@ -406,16 +370,6 @@ void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option)
   colors.push_back(kBlue);
   PlotnameSpecific.push_back(plotname);
 
-  // ROCGraphs.push_back(ROC_sigEffBkgRej);
-  // GraphLabels.push_back("MVA LLP vs. W+jets");
-  // colors.push_back(kGreen);
-  // PlotnameSpecific.push_back(plotname + "_bkgRej");
-
-  // ROCGraphs.push_back(ROC_sigEffBkgEffInverse);
-  // GraphLabels.push_back("MVA LLP vs. W+jets");
-  // colors.push_back(kRed);
-  // PlotnameSpecific.push_back(plotname + "_bkgEffInverse");
-
   Double_t xmin = 0.0;
   Double_t xmax = 1.0;
   Double_t ymin = 0.0;
@@ -431,11 +385,6 @@ void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option)
     ROCGraphs[i]->SetMarkerColor(colors[i]);
     ROCGraphs[i]->SetLineColor(colors[i]);
     ROCGraphs[i]->SetMarkerSize(0.5);
-   
-    if (!overlay){
-      if (i==1) xmin = 0.9;
-      if (i==2) xmax = 20000;
-    }
 
     ROCGraphs[i]->GetXaxis()->SetRangeUser(xmin,xmax);    
     ROCGraphs[i]->GetYaxis()->SetRangeUser(ymin,ymax);    
@@ -451,11 +400,10 @@ void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option)
       ROCGraphs[i]->Draw("AP");
       legend->Draw();
       cv->SaveAs(("ROCGraphs_" + PlotnameSpecific[i] + ".png").c_str());
-      if (i==0) {
-        ROCGraphs[i]->GetXaxis()->SetLimits(0.00001,1); // set non-zero lower value such that a log shows the lowest signal efficiency values too (if 0, minimum is 10^-3 below maximum)
-        gPad->SetLogx();
-        cv->SaveAs(("ROCGraphs_" + PlotnameSpecific[i] + "_logx.png").c_str());
-      }
+      ROCGraphs[i]->GetXaxis()->SetLimits(0.00001,1); // set non-zero lower value such that a log shows the lowest signal efficiency values too (if 0, minimum is 10^-3 below maximum)
+      gPad->SetLogx();
+      cv->SaveAs(("ROCGraphs_" + PlotnameSpecific[i] + "_logx.png").c_str());
+
       cv->Clear();
       legend->Clear();
       gPad->SetLogx(1);

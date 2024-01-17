@@ -2,12 +2,12 @@
 
 **1. Modify Classifier:**
 
-In `ExampleClassification.C`: Modify file paths, cuts, and signal and background selections.
+In `LLP_WPlusJets_Classification.C`: Modify file paths, cuts, and signal and background selections.
 
 **2. Run Classifier:**
 
 ```
-root -q -b -l ExampleClassification.C
+root -q -b -l LLP_WPlusJets_Classification.C
 ```
 This will produce a scratch output root file in the working directory (can be deleted, needed to avoid issues about "TTree created as a memory-resident Tree") and an output file `BDTWeightFilesTest/Test.root`.
 
@@ -17,6 +17,15 @@ Display output ROC curves, variable overlays, coorelations, etc. with:
 ```
 source display_gui.sh
 ```
+
+**4. Plot Output:**
+
+Run the plotting script over the output root file from TMVA in `BDTWeightFilesTest/Test.root`. The script plots the BDT scores (overlayed for signal and background), and a ROC curve (with and without background in log scale). Printouts are also made to quantify efficiencies at given backgrounds, etc. 
+```
+root -l /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/MakeMVAPerformancePlots.C+'("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_mh350.root","mh350",-1)'
+```
+Improvements to be made: overlay plots for 125 and 350 GeV. 
+
 
 ## Documentation
 [Official documentation](https://root.cern.ch/download/doc/tmva/TMVAUsersGuide.pdf)
