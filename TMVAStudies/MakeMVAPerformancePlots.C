@@ -79,11 +79,14 @@ TTree* getTreeFromFile(const char* infname, const char* tname)
 //*************************************************************************************************
 //
 //*************************************************************************************************
-TGraphAsymmErrors* MakeSigEffVsBkgEffGraph(TH1F* signalHist, TH1F* bkgHist, string name ) {
+// return a vector of TGraphAsymmErrors, sig vs bkg, sig vs bkg rej, sig vs inverse bkg eff
+vector<TGraphAsymmErrors*> MakeSigEffVsBkgEffGraph(TH1F* signalHist, TH1F* bkgHist, string name ) {
   //Make Met Plots
   const UInt_t nPoints = signalHist->GetXaxis()->GetNbins();
   double SigEff[nPoints];
   double BkgEff[nPoints];
+  double BkgRej[nPoints];
+  double BkgEffInverse[nPoints];
   double SigEffErrLow[nPoints];
   double SigEffErrHigh[nPoints];
   double BkgEffErrLow[nPoints];
@@ -120,21 +123,54 @@ TGraphAsymmErrors* MakeSigEffVsBkgEffGraph(TH1F* signalHist, TH1F* bkgHist, stri
     n2 = TMath::Nint(NBkgTotal);
     ratio = n1/n2;
     BkgEff[b] = ratio;
+    BkgRej[b] = 1-ratio;
+    BkgEffInverse[b] = 1/ratio;
     BkgEffErrLow[b] = 0;
     BkgEffErrHigh[b] = 0;
   }
 
+  vector<TGraphAsymmErrors*> Sig_Bkg_Graphs;
+  Sig_Bkg_Graphs.clear();
+
   TGraphAsymmErrors *tmpSigEffVsBkgEff = new TGraphAsymmErrors (nPoints, BkgEff, SigEff, BkgEffErrLow, BkgEffErrHigh, SigEffErrLow, SigEffErrHigh );
   tmpSigEffVsBkgEff->SetName(name.c_str());
-  tmpSigEffVsBkgEff->SetTitle("");
+  tmpSigEffVsBkgEff->SetTitle("ROC Curve for LLP vs. W+jets");
   tmpSigEffVsBkgEff->GetXaxis()->SetTitle("Bkg Eff");
   tmpSigEffVsBkgEff->GetYaxis()->SetTitle("Signal Eff");
+  tmpSigEffVsBkgEff->GetXaxis()->SetRangeUser(0,1);
   tmpSigEffVsBkgEff->GetYaxis()->SetTitleOffset(1.1);
   tmpSigEffVsBkgEff->GetXaxis()->SetTitleOffset(1.05);
   tmpSigEffVsBkgEff->SetMarkerSize(0.5);
   tmpSigEffVsBkgEff->SetMarkerStyle(20);
 
-  return tmpSigEffVsBkgEff;
+  Sig_Bkg_Graphs.push_back(tmpSigEffVsBkgEff);
+
+  TGraphAsymmErrors *tmpSigEffVsBkgRej = new TGraphAsymmErrors (nPoints, BkgRej, SigEff, BkgEffErrLow, BkgEffErrHigh, SigEffErrLow, SigEffErrHigh );
+  tmpSigEffVsBkgRej->SetName(name.c_str());
+  tmpSigEffVsBkgRej->SetTitle("");
+  tmpSigEffVsBkgRej->GetXaxis()->SetTitle("Bkg Rejection");
+  tmpSigEffVsBkgRej->GetYaxis()->SetTitle("Signal Eff");
+  tmpSigEffVsBkgRej->GetYaxis()->SetTitleOffset(1.1);
+  tmpSigEffVsBkgRej->GetXaxis()->SetTitleOffset(1.05);
+  tmpSigEffVsBkgRej->SetMarkerSize(0.5);
+  tmpSigEffVsBkgRej->SetMarkerStyle(20);
+
+  Sig_Bkg_Graphs.push_back(tmpSigEffVsBkgRej);
+
+  TGraphAsymmErrors *tmpSigEffVsBkgEffInverse = new TGraphAsymmErrors (nPoints, BkgEffInverse, SigEff, BkgEffErrLow, BkgEffErrHigh, SigEffErrLow, SigEffErrHigh );
+  tmpSigEffVsBkgEffInverse->SetName(name.c_str());
+  tmpSigEffVsBkgEffInverse->SetTitle("");
+  tmpSigEffVsBkgEffInverse->GetXaxis()->SetTitle("Bkg Eff (inverse)");
+  tmpSigEffVsBkgEffInverse->GetYaxis()->SetTitle("Signal Eff");
+  tmpSigEffVsBkgEffInverse->GetYaxis()->SetTitleOffset(1.1);
+  tmpSigEffVsBkgEffInverse->GetXaxis()->SetTitleOffset(1.05);
+  tmpSigEffVsBkgEffInverse->SetMarkerSize(0.5);
+  tmpSigEffVsBkgEffInverse->SetMarkerStyle(20);
+
+  Sig_Bkg_Graphs.push_back(tmpSigEffVsBkgEffInverse);
+
+//  return tmpSigEffVsBkgEff;
+  return Sig_Bkg_Graphs;
 }
 
 //*************************************************************************************************
@@ -298,76 +334,37 @@ void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option)
 
     // //FakeElectron
 	  Background_MVA->Fill(score, sig_bkg == 1);
-
   } 
-  
-//   //*****************************************************************************************
-//   //Current Working Points
-//   //*****************************************************************************************
-//   cout << "CSA14 Tight Real Electron Efficiency : " << RealElectronPassCSA14Tight << " / " << RealElectrons << " = " << RealElectronPassCSA14Tight/RealElectrons << endl;
-//   cout << "CSA14 Tight Fake Electron Efficiency : " << FakeElectronPassCSA14Tight << " / " << FakeElectrons << " = " << FakeElectronPassCSA14Tight/FakeElectrons << endl;
-//   TGraphAsymmErrors* ROC_CSA14TightWP = MakeCurrentWPSigEffVsBkgEffGraph(RealElectronPassCSA14Tight/RealElectrons , FakeElectronPassCSA14Tight/FakeElectrons, "ROC_CSA14TightWP"+label);
 
-//   Double_t BkgEffCSA14Tight = FakeElectronPassCSA14Tight/FakeElectrons;
-//   Double_t SigEffCSA14Tight = RealElectronPassCSA14Tight/RealElectrons;
+  //*****************************************************************************************
+  // Current Working Points
+  //*****************************************************************************************
+  cout << "Signal efficiency at background of 0.001  : " << FindSigEffAtFixedBkgEfficiency(Signal_MVA, Background_MVA, 0.001) <<  endl;
+  cout << "Signal efficiency at background of 0.0001  : " << FindSigEffAtFixedBkgEfficiency(Signal_MVA, Background_MVA, 0.0001) <<  endl;
+  cout << "Signal efficiency at background of 0.00001  : " << FindSigEffAtFixedBkgEfficiency(Signal_MVA, Background_MVA, 0.00001) <<  endl;
+  cout << "Background efficiency at signal of 80% : " << FindBkgEffAtFixedSignalEfficiency(Signal_MVA, Background_MVA, 0.8) << endl;
+  cout << "Background efficiency at signal of 70% : " << FindBkgEffAtFixedSignalEfficiency(Signal_MVA, Background_MVA, 0.7) << endl;
+  cout << "Background efficiency at signal of 60% : " << FindBkgEffAtFixedSignalEfficiency(Signal_MVA, Background_MVA, 0.6) << endl;
 
-//   cout << "**********************\n";
-//   Double_t SigEffIDMVATrig_AtTightBkgEff = FindSigEffAtFixedBkgEfficiency(Signal_MVA, Background_MVA, BkgEffCSA14Tight);
-//   Double_t BkgEffIDMVATrig_AtTightSigEff = FindBkgEffAtFixedSignalEfficiency(Signal_MVA, Background_MVA, SigEffCSA14Tight);
-//   cout << "Signal Efficiency (wrt CSA14Tight Cut-based) for : same bkg \n";
-//   cout << "IDMVATrig : " << SigEffIDMVATrig_AtTightBkgEff/SigEffCSA14Tight <<  endl;
-//   cout << "Bkg Efficiency (wrt CSA14Veto Cut-based) for same sig eff \n";
-//   cout << "IDMVATrig : " << BkgEffIDMVATrig_AtTightSigEff/BkgEffCSA14Tight << endl;
-//   cout << "**********************\n";
-
-//   cout << "**********************\n";
-//   Double_t BkgEffIDMVATrig_AtVetoSigEff = FindBkgEffAtFixedSignalEfficiency(Signal_MVA, Background_MVA, SigEffCSA14Veto);
-//   Double_t SigEffIDMVATrig_AtVetoBkgEff = FindSigEffAtFixedBkgEfficiency(Signal_MVA, Background_MVA, BkgEffCSA14Veto);
-//   cout << "Sig Efficiency (wrt CSA14Veto Cut-based) for same bkg eff \n";
-//   cout << "IDMVATrig : " << SigEffIDMVATrig_AtVetoBkgEff/SigEffCSA14Veto << endl;
-//   cout << "Bkg Efficiency (wrt CSA14Veto Cut-based) for same sig eff \n";
-//   cout << "IDMVATrig : " << BkgEffIDMVATrig_AtVetoSigEff/BkgEffCSA14Veto << endl;
-//   cout << "**********************\n";
+  //*****************************************************************************************
+  //Find Cut with same signal efficiency
+  //*****************************************************************************************
+  cout << "MVA Cut Value at 50% Sig Eff: " << FindCutValueAtFixedEfficiency(Signal_MVA, 0.5 ) << endl;
+  cout << "MVA Cut Value at 50% Bkg Eff: " << FindCutValueAtFixedEfficiency(Background_MVA, 0.5 ) << endl;
 
    //*****************************************************************************************
-   //Make ROC curves
+   // Make ROC curves
    //*****************************************************************************************
-   TGraphAsymmErrors* ROC_MVA_LLPWjets = MakeSigEffVsBkgEffGraph(Signal_MVA, Background_MVA, "ROC_MVA_LLP_W+jets"+label );
-
-//   //*****************************************************************************************
-//   //Find Cut with same signal efficiency
-//   //*****************************************************************************************
-//   Double_t CutValue_IDMVATrig_SameSig = FindCutValueAtFixedEfficiency(Signal_MVA, SigEffCSA14Tight );
-//   Double_t CutValue_IDMVATrig_SameBkg = FindCutValueAtFixedEfficiency(Background_MVA, BkgEffCSA14Tight );
-//   cout << "IDMVATrig Cut Value @ Same Cut-Based Tight Sig Eff: " << CutValue_IDMVATrig_SameSig << endl;
-//   cout << "IDMVATrig Cut Value @ Same Cut-Based Tight Bkg Eff: " << CutValue_IDMVATrig_SameBkg << endl;
+   // return a vector of TGraphAsymmErrors, sig vs bkg, sig vs bkg rej, sig vs inverse bkg eff
+   vector<TGraphAsymmErrors*> ROC_MVA_LLPWjets = MakeSigEffVsBkgEffGraph(Signal_MVA, Background_MVA, "ROC_MVA_LLP_W+jets"+label );
+   TGraphAsymmErrors* ROC_sigEffBkgEff = ROC_MVA_LLPWjets[0];
+   TGraphAsymmErrors* ROC_sigEffBkgRej = ROC_MVA_LLPWjets[1];
+   TGraphAsymmErrors* ROC_sigEffBkgEffInverse = ROC_MVA_LLPWjets[2];
+   //TGraphAsymmErrors* ROC_MVA_LLPWjets = MakeSigEffVsBkgEffGraph(Signal_MVA, Background_MVA, "ROC_MVA_LLP_W+jets"+label );
 
   TLegend* legend;
   TCanvas* cv;
   string plotname;
-
-  //*****************************************************************************************
-  //Plot ROC Curves
-  //*****************************************************************************************
-  vector<TGraphAsymmErrors*> ROCGraphs;
-  vector<string> GraphLabels;
-  vector<Int_t> colors;
-
-  //*****************************************************************************************
-  //*****************************************************************************************
-  ROCGraphs.clear();
-  GraphLabels.clear();
-  plotname = "LLP_WJets_MVA"+label;
-
-  ROCGraphs.push_back(ROC_MVA_LLPWjets);
-  GraphLabels.push_back("MVA LLP vs W+jets");
-  colors.push_back(kBlue);
-
-  //*****************************************************************************************
-  Double_t xmin = 0.0;
-  Double_t xmax = 1.0;
-  Double_t ymin = 0.0;
-  Double_t ymax = 1.0;
 
   cv = new TCanvas("cv", "cv", 800, 600);
 
@@ -375,32 +372,8 @@ void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option)
   legend->SetTextSize(0.03);
   legend->SetBorderSize(0);
   legend->SetFillStyle(0);
-  for (UInt_t i=0; i<GraphLabels.size(); ++i) {
-    legend->AddEntry(ROCGraphs[i],GraphLabels[i].c_str(), "LP");
 
-    ROCGraphs[i]->SetMarkerColor(colors[i]);
-    ROCGraphs[i]->SetLineColor(colors[i]);
-    ROCGraphs[i]->SetMarkerSize(0.5);
-   
-    ROCGraphs[i]->GetXaxis()->SetRangeUser(xmin,xmax);    
-    ROCGraphs[i]->GetYaxis()->SetRangeUser(ymin,ymax);    
-    if (i==0) {
-      ROCGraphs[i]->Draw("AP");
-    } else {
-      ROCGraphs[i]->Draw("Psame");
-    }
-  }
-
-  // legend->AddEntry(ROC_CSA14TightWP, "CSA14Tight WP", "P");
-  // ROC_CSA14TightWP->SetFillColor(kBlue);
-  // ROC_CSA14TightWP->SetMarkerColor(kBlue);
-  // ROC_CSA14TightWP->SetMarkerStyle(34);
-  // ROC_CSA14TightWP->SetMarkerSize(2.5);
-  // ROC_CSA14TightWP->Draw("Psame");
-
-  legend->Draw();
-  
-  cv->SaveAs(("ROCGraphs_" + plotname + ".png").c_str());
+  plotname = "LLP_WJets_MVA"+label;
 
   //*****************************************************************************************
   // Overlay signal and background BDT scores
@@ -415,5 +388,91 @@ void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option)
   hs->Draw("bar1 nostack");
   gPad->BuildLegend(0.65,0.65,0.85,0.85,"");
   cv->SaveAs(("BDTscore_" + plotname + ".png").c_str());
+
+  //*****************************************************************************************
+  //Plot ROC Curves
+  //*****************************************************************************************
+  vector<TGraphAsymmErrors*> ROCGraphs;
+  vector<string> GraphLabels;
+  vector<Int_t> colors;
+  vector<string> PlotnameSpecific;
+
+  ROCGraphs.clear();
+  GraphLabels.clear();
+  PlotnameSpecific.clear();
+
+  ROCGraphs.push_back(ROC_sigEffBkgEff);
+  GraphLabels.push_back("MVA LLP vs. W+jets");
+  colors.push_back(kBlue);
+  PlotnameSpecific.push_back(plotname);
+
+  // ROCGraphs.push_back(ROC_sigEffBkgRej);
+  // GraphLabels.push_back("MVA LLP vs. W+jets");
+  // colors.push_back(kGreen);
+  // PlotnameSpecific.push_back(plotname + "_bkgRej");
+
+  // ROCGraphs.push_back(ROC_sigEffBkgEffInverse);
+  // GraphLabels.push_back("MVA LLP vs. W+jets");
+  // colors.push_back(kRed);
+  // PlotnameSpecific.push_back(plotname + "_bkgEffInverse");
+
+  Double_t xmin = 0.0;
+  Double_t xmax = 1.0;
+  Double_t ymin = 0.0;
+  Double_t ymax = 1.0;
+
+  bool overlay = false;
+
+  //*****************************************************************************************
+
+  for (UInt_t i=0; i<GraphLabels.size(); ++i) {
+    legend->AddEntry(ROCGraphs[i],GraphLabels[i].c_str(), "LP");
+
+    ROCGraphs[i]->SetMarkerColor(colors[i]);
+    ROCGraphs[i]->SetLineColor(colors[i]);
+    ROCGraphs[i]->SetMarkerSize(0.5);
+   
+    if (!overlay){
+      if (i==1) xmin = 0.9;
+      if (i==2) xmax = 20000;
+    }
+
+    ROCGraphs[i]->GetXaxis()->SetRangeUser(xmin,xmax);    
+    ROCGraphs[i]->GetYaxis()->SetRangeUser(ymin,ymax);    
+    
+    if (overlay) {
+      if (i==0) {
+        ROCGraphs[i]->Draw("AP");
+      } else {
+        ROCGraphs[i]->Draw("Psame");
+      }
+    }
+    else {  // if want to save each ROC curve individually:
+      ROCGraphs[i]->Draw("AP");
+      legend->Draw();
+      cv->SaveAs(("ROCGraphs_" + PlotnameSpecific[i] + ".png").c_str());
+      if (i==0) {
+        ROCGraphs[i]->GetXaxis()->SetLimits(0.00001,1); // set non-zero lower value such that a log shows the lowest signal efficiency values too (if 0, minimum is 10^-3 below maximum)
+        gPad->SetLogx();
+        cv->SaveAs(("ROCGraphs_" + PlotnameSpecific[i] + "_logx.png").c_str());
+      }
+      cv->Clear();
+      legend->Clear();
+      gPad->SetLogx(1);
+    }
+  }
+
+  // legend->AddEntry(ROC_CSA14TightWP, "CSA14Tight WP", "P");
+  // ROC_CSA14TightWP->SetFillColor(kBlue);
+  // ROC_CSA14TightWP->SetMarkerColor(kBlue);
+  // ROC_CSA14TightWP->SetMarkerStyle(34);
+  // ROC_CSA14TightWP->SetMarkerSize(2.5);
+  // ROC_CSA14TightWP->Draw("Psame");
+
+  // overlay multiple ROC curves -- useful if comparing 125 vs. 350 for instance
+  if (overlay) {
+    legend->Draw();
+    cv->SaveAs(("ROCGraphs_" + plotname + ".png").c_str());
+  }
 
 } 
