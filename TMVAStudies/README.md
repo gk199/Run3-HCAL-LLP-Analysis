@@ -27,17 +27,23 @@ Input file 1, label 1, color 1, input file 2, label 2, color 2. An example of ru
 root -l /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/MakeMVAPerformancePlots.C+'("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_mh350.root","350",30,"/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_mh125.root","125",38)'
 ```
 
+**5. Weight Files:**
+Copy over weights files to the directory `../BDTWeightFiles/v*/` such that they can be used in the minituple production.
+
 # Version Tracking
-v0.0: First setup, trained on LLP MC with mH = 125 and 350, with W+jets backgrounds.
-
-v0.1: Removed jet E, pT from training. Trained on LLP MC with mH = 125 and 350, with W+jets backgrounds.
-
-For v0.0 and v0.1, the signal and backgrounds are from these files:
+v0.0: First setup, trained on LLP MC with mH = 125 and 350, with W+jets backgrounds. For v0.0, the signal and backgrounds are from these files:
 ``
    sigTagList.push_back("v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23");
    sigTagList.push_back("v3.0_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2023_11_29");
    TString bkgTag = "v3.0_LLPskim_2023Cv4_2023_11_22";
 ``
+
+v0.1: Removed jet E, pT from training. Trained on LLP MC with mH = 125 and 350, with W+jets backgrounds. For v0.1, the signal and backgrounds are from these files:
+```
+   sigTagList.push_back("v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_01_20_TRAIN");
+   sigTagList.push_back("v3.0_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_01_20_TRAIN");
+   TString bkgTag = "v3.0_LLPskim_2023Cv4_2023_11_22";
+```
 
 ## Documentation
 [Official documentation](https://root.cern.ch/download/doc/tmva/TMVAUsersGuide.pdf)

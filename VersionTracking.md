@@ -110,9 +110,25 @@ These are hadd-ed from
 ```
 with `* = minituple_v3.0_LLPskimRun2023Bv1_2023_11_09.root, minituple_v3.0_LLPskimRun2023Cv1_2023_11_14.root, minituple_v3.0_LLPskimRun2023Cv3_2023_11_15.root, minituple_v3.0_LLPskimRun2023Cv4_2023_11_16.root, minituple_v3.0_LLPskimRun2023Dv1_2023_11_16.root, minituple_v3.0_LLPskimRun2023Dv2_2023_11_16.root`.
 
-Note that v3 minituples for LLP MC (125GeV) are currently run over v2 ntuples (which don't have the isolation variables, but those are only needed for W+Jets). The W+Jets tree must be commented out for these. The fix for Sphiphi has been added to these minituples as well. 
+Note that v3 minituples for LLP MC (125GeV) are currently run over v2 ntuples (which don't have the HLT monitoring paths or isolation variables - only needed for W+Jets). The W+Jets tree must be commented out for these. The fix for Sphiphi has been added to these minituples as well. 
+
+### v3.1
+Updates:
+* HLT monitoring paths on all samples
+* Fix for default values of S phi, S eta, and HCAL depth energy fractions (avoid NaN, different default value vs no energy)
+* BDT score added to minituples, based off of BDT weight files in the directory `Run3-HCAL-LLP-Analysis/BDTWeightFiles/v*`
+* Saves BDT score for both 125 and 350 trainings, against 2023Cv4 W+jets, and on signal Train specific files
+
+Location of minituples:
+```
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.1/minituple_v3.1_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_01_20_TEST.root
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.1/minituple_v3.1_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_01_20_TRAIN.root
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.1/minituple_v3.1_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_01_20_TEST.root
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.1/minituple_v3.1_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_01_20_TRAIN.root
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.1/minituple_v3.1_LLPskim_Run2023Cv3_2024_01_20.root
+```
 
 ## V4
 Updates:
-* BDT score added to minituples, based off of BDT weight files in the directory `Run3-HCAL-LLP-Analysis/BDTWeightFiles/v*`
-* Fix for default values of S phi, S eta, and HCAL depth energy fractions (avoid NaN, different default value vs no energy)
+* MET filters
+* Trigger prescales
