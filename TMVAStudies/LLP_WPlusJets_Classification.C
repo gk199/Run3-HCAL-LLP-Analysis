@@ -187,7 +187,7 @@ int runClassification( TString dir, TString sigTag, TString bkgTag )
    TCut selections_depth3 = "jet0_EnergyFrac_Depth3 >= 0 && jet0_EnergyFrac_Depth3 <= 1";
    TCut selections_depth4 = "jet0_EnergyFrac_Depth4 >= 0 && jet0_EnergyFrac_Depth4 <= 1";
    TCut selection_Sphiphi = "jet0_S_phiphi > 0";
-   TCut selections_rechitVar1= selections_depth1 + selections_depth2 + selections_depth3 + selections_depth4 + selection_Sphiphi;
+   TCut selections_rechitVar1 = selections_depth1 + selections_depth2 + selections_depth3 + selections_depth4 + selection_Sphiphi;
    TCut selections_safety = selections_rechitVar1;
 
    TCut selections_trackVars = "jet0_Track0Pt > 0 && jet0_Track0Pt < 900 && jet0_Track0dR >= 0 && jet0_Track0dR < 1";
@@ -254,10 +254,10 @@ int runClassification( TString dir, TString sigTag, TString bkgTag )
    //dataloader->AddVariable( "bdtscore",      "bdtscore", "", 'F' );
 
    // jet kinematics // *************************
-   dataloader->AddVariable( "jet0_Pt", "jet0_Pt", "GeV", 'F' );
    dataloader->AddVariable( "jet0_Eta", "jet0_Eta", "", 'F' );
    // dataloader->AddVariable( "jet0_Phi", "jet0_Phi", "", 'F' );                                 // removing because there is a difference in pi and -pi in data (W+jets)
-   dataloader->AddVariable( "jet0_E", "jet0_E", "GeV", 'F' );
+   // dataloader->AddVariable( "jet0_Pt", "jet0_Pt", "GeV", 'F' );
+   // dataloader->AddVariable( "jet0_E", "jet0_E", "GeV", 'F' );
    // track-based variables // *************************
    dataloader->AddVariable( "jet0_ChargedHadEFrac", "jet0_ChargedHadEFrac", "", 'F' );
    dataloader->AddVariable( "jet0_NeutralHadEFrac", "jet0_NeutralHadEFrac", "", 'F' );
@@ -648,9 +648,8 @@ int LLP_WPlusJets_Classification()
    vector<TString> sigTagList;
    TString dir = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.0/";
 
-   sigTagList.push_back("v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23");
-   //sigTagList.push_back("v3.0_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2023_11_29");
-   //TString bkgTag = "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23";
+   //sigTagList.push_back("v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_01_20_TRAIN");
+   sigTagList.push_back("v3.0_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_01_20_TRAIN");
    TString bkgTag = "v3.0_LLPskim_2023Cv4_2023_11_22";
 
    for (auto tag: sigTagList){

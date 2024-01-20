@@ -5,7 +5,7 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader(){
 
 	bdt_tags = {
 		"350GeV", "125GeV"
-		//"test" // name of file in "BDTWeightFiles/v0.0/weights_*"
+		//"test" // name of file in "BDTWeightFiles/v0.1/weights_*"
 	};
 
 	if( !save_bdtscores ) bdt_tags.clear();
@@ -16,7 +16,7 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader(){
 
 		// Get filepath
 		bool filepath_exists = false;
-		vector<string> filepaths = {"", "BDTWeightFiles/", "../BDTWeightFiles/", "../../BDTWeightFiles/" };
+		vector<string> filepaths = {"", "BDTWeightFiles/", "../BDTWeightFiles/", "../../BDTWeightFiles/", "/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/BDTWeightFiles/" }; // last one is a quick fix to have mp_local run with the BDT weights files
 		string filepath;
 		for( int i=0; i<filepaths.size(); i++ ){
 			if( !gSystem->AccessPathName( Form("%s", filepaths.at(i).c_str()) ) ){
@@ -26,7 +26,7 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader(){
 			}
 		}
 
-		string filename = Form("%s/v0.0/weights_%s/TMVAClassification_BDTG.weights.xml", filepath.c_str(), bdt_tag.c_str() );
+		string filename = Form("%s/v0.1/weights_%s/TMVAClassification_BDTG.weights.xml", filepath.c_str(), bdt_tag.c_str() );
 
 		// Declare TMVA Reader
 		cout<<"  --> "<<bdt_tag<<endl;
@@ -35,10 +35,10 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader(){
 		// Read in variables // TODO: AUTOMATE
 
 		bdt_var_names[bdt_tag] = {
-			"jet0_Pt",
+			//"jet0_Pt",
 			"jet0_Eta",
 			//"jet0_Phi",
-			"jet0_E",
+			//"jet0_E",
 			"jet0_ChargedHadEFrac",
 			"jet0_NeutralHadEFrac",
 			"jet0_Track0Pt",
