@@ -1,9 +1,21 @@
-// root -l /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/MakeMVAPerformancePlots.C+'("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_mh350.root","350",30,"/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_mh125.root","125",38)'
-// inputs are output TMVA root file, label, color, repeat for second file to overlay
+// root -l /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/MakeMVAPerformancePlots_SigBkg.C+'("/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.1/minituple_v3.1_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_01_20_TEST.root","125",30,"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.1/minituple_v3.1_LLPskim_Run2023Cv3_2024_01_20.root","W+Jets",38)'
+// inputs are minituple signal file, label, color, minituple background file, label, color
 
+// /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.1/minituple_v3.1_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_01_20_TEST.root
+// /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.1/minituple_v3.1_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_01_20_TEST.root
+// /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.1/minituple_v3.1_LLPskim_Run2023Cv3_2024_01_20.root
+
+// void MakeMVAPerformancePlots_SigBkg(string InputFile, string Label, Int_t Option, string InputFile2, string Label2, Int_t Option2)
 //================================================================================================
 //
-//================================================================================================
+// HWW selection macro
+//
+//  * plots distributions associated with selected events
+//  * prints list of selected events from data
+//  * outputs ROOT files of events passing selection for each sample, 
+//    which can be processed by plotSelect.C
+//
+//________________________________________________________________________________________________
 
 #if !defined(__CINT__) || defined(__MAKECINT__)
 #include <TROOT.h>                  // access to gROOT, entry point to ROOT system
@@ -73,7 +85,7 @@ TTree* getTreeFromFile(const char* infname, const char* tname)
 //
 //*************************************************************************************************
 // return a TGraphAsymmErrors, sig vs bkg
-TGraphAsymmErrors* MakeSigEffVsBkgEffGraph(TH1F* signalHist, TH1F* bkgHist, string name ) {
+TGraphAsymmErrors* MakeSigEffVsBkgEffGraph(TH1F* signalHist, TH1F* bkgHist, string name, string Label ) {
   //Make Met Plots
   const UInt_t nPoints = signalHist->GetXaxis()->GetNbins();
   double SigEff[nPoints];
@@ -122,7 +134,7 @@ TGraphAsymmErrors* MakeSigEffVsBkgEffGraph(TH1F* signalHist, TH1F* bkgHist, stri
 
   TGraphAsymmErrors *tmpSigEffVsBkgEff = new TGraphAsymmErrors (nPoints, BkgEff, SigEff, BkgEffErrLow, BkgEffErrHigh, SigEffErrLow, SigEffErrHigh );
   tmpSigEffVsBkgEff->SetName(name.c_str());
-  tmpSigEffVsBkgEff->SetTitle("ROC Curve for LLP vs. W+jets");
+  tmpSigEffVsBkgEff->SetTitle(Form("ROC Curve for LLP (mh=%s) vs. W+jets", Label.c_str()));
   tmpSigEffVsBkgEff->GetXaxis()->SetTitle("Bkg Eff");
   tmpSigEffVsBkgEff->GetYaxis()->SetTitle("Signal Eff");
   tmpSigEffVsBkgEff->GetXaxis()->SetRangeUser(0,1);
@@ -269,7 +281,7 @@ void SetupPlots()
 
 //*************************************************************************************************
 //*************************************************************************************************
-void BDTPerformancePlots(string InputFile, string Label, Int_t Option)
+void BDTPerformancePlots(string InputFile, string Label, Int_t Option, string InputFile2, string Label2, Int_t Option2)
 {  
 
   string label = "";
@@ -278,8 +290,10 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option)
   //--------------------------------------------------------------------------------------------------------------
   // Histograms
   //==============================================================================================================  
-  TH1F *Signal_MVA = new TH1F(("Signal_MVA"+label).c_str(), "LLP Signal ; MVA (BDT) score for LLP signal ; Number of Events ",  5500, -1.1 , 1.1);
-  TH1F *Background_MVA = new TH1F(("Background_MVA"+label).c_str(), "W+Jets Background ; MVA (BDT) score for W+jets background ; Number of Events ",  5500, -1.1 , 1.1);
+  TH1F *Signal_MVA125 = new TH1F(("Signal_MVA125"+label).c_str(), "LLP Signal ; MVA (BDT trained on 125) score for LLP signal ; Number of Events ",  5500, -1.1 , 1.1);
+  TH1F *Signal_MVA350 = new TH1F(("Signal_MVA350"+label).c_str(), "LLP Signal ; MVA (BDT trained on 350) score for LLP signal ; Number of Events ",  5500, -1.1 , 1.1);
+  TH1F *Background_MVA125 = new TH1F(("Background_MVA125"+label).c_str(), "W+Jets Background ; MVA (BDT trained on 125) score for W+jets background ; Number of Events ",  5500, -1.1 , 1.1);
+  TH1F *Background_MVA350 = new TH1F(("Background_MVA350"+label).c_str(), "W+Jets Background ; MVA (BDT trained on 350) score for W+jets background ; Number of Events ",  5500, -1.1 , 1.1);
 
   Double_t RealElectrons = 0;
   Double_t FakeElectrons = 0;
@@ -287,59 +301,90 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option)
   Double_t FakeElectronPassCSA14Tight = 0;
 
   //*****************************************************************************************
+  // Get signal distribution
   //*****************************************************************************************
-  TTree *tree = getTreeFromFile(InputFile.c_str(), "TestTree"); // TTree options are TestTree and TrainTree. BDTWeightFilesTest is a TDirectoryFile 
+  TTree *tree_sig = getTreeFromFile(InputFile.c_str(), "NoSel"); 
 
-  int sig_bkg;
-  // char name;
-  float score;
-  tree->SetBranchAddress("classID", &sig_bkg);
-  // tree->SetBranchAddress("className", &name);
-  tree->SetBranchAddress("BDTG", &score);
+  float score350_sig;
+  float score125_sig;
+  tree_sig->SetBranchAddress("bdtscore_350GeV", &score350_sig);
+  tree_sig->SetBranchAddress("bdtscore_125GeV", &score125_sig);
 
-  cout << "Total Entries: " << tree->GetEntries() << "\n";
-  int nentries = tree->GetEntries();
+  cout << "Total Entries: " << tree_sig->GetEntries() << "\n";
+  int nentries = tree_sig->GetEntries();
   for(int ientry=0; ientry < nentries; ientry++) {       	
-    tree->GetEntry(ientry);
+    tree_sig->GetEntry(ientry);
     
     if (ientry % 100000 == 0) cout << "Event " << ientry << endl;
         
     //don't evaluate performance using training events
-
     //classify by eta and pt bins
-
-    //Some Preselection cuts
-    
-    //Real Electron
+    //Some Preselection cuts -- here is where we specify the signal region based on LLP truth information 
+  
     // eventually need to fill with weights
-	  Signal_MVA->Fill(score, sig_bkg == 0); // signal
+	  Signal_MVA125->Fill(score125_sig);
+	  Signal_MVA350->Fill(score350_sig);
+  } 
 
-    // //FakeElectron
-	  Background_MVA->Fill(score, sig_bkg == 1);
+  //*****************************************************************************************
+  // Get background distribution
+  //*****************************************************************************************
+  TTree *tree_bkg = getTreeFromFile(InputFile2.c_str(), "WPlusJets"); 
+  
+  float score350_bkg;
+  float score125_bkg;
+  tree_bkg->SetBranchAddress("bdtscore_350GeV", &score350_bkg);
+  tree_bkg->SetBranchAddress("bdtscore_125GeV", &score125_bkg);
+
+  cout << "Total Entries: " << tree_bkg->GetEntries() << "\n";
+  int nentries_bkg = tree_bkg->GetEntries();
+  for(int ientry=0; ientry < nentries_bkg; ientry++) {       	
+    tree_bkg->GetEntry(ientry);
+    
+    if (ientry % 100000 == 0) cout << "Event " << ientry << endl;
+        
+    //don't evaluate performance using training events
+    //classify by eta and pt bins
+    //Some Preselection cuts
+  
+    // eventually need to fill with weights
+	  Background_MVA125->Fill(score125_bkg);
+	  Background_MVA350->Fill(score350_bkg);
   } 
 
   //*****************************************************************************************
   // Current Working Points
   //*****************************************************************************************
-  cout << "Efficiencies for label = " << Label << endl;
-  cout << "Signal efficiency at background of 0.001  : " << FindSigEffAtFixedBkgEfficiency(Signal_MVA, Background_MVA, 0.001) <<  endl;
-  cout << "Signal efficiency at background of 0.0001  : " << FindSigEffAtFixedBkgEfficiency(Signal_MVA, Background_MVA, 0.0001) <<  endl;
-  cout << "Signal efficiency at background of 0.00001  : " << FindSigEffAtFixedBkgEfficiency(Signal_MVA, Background_MVA, 0.00001) <<  endl;
-  cout << "Background efficiency at signal of 80% : " << FindBkgEffAtFixedSignalEfficiency(Signal_MVA, Background_MVA, 0.8) << endl;
-  cout << "Background efficiency at signal of 70% : " << FindBkgEffAtFixedSignalEfficiency(Signal_MVA, Background_MVA, 0.7) << endl;
-  cout << "Background efficiency at signal of 60% : " << FindBkgEffAtFixedSignalEfficiency(Signal_MVA, Background_MVA, 0.6) << endl;
+  cout << "Efficiencies for label = " << Label << ", for BDT trained on 125" << endl;
+  cout << "Signal efficiency at background of 0.001  : " << FindSigEffAtFixedBkgEfficiency(Signal_MVA125, Background_MVA125, 0.001) <<  endl;
+  cout << "Signal efficiency at background of 0.0001  : " << FindSigEffAtFixedBkgEfficiency(Signal_MVA125, Background_MVA125, 0.0001) <<  endl;
+  cout << "Signal efficiency at background of 0.00001  : " << FindSigEffAtFixedBkgEfficiency(Signal_MVA125, Background_MVA125, 0.00001) <<  endl;
+  cout << "Background efficiency at signal of 80% : " << FindBkgEffAtFixedSignalEfficiency(Signal_MVA125, Background_MVA125, 0.8) << endl;
+  cout << "Background efficiency at signal of 70% : " << FindBkgEffAtFixedSignalEfficiency(Signal_MVA125, Background_MVA125, 0.7) << endl;
+  cout << "Background efficiency at signal of 60% : " << FindBkgEffAtFixedSignalEfficiency(Signal_MVA125, Background_MVA125, 0.6) << endl;
+
+  cout << "Efficiencies for label = " << Label << ", for BDT trained on 350" << endl;
+  cout << "Signal efficiency at background of 0.001  : " << FindSigEffAtFixedBkgEfficiency(Signal_MVA350, Background_MVA350, 0.001) <<  endl;
+  cout << "Signal efficiency at background of 0.0001  : " << FindSigEffAtFixedBkgEfficiency(Signal_MVA350, Background_MVA350, 0.0001) <<  endl;
+  cout << "Signal efficiency at background of 0.00001  : " << FindSigEffAtFixedBkgEfficiency(Signal_MVA350, Background_MVA350, 0.00001) <<  endl;
+  cout << "Background efficiency at signal of 80% : " << FindBkgEffAtFixedSignalEfficiency(Signal_MVA350, Background_MVA350, 0.8) << endl;
+  cout << "Background efficiency at signal of 70% : " << FindBkgEffAtFixedSignalEfficiency(Signal_MVA350, Background_MVA350, 0.7) << endl;
+  cout << "Background efficiency at signal of 60% : " << FindBkgEffAtFixedSignalEfficiency(Signal_MVA350, Background_MVA350, 0.6) << endl;
 
   //*****************************************************************************************
   //Find Cut with same signal efficiency
   //*****************************************************************************************
-  cout << "MVA Cut Value at 50% Sig Eff: " << FindCutValueAtFixedEfficiency(Signal_MVA, 0.5 ) << endl;
-  cout << "MVA Cut Value at 50% Bkg Eff: " << FindCutValueAtFixedEfficiency(Background_MVA, 0.5 ) << endl;
+  cout << "MVA125 Cut Value at 50% Sig Eff: " << FindCutValueAtFixedEfficiency(Signal_MVA125, 0.5 ) << endl;
+  cout << "MVA125 Cut Value at 50% Bkg Eff: " << FindCutValueAtFixedEfficiency(Background_MVA125, 0.5 ) << endl;
+  cout << "MVA350 Cut Value at 50% Sig Eff: " << FindCutValueAtFixedEfficiency(Signal_MVA350, 0.5 ) << endl;
+  cout << "MVA350 Cut Value at 50% Bkg Eff: " << FindCutValueAtFixedEfficiency(Background_MVA350, 0.5 ) << endl;
 
    //*****************************************************************************************
    // Make ROC curves
    //*****************************************************************************************
    // return a vector of TGraphAsymmErrors, sig vs bkg, sig vs bkg rej, sig vs inverse bkg eff
-   TGraphAsymmErrors* ROC_sigEffBkgEff = MakeSigEffVsBkgEffGraph(Signal_MVA, Background_MVA, "ROC_MVA_LLP_W+jets"+label );
+   TGraphAsymmErrors* ROC125_sigEffBkgEff = MakeSigEffVsBkgEffGraph(Signal_MVA125, Background_MVA125, "ROC_MVA125_LLP_W+jets"+label, Label);
+   TGraphAsymmErrors* ROC350_sigEffBkgEff = MakeSigEffVsBkgEffGraph(Signal_MVA350, Background_MVA350, "ROC_MVA350_LLP_W+jets"+label, Label );
 
   TLegend* legend_indiv;
   TCanvas* cv_indiv;
@@ -357,26 +402,31 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option)
   //*****************************************************************************************
   // Overlay signal and background BDT scores
   //*****************************************************************************************
-  THStack *hs = new THStack("hs", Form("Signal and Background BDT Scores (mH=%s) ; BDT Score ; Number of Entries",Label.c_str()));
-  Signal_MVA->SetFillColor(kBlue);
-  Background_MVA->SetFillColor(kRed);
-  Signal_MVA->Rebin(20);
-  Background_MVA->Rebin(20);
-  hs->Add(Signal_MVA);
-  hs->Add(Background_MVA);
+  THStack *hs = new THStack("hs", Form("Signal and Background BDT Scores (mH=%s) ; BDT (trained on 125) Score ; Number of Entries",Label.c_str()));
+  Signal_MVA125->SetFillColor(kBlue);
+  Background_MVA125->SetFillColor(kRed);
+  Signal_MVA125->Rebin(20);
+  Background_MVA125->Rebin(20);
+  hs->Add(Signal_MVA125);
+  hs->Add(Background_MVA125);
   cv_indiv->cd();
   hs->Draw("bar1 nostack");
   gPad->BuildLegend(0.65,0.65,0.85,0.85,"");
-  cv_indiv->SaveAs(("BDTscore_" + plotname + ".png").c_str());
+  cv_indiv->SaveAs(("BDT125score_" + plotname + ".png").c_str());
   cv_indiv->Clear();
 
   //*****************************************************************************************
   //Plot ROC Curves
   //*****************************************************************************************
-  ROCGraphs.push_back(ROC_sigEffBkgEff);
-  GraphLabels.push_back("MVA LLP (mh=" + Label + ") vs. W+jets");
+
+  ROCGraphs.push_back(ROC125_sigEffBkgEff);
+  ROCGraphs.push_back(ROC350_sigEffBkgEff);
+  GraphLabels.push_back("MVA trained on 125 for LLP vs. W+jets");
+  GraphLabels.push_back("MVA trained on 350 for LLP vs. W+jets");
   colors.push_back(Option);
-  PlotnameSpecific.push_back(plotname);
+  colors.push_back(Option2);
+  PlotnameSpecific.push_back(plotname + "_trainedOn125");
+  PlotnameSpecific.push_back(plotname + "_trainedOn350");
 
   Double_t xmin = 0.0;
   Double_t xmax = 1.0;
@@ -384,11 +434,11 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option)
   Double_t ymax = 1.0;
 
   bool overlay = true;
-
+  bool individual = false;
   //*****************************************************************************************
 
   for (UInt_t i=0; i<GraphLabels.size(); ++i) {
-    if (i == GraphLabels.size() - 1) legend->AddEntry(ROCGraphs[i],GraphLabels[i].c_str(), "LP");
+    legend->AddEntry(ROCGraphs[i],GraphLabels[i].c_str(), "LP");
 
     ROCGraphs[i]->SetMarkerColor(colors[i]);
     ROCGraphs[i]->SetLineColor(colors[i]);
@@ -396,8 +446,8 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option)
 
     ROCGraphs[i]->GetXaxis()->SetRangeUser(xmin,xmax);    
     ROCGraphs[i]->GetYaxis()->SetRangeUser(ymin,ymax);    
-    
-    if (overlay) {
+
+    if (overlay) {    
       cv->cd();
       if (i==0) {
         ROCGraphs[i]->Draw("AP");
@@ -406,7 +456,8 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option)
       }
       ROCGraphs[i]->GetXaxis()->SetLimits(0.00001,1);
     }
-    if (i == GraphLabels.size() - 1) {  // if want to save each ROC curve individually, only do last (most recently added) in list
+
+    if (individual) {
       cv_indiv->cd();
       legend_indiv->AddEntry(ROCGraphs[i],GraphLabels[i].c_str(), "LP");
       ROCGraphs[i]->Draw("AP");
@@ -439,10 +490,9 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option)
 
 //*************************************************************************************************
 //*************************************************************************************************
-void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option, string InputFile2, string Label2, Int_t Option2)
+void MakeMVAPerformancePlots_SigBkg(string InputFile, string Label, Int_t Option, string InputFile2, string Label2, Int_t Option2)
 {  
   SetupPlots();
 
-  BDTPerformancePlots(InputFile, Label, Option);
-  BDTPerformancePlots(InputFile2, Label2, Option2);
+  BDTPerformancePlots(InputFile, Label, Option, InputFile2, Label2, Option2);
 }
