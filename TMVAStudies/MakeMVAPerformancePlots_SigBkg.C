@@ -271,7 +271,7 @@ void SetupPlots()
   GraphLabels.clear();
   PlotnameSpecific.clear();
 
-  legend = new TLegend(0.5,0.14,0.94,0.44);
+  legend = new TLegend(0.45,0.14,0.9,0.34);
   legend->SetTextSize(0.03);
   legend->SetBorderSize(0);
   legend->SetFillStyle(0);
@@ -283,7 +283,6 @@ void SetupPlots()
 //*************************************************************************************************
 void BDTPerformancePlots(string InputFile, string Label, Int_t Option, string InputFile2, string Label2, Int_t Option2)
 {  
-
   string label = "";
   if (Label != "") label = "_" + Label;
 
@@ -303,17 +302,37 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option, string In
   //*****************************************************************************************
   // Get signal distribution
   //*****************************************************************************************
-  TTree *tree_sig = getTreeFromFile(InputFile.c_str(), "NoSel"); 
+  TTree *tree_sig = getTreeFromFile(InputFile.c_str(), "NoSel");
+
+  float LLP0_DecayR, LLP1_DecayR, LLP0_Eta, LLP1_Eta, jet0_isMatchedTo;
+
+  float radius_HB1 = 183.6;
+  float radius_HB2 = 190.2;
+  float radius_HB3 = 214.2;
+  float radius_HB4 = 244.8;
+  float radius_HBend = 295;
+  float HBeta = 1.26;
+
+  tree_sig->SetBranchAddress("LLP0_DecayR", &LLP0_DecayR);
+  tree_sig->SetBranchAddress("LLP1_DecayR", &LLP1_DecayR);
+  tree_sig->SetBranchAddress("LLP0_Eta", &LLP0_Eta);
+  tree_sig->SetBranchAddress("LLP1_Eta", &LLP1_Eta);
+  tree_sig->SetBranchAddress("jet0_isMatchedTo", &jet0_isMatchedTo);
+
+  TFile *myReducedFile = new TFile("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/temp.root", "RECREATE"); // preventing error "This error is symptomatic of a Tree created as a memory-resident Tree"
+  TTree *tree_sig_reduced = tree_sig->CopyTree(Form("(LLP0_DecayR >= %f && LLP0_DecayR < %f && abs(LLP0_Eta) <= %f && jet0_isMatchedTo == 0) || (LLP1_DecayR >= %f && LLP1_DecayR < %f && abs(LLP1_Eta) <= %f && jet0_isMatchedTo == 1)",radius_HB1, radius_HBend, HBeta, radius_HB1, radius_HBend, HBeta), "", tree_sig->GetEntries(), 0);
+  // hopefully there is a better way to implement these cuts, had TCut errors when imported RegionCuts.h on first try
+  // reduces by a factor of about 10 for mh=125
 
   float score350_sig;
   float score125_sig;
-  tree_sig->SetBranchAddress("bdtscore_350GeV", &score350_sig);
-  tree_sig->SetBranchAddress("bdtscore_125GeV", &score125_sig);
+  tree_sig_reduced->SetBranchAddress("bdtscore_350GeV", &score350_sig);
+  tree_sig_reduced->SetBranchAddress("bdtscore_125GeV", &score125_sig);
 
-  cout << "Total Entries: " << tree_sig->GetEntries() << "\n";
-  int nentries = tree_sig->GetEntries();
+  cout << "Total Entries: " << tree_sig_reduced->GetEntries() << "\n";
+  int nentries = tree_sig_reduced->GetEntries();
   for(int ientry=0; ientry < nentries; ientry++) {       	
-    tree_sig->GetEntry(ientry);
+    tree_sig_reduced->GetEntry(ientry);
     
     if (ientry % 100000 == 0) cout << "Event " << ientry << endl;
         
@@ -342,11 +361,7 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option, string In
     tree_bkg->GetEntry(ientry);
     
     if (ientry % 100000 == 0) cout << "Event " << ientry << endl;
-        
-    //don't evaluate performance using training events
-    //classify by eta and pt bins
-    //Some Preselection cuts
-  
+
     // eventually need to fill with weights
 	  Background_MVA125->Fill(score125_bkg);
 	  Background_MVA350->Fill(score350_bkg);

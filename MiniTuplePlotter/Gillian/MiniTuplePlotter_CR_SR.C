@@ -10,13 +10,18 @@ void MiniTuplePlotter_CR_SR(){
 	
 	// string path = "/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v3.0/minituple_";
 	string path = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.0/minituple_";
-//	vector<string> filetags_dataLLP	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23"};
-	vector<string> filetags_dataLLP	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2023_11_29"};
+	string path_v3pt1 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.1/minituple_";
+	vector<string> filetags_dataLLP	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23"};
+//	vector<string> filetags_dataLLP	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2023_11_29"};
 
 	vector<string> filetags_all 	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v2.0_MC_QCD_250k_2023_10_18", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23"};
 	vector<string> filetags_data 	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23" };
 	vector<string> filetags_LLP 	= { "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23" };	
 	vector<string> filetags_QCD 	= { "v2.0_MC_QCD_250k_2023_10_18" };	
+
+	vector<string> filetags_data_v3pt1 	= { "v3.1_LLPskim_Run2023Cv3_2024_01_20" };
+	vector<string> filetags_LLP_v3pt1 	= { "v3.1_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_01_20_TEST" };	
+	//vector<string> filetags_LLP_v3pt1 	= { "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_01_20_TEST" };	
 
 	vector<PlotParams> jetPlots0	= {P_jet0_E, P_jet0_Pt}; 																				// dont apply a 40 GeV jet cut on these
 	vector<PlotParams> jetPlots1	= {P_jet1_E, P_jet1_Pt}; 																				// dont apply a 40 GeV jet cut on these
@@ -51,7 +56,8 @@ void MiniTuplePlotter_CR_SR(){
 	vector<PlotParams> analysisVars	= {P_jet0_NeutralHadEFrac, P_jet0_LogNeutralOverChargedHad, P_jet0_Track0PtFrac,
 										P_jet0_EtaPhiQuadSpread_energy, P_jet0_EtaPhiQuadSpread, P_jet0_LeadingRechitEFracJet, 
 										P_jet0_EnergyFrac_Depth1, P_jet0_EnergyFrac_Depth2, P_jet0_EnergyFrac_Depth3, P_jet0_EnergyFrac_Depth4,
-										P_jet0_Smajor, P_jet0_Sminor, P_jet0_SminorSmajor, P_jet0_Setaeta, P_jet0_Sphiphi, P_jet0_Setaphi,	 				// only in newest v3.0 minituples
+										//P_jet0_Smajor, P_jet0_Sminor, P_jet0_SminorSmajor, 
+										P_jet0_Setaeta, P_jet0_Sphiphi, P_jet0_Setaphi,	 																	// only in newest v3.0 minituples
 										P_jet0_EtaSpread, P_jet0_PhiSpread, P_jet0_EtaSpread_energy, P_jet0_PhiSpread_energy,
 										//P_jet0_TDCaverage, P_jet0_TDCaverage_Eweight, P_jet0_TDCnDelayed, 
 										P_jet0_Track0dR};
@@ -63,8 +69,9 @@ void MiniTuplePlotter_CR_SR(){
 	bool LLP_WJets = true;				// analysis variables for LLP and W+Jets overlayed
 	bool LLP_all = false;				// all variables, track vars with leading track < 4 study, eta-phi spread
 	bool Jet_vars = false; 				// jet kinematics without a pT cut
-	bool NH_bins = false;				// bin in neutral hadron fraction
-	bool Jet_bins = false;				// bin in jet pT
+	bool NH_bins = true;				// bin in neutral hadron fraction
+	bool Jet_bins = true;				// bin in jet pT
+	bool BDT_bins = true;				// bin in BDT score
 	bool Overlay_all = false;			// overlay LLP MC, QCD MC, LLP skim
 	bool Matching_efficiency = false;	// LLP - jet matching efficiency
 
@@ -239,11 +246,47 @@ void MiniTuplePlotter_CR_SR(){
 		plotter_allVars_JetBins.Plot("ratio");
 	}
 
+	if (BDT_bins) {
+		// ----- Bin in BDT score ----- //
+
+		// for mH = 125 now, BDT score for 125
+
+		cout<<endl;
+		cout<<" ---------- Study 5: Bin in BDT score (MC and data) ---------- "<<endl;
+		cout<<endl;
+
+		class MiniTuplePlotter plotter_allVars_BDTbinsData( filetags_data_v3pt1, path_v3pt1 );
+		plotter_allVars_BDTbinsData.SetPlots(analysisVars); //allPlots);
+		plotter_allVars_BDTbinsData.SetTreeName( "WPlusJets" );	
+		plotter_allVars_BDTbinsData.SetOutputFileTag("BDTBins_Jet40_v3.1"); 	
+		plotter_allVars_BDTbinsData.SetComparisonCuts({Cut_BDTscoreNPt99, Cut_BDTscoreNPt98, Cut_BDTscoreNPt95, Cut_BDTscore0, Cut_BDTscorePos}); 
+		plotter_allVars_BDTbinsData.plot_log_ratio    = false; 
+		plotter_allVars_BDTbinsData.SetLegendNames({"Data: BDT score -1 to -0.99", "Data: BDT score -0.99 to -0.98", "Data: BDT score -0.98 to -0.95", "Data: BDT score -0.95 to 0", "Data: BDT score 0 to 1"});
+		plotter_allVars_BDTbinsData.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+		plotter_allVars_BDTbinsData.SetCuts("jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26");
+		plotter_allVars_BDTbinsData.SetSelectiveCuts("LLPskim", "jet0_NeutralHadEFrac < 0.6");  // BLINDED with track energy fraction (jet0_Track0Pt / jet0_Pt > 0.1) or neutral hadron fraction (jet0_NeutralHadEFrac < 0.6)
+		plotter_allVars_BDTbinsData.SetOutputDirectory("Data_BDTBins");
+		plotter_allVars_BDTbinsData.Plot("ratio");
+
+		class MiniTuplePlotter plotter_allVars_BDTBins( filetags_LLP_v3pt1, path_v3pt1 );
+		plotter_allVars_BDTBins.SetPlots(analysisVars); // {P_jet0_Track0PtFrac}); //MC_allPlots);
+		plotter_allVars_BDTBins.SetTreeName( "NoSel" );	
+		plotter_allVars_BDTBins.SetOutputFileTag("BDTBins_Jet40_v3.1_MC"); 	
+		plotter_allVars_BDTBins.SetComparisonCuts({Cut_BDTscoreN, Cut_BDTscorePt5, Cut_BDTscorePt9, Cut_BDTscorePt95, Cut_BDTscore1}); 
+		plotter_allVars_BDTBins.plot_log_ratio    = false; 
+		plotter_allVars_BDTBins.SetLegendNames({"BDT score -1 to 0", "BDT score 0 to 0.5", "BDT score 0.5 to 0.9", "BDT score 0.9 to 0.95", "BDT score 0.95 to 1"});
+		plotter_allVars_BDTBins.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+		plotter_allVars_BDTBins.SetCuts("jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26 && jet0_Track0Pt > 4");
+		plotter_allVars_BDTBins.SetSelectiveCuts("LLP_MC", Cut_LLPinHCAL_Jet0);
+		plotter_allVars_BDTBins.SetOutputDirectory("MC_BDTBins");
+		plotter_allVars_BDTBins.Plot("ratio");
+	}
+
 	if (Overlay_all) {
 		// ----- Overlay for MC signal, MC QCD, data ----- //
 
 		cout<<endl;
-		cout<<" ---------- Study 5: Overlay all minituples (QCD, LLP, skim)! ---------- "<<endl;
+		cout<<" ---------- Study 6: Overlay all minituples (QCD, LLP, skim)! ---------- "<<endl;
 		cout<<endl;
 
 		class MiniTuplePlotter plotter_overlay( filetags_all, path );
@@ -276,7 +319,7 @@ void MiniTuplePlotter_CR_SR(){
 		// ----- LLP to jet matching efficiencies -----//
 
 		cout<<endl;
-		cout<<" ---------- MC Study 6: LLP - jet match (efficiency plots) ---------- "<<endl;
+		cout<<" ---------- MC Study 7: LLP - jet match (efficiency plots) ---------- "<<endl;
 		cout<<endl;
 
 		class MiniTuplePlotter plotter_LLP_Jet_PtDiff( filetags_LLP, path );
