@@ -60,7 +60,7 @@ def main():
 		"HLT dijet, $\\leq$2 prompt track",
 		"HLT delayed jet, ECAL timing",
 		"All", 
-		"LLP $t > 6$~ns", 
+		"LLP $t > 6$~ns and $r < 295$~cm", 
 		"LLP $\\eta \\leq 1.26$", 
 		"LLP $E > 60$~GeV", 
 		"LLP 0 OR LLP 1",
@@ -135,11 +135,11 @@ def main():
 			if i == 11: total_selection_string = "( HLT_HT320_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 || HLT_HT420_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 )"
 			if i == 12: total_selection_string = "( HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay0p5nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay1nsInclusive == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay1nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay2nsInclusive == 1 )"
 
-			if i == 14: selection_string = "(LLP0_TravelTime > 6)"
+			if i == 14: selection_string = "(LLP0_TravelTime > 6 && LLP0_DecayR < 295)"
 			if i == 15: selection_string += "&& abs(LLP0_Eta) <= 1.26"
 			if i == 16: selection_string += "&& LLP0_E > 60"
 
-			if i == 14: selection1_string = "(LLP1_TravelTime > 6)"
+			if i == 14: selection1_string = "(LLP1_TravelTime > 6 && LLP1_DecayR < 295)"
 			if i == 15: selection1_string += "&& abs(LLP1_Eta) <= 1.26"
 			if i == 16: selection1_string += "&& LLP1_E > 60"
 
