@@ -4,7 +4,7 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader(){
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::DeclareTMVAReader()"<<endl;	
 
 	bdt_tags = {
-		"350GeV", "125GeV"
+		"LLP350", "LLP125", "hadd"
 		//"test" // name of file in "BDTWeightFiles/v0.1/weights_*"
 	};
 
@@ -26,7 +26,7 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader(){
 			}
 		}
 
-		string filename = Form("%s/v0.1/weights_%s/TMVAClassification_BDTG.weights.xml", filepath.c_str(), bdt_tag.c_str() );
+		string filename = Form("%s/v0.2/weights_%s/TMVAClassification_BDTG.weights.xml", filepath.c_str(), bdt_tag.c_str() );
 
 		// Declare TMVA Reader
 		cout<<"  --> "<<bdt_tag<<endl;

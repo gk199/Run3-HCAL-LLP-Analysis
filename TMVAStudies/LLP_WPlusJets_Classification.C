@@ -61,7 +61,7 @@
 
 using namespace TMVA;
 
-int runClassification( TString dir, TString sigTag, TString bkgTag )
+int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag )
 {
    // Setup cuts on LLP decay position. Include header file of all cuts potentially needed
    #include "../MiniTuplePlotter/RegionCuts.h"
@@ -200,7 +200,7 @@ int runClassification( TString dir, TString sigTag, TString bkgTag )
    std::cout << "Loading files..." << std::endl;
 
    // Create a ROOT output file where TMVA will store ntuples, histograms, etc.
-   TString outfileName( "BDTWeightFilesTest/Test.root" );
+   TString outfileName( "BDTWeightFilesTest/Test_" + tag +".root" );
    TFile* outputFile = TFile::Open( outfileName, "RECREATE" );
    
    // Signal // 
@@ -246,6 +246,7 @@ int runClassification( TString dir, TString sigTag, TString bkgTag )
    //
    //    (TMVA::gConfig().GetVariablePlotting()).fTimesRMS = 8.0;
    //    (TMVA::gConfig().GetIONames()).fWeightFileDir = "myWeightDirectory";
+   (TMVA::gConfig().GetIONames()).fWeightFileDir = "weights_"+tag; // save each weight file in a separate directory
 
    // Define the input variables that shall be used for the MVA training
    // note that you may also use variable expressions, such as: "3*var1/var2*abs(var3)"
@@ -645,15 +646,18 @@ int LLP_WPlusJets_Classification()
    // Select methods (don't look at this code - not of interest)
    //std::cout << "print" << std::endl;
 
-   vector<TString> sigTagList;
-   TString dir = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.0/";
+   map<TString, TString> sigTagList;
+   sigTagList["LLP125"]	   = "v3.1_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_01_20_TRAIN";
+   sigTagList["LLP350"]	   = "v3.1_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_01_20_TRAIN";
+   sigTagList["hadd"]      = "v3.1_LLP_MC_ggH_HToSSTobbbb_MH-125_350_HADD_13p6TeV_2024_01_20_TRAIN";
 
-   //sigTagList.push_back("v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_01_20_TRAIN");
-   sigTagList.push_back("v3.0_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_01_20_TRAIN");
    TString bkgTag = "v3.0_LLPskim_2023Cv4_2023_11_22";
 
-   for (auto tag: sigTagList){
-     runClassification(dir, tag, bkgTag);
+   TString dir = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.0/";
+
+   vector<string> filetag_keys_to_loop = {"LLP125", "LLP350", "hadd"};
+	for( auto key: filetag_keys_to_loop){
+      runClassification(dir, sigTagList[key], bkgTag, key);
    }
    return 0;
 }

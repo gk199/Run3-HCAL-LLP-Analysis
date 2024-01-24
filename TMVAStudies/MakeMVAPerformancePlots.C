@@ -1,6 +1,8 @@
 // root -l /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/MakeMVAPerformancePlots.C+'("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_mh350.root","350",30,"/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_mh125.root","125",38)'
 // inputs are output TMVA root file, label, color, repeat for second file to overlay
 
+// root -l /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/MakeMVAPerformancePlots.C+'()'
+
 //================================================================================================
 //
 //================================================================================================
@@ -439,10 +441,15 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option)
 
 //*************************************************************************************************
 //*************************************************************************************************
-void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option, string InputFile2, string Label2, Int_t Option2)
+//void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option, string InputFile2, string Label2, Int_t Option2)
+void MakeMVAPerformancePlots()
 {  
   SetupPlots();
 
-  BDTPerformancePlots(InputFile, Label, Option);
-  BDTPerformancePlots(InputFile2, Label2, Option2);
+  // BDTPerformancePlots(InputFile, Label, Option);
+  // BDTPerformancePlots(InputFile2, Label2, Option2);
+
+  BDTPerformancePlots("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_LLP125.root", "125", 38);
+  BDTPerformancePlots("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_LLP350.root", "350", 30);
+  BDTPerformancePlots("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_hadd.root", "hadd", 48);
 }

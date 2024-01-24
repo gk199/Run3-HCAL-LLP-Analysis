@@ -116,6 +116,10 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 			myvars_float.push_back( Form("jet%d_Track%ddxyToBS", i, t) );
 			myvars_float.push_back( Form("jet%d_Track%ddzOverErr", i, t) );
 			myvars_float.push_back( Form("jet%d_Track%ddxyOverErr", i, t) );
+			myvars_float.push_back( Form("jet%d_Track%dnMissingInnerHits", i, t) );
+			myvars_float.push_back( Form("jet%d_Track%dnMissingOuterHits", i, t) );
+			myvars_float.push_back( Form("jet%d_Track%dnPixelHits", i, t) );
+			myvars_float.push_back( Form("jet%d_Track%dnHits", i, t) );
 			myvars_float.push_back( Form("jet%d_Track%ddR", i, t) );
 			myvars_float.push_back( Form("jet%d_Track%ddEta", i, t) );
 			myvars_float.push_back( Form("jet%d_Track%ddPhi", i, t) );
@@ -376,6 +380,12 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 				tree_output_vars_float[Form("jet%d_Track%ddxyToBS", i, track)] 		= track_dxyToBS->at(track_num); 
 				tree_output_vars_float[Form("jet%d_Track%ddzOverErr", i, track)]	= track_dzToPV->at(track_num) / track_dzErr->at(track_num); 
 				tree_output_vars_float[Form("jet%d_Track%ddxyOverErr", i, track)] 	= track_dxyToBS->at(track_num) / track_dxyErr->at(track_num); 
+
+				tree_output_vars_float[Form("jet%d_Track%dnMissingInnerHits", i, track)] 	= track_nMissingInnerHits->at(track_num);
+				tree_output_vars_float[Form("jet%d_Track%dnMissingOuterHits", i, track)] 	= track_nMissingOuterHits->at(track_num); 
+				tree_output_vars_float[Form("jet%d_Track%dnPixelHits", i, track)] 			= track_nPixelHits->at(track_num); 
+				tree_output_vars_float[Form("jet%d_Track%dnHits", i, track)] 				= track_nHits->at(track_num); 
+
 				tree_output_vars_float[Form("jet%d_Track%ddR", i, track)] 			= DeltaR( jet_Eta->at(i), track_Eta->at(track_num), jet_Phi->at(i), track_Phi->at(track_num) ); 
 				tree_output_vars_float[Form("jet%d_Track%ddEta", i, track)] 		= fabs(jet_Eta->at(i) - track_Eta->at(track_num));
 				tree_output_vars_float[Form("jet%d_Track%ddPhi", i, track)] 		= fabs(deltaPhi( jet_Phi->at(i), track_Phi->at(track_num) )); 
