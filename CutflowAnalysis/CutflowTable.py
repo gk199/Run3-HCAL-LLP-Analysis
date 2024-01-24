@@ -55,6 +55,8 @@ def main():
 		"LLP OR, with Event HT $> 200$~GeV", 
 		"LLP AND, with Event HT $> 200$~GeV", 
 		"L1 passed (monitoring path)",
+		"L1 + Leading jet neutral hadron frac $>70\%$",
+		"L1 + Leading jet neutral hadron frac $>80\%$",
 		"HLT dijet, $\\leq$1 prompt track",
 		"HLT dijet, 1 displaced track",
 		"HLT dijet, $\\leq$2 prompt track",
@@ -78,6 +80,9 @@ def main():
 		"LLP AND   ",
 		"LLP OR with HTT", 
 		"LLP AND with HTT",
+		"L1 monitoring",
+		"L1 + NHF 70",
+		"L1 + NHF 80",
 		"HLT dijet, 1 prompt trk",
 		"HLT dijet, displaced trk",
 		"HLT dijet, 2 prompt trk",
@@ -111,7 +116,7 @@ def main():
 		selval1 = -1
 		Nevents = -1
 
-		if (i == 0 or i == 13): 
+		if (i == 0 or i == 15): 
 			selval = tree.GetEntries()
 			selval1 = tree.GetEntries()
 			init = selval
@@ -130,40 +135,43 @@ def main():
 			if i == 7: total_selection_string = "(" + selection_string + " && " + selection1_string + ") && eventHT > 200"
 
 			if i == 8: total_selection_string = "( HLT_L1SingleLLPJet == 1 )"
-			if i == 9: total_selection_string = "( HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT240_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT280_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1)"
-			if i == 10: total_selection_string = "( HLT_HT170_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT270_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet60_DisplacedTrack == 1 )"
-			if i == 11: total_selection_string = "( HLT_HT320_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 || HLT_HT420_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 )"
-			if i == 12: total_selection_string = "( HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay0p5nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay1nsInclusive == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay1nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay2nsInclusive == 1 )"
+			if i == 9: total_selection_string += "&& ( jet0_NeutralHadEFrac > 0.7 )"
+			if i == 10: total_selection_string += "&& ( jet0_NeutralHadEFrac > 0.8 )"
+			if i == 11: total_selection_string = "( HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT240_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT280_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1)"
+			if i == 12: total_selection_string = "( HLT_HT170_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT270_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet60_DisplacedTrack == 1 )"
+			if i == 13: total_selection_string = "( HLT_HT320_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 || HLT_HT420_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 )"
+			if i == 14: total_selection_string = "( HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay0p5nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay1nsInclusive == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay1nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay2nsInclusive == 1 )"
 
-			if i == 14: selection_string = "(LLP0_TravelTime > 6 && LLP0_DecayR < 295)"
-			if i == 15: selection_string += "&& abs(LLP0_Eta) <= 1.26"
-			if i == 16: selection_string += "&& LLP0_E > 60"
+			# second table, travel time focused
+			if i == 16: selection_string = "(LLP0_TravelTime > 6 && LLP0_DecayR < 295)"
+			if i == 17: selection_string += "&& abs(LLP0_Eta) <= 1.26"
+			if i == 18: selection_string += "&& LLP0_E > 60"
 
-			if i == 14: selection1_string = "(LLP1_TravelTime > 6 && LLP1_DecayR < 295)"
-			if i == 15: selection1_string += "&& abs(LLP1_Eta) <= 1.26"
-			if i == 16: selection1_string += "&& LLP1_E > 60"
+			if i == 16: selection1_string = "(LLP1_TravelTime > 6 && LLP1_DecayR < 295)"
+			if i == 17: selection1_string += "&& abs(LLP1_Eta) <= 1.26"
+			if i == 18: selection1_string += "&& LLP1_E > 60"
 
-			if i == 17: total_selection_string = "(" + selection_string + ") || (" + selection1_string + ")"
-			if i == 18: total_selection_string = "(" + selection_string + " && " + selection1_string + ")"
-			if i == 19: total_selection_string = "((" + selection_string + ") || (" + selection1_string + ")) && eventHT > 200"
-			if i == 20: total_selection_string = "(" + selection_string + " && " + selection1_string + ") && eventHT > 200"
+			if i == 19: total_selection_string = "(" + selection_string + ") || (" + selection1_string + ")"
+			if i == 20: total_selection_string = "(" + selection_string + " && " + selection1_string + ")"
+			if i == 21: total_selection_string = "((" + selection_string + ") || (" + selection1_string + ")) && eventHT > 200"
+			if i == 22: total_selection_string = "(" + selection_string + " && " + selection1_string + ") && eventHT > 200"
 
 			selval = tree.GetEntries(selection_string)
 			selval1 = tree.GetEntries(selection1_string)
 
-			if ((i >= 4 and i <= 12) or i >= 17): selval = tree.GetEntries(total_selection_string)
+			if ((i >= 4 and i <= 14) or i >= 19): selval = tree.GetEntries(total_selection_string)
 
 			Nevents = tree.GetEntries()
 
 		if print_latex:
-			if (i < 4 or (i > 12 and i < 17)): print(selname+" &", round(selval, 4), "&", round(selval1, 4), "&", round(selval/init, 4), "&", round(selval1/init, 4), "\\\\")
-			if (i == 4 or i == 17): print("\\hline")
-			if ((i >= 4 and i <= 12 ) or i >= 17): print(selname+" & \\multicolumn{2}{l}{", round(selval, 4), "} & \\multicolumn{2}{l}{", round(selval/init, 4), "} \\\\ ")
+			if (i < 4 or (i > 14 and i < 19)): print(selname+" &", round(selval, 4), "&", round(selval1, 4), "&", round(selval/init, 4), "&", round(selval1/init, 4), "\\\\")
+			if (i == 4 or i == 19): print("\\hline")
+			if ((i >= 4 and i <= 14 ) or i >= 19): print(selname+" & \\multicolumn{2}{l}{", round(selval, 4), "} & \\multicolumn{2}{l}{", round(selval/init, 4), "} \\\\ ")
 			if (i == 7): print("\\hline")
-			if (i == 12):
+			if (i == 14):
 				latex_end(file_path)
 				latex_setup(file_path)
-			if (i == 20):
+			if (i == 22):
 				latex_end(file_path)
 
 		else:
