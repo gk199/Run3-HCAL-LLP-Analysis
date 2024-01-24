@@ -121,11 +121,25 @@ Updates:
 
 Location of minituples:
 ```
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.0/minituple_v3.1_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_01_20_TRAIN.root
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.0/minituple_v3.1_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_01_20_TRAIN.root
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.0/minituple_v3.1_LLP_MC_ggH_HToSSTobbbb_MH-125_350_HADD_13p6TeV_2024_01_20_TRAIN.root
+
 /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.1/minituple_v3.1_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_01_20_TEST.root
-/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.1/minituple_v3.1_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_01_20_TRAIN.root
 /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.1/minituple_v3.1_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_01_20_TEST.root
-/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.1/minituple_v3.1_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_01_20_TRAIN.root
 /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.1/minituple_v3.1_LLPskim_Run2023Cv3_2024_01_20.root
+```
+
+### v3.2
+Updates:
+* Track information: missing inner and outer hits, n pixel hits, n hits
+* Test on 125, 350, and hadd-ed version of both samples
+
+Location of minituples:
+```
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.2/minituple_v3.2_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_01_23_TEST.root
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.2/minituple_v3.2_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_01_23_TEST.root
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.2/minituple_v3.2_LLPskim_Run2023Cv3_2024_01_23.root
 ```
 
 ## V4

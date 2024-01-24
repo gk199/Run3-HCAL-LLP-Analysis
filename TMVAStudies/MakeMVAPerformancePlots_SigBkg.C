@@ -1,9 +1,6 @@
 // root -l /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/MakeMVAPerformancePlots_SigBkg.C+'("/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.1/minituple_v3.1_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_01_20_TEST.root","125",30,"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.1/minituple_v3.1_LLPskim_Run2023Cv3_2024_01_20.root","W+Jets",38)'
 // inputs are minituple signal file, label, color, minituple background file, label, color
-
-// /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.1/minituple_v3.1_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_01_20_TEST.root
-// /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.1/minituple_v3.1_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_01_20_TEST.root
-// /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.1/minituple_v3.1_LLPskim_Run2023Cv3_2024_01_20.root
+// root -l /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/MakeMVAPerformancePlots_SigBkg.C+'()'
 
 // void MakeMVAPerformancePlots_SigBkg(string InputFile, string Label, Int_t Option, string InputFile2, string Label2, Int_t Option2)
 //================================================================================================
@@ -281,7 +278,7 @@ void SetupPlots()
 
 //*************************************************************************************************
 //*************************************************************************************************
-void BDTPerformancePlots(string InputFile, string Label, Int_t Option, string InputFile2, string Label2, Int_t Option2)
+void BDTPerformancePlots(string InputFile, string Label, string InputFile2, string Label2, Int_t Option, Int_t Option2, Int_t Option3)
 {  
   string label = "";
   if (Label != "") label = "_" + Label;
@@ -291,8 +288,10 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option, string In
   //==============================================================================================================  
   TH1F *Signal_MVA125 = new TH1F(("Signal_MVA125"+label).c_str(), "LLP Signal ; MVA (BDT trained on 125) score for LLP signal ; Number of Events ",  5500, -1.1 , 1.1);
   TH1F *Signal_MVA350 = new TH1F(("Signal_MVA350"+label).c_str(), "LLP Signal ; MVA (BDT trained on 350) score for LLP signal ; Number of Events ",  5500, -1.1 , 1.1);
+  TH1F *Signal_MVAhadd = new TH1F(("Signal_MVAhadd"+label).c_str(), "LLP Signal ; MVA (BDT trained on combination) score for LLP signal ; Number of Events ",  5500, -1.1 , 1.1);
   TH1F *Background_MVA125 = new TH1F(("Background_MVA125"+label).c_str(), "W+Jets Background ; MVA (BDT trained on 125) score for W+jets background ; Number of Events ",  5500, -1.1 , 1.1);
   TH1F *Background_MVA350 = new TH1F(("Background_MVA350"+label).c_str(), "W+Jets Background ; MVA (BDT trained on 350) score for W+jets background ; Number of Events ",  5500, -1.1 , 1.1);
+  TH1F *Background_MVAhadd = new TH1F(("Background_MVAhadd"+label).c_str(), "W+Jets Background ; MVA (BDT trained on combination) score for W+jets background ; Number of Events ",  5500, -1.1 , 1.1);
 
   Double_t RealElectrons = 0;
   Double_t FakeElectrons = 0;
@@ -324,12 +323,14 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option, string In
   // hopefully there is a better way to implement these cuts, had TCut errors when imported RegionCuts.h on first try
   // reduces by a factor of about 10 for mh=125
 
-  float score350_sig;
   float score125_sig;
-  tree_sig_reduced->SetBranchAddress("bdtscore_350GeV", &score350_sig);
-  tree_sig_reduced->SetBranchAddress("bdtscore_125GeV", &score125_sig);
+  float score350_sig;
+  float scoreHadd_sig;
+  tree_sig_reduced->SetBranchAddress("bdtscore_LLP125", &score125_sig);
+  tree_sig_reduced->SetBranchAddress("bdtscore_LLP350", &score350_sig);
+  tree_sig_reduced->SetBranchAddress("bdtscore_hadd", &scoreHadd_sig);
 
-  cout << "Total Entries: " << tree_sig_reduced->GetEntries() << "\n";
+  cout << "Total Entries (signal): " << tree_sig_reduced->GetEntries() << "\n";
   int nentries = tree_sig_reduced->GetEntries();
   for(int ientry=0; ientry < nentries; ientry++) {       	
     tree_sig_reduced->GetEntry(ientry);
@@ -343,6 +344,7 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option, string In
     // eventually need to fill with weights
 	  Signal_MVA125->Fill(score125_sig);
 	  Signal_MVA350->Fill(score350_sig);
+	  Signal_MVAhadd->Fill(scoreHadd_sig);
   } 
 
   //*****************************************************************************************
@@ -350,12 +352,14 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option, string In
   //*****************************************************************************************
   TTree *tree_bkg = getTreeFromFile(InputFile2.c_str(), "WPlusJets"); 
   
-  float score350_bkg;
   float score125_bkg;
-  tree_bkg->SetBranchAddress("bdtscore_350GeV", &score350_bkg);
-  tree_bkg->SetBranchAddress("bdtscore_125GeV", &score125_bkg);
+  float score350_bkg;
+  float scoreHadd_bkg;
+  tree_bkg->SetBranchAddress("bdtscore_LLP125", &score125_bkg);
+  tree_bkg->SetBranchAddress("bdtscore_LLP350", &score350_bkg);
+  tree_bkg->SetBranchAddress("bdtscore_hadd", &scoreHadd_bkg);
 
-  cout << "Total Entries: " << tree_bkg->GetEntries() << "\n";
+  cout << "Total Entries (background): " << tree_bkg->GetEntries() << "\n";
   int nentries_bkg = tree_bkg->GetEntries();
   for(int ientry=0; ientry < nentries_bkg; ientry++) {       	
     tree_bkg->GetEntry(ientry);
@@ -365,6 +369,7 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option, string In
     // eventually need to fill with weights
 	  Background_MVA125->Fill(score125_bkg);
 	  Background_MVA350->Fill(score350_bkg);
+    Background_MVAhadd->Fill(scoreHadd_bkg);
   } 
 
   //*****************************************************************************************
@@ -400,6 +405,7 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option, string In
    // return a vector of TGraphAsymmErrors, sig vs bkg, sig vs bkg rej, sig vs inverse bkg eff
    TGraphAsymmErrors* ROC125_sigEffBkgEff = MakeSigEffVsBkgEffGraph(Signal_MVA125, Background_MVA125, "ROC_MVA125_LLP_W+jets"+label, Label);
    TGraphAsymmErrors* ROC350_sigEffBkgEff = MakeSigEffVsBkgEffGraph(Signal_MVA350, Background_MVA350, "ROC_MVA350_LLP_W+jets"+label, Label );
+   TGraphAsymmErrors* ROChadd_sigEffBkgEff = MakeSigEffVsBkgEffGraph(Signal_MVAhadd, Background_MVAhadd, "ROC_MVAhadd_LLP_W+jets"+label, Label );
 
   TLegend* legend_indiv;
   TCanvas* cv_indiv;
@@ -412,7 +418,7 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option, string In
   legend_indiv->SetBorderSize(0);
   legend_indiv->SetFillStyle(0);
 
-  plotname = "LLP_WJets_MVA"+label;
+  plotname = Label+"_LLP_WJets_MVA";
 
   //*****************************************************************************************
   // Overlay signal and background BDT scores
@@ -427,7 +433,7 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option, string In
   cv_indiv->cd();
   hs->Draw("bar1 nostack");
   gPad->BuildLegend(0.65,0.65,0.85,0.85,"");
-  cv_indiv->SaveAs(("BDT125score_" + plotname + ".png").c_str());
+  cv_indiv->SaveAs(("Minituple_BDT125score_" + plotname + ".png").c_str());
   cv_indiv->Clear();
 
   //*****************************************************************************************
@@ -436,12 +442,16 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option, string In
 
   ROCGraphs.push_back(ROC125_sigEffBkgEff);
   ROCGraphs.push_back(ROC350_sigEffBkgEff);
+  ROCGraphs.push_back(ROChadd_sigEffBkgEff);
   GraphLabels.push_back("MVA trained on 125 for LLP vs. W+jets");
   GraphLabels.push_back("MVA trained on 350 for LLP vs. W+jets");
+  GraphLabels.push_back("MVA trained on combination for LLP vs. W+jets");
   colors.push_back(Option);
   colors.push_back(Option2);
+  colors.push_back(Option3);
   PlotnameSpecific.push_back(plotname + "_trainedOn125");
   PlotnameSpecific.push_back(plotname + "_trainedOn350");
+  PlotnameSpecific.push_back(plotname + "_trainedOnComb");
 
   Double_t xmin = 0.0;
   Double_t xmax = 1.0;
@@ -477,10 +487,10 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option, string In
       legend_indiv->AddEntry(ROCGraphs[i],GraphLabels[i].c_str(), "LP");
       ROCGraphs[i]->Draw("AP");
       legend_indiv->Draw();
-      cv_indiv->SaveAs(("ROCGraphs_" + PlotnameSpecific[i] + ".png").c_str());
+      cv_indiv->SaveAs(("Minituple_ROCGraphs_" + PlotnameSpecific[i] + ".png").c_str());
       ROCGraphs[i]->GetXaxis()->SetLimits(0.00001,1); // set non-zero lower value such that a log shows the lowest signal efficiency values too (if 0, minimum is 10^-3 below maximum)
       gPad->SetLogx();
-      cv_indiv->SaveAs(("ROCGraphs_" + PlotnameSpecific[i] + "_logx.png").c_str());
+      cv_indiv->SaveAs(("Minituple_ROCGraphs_" + PlotnameSpecific[i] + "_logx.png").c_str());
 
       legend_indiv->Clear();
       gPad->SetLogx(1);
@@ -499,15 +509,26 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option, string In
     cv->cd();
     gPad->SetLogx();
     legend->Draw();
-    cv->SaveAs(("ROCGraphs_" + plotname + "_overlay.png").c_str());
+    cv->SaveAs(("Minituple_ROCGraphs_" + plotname + "_overlay.png").c_str());
   }
 } 
 
 //*************************************************************************************************
 //*************************************************************************************************
-void MakeMVAPerformancePlots_SigBkg(string InputFile, string Label, Int_t Option, string InputFile2, string Label2, Int_t Option2)
+void MakeMVAPerformancePlots_SigBkg()
 {  
   SetupPlots();
 
-  BDTPerformancePlots(InputFile, Label, Option, InputFile2, Label2, Option2);
+  string Signal = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.2/minituple_v3.2_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_01_23_TEST.root";
+  string SigLabel = "125";
+  // string Signal = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.2/minituple_v3.2_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_01_23_TEST.root";
+  // string SigLabel = "350";
+  string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.2/minituple_v3.2_LLPskim_Run2023Cv3_2024_01_23.root";
+  string BkgLabel = "W+Jets";
+
+  int Color1 = 30;
+  int Color2 = 38;
+  int Color3 = 48;
+
+  BDTPerformancePlots(Signal, SigLabel, Background, BkgLabel, Color1, Color2, Color3);
 }

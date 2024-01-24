@@ -19,16 +19,20 @@ source display_gui.sh
 ```
 
 **4. Plot Output:**
-
-Run the plotting script over the output root file from TMVA in `BDTWeightFilesTest/Test.root`. The script plots the BDT scores (overlayed for signal and background), and a ROC curve (with and without background in log scale). The ROC curve is made for each input file, and overlayed for both of them. Printouts are also made to quantify efficiencies at given backgrounds, etc. Arguments are:
-
-Input file 1, label 1, color 1, input file 2, label 2, color 2. An example of running is:
+### TMVA output
+Run the plotting script over the output root file from TMVA in `BDTWeightFilesTest/Test_*.root`. The script plots the BDT scores (overlayed for each signal and background), and a ROC curve (for each signal overlayed, with background in log scale). The ROC curve is made for each input file, and overlayed for all of them. Printouts are also made to quantify efficiencies at given backgrounds, etc. Filenames and specifiers are directly listed in the plotting script, when `BDTPerformancePlots` is called. The order is: Input file, label, color. To run:
 ```
-root -l /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/MakeMVAPerformancePlots.C+'("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_mh350.root","350",30,"/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_mh125.root","125",38)'
+root -l MakeMVAPerformancePlots.C+'()'
+```
+
+### Minituples
+Run the plotting script over the produced minituples with the bdt scores saved. Signal and background files, labels, and colors are inputs to `BDTPerformancePlots`. For a given signal sample, multiple ROC curves are overlayed (testing on 125, 350, and combination BDTs). To run:
+```
+root -l MakeMVAPerformancePlots_SigBkg.C+'()'
 ```
 
 **5. Weight Files:**
-Copy over weights files to the directory `../BDTWeightFiles/v*/` such that they can be used in the minituple production.
+Copy over weights files to the directory `../BDTWeightFiles/v*/` such that they can be used in the minituple production. Make sure naming convention agrees with `BDTHelper.cxx`.
 
 # Version Tracking
 v0.0: First setup, trained on LLP MC with mH = 125 and 350, with W+jets backgrounds. For v0.0, the signal and backgrounds are from these files:

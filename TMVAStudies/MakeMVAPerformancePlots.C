@@ -441,13 +441,11 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option)
 
 //*************************************************************************************************
 //*************************************************************************************************
-//void MakeMVAPerformancePlots(string InputFile, string Label, Int_t Option, string InputFile2, string Label2, Int_t Option2)
 void MakeMVAPerformancePlots()
 {  
   SetupPlots();
 
   // BDTPerformancePlots(InputFile, Label, Option);
-  // BDTPerformancePlots(InputFile2, Label2, Option2);
 
   BDTPerformancePlots("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_LLP125.root", "125", 38);
   BDTPerformancePlots("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_LLP350.root", "350", 30);
