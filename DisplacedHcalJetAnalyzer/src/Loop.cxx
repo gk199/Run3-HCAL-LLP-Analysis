@@ -40,8 +40,21 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 	}
 
 	// fill output trees in minituples
+	bool WPlusJetsEvent = false;
+	if (PassWPlusJetsSelection()) WPlusJetsEvent = true;
+
 	FillOutputTrees("NoSel");
-	if (PassWPlusJetsSelection()) FillOutputTrees("WPlusJets"); // commenting out for LLP MC, keep for data
+	if (WPlusJetsEvent) FillOutputTrees("WPlusJets");
+
+	for (int i = 0; i < jet_Pt->size(); i++) {
+		FillOutputJetTrees("PerJet_NoSel", i);
+
+		vector<float> matchedInfo = JetIsMatchedTo( jet_Eta->at(i), jet_Phi->at(i) );
+		if (matchedInfo[0] > -1) { 					// if jet is matched to a LLP or LLP decay product
+			FillOutputJetTrees("PerJet_LLPmatched", i);
+		}
+		if (WPlusJetsEvent) FillOutputJetTrees("PerJet_WPlusJets",i);
+	}
 
 	return;
 
@@ -60,7 +73,10 @@ void DisplacedHcalJetAnalyzer::Loop(){
 
 	if( save_hists ) BookHists();
 
-	if( save_trees ) DeclareOutputTrees();
+	if( save_trees ) {
+		DeclareOutputTrees();
+		DeclareOutputJetTrees();
+	}
 
 	count["All"] = 0;
 
@@ -102,7 +118,6 @@ void DisplacedHcalJetAnalyzer::Loop(){
 			cout<<"Processing Event: "<<jentry<<"\t |  ";
 			cout<<"Rate: "<<std::fixed<<setprecision(2)<<event_timing<<" events/sec\t |  ";
 			cout<<"Estimated Time Remaining: "<<(nentries-jentry)/event_timing<<" sec \t\t \r"<<flush;
-
 		} 
 
 		if( debug ) cout<<"\n Processing Event "<<jentry<<" "<<endl;
@@ -119,7 +134,6 @@ void DisplacedHcalJetAnalyzer::Loop(){
 	cout<<"Cumulative Event Loop Rate: "<<std::fixed<<setprecision(2)<<GetEventRuntime(clock_start, init_entry, nentries)<<" events/sec \n"<<endl;
 
 	cout<<"\n ----- POST-PROCESSING ----- \n"<<endl;	
-
 
 
 	// ----- Print event counters ----- // 

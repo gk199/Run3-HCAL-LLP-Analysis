@@ -782,8 +782,11 @@ public :
    vector<string> GetBDTVariableNamesXML( string filepath, bool isSpectator );
    // OutputHelper.cxx
    virtual void   DeclareOutputTrees();
+   virtual void   DeclareOutputJetTrees();
    virtual void   ResetOutputBranches( string treename );
+   virtual vector<pair<float,float>> TrackMatcher( int jetIndex, vector<uint> jet_track_index );
    virtual void   FillOutputTrees( string treename );
+   virtual void   FillOutputJetTrees( string treename, int jetIndex );
    virtual void   WriteOutputTrees();
    virtual void   SetHistCategories();
    virtual void   BookHists();
