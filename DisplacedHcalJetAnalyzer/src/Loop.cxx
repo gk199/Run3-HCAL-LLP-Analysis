@@ -47,13 +47,15 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 	if (WPlusJetsEvent) FillOutputTrees("WPlusJets");
 
 	for (int i = 0; i < jet_Pt->size(); i++) {
-		FillOutputJetTrees("PerJet_NoSel", i);
+		if (jet_Pt->at(i) > 40 && abs(jet_Eta->at(i)) <= 1.26) { 
+			FillOutputJetTrees("PerJet_NoSel", i);
 
-		vector<float> matchedInfo = JetIsMatchedTo( jet_Eta->at(i), jet_Phi->at(i) );
-		if (matchedInfo[0] > -1) { 					// if jet is matched to a LLP or LLP decay product
-			FillOutputJetTrees("PerJet_LLPmatched", i);
+			vector<float> matchedInfo = JetIsMatchedTo( jet_Eta->at(i), jet_Phi->at(i) );
+			if (matchedInfo[0] > -1) { 					// if jet is matched to a LLP or LLP decay product
+				FillOutputJetTrees("PerJet_LLPmatched", i);
+			}
+			if (WPlusJetsEvent) FillOutputJetTrees("PerJet_WPlusJets",i);
 		}
-		if (WPlusJetsEvent) FillOutputJetTrees("PerJet_WPlusJets",i);
 	}
 
 	return;
