@@ -262,7 +262,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 
 	myvars_float.push_back("jet_S_phiphi");
 	myvars_float.push_back("jet_S_etaeta");
-	myvars_float.push_back("jet_etaphi");
+	myvars_float.push_back("jet_S_etaphi");
 
 	myvars_float.push_back("jet_Tracks_dR");
 
@@ -479,10 +479,15 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 
 		if (track_pt_index.size() > 0) {
 			std::sort (track_pt_index.begin(), track_pt_index.end(), greater<pair<float, float>>()); // sort to find highest pt tracks
-			int n_track = std::min(3, (int) jet_track_index.size());
+			// int n_track = std::min(3, (int) jet_track_index.size());
+			int n_track = jet_track_index.size();
+			int valid_tracks = 0;
 			for (int track = 0; track < n_track; track++) {
-				tree_output_vars_float[Form("jet%d_Track%dPt", i, track)] 			= track_pt_index[track].first;
 				int track_num = track_pt_index[track].second;
+				if (DeltaR( jet_Eta->at(i), track_Eta->at(track_num), jet_Phi->at(i), track_Phi->at(track_num) ) > 0.4 ) continue; 			// require track is closer to jet than ntuples enforce
+				valid_tracks += 1; 
+				if (valid_tracks > 3) continue;			
+				tree_output_vars_float[Form("jet%d_Track%dPt", i, track)] 			= track_pt_index[track].first;
 				tree_output_vars_float[Form("jet%d_Track%ddzToPV", i, track)] 		= track_dzToPV->at(track_num); 
 				tree_output_vars_float[Form("jet%d_Track%ddxyToBS", i, track)] 		= track_dxyToBS->at(track_num); 
 				tree_output_vars_float[Form("jet%d_Track%ddzOverErr", i, track)]	= track_dzToPV->at(track_num) / track_dzErr->at(track_num); 
@@ -494,8 +499,8 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 				tree_output_vars_float[Form("jet%d_Track%dnHits", i, track)] 				= track_nHits->at(track_num); 
 
 				tree_output_vars_float[Form("jet%d_Track%ddR", i, track)] 			= DeltaR( jet_Eta->at(i), track_Eta->at(track_num), jet_Phi->at(i), track_Phi->at(track_num) ); 
-				tree_output_vars_float[Form("jet%d_Track%ddEta", i, track)] 		= fabs(jet_Eta->at(i) - track_Eta->at(track_num));
-				tree_output_vars_float[Form("jet%d_Track%ddPhi", i, track)] 		= fabs(deltaPhi( jet_Phi->at(i), track_Phi->at(track_num) )); 
+				tree_output_vars_float[Form("jet%d_Track%ddEta", i, track)] 		= jet_Eta->at(i) - track_Eta->at(track_num);
+				tree_output_vars_float[Form("jet%d_Track%ddPhi", i, track)] 		= deltaPhi( jet_Phi->at(i), track_Phi->at(track_num) ); 
 				if (track == 1) {													// dR for two leading tracks
 					tree_output_vars_float[Form("jet%d_Tracks_dR", i)] 				= DeltaR( track_Eta->at(track_pt_index[0].second), track_Eta->at(track_num), track_Phi->at(track_pt_index[0].second), track_Phi->at(track_num) );
 				}
@@ -643,13 +648,18 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 
 	if (track_pt_index.size() > 0) {
 		std::sort (track_pt_index.begin(), track_pt_index.end(), greater<pair<float, float>>()); // sort to find highest pt tracks
-		int n_track = std::min(3, (int) jet_track_index.size());
+//		int n_track = std::min(3, (int) jet_track_index.size());
+		int n_track = jet_track_index.size();
+		int valid_tracks = 0;
 		for (int track = 0; track < n_track; track++) {
-			jet_tree_output_vars_float[Form( "jet_Track%dPt", track )] 		= track_pt_index[track].first;
 			int track_num = track_pt_index[track].second;
+			if (DeltaR( jet_Eta->at(jetIndex), track_Eta->at(track_num), jet_Phi->at(jetIndex), track_Phi->at(track_num) ) > 0.4 ) continue; 			// require track is closer to jet than ntuples enforce
+			valid_tracks += 1; 
+			if (valid_tracks > 3) continue;
+			jet_tree_output_vars_float[Form( "jet_Track%dPt", track )] 		= track_pt_index[track].first;
 			jet_tree_output_vars_float[Form( "jet_Track%ddR", track) ] 		= DeltaR( jet_Eta->at(jetIndex), track_Eta->at(track_num), jet_Phi->at(jetIndex), track_Phi->at(track_num) ); 
-			jet_tree_output_vars_float[Form( "jet_Track%ddEta", track) ] 	= fabs(jet_Eta->at(jetIndex) - track_Eta->at(track_num));
-			jet_tree_output_vars_float[Form( "jet_Track%ddPhi", track) ] 	= fabs(deltaPhi( jet_Phi->at(jetIndex), track_Phi->at(track_num) )); 
+			jet_tree_output_vars_float[Form( "jet_Track%ddEta", track) ] 	= jet_Eta->at(jetIndex) - track_Eta->at(track_num);
+			jet_tree_output_vars_float[Form( "jet_Track%ddPhi", track) ] 	= deltaPhi( jet_Phi->at(jetIndex), track_Phi->at(track_num) ); 
 			if (track == 1) {									// dR for two leading tracks
 				jet_tree_output_vars_float["jet_Tracks_dR"] 	= DeltaR( track_Eta->at(track_pt_index[0].second), track_Eta->at(track_num), track_Phi->at(track_pt_index[0].second), track_Phi->at(track_num) );
 			}
