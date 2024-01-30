@@ -100,6 +100,13 @@ public :
    map<string,float>    tree_output_vars_float;  
    map<string,string>   tree_output_vars_string;
 
+   vector<string> jet_treenames;
+   map<string,TTree*>   jet_tree_output;
+   map<string,bool>     jet_tree_output_vars_bool;  
+   map<string,int>      jet_tree_output_vars_int;  
+   map<string,float>    jet_tree_output_vars_float;  
+   map<string,string>   jet_tree_output_vars_string;
+
    // ----- Globals ----- //
 
    vector<string> HLT_Names;
