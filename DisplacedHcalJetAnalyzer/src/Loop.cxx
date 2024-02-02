@@ -41,10 +41,6 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 	bool WPlusJetsEvent = false;
 	if (PassWPlusJetsSelection()) WPlusJetsEvent = true;
 
-	// Fill event based output trees in minituples
-	FillOutputTrees("NoSel");
-	if (WPlusJetsEvent) FillOutputTrees("WPlusJets");
-
 	// Fill jet based output trees in minituples
 	for (int i = 0; i < jet_Pt->size(); i++) {
 		if (jet_Pt->at(i) > 40 && abs(jet_Eta->at(i)) <= 1.26) { 
@@ -54,9 +50,13 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 			if (matchedInfo[0] > -1) { 					// if jet is matched to a LLP or LLP decay product
 				FillOutputJetTrees("PerJet_LLPmatched", i);
 			}
-			if (WPlusJetsEvent) FillOutputJetTrees("PerJet_WPlusJets",i);
+			if (WPlusJetsEvent) FillOutputJetTrees("PerJet_WPlusJets", i);
 		}
 	}
+
+	// Fill event based output trees in minituples
+	FillOutputTrees("NoSel");
+	if (WPlusJetsEvent) FillOutputTrees("WPlusJets");
 
 	return;
 
@@ -76,8 +76,8 @@ void DisplacedHcalJetAnalyzer::Loop(){
 	if( save_hists ) BookHists();
 
 	if( save_trees ) {
-		DeclareOutputTrees();
 		DeclareOutputJetTrees();
+		DeclareOutputTrees();
 	}
 
 	count["All"] = 0;

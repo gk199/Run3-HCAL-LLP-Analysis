@@ -8,8 +8,9 @@ In `LLP_WPlusJets_Classification.C`: Modify file paths, cuts, and signal and bac
 
 ```
 root -q -b -l LLP_WPlusJets_Classification.C
+root -q -b -l LLP_WPlusJets_Classification_perJet.C
 ```
-This will produce a scratch output root file in the working directory (can be deleted, needed to avoid issues about "TTree created as a memory-resident Tree") and an output file `BDTWeightFilesTest/Test.root`.
+This will produce a scratch output root file in the working directory (can be deleted, needed to avoid issues about "TTree created as a memory-resident Tree") and an output file `BDTWeightFilesTest/Test*.root`. The output root files can be used to plot ROC curves from (see Section 4). The weights files must be copied over to the directory `../BDTWeightFiles/v0.*/weights*` to be used in the second running of minituples. This running saves the BDT scores for each event or jet in the output minituples.
 
 **3. Display Output:**
 
@@ -19,6 +20,8 @@ source display_gui.sh
 ```
 
 **4. Plot Output:**
+Standalone ROC curve plotters are developed.
+
 ### TMVA output
 Run the plotting script over the output root file from TMVA in `BDTWeightFilesTest/Test_*.root`. The script plots the BDT scores (overlayed for each signal and background), and a ROC curve (for each signal overlayed, with background in log scale). The ROC curve is made for each input file, and overlayed for all of them. Printouts are also made to quantify efficiencies at given backgrounds, etc. Filenames and specifiers are directly listed in the plotting script, when `BDTPerformancePlots` is called. The order is: Input file, label, color. To run:
 ```
@@ -32,7 +35,7 @@ root -l MakeMVAPerformancePlots_SigBkg.C+'()'
 ```
 
 **5. Weight Files:**
-Copy over weights files to the directory `../BDTWeightFiles/v*/` such that they can be used in the minituple production. Make sure naming convention agrees with `BDTHelper.cxx`.
+Copy over weights files to the directory `../BDTWeightFiles/v*/` such that they can be used in the minituple production. Make sure naming convention agrees with `BDTHelper.cxx` or `MyTags` in `DisplacedHcalJetAnalyzer.h`.
 
 # Version Tracking
 v0.0: First setup, trained on LLP MC with mH = 125 and 350, with W+jets backgrounds. For v0.0, the signal and backgrounds are from these files:

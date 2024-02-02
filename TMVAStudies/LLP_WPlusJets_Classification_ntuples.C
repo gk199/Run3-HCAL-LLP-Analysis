@@ -59,9 +59,12 @@
 #include "TMVA/Tools.h"
 #include "TMVA/TMVAGui.h"
 
+// include files that define the selections on truth variables, W+jets for the event, etc
+#include "../DisplacedHcalJetAnalyzer/util/DisplacedHcalJetAnalyzer.C"
+
 using namespace TMVA;
 
-int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag )
+int runClassification( TString sigDir, TString sigTag, TString bkgDir, TString bkgTag, TString tag )
 {
    // Setup cuts on LLP decay position. Include header file of all cuts potentially needed
    #include "../MiniTuplePlotter/RegionCuts.h"
@@ -180,17 +183,20 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
 
    // Define Selections
 
+   // would need to use functions such as PassWPlusJetsSelection(), but how to do this when we don't have an event loop explicitly?? 
+
    TCut selections_all = "jet0_Pt > 40 && abs(jet0_Eta) < 1.26";
 
    TCut selections_depth1 = "jet0_EnergyFrac_Depth1 >= 0 && jet0_EnergyFrac_Depth1 <= 1";
    TCut selections_depth2 = "jet0_EnergyFrac_Depth2 >= 0 && jet0_EnergyFrac_Depth2 <= 1";
    TCut selections_depth3 = "jet0_EnergyFrac_Depth3 >= 0 && jet0_EnergyFrac_Depth3 <= 1";
    TCut selections_depth4 = "jet0_EnergyFrac_Depth4 >= 0 && jet0_EnergyFrac_Depth4 <= 1";
-   TCut selections_rechitVar1 = selections_depth1 + selections_depth2 + selections_depth3 + selections_depth4;
-   TCut selections_rechitVar2 = "jet0_S_phiphi > 0 && jet0_S_phiphi < 900 && jet0_LeadingRechitE > 0 && jet0_LeadingRechitE < 900";
+   TCut selection_Sphiphi = "jet0_S_phiphi > 0";
+   TCut selections_rechitVar1 = selections_depth1 + selections_depth2 + selections_depth3 + selections_depth4 + selection_Sphiphi;
+   TCut selections_safety = selections_rechitVar1;
+
    TCut selections_trackVars = "jet0_Track0Pt > 0 && jet0_Track0Pt < 900 && jet0_Track0dR >= 0 && jet0_Track0dR < 1";
-   TCut selections_track1Vars = "jet0_Track1Pt > 0 && jet0_Track1Pt < 900 && jet0_Track1dR >= 0 && jet0_Track1dR < 1";
-   TCut selections_safety = selections_rechitVar1 + selections_rechitVar2 + selections_trackVars + selections_track1Vars; // no warnings when all variables behaved well! 
+   TCut selections_rechitVar2= "jet0_S_phiphi > 0 && jet0_S_phiphi < 900 && jet0_LeadingRechitE > 0 && jet0_LeadingRechitE < 900";
 
    TCut selections_background = selections_all + selections_safety;
    TCut selections_signal = selections_all + selections_safety + Cut_LLPinHCAL_Jet0; // LLP decays in HCAL and is matched to jet 0
@@ -205,7 +211,7 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
    // Signal // 
 
    TFile *siginput(0);
-   TString sigName = dir+"minituple_"+sigTag+".root";
+   TString sigName = sigDir+"output_"+sigTag+".root";
    siginput = TFile::Open( sigName ); // check if file in local directory exists
    std::cout << "--- TMVAClassification       : Using signal (training) input file: " << siginput->GetName() << std::endl;
    TTree *signalTree_temp = (TTree*)siginput->Get("NoSel");
@@ -216,7 +222,7 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
    // Register the training and test trees
 
    TFile *bkginput(0);
-   TString bkgName = dir+"minituple_"+bkgTag+".root"; 
+   TString bkgName = bkgDir+"output_"+bkgTag+".root"; 
    bkginput = TFile::Open( bkgName ); // check if file in local directory exists
    std::cout << "--- TMVAClassification       : Using background input file: " << bkginput->GetName() << std::endl;
    TTree *background_temp = (TTree*)bkginput->Get("WPlusJets");
@@ -261,15 +267,9 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
    // track-based variables // *************************
    dataloader->AddVariable( "jet0_ChargedHadEFrac", "jet0_ChargedHadEFrac", "", 'F' );
    dataloader->AddVariable( "jet0_NeutralHadEFrac", "jet0_NeutralHadEFrac", "", 'F' );
-   dataloader->AddVariable( "jet0_MuonEFrac", "jet0_MuonEFrac", "", 'F' );
    dataloader->AddVariable( "jet0_Track0Pt", "jet0_Track0Pt", "GeV", 'F' );
-   // dataloader->AddVariable( "jet0_Track0dR", "jet0_Track0dR", "", 'F' );
-   dataloader->AddVariable( "jet0_Track0dEta", "jet0_Track0dEta", "", 'F' );
-   dataloader->AddVariable( "jet0_Track0dPhi", "jet0_Track0dPhi", "", 'F' );
-   dataloader->AddVariable( "jet0_Track1Pt", "jet0_Track1Pt", "GeV", 'F' );
-   // dataloader->AddVariable( "jet0_Track1dR", "jet0_Track1dR", "", 'F' );
-   dataloader->AddVariable( "jet0_Track1dEta", "jet0_Track1dEta", "", 'F' );
-   dataloader->AddVariable( "jet0_Track1dPhi", "jet0_Track1dPhi", "", 'F' );
+   dataloader->AddVariable( "jet0_Track0dR", "jet0_Track0dR", "", 'F' );
+   //dataloader->AddVariable( "jet0_Track1Pt", "jet0_Track1Pt", "GeV", 'F' );
    //dataloader->AddVariable( "jet0_Track2Pt", "jet0_Track2Pt", "GeV", 'F' );
    //dataloader->AddVariable( "jet0_EleEFrac", "jet0_EleEFrac", "", 'F' );
    //dataloader->AddVariable( "jet0_HoverE", "jet0_HoverE", "", 'F' );
@@ -646,23 +646,25 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
    return 0;
 }
 
-int LLP_WPlusJets_Classification()
+int LLP_WPlusJets_Classification_ntuples()
 {
    // Select methods (don't look at this code - not of interest)
    //std::cout << "print" << std::endl;
 
    map<TString, TString> sigTagList;
-   sigTagList["LLP125"]	   = "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_01_31_TRAIN";
-   sigTagList["LLP350"]	   = "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_01_31_TRAIN";
-   sigTagList["hadd"]      = "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-125_350_HADD_13p6TeV_2024_01_31_TRAIN"; // same as the 125 file 
+   sigTagList["LLP125"]	   = "100";
+   sigTagList["LLP350"]	   = "1";
 
-   TString bkgTag = "v3.3_LLPskim_Run2023Cv4_2024_01_31_TRAIN";
+   map<TString, TString> sigDirList;
+   sigDirList["LLP125"]    = "root://cmsxrootd.fnal.gov///store/user/gkopp/ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV/LLP_MC_125__20240119_174604/240119_164620/0000/";
+   sigDirList["LLP350"]    = "root://cmsxrootd.fnal.gov///store/user/gkopp/HToSSTo4B_MH350_MS80_CTau500/LLP_MC_350__20231129_104033/231129_094141/0000/";
 
-   TString dir = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/";
+   TString bkgDir = "root://cmsxrootd.fnal.gov///store/user/gkopp/DisplacedJet/Run2023B-EXOLLPJetHCAL-PromptReco-v1_AOD_20231107_180123/231107_170140/0000/";
+   TString bkgTag = "10";
 
    vector<string> filetag_keys_to_loop = {"LLP125", "LLP350", "hadd"};
 	for( auto key: filetag_keys_to_loop){
-      runClassification(dir, sigTagList[key], bkgTag, key);
+      runClassification(sigDirList[key], sigTagList[key], bkgDir, bkgTag, key);
    }
    return 0;
 }

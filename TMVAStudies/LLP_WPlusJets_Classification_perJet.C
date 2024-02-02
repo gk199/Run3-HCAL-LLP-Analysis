@@ -263,12 +263,13 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
    // track-based variables // *************************
    dataloader->AddVariable( "jet_ChargedHadEFrac", "jet_ChargedHadEFrac", "", 'F' );
    dataloader->AddVariable( "jet_NeutralHadEFrac", "jet_NeutralHadEFrac", "", 'F' );
+   dataloader->AddVariable( "jet_MuonEFrac", "jet_MuonEFrac", "", 'F' );
    dataloader->AddVariable( "jet_Track0Pt", "jet_Track0Pt", "GeV", 'F' );
-   dataloader->AddVariable( "jet_Track0dR", "jet_Track0dR", "", 'F' );
+   // dataloader->AddVariable( "jet_Track0dR", "jet_Track0dR", "", 'F' );
    dataloader->AddVariable( "jet_Track0dEta", "jet_Track0dEta", "", 'F' );
    dataloader->AddVariable( "jet_Track0dPhi", "jet_Track0dPhi", "", 'F' );
    dataloader->AddVariable( "jet_Track1Pt", "jet_Track1Pt", "GeV", 'F' );
-   dataloader->AddVariable( "jet_Track1dR", "jet_Track1dR", "", 'F' );
+   // dataloader->AddVariable( "jet_Track1dR", "jet_Track1dR", "", 'F' );
    dataloader->AddVariable( "jet_Track1dEta", "jet_Track1dEta", "", 'F' );
    dataloader->AddVariable( "jet_Track1dPhi", "jet_Track1dPhi", "", 'F' );
    //dataloader->AddVariable( "jet_Track1Pt", "jet_Track1Pt", "GeV", 'F' );

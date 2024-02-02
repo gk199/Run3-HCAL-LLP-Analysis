@@ -27,11 +27,11 @@ void DisplacedHcalJetAnalyzer::Initialize( string infiletag, string infilepath )
 	SetHistCategories();
 
 	// Initialize TMVA Reader
-	MyTags event_based = MyTags(/*event_based=*/ true); // if set to  " = new MyTags", then always uses per event case -- why?
-	DeclareTMVAReader(event_based);
 	MyTags jet_based = MyTags(/*event_based=*/ false);
 	DeclareTMVAReader(jet_based);
-	
+	MyTags event_based = MyTags(/*event_based=*/ true);
+	DeclareTMVAReader(event_based);
+
 	return;
 }
 
