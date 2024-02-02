@@ -55,6 +55,76 @@
 #include "iostream"
 #include "iomanip" 
 
+/* ====================================================================================================================== */
+class MyTags {
+	public:
+		MyTags(bool event_based) {
+			if (event_based) {
+				bdt_tags_ = bdt_event_tags_;
+				bdt_var_names_ = {
+               //"jet0_Pt","jet0_Phi","jet0_E",
+               "jet0_Eta",
+               "jet0_ChargedHadEFrac",
+               "jet0_NeutralHadEFrac",
+               "jet0_Track0Pt",
+               "jet0_Track0dR",
+               "jet0_Track0dEta",
+               "jet0_Track0dPhi",
+               "jet0_Track1Pt",
+               "jet0_Track1dR",
+               "jet0_Track1dEta",
+               "jet0_Track1dPhi",
+               "jet0_EnergyFrac_Depth1",
+               "jet0_EnergyFrac_Depth2",
+               "jet0_EnergyFrac_Depth3",
+               "jet0_S_phiphi",
+               "jet0_LeadingRechitE",
+				};
+			} else {
+				bdt_tags_ = bdt_jet_tags_;
+				bdt_var_names_ = {
+               "jet_Eta",
+               "jet_ChargedHadEFrac",
+               "jet_NeutralHadEFrac",
+               "jet_Track0Pt",
+               "jet_Track0dR",
+               "jet_Track0dEta",
+               "jet_Track0dPhi",
+               "jet_Track1Pt",
+               "jet_Track1dR",
+               "jet_Track1dEta",
+               "jet_Track1dPhi",
+               "jet_EnergyFrac_Depth1",
+               "jet_EnergyFrac_Depth2",
+               "jet_EnergyFrac_Depth3",
+               "jet_S_phiphi",
+               "jet_LeadingRechitE",
+				};
+			}
+		}
+
+		vector<string> bdt_tags() const {
+			return bdt_tags_;
+		}
+		vector<string> bdt_var_names() const {
+			return bdt_var_names_;
+		}
+
+      static bool isValidTag(string tag) {
+         if ( std::find(bdt_event_tags_.begin(), bdt_event_tags_.end(), tag) != bdt_event_tags_.end() ) return true;
+         if ( std::find(bdt_jet_tags_.begin(), bdt_jet_tags_.end(), tag) != bdt_jet_tags_.end() ) return true;
+         return false;
+      }
+		
+	private:
+		vector<string> bdt_tags_;
+		vector<string> bdt_var_names_;
+
+      inline static vector<string> bdt_event_tags_ = {"LLP350", "LLP125", "hadd"};
+      inline static vector<string> bdt_jet_tags_ = {"LLP350_perJet", "LLP125_perJet", "hadd_perJet"};
+
+};
+
 class DisplacedHcalJetAnalyzer {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
@@ -783,7 +853,7 @@ public :
    virtual bool   PassWPlusJetsSelection();
    virtual float  EventHT();
    // BDTHelper.cxx
-   virtual void   DeclareTMVAReader();
+   virtual void   DeclareTMVAReader( MyTags bdt_tag_info );
    virtual float  GetBDTScores( string bdt_tag );
    virtual bool   EventValidForBDTEval();
    vector<string> GetBDTVariableNamesXML( string filepath, bool isSpectator );

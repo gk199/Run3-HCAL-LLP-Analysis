@@ -39,7 +39,8 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 	};
 
 	// Add BDT Scores //
-	for( auto bdt_tag: bdt_tags ){
+	MyTags event_based = MyTags(/*event_based=*/ true);
+	for( auto bdt_tag: event_based.bdt_tags() ){
 		myvars_float.push_back( Form("bdtscore_%s", bdt_tag.c_str()) );
 	}
 
@@ -234,7 +235,8 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 	vector<string> myvars_float = {};
 
 	// Add BDT Scores //
-	for( auto bdt_tag: bdt_tags ){
+	MyTags jet_based = MyTags(/*event_based=*/ false);
+	for( auto bdt_tag: jet_based.bdt_tags() ){
 		myvars_float.push_back( Form("bdtscore_%s", bdt_tag.c_str()) );
 	}
 
@@ -578,8 +580,12 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet100Eta", gLLPDecay_iLLP.at(i))] = LLPIsTruthMatched( i, 100 ).second;
 	}
 
+	MyTags event_based = MyTags(/*event_based=*/ true);
 	if( EventValidForBDTEval() ){
-		for( auto bdt_tag: bdt_tags ) tree_output_vars_float[Form("bdtscore_%s", bdt_tag.c_str())] = GetBDTScores(bdt_tag);
+		for( const auto & bdt_tag: event_based.bdt_tags() ) {
+			tree_output_vars_float[Form("bdtscore_%s", bdt_tag.c_str())] = GetBDTScores(bdt_tag);
+//			cout << GetBDTScores(bdt_tag) << " = bdt score (per event basis) for tag " << bdt_tag << endl;
+		}
 	} 
 
 	tree_output[treename]->Fill();
@@ -666,9 +672,13 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 		}
 	} // end of track matching 
 
-	// if( EventValidForBDTEval() ){
-	// 	for( auto bdt_tag: bdt_tags ) jet_tree_output_vars_float[Form("bdtscore_%s", bdt_tag.c_str())] = GetBDTScores(bdt_tag);
-	// } 
+	MyTags jet_based = MyTags(/*event_based=*/ false);
+	if( EventValidForBDTEval() ){
+		for(const auto & bdt_tag: jet_based.bdt_tags() ) {
+			jet_tree_output_vars_float[Form("bdtscore_%s", bdt_tag.c_str())] = GetBDTScores(bdt_tag);
+//			cout << GetBDTScores(bdt_tag) << " = bdt score for tag " << bdt_tag << endl;
+		}
+	}
 
 	jet_tree_output[treename]->Fill();
 	
