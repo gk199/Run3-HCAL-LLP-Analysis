@@ -652,11 +652,11 @@ int LLP_WPlusJets_Classification()
    //std::cout << "print" << std::endl;
 
    map<TString, TString> sigTagList;
-   sigTagList["LLP125"]	   = "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_01_31_TRAIN";
-   sigTagList["LLP350"]	   = "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_01_31_TRAIN";
-   sigTagList["hadd"]      = "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-125_350_HADD_13p6TeV_2024_01_31_TRAIN"; // same as the 125 file 
+   sigTagList["LLP125"]	   = "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_02_05_TRAIN";
+   sigTagList["LLP350"]	   = "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_02_05_TRAIN";
+   sigTagList["hadd"]      = "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-125_350_HADD_13p6TeV_2024_02_05_TRAIN";
 
-   TString bkgTag = "v3.3_LLPskim_Run2023Cv4_2024_01_31_TRAIN";
+   TString bkgTag = "v3.3_LLPskim_Run2023Cv4_2024_02_05_TRAIN";
 
    TString dir = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/";
 

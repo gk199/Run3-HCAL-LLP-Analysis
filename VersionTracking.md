@@ -142,7 +142,24 @@ Location of minituples:
 /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.2/minituple_v3.2_LLPskim_Run2023Cv3_2024_01_23.root
 ```
 
-## V4
+### v3.3
 Updates:
+* Add a tree filled on a per event basis, for jet information. With this structure, a BDT can be trained / tested on each jet
+* Added more jet-track association variables, with the delta eta and phi between jet center and leading tracks
+* Jet - track matching changed to be within dR of 0.4 at the minituple level
+* Added this new delta eta, phi jet to track information to the per jet and per event BDTs
+* Train on per event BDT (with leading jet) and per jet BDT (any jet above 40GeV and within 1.26 eta, and either matching to LLP or passing W+jets event selection, depending on sample)
+
+Location of minituples:
+```
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_v3.3_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_02_05_TRAIN.root
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_v3.3_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_02_05_TRAIN.root
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_v3.3_LLPskim_Run2023Cv4_2024_02_05_TRAIN.root
+```
+
+## V4
+Ongoing wish list:
+
 * MET filters
 * Trigger prescales
+* Some duplication in coding between event and jet filled trees, can this be reduced or simplified?

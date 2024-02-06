@@ -280,8 +280,8 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option)
   //--------------------------------------------------------------------------------------------------------------
   // Histograms
   //==============================================================================================================  
-  TH1F *Signal_MVA = new TH1F(("Signal_MVA"+label).c_str(), "LLP Signal ; MVA (BDT) score for LLP signal ; Number of Events ",  5500, -1.1 , 1.1);
-  TH1F *Background_MVA = new TH1F(("Background_MVA"+label).c_str(), "W+Jets Background ; MVA (BDT) score for W+jets background ; Number of Events ",  5500, -1.1 , 1.1);
+  TH1F *Signal_MVA = new TH1F(("Signal_MVA"+label).c_str(), "LLP Signal ; MVA (BDT) score for LLP signal ; Number of Events ",  55000, -1.1 , 1.1);
+  TH1F *Background_MVA = new TH1F(("Background_MVA"+label).c_str(), "W+Jets Background ; MVA (BDT) score for W+jets background ; Number of Events ",  55000, -1.1 , 1.1);
 
   Double_t RealElectrons = 0;
   Double_t FakeElectrons = 0;
@@ -447,10 +447,10 @@ void MakeMVAPerformancePlots()
 
   // BDTPerformancePlots(InputFile, Label, Option);
 
-  BDTPerformancePlots("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_LLP125.root", "125", 38);
-  BDTPerformancePlots("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_LLP350.root", "350", 30);
-  BDTPerformancePlots("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_hadd.root", "hadd", 48);
-  // BDTPerformancePlots("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_LLP125_perJet.root", "125_perJet", 38);
-  // BDTPerformancePlots("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_LLP350_perJet.root", "350_perJet", 30);
-  // BDTPerformancePlots("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_hadd_perJet.root", "hadd_perJet", 48);
+  // BDTPerformancePlots("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_LLP125.root", "125", 38);
+  // BDTPerformancePlots("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_LLP350.root", "350", 30);
+  // BDTPerformancePlots("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_hadd.root", "hadd", 48);
+  BDTPerformancePlots("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_LLP125_perJet.root", "125_perJet", 38);
+  BDTPerformancePlots("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_LLP350_perJet.root", "350_perJet", 30);
+  BDTPerformancePlots("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_hadd_perJet.root", "hadd_perJet", 48);
 }

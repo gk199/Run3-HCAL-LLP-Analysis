@@ -29,6 +29,7 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader( MyTags bdt_tag_info ){
 		}
 
 		string filename = Form("%s/v0.4/weights_%s/TMVAClassification_BDTG.weights.xml", filepath.c_str(), bdt_tag.c_str() );
+		cout << "filename = " << filename << endl;
 
 		// Declare TMVA Reader
 		cout<<"  --> "<<bdt_tag<<endl;
@@ -46,6 +47,7 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader( MyTags bdt_tag_info ){
 		}
 
 		// Read in spectators (to do... remove!)
+
 
 		vector<string> bdt_var_spectators = {
 			// "LLP0_Pt",
@@ -82,7 +84,12 @@ float DisplacedHcalJetAnalyzer::GetBDTScores(string bdt_tag){
 //	if( std::find(bdt_tags.begin(), bdt_tags.end(), bdt_tag) == bdt_tags.end() ) return -999.9;
 
 	for( auto bdt_var_name: bdt_var_names[bdt_tag] ){
-		bdt_vars[bdt_tag+" "+bdt_var_name] = tree_output_vars_float[bdt_var_name];
+		if (bdt_tag.find("perJet") != std::string::npos) {
+			bdt_vars[bdt_tag+" "+bdt_var_name] = jet_tree_output_vars_float[bdt_var_name];
+		}
+		else {
+			bdt_vars[bdt_tag+" "+bdt_var_name] = tree_output_vars_float[bdt_var_name];
+		}
 	}
 
 	return bdt_reader[bdt_tag]->EvaluateMVA("BDT");

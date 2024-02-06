@@ -180,19 +180,19 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
 
    // Define Selections
 
-   TCut selections_all = "jet_Pt > 40 && abs(jet_Eta) < 1.26";
+   TCut selections_all = "perJet_Pt > 40 && abs(perJet_Eta) < 1.26";
 
-   TCut selections_depth1 = "jet_EnergyFrac_Depth1 >= 0 && jet_EnergyFrac_Depth1 <= 1";
-   TCut selections_depth2 = "jet_EnergyFrac_Depth2 >= 0 && jet_EnergyFrac_Depth2 <= 1";
-   TCut selections_depth3 = "jet_EnergyFrac_Depth3 >= 0 && jet_EnergyFrac_Depth3 <= 1";
-   TCut selections_depth4 = "jet_EnergyFrac_Depth4 >= 0 && jet_EnergyFrac_Depth4 <= 1";
+   TCut selections_depth1 = "perJet_EnergyFrac_Depth1 >= 0 && perJet_EnergyFrac_Depth1 <= 1";
+   TCut selections_depth2 = "perJet_EnergyFrac_Depth2 >= 0 && perJet_EnergyFrac_Depth2 <= 1";
+   TCut selections_depth3 = "perJet_EnergyFrac_Depth3 >= 0 && perJet_EnergyFrac_Depth3 <= 1";
+   TCut selections_depth4 = "perJet_EnergyFrac_Depth4 >= 0 && perJet_EnergyFrac_Depth4 <= 1";
    TCut selections_rechitVar1 = selections_depth1 + selections_depth2 + selections_depth3 + selections_depth4;
-   TCut selections_rechitVar2 = "jet_S_phiphi > 0 && jet_S_phiphi < 900 && jet_LeadingRechitE > 0 && jet_LeadingRechitE < 900";
-   TCut selections_trackVars = "jet_Track0Pt > 0 && jet_Track0Pt < 900 && jet_Track0dR >= 0 && jet_Track0dR < 1";
-   TCut selections_track1Vars = "jet_Track1Pt > 0 && jet_Track1Pt < 900 && jet_Track1dR >= 0 && jet_Track1dR < 1";
+   TCut selections_rechitVar2 = "perJet_S_phiphi > 0 && perJet_S_phiphi < 900 && perJet_LeadingRechitE > 0 && perJet_LeadingRechitE < 900";
+   TCut selections_trackVars = "perJet_Track0Pt > 0 && perJet_Track0Pt < 900 && perJet_Track0dR >= 0 && perJet_Track0dR < 1";
+   TCut selections_track1Vars = "perJet_Track1Pt > 0 && perJet_Track1Pt < 900 && perJet_Track1dR >= 0 && perJet_Track1dR < 1";
    TCut selections_safety = selections_rechitVar1 + selections_rechitVar2 + selections_trackVars + selections_track1Vars; // no warnings when all variables behaved well! 
 
-   TCut LLPinHCAL = "jet_MatchedLLP_DecayR >= 183.6 && jet_MatchedLLP_DecayR < 295 && abs(jet_MatchedLLP_Eta) < 1.26";
+   TCut LLPinHCAL = "perJet_MatchedLLP_DecayR >= 183.6 && perJet_MatchedLLP_DecayR < 295 && abs(perJet_MatchedLLP_Eta) < 1.26";
 
    TCut selections_background = selections_all + selections_safety;
    TCut selections_signal = selections_all + selections_safety + LLPinHCAL; // LLP decays in HCAL and is matched to jet
@@ -256,34 +256,34 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
    //dataloader->AddVariable( "bdtscore",      "bdtscore", "", 'F' );
 
    // jet kinematics // *************************
-   dataloader->AddVariable( "jet_Eta", "jet_Eta", "", 'F' );
-   // dataloader->AddVariable( "jet_Phi", "jet_Phi", "", 'F' );                                 // removing because there is a difference in pi and -pi in data (W+jets)
-   // dataloader->AddVariable( "jet_Pt", "jet_Pt", "GeV", 'F' );
-   // dataloader->AddVariable( "jet_E", "jet_E", "GeV", 'F' );
+   dataloader->AddVariable( "perJet_Eta", "perJet_Eta", "", 'F' );
+   // dataloader->AddVariable( "perJet_Phi", "perJet_Phi", "", 'F' );                                 // removing because there is a difference in pi and -pi in data (W+jets)
+   // dataloader->AddVariable( "perJet_Pt", "perJet_Pt", "GeV", 'F' );
+   // dataloader->AddVariable( "perJet_E", "perJet_E", "GeV", 'F' );
    // track-based variables // *************************
-   dataloader->AddVariable( "jet_ChargedHadEFrac", "jet_ChargedHadEFrac", "", 'F' );
-   dataloader->AddVariable( "jet_NeutralHadEFrac", "jet_NeutralHadEFrac", "", 'F' );
-   dataloader->AddVariable( "jet_MuonEFrac", "jet_MuonEFrac", "", 'F' );
-   dataloader->AddVariable( "jet_Track0Pt", "jet_Track0Pt", "GeV", 'F' );
-   // dataloader->AddVariable( "jet_Track0dR", "jet_Track0dR", "", 'F' );
-   dataloader->AddVariable( "jet_Track0dEta", "jet_Track0dEta", "", 'F' );
-   dataloader->AddVariable( "jet_Track0dPhi", "jet_Track0dPhi", "", 'F' );
-   dataloader->AddVariable( "jet_Track1Pt", "jet_Track1Pt", "GeV", 'F' );
-   // dataloader->AddVariable( "jet_Track1dR", "jet_Track1dR", "", 'F' );
-   dataloader->AddVariable( "jet_Track1dEta", "jet_Track1dEta", "", 'F' );
-   dataloader->AddVariable( "jet_Track1dPhi", "jet_Track1dPhi", "", 'F' );
-   //dataloader->AddVariable( "jet_Track1Pt", "jet_Track1Pt", "GeV", 'F' );
-   //dataloader->AddVariable( "jet_Track2Pt", "jet_Track2Pt", "GeV", 'F' );
-   //dataloader->AddVariable( "jet_EleEFrac", "jet_EleEFrac", "", 'F' );
-   //dataloader->AddVariable( "jet_HoverE", "jet_HoverE", "", 'F' );
-   //dataloader->AddVariable( "log(jet_HoverE)", "jet_LogHoverE", "", 'F' );
+   dataloader->AddVariable( "perJet_ChargedHadEFrac", "perJet_ChargedHadEFrac", "", 'F' );
+   dataloader->AddVariable( "perJet_NeutralHadEFrac", "perJet_NeutralHadEFrac", "", 'F' );
+   dataloader->AddVariable( "perJet_MuonEFrac", "perJet_MuonEFrac", "", 'F' );
+   dataloader->AddVariable( "perJet_Track0Pt", "perJet_Track0Pt", "GeV", 'F' );
+   // dataloader->AddVariable( "perJet_Track0dR", "perJet_Track0dR", "", 'F' );
+   dataloader->AddVariable( "perJet_Track0dEta", "perJet_Track0dEta", "", 'F' );
+   dataloader->AddVariable( "perJet_Track0dPhi", "perJet_Track0dPhi", "", 'F' );
+   dataloader->AddVariable( "perJet_Track1Pt", "perJet_Track1Pt", "GeV", 'F' );
+   // dataloader->AddVariable( "perJet_Track1dR", "perJet_Track1dR", "", 'F' );
+   dataloader->AddVariable( "perJet_Track1dEta", "perJet_Track1dEta", "", 'F' );
+   dataloader->AddVariable( "perJet_Track1dPhi", "perJet_Track1dPhi", "", 'F' );
+   //dataloader->AddVariable( "perJet_Track1Pt", "perJet_Track1Pt", "GeV", 'F' );
+   //dataloader->AddVariable( "perJet_Track2Pt", "perJet_Track2Pt", "GeV", 'F' );
+   //dataloader->AddVariable( "perJet_EleEFrac", "perJet_EleEFrac", "", 'F' );
+   //dataloader->AddVariable( "perJet_HoverE", "perJet_HoverE", "", 'F' );
+   //dataloader->AddVariable( "log(jet_HoverE)", "perJet_LogHoverE", "", 'F' );
    // rechit-based variables // *************************
-   dataloader->AddVariable( "jet_EnergyFrac_Depth1", "jet_EnergyFrac_Depth1", "", 'F' );
-   dataloader->AddVariable( "jet_EnergyFrac_Depth2", "jet_EnergyFrac_Depth2", "", 'F' );
-   dataloader->AddVariable( "jet_EnergyFrac_Depth3", "jet_EnergyFrac_Depth3", "", 'F' );
-   //dataloader->AddVariable( "jet_EnergyFrac_Depth4", "jet_EnergyFrac_Depth4", "", 'F' );       // redundant! 
-   dataloader->AddVariable( "jet_S_phiphi", "jet_S_phiphi", "", 'F' );
-   dataloader->AddVariable( "jet_LeadingRechitE", "jet_LeadingRechtE", "", 'F' );
+   dataloader->AddVariable( "perJet_EnergyFrac_Depth1", "perJet_EnergyFrac_Depth1", "", 'F' );
+   dataloader->AddVariable( "perJet_EnergyFrac_Depth2", "perJet_EnergyFrac_Depth2", "", 'F' );
+   dataloader->AddVariable( "perJet_EnergyFrac_Depth3", "perJet_EnergyFrac_Depth3", "", 'F' );
+   //dataloader->AddVariable( "perJet_EnergyFrac_Depth4", "perJet_EnergyFrac_Depth4", "", 'F' );       // redundant! 
+   dataloader->AddVariable( "perJet_S_phiphi", "perJet_S_phiphi", "", 'F' );
+   dataloader->AddVariable( "perJet_LeadingRechitE", "perJet_LeadingRechtE", "", 'F' );
 
    // You can add so-called "Spectator variables", which are not used in the MVA training,
    // but will appear in the final "TestTree" produced by TMVA. This TestTree will contain the
@@ -655,11 +655,11 @@ int LLP_WPlusJets_Classification_perJet()
    //std::cout << "print" << std::endl;
 
    map<TString, TString> sigTagList;
-   sigTagList["LLP125"]	   = "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_01_31_TRAIN";
-   sigTagList["LLP350"]	   = "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_01_31_TRAIN";
-   sigTagList["hadd"]      = "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-125_350_HADD_13p6TeV_2024_01_31_TRAIN";
+   sigTagList["LLP125"]	   = "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_02_05_TRAIN";
+   sigTagList["LLP350"]	   = "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_02_05_TRAIN";
+   sigTagList["hadd"]      = "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-125_350_HADD_13p6TeV_2024_02_05_TRAIN";
 
-   TString bkgTag = "v3.3_LLPskim_Run2023Cv4_2024_01_31_TRAIN";
+   TString bkgTag = "v3.3_LLPskim_Run2023Cv4_2024_02_05_TRAIN";
 
    TString dir = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/";
 
