@@ -21,7 +21,7 @@ print_latex = True
 def latex_setup(file_path):
 	print("\\begin{table}[ht]")
 	print("\\centering")
-	if "data" in file_path: 
+	if "Run2023" in file_path: 
 		print("\\begin{tabular}{l|llll}")
 		print("\\hline")
 		print("\\textbf{Selection} & \\multicolumn{2}{l}{\\textbf{Number of Entries}} & \\multicolumn{2}{l}{\\textbf{Fraction of Entries}} \\\\ \\hline")
@@ -31,6 +31,20 @@ def latex_setup(file_path):
 		print("\\hline")
 		print("\\textbf{Selection} & \\multicolumn{2}{l}{\\textbf{Number of Weighted Entries}} & \\multicolumn{2}{l}{\\textbf{Fraction of Weighted Entries}} \\\\ \\hline")
 		print(" & \\textbf{LLP 0} & \\textbf{LLP 1} & \\textbf{LLP 0} & \\textbf{LLP 1} \\\\ \\hline")
+
+def bdt_latex_setup(file_path):
+	print("\\begin{table}[ht]")
+	print("\\centering")
+	if "Run2023" in file_path: 
+		print("\\begin{tabular}{l|lll}")
+		print("\\hline")
+		print("\\textbf{Selection} & \\textbf{Number of Entries} & \\multicolumn{2}{l}{\\textbf{Fraction of Entries}} \\\\ \\hline")
+		print(" &  & Of all entries & Of jet matched entries \\\\ \\hline")
+	else:
+		print("\\begin{tabular}{l|lll}")
+		print("\\hline")
+		print("\\textbf{Selection} & \\textbf{Number of Weighted Entries} & \\multicolumn{2}{l}{\\textbf{Fraction of Weighted Entries}} \\\\ \\hline")
+		print(" &  & Of all entries & Of jet matched entries \\\\ \\hline")
 
 def latex_end(file_path):
 	print("\\hline")
@@ -45,6 +59,7 @@ def main():
 	#tree     = sys.argv[2]
 	#weight   = sys.argv[3]	
 	
+	# Cutflow table, for depth based and timing based, on LLP MC samples
 	selection_list = [
 		"All", 
 		"LLP $r$ in HCAL depth 3 or 4", 
@@ -100,6 +115,7 @@ def main():
 	file = ROOT.TFile.Open(file_path)
 	# hist = file.Get("Cutflow_Medium")
 	tree = file.Get("NoSel")
+	tree = file.Get("WPlusJets")
 	
 	selection_string = ""
 	selection1_string = ""
@@ -177,6 +193,83 @@ def main():
 		else:
 			if (i < 4): print(selection_list_abbrev[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4), "LLP 1:", "\t", round(selval1, 4), "\t", round(selval1/init, 4))
 			if (i >= 4): print(selection_list_abbrev[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
+
+	# Cutflow table for comparison with BDT results
+	print(" \n")
+	print("BDT cutflow")
+	print(" \n")
+	BDT_selection_list = [
+		"All", 
+		"Jet $\\eta \\leq 1.26$ and $p_T \\geq 40$", 
+		"Jet matched to LLP", 
+		"Neutral hadron fraction $>80\%$", 
+		"Charged hadron fraction $<10\%$", 
+		"$S_{\\phi\\phi} < 0.02$",
+		"Track $\\Delta \\eta > 0.025$",
+		"Track $\\Delta \\phi > 0.025$",
+		"Leading rechit energy $> 8$~GeV",
+	]
+	
+	BDT_selection_list_abbrev = [
+		"All       ", 
+		"Jet position",
+		"Jet matched",
+		"NHF",
+		"CHF",
+		"S_phiphi",
+		"Track dEta",
+		"Track dPhi",
+		"RechitE",
+	]
+	
+	file = ROOT.TFile.Open(file_path)
+	tree = file.Get("NoSel")
+	tree = file.Get("WPlusJets")
+	
+	selection_string = ""
+	selection1_string = ""
+	total_selection_string = ""
+	
+	if print_latex:
+		bdt_latex_setup(file_path)
+
+	init = -1
+	comp = -1
+	
+	for i in range(len(BDT_selection_list)):
+		selname = BDT_selection_list[i]
+		selval  = -1
+		selval1 = -1
+		Nevents = -1
+
+		if (i == 0): 
+			selval = tree.GetEntries()
+			init = selval
+		else:
+			if i == 1: selection_string += "(abs(jet0_Eta) <= 1.26 && jet0_Pt > 40)"
+			if i == 2 and "Run2023" not in file_path: selection_string += "&& ((LLP0_DecayR >= 183.6 && LLP0_DecayR < 295 && abs(LLP0_Eta) <= 1.26 && jet0_isMatchedTo == 0) || (LLP1_DecayR >= 183.6 && LLP1_DecayR < 295 && abs(LLP1_Eta) <= 1.26 && jet0_isMatchedTo == 1))"
+			if i == 3: selection_string += "&& ( jet0_NeutralHadEFrac > 0.8 )"
+			if i == 4: selection_string += "&& ( jet0_ChargedHadEFrac < 0.1 )"
+			if i == 5: selection_string += "&& ( jet0_S_phiphi < 0.02 ) "
+			if i == 6: selection_string += "&& ( jet0_Track0dEta > 0.025 )"
+			if i == 7: selection_string += "&& ( jet0_Track0dPhi > 0.025 )"
+			if i == 8: selection_string += "&& ( jet0_LeadingRechitE > 8 )"
+
+			selval = tree.GetEntries(selection_string)
+			if (i == 2): comp = selval
+			Nevents = tree.GetEntries()
+
+		if print_latex:
+			if (i <= 2): print(selname+" &", round(selval, 4), "&", round(selval/init, 4), " & \\\\ ")
+			if (i == 2): print("\\hline")
+			if (i > 2): print(selname+" &", round(selval, 4), "&", round(selval/init, 4), " &", round(selval/comp, 4), " \\\\ ")
+			if (i == 8):
+				latex_end(file_path)
+
+		else:
+			if (i < 2): print(selection_list_abbrev[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
+			if (i >= 2): print(selection_list_abbrev[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
+
 
 if __name__ == '__main__':
 	main()
