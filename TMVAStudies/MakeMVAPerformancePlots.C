@@ -337,11 +337,11 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option)
   cout << "MVA Cut Value at 50% Sig Eff: " << FindCutValueAtFixedEfficiency(Signal_MVA, 0.5 ) << endl;
   cout << "MVA Cut Value at 50% Bkg Eff: " << FindCutValueAtFixedEfficiency(Background_MVA, 0.5 ) << endl;
 
-   //*****************************************************************************************
-   // Make ROC curves
-   //*****************************************************************************************
-   // return a vector of TGraphAsymmErrors, sig vs bkg, sig vs bkg rej, sig vs inverse bkg eff
-   TGraphAsymmErrors* ROC_sigEffBkgEff = MakeSigEffVsBkgEffGraph(Signal_MVA, Background_MVA, "ROC_MVA_LLP_W+jets"+label );
+  //*****************************************************************************************
+  // Make ROC curves
+  //*****************************************************************************************
+  // return a vector of TGraphAsymmErrors, sig vs bkg, sig vs bkg rej, sig vs inverse bkg eff
+  TGraphAsymmErrors* ROC_sigEffBkgEff = MakeSigEffVsBkgEffGraph(Signal_MVA, Background_MVA, "ROC_MVA_LLP_W+jets"+label );
 
   TLegend* legend_indiv;
   TCanvas* cv_indiv;
@@ -370,6 +370,8 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option)
   hs->Draw("bar1 nostack");
   gPad->BuildLegend(0.65,0.65,0.85,0.85,"");
   cv_indiv->SaveAs(("BDTscore_" + plotname + ".png").c_str());
+  gPad->SetLogy();
+  cv_indiv->SaveAs(("BDTscore_" + plotname + "_logY.png").c_str());
   cv_indiv->Clear();
 
   //*****************************************************************************************

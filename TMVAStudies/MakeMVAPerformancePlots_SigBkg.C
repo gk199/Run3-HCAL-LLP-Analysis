@@ -268,7 +268,7 @@ void SetupPlots()
   GraphLabels.clear();
   PlotnameSpecific.clear();
 
-  legend = new TLegend(0.45,0.14,0.9,0.34);
+  legend = new TLegend(0.32,0.14,0.9,0.34);
   legend->SetTextSize(0.03);
   legend->SetBorderSize(0);
   legend->SetFillStyle(0);
@@ -278,7 +278,7 @@ void SetupPlots()
 
 //*************************************************************************************************
 //*************************************************************************************************
-void BDTPerformancePlots(string InputFile, string Label, string InputFile2, string Label2, Int_t Option, Int_t Option2, Int_t Option3)
+void BDTPerformancePlots(string InputFile, string Label, string SigTree, string InputFile2, string Label2, string BkgTree, Int_t Option, Int_t Option2, Int_t Option3)
 {  
   string label = "";
   if (Label != "") label = "_" + Label;
@@ -301,9 +301,12 @@ void BDTPerformancePlots(string InputFile, string Label, string InputFile2, stri
   //*****************************************************************************************
   // Get signal distribution
   //*****************************************************************************************
-  TTree *tree_sig = getTreeFromFile(InputFile.c_str(), "NoSel");
+  TTree *tree_sig = getTreeFromFile(InputFile.c_str(), SigTree.c_str());
 
-  float LLP0_DecayR, LLP1_DecayR, LLP0_Eta, LLP1_Eta, jet0_isMatchedTo;
+  float LLP0_DecayR, LLP1_DecayR, LLP0_Eta, LLP1_Eta, jet0_isMatchedTo, jet0_Eta, jet0_Pt;
+  float perJet_MatchedLLP_DecayR, perJet_MatchedLLP_Eta;
+
+  float score125_sig, score350_sig, scoreHadd_sig;
 
   float radius_HB1 = 183.6;
   float radius_HB2 = 190.2;
@@ -312,23 +315,40 @@ void BDTPerformancePlots(string InputFile, string Label, string InputFile2, stri
   float radius_HBend = 295;
   float HBeta = 1.26;
 
-  tree_sig->SetBranchAddress("LLP0_DecayR", &LLP0_DecayR);
-  tree_sig->SetBranchAddress("LLP1_DecayR", &LLP1_DecayR);
-  tree_sig->SetBranchAddress("LLP0_Eta", &LLP0_Eta);
-  tree_sig->SetBranchAddress("LLP1_Eta", &LLP1_Eta);
-  tree_sig->SetBranchAddress("jet0_isMatchedTo", &jet0_isMatchedTo);
+  TCut SignalSelection = "";
+  if (SigTree.find("PerJet") == std::string::npos) {
+    tree_sig->SetBranchAddress("LLP0_DecayR", &LLP0_DecayR);
+    tree_sig->SetBranchAddress("LLP1_DecayR", &LLP1_DecayR);
+    tree_sig->SetBranchAddress("LLP0_Eta", &LLP0_Eta);
+    tree_sig->SetBranchAddress("LLP1_Eta", &LLP1_Eta);
+    tree_sig->SetBranchAddress("jet0_isMatchedTo", &jet0_isMatchedTo);
+    tree_sig->SetBranchAddress("jet0_Eta", &jet0_Eta);
+    tree_sig->SetBranchAddress("jet0_Pt", &jet0_Pt);
+    SignalSelection = Form("((LLP0_DecayR >= %f && LLP0_DecayR < %f && abs(LLP0_Eta) <= %f && jet0_isMatchedTo == 0) || (LLP1_DecayR >= %f && LLP1_DecayR < %f && abs(LLP1_Eta) <= %f && jet0_isMatchedTo == 1)) && (abs(jet0_Eta) < 1.26 && jet0_Pt > 40)",radius_HB1, radius_HBend, HBeta, radius_HB1, radius_HBend, HBeta);
+    cout << "per event tree, adding signal region cuts on LLP position and matching" << endl;
+    // hopefully there is a better way to implement these cuts, had TCut errors when imported RegionCuts.h on first try
+    // reduces by a factor of about 10 for mh=125
+  }
+  if (SigTree.find("PerJet") != std::string::npos) {
+     tree_sig->SetBranchAddress("perJet_MatchedLLP_DecayR", &perJet_MatchedLLP_DecayR);
+    tree_sig->SetBranchAddress("perJet_MatchedLLP_Eta", &perJet_MatchedLLP_Eta);
+    SignalSelection = "perJet_MatchedLLP_DecayR >= 183.6 && perJet_MatchedLLP_DecayR < 295 && abs(perJet_MatchedLLP_Eta) < 1.26";
+    cout << "per jet tree, adding signal region cuts on LLP position" << endl; // this tree already requires jet pT > 40 and eta < 1.26
+  }
 
   TFile *myReducedFile = new TFile("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/temp.root", "RECREATE"); // preventing error "This error is symptomatic of a Tree created as a memory-resident Tree"
-  TTree *tree_sig_reduced = tree_sig->CopyTree(Form("(LLP0_DecayR >= %f && LLP0_DecayR < %f && abs(LLP0_Eta) <= %f && jet0_isMatchedTo == 0) || (LLP1_DecayR >= %f && LLP1_DecayR < %f && abs(LLP1_Eta) <= %f && jet0_isMatchedTo == 1)",radius_HB1, radius_HBend, HBeta, radius_HB1, radius_HBend, HBeta), "", tree_sig->GetEntries(), 0);
-  // hopefully there is a better way to implement these cuts, had TCut errors when imported RegionCuts.h on first try
-  // reduces by a factor of about 10 for mh=125
+  TTree *tree_sig_reduced = tree_sig->CopyTree(SignalSelection, "", tree_sig->GetEntries(), 0); // no cuts needed for already jet matched tree
 
-  float score125_sig;
-  float score350_sig;
-  float scoreHadd_sig;
-  tree_sig_reduced->SetBranchAddress("bdtscore_LLP125", &score125_sig);
-  tree_sig_reduced->SetBranchAddress("bdtscore_LLP350", &score350_sig);
-  tree_sig_reduced->SetBranchAddress("bdtscore_hadd", &scoreHadd_sig);
+  if (SigTree.find("PerJet") == std::string::npos) {
+    tree_sig_reduced->SetBranchAddress("bdtscore_LLP125", &score125_sig);
+    tree_sig_reduced->SetBranchAddress("bdtscore_LLP350", &score350_sig);
+    tree_sig_reduced->SetBranchAddress("bdtscore_hadd", &scoreHadd_sig);
+  }
+  if (SigTree.find("PerJet") != std::string::npos) {
+    tree_sig_reduced->SetBranchAddress("bdtscore_LLP125_perJet", &score125_sig);
+    tree_sig_reduced->SetBranchAddress("bdtscore_LLP350_perJet", &score350_sig);
+    tree_sig_reduced->SetBranchAddress("bdtscore_hadd_perJet", &scoreHadd_sig);
+  }
 
   cout << "Total Entries (signal): " << tree_sig_reduced->GetEntries() << "\n";
   int nentries = tree_sig_reduced->GetEntries();
@@ -350,14 +370,27 @@ void BDTPerformancePlots(string InputFile, string Label, string InputFile2, stri
   //*****************************************************************************************
   // Get background distribution
   //*****************************************************************************************
-  TTree *tree_bkg = getTreeFromFile(InputFile2.c_str(), "WPlusJets"); 
+  TTree *tree_bkg = getTreeFromFile(InputFile2.c_str(), BkgTree.c_str()); 
   
   float score125_bkg;
   float score350_bkg;
   float scoreHadd_bkg;
-  tree_bkg->SetBranchAddress("bdtscore_LLP125", &score125_bkg);
-  tree_bkg->SetBranchAddress("bdtscore_LLP350", &score350_bkg);
-  tree_bkg->SetBranchAddress("bdtscore_hadd", &scoreHadd_bkg);
+  TCut BackgroundSelection = "";
+
+  if (SigTree.find("PerJet") == std::string::npos) {
+    tree_bkg->SetBranchAddress("bdtscore_LLP125", &score125_bkg);
+    tree_bkg->SetBranchAddress("bdtscore_LLP350", &score350_bkg);
+    tree_bkg->SetBranchAddress("bdtscore_hadd", &scoreHadd_bkg);
+
+    tree_bkg->SetBranchAddress("jet0_Eta", &jet0_Eta);
+    tree_bkg->SetBranchAddress("jet0_Pt", &jet0_Pt);  
+    BackgroundSelection = "abs(jet0_Eta) < 1.26 && jet0_Pt > 40";
+  }
+  if (SigTree.find("PerJet") != std::string::npos) {
+    tree_bkg->SetBranchAddress("bdtscore_LLP125_perJet", &score125_bkg);
+    tree_bkg->SetBranchAddress("bdtscore_LLP350_perJet", &score350_bkg);
+    tree_bkg->SetBranchAddress("bdtscore_hadd_perJet", &scoreHadd_bkg);
+  }
 
   cout << "Total Entries (background): " << tree_bkg->GetEntries() << "\n";
   int nentries_bkg = tree_bkg->GetEntries();
@@ -434,6 +467,8 @@ void BDTPerformancePlots(string InputFile, string Label, string InputFile2, stri
   hs->Draw("bar1 nostack");
   gPad->BuildLegend(0.65,0.65,0.85,0.85,"");
   cv_indiv->SaveAs(("Minituple_BDT125score_" + plotname + ".png").c_str());
+  gPad->SetLogy();
+  cv_indiv->SaveAs(("Minituple_BDT125score_" + plotname + "_logY.png").c_str());
   cv_indiv->Clear();
 
   //*****************************************************************************************
@@ -519,16 +554,27 @@ void MakeMVAPerformancePlots_SigBkg()
 {  
   SetupPlots();
 
-  string Signal = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.2/minituple_v3.2_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_01_23_TEST.root";
+  string Signal = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_v3.3_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_02_06_TEST.root";
   string SigLabel = "125";
-  // string Signal = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.2/minituple_v3.2_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_01_23_TEST.root";
+  string SignalTree = "NoSel";
+  // string SigLabel = "125_perJet";
+  // string SignalTree = "PerJet_LLPmatched";
+
+  // string Signal = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_v3.3_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_02_06_TEST.root";
   // string SigLabel = "350";
-  string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.2/minituple_v3.2_LLPskim_Run2023Cv3_2024_01_23.root";
+  // string SignalTree = "NoSel";
+  // string SigLabel = "350_perJet";
+  // string SignalTree = "PerJet_LLPmatched";
+
+  string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_v3.3_LLPskim_Run2023_hadd_TEST.root";
   string BkgLabel = "W+Jets";
+  string BackgroundTree = "WPlusJets";
+  // string BkgLabel = "W+Jets_perJet";
+  // string BackgroundTree = "PerJet_WPlusJets";
 
   int Color1 = 30;
   int Color2 = 38;
   int Color3 = 48;
 
-  BDTPerformancePlots(Signal, SigLabel, Background, BkgLabel, Color1, Color2, Color3);
+  BDTPerformancePlots(Signal, SigLabel, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3);
 }

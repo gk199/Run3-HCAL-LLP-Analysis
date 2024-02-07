@@ -656,7 +656,7 @@ int LLP_WPlusJets_Classification()
    sigTagList["LLP350"]	   = "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_02_05_TRAIN";
    sigTagList["hadd"]      = "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-125_350_HADD_13p6TeV_2024_02_05_TRAIN";
 
-   TString bkgTag = "v3.3_LLPskim_Run2023Cv4_2024_02_05_TRAIN";
+   TString bkgTag = "v3.3_LLPskim_Run2023Dv1_2024_02_05_TRAIN";
 
    TString dir = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/";
 
