@@ -146,6 +146,42 @@ TGraphAsymmErrors* MakeSigEffVsBkgEffGraph(TH1F* signalHist, TH1F* bkgHist, stri
 //*************************************************************************************************
 //
 //*************************************************************************************************
+TGraphAsymmErrors* MakeCurrentWPSigEffVsBkgEffGraph(Double_t signalEff, Double_t bkgEff, string name ) {
+  //Make Met Plots
+  double SigEff[1];
+  double BkgEff[1];
+  double SigEffErrLow[1];
+  double SigEffErrHigh[1];
+  double BkgEffErrLow[1];
+  double BkgEffErrHigh[1];
+  double NSigTotal = 0;
+  double NBkgTotal = 0;
+  double cutValue;
+
+  SigEff[0] = signalEff;
+  SigEffErrLow[0] = 0;
+  SigEffErrHigh[0] = 0;
+  BkgEff[0] = bkgEff;
+  BkgEffErrLow[0] = 0;
+  BkgEffErrHigh[0] = 0;
+
+  TGraphAsymmErrors *tmpSigEffVsBkgEff = new TGraphAsymmErrors (1, BkgEff, SigEff, BkgEffErrLow, BkgEffErrHigh , SigEffErrLow, SigEffErrHigh );
+  tmpSigEffVsBkgEff->SetName(name.c_str());
+  tmpSigEffVsBkgEff->SetTitle("");
+  tmpSigEffVsBkgEff->GetXaxis()->SetTitle("Bkg Eff");
+  tmpSigEffVsBkgEff->GetYaxis()->SetTitle("Signal Eff");
+  tmpSigEffVsBkgEff->GetYaxis()->SetTitleOffset(1.1);
+  tmpSigEffVsBkgEff->GetXaxis()->SetTitleOffset(1.05);
+  tmpSigEffVsBkgEff->SetMarkerColor(kBlack);
+  tmpSigEffVsBkgEff->SetLineColor(kBlack);
+  tmpSigEffVsBkgEff->SetMarkerSize(1.5);
+
+  return tmpSigEffVsBkgEff;
+}
+
+//*************************************************************************************************
+//
+//*************************************************************************************************
 Double_t FindCutValueAtFixedEfficiency(TH1F* signalHist, Double_t targetSignalEff ) {
 
   Double_t targetCutValue = -9999;
@@ -532,12 +568,21 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
     }
   }
 
-  // legend->AddEntry(ROC_CSA14TightWP, "CSA14Tight WP", "P");
-  // ROC_CSA14TightWP->SetFillColor(kBlue);
-  // ROC_CSA14TightWP->SetMarkerColor(kBlue);
-  // ROC_CSA14TightWP->SetMarkerStyle(34);
-  // ROC_CSA14TightWP->SetMarkerSize(2.5);
-  // ROC_CSA14TightWP->Draw("Psame");
+  // TGraphAsymmErrors* WP_event_cutflow = MakeCurrentWPSigEffVsBkgEffGraph(0.66 , 0.0009, "WP_event_cutflow"+label); // mh 125 working point, for per event approach
+  // legend->AddEntry(WP_event_cutflow, "Event Cutflow WP", "P");
+  // WP_event_cutflow->SetFillColor(kBlue);
+  // WP_event_cutflow->SetMarkerColor(kBlue);
+  // WP_event_cutflow->SetMarkerStyle(34);
+  // WP_event_cutflow->SetMarkerSize(2.5);
+  // WP_event_cutflow->Draw("Psame");  
+
+  TGraphAsymmErrors* WP_jet_cutflow = MakeCurrentWPSigEffVsBkgEffGraph(0.66 , 0.0008, "WP_jet_cutflow"+label); // mh 125 working point, for per jet approach
+  legend->AddEntry(WP_jet_cutflow, "Jet Cutflow WP", "P");
+  WP_jet_cutflow->SetFillColor(kBlue);
+  WP_jet_cutflow->SetMarkerColor(kBlue);
+  WP_jet_cutflow->SetMarkerStyle(34);
+  WP_jet_cutflow->SetMarkerSize(2.5);
+  WP_jet_cutflow->Draw("Psame");  
 
   // overlay multiple ROC curves -- useful if comparing 125 vs. 350 for instance
   if (overlay) {
@@ -555,10 +600,10 @@ void MakeMVAPerformancePlots_SigBkg()
   SetupPlots();
 
   string Signal = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_v3.3_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_02_06_TEST.root";
-  string SigLabel = "125";
-  string SignalTree = "NoSel";
-  // string SigLabel = "125_perJet";
-  // string SignalTree = "PerJet_LLPmatched";
+  // string SigLabel = "125";
+  // string SignalTree = "NoSel";
+  string SigLabel = "125_perJet";
+  string SignalTree = "PerJet_LLPmatched";
 
   // string Signal = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_v3.3_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_02_06_TEST.root";
   // string SigLabel = "350";
@@ -567,10 +612,10 @@ void MakeMVAPerformancePlots_SigBkg()
   // string SignalTree = "PerJet_LLPmatched";
 
   string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_v3.3_LLPskim_Run2023_hadd_TEST.root";
-  string BkgLabel = "W+Jets";
-  string BackgroundTree = "WPlusJets";
-  // string BkgLabel = "W+Jets_perJet";
-  // string BackgroundTree = "PerJet_WPlusJets";
+  // string BkgLabel = "W+Jets";
+  // string BackgroundTree = "WPlusJets";
+  string BkgLabel = "W+Jets_perJet";
+  string BackgroundTree = "PerJet_WPlusJets";
 
   int Color1 = 30;
   int Color2 = 38;

@@ -424,14 +424,7 @@ void BDTPerformancePlots(string InputFile, string Label, Int_t Option)
       gPad->SetLogx(1);
     }
   }
-
-  // legend->AddEntry(ROC_CSA14TightWP, "CSA14Tight WP", "P");
-  // ROC_CSA14TightWP->SetFillColor(kBlue);
-  // ROC_CSA14TightWP->SetMarkerColor(kBlue);
-  // ROC_CSA14TightWP->SetMarkerStyle(34);
-  // ROC_CSA14TightWP->SetMarkerSize(2.5);
-  // ROC_CSA14TightWP->Draw("Psame");
-
+  
   // overlay multiple ROC curves -- useful if comparing 125 vs. 350 for instance
   if (overlay) {
     cv->cd();
