@@ -21,6 +21,12 @@ cd CMSSW_11_3_0_pre1/src
 cmsenv
 cd ../..
 
+echo "Unzipping BDT Score Files..."
+unzip BDTWeightFiles.zip
+
+echo "ls"
+ls *
+
 echo ""
 echo "Infile: $ds_in"
 echo ""

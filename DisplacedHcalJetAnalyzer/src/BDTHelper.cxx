@@ -3,7 +3,7 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader(){
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::DeclareTMVAReader()"<<endl;	
 
-	bdt_tags = {
+	bdt_tags = { 
 		"test"
 	};
 
@@ -15,12 +15,13 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader(){
 
 		// Get filepath
 		bool filepath_exists = false;
-		vector<string> filepaths = {"", "BDTWeightFiles/", "../BDTWeightFiles/", "../../BDTWeightFiles/" };
+		vector<string> filepaths = { "BDTWeightFiles/", "../BDTWeightFiles/", "../../BDTWeightFiles/" };
 		string filepath;
 		for( int i=0; i<filepaths.size(); i++ ){
 			if( !gSystem->AccessPathName( Form("%s", filepaths.at(i).c_str()) ) ){
 				filepath = filepaths.at(i);
 				filepath_exists = true;
+				cout<<"Looking for BDT weight files in "<<filepath<<endl;
 				break;
 			}
 		}
@@ -28,7 +29,7 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader(){
 		string filename = Form("%s/v0.0/weights_%s/TMVAClassification_BDTG.weights.xml", filepath.c_str(), bdt_tag.c_str() );
 
 		// Declare TMVA Reader
-		cout<<"  --> "<<bdt_tag<<endl;
+		cout<<"  --> "<<bdt_tag<<" from  "<<filename<<endl;
 		bdt_reader[bdt_tag] = new TMVA::Reader( "!Color:!Silent", debug );
 
 		// Read in variables // TODO: AUTOMATE
