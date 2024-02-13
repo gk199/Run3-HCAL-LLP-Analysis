@@ -50,7 +50,10 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 			if (matchedInfo[0] > -1) { 					// if jet is matched to a LLP or LLP decay product
 				FillOutputJetTrees("PerJet_LLPmatched", i);
 			}
-			if (WPlusJetsEvent) FillOutputJetTrees("PerJet_WPlusJets", i);
+			if (WPlusJetsEvent) {
+				float phiSeparation = deltaPhi(jet_Phi->at(i), WPlusJets_leptonPhi);
+				if ( abs(phiSeparation) > 2 ) FillOutputJetTrees("PerJet_WPlusJets", i);
+			}
 		}
 	}
 
