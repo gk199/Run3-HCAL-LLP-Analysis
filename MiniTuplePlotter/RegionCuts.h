@@ -203,3 +203,21 @@ TCut Cut_BDTscoreNPt98 	= "bdtscore_125GeV >= -0.99 && bdtscore_125GeV < -0.98";
 TCut Cut_BDTscoreNPt95 	= "bdtscore_125GeV >= -0.98 && bdtscore_125GeV < -0.95";
 TCut Cut_BDTscore0   	= "bdtscore_125GeV >= -0.95 && bdtscore_125GeV < 0";
 TCut Cut_BDTscorePos   	= "bdtscore_125GeV >= 0";
+
+
+// --------------------------------------------------------------------- //
+// ---------------------------- per jet cuts --------------------------- //
+// --------------------------------------------------------------------- //
+TString matchedLLPinCR             = Form("perJet_MatchedLLP_DecayR < %0.1f && abs(perJet_MatchedLLP_Eta) < %f", controlRegion, HBeta);
+TString matchedLLPinTrackerNP      = Form("perJet_MatchedLLP_DecayR >= %0.1f && perJet_MatchedLLP_DecayR < %0.1f && abs(perJet_MatchedLLP_Eta) < %f",  controlRegion, radius_tracker[1], HBeta);
+TString matchedLLPinECAL           = Form("perJet_MatchedLLP_DecayR >= %0.1f && perJet_MatchedLLP_DecayR < %0.1f && abs(perJet_MatchedLLP_Eta) < %f",  radius_ECAL[0], radius_ECAL[1], HBeta);
+TString matchedmatchedLLPinHCAL1   = Form("perJet_MatchedLLP_DecayR >= %0.1f && perJet_MatchedLLP_DecayR < %0.1f && abs(perJet_MatchedLLP_Eta) < %f",  radius_depth1[0], radius_depth1[1], HBeta);
+TString matchedLLPinHCAL2          = Form("perJet_MatchedLLP_DecayR >= %0.1f && perJet_MatchedLLP_DecayR < %0.1f && abs(perJet_MatchedLLP_Eta) < %f",  radius_depth2[0], radius_depth2[1], HBeta);
+TString matchedLLPinHCAL34         = Form("perJet_MatchedLLP_DecayR >= %0.1f && perJet_MatchedLLP_DecayR < %0.1f && abs(perJet_MatchedLLP_Eta) < %f",  radius_depth34[0], radius_depth34[1], HBeta);
+
+TCut Cut_matchedLLPinCR             = matchedLLPinCR.Data();
+TCut Cut_matchedLLPinTrackerNP      = matchedLLPinTrackerNP.Data();
+TCut Cut_matchedLLPinECAL           = matchedLLPinECAL.Data();
+TCut Cut_matchedLLPinHCAL1          = matchedmatchedLLPinHCAL1.Data();
+TCut Cut_matchedLLPinHCAL2          = matchedLLPinHCAL2.Data();
+TCut Cut_matchedLLPinHCAL34         = matchedLLPinHCAL34.Data();

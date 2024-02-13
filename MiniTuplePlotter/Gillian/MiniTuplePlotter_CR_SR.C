@@ -11,10 +11,15 @@ void MiniTuplePlotter_CR_SR(){
 	// string path = "/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v3.0/minituple_";
 	string path = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.0/minituple_";
 	string path_v3pt1 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.1/minituple_";
+	string path_v3pt2 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.2/minituple_";
+	string path_v3pt3 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_";
 
 	map<string,vector<string>> filetags;
-	filetags["LLP125"]	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23"};
-	filetags["LLP350"]	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2023_11_29"};
+	// filetags["LLP125"]	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23"};
+	// filetags["LLP350"]	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2023_11_29"};
+
+	filetags["LLP125"]	= { "v3.3_LLPskim_Run2023_hadd_TEST", "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_02_06_TEST"};
+	filetags["LLP350"]	= { "v3.3_LLPskim_Run2023_hadd_TEST", "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_02_06_TEST"};
 
 	vector<string> filetags_all 	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v2.0_MC_QCD_250k_2023_10_18", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23"};
 	vector<string> filetags_data 	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23" };
@@ -23,7 +28,10 @@ void MiniTuplePlotter_CR_SR(){
 
 	vector<string> filetags_data_v3pt1 	= { "v3.1_LLPskim_Run2023Cv3_2024_01_20" };
 	vector<string> filetags_LLP_v3pt1 	= { "v3.1_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_01_20_TEST" };	
-	//vector<string> filetags_LLP_v3pt1 	= { "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_01_20_TEST" };	
+	//vector<string> filetags_LLP_v3pt1 	= { "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_01_20_TEST" };
+	vector<string> filetags_data_v3pt3 	= { "v3.3_LLPskim_Run2023_hadd_TEST" };
+	vector<string> filetags_LLP_v3pt3	= { "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_02_06_TEST" };
+	//vector<string> filetags_LLP_v3pt3 	= { "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_02_06_TEST" };
 
 	vector<PlotParams> jetPlots0	= {P_jet0_E, P_jet0_Pt}; 																				// dont apply a 40 GeV jet cut on these
 	vector<PlotParams> jetPlots1	= {P_jet1_E, P_jet1_Pt}; 																				// dont apply a 40 GeV jet cut on these
@@ -33,6 +41,7 @@ void MiniTuplePlotter_CR_SR(){
 										P_jet0_Track0Pt, P_jet0_Track0PtFrac, P_jet0_Track0dR, 					 											// track vars
 										P_jet0_Track0dEta, P_jet0_Track0dPhi, P_jet0_Tracks_dR, 
 										P_jet0_MatchedLLP_DecayR, P_jet0_MatchedLLP_Eta,
+//										P_jet0_Smajor, P_jet0_Sminor, P_jet0_SminorSmajor, 
 //										P_jet0_Track0dzToPV, P_jet0_Track0dxyToBS, P_jet0_Track0dzOverErr, P_jet0_Track0dxyOverErr,
 //										P_jet0_NSV, P_jet0_NSVCand, P_jet0_SV_x, P_jet0_SV_y, P_jet0_SV_z, P_jet0_SV_NTracks, P_jet0_SV_Mass, 				// SV
 //										P_jet0_FlightDist2D, P_jet0_FlightDist2DErr, P_jet0_FlightDist3D, P_jet0_FlightDist3DErr,
@@ -49,26 +58,34 @@ void MiniTuplePlotter_CR_SR(){
 	vector<PlotParams> MC_allPlots	= { P_LLP0_dR_b_to_b, P_LLP0_dEta_b_to_b, P_LLP0_dPhi_b_to_b, P_LLP0_dR_LLP_to_b };										// LLP decay kinematic variables
 	vector<PlotParams> trackVars	= {	P_jet0_Track0Pt, P_jet0_Track0PtFrac, P_jet0_Track0dR, 					 											// track vars
 										P_jet0_Track0dEta, P_jet0_Track0dPhi, P_jet0_Tracks_dR}; 
-//										P_jet0_Track0dzToPV, P_jet0_Track0dxyToBS, P_jet0_Track0dzOverErr, P_jet0_Track0dxyOverErr };
 	vector<PlotParams> rechitVars 	= {P_jet0_LeadingRechitE, P_jet0_SubLeadingRechitE, P_jet0_SSubLeadingRechitE, P_jet0_AllRechitE, P_jet0_3RechitFracE,	// HB rechits
 										P_jet0_LeadingRechitD, P_jet0_SubLeadingRechitD, P_jet0_SSubLeadingRechitD, 
 										P_jet0_LeadingRechitEFrac, P_jet0_LeadingRechitEFracJet, P_jet0_LeadingRechitJetEDiff, 
 										P_jet0_LeadingSubRechitEQuad, P_jet0_EtaPhiQuadSpread, P_jet0_EtaPhiQuadSpread_energy,
 										P_jet0_EnergyFrac_Depth1, P_jet0_EnergyFrac_Depth2, P_jet0_EnergyFrac_Depth3, P_jet0_EnergyFrac_Depth4 };			// depth ratios
-	vector<PlotParams> analysisVars	= {P_jet0_NeutralHadEFrac, P_jet0_LogNeutralOverChargedHad, P_jet0_Track0PtFrac,
-										P_jet0_EtaPhiQuadSpread_energy, P_jet0_EtaPhiQuadSpread, P_jet0_LeadingRechitEFracJet, 
+	vector<PlotParams> analysisVars	= { P_jet0_NeutralHadEFrac, P_jet0_ChargedHadEFrac, P_jet0_MuonEFrac, P_jet0_PhoEFrac, P_jet0_EleEFrac,
+										//P_jet0_NeutralHadEFrac_zero, P_jet0_ChargedHadEFrac_zero, P_jet0_MuonEFrac_zero, P_jet0_PhoEFrac_zero, P_jet0_EleEFrac_zero,
+										P_jet0_Track0Pt, P_jet0_Track0dEta, P_jet0_Track0dPhi, P_jet0_Track1Pt, P_jet0_Track1dEta, P_jet0_Track1dPhi, 
 										P_jet0_EnergyFrac_Depth1, P_jet0_EnergyFrac_Depth2, P_jet0_EnergyFrac_Depth3, P_jet0_EnergyFrac_Depth4,
-										//P_jet0_Smajor, P_jet0_Sminor, P_jet0_SminorSmajor, 
-										P_jet0_Setaeta, P_jet0_Sphiphi, P_jet0_Setaphi,	 																	// only in newest v3.0 minituples
-										P_jet0_EtaSpread, P_jet0_PhiSpread, P_jet0_EtaSpread_energy, P_jet0_PhiSpread_energy,
-										//P_jet0_TDCaverage, P_jet0_TDCaverage_Eweight, P_jet0_TDCnDelayed, 
-										P_jet0_Track0dR};
-	
+										P_jet0_Eta, P_jet0_Phi, P_jet0_Mass,
+										P_jet0_LeadingRechitE, P_jet0_LeadingRechitEFracJet, P_jet0_Sphiphi};
+	vector<PlotParams> analysisVars_perJet	= { P_perJet_NeutralHadEFrac, P_perJet_ChargedHadEFrac, P_perJet_MuonEFrac, P_perJet_PhoEFrac, P_perJet_EleEFrac,
+										// P_perJet_NeutralHadEFrac_zero, P_perJet_ChargedHadEFrac_zero, P_perJet_MuonEFrac_zero, P_perJet_PhoEFrac_zero, P_perJet_EleEFrac_zero,
+										P_perJet_Track0Pt, P_perJet_Track0dEta, P_perJet_Track0dPhi, P_perJet_Track1Pt, P_perJet_Track1dEta, P_perJet_Track1dPhi, 
+										P_perJet_EnergyFrac_Depth1, P_perJet_EnergyFrac_Depth2, P_perJet_EnergyFrac_Depth3, P_perJet_EnergyFrac_Depth4,
+										P_perJet_Eta, P_perJet_Phi, P_perJet_Mass,
+										P_perJet_LeadingRechitE, P_perJet_AllRechitE, P_perJet_LeadingRechitEFracJet, 
+										P_perJet_Sphiphi, P_perJet_Setaeta, P_perJet_Setaphi};				 																					// only in newest v3.0 minituples
+										// P_jet0_Track0nMissingInnerHits, P_jet0_Track0nMissingOuterHits, P_jet0_Track0nPixelHits, P_jet0_Track0nHits,			// only in v3.2 or newer
+										// P_jet0_EtaSpread, P_jet0_PhiSpread, P_jet0_EtaSpread_energy, P_jet0_PhiSpread_energy,
+										// P_jet0_TDCaverage, P_jet0_TDCaverage_Eweight, P_jet0_TDCnDelayed, 
+
 	MC_allPlots.insert(MC_allPlots.begin(), allPlots.begin(), allPlots.end());
 
 	#include "../RegionCuts.h"
 
 	bool LLP_WJets = true;				// analysis variables for LLP and W+Jets overlayed
+	bool Bkg_est = false;				// look at jet tagging vars by jet eta for probability estimations
 	bool LLP_all = false;				// all variables, track vars with leading track < 4 study, eta-phi spread
 	bool Jet_vars = false; 				// jet kinematics without a pT cut
 	bool NH_bins = false;				// bin in neutral hadron fraction
@@ -89,23 +106,62 @@ void MiniTuplePlotter_CR_SR(){
 		for( auto key: filetag_keys_to_loop){
 
 			// HCAL depth variables with LLP regions and data overlayed
-			class MiniTuplePlotter plotter_Depth_Data_LLP( filetags[key], path );
-			plotter_Depth_Data_LLP.SetPlots(analysisVars); 
-			plotter_Depth_Data_LLP.SetTreeNames( {"WPlusJets", "NoSel"} );	
-			plotter_Depth_Data_LLP.SetOutputFileTag("Overlay_"+key+"_v3.0");
-			plotter_Depth_Data_LLP.plot_log_ratio    = false; 
-			//plotter_Depth_Data_LLP.plot_cdf 		 = true;
-			//plotter_Depth_Data_LLP.plot_reverse_cdf  = true;
-			plotter_Depth_Data_LLP.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
-			plotter_Depth_Data_LLP.SetLegendNames({"LLP skim - W+jets selection", "Tracker: R > 10cm", "ECAL", "HCAL-D1", "HCAL-D2", "HCAL-D34"});
-			plotter_Depth_Data_LLP.colors = { kBlack, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed };
-			plotter_Depth_Data_LLP.SetCuts("jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26");
-			plotter_Depth_Data_LLP.SetComparisonCuts({Cut_LLPinTrackerNP_Jet0, Cut_LLPinECAL_Jet0, Cut_LLPinHCAL1_Jet0, Cut_LLPinHCAL2_Jet0, Cut_LLPinHCAL34_Jet0}, "LLP_MC");
-			//plotter_Depth_Data_LLP.SetSelectiveCuts("LLPskim", "jet0_NeutralHadEFrac < 0.6");  // BLINDED with track energy fraction (jet0_Track0Pt / jet0_Pt > 0.1) or neutral hadron fraction (jet0_NeutralHadEFrac < 0.6)
-			//plotter_Depth_Data_LLP.SetSelectiveCuts("LLPskim", "jet1_Pt < 30"); // for stronger W+jets selection
-			plotter_Depth_Data_LLP.SetOutputDirectory("Overlay_"+key);
-			plotter_Depth_Data_LLP.Plot("ratio");
+			class MiniTuplePlotter plotter_BDTvars( filetags[key], path_v3pt3 );
+			plotter_BDTvars.SetPlots(analysisVars); 
+			plotter_BDTvars.SetTreeNames( {"WPlusJets", "NoSel"} );	
+			plotter_BDTvars.SetOutputFileTag("Overlay_"+key+"_v3.3");
+			plotter_BDTvars.plot_log_ratio    = false; 
+			//plotter_BDTvars.plot_cdf 		 = true;
+			//plotter_BDTvars.plot_reverse_cdf  = true;
+			plotter_BDTvars.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+			plotter_BDTvars.SetLegendNames({"LLP skim - W+jets selection", "Tracker: R <= 10cm", "Tracker: R > 10cm", "ECAL", "HCAL-D1", "HCAL-D2", "HCAL-D34"});
+			plotter_BDTvars.colors = { kBlack, kGray, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed };
+			plotter_BDTvars.SetCuts("jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26");
+			plotter_BDTvars.SetComparisonCuts({Cut_LLPinCR_Jet0, Cut_LLPinTrackerNP_Jet0, Cut_LLPinECAL_Jet0, Cut_LLPinHCAL1_Jet0, Cut_LLPinHCAL2_Jet0, Cut_LLPinHCAL34_Jet0}, "LLP_MC");
+			//plotter_BDTvars.SetSelectiveCuts("LLPskim", "jet0_NeutralHadEFrac < 0.6");  // BLINDED with track energy fraction (jet0_Track0Pt / jet0_Pt > 0.1) or neutral hadron fraction (jet0_NeutralHadEFrac < 0.6)
+			//plotter_BDTvars.SetSelectiveCuts("LLPskim", "jet1_Pt < 30"); // for stronger W+jets selection
+			plotter_BDTvars.SetOutputDirectory("Overlay_"+key);
+			plotter_BDTvars.Plot("ratio");
+
+			// HCAL depth variables with LLP regions and data overlayed
+			class MiniTuplePlotter plotter_BDTvars_perJet( filetags[key], path_v3pt3 );
+			plotter_BDTvars_perJet.SetPlots(analysisVars_perJet); 
+			plotter_BDTvars_perJet.SetTreeNames( {"PerJet_WPlusJets", "PerJet_LLPmatched"} );	
+			plotter_BDTvars_perJet.SetOutputFileTag("Overlay_perJet_"+key+"_v3.3");
+			plotter_BDTvars_perJet.plot_log_ratio    = false; 
+			//plotter_BDTvars_perJet.plot_cdf 		 = true;
+			//plotter_BDTvars_perJet.plot_reverse_cdf  = true;
+			plotter_BDTvars_perJet.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+			plotter_BDTvars_perJet.SetLegendNames({"LLP skim - W+jets selection", "Tracker: R <= 10cm", "Tracker: R > 10cm", "ECAL", "HCAL-D1", "HCAL-D2", "HCAL-D34"});
+			plotter_BDTvars_perJet.colors = { kBlack, kGray, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed };
+			plotter_BDTvars_perJet.SetComparisonCuts({Cut_matchedLLPinCR, Cut_matchedLLPinTrackerNP, Cut_matchedLLPinECAL, Cut_matchedLLPinHCAL1, Cut_matchedLLPinHCAL2, Cut_matchedLLPinHCAL34}, "LLP_MC");
+			plotter_BDTvars_perJet.SetOutputDirectory("Overlay_perJet_"+key);
+			plotter_BDTvars_perJet.Plot("ratio");
 		}
+	}
+
+	if (Bkg_est) {
+		cout<<endl;
+		cout<<" ---------- Background Study 1: Tagging rates by jet eta ---------- "<<endl;
+		cout<<endl;
+
+		TCut Cut_BDTscore0 	= "bdtscore_LLP125_perJet > 0"; 
+		TCut Cut_BDTscore 	= "bdtscore_LLP125_perJet > 0.5"; 
+
+		// leading jet, all jet variables
+		class MiniTuplePlotter plotter_BkgEst( filetags_data_v3pt3, path_v3pt3 );
+		plotter_BkgEst.SetPlots({P_perJet_Eta, P_perJet_Phi, P_perJet_Pt});
+		plotter_BkgEst.SetTreeName( "PerJet_WPlusJets" );	
+		plotter_BkgEst.SetOutputFileTag("Jet40_CR_SR_v3.3_MC"); 	
+		plotter_BkgEst.SetComparisonCuts({Cut_None, Cut_BDTscore0, Cut_BDTscore});
+		plotter_BkgEst.plot_log_ratio   = true; 
+		plotter_BkgEst.plot_norm 		= false;
+		plotter_BkgEst.SetLegendNames({"Jets from W+Jets events", "with BDT 125 score > 0", "with BDT 125 score > 0.5"});
+		plotter_BkgEst.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+		//plotter_BkgEst.plot_cdf = true;
+		//plotter_BkgEst.plot_reverse_cdf = true;
+		plotter_BkgEst.SetOutputDirectory("BackgroundEstimations");
+		plotter_BkgEst.Plot("ratio");
 	}
 
 	if (LLP_all) {
@@ -264,6 +320,7 @@ void MiniTuplePlotter_CR_SR(){
 
 		class MiniTuplePlotter plotter_allVars_BDTbinsData( filetags_data_v3pt1, path_v3pt1 );
 		plotter_allVars_BDTbinsData.SetPlots(analysisVars); //allPlots);
+		plotter_allVars_BDTbinsData.AddPlot({P_jet0_Pt});
 		plotter_allVars_BDTbinsData.SetTreeName( "WPlusJets" );	
 		plotter_allVars_BDTbinsData.SetOutputFileTag("BDTBins_Jet40_v3.1"); 	
 		plotter_allVars_BDTbinsData.SetComparisonCuts({Cut_BDTscoreNPt99, Cut_BDTscoreNPt98, Cut_BDTscoreNPt95, Cut_BDTscore0, Cut_BDTscorePos}); 
@@ -277,6 +334,7 @@ void MiniTuplePlotter_CR_SR(){
 
 		class MiniTuplePlotter plotter_allVars_BDTBins( filetags_LLP_v3pt1, path_v3pt1 );
 		plotter_allVars_BDTBins.SetPlots(analysisVars); // {P_jet0_Track0PtFrac}); //MC_allPlots);
+		plotter_allVars_BDTBins.AddPlot({P_jet0_Pt});
 		plotter_allVars_BDTBins.SetTreeName( "NoSel" );	
 		plotter_allVars_BDTBins.SetOutputFileTag("BDTBins_Jet40_v3.1_MC"); 	
 		plotter_allVars_BDTBins.SetComparisonCuts({Cut_BDTscoreN, Cut_BDTscorePt5, Cut_BDTscorePt9, Cut_BDTscorePt95, Cut_BDTscore1}); 
@@ -330,7 +388,7 @@ void MiniTuplePlotter_CR_SR(){
 		cout<<endl;
 
 		class MiniTuplePlotter plotter_LLP_Jet_PtDiff( filetags_LLP, path );
-		plotter_LLP_Jet_PtDiff.SetPlots({P_jet0_llp0_ptDiff});
+		plotter_LLP_Jet_PtDiff.SetPlots({P_jet0_llp0_ptDiff, P_jet0_llp1_ptDiff});
 		plotter_LLP_Jet_PtDiff.SetTreeName( "NoSel" );	
 		plotter_LLP_Jet_PtDiff.SetOutputFileTag("Jet40_v3.0_MC"); 	
 		plotter_LLP_Jet_PtDiff.SetComparisonCuts({Cut_LLP0inCR, Cut_LLP0inTrackerNP, Cut_LLP0inECAL, Cut_LLPinHCAL_d1, Cut_LLP0inHCAL_d2, Cut_LLP0inHCAL_d34}); 
