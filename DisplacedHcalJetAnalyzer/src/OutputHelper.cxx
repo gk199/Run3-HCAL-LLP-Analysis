@@ -260,6 +260,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 	myvars_float.push_back("perJet_isTruthMatched");
 	myvars_float.push_back("perJet_isMatchedTo");
 	myvars_float.push_back("perJet_MatchedLLP_DecayR");
+	myvars_float.push_back("perJet_OtherLLP_DecayR");
 	myvars_float.push_back("perJet_MatchedLLP_Eta");
 
 	myvars_float.push_back("perJet_S_phiphi");
@@ -278,6 +279,8 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 	for (int d=0; d<4; d++) myvars_float.push_back( Form("perJet_EnergyFrac_Depth%d", d+1) );
 
 	myvars_float.push_back("perJet_LeadingRechitE" );
+	myvars_float.push_back("perJet_SubLeadingRechitE" );
+	myvars_float.push_back("perJet_SSubLeadingRechitE" );
 	myvars_float.push_back("perJet_AllRechitE" );
 	myvars_int.push_back("perJet_LeadingRechitD" );
 
@@ -407,7 +410,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("jet%d_ChargedHadEFrac", i)] 		= jet_ChargedHadEFrac->at(i);
 		tree_output_vars_float[Form("jet%d_NeutralHadEFrac", i)] 		= jet_NeutralHadEFrac->at(i);
 		tree_output_vars_float[Form("jet%d_PhoEFrac", i)] 				= jet_PhoEFrac->at(i);
-		tree_output_vars_float[Form("jet%d_EleFrac", i)] 				= jet_EleEFrac->at(i);
+		tree_output_vars_float[Form("jet%d_EleEFrac", i)] 				= jet_EleEFrac->at(i);
 		tree_output_vars_float[Form("jet%d_MuonEFrac", i)] 				= jet_MuonEFrac->at(i);
 		tree_output_vars_float[Form("jet%d_HoverE", i)] 				= (jet_ChargedHadEFrac->at(i)) / (jet_NeutralHadEFrac->at(i) + jet_PhoEFrac->at(i) + jet_EleEFrac->at(i));
 
@@ -627,11 +630,15 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	jet_tree_output_vars_float["perJet_isTruthMatched"] 	= 0;
 	vector<float> matchedInfo = JetIsMatchedTo( jet_Eta->at(jetIndex), jet_Phi->at(jetIndex) );
 	float matchedLLP = matchedInfo[0];
+	float otherLLP = -1;
+	if (matchedLLP == 1) otherLLP = 0;
+	if (matchedLLP == 0) otherLLP = 1;
 	float matchedDR = matchedInfo[1];
 	if (matchedLLP > -1) { // if jet is matched to a LLP or LLP decay product
 		jet_tree_output_vars_float["perJet_isTruthMatched"] = 1;
 		jet_tree_output_vars_float["perJet_isMatchedTo"] = matchedLLP;
 		jet_tree_output_vars_float["perJet_MatchedLLP_DecayR"] = gLLP_DecayVtx_R.at(matchedLLP); // what is the decay R for the LLP matched to this jet?
+		jet_tree_output_vars_float["perJet_OtherLLP_DecayR"] = gLLP_DecayVtx_R.at(otherLLP); // what is the decay R for the LLP matched to this jet?
 		jet_tree_output_vars_float["perJet_MatchedLLP_Eta"] = gLLP_Eta->at(matchedLLP); // what is the decay eta for the LLP matched to this jet?
 	}
 
@@ -645,6 +652,8 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 
 	for (int depth = 0; depth < 4; depth++) jet_tree_output_vars_float[Form("perJet_EnergyFrac_Depth%d", depth+1)] = energy[depth]; // each fractional energy saved in different tree
 	jet_tree_output_vars_float["perJet_LeadingRechitE"] 		= energeticRechits[0].first;
+	jet_tree_output_vars_float["perJet_SubLeadingRechitE"] 		= energeticRechits[1].first;
+	jet_tree_output_vars_float["perJet_SSubLeadingRechitE"] 	= energeticRechits[2].first;
 	jet_tree_output_vars_float["perJet_AllRechitE"] 			= energeticRechits[3].first;
 	jet_tree_output_vars_int["perJet_LeadingRechitD"] 			= energeticRechits[0].second;
 	

@@ -29,7 +29,6 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader( MyTags bdt_tag_info ){
 		}
 
 		string filename = Form("%s/v0.4/weights_%s/TMVAClassification_BDTG.weights.xml", filepath.c_str(), bdt_tag.c_str() );
-		cout << "filename = " << filename << endl;
 
 		// Declare TMVA Reader
 		cout<<"  --> "<<bdt_tag<<endl;
