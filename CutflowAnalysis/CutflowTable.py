@@ -46,6 +46,18 @@ def bdt_latex_setup(file_path):
 		print("\\textbf{Selection} & \\textbf{Number of Weighted Entries} & \\multicolumn{2}{l}{\\textbf{Fraction of Weighted Entries}} \\\\ \\hline")
 		print(" &  & Of all entries & Of jet matched entries \\\\ \\hline")
 
+def event_latex_setup(file_path):
+	print("\\begin{table}[ht]")
+	print("\\centering")
+	if "Run2023" in file_path: 
+		print("\\begin{tabular}{l|ll}")
+		print("\\hline")
+		print("\\textbf{Selection} & \\textbf{Number of Entries} & \\textbf{Fraction of Entries} \\\\ \\hline")
+	else:
+		print("\\begin{tabular}{l|ll}")
+		print("\\hline")
+		print("\\textbf{Selection} & \\textbf{Number of Weighted Entries} & \\textbf{Fraction of Weighted Entries} \\\\ \\hline")
+
 def latex_end(file_path):
 	print("\\hline")
 	print("\\end{tabular}")
@@ -63,7 +75,7 @@ def main():
 	selection_list = [
 		"All", 
 		"LLP $r$ in HCAL depth 3 or 4", 
-		"LLP $\\eta \\leq 1.26$", 
+		"LLP $\\abs\\eta \\leq 1.26$", 
 		"LLP $E > 60$~GeV", 
 		"LLP 0 OR LLP 1",
 		"LLP 0 AND LLP 1",
@@ -78,7 +90,7 @@ def main():
 		"HLT delayed jet, ECAL timing",
 		"All", 
 		"LLP $t > 6$~ns and $r < 295$~cm", 
-		"LLP $\\eta \\leq 1.26$", 
+		"LLP $\\abs\\eta \\leq 1.26$", 
 		"LLP $E > 60$~GeV", 
 		"LLP 0 OR LLP 1",
 		"LLP 0 AND LLP 1",
@@ -200,7 +212,7 @@ def main():
 	print(" \n")
 	BDT_selection_list = [
 		"All", 
-		"Jet $\\eta \\leq 1.26$ and $p_T \\geq 40$", 
+		"Jet $\\abs\\eta \\leq 1.26$ and $p_T \\geq 40$", 
 		"Jet matched to LLP", 
 		"Neutral hadron fraction $>80\%$", 
 		"Charged hadron fraction $<10\%$", 
@@ -265,8 +277,7 @@ def main():
 				latex_end(file_path)
 
 		else:
-			if (i < 2): print(selection_list_abbrev[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
-			if (i >= 2): print(selection_list_abbrev[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
+			print(selection_list_abbrev[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
 
 
 	# Cutflow table for comparison with BDT results -- per jet
@@ -274,7 +285,7 @@ def main():
 	print("BDT cutflow, done per jet")
 	print(" \n")
 	BDT_selection_list = [
-		"All (jet $\\eta \\leq 1.26$ and $p_T \\geq 40$)", 
+		"All (jet $\\abs\\eta \\leq 1.26$ and $p_T \\geq 40$)", 
 		"Jet matched to LLP in HCAL", 
 		"Neutral hadron fraction $>80\%$", 
 		"Charged hadron fraction $<10\%$", 
@@ -338,9 +349,64 @@ def main():
 				latex_end(file_path)
 
 		else:
-			if (i < 2): print(selection_list_abbrev[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
-			if (i >= 2): print(selection_list_abbrev[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
+			print(selection_list_abbrev[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
 
+	# Cutflow table for background estimation: basic event selection
+	print(" \n")
+	print("Background cutflow, done per event")
+	print(" \n")
+	event_selection_list = [
+		"All events (skim)", 
+		"Jet $\\geq 40$~GeV $p_T$ (one of 3 leading)", 
+		"Jet $\\abs\\eta \\leq 1.26$", 
+		"HLT passed",
+		"L1 passed (monitoring)",
+	]
+	
+	event_selection_list_abbrev = [
+		"All       ", 
+		"Jet pT", 
+		"Jet eta",
+		"HLT passed",
+		"L1 passed (monitoring)",
+	]
+
+	file = ROOT.TFile.Open(file_path)
+	tree = file.Get("NoSel")
+	
+	selection_string = ""
+	
+	if print_latex:
+		event_latex_setup(file_path)
+
+	init = -1
+	
+	for i in range(len(event_selection_list)):
+		selname = event_selection_list[i]
+		selval  = -1
+		Nevents = -1
+
+		if (i == 0): 
+			selval = tree.GetEntries()
+			init = selval
+		else:
+			if i == 1: selection_string += "(jet0_Pt >= 40 || jet1_Pt >= 40 || jet2_Pt >= 40)"
+			if i == 2: selection_string += "&& ((jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26) || (jet1_Pt >= 40 && abs(jet1_Eta) <= 1.26) || (jet2_Pt >= 40 && abs(jet2_Eta) <= 1.26))"
+			if i == 3: selection_string += "&& (HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT240_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT280_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT170_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT270_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet60_DisplacedTrack == 1 || HLT_HT320_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 || HLT_HT420_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay0p5nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay1nsInclusive == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay1nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay2nsInclusive == 1 )"
+			if i == 4: selection_string += "&& HLT_L1SingleLLPJet == 1"
+
+			selval = tree.GetEntries(selection_string)
+			if (i == 1): comp = selval
+			Nevents = tree.GetEntries()
+
+		if print_latex:
+			print(selname+" &", round(selval, 4), "&", round(selval/init, 4), " \\\\ ")
+			if (i == 0): print("\\hline")
+			if (i == 4):
+				latex_end(file_path)
+
+		else:
+			print(selection_list_abbrev[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
 
 if __name__ == '__main__':
 	main()
