@@ -180,26 +180,34 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
 
    // Define Selections
 
-   TCut selections_all = "jet0_Pt > 40 && abs(jet0_Eta) < 1.26";
+   TCut selections_all = "perJet_Pt > 40 && abs(perJet_Eta) < 1.26";
 
-   TCut selections_depth1 = "jet0_EnergyFrac_Depth1 >= 0 && jet0_EnergyFrac_Depth1 <= 1";
-   TCut selections_depth2 = "jet0_EnergyFrac_Depth2 >= 0 && jet0_EnergyFrac_Depth2 <= 1";
-   TCut selections_depth3 = "jet0_EnergyFrac_Depth3 >= 0 && jet0_EnergyFrac_Depth3 <= 1";
-   TCut selections_depth4 = "jet0_EnergyFrac_Depth4 >= 0 && jet0_EnergyFrac_Depth4 <= 1";
+   TCut selections_depth1 = "perJet_EnergyFrac_Depth1 >= 0 && perJet_EnergyFrac_Depth1 <= 1";
+   TCut selections_depth2 = "perJet_EnergyFrac_Depth2 >= 0 && perJet_EnergyFrac_Depth2 <= 1";
+   TCut selections_depth3 = "perJet_EnergyFrac_Depth3 >= 0 && perJet_EnergyFrac_Depth3 <= 1";
+   TCut selections_depth4 = "perJet_EnergyFrac_Depth4 >= 0 && perJet_EnergyFrac_Depth4 <= 1";
    TCut selections_rechitVar1 = selections_depth1 + selections_depth2 + selections_depth3 + selections_depth4;
-   TCut selections_rechitVar2 = "jet0_S_phiphi > 0 && jet0_S_phiphi < 900 && jet0_LeadingRechitE > 0 && jet0_LeadingRechitE < 900";
-   TCut selections_trackVars = "jet0_Track0Pt > 0 && jet0_Track0Pt < 900 && jet0_Track0dR >= 0 && jet0_Track0dR < 1";
-   TCut selections_track1Vars = "jet0_Track1Pt > 0 && jet0_Track1Pt < 900 && jet0_Track1dR >= 0 && jet0_Track1dR < 1";
+   TCut selections_rechitVar2 = "perJet_S_phiphi > 0 && perJet_S_phiphi < 900 && perJet_LeadingRechitE > 0 && perJet_LeadingRechitE < 900";
+   TCut selections_trackVars = "perJet_Track0Pt > 0 && perJet_Track0Pt < 900 && perJet_Track0dR >= 0 && perJet_Track0dR < 1";
+   TCut selections_track1Vars = "perJet_Track1Pt > 0 && perJet_Track1Pt < 900 && perJet_Track1dR >= 0 && perJet_Track1dR < 1";
    TCut selections_safety = selections_rechitVar1 + selections_rechitVar2 + selections_trackVars + selections_track1Vars; // no warnings when all variables behaved well! 
 
+   TCut LLPinHCAL = "perJet_MatchedLLP_DecayR >= 183.6 && perJet_MatchedLLP_DecayR < 295 && abs(perJet_MatchedLLP_Eta) < 1.26";
+   TCut LLPinECAL = "perJet_MatchedLLP_DecayR >= 161.6 && perJet_MatchedLLP_DecayR < 183.6 && abs(perJet_MatchedLLP_Eta) < 1.26";
+   TCut LLPinHCAL12 = "perJet_MatchedLLP_DecayR >= 183.6 && perJet_MatchedLLP_DecayR < 214.2 && abs(perJet_MatchedLLP_Eta) < 1.26";
+   TCut LLPinHCAL34 = "perJet_MatchedLLP_DecayR >= 214.2 && perJet_MatchedLLP_DecayR < 295 && abs(perJet_MatchedLLP_Eta) < 1.26";
+
    TCut selections_background = selections_all + selections_safety;
-   TCut selections_signal = selections_all + selections_safety + Cut_LLPinHCAL_Jet0; // LLP decays in HCAL and is matched to jet 0
+   TCut selections_signal = selections_all + selections_safety + LLPinHCAL;            // LLP decays in HCAL and is matched to jet
+   TCut selections_signalECAL = selections_all + selections_safety + LLPinECAL;        // LLP decays in ECAL and is matched to jet
+   TCut selections_signalHCAL12 = selections_all + selections_safety + LLPinHCAL12;    // LLP decays in HCAL depth 12 and is matched to jet
+   TCut selections_signalHCAL34 = selections_all + selections_safety + LLPinHCAL34;    // LLP decays in HCAL depth 34 and is matched to jet
 
    // Read training and test data (it is also possible to use ASCII format as input -> see TMVA Users Guide)
    std::cout << "Loading files..." << std::endl;
 
    // Create a ROOT output file where TMVA will store ntuples, histograms, etc.
-   TString outfileName( "BDTWeightFilesTest/Test_" + tag +".root" );
+   TString outfileName( "BDTWeightFilesTest/Test_" + tag +"_perJet.root" );
    TFile* outputFile = TFile::Open( outfileName, "RECREATE" );
    
    // Signal // 
@@ -208,10 +216,13 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
    TString sigName = dir+"minituple_"+sigTag+".root";
    siginput = TFile::Open( sigName ); // check if file in local directory exists
    std::cout << "--- TMVAClassification       : Using signal (training) input file: " << siginput->GetName() << std::endl;
-   TTree *signalTree_temp = (TTree*)siginput->Get("NoSel");
+   TTree *signalTree_temp = (TTree*)siginput->Get("PerJet_LLPmatched");
    std::cout << "opened signal file" << std::endl;
    TFile* scratchFile = TFile::Open( "scratchFile.root", "RECREATE" );
-   TTree *signalTree      = (TTree*)signalTree_temp->CopyTree(selections_signal);
+   TTree *signalTree       = (TTree*)signalTree_temp->CopyTree(selections_signal);
+   TTree *signalTreeECAL   = (TTree*)signalTree_temp->CopyTree(selections_signalECAL);
+   TTree *signalTreeHCAL12 = (TTree*)signalTree_temp->CopyTree(selections_signalHCAL12);
+   TTree *signalTreeHCAL34 = (TTree*)signalTree_temp->CopyTree(selections_signalHCAL34);
 
    // Register the training and test trees
 
@@ -219,7 +230,7 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
    TString bkgName = dir+"minituple_"+bkgTag+".root"; 
    bkginput = TFile::Open( bkgName ); // check if file in local directory exists
    std::cout << "--- TMVAClassification       : Using background input file: " << bkginput->GetName() << std::endl;
-   TTree *background_temp = (TTree*)bkginput->Get("WPlusJets");
+   TTree *background_temp = (TTree*)bkginput->Get("PerJet_WPlusJets");
    std::cout << "opened background file" << std::endl;
    scratchFile->cd();
    TTree *background      = (TTree*)background_temp->CopyTree(selections_background);
@@ -245,7 +256,7 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
    //
    //    (TMVA::gConfig().GetVariablePlotting()).fTimesRMS = 8.0;
    //    (TMVA::gConfig().GetIONames()).fWeightFileDir = "myWeightDirectory";
-   (TMVA::gConfig().GetIONames()).fWeightFileDir = "weights_"+tag; // save each weight file in a separate directory
+   (TMVA::gConfig().GetIONames()).fWeightFileDir = "weights_"+tag+"_perJet"; // save each weight file in a separate directory
 
    // Define the input variables that shall be used for the MVA training
    // note that you may also use variable expressions, such as: "3*var1/var2*abs(var3)"
@@ -254,33 +265,34 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
    //dataloader->AddVariable( "bdtscore",      "bdtscore", "", 'F' );
 
    // jet kinematics // *************************
-   dataloader->AddVariable( "jet0_Eta", "jet0_Eta", "", 'F' );
-   // dataloader->AddVariable( "jet0_Phi", "jet0_Phi", "", 'F' );                                 // removing because there is a difference in pi and -pi in data (W+jets)
-   // dataloader->AddVariable( "jet0_Pt", "jet0_Pt", "GeV", 'F' );
-   // dataloader->AddVariable( "jet0_E", "jet0_E", "GeV", 'F' );
+   dataloader->AddVariable( "perJet_Eta", "perJet_Eta", "", 'F' );
+   // dataloader->AddVariable( "perJet_Phi", "perJet_Phi", "", 'F' );                                 // removing because there is a difference in pi and -pi in data (W+jets)
+   // dataloader->AddVariable( "perJet_Pt", "perJet_Pt", "GeV", 'F' );
+   // dataloader->AddVariable( "perJet_E", "perJet_E", "GeV", 'F' );
    // track-based variables // *************************
-   dataloader->AddVariable( "jet0_ChargedHadEFrac", "jet0_ChargedHadEFrac", "", 'F' );
-   dataloader->AddVariable( "jet0_NeutralHadEFrac", "jet0_NeutralHadEFrac", "", 'F' );
-   dataloader->AddVariable( "jet0_MuonEFrac", "jet0_MuonEFrac", "", 'F' );
-   dataloader->AddVariable( "jet0_PhoEFrac", "jet0_PhoEFrac", "", 'F' );
-   //dataloader->AddVariable( "jet0_EleEFrac", "jet0_EleEFrac", "", 'F' );
-   dataloader->AddVariable( "jet0_Track0Pt", "jet0_Track0Pt", "GeV", 'F' );
-   // dataloader->AddVariable( "jet0_Track0dR", "jet0_Track0dR", "", 'F' );
-   dataloader->AddVariable( "jet0_Track0dEta", "jet0_Track0dEta", "", 'F' );
-   dataloader->AddVariable( "jet0_Track0dPhi", "jet0_Track0dPhi", "", 'F' );
-   dataloader->AddVariable( "jet0_Track1Pt", "jet0_Track1Pt", "GeV", 'F' );
-   // dataloader->AddVariable( "jet0_Track1dR", "jet0_Track1dR", "", 'F' );
-   dataloader->AddVariable( "jet0_Track1dEta", "jet0_Track1dEta", "", 'F' );
-   dataloader->AddVariable( "jet0_Track1dPhi", "jet0_Track1dPhi", "", 'F' );
-   //dataloader->AddVariable( "jet0_Track2Pt", "jet0_Track2Pt", "GeV", 'F' );
-   //dataloader->AddVariable( "jet0_HoverE", "jet0_HoverE", "", 'F' );
+   dataloader->AddVariable( "perJet_ChargedHadEFrac", "perJet_ChargedHadEFrac", "", 'F' );
+   dataloader->AddVariable( "perJet_NeutralHadEFrac", "perJet_NeutralHadEFrac", "", 'F' );
+   //dataloader->AddVariable( "perJet_MuonEFrac", "perJet_MuonEFrac", "", 'F' );
+   dataloader->AddVariable( "perJet_PhoEFrac", "perJet_PhoEFrac", "", 'F' );
+   dataloader->AddVariable( "perJet_EleEFrac", "perJet_EleEFrac", "", 'F' );
+   dataloader->AddVariable( "perJet_Track0Pt", "perJet_Track0Pt", "GeV", 'F' );
+   // dataloader->AddVariable( "perJet_Track0dR", "perJet_Track0dR", "", 'F' );
+   dataloader->AddVariable( "perJet_Track0dEta", "perJet_Track0dEta", "", 'F' );
+   dataloader->AddVariable( "perJet_Track0dPhi", "perJet_Track0dPhi", "", 'F' );
+   dataloader->AddVariable( "perJet_Track1Pt", "perJet_Track1Pt", "GeV", 'F' );
+   // dataloader->AddVariable( "perJet_Track1dR", "perJet_Track1dR", "", 'F' );
+   dataloader->AddVariable( "perJet_Track1dEta", "perJet_Track1dEta", "", 'F' );
+   dataloader->AddVariable( "perJet_Track1dPhi", "perJet_Track1dPhi", "", 'F' );
+   //dataloader->AddVariable( "perJet_Track1Pt", "perJet_Track1Pt", "GeV", 'F' );
+   //dataloader->AddVariable( "perJet_Track2Pt", "perJet_Track2Pt", "GeV", 'F' );
+   //dataloader->AddVariable( "perJet_HoverE", "perJet_HoverE", "", 'F' );
    // rechit-based variables // *************************
-   dataloader->AddVariable( "jet0_EnergyFrac_Depth1", "jet0_EnergyFrac_Depth1", "", 'F' );
-   dataloader->AddVariable( "jet0_EnergyFrac_Depth2", "jet0_EnergyFrac_Depth2", "", 'F' );
-   dataloader->AddVariable( "jet0_EnergyFrac_Depth3", "jet0_EnergyFrac_Depth3", "", 'F' );
-   //dataloader->AddVariable( "jet0_EnergyFrac_Depth4", "jet0_EnergyFrac_Depth4", "", 'F' );       // redundant! 
-   dataloader->AddVariable( "jet0_S_phiphi", "jet0_S_phiphi", "", 'F' );
-   dataloader->AddVariable( "jet0_LeadingRechitE / jet0_E", "jet0_LeadingRechtE / jet0_E", "", 'F' );
+   dataloader->AddVariable( "perJet_EnergyFrac_Depth1", "perJet_EnergyFrac_Depth1", "", 'F' );
+   dataloader->AddVariable( "perJet_EnergyFrac_Depth2", "perJet_EnergyFrac_Depth2", "", 'F' );
+   dataloader->AddVariable( "perJet_EnergyFrac_Depth3", "perJet_EnergyFrac_Depth3", "", 'F' );
+   //dataloader->AddVariable( "perJet_EnergyFrac_Depth4", "perJet_EnergyFrac_Depth4", "", 'F' );       // redundant! 
+   dataloader->AddVariable( "perJet_S_phiphi", "perJet_S_phiphi", "", 'F' );
+   dataloader->AddVariable( "perJet_LeadingRechitE / perJet_E", "perJet_LeadingRechtE / perJet_E", "", 'F' );
 
    // You can add so-called "Spectator variables", which are not used in the MVA training,
    // but will appear in the final "TestTree" produced by TMVA. This TestTree will contain the
@@ -303,6 +315,9 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
 
    // You can add an arbitrary number of signal or background trees
    dataloader->AddSignalTree     ( signalTree,     signalWeight );
+   dataloader->AddSignalTree     ( signalTreeECAL,     signalWeight );
+   dataloader->AddSignalTree     ( signalTreeHCAL12,     signalWeight );
+   dataloader->AddSignalTree     ( signalTreeHCAL34,     signalWeight );
    dataloader->AddBackgroundTree ( background, backgroundWeight );
 
    // To give different trees for training and testing, do as follows:
@@ -646,7 +661,7 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
    return 0;
 }
 
-int LLP_WPlusJets_Classification()
+int LLP_WPlusJets_Classification_perJet()
 {
    // Select methods (don't look at this code - not of interest)
    //std::cout << "print" << std::endl;

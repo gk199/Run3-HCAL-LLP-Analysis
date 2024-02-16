@@ -265,18 +265,22 @@ vector<float> DisplacedHcalJetAnalyzer::GetTDCavg_Jet(int idx_jet, float deltaR_
 
 	float rechitN = 0;
 	int totalTDC = 0;
+	int totalTime = 0;
 	float totalEnergy = 0;
 	int energyTDC = 0;
 	float avgTDC = 0;
 	float avgTDCenergy = 0;
 	float nDelayedTDC = 0;
+	float avgTime = 0;
 
 	for (int i = 0; i < matchedRechit.size(); i++) {
 		int TDC = hbheRechit_auxTDC->at(matchedRechit[i]); // decoded in ntupler (six bit mask, bit shifting applied)
+		int time = hbheRechit_time->at(matchedRechit[i]); // MAHI time, may be unreliable
 		int energy = hbheRechit_E->at(matchedRechit[i]);
 		if (energy > 4 && TDC < 3) {
 			rechitN += 1;
 			totalTDC += TDC;
+			totalTime += time;
 			totalEnergy += energy;
 			energyTDC += TDC * energy;
 			if (TDC > 0) nDelayedTDC += 1;
@@ -285,6 +289,7 @@ vector<float> DisplacedHcalJetAnalyzer::GetTDCavg_Jet(int idx_jet, float deltaR_
 
 	if (rechitN > 0) {
 		avgTDC = totalTDC / rechitN;
+		avgTime = totalTime / rechitN;
 		avgTDCenergy = energyTDC / totalEnergy;
 	}
 	
@@ -295,7 +300,7 @@ vector<float> DisplacedHcalJetAnalyzer::GetTDCavg_Jet(int idx_jet, float deltaR_
 		std::cout << avgTDCenergy << " = avgTDCenergy from energyTDC = " << energyTDC << " and totalEnergy = " << totalEnergy << std::endl;
 	}
 	*/
-	vector<float> TDC_TDCenergy = {avgTDC,avgTDCenergy,nDelayedTDC};
+	vector<float> TDC_TDCenergy = {avgTDC,avgTDCenergy,nDelayedTDC,avgTime};
 
 	return TDC_TDCenergy;
 }

@@ -62,8 +62,8 @@ PlotParams P_jet0_TDCnDelayed			={"jet0_TDCnDelayed", "Leading Jet Number of Del
 // tracks
 PlotParams P_jet0_Track0PtFrac			= {"jet0_Track0Pt / jet0_Pt", "Leading Jet: Leading Track p_{T} / Jet p_{T}", "Track Energy Fraction", 0, 1 };
 PlotParams P_jet0_Track0Pt				= {"jet0_Track0Pt", "Leading Jet: Leading Track p_{T}", "p_{T} [GeV]", 0, 15 };
-PlotParams P_jet0_Track1Pt				= {"jet0_Track1Pt", "Leading Jet: Subeading Track p_{T}", "p_{T} [GeV]", 0, 5 };
-PlotParams P_jet0_Track2Pt				= {"jet0_Track2Pt", "Leading Jet: Third leading Track p_{T}", "p_{T} [GeV]", 0, 5 };
+PlotParams P_jet0_Track1Pt				= {"jet0_Track1Pt", "Leading Jet: Subeading Track p_{T}", "p_{T} [GeV]", 0, 15 };
+PlotParams P_jet0_Track2Pt				= {"jet0_Track2Pt", "Leading Jet: Third leading Track p_{T}", "p_{T} [GeV]", 0, 15 };
 PlotParams P_jet0_Track0dxyToBS			= {"jet0_Track0dxyToBS", "Leading Jet: Leading Track d_{xy} to BS", "d_{xy} to BS", -20, 20};
 PlotParams P_jet0_Track1dxyToBS			= {"jet0_Track0dxyToBS", "Leading Jet: Subleading Track d_{xy} to BS", "d_{xy} to BS", -20, 20};
 PlotParams P_jet0_Track2dxyToBS			= {"jet0_Track2dxyToBS", "Leading Jet: Third Leading Track d_{xy} to BS", "d_{xy} to BS", -20, 20};
@@ -76,6 +76,12 @@ PlotParams P_jet0_Track2dzToPV			= {"jet0_Track2dzToPV", "Leading Jet: Third Lea
 PlotParams P_jet0_Track0dzOverErr		= {"jet0_Track0dzOverErr", "Leading Jet: Leading Track #DeltaZ / error", "#DeltaZ [cm] / error", 0, 100 };
 PlotParams P_jet0_Track1dzOverErr		= {"jet0_Track1dzOverErr", "Leading Jet: Subeading Track #DeltaZ / error", "#DeltaZ [cm] / error", 0, 100 };
 PlotParams P_jet0_Track2dzOverErr		= {"jet0_Track2dzOverErr", "Leading Jet: Third Leading Track #DeltaZ / error", "#DeltaZ [cm] / error", 0, 100 };
+
+PlotParams P_jet0_Track0nMissingInnerHits	= {"jet0_Track0nMissingInnerHits", "Leading Jet: Leading Track Number of Missing Inner Hits", "Number of Hits", 0, 15 };
+PlotParams P_jet0_Track0nMissingOuterHits	= {"jet0_Track0nMissingOuterHits", "Leading Jet: Leading Track Number of Missing Outer Hits", "Number of Hits", 0, 20 };
+PlotParams P_jet0_Track0nPixelHits			= {"jet0_Track0nPixelHits", "Leading Jet: Leading Track Number of Pixel Hits", "Number of Hits", 0, 10 };
+PlotParams P_jet0_Track0nHits				= {"jet0_Track0nHits", "Leading Jet: Leading Track Number of Hits", "Number of Hits", 0, 40 };
+
 PlotParams P_jet0_Tracks_dR				= {"jet0_Tracks_dR", "Leading Jet: Leading Track to Sub-leading Track #DeltaR", "#DeltaR (leading, subleading track)", 0, 1.1 };
 PlotParams P_jet0_Track0dR				= {"jet0_Track0dR", "Leading Jet to Leading Track #DeltaR", "#DeltaR", 0, 0.6 };
 PlotParams P_jet0_Track1dR				= {"jet0_Track1dR", "Leading Jet to Subleading Track #DeltaR", "#DeltaR", 0, 0.6 };
@@ -117,11 +123,16 @@ PlotParams P_jet0_LeadingRechitD		= {"jet0_LeadingRechitD", "Leading Jet: Leadin
 PlotParams P_jet0_SubLeadingRechitD		= {"jet0_SubLeadingRechitD", "Leading Jet: Subleading Rechit Depth", "HCAL Depth", 0, 5 };
 PlotParams P_jet0_SSubLeadingRechitD	= {"jet0_SSubLeadingRechitD", "Leading Jet: Third Leading Rechit Depth", "HCAL Depth", 0, 5 };
 // energy fractions
-PlotParams P_jet0_NeutralHadEFrac		= {"jet0_NeutralHadEFrac", "Leading Jet: Neutral Hadron Energy Fraction", "Neutral Hadron Energy Fraction", 0, 1 };
-PlotParams P_jet0_ChargedHadEFrac		= {"jet0_ChargedHadEFrac", "Leading Jet: Charged Hadron Energy Fraction", "Charged Hadron Energy Fraction", 0, 1 };
-PlotParams P_jet0_PhoEFrac				= {"jet0_PhoEFrac", "Leading Jet: Photon Energy Fraction", "Photon Energy Fraction", 0, 1 };
-PlotParams P_jet0_EleEFrac				= {"jet0_EleEFrac", "Leading Jet: Electromagnetic Energy Fraction", "Electromagnetic Energy Fraction", 0, 1 };
-PlotParams P_jet0_MuonEFrac				= {"jet0_MuonEFrac", "Leading Jet: Muon Energy Fraction", "Muon Energy Fraction", 0, 1 };
+PlotParams P_jet0_NeutralHadEFrac		= {"jet0_NeutralHadEFrac", "Leading Jet: Neutral Hadron Energy Fraction", "Neutral Hadron Energy Fraction", 0, 1.01 };
+PlotParams P_jet0_ChargedHadEFrac		= {"jet0_ChargedHadEFrac", "Leading Jet: Charged Hadron Energy Fraction", "Charged Hadron Energy Fraction", 0, 1.01 };
+PlotParams P_jet0_PhoEFrac				= {"jet0_PhoEFrac", "Leading Jet: Photon Energy Fraction", "Photon Energy Fraction", 0, 1.01 };
+PlotParams P_jet0_EleEFrac				= {"jet0_EleEFrac", "Leading Jet: Electron Energy Fraction", "Electron Energy Fraction", 0, 1.01 };
+PlotParams P_jet0_MuonEFrac				= {"jet0_MuonEFrac", "Leading Jet: Muon Energy Fraction", "Muon Energy Fraction", 0, 1.01 };
+PlotParams P_jet0_NeutralHadEFrac_zero	= {"jet0_NeutralHadEFrac", "Leading Jet: Neutral Hadron Energy Fraction", "Neutral Hadron Energy Fraction", 0, 0.005 };
+PlotParams P_jet0_ChargedHadEFrac_zero	= {"jet0_ChargedHadEFrac", "Leading Jet: Charged Hadron Energy Fraction", "Charged Hadron Energy Fraction", 0, 0.005 };
+PlotParams P_jet0_PhoEFrac_zero			= {"jet0_PhoEFrac", "Leading Jet: Photon Energy Fraction", "Photon Energy Fraction", 0, 0.005 };
+PlotParams P_jet0_EleEFrac_zero			= {"jet0_EleEFrac", "Leading Jet: Electron Energy Fraction", "Electron Energy Fraction", 0, 0.005 };
+PlotParams P_jet0_MuonEFrac_zero		= {"jet0_MuonEFrac", "Leading Jet: Muon Energy Fraction", "Muon Energy Fraction", 0, 0.005 };
 PlotParams P_jet0_NeutralHadMult		= {"jet0_NeutralHadMult", "Leading Jet: Neutral Hadron Multiplicity", "Neutral Hadron Multiplicity", 0, 20 };
 PlotParams P_jet0_ChargedHadMult		= {"jet0_ChargedHadMult", "Leading Jet: Charged Hadron Multiplicity", "Charged Hadron Multiplicity", 0, 40 };
 PlotParams P_jet0_PhoMult				= {"jet0_PhoMult", "Leading Jet: Photon Multiplicity", "Photon Multiplicity", 0, 40 };
@@ -133,10 +144,10 @@ PlotParams P_jet0_NeutralPhoEFrac		= {"(jet0_NeutralHadEFrac+jet0_PhoEFrac)", "L
 PlotParams P_jet0_NeutralOverChargedHad = {"jet0_NeutralHadEFrac/jet0_ChargedHadEFrac", "Leading Jet: Neutral / Charged Hadron Energy", "Neutral / Charged Hadron Energy", 0, 100};
 PlotParams P_jet0_LogNeutralOverChargedHad = {"log(jet0_NeutralHadEFrac/jet0_ChargedHadEFrac)", "Leading Jet: log(Neutral / Charged Hadron Energy)", "log(Neutral / Charged Hadron Energy)", -10, 10};
 // hcal energy fractions
-PlotParams P_jet0_EnergyFrac_Depth1		= {"jet0_EnergyFrac_Depth1", "Leading Jet: Energy Fraction in HCAL Depth 1", "Energy Fraction", 0, 1 };
-PlotParams P_jet0_EnergyFrac_Depth2		= {"jet0_EnergyFrac_Depth2", "Leading Jet: Energy Fraction in HCAL Depth 2", "Energy Fraction", 0, 1 };
-PlotParams P_jet0_EnergyFrac_Depth3		= {"jet0_EnergyFrac_Depth3", "Leading Jet: Energy Fraction in HCAL Depth 3", "Energy Fraction", 0, 1 };
-PlotParams P_jet0_EnergyFrac_Depth4		= {"jet0_EnergyFrac_Depth4", "Leading Jet: Energy Fraction in HCAL Depth 4", "Energy Fraction", 0, 1 };
+PlotParams P_jet0_EnergyFrac_Depth1		= {"jet0_EnergyFrac_Depth1", "Leading Jet: Energy Fraction in HCAL Depth 1", "Energy Fraction", 0, 1.01 };
+PlotParams P_jet0_EnergyFrac_Depth2		= {"jet0_EnergyFrac_Depth2", "Leading Jet: Energy Fraction in HCAL Depth 2", "Energy Fraction", 0, 1.01 };
+PlotParams P_jet0_EnergyFrac_Depth3		= {"jet0_EnergyFrac_Depth3", "Leading Jet: Energy Fraction in HCAL Depth 3", "Energy Fraction", 0, 1.01 };
+PlotParams P_jet0_EnergyFrac_Depth4		= {"jet0_EnergyFrac_Depth4", "Leading Jet: Energy Fraction in HCAL Depth 4", "Energy Fraction", 0, 1.01 };
 
 PlotParams P_jet0_HCALd1_over_d2		= {"jet0_EnergyFrac_Depth1/jet0_EnergyFrac_Depth2", "HCAL Energy: Depth 1 over Depth 2", "Depth 1 over Depth 2 Energy Ratio", 0, 60};
 PlotParams P_jet0_HCALd1_over_d3		= {"jet0_EnergyFrac_Depth1/jet0_EnergyFrac_Depth3", "HCAL Energy: Depth 1 over Depth 3", "Depth 1 over Depth 3 Energy Ratio", 0, 60};
@@ -148,8 +159,8 @@ PlotParams P_jet0_isTruthMatched		= {"jet0_isTruthMatched", "Leading Jet is Trut
 PlotParams P_jet0_isMatchedTo			= {"jet0_isMatchedTo", "Leading Jet is Matched to LLP", "is Matched to LLP", 0, 2 };
 PlotParams P_jet0_MatchedLLP_DecayR		= {"jet0_MatchedLLP_DecayR", "Leading Jet Matched LLP Decay R", "Decay R [cm]", 0, 350 };
 PlotParams P_jet0_MatchedLLP_Eta		= {"jet0_MatchedLLP_Eta", "Leading Jet Matched LLP #eta", "#eta", -1.5, 1.5 };
-PlotParams P_jet0_llp0_ptDiff			= {"(jet0_Pt - LLP0_Pt) / LLP0_Pt", "Leading Jet Pt - LLP0 Pt / LLP 0 Pt", "Pt Match (LLP0)", -2, 5 };
-PlotParams P_jet0_llp1_ptDiff			= {"(jet0_Pt - LLP1_Pt) / LLP1_Pt", "Leading Jet Pt - LLP1 Pt / LLP 1 Pt", "Pt Match (LLP1)", -2, 5 };
+PlotParams P_jet0_llp0_ptDiff			= {"jet0_Pt / LLP0_Pt", "Leading Jet p_{T} / LLP 0 p_{T}", "p_{T} Match (LLP0)", 0, 5 };
+PlotParams P_jet0_llp1_ptDiff			= {"jet0_Pt / LLP1_Pt", "Leading Jet p_{T} / LLP 1 p_{T}", "p_{T} Match (LLP1)", 0, 5 };
 
 // --------------------------------------------------------------------- //
 // below ones are for example files, v1 minituples have changed variable names as used above
@@ -165,8 +176,8 @@ PlotParams P_jet0_etaSpread_energy		= {"jet0_etaSpread_energy", "Leading Jet #et
 PlotParams P_jet0_phiSpread				= {"jet0_phiSpread", "Leading Jet #phi Spread", "#phi Spread", 0, 0.4 };
 PlotParams P_jet0_phiSpread_energy		= {"jet0_phiSpread_energy", "Leading Jet #phi Spread Energy", "#phi Spread (energy weighted)", 0, 0.2 };
 PlotParams P_jet0_track0Pt				= {"jet0_track0Pt", "Leading Jet: Leading Track p_{T}", "p_{T} [GeV]", 0, 15 };
-PlotParams P_jet0_track1Pt				= {"jet0_track1Pt", "Leading Jet: Subeading Track p_{T}", "p_{T} [GeV]", 0, 5 };
-PlotParams P_jet0_track2Pt				= {"jet0_track2Pt", "Leading Jet: Third leading Track p_{T}", "p_{T} [GeV]", 0, 5 };
+PlotParams P_jet0_track1Pt				= {"jet0_track1Pt", "Leading Jet: Subeading Track p_{T}", "p_{T} [GeV]", 0, 15 };
+PlotParams P_jet0_track2Pt				= {"jet0_track2Pt", "Leading Jet: Third leading Track p_{T}", "p_{T} [GeV]", 0, 15 };
 //PlotParams P_jet0_track0dzToPV		= {"jet0_track0dzToPV", "Leading Jet: Leading Track #DeltaZ to PV", "#DeltaZ [cm]", MIN, MAX };
 //PlotParams P_jet0_track1dzToPV		= {"jet0_track1dzToPV", "Leading Jet: Subeading Track #DeltaZ to PV", "#DeltaZ [cm]", MIN, MAX };
 //PlotParams P_jet0_track2dzToPV		= {"jet0_track2dzToPV", "Leading Jet: Third Leading Track #DeltaZ to PV", "#DeltaZ [cm]", MIN, MAX };
@@ -184,7 +195,7 @@ PlotParams P_jet1_EtaPhiQuadSpread_energy={"jet1_EtaPhiQuadSpread_energy", "Lead
 PlotParams P_jet1_NeutralHadEFrac		= {"jet1_NeutralHadEFrac", "Sub-Leading Jet: Neutral Hadron Energy Fraction", "Neutral Hadron Energy Fraction", 0, 1 };
 PlotParams P_jet1_ChargedHadEFrac		= {"jet1_ChargedHadEFrac", "Sub-Leading Jet: Charged Hadron Energy Fraction", "Charged Hadron Energy Fraction", 0, 1 };
 PlotParams P_jet1_PhoEFrac				= {"jet1_PhoEFrac", "Sub-Leading Jet: Photon Energy Fraction", "Photon Energy Fraction", 0, 1 };
-PlotParams P_jet1_EleEFrac				= {"jet1_EleEFrac", "Sub-Leading Jet: Electromagnetic Energy Fraction", "Electromagnetic Energy Fraction", 0, 1 };
+PlotParams P_jet1_EleEFrac				= {"jet1_EleEFrac", "Sub-Leading Jet: Electron Energy Fraction", "Electron Energy Fraction", 0, 1 };
 PlotParams P_jet1_MuonEFrac				= {"jet1_MuonEFrac", "Sub-Leading Jet: Muon Energy Fraction", "Muon Energy Fraction", 0, 1 };
 PlotParams P_jet1_HoverE				= {"jet1_HoverE", "Sub-Leading Jet: H/E Energy Ratio", "H/E Energy Ratio", 0, 100 };
 PlotParams P_jet1_NeutralOverChargedHad = {"jet1_NeutralHadEFrac/jet0_ChargedHadEFrac", "Sub-Leading Jet: Neutral / Charged Hadronic Energy Fraction", "Neutral / Charged Hadronic Energy Fraction", 0, 100};
@@ -194,6 +205,7 @@ PlotParams P_jet1_NeutralOverChargedHad = {"jet1_NeutralHadEFrac/jet0_ChargedHad
 PlotParams P_met_Pt						= {"met_Pt", "MET p_{T}", "p_{T} [GeV]", 0, 400 };
 PlotParams P_met_Phi					= {"met_Phi", "MET #phi", "#phi", -3.2, 3.2 };
 PlotParams P_met_SumEt					= {"met_SumEt", "MET Sum E_{T}", "E_{T} [GeV]", 0, 5000 };
+PlotParams P_eventHT					= {"eventHT", "Event HT", "HT [GeV]", 0, 2000 };
 
 // --------------------------------------------------------------------- //
 // LLP variables 
@@ -203,11 +215,11 @@ PlotParams P_LLP0_Phi					= {"LLP0_Phi", "LLP0 #phi", "#phi", -3.2, 3.2 };
 PlotParams P_LLP0_Pt					= {"LLP0_Pt", "LLP0 p_{T}", "p_{T} [GeV]", 0, 250 };
 PlotParams P_LLP0_E						= {"LLP0_E", "LLP0 Energy", "E [GeV]", 0, 250 };
 PlotParams P_LLP0_Beta					= {"LLP0_Beta", "LLP0 $beta", "$beta", 0, 250 };
-PlotParams P_LLP0_TravelTime			= {"LLP0_TravelTime", "LLP0 Travel Time", "Travel Time [ns]", 0, 250 };
+PlotParams P_LLP0_TravelTime			= {"LLP0_TravelTime", "LLP0 Travel Time", "Travel Time [ns]", 0, 25 };
 PlotParams P_LLP0_DecayR				= {"LLP0_DecayR", "LLP0 decay radius", "Decay R [cm]", 0, 350 };
 PlotParams P_LLP0_DecayX				= {"LLP0_DecayX", "LLP0 decay X position", "Decay X [cm]", -2000, 2000 };
 PlotParams P_LLP0_DecayY				= {"LLP0_DecayY", "LLP0 decay Y position", "Decay Y [cm]", -2000, 2000 };
-PlotParams P_LLP0_DecayZ				= {"LLP0_DecayZ", "LLP0 decay Z position", "Decay Z [cm]", -10000, 10000 };
+PlotParams P_LLP0_DecayZ				= {"LLP0_DecayZ", "LLP0 decay Z position", "Decay Z [cm]", -1000, 1000 };
 PlotParams P_LLP0_DecayT				= {"LLP0_DecayT", "LLP0 decay time", "Decay time [ns]", 0, 10 };
 PlotParams P_LLP0_DecayCtau				= {"LLP0_DecayCtau", "LLP0 c#tau", "c#tau [cm]", 0, 1000 };
 
@@ -231,3 +243,48 @@ PlotParams P_LLP1_DecayY				= {"LLP1_DecayY", "LLP1 decay Y position", "Decay Y 
 PlotParams P_LLP1_DecayZ				= {"LLP1_DecayZ", "LLP1 decay Z position", "Decay Z [cm]", -10000, 10000 };
 PlotParams P_LLP1_DecayT				= {"LLP1_DecayT", "LLP1 decay time", "Decay time [ns]", 0, 10 };
 PlotParams P_LLP1_DecayCtau				= {"LLP1_DecayCtau", "LLP1 c#tau", "c#tau [cm]", 0, 1000 };
+
+// --------------------------------------------------------------------- //
+// -------------------------- per jet variables ------------------------ //
+// --------------------------------------------------------------------- //
+
+PlotParams P_perJet_E					= {"perJet_E", "Jet Energy", "Jet E [GeV]", 0, 250 };
+PlotParams P_perJet_Pt					= {"perJet_Pt", "Jet p_{T}", "Jet p_{T} [GeV]", 0, 250 };
+PlotParams P_perJet_Eta					= {"perJet_Eta", "Jet #eta", "Jet #eta", -1.5, 1.5 };
+PlotParams P_perJet_Phi					= {"perJet_Phi", "Jet #phi", "Jet #phi", -3.2, 3.2 };
+PlotParams P_perJet_Mass					= {"perJet_Mass", "Jet Mass", "Jet Mass", 0, 40 };
+
+PlotParams P_perJet_NeutralHadEFrac			= {"perJet_NeutralHadEFrac", "Jet: Neutral Hadron Energy Fraction", "Neutral Hadron Energy Fraction", 0, 1.01 };
+PlotParams P_perJet_ChargedHadEFrac			= {"perJet_ChargedHadEFrac", "Jet: Charged Hadron Energy Fraction", "Charged Hadron Energy Fraction", 0, 1.01 };
+PlotParams P_perJet_PhoEFrac				= {"perJet_PhoEFrac", "Jet: Photon Energy Fraction", "Photon Energy Fraction", 0, 1.01 };
+PlotParams P_perJet_EleEFrac				= {"perJet_EleEFrac", "Jet: Electron Energy Fraction", "Electron Energy Fraction", 0, 1.01 };
+PlotParams P_perJet_MuonEFrac				= {"perJet_MuonEFrac", "Jet: Muon Energy Fraction", "Muon Energy Fraction", 0, 1.01 };
+PlotParams P_perJet_NeutralHadEFrac_zero	= {"perJet_NeutralHadEFrac", "Jet: Neutral Hadron Energy Fraction", "Neutral Hadron Energy Fraction", 0, 0.005 };
+PlotParams P_perJet_ChargedHadEFrac_zero	= {"perJet_ChargedHadEFrac", "Jet: Charged Hadron Energy Fraction", "Charged Hadron Energy Fraction", 0, 0.005 };
+PlotParams P_perJet_PhoEFrac_zero			= {"perJet_PhoEFrac", "Jet: Photon Energy Fraction", "Photon Energy Fraction", 0, 0.005 };
+PlotParams P_perJet_EleEFrac_zero			= {"perJet_EleEFrac", "Jet: Electron Energy Fraction", "Electron Energy Fraction", 0, 0.005 };
+PlotParams P_perJet_MuonEFrac_zero			= {"perJet_MuonEFrac", "Jet: Muon Energy Fraction", "Muon Energy Fraction", 0, 0.005 };
+
+PlotParams P_perJet_Track0Pt				= {"perJet_Track0Pt", "Jet: Leading Track p_{T}", "p_{T} [GeV]", 0, 15 };
+PlotParams P_perJet_Track1Pt				= {"perJet_Track1Pt", "Jet: Subeading Track p_{T}", "p_{T} [GeV]", 0, 15 };
+PlotParams P_perJet_Track2Pt				= {"perJet_Track2Pt", "Jet: Third leading Track p_{T}", "p_{T} [GeV]", 0, 15 };
+PlotParams P_perJet_Track0dEta				= {"perJet_Track0dEta", "Jet to Leading Track #Delta#eta", "#Delta#eta", 0, 0.6 };
+PlotParams P_perJet_Track1dEta				= {"perJet_Track1dEta", "Jet to Subleading Track #Delta#eta", "#Delta#eta", 0, 0.6 };
+PlotParams P_perJet_Track2dEta				= {"perJet_Track2dEta", "Jet to Third Leading Track #Delta#eta", "#Delta#eta", 0, 0.6 };
+PlotParams P_perJet_Track0dPhi				= {"perJet_Track0dPhi", "Jet to Leading Track #Delta#phi", "#Delta#phi", 0, 0.6 };
+PlotParams P_perJet_Track1dPhi				= {"perJet_Track1dPhi", "Jet to Subleading Track #Delta#phi", "#Delta#phi", 0, 0.6 };
+PlotParams P_perJet_Track2dPhi				= {"perJet_Track2dPhi", "Jet to Third Leading Track #Delta#phi", "#Delta#phi", 0, 0.6 };
+
+PlotParams P_perJet_EnergyFrac_Depth1		= {"perJet_EnergyFrac_Depth1", "Jet: Energy Fraction in HCAL Depth 1", "Energy Fraction", 0, 1.01 };
+PlotParams P_perJet_EnergyFrac_Depth2		= {"perJet_EnergyFrac_Depth2", "Jet: Energy Fraction in HCAL Depth 2", "Energy Fraction", 0, 1.01 };
+PlotParams P_perJet_EnergyFrac_Depth3		= {"perJet_EnergyFrac_Depth3", "Jet: Energy Fraction in HCAL Depth 3", "Energy Fraction", 0, 1.01 };
+PlotParams P_perJet_EnergyFrac_Depth4		= {"perJet_EnergyFrac_Depth4", "Jet: Energy Fraction in HCAL Depth 4", "Energy Fraction", 0, 1.01 };
+PlotParams P_perJet_LeadingRechitE			= {"perJet_LeadingRechitE", "Jet: Leading Rechit Energy", "Leading Rechit Energy [GeV]", 0, 100 };
+PlotParams P_perJet_AllRechitE				= {"perJet_AllRechitE", "Jet: Sum of HB Rechit Energy", "Sum of HB Rechit Energy [GeV]", 0, 300 };
+PlotParams P_perJet_AllRechitE				= {"perJet_AllRechitE / perJet_E", "Jet: Fraction of Jet Energy in HB Rechits", "Energy Fraction", 0, 1.01 };
+//PlotParams P_perJet_3RechitFracE			= {"(perJet_LeadingRechitE + perJet_SubLeadingRechitE + perJet_SSubLeadingRechitE) / perJet_AllRechitE", "Jet: Fraction of Energy in Leading 3 Rechits", "Fraction of Energy", 0, 1 };
+PlotParams P_perJet_LeadingRechitEFracJet	= {"perJet_LeadingRechitE / perJet_E", "Jet: Leading Rechit Energy / Jet Energy", "Energy Fraction", 0, 1 };
+
+PlotParams P_perJet_Setaeta 				= {"perJet_S_etaeta", "Jet S #eta#eta", "S #eta#eta", 0, 0.15 };
+PlotParams P_perJet_Sphiphi 				= {"perJet_S_phiphi", "Jet S #phi#phi", "S #phi#phi", 0, 0.15 };
+PlotParams P_perJet_Setaphi 				= {"perJet_S_etaphi", "Jet S #eta#phi", "S #eta#phi", 0, 0.15 };

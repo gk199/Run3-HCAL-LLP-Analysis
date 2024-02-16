@@ -70,7 +70,7 @@ void StampCMS( const std::string & approvaltext = "Internal", float lumi=140., f
   label_approvaltext.SetTextFont(52);
   label_approvaltext.SetTextColor(1);
   label_approvaltext.SetTextSize(textsize*0.85);
-  label_approvaltext.DrawLatex( x+0.08, y, approvaltext.c_str() ); 
+  label_approvaltext.DrawLatex( x+0.075, y, approvaltext.c_str() ); 
 
   TLatex label_energylumi; 
   label_energylumi.SetNDC();
