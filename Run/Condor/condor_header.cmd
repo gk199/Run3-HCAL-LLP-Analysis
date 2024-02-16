@@ -4,7 +4,7 @@ should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT_OR_EVICT
 notification   		= never
 
-+JobFlavour = "longlunch"
++JobFlavour = "espresso"
 
 # Output
 log                     = job$(Process).local.log
