@@ -5,8 +5,8 @@ TString AND 		= " && ";
 TCut Cut_None			= "";
 TCut Cut_HLTpassed1 	= "HLT_L1SingleLLPJet == 1"; // monitoring trigger // not in v1 ntuples yet
 TCut Cut_HLTpassed2 	= "HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1";
-TCut Cut_HLTpassed3 	= "HLT_HT240_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1"; // not in v1 ntuples yet
-TCut Cut_HLTpassed4 	= "HLT_HT280_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1"; // end of group 1 of triggers // not in v1 ntuples yet
+TCut Cut_HLTpassed3 	= "HLT_HT240_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1"; 
+TCut Cut_HLTpassed4 	= "HLT_HT280_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1"; // end of group 1 of triggers 
 TCut Cut_HLTpassed5 	= "HLT_HT170_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1"; 
 TCut Cut_HLTpassed6 	= "HLT_HT200_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1";
 TCut Cut_HLTpassed7 	= "HLT_HT270_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1";
@@ -130,6 +130,7 @@ TCut Cut_LLPinHCAL12_Jet0	= 	( "(" + LLP0inHCAL_d12 + AND + Jet0_LLP0 + ")" + 	O
 TCut Cut_LLPinHCAL12_Jet1	= 	( "(" + LLP0inHCAL_d12 + AND + Jet1_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d12 + AND + Jet1_LLP1 + ")" ).Data();
 TCut Cut_LLPinHCAL34_Jet0	= 	( "(" + LLP0inHCAL_d34 + AND + Jet0_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet0_LLP1 + ")" ).Data();
 TCut Cut_LLPinHCAL34_Jet1	= 	( "(" + LLP0inHCAL_d34 + AND + Jet1_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet1_LLP1 + ")" ).Data();
+TCut Cut_LLPinHCAL123_Jet0	= 	( "( (" + LLP0inHCAL_d2 + OR + LLP0inHCAL_d34 + ")" + AND + Jet0_LLP0 + ")" + 	OR + "( (" + LLP1inHCAL_d2 + OR + LLP1inHCAL_d34 + ")" + AND + Jet0_LLP1 + ")" ).Data();
 
 TCut Cut_LLPinCR_Jet0	    = 	( "(" + LLP0inCR + AND + Jet0_LLP0 + ")" + 	        OR + "(" + LLP1inCR + AND + Jet0_LLP1 + ")" ).Data();
 TCut Cut_LLPinCR_Jet1	    = 	( "(" + LLP0inCR + AND + Jet1_LLP0 + ")" + 	        OR + "(" + LLP1inCR + AND + Jet1_LLP1 + ")" ).Data();
@@ -188,3 +189,35 @@ TCut Cut_JetPt80 	= "jet0_Pt >= 80 && jet0_Pt < 120";
 TCut Cut_JetPt120 	= "jet0_Pt >= 120 && jet0_Pt < 160";
 TCut Cut_JetPt160 	= "jet0_Pt >= 160 && jet0_Pt < 200";
 TCut Cut_JetPt200 	= "jet0_Pt >= 200";
+
+
+// cuts for bins of BDT score
+TCut Cut_BDTscoreN 	    = "bdtscore_125GeV >= -1 && bdtscore_125GeV < 0";
+TCut Cut_BDTscorePt5 	= "bdtscore_125GeV >= 0 && bdtscore_125GeV < 0.5";
+TCut Cut_BDTscorePt9 	= "bdtscore_125GeV >= 0.5 && bdtscore_125GeV < 0.9";
+TCut Cut_BDTscorePt95 	= "bdtscore_125GeV >= 0.9 && bdtscore_125GeV < 0.95";
+TCut Cut_BDTscore1   	= "bdtscore_125GeV >= 0.95";
+
+TCut Cut_BDTscoreNPt99 	= "bdtscore_125GeV >= -1 && bdtscore_125GeV < -0.99";
+TCut Cut_BDTscoreNPt98 	= "bdtscore_125GeV >= -0.99 && bdtscore_125GeV < -0.98";
+TCut Cut_BDTscoreNPt95 	= "bdtscore_125GeV >= -0.98 && bdtscore_125GeV < -0.95";
+TCut Cut_BDTscore0   	= "bdtscore_125GeV >= -0.95 && bdtscore_125GeV < 0";
+TCut Cut_BDTscorePos   	= "bdtscore_125GeV >= 0";
+
+
+// --------------------------------------------------------------------- //
+// ---------------------------- per jet cuts --------------------------- //
+// --------------------------------------------------------------------- //
+TString matchedLLPinCR             = Form("perJet_MatchedLLP_DecayR < %0.1f && abs(perJet_MatchedLLP_Eta) < %f", controlRegion, HBeta);
+TString matchedLLPinTrackerNP      = Form("perJet_MatchedLLP_DecayR >= %0.1f && perJet_MatchedLLP_DecayR < %0.1f && abs(perJet_MatchedLLP_Eta) < %f",  controlRegion, radius_tracker[1], HBeta);
+TString matchedLLPinECAL           = Form("perJet_MatchedLLP_DecayR >= %0.1f && perJet_MatchedLLP_DecayR < %0.1f && abs(perJet_MatchedLLP_Eta) < %f",  radius_ECAL[0], radius_ECAL[1], HBeta);
+TString matchedmatchedLLPinHCAL1   = Form("perJet_MatchedLLP_DecayR >= %0.1f && perJet_MatchedLLP_DecayR < %0.1f && abs(perJet_MatchedLLP_Eta) < %f",  radius_depth1[0], radius_depth1[1], HBeta);
+TString matchedLLPinHCAL2          = Form("perJet_MatchedLLP_DecayR >= %0.1f && perJet_MatchedLLP_DecayR < %0.1f && abs(perJet_MatchedLLP_Eta) < %f",  radius_depth2[0], radius_depth2[1], HBeta);
+TString matchedLLPinHCAL34         = Form("perJet_MatchedLLP_DecayR >= %0.1f && perJet_MatchedLLP_DecayR < %0.1f && abs(perJet_MatchedLLP_Eta) < %f",  radius_depth34[0], radius_depth34[1], HBeta);
+
+TCut Cut_matchedLLPinCR             = matchedLLPinCR.Data();
+TCut Cut_matchedLLPinTrackerNP      = matchedLLPinTrackerNP.Data();
+TCut Cut_matchedLLPinECAL           = matchedLLPinECAL.Data();
+TCut Cut_matchedLLPinHCAL1          = matchedmatchedLLPinHCAL1.Data();
+TCut Cut_matchedLLPinHCAL2          = matchedLLPinHCAL2.Data();
+TCut Cut_matchedLLPinHCAL34         = matchedLLPinHCAL34.Data();

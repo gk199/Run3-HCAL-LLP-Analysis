@@ -1,12 +1,15 @@
 /* ====================================================================================================================== */
-void DisplacedHcalJetAnalyzer::DeclareTMVAReader(){
+void DisplacedHcalJetAnalyzer::DeclareTMVAReader( MyTags bdt_tag_info ){
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::DeclareTMVAReader()"<<endl;	
 
-	bdt_tags = { 
-		"test"
-	};
+	// bdt_tags = {
+	// 	"LLP350", "LLP125", "hadd", "LLP350_perJet", "LLP125_perJet", "hadd_perJet"
+	// 	//"test" // name of file in "BDTWeightFiles/v0.1/weights_*"
+	// };
 
+	vector<string> bdt_tags = bdt_tag_info.bdt_tags();
+	
 	if( !save_bdtscores ) bdt_tags.clear();
 
 	cout<<"Reading in BDT Weight Files..."<<endl;
@@ -26,7 +29,7 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader(){
 			}
 		}
 
-		string filename = Form("%s/v0.0/weights_%s/TMVAClassification_BDTG.weights.xml", filepath.c_str(), bdt_tag.c_str() );
+		string filename = Form("%s/v0.4/weights_%s/TMVAClassification_BDTG.weights.xml", filepath.c_str(), bdt_tag.c_str() );
 
 		// Declare TMVA Reader
 		cout<<"  --> "<<bdt_tag<<" from  "<<filename<<endl;
@@ -34,21 +37,7 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader(){
 
 		// Read in variables // TODO: AUTOMATE
 
-		bdt_var_names[bdt_tag] = {
-			"jet0_Pt",
-			"jet0_Eta",
-			"jet0_Phi",
-			"jet0_E",
-			"jet0_ChargedHadEFrac",
-			"jet0_NeutralHadEFrac",
-			"jet0_Track0Pt",
-			"jet0_Track0dR",
-			"jet0_EnergyFrac_Depth1",
-			"jet0_EnergyFrac_Depth2",
-			"jet0_EnergyFrac_Depth3",
-			"jet0_S_phiphi",
-			"jet0_LeadingRechitE",
-		};
+		bdt_var_names[bdt_tag] = bdt_tag_info.bdt_var_names();
 
 		// TODO bdt_var_names[bdt_tag] = GetBDTVariableNamesXML( filename, false );
 
@@ -59,15 +48,16 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader(){
 
 		// Read in spectators (to do... remove!)
 
+
 		vector<string> bdt_var_spectators = {
-			"LLP0_Pt",
-			"LLP0_E",
-			"LLP0_Beta",
-			"LLP0_TravelTime",
-			"LLP0_DecayR",
-			"LLP0_DecayX",
-			"LLP0_DecayY",
-			"LLP0_DecayZ"
+			// "LLP0_Pt",
+			// "LLP0_E",
+			// "LLP0_Beta",
+			// "LLP0_TravelTime",
+			// "LLP0_DecayR",
+			// "LLP0_DecayX",
+			// "LLP0_DecayY",
+			// "LLP0_DecayZ"
 		};
 
 		// TODO bdt_var_names[bdt_tag] = GetBDTVariableNamesXML( filename, true );
@@ -86,11 +76,20 @@ float DisplacedHcalJetAnalyzer::GetBDTScores(string bdt_tag){
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetBDTScores()"<<endl;
 
-	// Check if bdt tag exists...
-	if( std::find(bdt_tags.begin(), bdt_tags.end(), bdt_tag) == bdt_tags.end() ) return -999.9;
+	// Check if bdt tag exists...	
+	if (!MyTags::isValidTag(bdt_tag)) { // BDT tag not found
+		return -999.9;
+	}
+
+//	if( std::find(bdt_tags.begin(), bdt_tags.end(), bdt_tag) == bdt_tags.end() ) return -999.9;
 
 	for( auto bdt_var_name: bdt_var_names[bdt_tag] ){
-		bdt_vars[bdt_tag+" "+bdt_var_name] = tree_output_vars_float[bdt_var_name];
+		if (bdt_tag.find("perJet") != std::string::npos) {
+			bdt_vars[bdt_tag+" "+bdt_var_name] = jet_tree_output_vars_float[bdt_var_name];
+		}
+		else {
+			bdt_vars[bdt_tag+" "+bdt_var_name] = tree_output_vars_float[bdt_var_name];
+		}
 	}
 
 	return bdt_reader[bdt_tag]->EvaluateMVA("BDT");

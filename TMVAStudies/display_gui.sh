@@ -1,1 +1,5 @@
-root -l -e 'TMVA::TMVAGui("BDTWeightFilesTest/Test.root")'
+#root -l -e 'TMVA::TMVAGui("BDTWeightFilesTest/Test.root")'
+#root -l -e 'TMVA::TMVAGui("BDTWeightFilesTest/Test_mh125.root")'
+root -l -e 'TMVA::TMVAGui("BDTWeightFilesTest/Test_mh350.root")'
+#root -l -e 'TMVA::TMVAGui("BDTWeightFilesTest/Test_mh125_70-30split.root")'
+#root -l -e 'TMVA::TMVAGui("BDTWeightFilesTest/Test_mh350_70-30split.root")'
