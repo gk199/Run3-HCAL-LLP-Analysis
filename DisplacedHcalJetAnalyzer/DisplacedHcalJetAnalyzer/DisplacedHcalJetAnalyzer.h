@@ -191,6 +191,8 @@ public :
    vector<float> gLLP_DecayVtx_R;
    vector<float> gLLP_DecayVtx_Mag;
 
+   float WPlusJets_leptonPhi = -9999.9;
+
    // ----- Variables ----- //
 
    // Fixed size dimensions of array or collections stored in the TTree if any.

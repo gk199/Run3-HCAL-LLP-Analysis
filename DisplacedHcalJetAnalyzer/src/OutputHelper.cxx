@@ -108,6 +108,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("jet%d_TDCavg", i) );
 		myvars_float.push_back( Form("jet%d_TDCavg_energyWeight", i) );
 		myvars_float.push_back( Form("jet%d_TDCnDelayed", i) );
+		myvars_float.push_back( Form("jet%d_Timeavg", i) );
 
 		for (int t=0; t<3; t++) {
 			myvars_float.push_back( Form("jet%d_Track%dPt", i, t) );
@@ -477,6 +478,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("jet%d_TDCavg", i)] = TDC_TDCenergy[0];
 		tree_output_vars_float[Form("jet%d_TDCavg_energyWeight", i)] = TDC_TDCenergy[1];
 		tree_output_vars_float[Form("jet%d_TDCnDelayed", i)] = TDC_TDCenergy[2];
+		tree_output_vars_float[Form("jet%d_Timeavg", i)] = TDC_TDCenergy[3];
 		
 		// find three highest pT tracks matched to a jet, and save the generalTrack index for use later (in dzToPV and dzyToBS)
 		vector<uint> jet_track_index = jet_TrackIndices->at(i);

@@ -18,7 +18,7 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader( MyTags bdt_tag_info ){
 
 		// Get filepath
 		bool filepath_exists = false;
-		vector<string> filepaths = {"", "BDTWeightFiles/", "../BDTWeightFiles/", "../../BDTWeightFiles/", "/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/BDTWeightFiles/" }; // last one is a quick fix to have mp_local run with the BDT weights files
+		vector<string> filepaths = {"", "BDTWeightFiles/", "../BDTWeightFiles/", "../../BDTWeightFiles/" };
 		string filepath;
 		for( int i=0; i<filepaths.size(); i++ ){
 			if( !gSystem->AccessPathName( Form("%s", filepaths.at(i).c_str()) ) ){
