@@ -144,10 +144,10 @@ Location of minituples:
 
 ### v3.3
 Updates:
-* Add a tree filled on a per event basis, for jet information. With this structure, a BDT can be trained / tested on each jet
+* Add a tree filled on a per jet basis, for jet information. With this structure, a BDT can be trained / tested on each jet
 * Added more jet-track association variables to BDT, with the delta eta and phi between jet center and leading tracks
 * Jet - track matching changed to be within dR of 0.4 at the minituple level
-* Added this new delta eta, phi jet to track information to the per jet and per event BDTs
+* Added this new delta eta, phi jet - track information to the per jet and per event BDTs
 * Train on per event BDT (with leading jet) and per jet BDT (any jet above 40GeV and within 1.26 eta, and either matching to LLP or passing W+jets event selection, depending on sample)
 
 Location of minituples:
