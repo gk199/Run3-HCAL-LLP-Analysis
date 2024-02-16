@@ -262,6 +262,8 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
    dataloader->AddVariable( "jet0_ChargedHadEFrac", "jet0_ChargedHadEFrac", "", 'F' );
    dataloader->AddVariable( "jet0_NeutralHadEFrac", "jet0_NeutralHadEFrac", "", 'F' );
    dataloader->AddVariable( "jet0_MuonEFrac", "jet0_MuonEFrac", "", 'F' );
+   dataloader->AddVariable( "jet0_PhoEFrac", "jet0_PhoEFrac", "", 'F' );
+   //dataloader->AddVariable( "jet0_EleEFrac", "jet0_EleEFrac", "", 'F' );
    dataloader->AddVariable( "jet0_Track0Pt", "jet0_Track0Pt", "GeV", 'F' );
    // dataloader->AddVariable( "jet0_Track0dR", "jet0_Track0dR", "", 'F' );
    dataloader->AddVariable( "jet0_Track0dEta", "jet0_Track0dEta", "", 'F' );
@@ -271,16 +273,14 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
    dataloader->AddVariable( "jet0_Track1dEta", "jet0_Track1dEta", "", 'F' );
    dataloader->AddVariable( "jet0_Track1dPhi", "jet0_Track1dPhi", "", 'F' );
    //dataloader->AddVariable( "jet0_Track2Pt", "jet0_Track2Pt", "GeV", 'F' );
-   //dataloader->AddVariable( "jet0_EleEFrac", "jet0_EleEFrac", "", 'F' );
    //dataloader->AddVariable( "jet0_HoverE", "jet0_HoverE", "", 'F' );
-   //dataloader->AddVariable( "log(jet0_HoverE)", "jet0_LogHoverE", "", 'F' );
    // rechit-based variables // *************************
    dataloader->AddVariable( "jet0_EnergyFrac_Depth1", "jet0_EnergyFrac_Depth1", "", 'F' );
    dataloader->AddVariable( "jet0_EnergyFrac_Depth2", "jet0_EnergyFrac_Depth2", "", 'F' );
    dataloader->AddVariable( "jet0_EnergyFrac_Depth3", "jet0_EnergyFrac_Depth3", "", 'F' );
    //dataloader->AddVariable( "jet0_EnergyFrac_Depth4", "jet0_EnergyFrac_Depth4", "", 'F' );       // redundant! 
    dataloader->AddVariable( "jet0_S_phiphi", "jet0_S_phiphi", "", 'F' );
-   dataloader->AddVariable( "jet0_LeadingRechitE", "jet0_LeadingRechtE", "", 'F' );
+   dataloader->AddVariable( "jet0_LeadingRechitE / jet0_E", "jet0_LeadingRechtE / jet0_E", "", 'F' );
 
    // You can add so-called "Spectator variables", which are not used in the MVA training,
    // but will appear in the final "TestTree" produced by TMVA. This TestTree will contain the

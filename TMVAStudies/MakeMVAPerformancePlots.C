@@ -1,6 +1,8 @@
 // root -l /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/MakeMVAPerformancePlots.C+'("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_mh350.root","350",30,"/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/BDTWeightFilesTest/Test_mh125.root","125",38)'
 // inputs are output TMVA root file, label, color, repeat for second file to overlay
 
+// Adapted from https://github.com/cms-lpc-llp/llp_analyzer/blob/master/macros/ObjectStudies/MakeElectronIDMVAPerformancePlots.C by Gillian Kopp
+
 // root -l /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/MakeMVAPerformancePlots.C+'()'
 
 //================================================================================================

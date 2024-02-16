@@ -193,9 +193,15 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
    TCut selections_safety = selections_rechitVar1 + selections_rechitVar2 + selections_trackVars + selections_track1Vars; // no warnings when all variables behaved well! 
 
    TCut LLPinHCAL = "perJet_MatchedLLP_DecayR >= 183.6 && perJet_MatchedLLP_DecayR < 295 && abs(perJet_MatchedLLP_Eta) < 1.26";
+   TCut LLPinECAL = "perJet_MatchedLLP_DecayR >= 161.6 && perJet_MatchedLLP_DecayR < 183.6 && abs(perJet_MatchedLLP_Eta) < 1.26";
+   TCut LLPinHCAL12 = "perJet_MatchedLLP_DecayR >= 183.6 && perJet_MatchedLLP_DecayR < 214.2 && abs(perJet_MatchedLLP_Eta) < 1.26";
+   TCut LLPinHCAL34 = "perJet_MatchedLLP_DecayR >= 214.2 && perJet_MatchedLLP_DecayR < 295 && abs(perJet_MatchedLLP_Eta) < 1.26";
 
    TCut selections_background = selections_all + selections_safety;
-   TCut selections_signal = selections_all + selections_safety + LLPinHCAL; // LLP decays in HCAL and is matched to jet
+   TCut selections_signal = selections_all + selections_safety + LLPinHCAL;            // LLP decays in HCAL and is matched to jet
+   TCut selections_signalECAL = selections_all + selections_safety + LLPinECAL;        // LLP decays in ECAL and is matched to jet
+   TCut selections_signalHCAL12 = selections_all + selections_safety + LLPinHCAL12;    // LLP decays in HCAL depth 12 and is matched to jet
+   TCut selections_signalHCAL34 = selections_all + selections_safety + LLPinHCAL34;    // LLP decays in HCAL depth 34 and is matched to jet
 
    // Read training and test data (it is also possible to use ASCII format as input -> see TMVA Users Guide)
    std::cout << "Loading files..." << std::endl;
@@ -213,7 +219,10 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
    TTree *signalTree_temp = (TTree*)siginput->Get("PerJet_LLPmatched");
    std::cout << "opened signal file" << std::endl;
    TFile* scratchFile = TFile::Open( "scratchFile.root", "RECREATE" );
-   TTree *signalTree      = (TTree*)signalTree_temp->CopyTree(selections_signal);
+   TTree *signalTree       = (TTree*)signalTree_temp->CopyTree(selections_signal);
+   TTree *signalTreeECAL   = (TTree*)signalTree_temp->CopyTree(selections_signalECAL);
+   TTree *signalTreeHCAL12 = (TTree*)signalTree_temp->CopyTree(selections_signalHCAL12);
+   TTree *signalTreeHCAL34 = (TTree*)signalTree_temp->CopyTree(selections_signalHCAL34);
 
    // Register the training and test trees
 
@@ -263,7 +272,9 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
    // track-based variables // *************************
    dataloader->AddVariable( "perJet_ChargedHadEFrac", "perJet_ChargedHadEFrac", "", 'F' );
    dataloader->AddVariable( "perJet_NeutralHadEFrac", "perJet_NeutralHadEFrac", "", 'F' );
-   dataloader->AddVariable( "perJet_MuonEFrac", "perJet_MuonEFrac", "", 'F' );
+   //dataloader->AddVariable( "perJet_MuonEFrac", "perJet_MuonEFrac", "", 'F' );
+   dataloader->AddVariable( "perJet_PhoEFrac", "perJet_PhoEFrac", "", 'F' );
+   dataloader->AddVariable( "perJet_EleEFrac", "perJet_EleEFrac", "", 'F' );
    dataloader->AddVariable( "perJet_Track0Pt", "perJet_Track0Pt", "GeV", 'F' );
    // dataloader->AddVariable( "perJet_Track0dR", "perJet_Track0dR", "", 'F' );
    dataloader->AddVariable( "perJet_Track0dEta", "perJet_Track0dEta", "", 'F' );
@@ -274,16 +285,14 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
    dataloader->AddVariable( "perJet_Track1dPhi", "perJet_Track1dPhi", "", 'F' );
    //dataloader->AddVariable( "perJet_Track1Pt", "perJet_Track1Pt", "GeV", 'F' );
    //dataloader->AddVariable( "perJet_Track2Pt", "perJet_Track2Pt", "GeV", 'F' );
-   //dataloader->AddVariable( "perJet_EleEFrac", "perJet_EleEFrac", "", 'F' );
    //dataloader->AddVariable( "perJet_HoverE", "perJet_HoverE", "", 'F' );
-   //dataloader->AddVariable( "log(jet_HoverE)", "perJet_LogHoverE", "", 'F' );
    // rechit-based variables // *************************
    dataloader->AddVariable( "perJet_EnergyFrac_Depth1", "perJet_EnergyFrac_Depth1", "", 'F' );
    dataloader->AddVariable( "perJet_EnergyFrac_Depth2", "perJet_EnergyFrac_Depth2", "", 'F' );
    dataloader->AddVariable( "perJet_EnergyFrac_Depth3", "perJet_EnergyFrac_Depth3", "", 'F' );
    //dataloader->AddVariable( "perJet_EnergyFrac_Depth4", "perJet_EnergyFrac_Depth4", "", 'F' );       // redundant! 
    dataloader->AddVariable( "perJet_S_phiphi", "perJet_S_phiphi", "", 'F' );
-   dataloader->AddVariable( "perJet_LeadingRechitE", "perJet_LeadingRechtE", "", 'F' );
+   dataloader->AddVariable( "perJet_LeadingRechitE / perJet_E", "perJet_LeadingRechtE / perJet_E", "", 'F' );
 
    // You can add so-called "Spectator variables", which are not used in the MVA training,
    // but will appear in the final "TestTree" produced by TMVA. This TestTree will contain the
@@ -306,6 +315,9 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
 
    // You can add an arbitrary number of signal or background trees
    dataloader->AddSignalTree     ( signalTree,     signalWeight );
+   dataloader->AddSignalTree     ( signalTreeECAL,     signalWeight );
+   dataloader->AddSignalTree     ( signalTreeHCAL12,     signalWeight );
+   dataloader->AddSignalTree     ( signalTreeHCAL34,     signalWeight );
    dataloader->AddBackgroundTree ( background, backgroundWeight );
 
    // To give different trees for training and testing, do as follows:

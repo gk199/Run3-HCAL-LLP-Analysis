@@ -2,6 +2,8 @@
 // inputs are minituple signal file, label, color, minituple background file, label, color
 // root -l /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/MakeMVAPerformancePlots_SigBkg.C+'()'
 
+// Adapted from https://github.com/cms-lpc-llp/llp_analyzer/blob/master/macros/ObjectStudies/MakeElectronIDMVAPerformancePlots.C by Gillian Kopp
+
 // void MakeMVAPerformancePlots_SigBkg(string InputFile, string Label, Int_t Option, string InputFile2, string Label2, Int_t Option2)
 //================================================================================================
 //
@@ -78,6 +80,31 @@ TTree* getTreeFromFile(const char* infname, const char* tname)
   return t;
 }
 
+void StampCMS( const std::string & approvaltext = "Internal", float lumi=140., float x=0.14, float y=0.84, float textsize=0.045) {
+  // Usage:  StampCMS("Internal", 126.5, 0.12, 0.75);
+  
+  textsize = 0.045;
+  TLatex *label_cms = new TLatex();
+  label_cms->SetNDC();
+  label_cms->SetTextColor(1);
+  label_cms->SetTextSize(textsize);
+  label_cms->DrawLatex( x, y, "CMS" );
+
+  TLatex *label_approvaltext = new TLatex();
+  label_approvaltext->SetNDC();
+  label_approvaltext->SetTextFont(52);
+  label_approvaltext->SetTextColor(1);
+  label_approvaltext->SetTextSize(textsize*0.85);
+  label_approvaltext->DrawLatex( x+0.075, y, approvaltext.c_str() ); 
+
+  TLatex *label_energylumi = new TLatex(); 
+  label_energylumi->SetNDC();
+  label_energylumi->SetTextFont(42);
+  label_energylumi->SetTextColor(1);
+  label_energylumi->SetTextSize(textsize*0.65 );
+  label_energylumi->DrawLatex( x, y-.035, "#sqrt{s} = 13.6 TeV" ); // Just energy for now...
+}
+
 //*************************************************************************************************
 //
 //*************************************************************************************************
@@ -147,7 +174,6 @@ TGraphAsymmErrors* MakeSigEffVsBkgEffGraph(TH1F* signalHist, TH1F* bkgHist, stri
 //
 //*************************************************************************************************
 TGraphAsymmErrors* MakeCurrentWPSigEffVsBkgEffGraph(Double_t signalEff, Double_t bkgEff, string name ) {
-  //Make Met Plots
   double SigEff[1];
   double BkgEff[1];
   double SigEffErrLow[1];
@@ -177,6 +203,62 @@ TGraphAsymmErrors* MakeCurrentWPSigEffVsBkgEffGraph(Double_t signalEff, Double_t
   tmpSigEffVsBkgEff->SetMarkerSize(1.5);
 
   return tmpSigEffVsBkgEff;
+}
+
+//*************************************************************************************************
+//
+//*************************************************************************************************
+TGraphAsymmErrors* MakeCurrentWPSigEffVsCutValueGraph(TH1F* signalHist, string name, Double_t myCutValue ) {
+  const UInt_t nPoints = signalHist->GetXaxis()->GetNbins();
+  double cutValue[1] = {0};
+  double cutValueErr[1] = {0};
+  double SigEff[1] = {0};
+  double SigEffErrLow[1] = {0};
+  double SigEffErrHigh[1] = {0};
+  double NSigTotal = 0;
+  
+  Double_t effDiff = 9999;
+
+  for (UInt_t q=0; q < nPoints+2; ++q) {
+    NSigTotal += signalHist->GetBinContent(q);
+  }
+
+  for(UInt_t b=0; b < nPoints; ++b) {
+    Double_t nsig = 0;
+    for (UInt_t q=b; q < nPoints+2; ++q) {
+      nsig += signalHist->GetBinContent(q);
+    }
+
+    Double_t ratio;
+    Double_t n1 = 0;
+    Double_t n2 = 0;
+
+    n1 = TMath::Nint(nsig);
+    n2 = TMath::Nint(NSigTotal);
+    ratio = n1/n2;
+    
+    // cout << myCutValue << " : " << signalHist->GetXaxis()->GetBinCenter(b) << " , " << cutValue[0] << endl;
+    if (fabs(myCutValue - signalHist->GetXaxis()->GetBinCenter(b)) < fabs(myCutValue - cutValue[0])) {
+      SigEff[0] = ratio;
+      SigEffErrLow[0] = 0;
+      SigEffErrHigh[0] = 0;
+      cutValue[0] = signalHist->GetXaxis()->GetBinCenter(b);
+      cutValueErr[0] = 0;
+      cout << cutValue << ", SigEff = " << SigEff << ", cutValueErr = " << cutValueErr << endl;
+    }
+  }
+  TGraphAsymmErrors *tmpSigEffVsCut = new TGraphAsymmErrors (1, cutValue, SigEff, cutValueErr, cutValueErr, SigEffErrLow, SigEffErrHigh  );
+  tmpSigEffVsCut->SetName(name.c_str());
+  tmpSigEffVsCut->SetTitle("");
+  tmpSigEffVsCut->GetXaxis()->SetTitle("Cut Value");
+  tmpSigEffVsCut->GetYaxis()->SetTitle("Efficiency");
+  tmpSigEffVsCut->GetYaxis()->SetTitleOffset(1.1);
+  tmpSigEffVsCut->GetXaxis()->SetTitleOffset(1.05);
+  tmpSigEffVsCut->SetMarkerColor(kBlack);
+  tmpSigEffVsCut->SetLineColor(kBlack);
+  tmpSigEffVsCut->SetMarkerSize(1.5);
+
+  return tmpSigEffVsCut;
 }
 
 //*************************************************************************************************
@@ -344,6 +426,7 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
 
   float score125_sig, score350_sig, scoreHadd_sig;
 
+  float radius_ECAL = 161.6;
   float radius_HB1 = 183.6;
   float radius_HB2 = 190.2;
   float radius_HB3 = 214.2;
@@ -360,7 +443,7 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
     tree_sig->SetBranchAddress("jet0_isMatchedTo", &jet0_isMatchedTo);
     tree_sig->SetBranchAddress("jet0_Eta", &jet0_Eta);
     tree_sig->SetBranchAddress("jet0_Pt", &jet0_Pt);
-    SignalSelection = Form("((LLP0_DecayR >= %f && LLP0_DecayR < %f && abs(LLP0_Eta) <= %f && jet0_isMatchedTo == 0) || (LLP1_DecayR >= %f && LLP1_DecayR < %f && abs(LLP1_Eta) <= %f && jet0_isMatchedTo == 1)) && (abs(jet0_Eta) < 1.26 && jet0_Pt > 40)",radius_HB1, radius_HBend, HBeta, radius_HB1, radius_HBend, HBeta);
+    SignalSelection = Form("((LLP0_DecayR >= %f && LLP0_DecayR < %f && abs(LLP0_Eta) <= %f && jet0_isMatchedTo == 0) || (LLP1_DecayR >= %f && LLP1_DecayR < %f && abs(LLP1_Eta) <= %f && jet0_isMatchedTo == 1)) && (abs(jet0_Eta) < 1.26 && jet0_Pt > 40)", radius_HB3, radius_HBend, HBeta, radius_HB3, radius_HBend, HBeta);
     cout << "per event tree, adding signal region cuts on LLP position and matching" << endl;
     // hopefully there is a better way to implement these cuts, had TCut errors when imported RegionCuts.h on first try
     // reduces by a factor of about 10 for mh=125
@@ -368,7 +451,7 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   if (SigTree.find("PerJet") != std::string::npos) {
      tree_sig->SetBranchAddress("perJet_MatchedLLP_DecayR", &perJet_MatchedLLP_DecayR);
     tree_sig->SetBranchAddress("perJet_MatchedLLP_Eta", &perJet_MatchedLLP_Eta);
-    SignalSelection = "perJet_MatchedLLP_DecayR >= 183.6 && perJet_MatchedLLP_DecayR < 295 && abs(perJet_MatchedLLP_Eta) < 1.26";
+    SignalSelection = Form("perJet_MatchedLLP_DecayR >= %f && perJet_MatchedLLP_DecayR < %f && abs(perJet_MatchedLLP_Eta) < %f", radius_HB1, radius_HBend, 1.26);
     cout << "per jet tree, adding signal region cuts on LLP position" << endl; // this tree already requires jet pT > 40 and eta < 1.26
   }
 
@@ -468,13 +551,13 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   cout << "MVA350 Cut Value at 50% Sig Eff: " << FindCutValueAtFixedEfficiency(Signal_MVA350, 0.5 ) << endl;
   cout << "MVA350 Cut Value at 50% Bkg Eff: " << FindCutValueAtFixedEfficiency(Background_MVA350, 0.5 ) << endl;
 
-   //*****************************************************************************************
-   // Make ROC curves
-   //*****************************************************************************************
-   // return a vector of TGraphAsymmErrors, sig vs bkg, sig vs bkg rej, sig vs inverse bkg eff
-   TGraphAsymmErrors* ROC125_sigEffBkgEff = MakeSigEffVsBkgEffGraph(Signal_MVA125, Background_MVA125, "ROC_MVA125_LLP_W+jets"+label, Label);
-   TGraphAsymmErrors* ROC350_sigEffBkgEff = MakeSigEffVsBkgEffGraph(Signal_MVA350, Background_MVA350, "ROC_MVA350_LLP_W+jets"+label, Label );
-   TGraphAsymmErrors* ROChadd_sigEffBkgEff = MakeSigEffVsBkgEffGraph(Signal_MVAhadd, Background_MVAhadd, "ROC_MVAhadd_LLP_W+jets"+label, Label );
+  //*****************************************************************************************
+  // Make ROC curves
+  //*****************************************************************************************
+  // return a vector of TGraphAsymmErrors, sig vs bkg, sig vs bkg rej, sig vs inverse bkg eff
+  TGraphAsymmErrors* ROC125_sigEffBkgEff = MakeSigEffVsBkgEffGraph(Signal_MVA125, Background_MVA125, "ROC_MVA125_LLP_W+jets"+label, Label);
+  TGraphAsymmErrors* ROC350_sigEffBkgEff = MakeSigEffVsBkgEffGraph(Signal_MVA350, Background_MVA350, "ROC_MVA350_LLP_W+jets"+label, Label );
+  TGraphAsymmErrors* ROChadd_sigEffBkgEff = MakeSigEffVsBkgEffGraph(Signal_MVAhadd, Background_MVAhadd, "ROC_MVAhadd_LLP_W+jets"+label, Label );
 
   TLegend* legend_indiv;
   TCanvas* cv_indiv;
@@ -493,15 +576,16 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   // Overlay signal and background BDT scores
   //*****************************************************************************************
   THStack *hs = new THStack("hs", Form("Signal and Background BDT Scores (mH=%s) ; BDT (trained on 125) Score ; Number of Entries",Label.c_str()));
-  Signal_MVA125->SetFillColor(kBlue);
-  Background_MVA125->SetFillColor(kRed);
-  Signal_MVA125->Rebin(20);
-  Background_MVA125->Rebin(20);
+  Signal_MVA125->SetFillColorAlpha(kBlue, 0.35);
+  Background_MVA125->SetFillColorAlpha(kRed, 0.35);
+  Signal_MVA125->Rebin(50);
+  Background_MVA125->Rebin(50);
   hs->Add(Signal_MVA125);
   hs->Add(Background_MVA125);
   cv_indiv->cd();
   hs->Draw("bar1 nostack");
   gPad->BuildLegend(0.65,0.65,0.85,0.85,"");
+  StampCMS( "Internal", 140., 0.2, 0.84, 0.045 );
   cv_indiv->SaveAs(("Minituple_BDT125score_" + plotname + ".png").c_str());
   gPad->SetLogy();
   cv_indiv->SaveAs(("Minituple_BDT125score_" + plotname + "_logY.png").c_str());
@@ -558,6 +642,7 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
       legend_indiv->AddEntry(ROCGraphs[i],GraphLabels[i].c_str(), "LP");
       ROCGraphs[i]->Draw("AP");
       legend_indiv->Draw();
+      StampCMS( "Internal", 140., 0.14, 0.84, 0.045 );
       cv_indiv->SaveAs(("Minituple_ROCGraphs_" + PlotnameSpecific[i] + ".png").c_str());
       ROCGraphs[i]->GetXaxis()->SetLimits(0.00001,1); // set non-zero lower value such that a log shows the lowest signal efficiency values too (if 0, minimum is 10^-3 below maximum)
       gPad->SetLogx();
@@ -576,22 +661,47 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   // WP_event_cutflow->SetMarkerSize(2.5);
   // WP_event_cutflow->Draw("Psame");  
 
-  TGraphAsymmErrors* WP_jet_cutflow = MakeCurrentWPSigEffVsBkgEffGraph(0.66 , 0.0008, "WP_jet_cutflow"+label); // mh 125 working point, for per jet approach
-  legend->AddEntry(WP_jet_cutflow, "Jet Cutflow WP", "P");
-  WP_jet_cutflow->SetFillColor(kBlue);
-  WP_jet_cutflow->SetMarkerColor(kBlue);
-  WP_jet_cutflow->SetMarkerStyle(34);
-  WP_jet_cutflow->SetMarkerSize(2.5);
-  WP_jet_cutflow->Draw("Psame");  
+  if (InputFile.find("125") != std::string::npos) {
+    TGraphAsymmErrors* WP_jet_cutflow = MakeCurrentWPSigEffVsBkgEffGraph(0.66 , 0.0008, "WP_jet_cutflow"+label); // mh 125 working point, for per jet approach
+    legend->AddEntry(WP_jet_cutflow, "Jet Cutflow WP (mH = 125)", "P");
+    WP_jet_cutflow->SetFillColor(kBlue);
+    WP_jet_cutflow->SetMarkerColor(kBlue);
+    WP_jet_cutflow->SetMarkerStyle(34);
+    WP_jet_cutflow->SetMarkerSize(2.5);
+    WP_jet_cutflow->Draw("Psame");  
+  }
+  if (InputFile.find("350") != std::string::npos) {
+    TGraphAsymmErrors* WP_jet_cutflow = MakeCurrentWPSigEffVsBkgEffGraph(0.77 , 0.0008, "WP_jet_cutflow"+label); // mh 350 working point, for per jet approach
+    legend->AddEntry(WP_jet_cutflow, "Jet Cutflow WP (mH = 350)", "P");
+    WP_jet_cutflow->SetFillColor(kBlue);
+    WP_jet_cutflow->SetMarkerColor(kBlue);
+    WP_jet_cutflow->SetMarkerStyle(34);
+    WP_jet_cutflow->SetMarkerSize(2.5);
+    WP_jet_cutflow->Draw("Psame");  
+  }
+  // this should be a separate graph
+  // need code that just gets eff at fixed cut value for here -- to edit
+  // TGraphAsymmErrors* WP_BDTcut = MakeCurrentWPSigEffVsCutValueGraph(Signal_MVA125, "BDT cut = 0.8", 0.99);
+  // legend->AddEntry(WP_BDTcut, "BDT cut = 0.99", "P");
+  // WP_BDTcut->SetFillColor(kGreen);
+  // WP_BDTcut->SetMarkerColor(kGreen);
+  // WP_BDTcut->SetMarkerStyle(34);
+  // WP_BDTcut->SetMarkerSize(2.5);
+  // WP_BDTcut->Draw("Psame");  
 
   // overlay multiple ROC curves -- useful if comparing 125 vs. 350 for instance
   if (overlay) {
     cv->cd();
     gPad->SetLogx();
     legend->Draw();
+    StampCMS( "Internal", 140., 0.14, 0.84, 0.045 );
     cv->SaveAs(("Minituple_ROCGraphs_" + plotname + "_overlay.png").c_str());
   }
+
+  // cv_indiv->Clear();
+  // legend_indiv->Clear();
 } 
+
 
 //*************************************************************************************************
 //*************************************************************************************************
@@ -605,11 +715,11 @@ void MakeMVAPerformancePlots_SigBkg()
   string SigLabel = "125_perJet";
   string SignalTree = "PerJet_LLPmatched";
 
-  // string Signal = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_v3.3_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_02_06_TEST.root";
-  // string SigLabel = "350";
-  // string SignalTree = "NoSel";
-  // string SigLabel = "350_perJet";
-  // string SignalTree = "PerJet_LLPmatched";
+  string Signal2 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_v3.3_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_02_06_TEST.root";
+  // string SigLabel2 = "350";
+  // string SignalTree2 = "NoSel";
+  string SigLabel2 = "350_perJet";
+  string SignalTree2 = "PerJet_LLPmatched";
 
   string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_v3.3_LLPskim_Run2023_hadd_TEST.root";
   // string BkgLabel = "W+Jets";
@@ -622,4 +732,6 @@ void MakeMVAPerformancePlots_SigBkg()
   int Color3 = 48;
 
   BDTPerformancePlots(Signal, SigLabel, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3);
+  SetupPlots();
+  BDTPerformancePlots(Signal2, SigLabel2, SignalTree2, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3);
 }
