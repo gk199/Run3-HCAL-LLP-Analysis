@@ -674,7 +674,7 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	vector<uint> jet_track_index = jet_TrackIndices->at(jetIndex);
 	vector<pair<float, float>> track_pt_index = TrackMatcher(jetIndex, jet_track_index);
 
-	for (int track = 0; track < 3; track++) tree_output_vars_float[Form("perJet_Track%dPt", track)] = 0; // default value for track pT (in case no tracks are matched)
+	for (int track = 0; track < 3; track++) jet_tree_output_vars_float[Form("perJet_Track%dPt", track)] = 0; // default value for track pT (in case no tracks are matched)
 	if (track_pt_index.size() > 0) {
 		std::sort (track_pt_index.begin(), track_pt_index.end(), greater<pair<float, float>>()); // sort to find highest pt tracks
 //		int n_track = std::min(3, (int) jet_track_index.size());
@@ -686,11 +686,11 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 			// could put requirement here that track matches with PV
 			valid_tracks += 1; 
 			if (valid_tracks > 3) continue;
-			jet_tree_output_vars_float[Form( "perJet_Track%dPt", track )] 		= track_pt_index[track].first;
-			tree_output_vars_float[Form("perJet_Track%ddzToPV", track)] 		= track_dzToPV->at(track_num); 
-			tree_output_vars_float[Form("perJet_Track%ddxyToBS", track)] 		= track_dxyToBS->at(track_num); 
-			tree_output_vars_float[Form("perJet_Track%ddzOverErr", track)]		= track_dzToPV->at(track_num) / track_dzErr->at(track_num); 
-			tree_output_vars_float[Form("perJet_Track%ddxyOverErr", track)] 	= track_dxyToBS->at(track_num) / track_dxyErr->at(track_num); 
+			jet_tree_output_vars_float[Form("perJet_Track%dPt", track)] 			= track_pt_index[track].first;
+			jet_tree_output_vars_float[Form("perJet_Track%ddzToPV", track)] 		= track_dzToPV->at(track_num); 
+			jet_tree_output_vars_float[Form("perJet_Track%ddxyToBS", track)] 		= track_dxyToBS->at(track_num); 
+			jet_tree_output_vars_float[Form("perJet_Track%ddzOverErr", track)]		= track_dzToPV->at(track_num) / track_dzErr->at(track_num); 
+			jet_tree_output_vars_float[Form("perJet_Track%ddxyOverErr", track)] 	= track_dxyToBS->at(track_num) / track_dxyErr->at(track_num); 
 
 			jet_tree_output_vars_float[Form( "perJet_Track%ddR", track) ] 		= DeltaR( jet_Eta->at(jetIndex), track_Eta->at(track_num), jet_Phi->at(jetIndex), track_Phi->at(track_num) ); 
 			jet_tree_output_vars_float[Form( "perJet_Track%ddEta", track) ] 	= jet_Eta->at(jetIndex) - track_Eta->at(track_num);

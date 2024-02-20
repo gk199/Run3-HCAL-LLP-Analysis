@@ -127,6 +127,7 @@ class MyTags {
       static bool isValidTag(string tag) {
          if ( std::find(bdt_event_tags_.begin(), bdt_event_tags_.end(), tag) != bdt_event_tags_.end() ) return true;
          if ( std::find(bdt_jet_tags_.begin(), bdt_jet_tags_.end(), tag) != bdt_jet_tags_.end() ) return true;
+         if ( std::find(bdt_jet_tags_calor_.begin(), bdt_jet_tags_calor_.end(), tag) != bdt_jet_tags_calor_.end() ) return true;
          return false;
       }
 		
