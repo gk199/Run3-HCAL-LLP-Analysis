@@ -39,7 +39,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 	};
 
 	// Add BDT Scores //
-	MyTags event_based = MyTags(/*event_based=*/ true);
+	MyTags event_based = MyTags(/*event_based=*/ true, /*calor_only=*/ false);
 	for( auto bdt_tag: event_based.bdt_tags() ){
 		myvars_float.push_back( Form("bdtscore_%s", bdt_tag.c_str()) );
 	}
@@ -236,8 +236,12 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 	vector<string> myvars_float = {};
 
 	// Add BDT Scores //
-	MyTags jet_based = MyTags(/*event_based=*/ false);
+	MyTags jet_based = MyTags(/*event_based=*/ false, /*calor_only=*/ false);
 	for( auto bdt_tag: jet_based.bdt_tags() ){
+		myvars_float.push_back( Form("bdtscore_%s", bdt_tag.c_str()) );
+	}
+	MyTags jet_based_calor = MyTags(/*event_based=*/ false, /*calor_only=*/ true);
+	for( auto bdt_tag: jet_based_calor.bdt_tags() ){
 		myvars_float.push_back( Form("bdtscore_%s", bdt_tag.c_str()) );
 	}
 
@@ -275,6 +279,11 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 		myvars_float.push_back( Form("perJet_Track%ddR", t) );
 		myvars_float.push_back( Form("perJet_Track%ddEta", t) );
 		myvars_float.push_back( Form("perJet_Track%ddPhi", t) );
+
+		myvars_float.push_back( Form("perJet_Track%ddzToPV", t) );
+		myvars_float.push_back( Form("perJet_Track%ddxyToBS", t) );
+		myvars_float.push_back( Form("perJet_Track%ddzOverErr", t) );
+		myvars_float.push_back( Form("perJet_Track%ddxyOverErr", t) );
 	}
 
 	for (int d=0; d<4; d++) myvars_float.push_back( Form("perJet_EnergyFrac_Depth%d", d+1) );
@@ -484,6 +493,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		vector<uint> jet_track_index = jet_TrackIndices->at(i);
 		vector<pair<float, float>> track_pt_index = TrackMatcher(i, jet_track_index);
 
+		for (int track = 0; track < 3; track++) tree_output_vars_float[Form("jet%d_Track%dPt", i, track)] = 0; // default value for track pT (in case no tracks are matched)
 		if (track_pt_index.size() > 0) {
 			std::sort (track_pt_index.begin(), track_pt_index.end(), greater<pair<float, float>>()); // sort to find highest pt tracks
 			// int n_track = std::min(3, (int) jet_track_index.size());
@@ -492,6 +502,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 			for (int track = 0; track < n_track; track++) {
 				int track_num = track_pt_index[track].second;
 				if (DeltaR( jet_Eta->at(i), track_Eta->at(track_num), jet_Phi->at(i), track_Phi->at(track_num) ) > 0.4 ) continue; 			// require track is closer to jet than ntuples enforce
+				// could put requirement here that track matches with PV
 				valid_tracks += 1; 
 				if (valid_tracks > 3) continue;			
 				tree_output_vars_float[Form("jet%d_Track%dPt", i, track)] 			= track_pt_index[track].first;
@@ -585,7 +596,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet100Eta", gLLPDecay_iLLP.at(i))] = LLPIsTruthMatched( i, 100 ).second;
 	}
 
-	MyTags event_based = MyTags(/*event_based=*/ true);
+	MyTags event_based = MyTags(/*event_based=*/ true, /*calor_only=*/ false);
 	if( EventValidForBDTEval() ){
 		for( const auto & bdt_tag: event_based.bdt_tags() ) {
 			tree_output_vars_float[Form("bdtscore_%s", bdt_tag.c_str())] = GetBDTScores(bdt_tag);
@@ -663,6 +674,7 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	vector<uint> jet_track_index = jet_TrackIndices->at(jetIndex);
 	vector<pair<float, float>> track_pt_index = TrackMatcher(jetIndex, jet_track_index);
 
+	for (int track = 0; track < 3; track++) tree_output_vars_float[Form("perJet_Track%dPt", track)] = 0; // default value for track pT (in case no tracks are matched)
 	if (track_pt_index.size() > 0) {
 		std::sort (track_pt_index.begin(), track_pt_index.end(), greater<pair<float, float>>()); // sort to find highest pt tracks
 //		int n_track = std::min(3, (int) jet_track_index.size());
@@ -671,9 +683,15 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 		for (int track = 0; track < n_track; track++) {
 			int track_num = track_pt_index[track].second;
 			if (DeltaR( jet_Eta->at(jetIndex), track_Eta->at(track_num), jet_Phi->at(jetIndex), track_Phi->at(track_num) ) > 0.4 ) continue; 			// require track is closer to jet than ntuples enforce
+			// could put requirement here that track matches with PV
 			valid_tracks += 1; 
 			if (valid_tracks > 3) continue;
 			jet_tree_output_vars_float[Form( "perJet_Track%dPt", track )] 		= track_pt_index[track].first;
+			tree_output_vars_float[Form("perJet_Track%ddzToPV", track)] 		= track_dzToPV->at(track_num); 
+			tree_output_vars_float[Form("perJet_Track%ddxyToBS", track)] 		= track_dxyToBS->at(track_num); 
+			tree_output_vars_float[Form("perJet_Track%ddzOverErr", track)]		= track_dzToPV->at(track_num) / track_dzErr->at(track_num); 
+			tree_output_vars_float[Form("perJet_Track%ddxyOverErr", track)] 	= track_dxyToBS->at(track_num) / track_dxyErr->at(track_num); 
+
 			jet_tree_output_vars_float[Form( "perJet_Track%ddR", track) ] 		= DeltaR( jet_Eta->at(jetIndex), track_Eta->at(track_num), jet_Phi->at(jetIndex), track_Phi->at(track_num) ); 
 			jet_tree_output_vars_float[Form( "perJet_Track%ddEta", track) ] 	= jet_Eta->at(jetIndex) - track_Eta->at(track_num);
 			jet_tree_output_vars_float[Form( "perJet_Track%ddPhi", track) ] 	= deltaPhi( jet_Phi->at(jetIndex), track_Phi->at(track_num) ); 
@@ -683,11 +701,17 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 		}
 	} // end of track matching 
 
-	MyTags jet_based = MyTags(/*event_based=*/ false);
+	MyTags jet_based = MyTags(/*event_based=*/ false, /*calor_only=*/ false);
 	if( EventValidForBDTEval() ){
 		for(const auto & bdt_tag: jet_based.bdt_tags() ) {
 			jet_tree_output_vars_float[Form("bdtscore_%s", bdt_tag.c_str())] = GetBDTScores(bdt_tag);
-//			cout << GetBDTScores(bdt_tag) << " = bdt score (per jet basis) for tag " << bdt_tag << endl;
+		}
+	}
+
+	MyTags jet_based_calor = MyTags(/*event_based=*/ false, /*calor_only=*/ true);
+	if( EventValidForBDTEval() ){
+		for(const auto & bdt_tag: jet_based_calor.bdt_tags() ) {
+			jet_tree_output_vars_float[Form("bdtscore_%s", bdt_tag.c_str())] = GetBDTScores(bdt_tag);
 		}
 	}
 
