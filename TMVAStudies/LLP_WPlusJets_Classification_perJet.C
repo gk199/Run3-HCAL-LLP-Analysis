@@ -192,9 +192,9 @@ int runClassification( TString dir, TString sigTag, TString sigTag_test, TString
    TCut selections_track1Vars = "perJet_Track1Pt > 0 && perJet_Track1Pt < 900 && perJet_Track1dR >= 0 && perJet_Track1dR < 1";
    TCut selections_safety = selections_rechitVar1 + selections_rechitVar2 + selections_trackVars + selections_track1Vars; // no warnings when all variables behaved well! 
 
-   TCut LLPinHCAL = "perJet_MatchedLLP_DecayR >= 183.6 && perJet_MatchedLLP_DecayR < 295 && abs(perJet_MatchedLLP_Eta) < 1.26";
-   TCut LLPinECAL = "perJet_MatchedLLP_DecayR >= 161.6 && perJet_MatchedLLP_DecayR < 183.6 && abs(perJet_MatchedLLP_Eta) < 1.26";
-   TCut LLPinHCAL12 = "perJet_MatchedLLP_DecayR >= 183.6 && perJet_MatchedLLP_DecayR < 214.2 && abs(perJet_MatchedLLP_Eta) < 1.26";
+   TCut LLPinHCAL = "perJet_MatchedLLP_DecayR >= 177 && perJet_MatchedLLP_DecayR < 295 && abs(perJet_MatchedLLP_Eta) < 1.26";
+   TCut LLPinECAL = "perJet_MatchedLLP_DecayR >= 129 && perJet_MatchedLLP_DecayR < 177 && abs(perJet_MatchedLLP_Eta) < 1.26";
+   TCut LLPinHCAL12 = "perJet_MatchedLLP_DecayR >= 177 && perJet_MatchedLLP_DecayR < 214.2 && abs(perJet_MatchedLLP_Eta) < 1.26";
    TCut LLPinHCAL34 = "perJet_MatchedLLP_DecayR >= 214.2 && perJet_MatchedLLP_DecayR < 295 && abs(perJet_MatchedLLP_Eta) < 1.26";
 
    TCut selections_background = selections_all + selections_safety;

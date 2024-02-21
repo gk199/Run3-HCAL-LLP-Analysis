@@ -426,8 +426,8 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
 
   float score125_sig, score350_sig, scoreHadd_sig;
 
-  float radius_ECAL = 161.6;
-  float radius_HB1 = 183.6;
+  float radius_ECAL = 129;
+  float radius_HB1 = 177;
   float radius_HB2 = 190.2;
   float radius_HB3 = 214.2;
   float radius_HB4 = 244.8;

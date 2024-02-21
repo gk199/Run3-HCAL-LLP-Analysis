@@ -8,18 +8,19 @@ void MiniTuplePlotter_CR_SR(){
 
 	// List where minituples are stored
 	
-	// string path = "/eos/user/g/gkopp/LLP_Analysis/MiniTuples/v3.0/minituple_";
 	string path = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.0/minituple_";
 	string path_v3pt1 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.1/minituple_";
 	string path_v3pt2 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.2/minituple_";
 	string path_v3pt3 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_";
+	string path_v3pt4 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.4/minituple_";
 
 	map<string,vector<string>> filetags;
 	// filetags["LLP125"]	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23"};
 	// filetags["LLP350"]	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2023_11_29"};
 
-	filetags["LLP125"]	= { "v3.3_LLPskim_Run2023_hadd_TEST", "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_02_06_TEST"};
-	filetags["LLP350"]	= { "v3.3_LLPskim_Run2023_hadd_TEST", "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_02_06_TEST"};
+	filetags["LLP125"]	= { "v3.4_LLPskim_Run2023Cv4_2024_02_16", "v3.4_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_02_16_batch2"};
+	filetags["LLP250"]	= { "v3.4_LLPskim_Run2023Cv4_2024_02_16", "v3.4_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_02_16_batch2"};
+	filetags["LLP350"]	= { "v3.4_LLPskim_Run2023Cv4_2024_02_16", "v3.4_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_02_16_batch2"};
 
 	vector<string> filetags_all 	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v2.0_MC_QCD_250k_2023_10_18", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23"};
 	vector<string> filetags_data 	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23" };
@@ -65,16 +66,17 @@ void MiniTuplePlotter_CR_SR(){
 										P_jet0_EnergyFrac_Depth1, P_jet0_EnergyFrac_Depth2, P_jet0_EnergyFrac_Depth3, P_jet0_EnergyFrac_Depth4 };			// depth ratios
 	vector<PlotParams> analysisVars	= { P_jet0_NeutralHadEFrac, P_jet0_ChargedHadEFrac, P_jet0_MuonEFrac, P_jet0_PhoEFrac, P_jet0_EleEFrac,
 										//P_jet0_NeutralHadEFrac_zero, P_jet0_ChargedHadEFrac_zero, P_jet0_MuonEFrac_zero, P_jet0_PhoEFrac_zero, P_jet0_EleEFrac_zero,
-										P_jet0_Track0Pt, P_jet0_Track0dEta, P_jet0_Track0dPhi, P_jet0_Track1Pt, P_jet0_Track1dEta, P_jet0_Track1dPhi, 
+										P_jet0_Track0Pt, P_jet0_Track0dEta, P_jet0_Track0dPhi, P_jet0_Track0dR, P_jet0_Track1Pt, P_jet0_Track1dEta, P_jet0_Track1dPhi, P_jet0_Track1dR, 
 										P_jet0_EnergyFrac_Depth1, P_jet0_EnergyFrac_Depth2, P_jet0_EnergyFrac_Depth3, P_jet0_EnergyFrac_Depth4,
 										P_jet0_Eta, P_jet0_Phi, P_jet0_Mass,
 										P_jet0_LeadingRechitE, P_jet0_LeadingRechitEFracJet, P_jet0_Sphiphi};
 	vector<PlotParams> analysisVars_perJet	= { P_perJet_NeutralHadEFrac, P_perJet_ChargedHadEFrac, P_perJet_MuonEFrac, P_perJet_PhoEFrac, P_perJet_EleEFrac,
 										// P_perJet_NeutralHadEFrac_zero, P_perJet_ChargedHadEFrac_zero, P_perJet_MuonEFrac_zero, P_perJet_PhoEFrac_zero, P_perJet_EleEFrac_zero,
-										P_perJet_Track0Pt, P_perJet_Track0dEta, P_perJet_Track0dPhi, P_perJet_Track1Pt, P_perJet_Track1dEta, P_perJet_Track1dPhi, 
+										P_perJet_Track0Pt, P_perJet_Track0PtFrac, P_perJet_Track1Pt, P_perJet_Track1PtFrac,
+										P_perJet_Track0dEta, P_perJet_Track0dPhi, P_perJet_Track0dR, P_perJet_Track1dEta, P_perJet_Track1dPhi, P_perJet_Track1dR, 
 										P_perJet_EnergyFrac_Depth1, P_perJet_EnergyFrac_Depth2, P_perJet_EnergyFrac_Depth3, P_perJet_EnergyFrac_Depth4,
 										P_perJet_Eta, P_perJet_Phi, P_perJet_Mass,
-										P_perJet_LeadingRechitE, P_perJet_AllRechitE, P_perJet_LeadingRechitEFracJet, 
+										P_perJet_LeadingRechitE, P_perJet_AllRechitE, P_perJet_LeadingRechitEFracJet, P_perJet_AllRechitEFracJet,
 										P_perJet_Sphiphi, P_perJet_Setaeta, P_perJet_Setaphi};				 																					// only in newest v3.0 minituples
 										// P_jet0_Track0nMissingInnerHits, P_jet0_Track0nMissingOuterHits, P_jet0_Track0nPixelHits, P_jet0_Track0nHits,			// only in v3.2 or newer
 										// P_jet0_EtaSpread, P_jet0_PhiSpread, P_jet0_EtaSpread_energy, P_jet0_PhiSpread_energy,
@@ -101,15 +103,15 @@ void MiniTuplePlotter_CR_SR(){
 		cout<<" ---------- CR / SR Study 0: Jet, track kinematics for LLP MC and W+jets (background) ---------- "<<endl;
 		cout<<endl;
 		
-		vector<string> filetag_keys_to_loop = {"LLP125", "LLP350"};
+		vector<string> filetag_keys_to_loop = {"LLP125", "LLP250", "LLP350"};
 
 		for( auto key: filetag_keys_to_loop){
 
 			// HCAL depth variables with LLP regions and data overlayed
-			class MiniTuplePlotter plotter_BDTvars( filetags[key], path_v3pt3 );
+			class MiniTuplePlotter plotter_BDTvars( filetags[key], path_v3pt4 );
 			plotter_BDTvars.SetPlots(analysisVars); 
 			plotter_BDTvars.SetTreeNames( {"WPlusJets", "NoSel"} );	
-			plotter_BDTvars.SetOutputFileTag("Overlay_"+key+"_v3.3");
+			plotter_BDTvars.SetOutputFileTag("Overlay_"+key+"_v3.4");
 			plotter_BDTvars.plot_log_ratio    = false; 
 			//plotter_BDTvars.plot_cdf 		 = true;
 			//plotter_BDTvars.plot_reverse_cdf  = true;
@@ -124,10 +126,10 @@ void MiniTuplePlotter_CR_SR(){
 			plotter_BDTvars.Plot("ratio");
 
 			// HCAL depth variables with LLP regions and data overlayed
-			class MiniTuplePlotter plotter_BDTvars_perJet( filetags[key], path_v3pt3 );
+			class MiniTuplePlotter plotter_BDTvars_perJet( filetags[key], path_v3pt4 );
 			plotter_BDTvars_perJet.SetPlots(analysisVars_perJet); 
 			plotter_BDTvars_perJet.SetTreeNames( {"PerJet_WPlusJets", "PerJet_LLPmatched"} );	
-			plotter_BDTvars_perJet.SetOutputFileTag("Overlay_perJet_"+key+"_v3.3");
+			plotter_BDTvars_perJet.SetOutputFileTag("Overlay_perJet_"+key+"_v3.4");
 			plotter_BDTvars_perJet.plot_log_ratio    = false; 
 			//plotter_BDTvars_perJet.plot_cdf 		 = true;
 			//plotter_BDTvars_perJet.plot_reverse_cdf  = true;
