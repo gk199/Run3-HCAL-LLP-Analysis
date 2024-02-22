@@ -154,40 +154,7 @@ float GetBDTScore( string bdt_tag, map<string,Float_t> input_vars ){
 }
 
 /* ====================================================================================================================== */
-void AddBranchesToFile( string infiletag, string treename ){
-
-	cout<<endl;
-	cout<<" ----- DECORATING "<<infiletag<<" (vIN = "<<vIN<<", vOUT = "<<vOUT<<") ----- "<<endl;
-	cout<<endl;
-
-	clock_t start_clock = clock();
-
-	// ----- Infile / Outfile ----- //
-
-	bool isData = false; 
-	bool isSignal = false;
-	bool isBkgMC = false;
-	if( infiletag.find("data") != string::npos ) isData = true;
-	if( infiletag.find("CTau") != string::npos ) isSignal = true; // TODO: FIX 
-	if( !isData && !isSignal ) isBkgMC = true;
-
-	// Infile
-	TString infilepath = Form( "%s/minituple_%s.root", infiledir.c_str(), infiletag.c_str() );
-	cout<<"Reading in "<<infilepath<<endl;
-	TFile *f = new TFile( infilepath, "READ" );
-	TTree *t_temp = (TTree*) f->Get( Form( "%s", treename.c_str() ) );
-	Long64_t NEntries_temp = t_temp->GetEntries();
-
-	cout<<" -> isData:   "<<isData<<endl;
-	cout<<" -> isSignal: "<<isSignal<<endl;
-	cout<<" -> isBkgMC: "<<isBkgMC<<endl;
-
-	// Outfile
-	TString outfilename = Form( "%s/minituple_%s.root", outfiledir.c_str(), infiletag.c_str() );
-	TFile *fout = new TFile(outfilename, "RECREATE");
-	cout<<"Cloning Tree ... (this step could take approx "<<0.0001*NEntries_temp<<" seconds)"<<endl;
-	TTree *tree = (TTree*) t_temp->CloneTree();
-	cout<<" -> Processing time: "<<(clock()-start_clock)/(double)CLOCKS_PER_SEC<<endl;
+void AddBranchesToTree( TTree* tree ){
 
 	// ----- Define Input Variables & Branches ----- //
 
@@ -241,11 +208,10 @@ void AddBranchesToFile( string infiletag, string treename ){
 		output_branches[output_var] = tree->Branch(Form("%s", output_var.c_str()), &output_vars[output_var] );
 	}
 
-	fout->cd();
-	
-	cout<<"Looping over "<<NEntries_temp<<" events"<<endl;
+	Long64_t NEntries = tree->GetEntries();
+	cout<<"Looping over "<<NEntries<<" events"<<endl;
 
-	for (Long64_t jentry = 0; jentry < NEntries_temp; jentry++) {
+	for (Long64_t jentry = 0; jentry < NEntries; jentry++) {
 
 		tree->GetEntry(jentry);
 
@@ -280,11 +246,61 @@ void AddBranchesToFile( string infiletag, string treename ){
 
 	tree->Write("", TObject::kOverwrite); 
 
-	cout<<"File written to: "<<outfilename<<endl;
-	fout->Close();
+}
 
-	double duration_sec = (clock()-start_clock)/(double)CLOCKS_PER_SEC;
-	std::cout<<" --> Run Time = "<<duration_sec<<" sec\n"<<endl;
+/* ====================================================================================================================== */
+void AddTreesToFile( string infiletag, vector<string> treenames ){
+
+        cout<<endl;
+        cout<<" ----- DECORATING "<<infiletag<<" (vIN = "<<vIN<<", vOUT = "<<vOUT<<") ----- "<<endl;
+        cout<<endl;
+
+        clock_t start_clock = clock();
+
+        // ----- Infile / Outfile ----- //
+
+        bool isData = false;
+        bool isSignal = false;
+        bool isBkgMC = false;
+        if( infiletag.find("data") != string::npos ) isData = true;
+        if( infiletag.find("CTau") != string::npos ) isSignal = true; // TODO: FIX 
+        if( !isData && !isSignal ) isBkgMC = true;
+
+        // Infile
+        TString infilepath = Form( "%s/minituple_%s.root", infiledir.c_str(), infiletag.c_str() );
+        cout<<"Reading in "<<infilepath<<endl;
+        TFile *f = new TFile( infilepath, "READ" );
+
+        cout<<" -> isData:   "<<isData<<endl;
+        cout<<" -> isSignal: "<<isSignal<<endl;
+        cout<<" -> isBkgMC: "<<isBkgMC<<endl;
+
+        map<string,TTree*> trees_input;
+        map<string,Long64_t> NEntries_input;
+        for( auto treename: treenames ){
+                trees_input[treename] = (TTree*) f->Get( Form( "%s", treename.c_str() ) );
+                NEntries_input[treename] = trees_input[treename]->GetEntries();
+        }
+
+        // Outfile
+        TString outfilename = Form( "%s/minituple_%s.root", outfiledir.c_str(), infiletag.c_str() );
+        TFile *fout = new TFile(outfilename, "RECREATE");
+
+        for( auto treename: treenames ){
+                cout<<"\n ----- Running Over: "<<treename<<" ----- \n"<<endl;
+                cout<<"Cloning Tree ... (this step could take approx "<<0.0001*NEntries_input[treename]<<" s)"<<endl;
+                TTree *tree = (TTree*) trees_input[treename]->CloneTree();
+                cout<<" -> Processing time: "<<(clock()-start_clock)/(double)CLOCKS_PER_SEC<<" s"<<endl;
+
+                fout->cd();
+                AddBranchesToTree( tree );
+        }
+
+        cout<<"File written to: "<<outfilename<<endl;
+        fout->Close();
+
+        double duration_sec = (clock()-start_clock)/(double)CLOCKS_PER_SEC;
+        std::cout<<" --> Run Time = "<<duration_sec<<" sec\n"<<endl;
 
 }
 
@@ -293,7 +309,7 @@ void AddBDTScoreBranches(){
 
 	clock_t start_clock = clock();
 
-	AddBranchesToFile( "test", "NoSel" );
+	AddTreesToFile( "test", vector<string>{"NoSel","WPlusJets"} );
 
 	std::cout<<"--------------------------------------------------------"<<endl;
 	double duration_sec = (clock()-start_clock)/(double)CLOCKS_PER_SEC;
