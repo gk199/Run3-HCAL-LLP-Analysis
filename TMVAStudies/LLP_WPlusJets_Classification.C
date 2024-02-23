@@ -61,7 +61,7 @@
 
 using namespace TMVA;
 
-int runClassification( TString dir, TString sigTag, TString sigTag_test, TString bkgTag, TString tag )
+int runClassification( TString dir, TString sigTag, TString sigTag_test, TString bkgTag, TString bkgTag2, TString bkgTag_test, TString tag )
 {
    // Setup cuts on LLP decay position. Include header file of all cuts potentially needed
    #include "../MiniTuplePlotter/RegionCuts.h"
@@ -236,11 +236,30 @@ int runClassification( TString dir, TString sigTag, TString sigTag_test, TString
    TFile *bkginput(0);
    TString bkgName = dir+"minituple_"+bkgTag+".root"; 
    bkginput = TFile::Open( bkgName ); // check if file in local directory exists
-   std::cout << "--- TMVAClassification       : Using background input file: " << bkginput->GetName() << std::endl;
+   std::cout << "--- TMVAClassification       : Using background (training, 1) input file: " << bkginput->GetName() << std::endl;
    TTree *background_temp = (TTree*)bkginput->Get("WPlusJets");
-   std::cout << "opened background file" << std::endl;
+   std::cout << "opened background (training, 1) file" << std::endl;
    scratchFile->cd();
    TTree *background      = (TTree*)background_temp->CopyTree(selections_background);
+
+   TFile *bkginput2(0);
+   TString bkgName2 = dir+"minituple_"+bkgTag2+".root"; 
+   bkginput2 = TFile::Open( bkgName2 ); // check if file in local directory exists
+   std::cout << "--- TMVAClassification       : Using background (training, 2) input file: " << bkginput2->GetName() << std::endl;
+   TTree *background_temp2 = (TTree*)bkginput2->Get("WPlusJets");
+   std::cout << "opened background (training, 2) file" << std::endl;
+   scratchFile->cd();
+   TTree *background2      = (TTree*)background_temp2->CopyTree(selections_background);
+
+   // Background, for testing
+   TFile *bkginput_test(0);
+   TString bkgName_test = dir+"minituple_"+bkgTag_test+".root"; 
+   bkginput_test = TFile::Open( bkgName_test ); // check if file in local directory exists
+   std::cout << "--- TMVAClassification       : Using background (testing) input file: " << bkginput_test->GetName() << std::endl;
+   TTree *background_temp_test = (TTree*)bkginput_test->Get("WPlusJets");
+   std::cout << "opened background (testing) file" << std::endl;
+   scratchFile->cd();
+   TTree *background_test      = (TTree*)background_temp_test->CopyTree(selections_background);
 
    outputFile->cd();
 
@@ -327,6 +346,8 @@ int runClassification( TString dir, TString sigTag, TString sigTag_test, TString
    // dataloader->AddSignalTree     ( signalTreeHCAL34,     signalWeight );
    // dataloader->AddSignalTree     ( signalTreeHCAL34_test,     signalWeight, "Test" );
    dataloader->AddBackgroundTree ( background, backgroundWeight );
+   dataloader->AddBackgroundTree ( background2, backgroundWeight );
+   dataloader->AddBackgroundTree ( background_test, backgroundWeight, "Test" );
 
    // To give different trees for training and testing, do as follows:
    //
@@ -691,13 +712,15 @@ int LLP_WPlusJets_Classification()
    sigTagList_test["hadd"]             = "v3.4_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TEST-batch2";
 
    TString bkgTag = "v3.4_LLPskim_Run2023Dv1_2024_02_16";
+   TString bkgTag2 = "v3.4_LLPskim_Run2023Cv1_2024_02_16";
+   TString bkgTag_test = "v3.4_LLPskim_Run2023Cv4_2024_02_16";
 
    TString dir = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.4/";
 
    vector<string> filetag_keys_to_loop = {"LLP125_MS15", "LLP350_MS80", "LLP125_MS50", "LLP250_MS120", "LLP350_MS160", "hadd"};
 	for( auto key: filetag_keys_to_loop){
       cout << "TMVA training for " << key << endl;
-      runClassification(dir, sigTagList[key], sigTagList_test[key], bkgTag, key);
+      runClassification(dir, sigTagList[key], sigTagList_test[key], bkgTag, bkgTag2, bkgTag_test, key);
       cout << " " << endl;
    }
    return 0;
