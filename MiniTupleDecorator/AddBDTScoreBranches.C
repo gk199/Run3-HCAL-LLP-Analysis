@@ -46,7 +46,7 @@ vector<double> list_lifetime_rw     = {  0.5 ,  1.,  2.,  4.,  5.,  6.,  10.,  1
 
 string bdt_version = "v0.4";
 
-vector<string> bdt_tags = { "LLP350", "LLP125" };
+vector<string> bdt_tags = { "LLP125", "LLP125_perJet" }; //{ "LLP125", "LLP350", "hadd",  "LLP125_perJet", "LLP350_perJet", "hadd_perJet" };
 map<string,TMVA::Reader*> bdt_reader;
 map<string,vector<string>> bdt_var_names;
 map<string,Float_t> bdt_vars;
@@ -123,7 +123,7 @@ bool BookTMVAReader( string bdt_tag ){
 	if( !filepath_exists ) return false; 
 
 	string filename = Form("%s%s/weights_%s/TMVAClassification_BDTG.weights.xml", filepath.c_str(), bdt_version.c_str(), bdt_tag.c_str() );
-
+	
 	// Declare TMVA Reader
 	cout<<"  --> "<<bdt_tag<<" from  "<<filename<<endl;
 	bdt_reader[bdt_tag] = new TMVA::Reader( "!Color:!Silent", debug );
@@ -144,33 +144,64 @@ bool BookTMVAReader( string bdt_tag ){
 }
 
 /* ====================================================================================================================== */
-float GetBDTScore( string bdt_tag, map<string,Float_t> input_vars ){
+float GetBDTScore( string bdt_tag, map<string,Float_t> input_vars, string jet_index ){
 
-	for( auto bdt_var_name: bdt_var_names[bdt_tag] ){
-		bdt_vars[bdt_tag+" "+bdt_var_name] = input_vars[bdt_var_name];
+	for( auto var: bdt_var_names[bdt_tag] ){
+		
+		if( jet_index == "-1" ){ 
+			bdt_vars[bdt_tag+" "+var] = input_vars[var];
+		} else {
+			string var_mod = var;
+			var_mod.replace( var.find( "perJet" ), 6, "jet"+jet_index );
+			bdt_vars[bdt_tag+" "+var] = input_vars[var_mod];
+		}
 	}
 
 	return bdt_reader[bdt_tag]->EvaluateMVA("BDT");
 }
 
 /* ====================================================================================================================== */
-void AddBranchesToTree( TTree* tree ){
+void AddBranchesToTree( TTree* tree, bool tree_perJet ){
 
 	// ----- Define Input Variables & Branches ----- //
 
-	vector<string> input_variable_names = { // As read from MiniTuple
-		//"jet0_Pt",
-	};
+	vector<string> input_variable_names = {};
 
 	// Book TMVA Reader //
 	
+	vector<string> bdt_tags_booked = {};
+	map<string,bool> bdt_perJet;
+
 	for( auto bdt_tag: bdt_tags ){ 
 
+		bdt_perJet[bdt_tag] = false;
+                if( bdt_tag.find( "perJet" ) != string::npos ) bdt_perJet[bdt_tag] = true;
+
+		// Don't run event-level bdt on jet level tree
+		if( tree_perJet && !bdt_perJet[bdt_tag] ) continue; 
+
 		bool pass = BookTMVAReader( bdt_tag );
-		if( pass == false ) cout<<"WARNING: Unable to book TMVA Reader for bdt_tag "<<bdt_tag<<" -- file not found?"<<endl;
+		if( pass == false ) {
+			cout<<"WARNING: Unable to book TMVA Reader for bdt_tag "<<bdt_tag<<" -- file not found?"<<endl;
+			continue;
+		}
+
+		bdt_tags_booked.push_back( bdt_tag );
 		
 		for( auto var: bdt_var_names[bdt_tag] ){
-			input_variable_names.push_back( var );
+
+			// Tree / bdt agreement (event, event) and (perJet, perJet)
+			if( tree_perJet == bdt_perJet[bdt_tag] ){
+				input_variable_names.push_back( var );
+				continue;
+			} 
+			
+		        // Run jet-level bdt on event-level
+			for( auto i_jet: vector<string>{ "0", "1", "2" } ){
+				string var_mod = var;
+				var_mod.replace( var.find( "perJet" ), 6, "jet"+i_jet ); 
+				input_variable_names.push_back( var_mod );
+			}
 		}
 	}
 
@@ -192,8 +223,14 @@ void AddBranchesToTree( TTree* tree ){
 
 	vector<string> output_variable_names = {};
 
-	for( auto bdt_tag: bdt_tags ){
-		output_variable_names.push_back( "bdtscoreX_"+bdt_tag );
+	for( auto bdt_tag: bdt_tags_booked ){
+		if( tree_perJet == bdt_perJet[bdt_tag] ){
+			output_variable_names.push_back( "bdtscoreX_"+bdt_tag );
+			continue;
+		}
+		for( auto i_jet: vector<string>{ "0", "1", "2" } ){
+			output_variable_names.push_back( "jet"+i_jet+"_bdtscoreX_"+bdt_tag );
+		}
 	}
 
 	//for( auto lt_rw: list_lifetime_rw_str ) 
@@ -220,8 +257,14 @@ void AddBranchesToTree( TTree* tree ){
 
 		// BDT Scores
 
-		for( auto bdt_tag: bdt_tags ){
-			output_vars["bdtscoreX_"+bdt_tag] = GetBDTScore( bdt_tag, input_vars );
+		for( auto bdt_tag: bdt_tags_booked ){
+			if( tree_perJet == bdt_perJet[bdt_tag] ){
+				output_vars["bdtscoreX_"+bdt_tag] = GetBDTScore( bdt_tag, input_vars, "-1" );
+				continue;
+			}
+			for( auto i_jet: vector<string>{ "0", "1", "2" } ){
+				output_vars["jet"+i_jet+"_bdtscoreX_"+bdt_tag] = GetBDTScore( bdt_tag, input_vars, i_jet ); 
+			}
 		}
 
 		// Lifetime Reweighting // 
@@ -259,12 +302,13 @@ void AddTreesToFile( string infiletag, vector<string> treenames ){
 
         // ----- Infile / Outfile ----- //
 
+	// TODO: FIX
         bool isData = false;
         bool isSignal = false;
         bool isBkgMC = false;
-        if( infiletag.find("data") != string::npos ) isData = true;
-        if( infiletag.find("CTau") != string::npos ) isSignal = true; // TODO: FIX 
-        if( !isData && !isSignal ) isBkgMC = true;
+        //if( infiletag.find("data") != string::npos ) isData = true;
+        //if( infiletag.find("CTau") != string::npos ) isSignal = true; // TODO: FIX 
+        //if( !isData && !isSignal ) isBkgMC = true;
 
         // Infile
         TString infilepath = Form( "%s/minituple_%s.root", infiledir.c_str(), infiletag.c_str() );
@@ -291,9 +335,12 @@ void AddTreesToFile( string infiletag, vector<string> treenames ){
                 cout<<"Cloning Tree ... (this step could take approx "<<0.0001*NEntries_input[treename]<<" s)"<<endl;
                 TTree *tree = (TTree*) trees_input[treename]->CloneTree();
                 cout<<" -> Processing time: "<<(clock()-start_clock)/(double)CLOCKS_PER_SEC<<" s"<<endl;
+		
+		bool tree_perJet = false;
+		if( treename.find( "PerJet" ) != string::npos ) tree_perJet = true;
 
                 fout->cd();
-                AddBranchesToTree( tree );
+                AddBranchesToTree( tree, tree_perJet );
         }
 
         cout<<"File written to: "<<outfilename<<endl;
@@ -309,7 +356,8 @@ void AddBDTScoreBranches(){
 
 	clock_t start_clock = clock();
 
-	AddTreesToFile( "test", vector<string>{"NoSel","WPlusJets"} );
+	//AddTreesToFile( "test", vector<string>{"NoSel","WPlusJets", "PerJet_LLPmatched", "PerJet_NoSel", "PerJet_WPlusJets"} );
+	AddTreesToFile( "test", vector<string>{"NoSel", "PerJet_LLPmatched" } );
 
 	std::cout<<"--------------------------------------------------------"<<endl;
 	double duration_sec = (clock()-start_clock)/(double)CLOCKS_PER_SEC;
