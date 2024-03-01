@@ -21,7 +21,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 
 	// Add Event Variables //
 	vector<string> myvars_int = {
-		"run","lumi","event",
+		"run","lumi","event","jet","muon","ele","pho",
 		"RechitN","RechitN_1GeV","RechitN_5GeV","RechitN_10GeV",
 		"TrackN", "ecalRechitN", "HBHE_Rechit_auxTDC"
 	};	
@@ -229,7 +229,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 
 	// Add Event Variables //
 	vector<string> myvars_int = {
-		"run","lumi","event",
+		"run","lumi","event","jet","muon","ele","pho",
 		"jetIndex"
 	};	
 
@@ -372,6 +372,10 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 	tree_output_vars_int["run"] 	= runNum;
 	tree_output_vars_int["lumi"] 	= lumiNum;
 	tree_output_vars_int["event"] 	= eventNum;
+	tree_output_vars_int["jet"]		= n_jet;
+	tree_output_vars_int["ele"]		= n_ele;
+	tree_output_vars_int["muon"]	= n_muon;
+	tree_output_vars_int["pho"]		= n_pho;
 	tree_output_vars_int["RechitN"] = n_hbheRechit;
 	tree_output_vars_int["TrackN"]	= n_track;
 	tree_output_vars_int["ecalRechitN"] = n_ecalRechit;
@@ -493,7 +497,12 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		vector<uint> jet_track_index = jet_TrackIndices->at(i);
 		vector<pair<float, float>> track_pt_index = TrackMatcher(i, jet_track_index);
 
-		for (int track = 0; track < 3; track++) tree_output_vars_float[Form("jet%d_Track%dPt", i, track)] = 0; // default value for track pT (in case no tracks are matched)
+		for (int track = 0; track < 3; track++) {
+			tree_output_vars_float[Form("jet%d_Track%dPt", i, track)] = 0; // default value for track pT (in case no tracks are matched)
+			tree_output_vars_float[Form("jet%d_Track%ddR", i, track)] = 0.5; // default value for track dR (in case no tracks are matched)
+			tree_output_vars_float[Form("jet%d_Track%ddEta", i, track)] = 0.5;
+			tree_output_vars_float[Form("jet%d_Track%ddPhi", i, track)] = 0.5;
+		}
 		if (track_pt_index.size() > 0) {
 			std::sort (track_pt_index.begin(), track_pt_index.end(), greater<pair<float, float>>()); // sort to find highest pt tracks
 			// int n_track = std::min(3, (int) jet_track_index.size());
@@ -623,6 +632,10 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	jet_tree_output_vars_int["run"] 		= runNum;
 	jet_tree_output_vars_int["lumi"] 		= lumiNum;
 	jet_tree_output_vars_int["event"] 		= eventNum;
+	jet_tree_output_vars_int["jet"]			= n_jet;
+	jet_tree_output_vars_int["ele"]			= n_ele;
+	jet_tree_output_vars_int["muon"]		= n_muon;
+	jet_tree_output_vars_int["pho"]			= n_pho;
 	jet_tree_output_vars_int["jetIndex"] 	= jetIndex;
 
 	jet_tree_output_vars_float["perJet_E"] 			= jet_E->at(jetIndex);
@@ -674,7 +687,12 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	vector<uint> jet_track_index = jet_TrackIndices->at(jetIndex);
 	vector<pair<float, float>> track_pt_index = TrackMatcher(jetIndex, jet_track_index);
 
-	for (int track = 0; track < 3; track++) jet_tree_output_vars_float[Form("perJet_Track%dPt", track)] = 0; // default value for track pT (in case no tracks are matched)
+	for (int track = 0; track < 3; track++) {
+		jet_tree_output_vars_float[Form("perJet_Track%dPt", track)] = 0; // default value for track pT (in case no tracks are matched)
+		jet_tree_output_vars_float[Form("perJet_Track%ddR", track)] = 0.5; // default value for track dR (in case no tracks are matched)
+		jet_tree_output_vars_float[Form("perJet_Track%ddEta", track)] = 0.5;
+		jet_tree_output_vars_float[Form("perJet_Track%ddPhi", track)] = 0.5;
+	}
 	if (track_pt_index.size() > 0) {
 		std::sort (track_pt_index.begin(), track_pt_index.end(), greater<pair<float, float>>()); // sort to find highest pt tracks
 //		int n_track = std::min(3, (int) jet_track_index.size());
