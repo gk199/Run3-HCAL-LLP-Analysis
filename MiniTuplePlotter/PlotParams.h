@@ -61,9 +61,11 @@ PlotParams P_jet0_TDCnDelayed			={"jet0_TDCnDelayed", "Leading Jet Number of Del
 
 // tracks
 PlotParams P_jet0_Track0PtFrac			= {"jet0_Track0Pt / jet0_Pt", "Leading Jet: Leading Track p_{T} / Jet p_{T}", "Track Energy Fraction", 0, 1 };
+PlotParams P_jet0_Track1PtFrac			= {"jet0_Track1Pt / jet0_Pt", "Leading Jet: Subleading Track p_{T} / Jet p_{T}", "Track Energy Fraction", 0, 1 };
+PlotParams P_jet0_Track2PtFrac			= {"jet0_Track2Pt / jet0_Pt", "Leading Jet: Third Leading Track p_{T} / Jet p_{T}", "Track Energy Fraction", 0, 1 };
 PlotParams P_jet0_Track0Pt				= {"jet0_Track0Pt", "Leading Jet: Leading Track p_{T}", "p_{T} [GeV]", 0, 15 };
 PlotParams P_jet0_Track1Pt				= {"jet0_Track1Pt", "Leading Jet: Subeading Track p_{T}", "p_{T} [GeV]", 0, 15 };
-PlotParams P_jet0_Track2Pt				= {"jet0_Track2Pt", "Leading Jet: Third leading Track p_{T}", "p_{T} [GeV]", 0, 15 };
+PlotParams P_jet0_Track2Pt				= {"jet0_Track2Pt", "Leading Jet: Third Leading Track p_{T}", "p_{T} [GeV]", 0, 15 };
 PlotParams P_jet0_Track0dxyToBS			= {"jet0_Track0dxyToBS", "Leading Jet: Leading Track d_{xy} to BS", "d_{xy} to BS", -20, 20};
 PlotParams P_jet0_Track1dxyToBS			= {"jet0_Track0dxyToBS", "Leading Jet: Subleading Track d_{xy} to BS", "d_{xy} to BS", -20, 20};
 PlotParams P_jet0_Track2dxyToBS			= {"jet0_Track2dxyToBS", "Leading Jet: Third Leading Track d_{xy} to BS", "d_{xy} to BS", -20, 20};
@@ -82,16 +84,16 @@ PlotParams P_jet0_Track0nMissingOuterHits	= {"jet0_Track0nMissingOuterHits", "Le
 PlotParams P_jet0_Track0nPixelHits			= {"jet0_Track0nPixelHits", "Leading Jet: Leading Track Number of Pixel Hits", "Number of Hits", 0, 10 };
 PlotParams P_jet0_Track0nHits				= {"jet0_Track0nHits", "Leading Jet: Leading Track Number of Hits", "Number of Hits", 0, 40 };
 
-PlotParams P_jet0_Tracks_dR				= {"jet0_Tracks_dR", "Leading Jet: Leading Track to Sub-leading Track #DeltaR", "#DeltaR (leading, subleading track)", 0, 1.1 };
-PlotParams P_jet0_Track0dR				= {"jet0_Track0dR", "Leading Jet to Leading Track #DeltaR", "#DeltaR", 0, 0.6 };
-PlotParams P_jet0_Track1dR				= {"jet0_Track1dR", "Leading Jet to Subleading Track #DeltaR", "#DeltaR", 0, 0.6 };
-PlotParams P_jet0_Track2dR				= {"jet0_Track2dR", "Leading Jet to Third Leading Track #DeltaR", "#DeltaR", 0, 0.6 };
-PlotParams P_jet0_Track0dEta			= {"jet0_Track0dEta", "Leading Jet to Leading Track #Delta#eta", "#Delta#eta", 0, 0.6 };
-PlotParams P_jet0_Track1dEta			= {"jet0_Track1dEta", "Leading Jet to Subleading Track #Delta#eta", "#Delta#eta", 0, 0.6 };
-PlotParams P_jet0_Track2dEta			= {"jet0_Track2dEta", "Leading Jet to Third Leading Track #Delta#eta", "#Delta#eta", 0, 0.6 };
-PlotParams P_jet0_Track0dPhi			= {"jet0_Track0dPhi", "Leading Jet to Leading Track #Delta#phi", "#Delta#phi", 0, 0.6 };
-PlotParams P_jet0_Track1dPhi			= {"jet0_Track1dPhi", "Leading Jet to Subleading Track #Delta#phi", "#Delta#phi", 0, 0.6 };
-PlotParams P_jet0_Track2dPhi			= {"jet0_Track2dPhi", "Leading Jet to Third Leading Track #Delta#phi", "#Delta#phi", 0, 0.6 };
+PlotParams P_jet0_Tracks_dR				= {"jet0_Tracks_dR", "Leading Jet: Leading Track to Sub-leading Track #DeltaR", "#DeltaR (leading, subleading track)", 0, 1.0 };
+PlotParams P_jet0_Track0dR				= {"jet0_Track0dR", "Leading Jet to Leading Track #DeltaR", "#DeltaR", 0, 0.5 };
+PlotParams P_jet0_Track1dR				= {"jet0_Track1dR", "Leading Jet to Subleading Track #DeltaR", "#DeltaR", 0, 0.5 };
+PlotParams P_jet0_Track2dR				= {"jet0_Track2dR", "Leading Jet to Third Leading Track #DeltaR", "#DeltaR", 0, 0.5 };
+PlotParams P_jet0_Track0dEta			= {"jet0_Track0dEta", "Leading Jet to Leading Track #Delta#eta", "#Delta#eta", 0, 0.5 };
+PlotParams P_jet0_Track1dEta			= {"jet0_Track1dEta", "Leading Jet to Subleading Track #Delta#eta", "#Delta#eta", 0, 0.5 };
+PlotParams P_jet0_Track2dEta			= {"jet0_Track2dEta", "Leading Jet to Third Leading Track #Delta#eta", "#Delta#eta", 0, 0.5 };
+PlotParams P_jet0_Track0dPhi			= {"jet0_Track0dPhi", "Leading Jet to Leading Track #Delta#phi", "#Delta#phi", 0, 0.5 };
+PlotParams P_jet0_Track1dPhi			= {"jet0_Track1dPhi", "Leading Jet to Subleading Track #Delta#phi", "#Delta#phi", 0, 0.5 };
+PlotParams P_jet0_Track2dPhi			= {"jet0_Track2dPhi", "Leading Jet to Third Leading Track #Delta#phi", "#Delta#phi", 0, 0.5 };
 // note these still need a fix in the ntupler!!!!!!!
 PlotParams P_jet0_PtAllTracks			= {"jet0_PtAllTracks", "Leading Jet: p_{T} all tracks", "p_{T} all tracks", 0, 100 };
 PlotParams P_jet0_PtAllPVTracks			= {"jet0_PtAllPVTracks", "Leading Jet: p_{T} all PV tracks", "p_{T} all PV tracks", 0, 100 };
@@ -268,12 +270,18 @@ PlotParams P_perJet_MuonEFrac_zero			= {"perJet_MuonEFrac", "Jet: Muon Energy Fr
 PlotParams P_perJet_Track0Pt				= {"perJet_Track0Pt", "Jet: Leading Track p_{T}", "p_{T} [GeV]", 0, 15 };
 PlotParams P_perJet_Track1Pt				= {"perJet_Track1Pt", "Jet: Subeading Track p_{T}", "p_{T} [GeV]", 0, 15 };
 PlotParams P_perJet_Track2Pt				= {"perJet_Track2Pt", "Jet: Third leading Track p_{T}", "p_{T} [GeV]", 0, 15 };
-PlotParams P_perJet_Track0dEta				= {"perJet_Track0dEta", "Jet to Leading Track #Delta#eta", "#Delta#eta", 0, 0.6 };
-PlotParams P_perJet_Track1dEta				= {"perJet_Track1dEta", "Jet to Subleading Track #Delta#eta", "#Delta#eta", 0, 0.6 };
-PlotParams P_perJet_Track2dEta				= {"perJet_Track2dEta", "Jet to Third Leading Track #Delta#eta", "#Delta#eta", 0, 0.6 };
-PlotParams P_perJet_Track0dPhi				= {"perJet_Track0dPhi", "Jet to Leading Track #Delta#phi", "#Delta#phi", 0, 0.6 };
-PlotParams P_perJet_Track1dPhi				= {"perJet_Track1dPhi", "Jet to Subleading Track #Delta#phi", "#Delta#phi", 0, 0.6 };
-PlotParams P_perJet_Track2dPhi				= {"perJet_Track2dPhi", "Jet to Third Leading Track #Delta#phi", "#Delta#phi", 0, 0.6 };
+PlotParams P_perJet_Track0PtFrac			= {"perJet_Track0Pt / perJet_Pt", "Leading Track p_{T} / Jet p_{T}", "Track Energy Fraction", 0, 1 };
+PlotParams P_perJet_Track1PtFrac			= {"perJet_Track0Pt / perJet_Pt", "Leading Track p_{T} / Jet p_{T}", "Track Energy Fraction", 0, 1 };
+PlotParams P_perJet_Track2PtFrac			= {"perJet_Track0Pt / perJet_Pt", "Leading Track p_{T} / Jet p_{T}", "Track Energy Fraction", 0, 1 };
+PlotParams P_perJet_Track0dR				= {"perJet_Track0dR", "Jet to Leading Track #Delta R", "#Delta R", 0, 0.5 };
+PlotParams P_perJet_Track1dR				= {"perJet_Track1dR", "Jet to Subleading Track #Delta R", "#Delta R", 0, 0.5 };
+PlotParams P_perJet_Track2dR				= {"perJet_Track2dR", "Jet to Third leading Track #Delta R", "#Delta R", 0, 0.5 };
+PlotParams P_perJet_Track0dEta				= {"perJet_Track0dEta", "Jet to Leading Track #Delta#eta", "#Delta#eta", 0, 0.5 };
+PlotParams P_perJet_Track1dEta				= {"perJet_Track1dEta", "Jet to Subleading Track #Delta#eta", "#Delta#eta", 0, 0.5 };
+PlotParams P_perJet_Track2dEta				= {"perJet_Track2dEta", "Jet to Third Leading Track #Delta#eta", "#Delta#eta", 0, 0.5 };
+PlotParams P_perJet_Track0dPhi				= {"perJet_Track0dPhi", "Jet to Leading Track #Delta#phi", "#Delta#phi", 0, 0.5 };
+PlotParams P_perJet_Track1dPhi				= {"perJet_Track1dPhi", "Jet to Subleading Track #Delta#phi", "#Delta#phi", 0, 0.5 };
+PlotParams P_perJet_Track2dPhi				= {"perJet_Track2dPhi", "Jet to Third Leading Track #Delta#phi", "#Delta#phi", 0, 0.5 };
 
 PlotParams P_perJet_EnergyFrac_Depth1		= {"perJet_EnergyFrac_Depth1", "Jet: Energy Fraction in HCAL Depth 1", "Energy Fraction", 0, 1.01 };
 PlotParams P_perJet_EnergyFrac_Depth2		= {"perJet_EnergyFrac_Depth2", "Jet: Energy Fraction in HCAL Depth 2", "Energy Fraction", 0, 1.01 };
@@ -281,10 +289,24 @@ PlotParams P_perJet_EnergyFrac_Depth3		= {"perJet_EnergyFrac_Depth3", "Jet: Ener
 PlotParams P_perJet_EnergyFrac_Depth4		= {"perJet_EnergyFrac_Depth4", "Jet: Energy Fraction in HCAL Depth 4", "Energy Fraction", 0, 1.01 };
 PlotParams P_perJet_LeadingRechitE			= {"perJet_LeadingRechitE", "Jet: Leading Rechit Energy", "Leading Rechit Energy [GeV]", 0, 100 };
 PlotParams P_perJet_AllRechitE				= {"perJet_AllRechitE", "Jet: Sum of HB Rechit Energy", "Sum of HB Rechit Energy [GeV]", 0, 300 };
-PlotParams P_perJet_AllRechitE				= {"perJet_AllRechitE / perJet_E", "Jet: Fraction of Jet Energy in HB Rechits", "Energy Fraction", 0, 1.01 };
+PlotParams P_perJet_AllRechitEFracJet		= {"perJet_AllRechitE / perJet_E", "Jet: Fraction of Jet Energy in HB Rechits", "Energy Fraction", 0, 1.01 };
 //PlotParams P_perJet_3RechitFracE			= {"(perJet_LeadingRechitE + perJet_SubLeadingRechitE + perJet_SSubLeadingRechitE) / perJet_AllRechitE", "Jet: Fraction of Energy in Leading 3 Rechits", "Fraction of Energy", 0, 1 };
 PlotParams P_perJet_LeadingRechitEFracJet	= {"perJet_LeadingRechitE / perJet_E", "Jet: Leading Rechit Energy / Jet Energy", "Energy Fraction", 0, 1 };
 
 PlotParams P_perJet_Setaeta 				= {"perJet_S_etaeta", "Jet S #eta#eta", "S #eta#eta", 0, 0.15 };
 PlotParams P_perJet_Sphiphi 				= {"perJet_S_phiphi", "Jet S #phi#phi", "S #phi#phi", 0, 0.15 };
 PlotParams P_perJet_Setaphi 				= {"perJet_S_etaphi", "Jet S #eta#phi", "S #eta#phi", 0, 0.15 };
+
+PlotParams P_perJet_Track0dxyOverErr		= {"perJet_Track0dxyOverErr", "Jet: Leading Track d_{xy} / error", "d_{xy} / error", 0, 40};
+PlotParams P_perJet_Track1dxyOverErr		= {"perJet_Track1dxyOverErr", "Jet: Subleading Track d_{xy} / error", "d_{xy} / error", 0, 40};
+PlotParams P_perJet_Track2dxyOverErr		= {"perJet_Track2dxyOverErr", "Jet: Third Leading Track d_{xy} / error", "d_{xy} / error", 0, 40};
+PlotParams P_perJet_Track0dzOverErr			= {"perJet_Track0dzOverErr", "Jet: Leading Track #DeltaZ / error", "#DeltaZ [cm] / error", 0, 100 };
+PlotParams P_perJet_Track1dzOverErr			= {"perJet_Track1dzOverErr", "Jet: Subeading Track #DeltaZ / error", "#DeltaZ [cm] / error", 0, 100 };
+PlotParams P_perJet_Track2dzOverErr			= {"perJet_Track2dzOverErr", "Jet: Third Leading Track #DeltaZ / error", "#DeltaZ [cm] / error", 0, 100 };
+
+PlotParams P_perJet_Track0dzToPV			= {"perJet_Track0dzToPV", "Jet: Leading Track #DeltaZ", "#DeltaZ [cm]", 0, 100 };
+PlotParams P_perJet_Track0dxyToBS			= {"perJet_Track0dxyToBS", "Jet: Leading Track #DeltaXY", "#DeltaXY [cm]", 0, 100 };
+PlotParams P_perJet_Track1dzToPV			= {"perJet_Track1dzToPV", "Jet: Subleading Track #DeltaZ", "#DeltaZ [cm]", 0, 100 };
+PlotParams P_perJet_Track1dxyToBS			= {"perJet_Track1dxyToBS", "Jet: Subleading Track #DeltaXY", "#DeltaXY [cm]", 0, 100 };
+
+PlotParams P_perJet_OtherLLP_DecayR			= {"perJet_OtherLLP_DecayR", "Jet: Decay R of the non-matched LLP", "Decay R [cm]", 0, 350};
