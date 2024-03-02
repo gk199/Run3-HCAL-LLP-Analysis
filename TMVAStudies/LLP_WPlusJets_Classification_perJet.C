@@ -61,7 +61,7 @@
 
 using namespace TMVA;
 
-int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag )
+int runClassification( TString dir, TString sigTag, TString sigTag_test, TString bkgTag, TString bkgTag2, TString bkgTag_test,  string tag )
 {
    // Setup cuts on LLP decay position. Include header file of all cuts potentially needed
    #include "../MiniTuplePlotter/RegionCuts.h"
@@ -192,9 +192,9 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
    TCut selections_track1Vars = "perJet_Track1Pt > 0 && perJet_Track1Pt < 900 && perJet_Track1dR >= 0 && perJet_Track1dR < 1";
    TCut selections_safety = selections_rechitVar1 + selections_rechitVar2 + selections_trackVars + selections_track1Vars; // no warnings when all variables behaved well! 
 
-   TCut LLPinHCAL = "perJet_MatchedLLP_DecayR >= 183.6 && perJet_MatchedLLP_DecayR < 295 && abs(perJet_MatchedLLP_Eta) < 1.26";
-   TCut LLPinECAL = "perJet_MatchedLLP_DecayR >= 161.6 && perJet_MatchedLLP_DecayR < 183.6 && abs(perJet_MatchedLLP_Eta) < 1.26";
-   TCut LLPinHCAL12 = "perJet_MatchedLLP_DecayR >= 183.6 && perJet_MatchedLLP_DecayR < 214.2 && abs(perJet_MatchedLLP_Eta) < 1.26";
+   TCut LLPinHCAL = "perJet_MatchedLLP_DecayR >= 177 && perJet_MatchedLLP_DecayR < 295 && abs(perJet_MatchedLLP_Eta) < 1.26";
+   TCut LLPinECAL = "perJet_MatchedLLP_DecayR >= 129 && perJet_MatchedLLP_DecayR < 177 && abs(perJet_MatchedLLP_Eta) < 1.26";
+   TCut LLPinHCAL12 = "perJet_MatchedLLP_DecayR >= 177 && perJet_MatchedLLP_DecayR < 214.2 && abs(perJet_MatchedLLP_Eta) < 1.26";
    TCut LLPinHCAL34 = "perJet_MatchedLLP_DecayR >= 214.2 && perJet_MatchedLLP_DecayR < 295 && abs(perJet_MatchedLLP_Eta) < 1.26";
 
    TCut selections_background = selections_all + selections_safety;
@@ -220,20 +220,52 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
    std::cout << "opened signal file" << std::endl;
    TFile* scratchFile = TFile::Open( "scratchFile.root", "RECREATE" );
    TTree *signalTree       = (TTree*)signalTree_temp->CopyTree(selections_signal);
-   TTree *signalTreeECAL   = (TTree*)signalTree_temp->CopyTree(selections_signalECAL);
+
    TTree *signalTreeHCAL12 = (TTree*)signalTree_temp->CopyTree(selections_signalHCAL12);
    TTree *signalTreeHCAL34 = (TTree*)signalTree_temp->CopyTree(selections_signalHCAL34);
+
+   // Signal, for testing
+   TFile *siginput_test(0);
+   TString sigName_test = dir+"minituple_"+sigTag_test+".root";
+   siginput_test = TFile::Open( sigName_test ); // check if file in local directory exists
+   std::cout << "--- TMVAClassification       : Using signal (testing) input file: " << siginput_test->GetName() << std::endl;
+   TTree *signalTreeTest_temp = (TTree*)siginput_test->Get("PerJet_LLPmatched");
+   std::cout << "opened signal (testing) file" << std::endl;
+   TFile* scratchFile_test = TFile::Open( "scratchFile_test.root", "RECREATE" );
+   TTree *signalTree_test       = (TTree*)signalTreeTest_temp->CopyTree(selections_signal);
+
+   TTree *signalTreeHCAL12_test = (TTree*)signalTreeTest_temp->CopyTree(selections_signalHCAL12);
+   TTree *signalTreeHCAL34_test = (TTree*)signalTreeTest_temp->CopyTree(selections_signalHCAL34);
 
    // Register the training and test trees
 
    TFile *bkginput(0);
    TString bkgName = dir+"minituple_"+bkgTag+".root"; 
    bkginput = TFile::Open( bkgName ); // check if file in local directory exists
-   std::cout << "--- TMVAClassification       : Using background input file: " << bkginput->GetName() << std::endl;
+   std::cout << "--- TMVAClassification       : Using background (training, 1) input file: " << bkginput->GetName() << std::endl;
    TTree *background_temp = (TTree*)bkginput->Get("PerJet_WPlusJets");
    std::cout << "opened background file" << std::endl;
    scratchFile->cd();
    TTree *background      = (TTree*)background_temp->CopyTree(selections_background);
+
+   TFile *bkginput2(0);
+   TString bkgName2 = dir+"minituple_"+bkgTag2+".root"; 
+   bkginput2 = TFile::Open( bkgName2 ); // check if file in local directory exists
+   std::cout << "--- TMVAClassification       : Using background (training, 2) input file: " << bkginput2->GetName() << std::endl;
+   TTree *background_temp2 = (TTree*)bkginput2->Get("PerJet_WPlusJets");
+   std::cout << "opened background (training, 2) file" << std::endl;
+   scratchFile->cd();
+   TTree *background2      = (TTree*)background_temp2->CopyTree(selections_background);
+
+   // Background, for testing
+   TFile *bkginput_test(0);
+   TString bkgName_test = dir+"minituple_"+bkgTag_test+".root"; 
+   bkginput_test = TFile::Open( bkgName_test ); // check if file in local directory exists
+   std::cout << "--- TMVAClassification       : Using background (testing) input file: " << bkginput_test->GetName() << std::endl;
+   TTree *background_temp_test = (TTree*)bkginput_test->Get("PerJet_WPlusJets");
+   std::cout << "opened background (testing) file" << std::endl;
+   scratchFile->cd();
+   TTree *background_test      = (TTree*)background_temp_test->CopyTree(selections_background);
 
    outputFile->cd();
 
@@ -270,22 +302,24 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
    // dataloader->AddVariable( "perJet_Pt", "perJet_Pt", "GeV", 'F' );
    // dataloader->AddVariable( "perJet_E", "perJet_E", "GeV", 'F' );
    // track-based variables // *************************
-   dataloader->AddVariable( "perJet_ChargedHadEFrac", "perJet_ChargedHadEFrac", "", 'F' );
-   dataloader->AddVariable( "perJet_NeutralHadEFrac", "perJet_NeutralHadEFrac", "", 'F' );
-   //dataloader->AddVariable( "perJet_MuonEFrac", "perJet_MuonEFrac", "", 'F' );
-   dataloader->AddVariable( "perJet_PhoEFrac", "perJet_PhoEFrac", "", 'F' );
-   dataloader->AddVariable( "perJet_EleEFrac", "perJet_EleEFrac", "", 'F' );
-   dataloader->AddVariable( "perJet_Track0Pt", "perJet_Track0Pt", "GeV", 'F' );
-   // dataloader->AddVariable( "perJet_Track0dR", "perJet_Track0dR", "", 'F' );
-   dataloader->AddVariable( "perJet_Track0dEta", "perJet_Track0dEta", "", 'F' );
-   dataloader->AddVariable( "perJet_Track0dPhi", "perJet_Track0dPhi", "", 'F' );
-   dataloader->AddVariable( "perJet_Track1Pt", "perJet_Track1Pt", "GeV", 'F' );
-   // dataloader->AddVariable( "perJet_Track1dR", "perJet_Track1dR", "", 'F' );
-   dataloader->AddVariable( "perJet_Track1dEta", "perJet_Track1dEta", "", 'F' );
-   dataloader->AddVariable( "perJet_Track1dPhi", "perJet_Track1dPhi", "", 'F' );
-   //dataloader->AddVariable( "perJet_Track1Pt", "perJet_Track1Pt", "GeV", 'F' );
-   //dataloader->AddVariable( "perJet_Track2Pt", "perJet_Track2Pt", "GeV", 'F' );
-   //dataloader->AddVariable( "perJet_HoverE", "perJet_HoverE", "", 'F' );
+   if (tag.find("calor") == std::string::npos) {
+      cout << "adding track based variables!" << endl;
+      dataloader->AddVariable( "perJet_ChargedHadEFrac", "perJet_ChargedHadEFrac", "", 'F' );
+      dataloader->AddVariable( "perJet_NeutralHadEFrac", "perJet_NeutralHadEFrac", "", 'F' );
+      dataloader->AddVariable( "perJet_PhoEFrac", "perJet_PhoEFrac", "", 'F' );
+      dataloader->AddVariable( "perJet_EleEFrac", "perJet_EleEFrac", "", 'F' );
+      dataloader->AddVariable( "perJet_Track0Pt / perJet_Pt", "perJet_Track0Pt / perJet_Pt", "", 'F' );
+      dataloader->AddVariable( "perJet_Track0dEta", "perJet_Track0dEta", "", 'F' );
+      dataloader->AddVariable( "perJet_Track0dPhi", "perJet_Track0dPhi", "", 'F' );
+      dataloader->AddVariable( "perJet_Track1Pt / perJet_Pt", "perJet_Track1Pt / perJet_Pt", "", 'F' );
+      dataloader->AddVariable( "perJet_Track1dEta", "perJet_Track1dEta", "", 'F' );
+      dataloader->AddVariable( "perJet_Track1dPhi", "perJet_Track1dPhi", "", 'F' );
+      // dataloader->AddVariable( "perJet_MuonEFrac", "perJet_MuonEFrac", "", 'F' );      // redundant
+      // dataloader->AddVariable( "perJet_Track0dR", "perJet_Track0dR", "", 'F' );        // eta phi instead
+      // dataloader->AddVariable( "perJet_Track1dR", "perJet_Track1dR", "", 'F' );        // eta phi instead
+      // dataloader->AddVariable( "perJet_Track2Pt", "perJet_Track2Pt", "GeV", 'F' );     // track 0, 1 only
+      // dataloader->AddVariable( "perJet_HoverE", "perJet_HoverE", "", 'F' );            // in other fracs
+   }
    // rechit-based variables // *************************
    dataloader->AddVariable( "perJet_EnergyFrac_Depth1", "perJet_EnergyFrac_Depth1", "", 'F' );
    dataloader->AddVariable( "perJet_EnergyFrac_Depth2", "perJet_EnergyFrac_Depth2", "", 'F' );
@@ -314,11 +348,24 @@ int runClassification( TString dir, TString sigTag, TString bkgTag, TString tag 
    Double_t backgroundWeight = 1.0;
 
    // You can add an arbitrary number of signal or background trees
-   dataloader->AddSignalTree     ( signalTree,     signalWeight );
-   dataloader->AddSignalTree     ( signalTreeECAL,     signalWeight );
-   dataloader->AddSignalTree     ( signalTreeHCAL12,     signalWeight );
-   dataloader->AddSignalTree     ( signalTreeHCAL34,     signalWeight );
+   if (tag.find("HCAL") == std::string::npos) { // no selections applied
+      cout << "adding signal trees for inclusive HCAL only" << endl;
+      dataloader->AddSignalTree     ( signalTree,      signalWeight );
+      dataloader->AddSignalTree     ( signalTree_test, signalWeight,  "Test" );
+   }
+   if (tag.find("HCAL12") != std::string::npos) {
+      cout << "adding signal trees for HCAL 12 only" << endl;
+      dataloader->AddSignalTree     ( signalTreeHCAL12,     signalWeight );
+      dataloader->AddSignalTree     ( signalTreeHCAL12_test,     signalWeight, "Test" );
+   }
+   if (tag.find("HCAL34") != std::string::npos) {
+      cout << "adding signal trees for HCAL 34 only" << endl;
+      dataloader->AddSignalTree     ( signalTreeHCAL34,     signalWeight );
+      dataloader->AddSignalTree     ( signalTreeHCAL34_test,     signalWeight, "Test" );
+   }
    dataloader->AddBackgroundTree ( background, backgroundWeight );
+   dataloader->AddBackgroundTree ( background2, backgroundWeight );
+   dataloader->AddBackgroundTree ( background_test, backgroundWeight, "Test" );
 
    // To give different trees for training and testing, do as follows:
    //
@@ -667,18 +714,36 @@ int LLP_WPlusJets_Classification_perJet()
    //std::cout << "print" << std::endl;
 
    map<TString, TString> sigTagList;
-   sigTagList["LLP125"]	   = "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_02_05_TRAIN";
-   sigTagList["LLP350"]	   = "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_02_05_TRAIN";
-   sigTagList["hadd"]      = "v3.3_LLP_MC_ggH_HToSSTobbbb_MH-125_350_HADD_13p6TeV_2024_02_05_TRAIN";
+   sigTagList["LLP125_MS15"]	   = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_02_21_TRAIN";
+   sigTagList["LLP350_MS80"]	   = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_02_21_TRAIN";
+   sigTagList["LLP125_MS50"]	   = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_02_21_batch1";
+   sigTagList["LLP250_MS120"]    = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_02_21_batch1";
+   sigTagList["LLP350_MS160"]    = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_02_21_batch1";
+   sigTagList["hadd"]            = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TRAIN-batch1";
 
-   TString bkgTag = "v3.3_LLPskim_Run2023Dv1_2024_02_05_TRAIN";
+   map<TString, TString> sigTagList_test;
+   sigTagList_test["LLP125_MS15"]	   = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_02_21_TEST";
+   sigTagList_test["LLP350_MS80"]	   = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_02_21_TEST";
+   sigTagList_test["LLP125_MS50"]	   = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_02_21_batch2";
+   sigTagList_test["LLP250_MS120"]     = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_02_21_batch2";
+   sigTagList_test["LLP350_MS160"]     = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_02_21_batch2";
+   sigTagList_test["hadd"]             = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TEST-batch2";
 
-   TString dir = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/";
+   TString bkgTag = "v3.5_LLPskim_Run2023Dv1_2024_02_21";
+   TString bkgTag2 = "v3.5_LLPskim_Run2023Cv1_2024_02_21";
+   TString bkgTag_test = "v3.5_LLPskim_Run2023Cv4_2024_02_21";
 
-   vector<string> filetag_keys_to_loop = {"LLP125", "LLP350", "hadd"};
+   TString dir = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.5/";
+   
+   vector<string> filetag_keys_to_loop = {"LLP125_MS15", "LLP350_MS80", "LLP125_MS50", "LLP250_MS120", "LLP350_MS160", "hadd"};
+   vector<string> LLP_selections = {"", "_HCAL12", "_HCAL34", "_calor", "_HCAL12_calor", "_HCAL34_calor"};
+   // finished 350 / 80, HCAL34_calor on friday 6pm 
 	for( auto key: filetag_keys_to_loop){
-      runClassification(dir, sigTagList[key], bkgTag, key);
+      for( auto sel: LLP_selections){
+         cout << "TMVA training for " << key << ", per jet, with selections " << sel << endl;
+         runClassification(dir, sigTagList[key], sigTagList_test[key], bkgTag, bkgTag2, bkgTag_test, key+sel); // key + "xxx" will be the name of the weights file. Make sure this agrees with the signal selection cuts!
+         cout << " " << endl;
+      }
    }
    return 0;
 }
-

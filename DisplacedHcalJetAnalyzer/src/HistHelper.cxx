@@ -273,8 +273,8 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 					for (int depth = 0; depth < 4; depth++) {
 						h2["gen_depth_energyP_"+is]->Fill(depth + 1, energy[i][depth]);
 						h["gen_energyP_"+is]->Fill(depth + 1, energy[i][depth]); // fill TH1D, weight = fractional energy at that depth
-						if (decay_radius > 153 && decay_radius < 183.6) h["gen_energyP_beforeHB_"+is]->Fill(depth + 1, energy[i][depth]);
-						if (decay_radius >= 183.6 && decay_radius < 190.2) h["gen_energyP_HBdepth1_"+is]->Fill(depth + 1, energy[i][depth]); 
+						if (decay_radius > 153 && decay_radius < 177) h["gen_energyP_beforeHB_"+is]->Fill(depth + 1, energy[i][depth]);
+						if (decay_radius >= 177 && decay_radius < 190.2) h["gen_energyP_HBdepth1_"+is]->Fill(depth + 1, energy[i][depth]); 
 						if (decay_radius >= 190.2 && decay_radius < 214.2) h["gen_energyP_HBdepth2_"+is]->Fill(depth + 1, energy[i][depth]); 
 						if (decay_radius >= 214.2 && decay_radius < 244.8) h["gen_energyP_HBdepth3_"+is]->Fill(depth + 1, energy[i][depth]); 
 						if (decay_radius >= 244.8 && decay_radius < 295) h["gen_energyP_HBdepth4_"+is]->Fill(depth + 1, energy[i][depth]); 

@@ -30,15 +30,15 @@ TCut Cut_Jet0_isTruthMatched	= "jet0_isTruthMatched == 1";
 TCut Cut_Jet1_isTruthMatched	= "jet1_isTruthMatched == 1";
 
 // Setup cuts on LLP decay position
-float radius_tracker[2]  = {0, 161.6};
-float radius_ECAL[2]     = {161.6, 183.6}; // 22cm of ECAL
-float radius_depth1[2]   = {183.6, 190.2};
+float radius_tracker[2]  = {0, 129};
+float radius_ECAL[2]     = {129, 177}; // 48cm of ECAL
+float radius_depth1[2]   = {177, 190.2};
 float radius_depth2[2]   = {190.2, 214.2};
 float radius_depth3[2]   = {214.2, 244.8};
 float radius_depth4[2]   = {244.8, 295};
 float radius_all[2]      = {0,9999};
-float radius_inHCAL[2]   = {183.6, 295};
-float radius_depth12[2]  = {183.6, 214.2};
+float radius_inHCAL[2]   = {177, 295};
+float radius_depth12[2]  = {177, 214.2};
 float radius_depth34[2]  = {214.2, 295};
 
 float HBeta = 1.26;
@@ -211,13 +211,15 @@ TCut Cut_BDTscorePos   	= "bdtscore_125GeV >= 0";
 TString matchedLLPinCR             = Form("perJet_MatchedLLP_DecayR < %0.1f && abs(perJet_MatchedLLP_Eta) < %f", controlRegion, HBeta);
 TString matchedLLPinTrackerNP      = Form("perJet_MatchedLLP_DecayR >= %0.1f && perJet_MatchedLLP_DecayR < %0.1f && abs(perJet_MatchedLLP_Eta) < %f",  controlRegion, radius_tracker[1], HBeta);
 TString matchedLLPinECAL           = Form("perJet_MatchedLLP_DecayR >= %0.1f && perJet_MatchedLLP_DecayR < %0.1f && abs(perJet_MatchedLLP_Eta) < %f",  radius_ECAL[0], radius_ECAL[1], HBeta);
-TString matchedmatchedLLPinHCAL1   = Form("perJet_MatchedLLP_DecayR >= %0.1f && perJet_MatchedLLP_DecayR < %0.1f && abs(perJet_MatchedLLP_Eta) < %f",  radius_depth1[0], radius_depth1[1], HBeta);
+TString matchedLLPinHCAL           = Form("perJet_MatchedLLP_DecayR >= %0.1f && perJet_MatchedLLP_DecayR < %0.1f && abs(perJet_MatchedLLP_Eta) < %f",  radius_depth1[0], radius_depth34[1], HBeta);
+TString matchedLLPinHCAL1           = Form("perJet_MatchedLLP_DecayR >= %0.1f && perJet_MatchedLLP_DecayR < %0.1f && abs(perJet_MatchedLLP_Eta) < %f",  radius_depth1[0], radius_depth1[1], HBeta);
 TString matchedLLPinHCAL2          = Form("perJet_MatchedLLP_DecayR >= %0.1f && perJet_MatchedLLP_DecayR < %0.1f && abs(perJet_MatchedLLP_Eta) < %f",  radius_depth2[0], radius_depth2[1], HBeta);
 TString matchedLLPinHCAL34         = Form("perJet_MatchedLLP_DecayR >= %0.1f && perJet_MatchedLLP_DecayR < %0.1f && abs(perJet_MatchedLLP_Eta) < %f",  radius_depth34[0], radius_depth34[1], HBeta);
 
 TCut Cut_matchedLLPinCR             = matchedLLPinCR.Data();
 TCut Cut_matchedLLPinTrackerNP      = matchedLLPinTrackerNP.Data();
 TCut Cut_matchedLLPinECAL           = matchedLLPinECAL.Data();
-TCut Cut_matchedLLPinHCAL1          = matchedmatchedLLPinHCAL1.Data();
+TCut Cut_matchedLLPinHCAL           = matchedLLPinHCAL.Data();
+TCut Cut_matchedLLPinHCAL1          = matchedLLPinHCAL1.Data();
 TCut Cut_matchedLLPinHCAL2          = matchedLLPinHCAL2.Data();
 TCut Cut_matchedLLPinHCAL34         = matchedLLPinHCAL34.Data();

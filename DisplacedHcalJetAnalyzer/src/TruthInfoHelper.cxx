@@ -194,7 +194,7 @@ vector<float> DisplacedHcalJetAnalyzer::JetIsMatchedTo( float jet_eta, float jet
 	for( int i_llp=0; i_llp<gLLP_Pt->size(); i_llp++ ){
 
 		// Require decay in HB to match to LLP directly
-		if( gLLP_DecayVtx_R.at(i_llp) < 183.6 || gLLP_DecayVtx_R.at(i_llp) >= 295 || fabs(gLLP_Eta->at(i_llp)) > 1.26 )
+		if( gLLP_DecayVtx_R.at(i_llp) < 177 || gLLP_DecayVtx_R.at(i_llp) >= 295 || fabs(gLLP_Eta->at(i_llp)) > 1.26 )
 			continue;
 
 		float dR_temp = DeltaR( gLLP_Eta->at(i_llp), jet_eta, gLLP_Phi->at(i_llp), jet_phi );
@@ -211,7 +211,7 @@ vector<float> DisplacedHcalJetAnalyzer::JetIsMatchedTo( float jet_eta, float jet
 		int idx_llp = gLLPDecay_iLLP.at(i_tru);
 
 		// Require decay not HB, such that it makes sense to match to decay products instead
-		if( gLLP_DecayVtx_R.at(idx_llp) >= 183.6 && gLLP_DecayVtx_R.at(idx_llp) < 295 && fabs(gLLP_Eta->at(idx_llp)) <= 1.26 )
+		if( gLLP_DecayVtx_R.at(idx_llp) >= 177 && gLLP_DecayVtx_R.at(idx_llp) < 295 && fabs(gLLP_Eta->at(idx_llp)) <= 1.26 )
 			continue;
 
 		TVector3 vec_llp;
@@ -246,7 +246,7 @@ pair<bool,float> DisplacedHcalJetAnalyzer::LLPDecayIsTruthMatched_LLP_b( int idx
 	for( int i=0; i<jet_Pt->size(); i++){
 		if (jet_Pt->at(i) < jetPt_cut) continue;
 		// Check if LLP is directly matched to a jet
-		if( gLLP_DecayVtx_R.at(idx_gLLP) >= 183.6 && gLLP_DecayVtx_R.at(idx_gLLP) < 295 && fabs(gLLP_Eta->at(idx_gLLP)) <= 1.26 ) {
+		if( gLLP_DecayVtx_R.at(idx_gLLP) >= 177 && gLLP_DecayVtx_R.at(idx_gLLP) < 295 && fabs(gLLP_Eta->at(idx_gLLP)) <= 1.26 ) {
 
 			float dR_temp = DeltaR( gLLP_Eta->at(idx_gLLP), jet_Eta->at(i), gLLP_Phi->at(idx_gLLP), jet_Phi->at(i) );
 

@@ -257,7 +257,7 @@ def main():
 			init = selval
 		else:
 			if i == 1: selection_string += "(abs(jet0_Eta) <= 1.26 && jet0_Pt > 40)"
-			if i == 2 and "Run2023" not in file_path: selection_string += "&& ((LLP0_DecayR >= 183.6 && LLP0_DecayR < 295 && abs(LLP0_Eta) <= 1.26 && jet0_isMatchedTo == 0) || (LLP1_DecayR >= 183.6 && LLP1_DecayR < 295 && abs(LLP1_Eta) <= 1.26 && jet0_isMatchedTo == 1))"
+			if i == 2 and "Run2023" not in file_path: selection_string += "&& ((LLP0_DecayR >= 177 && LLP0_DecayR < 295 && abs(LLP0_Eta) <= 1.26 && jet0_isMatchedTo == 0) || (LLP1_DecayR >= 177 && LLP1_DecayR < 295 && abs(LLP1_Eta) <= 1.26 && jet0_isMatchedTo == 1))"
 			if i == 3: selection_string += "&& ( jet0_NeutralHadEFrac > 0.8 )"
 			if i == 4: selection_string += "&& ( jet0_ChargedHadEFrac < 0.1 )"
 			if i == 5: selection_string += "&& ( jet0_S_phiphi < 0.02 ) "
@@ -327,7 +327,7 @@ def main():
 			selval = tree.GetEntries()
 			init = selval
 		else:
-			if i == 1 and "Run2023" not in file_path: selection_string += "(perJet_MatchedLLP_DecayR >= 183.6 && perJet_MatchedLLP_DecayR < 295 && abs(perJet_MatchedLLP_Eta) < 1.26)"
+			if i == 1 and "Run2023" not in file_path: selection_string += "(perJet_MatchedLLP_DecayR >= 177 && perJet_MatchedLLP_DecayR < 295 && abs(perJet_MatchedLLP_Eta) < 1.26)"
 			if i == 2: 
 				if "Run2023" not in file_path: selection_string += "&& "
 				selection_string += "( perJet_NeutralHadEFrac > 0.8 )"

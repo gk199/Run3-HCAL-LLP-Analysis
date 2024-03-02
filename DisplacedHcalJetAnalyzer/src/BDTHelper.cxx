@@ -1,12 +1,7 @@
 /* ====================================================================================================================== */
 void DisplacedHcalJetAnalyzer::DeclareTMVAReader( MyTags bdt_tag_info ){
 
-	if( debug ) cout<<"DisplacedHcalJetAnalyzer::DeclareTMVAReader()"<<endl;	
-
-	// bdt_tags = {
-	// 	"LLP350", "LLP125", "hadd", "LLP350_perJet", "LLP125_perJet", "hadd_perJet"
-	// 	//"test" // name of file in "BDTWeightFiles/v0.1/weights_*"
-	// };
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::DeclareTMVAReader()"<<endl;
 
 	vector<string> bdt_tags = bdt_tag_info.bdt_tags();
 	
@@ -29,7 +24,7 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader( MyTags bdt_tag_info ){
 			}
 		}
 
-		string filename = Form("%s/v0.4/weights_%s/TMVAClassification_BDTG.weights.xml", filepath.c_str(), bdt_tag.c_str() );
+		string filename = Form("%s/v0.6/weights_%s/TMVAClassification_BDTG.weights.xml", filepath.c_str(), bdt_tag.c_str() );
 
 		// Declare TMVA Reader
 		cout<<"  --> "<<bdt_tag<<" from  "<<filename<<endl;

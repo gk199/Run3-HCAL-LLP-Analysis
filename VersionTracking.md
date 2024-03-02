@@ -75,6 +75,8 @@ Location of minituples:
 /eos/user/g/gkopp/LLP_Analysis/MiniTuples/v2.0/minituple_v2.0_LLPskimRun2023C_500k_2023_10_18.root
 /eos/user/g/gkopp/LLP_Analysis/MiniTuples/v2.0/minituple_v2.0_MC_QCD_250k_2023_10_18.root
 ```
+Directory in personal eos space was accidentally removed.
+
 Also copied to LPC space:
 ```
 /eos/uscms/store/group/lpclonglived/gkopp/HCAL_LLP_Analysis/MiniTuples/v2.0/minituple_v2.0_LLPskimRun2023C_500k_2023_10_18.root
@@ -156,15 +158,54 @@ Location of minituples:
 /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_v3.3_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_02_05_TRAIN.root
 /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_v3.3_LLP_MC_ggH_HToSSTobbbb_MH-125_350_HADD_13p6TeV_2024_02_05_TRAIN.root
 
-/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_v3.3_LLPskim_Run2023Cv4_2024_02_05_TRAIN.root
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_v3.3_LLPskim_Run2023Bv1_2024_02_07_TEST.root
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_v3.3_LLPskim_Run2023Cv1_2024_02_07_TEST.root
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_v3.3_LLPskim_Run2023Cv2_2024_02_07_TEST.root
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_v3.3_LLPskim_Run2023Cv3_2024_02_07_TEST.root
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_v3.3_LLPskim_Run2023Cv4_2024_02_07_TEST.root
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_v3.3_LLPskim_Run2023Dv1_2024_02_05_TRAIN.root
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.3/minituple_v3.3_LLPskim_Run2023Dv2_2024_02_07_TEST.root
 ```
 
 ### v3.4
 Updates:
-* W+jets tree requires jet is dPhi > 2 from lepton
+* W+jets trees requires saved jet is dPhi > 2 from lepton
 * Electron energy fraction debugged
 * Non-matched LLP decay R added to perJet trees
 * Added HCAL MAHI time()
+
+For the LLP skim files, this is the number of files processed for each era: 61 (complete), 922 (complete), 1304 (complete), 1480 (near complete), 1830 (near complete), 617 (near complete), 83 (complete). Bv1 needs a longer job flavor. 
+
+Expected numbers of files for each are: 61, 922, 1304, 1484, 1855, 622, and 83 (listed in `Run/Condor/submit_MC/sh`).
+
+Location of minituples:
+```
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.4
+```
+
+### v3.5
+Updates:
+* BDTs: all variables (jet eta, charged hadron fraction, neutral hadron fraction, photon fraction, electron fraction, leading and subleading track fractional pT, track dEta, track dPhi, energy fraction in each HCAL depth, Sphiphi, fractional energy in leading rechit) and HCAL variables (jet eta, energy fraction in each HCAL depth, Sphiphi, fractional energy in leading rechit), updated start of HCAL cut to be 177cm, v0.5
+* Default value for track pT is 0 GeV (such that jets with no matched tracks will report a track pT of 0)
+* Added dxy, dz, and significance to minituples (next iteration, can cut on these in TrackMatcher)
+* Start LLP-jet matching at 177cm instead of 183.6cm (start of HCAL)
+Last three are in the minituples, but the BDT (v0.5) was trained on v3.4 minituples without those edits, but with the HCAL start set at 177 in BDT-level cuts (iterative process).
+
+Location of minituples:
+```
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.5/
+```
+
+### v3.6
+Updates:
+* Save n_jet, n_ele, n_muon, n_pho
+* Default value for dR, dEta, dPhi (jet, track) is 0.5 to indicate how many jets do not have matched tracks
+* BDT (v0.6) trained on v3.5 minituples
+
+Location of minituples:
+```
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.6/
+```
 
 ## V4
 Ongoing wish list:
