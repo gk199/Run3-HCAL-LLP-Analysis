@@ -736,7 +736,8 @@ int LLP_WPlusJets_Classification_perJet()
    TString dir = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.5/";
    
    vector<string> filetag_keys_to_loop = {"LLP125_MS15", "LLP350_MS80", "LLP125_MS50", "LLP250_MS120", "LLP350_MS160", "hadd"};
-   vector<string> LLP_selections = {"", "HCAL12", "HCAL34", "calor", "HCAL12_calor", "HCAL34_calor"};
+   vector<string> LLP_selections = {"", "_HCAL12", "_HCAL34", "_calor", "_HCAL12_calor", "_HCAL34_calor"};
+   // finished 350 / 80, HCAL34_calor on friday 6pm 
 	for( auto key: filetag_keys_to_loop){
       for( auto sel: LLP_selections){
          cout << "TMVA training for " << key << ", per jet, with selections " << sel << endl;

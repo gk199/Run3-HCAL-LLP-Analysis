@@ -880,7 +880,7 @@ void MakeMVAPerformancePlots_SigBkg()
   string Signal2 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.5/minituple_v3.5_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_02_21_TEST.root";
   string SigLabel2 = "350_mX80";
 
-  string Signal3 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.5/minituple_v3.5_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau10000_13p6TeV_2024_02_21_batch2.root";
+  string Signal3 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.5/minituple_v3.5_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_02_21_batch2.root";
   string SigLabel3 = "125_mX50";
 
   string Signal4 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.5/minituple_v3.5_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_02_21_batch2.root";
