@@ -40,6 +40,9 @@
 #include "TEfficiency.h"
 #include "THStack.h"
 
+#include <filesystem>
+namespace fs = std::filesystem;
+
 #endif
 
 //------------------------------------------------------------------------------
@@ -872,51 +875,54 @@ void MakeMVAPerformancePlots_SigBkg()
   // Signals
   string SignalTree = "PerJet_LLPmatched";
 
-  string Signal = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.5/minituple_v3.5_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_02_21_TEST.root";
+  string Signal = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.6/minituple_v3.6_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_02_TEST.root";
   // string SigLabel = "125";
   // string SignalTree = "NoSel";
   string SigLabel = "125_mX15";
 
-  string Signal2 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.5/minituple_v3.5_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_02_21_TEST.root";
+  string Signal2 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.6/minituple_v3.6_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_02_TEST.root";
   string SigLabel2 = "350_mX80";
 
-  string Signal3 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.5/minituple_v3.5_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_02_21_batch2.root";
+  string Signal3 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.6/minituple_v3.6_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_03_02_batch2.root";
   string SigLabel3 = "125_mX50";
 
-  string Signal4 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.5/minituple_v3.5_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_02_21_batch2.root";
+  string Signal4 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.6/minituple_v3.6_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_03_02_batch2.root";
   string SigLabel4 = "250_mX120";
 
-  string Signal5 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.5/minituple_v3.5_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_02_21_batch2.root";
+  string Signal5 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.6/minituple_v3.6_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_03_02_batch2.root";
   string SigLabel5 = "350_mX160";
 
   // Backgrounds
-  string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.5/minituple_v3.5_LLPskim_Run2023Cv4_2024_02_21.root";
+  string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.6/minituple_v3.6_LLPskim_Run2023Cv4_2024_03_02.root";
   // string BkgLabel = "W+Jets";
   // string BackgroundTree = "WPlusJets";
   string BkgLabel = "W+Jets_perJet";
   string BackgroundTree = "PerJet_WPlusJets";
 
-  // minituple_v3.5_LLPskim_Run2023Bv1_2024_02_21.root
-  // minituple_v3.5_LLPskim_Run2023Cv1_2024_02_21.root
-  // minituple_v3.5_LLPskim_Run2023Cv2_2024_02_21.root
-  // minituple_v3.5_LLPskim_Run2023Cv3_2024_02_21.root
-  // minituple_v3.5_LLPskim_Run2023Cv4_2024_02_21.root
-  // minituple_v3.5_LLPskim_Run2023Dv1_2024_02_21.root
-  // minituple_v3.5_LLPskim_Run2023Dv2_2024_02_21.root
+  // minituple_v3.6_LLPskim_Run2023Bv1_2024_03_02.root
+  // minituple_v3.6_LLPskim_Run2023Cv1_2024_03_02.root
+  // minituple_v3.6_LLPskim_Run2023Cv2_2024_03_02.root
+  // minituple_v3.6_LLPskim_Run2023Cv3_2024_03_02.root
+  // minituple_v3.6_LLPskim_Run2023Cv4_2024_03_02.root
+  // minituple_v3.6_LLPskim_Run2023Dv1_2024_03_02.root
+  // minituple_v3.6_LLPskim_Run2023Dv2_2024_03_02.root
 
   int Color1 = 30;
   int Color2 = 38;
   int Color3 = 48;
 
-  string plotType = ""; // _calor, _HCAL12_calor, _HCAL34_calor, "", _HCAL12, _HCAL34
-
-  BDTPerformancePlots(Signal, SigLabel, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, plotType);
-  SetupPlots();
-  BDTPerformancePlots(Signal2, SigLabel2, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, plotType);
-  SetupPlots();
-  BDTPerformancePlots(Signal3, SigLabel3, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, plotType);
-  SetupPlots();
-  BDTPerformancePlots(Signal4, SigLabel4, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, plotType);
-  SetupPlots();
-  BDTPerformancePlots(Signal5, SigLabel5, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, plotType);
+  vector<string> plotType = {"_calor", "_HCAL12_calor", "_HCAL34_calor", "", "_HCAL12", "_HCAL34"};
+  for( auto type: plotType){
+    if (type != "") fs::create_directory(type);
+    BDTPerformancePlots(Signal, SigLabel, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
+    SetupPlots();
+    BDTPerformancePlots(Signal2, SigLabel2, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
+    SetupPlots();
+    BDTPerformancePlots(Signal3, SigLabel3, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
+    SetupPlots();
+    BDTPerformancePlots(Signal4, SigLabel4, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
+    SetupPlots();
+    BDTPerformancePlots(Signal5, SigLabel5, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
+    SetupPlots();
+  }
 }
