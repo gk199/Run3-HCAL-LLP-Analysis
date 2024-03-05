@@ -26,8 +26,8 @@ bool debug = false;
 
 // ----- Input and Output Paths ----- //
 
-string basepath = "../MiniTuples/";
-string vIN 		= "v3.4";
+string basepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/";
+string vIN 		= "v3.6";
 string vOUT		= vIN+".1";
 
 string infiledir  = basepath + vIN;
@@ -44,9 +44,9 @@ vector<double> list_lifetime_rw     = {  0.5 ,  1.,  2.,  4.,  5.,  6.,  10.,  1
 
 // ----- BDT Globals ----- //
 
-string bdt_version = "v0.4";
+string bdt_version = "v0.6";
 
-vector<string> bdt_tags = { "LLP125", "LLP125_perJet" }; //{ "LLP125", "LLP350", "hadd",  "LLP125_perJet", "LLP350_perJet", "hadd_perJet" };
+vector<string> bdt_tags = { "LLP350_MS80_perJet" }; //{ "LLP125", "LLP125_perJet" }; //{ "LLP125", "LLP350", "hadd",  "LLP125_perJet", "LLP350_perJet", "hadd_perJet" };
 map<string,TMVA::Reader*> bdt_reader;
 map<string,vector<string>> bdt_var_names;
 map<string,Float_t> bdt_vars;
@@ -144,6 +144,20 @@ bool BookTMVAReader( string bdt_tag ){
 }
 
 /* ====================================================================================================================== */
+// A quick way to split strings separated via any character delimiter (https://www.geeksforgeeks.org/how-to-split-a-string-in-cc-python-and-java/)
+vector<string> adv_tokenizer(string s, char del)
+{
+	vector<string> split_string = {};
+    stringstream ss(s);
+    string word;
+    while (!ss.eof()) {
+        getline(ss, word, del);
+		split_string.push_back(word);
+    }
+	return split_string;
+}
+
+/* ====================================================================================================================== */
 float GetBDTScore( string bdt_tag, map<string,Float_t> input_vars, string jet_index ){
 
 	for( auto var: bdt_var_names[bdt_tag] ){
@@ -153,7 +167,12 @@ float GetBDTScore( string bdt_tag, map<string,Float_t> input_vars, string jet_in
 		} else {
 			string var_mod = var;
 			var_mod.replace( var.find( "perJet" ), 6, "jet"+jet_index );
-			bdt_vars[bdt_tag+" "+var] = input_vars[var_mod];
+			if (var_mod.find( "perJet" ) != string::npos ) var_mod.replace( var_mod.find( "perJet" ), 6, "jet"+jet_index );
+			if (var_mod.find( "/" ) != string::npos ) {
+				vector<string> split_string = adv_tokenizer(var_mod, '/');
+				bdt_vars[bdt_tag+" "+var] = input_vars[split_string[0]] / input_vars[split_string[1]];			//"x/y" = input_var["x"] / input_var["y"]
+			}
+			else bdt_vars[bdt_tag+" "+var] = input_vars[var_mod];
 		}
 	}
 
@@ -192,17 +211,29 @@ void AddBranchesToTree( TTree* tree, bool tree_perJet ){
 
 			// Tree / bdt agreement (event, event) and (perJet, perJet)
 			if( tree_perJet == bdt_perJet[bdt_tag] ){
-				input_variable_names.push_back( var );
+				if (var.find( "/" ) != string::npos ) {	// GK: added if statement to deal with division. push back "x" and push back "y"
+					vector<string> split_string = adv_tokenizer(var, '/');
+					input_variable_names.push_back(split_string[0]);
+					input_variable_names.push_back(split_string[1]);
+				}
+				else input_variable_names.push_back( var );
 				continue;
 			} 
 			
-		        // Run jet-level bdt on event-level
+		    // Run jet-level bdt on event-level
 			for( auto i_jet: vector<string>{ "0", "1", "2" } ){
 				string var_mod = var;
 				var_mod.replace( var.find( "perJet" ), 6, "jet"+i_jet ); 
-				input_variable_names.push_back( var_mod );
+				if (var_mod.find( "perJet" ) != string::npos ) var_mod.replace( var_mod.find( "perJet" ), 6, "jet"+i_jet );
+				if (var_mod.find( "/" ) != string::npos ) { // GK: added if statement to deal with division. push back "x" and push back "y"
+					vector<string> split_string = adv_tokenizer(var_mod, '/');
+					input_variable_names.push_back(split_string[0]);
+					input_variable_names.push_back(split_string[1]);
+				}
+				else input_variable_names.push_back( var_mod );
 			}
 		}
+		//for (int i = 0; i < input_variable_names.size(); i++) cout << input_variable_names[i] << endl;
 	}
 
 	// Make input_variable_names unique
@@ -219,7 +250,6 @@ void AddBranchesToTree( TTree* tree, bool tree_perJet ){
 	}
 
 	// ----- Define Output Variables & Branches ----- //
-
 
 	vector<string> output_variable_names = {};
 
@@ -357,7 +387,8 @@ void AddBDTScoreBranches(){
 	clock_t start_clock = clock();
 
 	//AddTreesToFile( "test", vector<string>{"NoSel","WPlusJets", "PerJet_LLPmatched", "PerJet_NoSel", "PerJet_WPlusJets"} );
-	AddTreesToFile( "test", vector<string>{"NoSel", "PerJet_LLPmatched" } );
+	//AddTreesToFile( "test", vector<string>{"NoSel", "PerJet_LLPmatched" } );
+	AddTreesToFile( "v3.6_LLPskim_Run2023Bv1_2024_03_02", vector<string>{ "WPlusJets" } );
 
 	std::cout<<"--------------------------------------------------------"<<endl;
 	double duration_sec = (clock()-start_clock)/(double)CLOCKS_PER_SEC;
