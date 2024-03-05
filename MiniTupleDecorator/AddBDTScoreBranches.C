@@ -163,7 +163,11 @@ float GetBDTScore( string bdt_tag, map<string,Float_t> input_vars, string jet_in
 	for( auto var: bdt_var_names[bdt_tag] ){
 		
 		if( jet_index == "-1" ){ 
-			bdt_vars[bdt_tag+" "+var] = input_vars[var];
+			if (var.find( "/" ) != string::npos ) { // if this part is removed, the per event and per jet trees do not agree. but with it removed, the two per per jet branches do agree...
+				vector<string> split_string = AdvTokenizer(var, '/');
+				bdt_vars[bdt_tag+" "+var] = input_vars[split_string[0]] / input_vars[split_string[1]];	// GK: fix for division BDT vars, such that "x/y" becomes input_var["x"] / input_var["y"]
+			}
+			else bdt_vars[bdt_tag+" "+var] = input_vars[var];
 		} else {
 			string var_mod = var;
 			var_mod.replace( var.find( "perJet" ), 6, "jet"+jet_index );
@@ -288,11 +292,19 @@ void AddBranchesToTree( TTree* tree, bool tree_perJet ){
 
 		for( auto bdt_tag: bdt_tags_booked ){
 			if( tree_perJet == bdt_perJet[bdt_tag] ){
-				output_vars["bdtscoreX_"+bdt_tag] = GetBDTScore( bdt_tag, input_vars, "-1" ); // GK -- all vars are empty in output tree -- major issue! 
+				output_vars["bdtscoreX_"+bdt_tag] = GetBDTScore( bdt_tag, input_vars, "-1" );
+				// if (jentry <= 10) {
+				// 	cout << GetBDTScore( bdt_tag, input_vars, "-1" ) << " = per jet score, with tag = " << bdt_tag << " and vars = " << endl;
+				// 	for (int i = 0; i < input_variable_names.size(); i++) cout << input_vars[input_variable_names[i]] << endl;
+				// }
 				continue;
 			}
 			for( auto i_jet: vector<string>{ "0", "1", "2" } ){
 				output_vars["jet"+i_jet+"_bdtscoreX_"+bdt_tag] = GetBDTScore( bdt_tag, input_vars, i_jet ); 
+				// if (jentry <= 10) {
+				// 	cout << GetBDTScore( bdt_tag, input_vars, i_jet ) << " = jet " << i_jet << " score, with tag = " << bdt_tag << " and vars = " << endl;
+				// 	for (int i = 0; i < input_variable_names.size(); i++) cout << input_vars[input_variable_names[i]] << endl;
+				// }
 			}
 		}
 
@@ -362,7 +374,7 @@ void AddTreesToFile( string infiletag, vector<string> treenames ){
         for( auto treename: treenames ){
                 cout<<"\n ----- Running Over: "<<treename<<" ----- \n"<<endl;
                 cout<<"Cloning Tree ... (this step could take approx "<<0.0001*NEntries_input[treename]<<" s)"<<endl;
-				TFile *fscratch = new TFile("minituple_scratch.root", "RECREATE"); // preventing basket WriteBuffer failed
+				//TFile *fscratch = new TFile("minituple_scratch.root", "RECREATE"); // preventing basket WriteBuffer failed -- but causes actual tree to not be filled! need to debug
                 TTree *tree = (TTree*) trees_input[treename]->CloneTree();
                 cout<<" -> Processing time: "<<(clock()-start_clock)/(double)CLOCKS_PER_SEC<<" s"<<endl;
 		
@@ -388,7 +400,7 @@ void AddBDTScoreBranches(){
 
 	//AddTreesToFile( "test", vector<string>{"NoSel","WPlusJets", "PerJet_LLPmatched", "PerJet_NoSel", "PerJet_WPlusJets"} );
 	//AddTreesToFile( "test", vector<string>{"NoSel", "PerJet_LLPmatched" } );
-	AddTreesToFile( "v3.6_LLPskim_Run2023Bv1_2024_03_02", vector<string>{ "WPlusJets" } );
+	AddTreesToFile( "v3.6_LLPskim_Run2023Bv1_2024_03_02", vector<string>{ "WPlusJets", "PerJet_WPlusJets" } );
 
 	std::cout<<"--------------------------------------------------------"<<endl;
 	double duration_sec = (clock()-start_clock)/(double)CLOCKS_PER_SEC;
