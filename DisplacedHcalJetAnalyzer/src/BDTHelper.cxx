@@ -67,6 +67,20 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader( MyTags bdt_tag_info ){
 }
 
 /* ====================================================================================================================== */
+// A quick way to split strings separated via any character delimiter (https://www.geeksforgeeks.org/how-to-split-a-string-in-cc-python-and-java/)
+vector<string> AdvTokenizer(string s, char del)
+{
+	vector<string> split_string = {};
+    stringstream ss(s);
+    string word;
+    while (!ss.eof()) {
+        getline(ss, word, del);
+		split_string.push_back(word);
+    }
+	return split_string;
+}
+
+/* ====================================================================================================================== */
 float DisplacedHcalJetAnalyzer::GetBDTScores(string bdt_tag){
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetBDTScores()"<<endl;
@@ -78,12 +92,15 @@ float DisplacedHcalJetAnalyzer::GetBDTScores(string bdt_tag){
 
 //	if( std::find(bdt_tags.begin(), bdt_tags.end(), bdt_tag) == bdt_tags.end() ) return -999.9;
 
-	for( auto bdt_var_name: bdt_var_names[bdt_tag] ){
-		if (bdt_tag.find("perJet") != std::string::npos) {
-			bdt_vars[bdt_tag+" "+bdt_var_name] = jet_tree_output_vars_float[bdt_var_name];
+	for( auto bdt_var_name: bdt_var_names[bdt_tag] ){ 
+		if (bdt_var_name.find( "/" ) != string::npos ) { // handle case where bdt_var_names has division in the name: Need to add the vars individually, with bdt_vars = tree_output_vars[numerator] / tree_output_vars[denominator]
+			vector<string> split_string = AdvTokenizer(bdt_var_name, '/');
+			if (bdt_tag.find("perJet") != std::string::npos) bdt_vars[bdt_tag+" "+bdt_var_name] = jet_tree_output_vars_float[split_string[0]] / jet_tree_output_vars_float[split_string[1]];
+			else bdt_vars[bdt_tag+" "+bdt_var_name] = tree_output_vars_float[split_string[0]] / tree_output_vars_float[split_string[1]];
 		}
 		else {
-			bdt_vars[bdt_tag+" "+bdt_var_name] = tree_output_vars_float[bdt_var_name];
+			if (bdt_tag.find("perJet") != std::string::npos) bdt_vars[bdt_tag+" "+bdt_var_name] = jet_tree_output_vars_float[bdt_var_name];
+			else bdt_vars[bdt_tag+" "+bdt_var_name] = tree_output_vars_float[bdt_var_name];
 		}
 	}
 

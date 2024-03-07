@@ -226,6 +226,9 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 	jet_treenames = { "PerJet_NoSel", "PerJet_WPlusJets", "PerJet_LLPmatched" }; 
 
 	vector<string> myvars_bool = {};
+	for (int i = 0; i < HLT_Indices.size(); i++) {
+		myvars_bool.push_back(HLT_Names[i]);
+	}
 
 	// Add Event Variables //
 	vector<string> myvars_int = {
@@ -233,7 +236,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 		"jetIndex"
 	};	
 
-	vector<string> myvars_float = {};
+	vector<string> myvars_float = {"eventHT"};
 
 	// Add BDT Scores //
 	MyTags jet_based = MyTags(/*event_based=*/ false, /*calor_only=*/ false);
@@ -264,7 +267,9 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 
 	myvars_float.push_back("perJet_isTruthMatched");
 	myvars_float.push_back("perJet_isMatchedTo");
+	myvars_float.push_back("perJet_MatchedLLP_DecayZ");
 	myvars_float.push_back("perJet_MatchedLLP_DecayR");
+	myvars_float.push_back("perJet_MatchedLLP_TravelTime");
 	myvars_float.push_back("perJet_OtherLLP_DecayR");
 	myvars_float.push_back("perJet_MatchedLLP_Eta");
 
@@ -637,6 +642,7 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	jet_tree_output_vars_int["muon"]		= n_muon;
 	jet_tree_output_vars_int["pho"]			= n_pho;
 	jet_tree_output_vars_int["jetIndex"] 	= jetIndex;
+	jet_tree_output_vars_float["eventHT"]   = EventHT();
 
 	jet_tree_output_vars_float["perJet_E"] 			= jet_E->at(jetIndex);
 	jet_tree_output_vars_float["perJet_Pt"] 		= jet_Pt->at(jetIndex);
@@ -663,7 +669,9 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	if (matchedLLP > -1) { // if jet is matched to a LLP or LLP decay product
 		jet_tree_output_vars_float["perJet_isTruthMatched"] = 1;
 		jet_tree_output_vars_float["perJet_isMatchedTo"] = matchedLLP;
+		jet_tree_output_vars_float["perJet_MatchedLLP_DecayZ"] = gLLP_DecayVtx_Z->at(matchedLLP); // what is the decay Z for the LLP matched to this jet?
 		jet_tree_output_vars_float["perJet_MatchedLLP_DecayR"] = gLLP_DecayVtx_R.at(matchedLLP); // what is the decay R for the LLP matched to this jet?
+		jet_tree_output_vars_float["perJet_MatchedLLP_TravelTime"] = gLLP_TravelTime->at(matchedLLP); // what is the travel time for the LLP matched to this jet?
 		jet_tree_output_vars_float["perJet_OtherLLP_DecayR"] = gLLP_DecayVtx_R.at(otherLLP); // what is the decay R for the LLP matched to this jet?
 		jet_tree_output_vars_float["perJet_MatchedLLP_Eta"] = gLLP_Eta->at(matchedLLP); // what is the decay eta for the LLP matched to this jet?
 	}

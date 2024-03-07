@@ -163,7 +163,7 @@ float GetBDTScore( string bdt_tag, map<string,Float_t> input_vars, string jet_in
 	for( auto var: bdt_var_names[bdt_tag] ){
 		
 		if( jet_index == "-1" ){ 
-			if (var.find( "/" ) != string::npos ) { // if this part is removed, the per event and per jet trees do not agree. but with it removed, the two per per jet branches do agree...
+			if (var.find( "/" ) != string::npos ) { 
 				vector<string> split_string = AdvTokenizer(var, '/');
 				bdt_vars[bdt_tag+" "+var] = input_vars[split_string[0]] / input_vars[split_string[1]];	// GK: fix for division BDT vars, such that "x/y" becomes input_var["x"] / input_var["y"]
 			}
@@ -215,7 +215,7 @@ void AddBranchesToTree( TTree* tree, bool tree_perJet ){
 
 			// Tree / bdt agreement (event, event) and (perJet, perJet)
 			if( tree_perJet == bdt_perJet[bdt_tag] ){
-				if (var.find( "/" ) != string::npos ) {	// GK: added if statement to deal with division. push back "x" and push back "y"
+				if (var.find( "/" ) != string::npos ) {	// GK: added if statement to deal with division. push back "x" and push back "y" when x/y is input to BDT
 					vector<string> split_string = AdvTokenizer(var, '/');
 					input_variable_names.push_back(split_string[0]);
 					input_variable_names.push_back(split_string[1]);
@@ -229,7 +229,7 @@ void AddBranchesToTree( TTree* tree, bool tree_perJet ){
 				string var_mod = var;
 				var_mod.replace( var.find( "perJet" ), 6, "jet"+i_jet ); 
 				if (var_mod.find( "perJet" ) != string::npos ) var_mod.replace( var_mod.find( "perJet" ), 6, "jet"+i_jet );
-				if (var_mod.find( "/" ) != string::npos ) { // GK: added if statement to deal with division. push back "x" and push back "y"
+				if (var_mod.find( "/" ) != string::npos ) { // GK: GK: added if statement to deal with division. push back "x" and push back "y" when x/y is input to BDT
 					vector<string> split_string = AdvTokenizer(var_mod, '/');
 					input_variable_names.push_back(split_string[0]);
 					input_variable_names.push_back(split_string[1]);
@@ -293,18 +293,10 @@ void AddBranchesToTree( TTree* tree, bool tree_perJet ){
 		for( auto bdt_tag: bdt_tags_booked ){
 			if( tree_perJet == bdt_perJet[bdt_tag] ){
 				output_vars["bdtscoreX_"+bdt_tag] = GetBDTScore( bdt_tag, input_vars, "-1" );
-				// if (jentry <= 10) {
-				// 	cout << GetBDTScore( bdt_tag, input_vars, "-1" ) << " = per jet score, with tag = " << bdt_tag << " and vars = " << endl;
-				// 	for (int i = 0; i < input_variable_names.size(); i++) cout << input_vars[input_variable_names[i]] << endl;
-				// }
 				continue;
 			}
 			for( auto i_jet: vector<string>{ "0", "1", "2" } ){
 				output_vars["jet"+i_jet+"_bdtscoreX_"+bdt_tag] = GetBDTScore( bdt_tag, input_vars, i_jet ); 
-				// if (jentry <= 10) {
-				// 	cout << GetBDTScore( bdt_tag, input_vars, i_jet ) << " = jet " << i_jet << " score, with tag = " << bdt_tag << " and vars = " << endl;
-				// 	for (int i = 0; i < input_variable_names.size(); i++) cout << input_vars[input_variable_names[i]] << endl;
-				// }
 			}
 		}
 
