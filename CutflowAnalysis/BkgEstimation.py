@@ -183,6 +183,8 @@ def main():
 		print(" \n")
 		selection_list_noCut = [
 			"All", 
+            "Jet $\\geq 40$~GeV $p_T$ (one of 3 leading)", 
+            "Jet $\\abs\\eta \\leq 1.26$", 
             "0 jets with BDT score $\\geq 0.99$",
             "1 jet with BDT score $\\geq 0.99$",
             "2 jets with BDT scores $\\geq 0.99$",
@@ -190,6 +192,8 @@ def main():
 	
 		selection_list_abbrev_noCut = [
 			"All       ",
+            "Jet pT", 
+            "Jet eta",
             "No jet BDT passed",
             "Jet BDT passed",
             "Two jet BDT passed",
@@ -209,31 +213,31 @@ def main():
 				selval = tree.GetEntries()
 				init = selval
 			else:
-				if i == 1: 
-					total_selection_string = "(( jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 0 condition
+				if i == 1: total_selection_string = "(jet0_Pt >= 40 || jet1_Pt >= 40 || jet2_Pt >= 40)"
+				if i == 2: total_selection_string += "&& ((jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26) || (jet1_Pt >= 40 && abs(jet1_Eta) <= 1.26) || (jet2_Pt >= 40 && abs(jet2_Eta) <= 1.26))"
+				if i == 3: 
+					total_selection_string += " && (( jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 0 condition
 					total_selection_string += " || ( jet1_Pt >= 40 && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 1 condition
 					total_selection_string += " || ( jet2_Pt >= 40 && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 2 condition
-				if i == 2: 
+				if i == 4: 
 					total_selection_string += "&& ((( jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet1_Pt >= 40 && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 1 condition
 					total_selection_string += " || (( jet1_Pt >= 40 && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet2_Pt >= 40 && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 1 AND 2 condition
 					total_selection_string += " || (( jet2_Pt >= 40 && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)))" # jet 2 AND 0 condition
 
-
 				selval = tree.GetEntries(total_selection_string)
-				if (i == 1): 
-					one_plus_jets = selval
-				if (i == 2): 
-					two_plus_jets = selval
+				if i == 2: all_events = selval # but end up doing comparison (denominator) to all LLP events...
+				if i == 3: one_plus_jets = selval
+				if i == 4: two_plus_jets = selval
 
 				Nevents = tree.GetEntries()
 
 			if print_latex:
-				if (i == 0): 
+				if (i <= 2): 
 					print(selname+" &", round(selval, 4), " &", round(selval/init, 4), " \\\\ ")
-					print("\\hline")
-				if (i == 1): print(selname+" & ", round(init - one_plus_jets, 4), " &", round((init - one_plus_jets)/init, 4), " \\\\ ") # 0 bin is all events - events with at least 1
-				if (i == 2): print(selname+" & ", round(one_plus_jets - two_plus_jets, 4), " &", round((one_plus_jets - two_plus_jets)/init, 4), " \\\\ ") # 1 bin is events with at least 1 - events with at least 2
-				if (i == 3): 
+					if i == 0: print("\\hline")
+				if i == 3: print(selname+" & ", round(all_events - one_plus_jets, 4), " &", round((all_events - one_plus_jets)/init, 4), " \\\\ ") # 0 bin is all events - events with at least 1
+				if i == 4: print(selname+" & ", round(one_plus_jets - two_plus_jets, 4), " &", round((one_plus_jets - two_plus_jets)/init, 4), " \\\\ ") # 1 bin is events with at least 1 - events with at least 2
+				if i == 5: 
 					print(selname+" & ", round(two_plus_jets, 4), " & ", round(two_plus_jets/init, 4), " \\\\ ") # 2+ bin is events with at least 2
 					latex_end(file_path)
 
