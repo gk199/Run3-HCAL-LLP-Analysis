@@ -74,7 +74,7 @@ def main():
 	if "LLP_MC" in file_path:
 		# Cutflow table for background estimation: basic event selection
 		print(" \n")
-		print("Signal cutflow, done per event")
+		print("Signal cutflow, with truth cuts, done per event")
 		print(" \n")
 
 		selection_list = [
@@ -176,6 +176,69 @@ def main():
 			else:
 				if (i < 4): print(selection_list_abbrev[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4), "LLP 1:", "\t", round(selval1, 4), "\t", round(selval1/init, 4))
 				if (i >= 4): print(selection_list_abbrev[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
+
+		# Cutflow table for background estimation: basic event selection
+		print(" \n")
+		print("Signal cutflow, without truth cuts, done per event")
+		print(" \n")
+		selection_list_noCut = [
+			"All", 
+            "0 jets with BDT score $\\geq 0.99$",
+            "1 jet with BDT score $\\geq 0.99$",
+            "2 jets with BDT scores $\\geq 0.99$",
+		]
+	
+		selection_list_abbrev_noCut = [
+			"All       ",
+            "No jet BDT passed",
+            "Jet BDT passed",
+            "Two jet BDT passed",
+		]
+		
+		if print_latex:
+			event_latex_setup(file_path)
+
+		init = -1
+		
+		for i in range(len(selection_list_noCut)):
+			selname = selection_list_noCut[i]
+			selval  = -1
+			Nevents = -1
+
+			if (i == 0): 
+				selval = tree.GetEntries()
+				init = selval
+			else:
+				if i == 1: 
+					total_selection_string = "(( jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 0 condition
+					total_selection_string += " || ( jet1_Pt >= 40 && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 1 condition
+					total_selection_string += " || ( jet2_Pt >= 40 && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 2 condition
+				if i == 2: 
+					total_selection_string += "&& ((( jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet1_Pt >= 40 && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 1 condition
+					total_selection_string += " || (( jet1_Pt >= 40 && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet2_Pt >= 40 && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 1 AND 2 condition
+					total_selection_string += " || (( jet2_Pt >= 40 && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)))" # jet 2 AND 0 condition
+
+
+				selval = tree.GetEntries(total_selection_string)
+				if (i == 1): 
+					one_plus_jets = selval
+				if (i == 2): 
+					two_plus_jets = selval
+
+				Nevents = tree.GetEntries()
+
+			if print_latex:
+				if (i == 0): 
+					print(selname+" &", round(selval, 4), " &", round(selval/init, 4), " \\\\ ")
+					print("\\hline")
+				if (i == 1): print(selname+" & ", round(init - one_plus_jets, 4), " &", round((init - one_plus_jets)/init, 4), " \\\\ ") # 0 bin is all events - events with at least 1
+				if (i == 2): print(selname+" & ", round(one_plus_jets - two_plus_jets, 4), " &", round((one_plus_jets - two_plus_jets)/init, 4), " \\\\ ") # 1 bin is events with at least 1 - events with at least 2
+				if (i == 3): 
+					print(selname+" & ", round(two_plus_jets, 4), " & ", round(two_plus_jets/init, 4), " \\\\ ") # 2+ bin is events with at least 2
+					latex_end(file_path)
+
+			else:
+				print(selection_list_abbrev_noCut[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
 
 
 	if "Run2023" in file_path:
