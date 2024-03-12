@@ -70,6 +70,8 @@ def main():
 	file_path = sys.argv[1]
 	#tree     = sys.argv[2]
 	#weight   = sys.argv[3]	
+
+	jet_energy = sys.argv[2]
 	
 	if "LLP_MC" in file_path:
 		# Cutflow table for background estimation: basic event selection
@@ -123,18 +125,20 @@ def main():
 			selval1 = -1
 			Nevents = -1
 
-			if (i == 0): 
+			if i == 0: 
 				selval = tree.GetEntries()
 				selval1 = tree.GetEntries()
 				init = selval
 			else:
-				if i == 1: selection_string += "(LLP0_DecayR >= 214.2 && LLP0_DecayR < 295)"
-				if i == 2: selection_string += "&& abs(LLP0_Eta) <= 1.26"
-				if i == 3: selection_string += "&& LLP0_E > 60"
-
-				if i == 1: selection1_string += "(LLP1_DecayR >= 214.2 && LLP1_DecayR < 295)"
-				if i == 2: selection1_string += "&& abs(LLP1_Eta) <= 1.26"
-				if i == 3: selection1_string += "&& LLP1_E > 60"
+				if i == 1: 
+					selection_string += "(LLP0_DecayR >= 214.2 && LLP0_DecayR < 295)"
+					selection1_string += "(LLP1_DecayR >= 214.2 && LLP1_DecayR < 295)"
+				if i == 2: 
+					selection_string += "&& abs(LLP0_Eta) <= 1.26"
+					selection1_string += "&& abs(LLP1_Eta) <= 1.26"
+				if i == 3: 
+					selection_string += "&& LLP0_E > 60"
+					selection1_string += "&& LLP1_E > 60"
 
 				if i == 4: total_selection_string = "(" + selection_string + ") || (" + selection1_string + ")"
 				if i == 5: total_selection_string = "(" + selection_string + " && " + selection1_string + ")"
@@ -142,34 +146,32 @@ def main():
 				if i == 7: total_selection_string = "(" + selection_string + " && " + selection1_string + ") && eventHT > 200"
 
 				if i == 8: 
-					total_selection_string += "&& (( jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 0 condition
-					total_selection_string += " || ( jet1_Pt >= 40 && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 1 condition
-					total_selection_string += " || ( jet2_Pt >= 40 && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 2 condition
+					total_selection_string += "&& (( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 0 condition
+					total_selection_string += " || ( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 1 condition
+					total_selection_string += " || ( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 2 condition
 				if i == 9: 
-					total_selection_string += "&& ((( jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet1_Pt >= 40 && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 1 condition
-					total_selection_string += " || (( jet1_Pt >= 40 && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet2_Pt >= 40 && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 1 AND 2 condition
-					total_selection_string += " || (( jet2_Pt >= 40 && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)))" # jet 2 AND 0 condition
+					total_selection_string += "&& ((( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 1 condition
+					total_selection_string += " || (( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 1 AND 2 condition
+					total_selection_string += " || (( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)))" # jet 2 AND 0 condition
 
 				selval = tree.GetEntries(selection_string)
 				selval1 = tree.GetEntries(selection1_string)
 
-				if (i >= 4): selval = tree.GetEntries(total_selection_string)
-				if (i == 7): all_events = selval
-				if (i == 8): 
-					one_plus_jets = selval
-				if (i == 9): 
-					two_plus_jets = selval
+				if i >= 4: selval = tree.GetEntries(total_selection_string)
+				if i == 7: all_events = selval
+				if i == 8: one_plus_jets = selval
+				if i == 9: two_plus_jets = selval
 
 				Nevents = tree.GetEntries()
 
 			if print_latex:
-				if (i < 4): print(selname+" &", round(selval, 4), "&", round(selval1, 4), "&", round(selval/init, 4), "&", round(selval1/init, 4), "\\\\")
-				if (i == 4): print("\\hline")
+				if i < 4: print(selname+" &", round(selval, 4), "&", round(selval1, 4), "&", round(selval/init, 4), "&", round(selval1/init, 4), "\\\\")
+				if i == 4: print("\\hline")
 				if (i >= 4 and i < 8): print(selname+" & \\multicolumn{2}{l}{", round(selval, 4), "} & \\multicolumn{2}{l}{", round(selval/init, 4), "} \\\\ ")
-				if (i == 7): print("\\hline")
-				if (i == 8): print(selname+" & \\multicolumn{2}{l}{", round(all_events - one_plus_jets, 4), "} & \\multicolumn{2}{l}{", round((all_events - one_plus_jets)/init, 4), "} \\\\ ") # 0 bin is all events - events with at least 1
-				if (i == 9): print(selname+" & \\multicolumn{2}{l}{", round(one_plus_jets - two_plus_jets, 4), "} & \\multicolumn{2}{l}{", round((one_plus_jets - two_plus_jets)/init, 4), "} \\\\ ") # 1 bin is events with at least 1 - events with at least 2
-				if (i == 10): 
+				if i == 7: print("\\hline")
+				if i == 8: print(selname+" & \\multicolumn{2}{l}{", round(all_events - one_plus_jets, 4), "} & \\multicolumn{2}{l}{", round((all_events - one_plus_jets)/init, 4), "} \\\\ ") # 0 bin is all events - events with at least 1
+				if i == 9: print(selname+" & \\multicolumn{2}{l}{", round(one_plus_jets - two_plus_jets, 4), "} & \\multicolumn{2}{l}{", round((one_plus_jets - two_plus_jets)/init, 4), "} \\\\ ") # 1 bin is events with at least 1 - events with at least 2
+				if i == 10: 
 					print(selname+" & \\multicolumn{2}{l}{", round(two_plus_jets, 4), "} & \\multicolumn{2}{l}{", round(two_plus_jets/init, 4), "} \\\\ ") # 2+ bin is events with at least 2
 					latex_end(file_path)
 
@@ -183,7 +185,7 @@ def main():
 		print(" \n")
 		selection_list_noCut = [
 			"All", 
-            "Jet $\\geq 40$~GeV $p_T$ (one of 3 leading)", 
+            "Jet $\\geq "+jet_energy+"$~GeV $p_T$ (one of 3 leading)", 
             "Jet $\\abs\\eta \\leq 1.26$", 
             "0 jets with BDT score $\\geq 0.99$",
             "1 jet with BDT score $\\geq 0.99$",
@@ -209,20 +211,20 @@ def main():
 			selval  = -1
 			Nevents = -1
 
-			if (i == 0): 
+			if i == 0: 
 				selval = tree.GetEntries()
 				init = selval
 			else:
-				if i == 1: total_selection_string = "(jet0_Pt >= 40 || jet1_Pt >= 40 || jet2_Pt >= 40)"
-				if i == 2: total_selection_string += "&& ((jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26) || (jet1_Pt >= 40 && abs(jet1_Eta) <= 1.26) || (jet2_Pt >= 40 && abs(jet2_Eta) <= 1.26))"
+				if i == 1: total_selection_string = "(jet0_Pt >= "+jet_energy+" || jet1_Pt >= "+jet_energy+" || jet2_Pt >= "+jet_energy+")"
+				if i == 2: total_selection_string += "&& ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26) || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26) || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26))"
 				if i == 3: 
-					total_selection_string += " && (( jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 0 condition
-					total_selection_string += " || ( jet1_Pt >= 40 && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 1 condition
-					total_selection_string += " || ( jet2_Pt >= 40 && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 2 condition
+					total_selection_string += " && (( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 0 condition
+					total_selection_string += " || ( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 1 condition
+					total_selection_string += " || ( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 2 condition
 				if i == 4: 
-					total_selection_string += "&& ((( jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet1_Pt >= 40 && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 1 condition
-					total_selection_string += " || (( jet1_Pt >= 40 && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet2_Pt >= 40 && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 1 AND 2 condition
-					total_selection_string += " || (( jet2_Pt >= 40 && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)))" # jet 2 AND 0 condition
+					total_selection_string += "&& ((( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 1 condition
+					total_selection_string += " || (( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 1 AND 2 condition
+					total_selection_string += " || (( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)))" # jet 2 AND 0 condition
 
 				selval = tree.GetEntries(total_selection_string)
 				if i == 2: all_events = selval # but end up doing comparison (denominator) to all LLP events...
@@ -232,7 +234,7 @@ def main():
 				Nevents = tree.GetEntries()
 
 			if print_latex:
-				if (i <= 2): 
+				if i <= 2: 
 					print(selname+" &", round(selval, 4), " &", round(selval/init, 4), " \\\\ ")
 					if i == 0: print("\\hline")
 				if i == 3: print(selname+" & ", round(all_events - one_plus_jets, 4), " &", round((all_events - one_plus_jets)/init, 4), " \\\\ ") # 0 bin is all events - events with at least 1
@@ -248,11 +250,11 @@ def main():
 	if "Run2023" in file_path:
 		# Cutflow table for background estimation: basic event selection
 		print(" \n")
-		print("Background cutflow, done per event")
+		print("Background (W+jets) cutflow, done per event")
 		print(" \n")
 		event_selection_list = [
             "All events (skim)", 
-            "Jet $\\geq 40$~GeV $p_T$ (one of 3 leading)", 
+            "Jet $\\geq "+jet_energy+"$~GeV $p_T$ (one of 3 leading)", 
             "Jet $\\abs\\eta \\leq 1.26$", 
             "0 jets with BDT score $\\geq 0.99$",
             "1 jet with BDT score $\\geq 0.99$",
@@ -283,40 +285,97 @@ def main():
 			selval  = -1
 			Nevents = -1
 
-			if (i == 0): 
+			if i == 0: 
+				selval = tree.GetEntries()
+				init = selval
+			else:
+				if i == 1: selection_string += "(jet0_Pt >= "+jet_energy+" || jet1_Pt >= "+jet_energy+" || jet2_Pt >= "+jet_energy+")"
+				if i == 2: selection_string += "&& ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26) || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26) || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26))"
+				if i == 3: 
+					selection_string += "&& ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 0 condition
+					selection_string += " || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 1 condition
+					selection_string += " || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 2 condition
+				if i == 4: 
+					selection_string += "&& (((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 1 condition
+					selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 1 AND 2 condition
+					selection_string += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)))" # jet 2 AND 0 condition
+                
+				selval = tree.GetEntries(selection_string)
+				if i == 1: comp = selval
+				if i == 2: all_events = selval
+				if i == 3: one_plus_jets = selval
+				if i == 4: two_plus_jets = selval
+				Nevents = tree.GetEntries()
+
+			if print_latex:
+				if i == 0: print("\\hline")
+				if i < 3: print(selname+" &", round(selval, 4), "&", round(selval/init, 4), " \\\\ ")
+				if i == 3: print(selname+" &", round(all_events - one_plus_jets, 4), "&", round((all_events - one_plus_jets)/init, 4), " \\\\ ") # 0 bin is all events - events with at least 1
+				if i == 4: print(selname+" &", round(one_plus_jets - two_plus_jets, 4), "&", round((one_plus_jets - two_plus_jets)/init, 4), " \\\\ ") # 1 bin is events with at least 1 - events with at least 2
+				if i == 5: 
+					print(selname+" &", round(two_plus_jets, 4), "&", round(two_plus_jets/init, 4), " \\\\ ") # 2+ bin is events with at least 2
+					latex_end(file_path)
+
+			else:
+				print(selection_list_abbrev[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
+
+		print(" \n")
+		print("Background single tag estimation, done per event")
+		print(" \n")
+		event_selection_list = [
+            "All events (skim)", 
+            "Jet $\\geq 40$~GeV $p_T$ (one of 3 leading)", 
+            "Jet $\\abs\\eta \\leq 1.26$", 
+            "One tagged jet prediction ($p=0.0014$)",
+            "Jet $\\geq 60$~GeV $p_T$ (one of 3 leading)", 
+            "Jet $\\abs\\eta \\leq 1.26$", 
+            "One tagged jet prediction ($p=0.0011$)",
+        ]
+        
+		event_selection_list_abbrev = [
+            "All       ", 
+            "Jet pT", 
+            "Jet eta",
+            "One jet prediction",
+            "Jet pT", 
+            "Jet eta",
+            "One jet prediction",
+        ]
+
+		file = ROOT.TFile.Open(file_path)
+		tree = file.Get("NoSel")
+        
+		selection_string = ""
+        
+		if print_latex:
+			event_latex_setup(file_path)
+
+		init = -1
+        
+		for i in range(len(event_selection_list)):
+			selname = event_selection_list[i]
+			selval  = -1
+			Nevents = -1
+
+			if i == 0: 
 				selval = tree.GetEntries()
 				init = selval
 			else:
 				if i == 1: selection_string += "(jet0_Pt >= 40 || jet1_Pt >= 40 || jet2_Pt >= 40)"
 				if i == 2: selection_string += "&& ((jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26) || (jet1_Pt >= 40 && abs(jet1_Eta) <= 1.26) || (jet2_Pt >= 40 && abs(jet2_Eta) <= 1.26))"
-				if i == 3: 
-					selection_string += "&& ((jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 0 condition
-					selection_string += " || (jet1_Pt >= 40 && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 1 condition
-					selection_string += " || (jet2_Pt >= 40 && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 2 condition
-				if i == 4: 
-					selection_string += "&& (((jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet1_Pt >= 40 && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 1 condition
-					selection_string += " || ((jet1_Pt >= 40 && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet2_Pt >= 40 && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 1 AND 2 condition
-					selection_string += " || ((jet2_Pt >= 40 && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)))" # jet 2 AND 0 condition
-                
+				if i == 4: selection_string = "(jet0_Pt >= 60 || jet1_Pt >= 60 || jet2_Pt >= 60)"
+				if i == 5: selection_string += "&& ((jet0_Pt >= 60 && abs(jet0_Eta) <= 1.26) || (jet1_Pt >= 60 && abs(jet1_Eta) <= 1.26) || (jet2_Pt >= 60 && abs(jet2_Eta) <= 1.26))"
+								
 				selval = tree.GetEntries(selection_string)
-				if (i == 1): comp = selval
-				if (i == 2): all_events = selval
-				if (i == 3): 
-					one_plus_jets = selval
-				if (i == 4): 
-					two_plus_jets = selval
-				Nevents = tree.GetEntries()
+				if (i == 2 or i == 5): all_events = selval
+				if i == 3: selval = all_events * 0.0014
+				if i == 6: selval = all_events * 0.0011
 
 			if print_latex:
-				if (i < 3): print(selname+" &", round(selval, 4), "&", round(selval/init, 4), " \\\\ ")
-				if (i == 3): print(selname+" &", round(all_events - one_plus_jets, 4), "&", round((all_events - one_plus_jets)/init, 4), " \\\\ ") # 0 bin is all events - events with at least 1
-				if (i == 4): print(selname+" &", round(one_plus_jets - two_plus_jets, 4), "&", round((one_plus_jets - two_plus_jets)/init, 4), " \\\\ ") # 1 bin is events with at least 1 - events with at least 2
-				if (i == 5): print(selname+" &", round(two_plus_jets, 4), "&", round(two_plus_jets/init, 4), " \\\\ ") # 2+ bin is events with at least 2
-				if (i == 0): print("\\hline")
-				if (i == 5): latex_end(file_path)
-
-			else:
-				print(selection_list_abbrev[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
+				print(selname+" &", round(selval, 4), "&", round(selval/init, 4), " \\\\ ")
+				if i == 0: print("\\hline")
+				if i == 3: print("\\hline \\hline")
+				if i == 6: latex_end(file_path)
 
 if __name__ == '__main__':
 	main()
