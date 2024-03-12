@@ -21,7 +21,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 
 	// Add Event Variables //
 	vector<string> myvars_int = {
-		"run","lumi","event","jet","muon","ele","pho",
+		"run","lumi","event","jet","validJet","muon","ele","pho",
 		"RechitN","RechitN_1GeV","RechitN_5GeV","RechitN_10GeV",
 		"TrackN", "ecalRechitN", "HBHE_Rechit_auxTDC"
 	};	
@@ -59,6 +59,9 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("jet%d_E", i) );
 		myvars_float.push_back( Form("jet%d_Mass", i) );
 		myvars_float.push_back( Form("jet%d_JetArea", i) );
+
+		myvars_int.push_back( Form("jet%d_L1trig_Matched", i) );
+		// myvars_int.push_back( Form("jet%d_Index", i) );
 
 		myvars_float.push_back( Form("jet%d_ChargedHadEFrac", i) );
 		myvars_float.push_back( Form("jet%d_NeutralHadEFrac", i) );
@@ -414,11 +417,25 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("l1jet%d_hwQual", i)]	= l1jet_hwQual->at(i);
 	}
 
-	// jets are already sorted in jet Pt (not jet E!). Loop over first three jets, and save quantities in the ntuples
-	int max_jets = std::min(3, n_jet);
-	//std::cout << " " << std::endl;
-	//std::cout << "Event = " << eventNum << std::endl;
+	// jets are already sorted in jet Pt (not jet E!). Loop over first three reco jets, and save quantities in the ntuples
+	// int max_jets = std::min(3, n_jet);
+	int max_jets = n_jet;
+	int valid_jet = 0;
 	for (int i = 0; i < max_jets; i++) {
+		if (jet_Pt->at(i) > 40 && abs(jet_Eta->at(i)) <= 1.26) valid_jet += 1; // continue; // not interested if low energy (< 40) or in HE (eta > 1.26)
+		if (i > 2) continue; // below output variables are only designed to be used for first three jets
+		// tree_output_vars_int[Form("jet%d_Index", i)]	= i; // needed if only filling for valid_jet, ("jet%d_Index", valid_jet)] = i
+		
+		float dR = 999.9;
+		float L1trig = -999.9;
+		for (int j = 0; j < max_l1jets; j++) { // loop over L1 jets to determine if a reco jet is matched to jet that passed L1
+			float dR_to_L1 = DeltaR( jet_Eta->at(i), l1jet_Eta->at(j), jet_Phi->at(i), l1jet_Phi->at(j) );
+			if (dR_to_L1 < dR) { // if matched, save the dR and whether the L1 jet is triggered by HCAL LLP
+				dR = dR_to_L1;
+				L1trig = l1jet_hwQual->at(j);
+			}
+		}
+		if (dR < 0.4) tree_output_vars_int[Form("jet%d_L1trig_Matched", i)] = L1trig;
 		tree_output_vars_float[Form("jet%d_Pt", i)] 	= jet_Pt->at(i);
 		tree_output_vars_float[Form("jet%d_Eta", i)] 	= jet_Eta->at(i);
 		tree_output_vars_float[Form("jet%d_Phi", i)] 	= jet_Phi->at(i);
@@ -539,6 +556,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 			}
 		} // end of track matching 
 	}
+	tree_output_vars_int["validJet"]	= valid_jet;
 
 	for (int i = 0; i < n_gLLP; i++) {
 		float decay_radius = gLLP_DecayVtx_R.at(i); // GetDecayRadiusHB_LLP(i); // -999 default value
@@ -641,7 +659,6 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	jet_tree_output_vars_int["ele"]			= n_ele;
 	jet_tree_output_vars_int["muon"]		= n_muon;
 	jet_tree_output_vars_int["pho"]			= n_pho;
-	jet_tree_output_vars_int["jetIndex"] 	= jetIndex;
 	jet_tree_output_vars_float["eventHT"]   = EventHT();
 
 	jet_tree_output_vars_float["perJet_E"] 			= jet_E->at(jetIndex);

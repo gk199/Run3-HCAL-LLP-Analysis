@@ -207,8 +207,16 @@ Location of minituples:
 /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.6/
 ```
 
+### v3.7
+Updates:
+* For jet matched, added LLP z decay position and travel time (for HLT efficiency plots), event HT
+* Fix bug for BDT inputs that rely on division (track pT / jet pT; rechit E / jet E) for BDT evaluation
+* Add L1 jet matching to reco jets, and save value of hwQual for matched L1 jet (dR < 0.4)
+
+
 ## V4
 Ongoing wish list:
 * MET filters
 * Trigger prescales
 * Some duplication in coding between event and jet filled trees, can this be reduced or simplified?
+* Should be able to do BDT helper with automated read-in of files instead of MyTags class in .h file
