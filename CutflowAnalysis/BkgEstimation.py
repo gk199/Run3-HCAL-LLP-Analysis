@@ -246,6 +246,74 @@ def main():
 			else:
 				print(selection_list_abbrev_noCut[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
 
+		# Cutflow table for fraction of events passing BDT that have HLT set
+		print(" \n")
+		print("Signal cutflow, HLT check, done per event")
+		print(" \n")
+		selection_list_noCut = [
+			"All", 
+            "Jet $\\geq "+jet_energy+"$~GeV $p_T$ (one of 3 leading)", 
+            "Jet $\\abs\\eta \\leq 1.26$", 
+            "0 jets with BDT score $\\geq 0.99$",
+            "1+ jet with BDT score $\\geq 0.99$",
+			"HCAL based HLT passed",
+		]
+	
+		selection_list_abbrev_noCut = [
+			"All       ",
+            "Jet pT", 
+            "Jet eta",
+            "No jet BDT passed",
+            "Jet BDT passed",
+			"HLT passed",
+		]
+		
+		if print_latex:
+			event_latex_setup(file_path)
+
+		init = -1
+		
+		for i in range(len(selection_list_noCut)):
+			selname = selection_list_noCut[i]
+			selval  = -1
+			Nevents = -1
+
+			if i == 0: 
+				selval = tree.GetEntries()
+				init = selval
+			else:
+				if i == 1: total_selection_string = "(jet0_Pt >= "+jet_energy+" || jet1_Pt >= "+jet_energy+" || jet2_Pt >= "+jet_energy+")"
+				if i == 2: total_selection_string += "&& ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26) || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26) || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26))"
+				if i == 3: 
+					total_selection_string += " && (( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 0 condition
+					total_selection_string += " || ( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 1 condition
+					total_selection_string += " || ( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 2 condition
+				if i == 5: 
+					total_selection_string += "&& (( HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT240_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT280_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1)"
+					total_selection_string += "|| ( HLT_HT170_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT270_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet60_DisplacedTrack == 1 )"
+					total_selection_string += "|| ( HLT_HT320_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 || HLT_HT420_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 )"
+					total_selection_string += "|| ( HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay0p5nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay1nsInclusive == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay1nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay2nsInclusive == 1 )"
+					total_selection_string += "|| HLT_L1SingleLLPJet == 1)"
+
+				selval = tree.GetEntries(total_selection_string)
+				if i == 2: all_events = selval # but end up doing comparison (denominator) to all LLP events...
+				if i == 3: one_plus_jets = selval
+
+				Nevents = tree.GetEntries()
+
+			if print_latex:
+				if i <= 2: 
+					print(selname+" &", round(selval, 4), " &", round(selval/init, 4), " \\\\ ")
+					if i == 0: print("\\hline")
+				if i == 3: print(selname+" & ", round(all_events - one_plus_jets, 4), " &", round((all_events - one_plus_jets)/init, 4), " \\\\ ") # 0 bin is all events - events with at least 1
+				if i == 4: print(selname+" & ", round(one_plus_jets, 4), " &", round((one_plus_jets)/init, 4), " \\\\ ") # 1 bin is events with at least 1 
+				if i == 5: 
+					print(selname+" & ", round(selval, 4), " & ", round(selval/init, 4), " \\\\ ") 
+					latex_end(file_path)
+
+			else:
+				print(selection_list_abbrev_noCut[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
+
 
 	if "Run2023" in file_path:
 		# Cutflow table for background estimation: basic event selection
@@ -374,7 +442,7 @@ def main():
 			if print_latex:
 				print(selname+" &", round(selval, 4), "&", round(selval/init, 4), " \\\\ ")
 				if i == 0: print("\\hline")
-				if i == 3: print("\\hline \\hline")
+				if i == 3: print("\\hline")
 				if i == 6: latex_end(file_path)
 
 if __name__ == '__main__':
