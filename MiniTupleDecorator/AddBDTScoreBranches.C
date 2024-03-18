@@ -27,7 +27,7 @@ bool debug = false;
 // ----- Input and Output Paths ----- //
 
 string basepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/";
-string vIN 		= "v3.6";
+string vIN 		= "v3.7";
 string vOUT		= vIN+".1";
 
 string infiledir  = basepath + vIN;
@@ -44,7 +44,7 @@ vector<double> list_lifetime_rw     = {  0.5 ,  1.,  2.,  4.,  5.,  6.,  10.,  1
 
 // ----- BDT Globals ----- //
 
-string bdt_version = "v0.6";
+string bdt_version = "v0.7";
 
 vector<string> bdt_tags = { "LLP350_MS80_perJet" }; //{ "LLP125", "LLP125_perJet" }; //{ "LLP125", "LLP350", "hadd",  "LLP125_perJet", "LLP350_perJet", "hadd_perJet" };
 map<string,TMVA::Reader*> bdt_reader;
@@ -225,7 +225,7 @@ void AddBranchesToTree( TTree* tree, bool tree_perJet ){
 			} 
 			
 		    // Run jet-level bdt on event-level
-			for( auto i_jet: vector<string>{ "0", "1", "2" } ){
+			for( auto i_jet: vector<string>{ "0", "1", "2", "3", "4", "5" } ){
 				string var_mod = var;
 				var_mod.replace( var.find( "perJet" ), 6, "jet"+i_jet ); 
 				if (var_mod.find( "perJet" ) != string::npos ) var_mod.replace( var_mod.find( "perJet" ), 6, "jet"+i_jet );
@@ -261,7 +261,7 @@ void AddBranchesToTree( TTree* tree, bool tree_perJet ){
 			output_variable_names.push_back( "bdtscoreX_"+bdt_tag );
 			continue;
 		}
-		for( auto i_jet: vector<string>{ "0", "1", "2" } ){
+		for( auto i_jet: vector<string>{ "0", "1", "2", "3", "4", "5" } ){ // first 6 jets are saved
 			output_variable_names.push_back( "jet"+i_jet+"_bdtscoreX_"+bdt_tag );
 		}
 	}
@@ -339,9 +339,9 @@ void AddTreesToFile( string infiletag, vector<string> treenames ){
         bool isData = false;
         bool isSignal = false;
         bool isBkgMC = false;
-        //if( infiletag.find("data") != string::npos ) isData = true;
-        //if( infiletag.find("CTau") != string::npos ) isSignal = true; // TODO: FIX 
-        //if( !isData && !isSignal ) isBkgMC = true;
+        if( infiletag.find("Run2023") != string::npos ) isData = true;
+        if( infiletag.find("CTau") != string::npos ) isSignal = true; 
+        if( !isData && !isSignal ) isBkgMC = true;
 
         // Infile
         TString infilepath = Form( "%s/minituple_%s.root", infiledir.c_str(), infiletag.c_str() );
@@ -391,8 +391,25 @@ void AddBDTScoreBranches(){
 	clock_t start_clock = clock();
 
 	//AddTreesToFile( "test", vector<string>{"NoSel","WPlusJets", "PerJet_LLPmatched", "PerJet_NoSel", "PerJet_WPlusJets"} );
-	//AddTreesToFile( "test", vector<string>{"NoSel", "PerJet_LLPmatched" } );
-	AddTreesToFile( "v3.6_LLPskim_Run2023Bv1_2024_03_02", vector<string>{ "WPlusJets", "PerJet_WPlusJets" } );
+
+	AddTreesToFile( "v3.7_LLPskim_Run2023Bv1_2024_03_14", vector<string>{ "NoSel", "WPlusJets" } );
+	AddTreesToFile( "v3.7_LLPskim_Run2023Cv1_2024_03_14", vector<string>{ "NoSel", "WPlusJets" } );
+	AddTreesToFile( "v3.7_LLPskim_Run2023Cv2_2024_03_14", vector<string>{ "NoSel", "WPlusJets" } );
+	AddTreesToFile( "v3.7_LLPskim_Run2023Cv3_2024_03_14", vector<string>{ "NoSel", "WPlusJets" } );
+	AddTreesToFile( "v3.7_LLPskim_Run2023Cv4_2024_03_14", vector<string>{ "NoSel", "WPlusJets" } );
+	AddTreesToFile( "v3.7_LLPskim_Run2023Dv1_2024_03_14", vector<string>{ "NoSel", "WPlusJets" } );
+	AddTreesToFile( "v3.7_LLPskim_Run2023Dv2_2024_03_14", vector<string>{ "NoSel", "WPlusJets" } );
+
+	AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_14_TEST", vector<string>{ "NoSel" } );
+	AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_14_TRAIN", vector<string>{ "NoSel" } );
+	AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_03_14_batch1", vector<string>{ "NoSel" } );
+	AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_03_14_batch2", vector<string>{ "NoSel" } );
+	AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_03_14_batch1", vector<string>{ "NoSel" } );
+	AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_03_14_batch2", vector<string>{ "NoSel" } );
+	AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_03_14_batch1", vector<string>{ "NoSel" } );
+	AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_03_14_batch2", vector<string>{ "NoSel" } );
+	AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TEST", vector<string>{ "NoSel" } );
+	AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TRAIN", vector<string>{ "NoSel" } );
 
 	std::cout<<"--------------------------------------------------------"<<endl;
 	double duration_sec = (clock()-start_clock)/(double)CLOCKS_PER_SEC;
@@ -403,4 +420,3 @@ void AddBDTScoreBranches(){
 	std::cout<<"--------------------------------------------------------"<<endl;	
 
 }
-

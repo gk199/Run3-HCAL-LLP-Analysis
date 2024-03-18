@@ -210,9 +210,15 @@ Location of minituples:
 ### v3.7
 Updates:
 * For jet matched, added LLP z decay position and travel time (for HLT efficiency plots), event HT
-* Fix bug for BDT inputs that rely on division (track pT / jet pT; rechit E / jet E) for BDT evaluation
+* Fix bug for BDT inputs that rely on division (track pT / jet pT; rechit E / jet E) for BDT evaluation, both in decorator script and in general minituples script
 * Add L1 jet matching to reco jets, and save value of hwQual for matched L1 jet (dR < 0.4)
+* Save up to 6 valid jets (with a pT > 40 and eta < 1.26). Jet indexing is now off of valid jets, not all jets. Values will be -9999.9 if there is not a valid jet at that position
+* BDT (v0.7) trained on v3.6 minituples
 
+Location of minituples:
+```
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/
+```
 
 ## V4
 Ongoing wish list:
