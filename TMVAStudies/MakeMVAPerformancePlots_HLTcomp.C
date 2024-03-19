@@ -539,6 +539,7 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
     tree_sig->SetBranchAddress("perJet_MatchedLLP_DecayR", &perJet_MatchedLLP_DecayR);
     tree_sig->SetBranchAddress("perJet_MatchedLLP_Eta", &perJet_MatchedLLP_Eta);
     SignalSelection = Form("perJet_MatchedLLP_DecayR >= %f && perJet_MatchedLLP_DecayR < %f && abs(perJet_MatchedLLP_Eta) < %f", radius_HB1, radius_HBend, 1.26);
+    HLT_Selection = "(HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT240_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT280_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT170_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT270_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet60_DisplacedTrack == 1 || HLT_HT320_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 || HLT_HT420_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay0p5nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay1nsInclusive == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay1nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay2nsInclusive == 1)";
     if (plotType.find("HCAL12") != std::string::npos) {
       SignalSelection = Form("perJet_MatchedLLP_DecayR >= %f && perJet_MatchedLLP_DecayR < %f && abs(perJet_MatchedLLP_Eta) < %f", radius_HB1, radius_HB3, 1.26);
       cout << "selection = HCAL depth 12 only" << endl;
@@ -815,42 +816,44 @@ void MakeMVAPerformancePlots_HLTcomp()
   SetupPlots();
 
   // Signals
-  // string SignalTree = "PerJet_LLPmatched";
-  string SignalTree = "NoSel";
+  string SignalTree = "PerJet_LLPmatched";
 
-  string Signal = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.6/minituple_v3.6_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_02_TEST.root";
-  // string SigLabel = "125";
+  string Signal = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_14_TEST.root";
   string SigLabel = "125_mX15";
 
-  // string Signal2 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.6/minituple_v3.6_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_02_TEST.root";
-  // string SigLabel2 = "350_mX80";
-
-  string Signal2 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.6.1/minituple_v3.6_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_02_TEST.root";
+  string Signal2 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TEST.root";
   string SigLabel2 = "350_mX80";
 
-  string Signal3 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.6/minituple_v3.6_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_03_02_batch2.root";
+  // for per event analysis
+  // string Signal2 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TEST.root";
+  // string SigLabel2 = "350_mX80";
+  // string SignalTree = "NoSel";
+
+  string Signal3 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_03_14_batch2.root";
   string SigLabel3 = "125_mX50";
 
-  string Signal4 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.6/minituple_v3.6_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_03_02_batch2.root";
+  string Signal4 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_03_14_batch2.root";
   string SigLabel4 = "250_mX120";
 
-  string Signal5 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.6/minituple_v3.6_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_03_02_batch2.root";
+  string Signal5 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_03_14_batch2.root";
   string SigLabel5 = "350_mX160";
 
   // Backgrounds
-  string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.6.1/minituple_v3.6_LLPskim_Run2023_HADD.root";
-  string BkgLabel = "W+Jets";
-  string BackgroundTree = "WPlusJets";
-  // string BkgLabel = "W+Jets_perJet";
-  // string BackgroundTree = "PerJet_WPlusJets";
+  // string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_v3.7_LLPskim_Run2023_HADD.root";
+  // string BkgLabel = "W+Jets";
+  // string BackgroundTree = "WPlusJets";
+  // string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_v3.7_LLPskim_Run2023Cv4_2024_03_14.root";
+  string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_v3.7_LLPskim_Run2023_HADD.root";
+  string BkgLabel = "W+Jets_perJet";
+  string BackgroundTree = "PerJet_WPlusJets";
 
-  // minituple_v3.6_LLPskim_Run2023Bv1_2024_03_02.root
-  // minituple_v3.6_LLPskim_Run2023Cv1_2024_03_02.root
-  // minituple_v3.6_LLPskim_Run2023Cv2_2024_03_02.root
-  // minituple_v3.6_LLPskim_Run2023Cv3_2024_03_02.root
-  // minituple_v3.6_LLPskim_Run2023Cv4_2024_03_02.root
-  // minituple_v3.6_LLPskim_Run2023Dv1_2024_03_02.root
-  // minituple_v3.6_LLPskim_Run2023Dv2_2024_03_02.root
+  // minituple_v3.7_LLPskim_Run2023Bv1_2024_03_14.root
+  // minituple_v3.7_LLPskim_Run2023Cv1_2024_03_14.root
+  // minituple_v3.7_LLPskim_Run2023Cv2_2024_03_14.root
+  // minituple_v3.7_LLPskim_Run2023Cv3_2024_03_14.root
+  // minituple_v3.7_LLPskim_Run2023Cv4_2024_03_14.root
+  // minituple_v3.7_LLPskim_Run2023Dv1_2024_03_14.root
+  // minituple_v3.7_LLPskim_Run2023Dv2_2024_03_14.root
 
   int Color1 = 30;
   int Color2 = 38;

@@ -295,7 +295,10 @@ void AddBranchesToTree( TTree* tree, bool tree_perJet ){
 				output_vars["bdtscoreX_"+bdt_tag] = GetBDTScore( bdt_tag, input_vars, "-1" );
 				continue;
 			}
-			for( auto i_jet: vector<string>{ "0", "1", "2" } ){
+			for( auto i_jet: vector<string>{ "0", "1", "2", "3", "4", "5" } ){
+				// float jet0_Pt;
+				// tree->SetBranchAddress( "jet0_Pt", &jet0_Pt );
+				// cout << jet0_Pt << " jet 0 pT, with BDT score " << GetBDTScore( bdt_tag, input_vars, i_jet ) << endl;
 				output_vars["jet"+i_jet+"_bdtscoreX_"+bdt_tag] = GetBDTScore( bdt_tag, input_vars, i_jet ); 
 			}
 		}
@@ -386,30 +389,34 @@ void AddTreesToFile( string infiletag, vector<string> treenames ){
 }
 
 /* ====================================================================================================================== */
-void AddBDTScoreBranches(){
+void AddBDTScoreBranches(string infilepath, vector<string> infiletags){
 
 	clock_t start_clock = clock();
 
 	//AddTreesToFile( "test", vector<string>{"NoSel","WPlusJets", "PerJet_LLPmatched", "PerJet_NoSel", "PerJet_WPlusJets"} );
 
-	AddTreesToFile( "v3.7_LLPskim_Run2023Bv1_2024_03_14", vector<string>{ "NoSel", "WPlusJets" } );
-	AddTreesToFile( "v3.7_LLPskim_Run2023Cv1_2024_03_14", vector<string>{ "NoSel", "WPlusJets" } );
-	AddTreesToFile( "v3.7_LLPskim_Run2023Cv2_2024_03_14", vector<string>{ "NoSel", "WPlusJets" } );
-	AddTreesToFile( "v3.7_LLPskim_Run2023Cv3_2024_03_14", vector<string>{ "NoSel", "WPlusJets" } );
-	AddTreesToFile( "v3.7_LLPskim_Run2023Cv4_2024_03_14", vector<string>{ "NoSel", "WPlusJets" } );
-	AddTreesToFile( "v3.7_LLPskim_Run2023Dv1_2024_03_14", vector<string>{ "NoSel", "WPlusJets" } );
-	AddTreesToFile( "v3.7_LLPskim_Run2023Dv2_2024_03_14", vector<string>{ "NoSel", "WPlusJets" } );
+	// AddTreesToFile( "job2_8_output_97", vector<string>{ "NoSel" } );
 
-	AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_14_TEST", vector<string>{ "NoSel" } );
-	AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_14_TRAIN", vector<string>{ "NoSel" } );
-	AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_03_14_batch1", vector<string>{ "NoSel" } );
-	AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_03_14_batch2", vector<string>{ "NoSel" } );
-	AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_03_14_batch1", vector<string>{ "NoSel" } );
-	AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_03_14_batch2", vector<string>{ "NoSel" } );
-	AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_03_14_batch1", vector<string>{ "NoSel" } );
-	AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_03_14_batch2", vector<string>{ "NoSel" } );
-	AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TEST", vector<string>{ "NoSel" } );
-	AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TRAIN", vector<string>{ "NoSel" } );
+	// AddTreesToFile( "v3.7_LLPskim_Run2023Bv1_2024_03_14", vector<string>{ "NoSel", "WPlusJets" } );
+	// AddTreesToFile( "v3.7_LLPskim_Run2023Cv1_2024_03_14", vector<string>{ "NoSel", "WPlusJets" } );
+	// AddTreesToFile( "v3.7_LLPskim_Run2023Cv2_2024_03_14", vector<string>{ "NoSel", "WPlusJets" } );
+	// AddTreesToFile( "v3.7_LLPskim_Run2023Cv3_2024_03_14", vector<string>{ "NoSel", "WPlusJets" } );
+	// AddTreesToFile( "v3.7_LLPskim_Run2023Cv4_2024_03_14", vector<string>{ "NoSel", "WPlusJets" } );
+	// AddTreesToFile( "v3.7_LLPskim_Run2023Dv1_2024_03_14", vector<string>{ "NoSel", "WPlusJets" } );
+	// AddTreesToFile( "v3.7_LLPskim_Run2023Dv2_2024_03_14", vector<string>{ "NoSel", "WPlusJets" } );
+
+	// AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_14_TEST", vector<string>{ "NoSel" } );
+	// AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_14_TRAIN", vector<string>{ "NoSel" } );
+	// AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_03_14_batch1", vector<string>{ "NoSel" } );
+	// AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_03_14_batch2", vector<string>{ "NoSel" } );
+	// AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_03_14_batch1", vector<string>{ "NoSel" } );
+	// AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_03_14_batch2", vector<string>{ "NoSel" } );
+	// AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_03_14_batch1", vector<string>{ "NoSel" } );
+	// AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_03_14_batch2", vector<string>{ "NoSel" } );
+	// AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TEST", vector<string>{ "NoSel" } );
+	// AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TRAIN", vector<string>{ "NoSel" } );
+
+	AddTreesToFile( infilepath, infiletags );
 
 	std::cout<<"--------------------------------------------------------"<<endl;
 	double duration_sec = (clock()-start_clock)/(double)CLOCKS_PER_SEC;
