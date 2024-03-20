@@ -191,6 +191,7 @@ int runClassification( TString dir, TString sigTag, TString sigTag_test, TString
    TCut selections_trackVars = "perJet_Track0Pt > 0 && perJet_Track0Pt < 900 && perJet_Track0dR >= 0 && perJet_Track0dR < 1";
    TCut selections_track1Vars = "perJet_Track1Pt > 0 && perJet_Track1Pt < 900 && perJet_Track1dR >= 0 && perJet_Track1dR < 1";
    TCut selections_safety = selections_rechitVar1 + selections_rechitVar2 + selections_trackVars + selections_track1Vars; // no warnings when all variables behaved well! 
+// + Cut_AnyLLP_HLT;
 
    TCut LLPinHCAL = "perJet_MatchedLLP_DecayR >= 177 && perJet_MatchedLLP_DecayR < 295 && abs(perJet_MatchedLLP_Eta) < 1.26";
    TCut LLPinECAL = "perJet_MatchedLLP_DecayR >= 129 && perJet_MatchedLLP_DecayR < 177 && abs(perJet_MatchedLLP_Eta) < 1.26";
@@ -714,30 +715,31 @@ int LLP_WPlusJets_Classification_perJet()
    //std::cout << "print" << std::endl;
 
    map<TString, TString> sigTagList;
-   sigTagList["LLP125_MS15"]	   = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_02_21_TRAIN";
-   sigTagList["LLP350_MS80"]	   = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_02_21_TRAIN";
-   sigTagList["LLP125_MS50"]	   = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_02_21_batch1";
-   sigTagList["LLP250_MS120"]    = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_02_21_batch1";
-   sigTagList["LLP350_MS160"]    = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_02_21_batch1";
-   sigTagList["hadd"]            = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TRAIN-batch1";
+   sigTagList["LLP125_MS15"]	   = "v3.6_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_02_TRAIN";
+   sigTagList["LLP350_MS80"]	   = "v3.6_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_02_TRAIN";
+   sigTagList["LLP125_MS50"]	   = "v3.6_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_03_02_batch1";
+   sigTagList["LLP250_MS120"]    = "v3.6_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_03_02_batch1";
+   sigTagList["LLP350_MS160"]    = "v3.6_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_03_02_batch1";
+   sigTagList["hadd"]            = "v3.6_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TRAIN-batch1";
 
    map<TString, TString> sigTagList_test;
-   sigTagList_test["LLP125_MS15"]	   = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_02_21_TEST";
-   sigTagList_test["LLP350_MS80"]	   = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_02_21_TEST";
-   sigTagList_test["LLP125_MS50"]	   = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_02_21_batch2";
-   sigTagList_test["LLP250_MS120"]     = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_02_21_batch2";
-   sigTagList_test["LLP350_MS160"]     = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_02_21_batch2";
-   sigTagList_test["hadd"]             = "v3.5_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TEST-batch2";
+   sigTagList_test["LLP125_MS15"]	   = "v3.6_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_02_TEST";
+   sigTagList_test["LLP350_MS80"]	   = "v3.6_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_02_TEST";
+   sigTagList_test["LLP125_MS50"]	   = "v3.6_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_03_02_batch2";
+   sigTagList_test["LLP250_MS120"]     = "v3.6_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_03_02_batch2";
+   sigTagList_test["LLP350_MS160"]     = "v3.6_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_03_02_batch2";
+   sigTagList_test["hadd"]             = "v3.6_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TEST-batch2";
 
-   TString bkgTag = "v3.5_LLPskim_Run2023Dv1_2024_02_21";
-   TString bkgTag2 = "v3.5_LLPskim_Run2023Cv1_2024_02_21";
-   TString bkgTag_test = "v3.5_LLPskim_Run2023Cv4_2024_02_21";
+   TString bkgTag = "v3.6_LLPskim_Run2023Dv1_2024_03_02";
+   TString bkgTag2 = "v3.6_LLPskim_Run2023Cv1_2024_03_02";
+   TString bkgTag_test = "v3.6_LLPskim_Run2023Cv4_2024_03_02";
 
-   TString dir = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.5/";
+   TString dir = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.6/";
    
-   vector<string> filetag_keys_to_loop = {"LLP125_MS15", "LLP350_MS80", "LLP125_MS50", "LLP250_MS120", "LLP350_MS160", "hadd"};
-   vector<string> LLP_selections = {"", "_HCAL12", "_HCAL34", "_calor", "_HCAL12_calor", "_HCAL34_calor"};
-   // finished 350 / 80, HCAL34_calor on friday 6pm 
+  vector<string> filetag_keys_to_loop = {"LLP125_MS15", "LLP350_MS80", "LLP125_MS50", "LLP250_MS120", "LLP350_MS160", "hadd"};
+  vector<string> LLP_selections = {"", "_HCAL12", "_HCAL34"}; // , "_calor", "_HCAL12_calor", "_HCAL34_calor"};
+   // vector<string> filetag_keys_to_loop = {"LLP350_MS80"};
+   // vector<string> LLP_selections = {"", "_HCAL12", "_HCAL34"};
 	for( auto key: filetag_keys_to_loop){
       for( auto sel: LLP_selections){
          cout << "TMVA training for " << key << ", per jet, with selections " << sel << endl;

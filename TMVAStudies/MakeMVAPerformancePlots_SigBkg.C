@@ -40,6 +40,9 @@
 #include "TEfficiency.h"
 #include "THStack.h"
 
+#include <filesystem>
+namespace fs = std::filesystem;
+
 #endif
 
 //------------------------------------------------------------------------------
@@ -467,7 +470,7 @@ void SetupPlots()
   GraphLabels.clear();
   PlotnameSpecific.clear();
 
-  legend = new TLegend(0.32,0.14,0.9,0.34);
+  legend = new TLegend(0.32,0.12,0.9,0.34);
   legend->SetTextSize(0.03);
   legend->SetBorderSize(0);
   legend->SetFillStyle(0);
@@ -526,7 +529,7 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   float HBeta = 1.26;
 
   TCut SignalSelection = "";
-  if (SigTree.find("PerJet") == std::string::npos) {
+  if (SigTree.find("PerJet") == std::string::npos) { // per event tree
     tree_sig->SetBranchAddress("LLP0_DecayR", &LLP0_DecayR);
     tree_sig->SetBranchAddress("LLP1_DecayR", &LLP1_DecayR);
     tree_sig->SetBranchAddress("LLP0_Eta", &LLP0_Eta);
@@ -714,6 +717,23 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   cv_indiv->SaveAs((plotDir + "Minituple_BDT125score_" + plotname + "_logY.png").c_str());
   cv_indiv->Clear();
 
+  THStack *hs2 = new THStack("hs2", Form("Signal and Background BDT Scores (mH=%s) ; BDT (trained on 350) Score ; Number of Entries",Label.c_str()));
+  Signal_MVA350_80->SetFillColorAlpha(kBlue, 0.35);
+  Background_MVA350_80->SetFillColorAlpha(kRed, 0.35);
+  Signal_MVA350_80->Rebin(50);
+  Background_MVA350_80->Rebin(50);
+  hs2->Add(Signal_MVA350_80);
+  hs2->Add(Background_MVA350_80);
+  cv_indiv->cd();
+  hs2->Draw("bar1 nostack");
+  gPad->BuildLegend(0.65,0.65,0.85,0.85,"");
+  StampCMS( "Internal", 140., 0.2, 0.84, 0.045 );
+  gPad->SetLogy(0);
+  cv_indiv->SaveAs((plotDir + "Minituple_BDT350score_" + plotname + ".png").c_str());
+  gPad->SetLogy();
+  cv_indiv->SaveAs((plotDir + "Minituple_BDT350score_" + plotname + "_logY.png").c_str());
+  cv_indiv->Clear();
+
   //*****************************************************************************************
   //Plot ROC Curves
   //*****************************************************************************************
@@ -733,13 +753,13 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   // colors.push_back(Option);
   // colors.push_back(Option2);
   // colors.push_back(Option3);
-  gStyle->SetPalette(kViridis);
+  gStyle->SetPalette(kCandy); // (kViridis);
   colors.push_back(TColor::GetPalette().At(0));
   colors.push_back(TColor::GetPalette().At(50));
   colors.push_back(TColor::GetPalette().At(100));
   colors.push_back(TColor::GetPalette().At(150));
   colors.push_back(TColor::GetPalette().At(200));
-  colors.push_back(Option3);
+  colors.push_back(kGray+1); //(Option3);
   PlotnameSpecific.push_back(plotname + "_trainedOn125_15");
   PlotnameSpecific.push_back(plotname + "_trainedOn350_80");
   PlotnameSpecific.push_back(plotname + "_trainedOn125_50");
@@ -792,15 +812,37 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
     }
   }
 
-  if (InputFile.find("MH-125_MS-15") != std::string::npos) {
-    TGraphAsymmErrors* WP_jet_cutflow = MakeCurrentWPSigEffVsBkgEffGraph(0.66 , 0.0008, "WP_jet_cutflow"+label); // mh 125 working point, for per jet approach
-    legend->AddEntry(WP_jet_cutflow, "Cutflow Jet WP comparison (mH = 125)", "P");
-    WP_jet_cutflow->SetFillColor(kBlue);
-    WP_jet_cutflow->SetMarkerColor(kBlue);
-    WP_jet_cutflow->SetMarkerStyle(34);
-    WP_jet_cutflow->SetMarkerSize(1.5);
-    WP_jet_cutflow->Draw("Psame");  
+  float signal_eff = 0;
+  string mass = "";
+  if (InputFile.find("MH-125_MS-15") != std::string::npos) { // mh 125 working point, for per jet approach
+    signal_eff = 0.66;
+    mass = "125";
+  }
+  if (InputFile.find("MH-350_MS-80") != std::string::npos) { // mh 350 working point, for per jet approach
+    signal_eff = 0.77;
+    mass = "350";
+  }
+  if (InputFile.find("MH-125_MS-50") != std::string::npos) { // mh 125 working point, for per jet approach
+    signal_eff = 0.58;
+    mass = "125";
+  }
+  if (InputFile.find("MH-250_MS-120") != std::string::npos) { // mh 250 working point, for per jet approach
+    signal_eff = 0.65;
+    mass = "250";
+  }
+  if (InputFile.find("MH-350_MS-160") != std::string::npos) { // mh 125 working point, for per jet approach
+    signal_eff = 0.68;
+    mass = "350";
+  }
+  TGraphAsymmErrors* WP_jet_cutflow = MakeCurrentWPSigEffVsBkgEffGraph(signal_eff , 0.0008, "WP_jet_cutflow"+label); 
+  legend->AddEntry(WP_jet_cutflow, Form("Cutflow Jet WP comparison (mH = %s)", mass.c_str()), "P");
+  WP_jet_cutflow->SetFillColor(kBlue);
+  WP_jet_cutflow->SetMarkerColor(kBlue);
+  WP_jet_cutflow->SetMarkerStyle(34);
+  WP_jet_cutflow->SetMarkerSize(1.5);
+  WP_jet_cutflow->Draw("Psame");  
 
+  // if (InputFile.find("MH-125_MS-15") != std::string::npos) {
     // TGraphAsymmErrors* WP_BDTcut = MakeCurrentWPSigEffVsBkgEffAtCutValueGraph(Signal_MVA125_15, Background_MVA125_15, "Eff at fixed cut", 0.99);
     // legend->AddEntry(WP_BDTcut, "BDT cut = 0.99 point (mH = 125)", "P");
     // WP_BDTcut->SetFillColor(colors[0]);
@@ -808,24 +850,16 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
     // WP_BDTcut->SetMarkerStyle(34);
     // WP_BDTcut->SetMarkerSize(1.5);
     // WP_BDTcut->Draw("Psame"); 
-  }
-  if (InputFile.find("MH-350_MS-80") != std::string::npos) {
-    TGraphAsymmErrors* WP_jet_cutflow = MakeCurrentWPSigEffVsBkgEffGraph(0.77 , 0.0008, "WP_jet_cutflow"+label); // mh 350 working point, for per jet approach
-    legend->AddEntry(WP_jet_cutflow, "Cutflow Jet WP comparison (mH = 350)", "P");
-    WP_jet_cutflow->SetFillColor(kBlue);
-    WP_jet_cutflow->SetMarkerColor(kBlue);
-    WP_jet_cutflow->SetMarkerStyle(34);
-    WP_jet_cutflow->SetMarkerSize(1.5);
-    WP_jet_cutflow->Draw("Psame");  
-
-    TGraphAsymmErrors* WP_BDTcut = MakeCurrentWPSigEffVsBkgEffAtCutValueGraph(Signal_MVA350_80, Background_MVA350_80, "Eff at fixed cut", 0.99);
-    legend->AddEntry(WP_BDTcut, "BDT cut = 0.99 point (mH = 350)", "P");
-    WP_BDTcut->SetFillColor(colors[1]);
-    WP_BDTcut->SetMarkerColor(colors[1]);
+  // }
+  // if (InputFile.find("MH-350_MS-80") != std::string::npos) {
+    TGraphAsymmErrors* WP_BDTcut = MakeCurrentWPSigEffVsBkgEffAtCutValueGraph(Signal_MVA350_80, Background_MVA350_80, "Eff at fixed cut", 0.998);
+    legend->AddEntry(WP_BDTcut, Form("BDT cut = 0.998 (mH = %s)", mass.c_str()), "P");
+    WP_BDTcut->SetFillColor(kBlack);
+    WP_BDTcut->SetMarkerColor(kBlack);
     WP_BDTcut->SetMarkerStyle(34);
     WP_BDTcut->SetMarkerSize(1.5);
     WP_BDTcut->Draw("Psame"); 
-  }
+  // }
 
   // overlay multiple ROC curves -- useful if comparing 125 vs. 350 for instance
   if (overlay) {
@@ -837,24 +871,24 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   }
   
   // separate graph -- signal efficiency vs cut value, full curve
-  TGraphAsymmErrors* WP_BDTcut = MakeCurrentWPSigEffVsCutValueGraph(Signal_MVA125_15, "", 0.99);
+  TGraphAsymmErrors* WP_BDTcut_sig = MakeCurrentWPSigEffVsCutValueGraph(Signal_MVA125_15, "", 0.99);
   TGraphAsymmErrors* WP_BDTcut_bkg = MakeCurrentWPSigEffVsCutValueGraph(Background_MVA125_15, "", 0.99);
   legend->Clear(); 
-  WP_BDTcut->SetFillColor(colors[0]);
-  WP_BDTcut->SetMarkerColor(colors[0]);
-  WP_BDTcut->SetMarkerStyle(34);
-  WP_BDTcut->SetMarkerSize(1.5);
+  WP_BDTcut_sig->SetFillColor(colors[0]);
+  WP_BDTcut_sig->SetMarkerColor(colors[0]);
+  WP_BDTcut_sig->SetMarkerStyle(34);
+  WP_BDTcut_sig->SetMarkerSize(1.5);
   WP_BDTcut_bkg->SetFillColor(colors[1]);
   WP_BDTcut_bkg->SetMarkerColor(colors[1]);
   WP_BDTcut_bkg->SetMarkerStyle(34);
   WP_BDTcut_bkg->SetMarkerSize(1.5);
-  legend->AddEntry(WP_BDTcut, "Signal Efficiency", "P");
+  legend->AddEntry(WP_BDTcut_sig, "Signal Efficiency", "P");
   legend->AddEntry(WP_BDTcut_bkg, "Background Efficiency", "P");
   cv_indiv->cd();
-  WP_BDTcut->GetXaxis()->SetLimits(-1.1,1.1);   
-  WP_BDTcut->GetYaxis()->SetRangeUser(0,1.1);
+  WP_BDTcut_sig->GetXaxis()->SetLimits(-1.1,1.1);   
+  WP_BDTcut_sig->GetYaxis()->SetRangeUser(0,1.1);
   gPad->Update();
-  WP_BDTcut->Draw("AP"); 
+  WP_BDTcut_sig->Draw("AP"); 
   WP_BDTcut_bkg->Draw("Psame"); 
   gPad->SetLogy(0);
   legend->Draw();
@@ -872,51 +906,55 @@ void MakeMVAPerformancePlots_SigBkg()
   // Signals
   string SignalTree = "PerJet_LLPmatched";
 
-  string Signal = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.5/minituple_v3.5_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_02_21_TEST.root";
+  string Signal = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_14_TEST.root";
   // string SigLabel = "125";
   // string SignalTree = "NoSel";
   string SigLabel = "125_mX15";
 
-  string Signal2 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.5/minituple_v3.5_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_02_21_TEST.root";
+  string Signal2 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TEST.root";
   string SigLabel2 = "350_mX80";
 
-  string Signal3 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.5/minituple_v3.5_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_02_21_batch2.root";
+  string Signal3 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_03_14_batch2.root";
   string SigLabel3 = "125_mX50";
 
-  string Signal4 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.5/minituple_v3.5_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_02_21_batch2.root";
+  string Signal4 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_03_14_batch2.root";
   string SigLabel4 = "250_mX120";
 
-  string Signal5 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.5/minituple_v3.5_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_02_21_batch2.root";
+  string Signal5 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_03_14_batch2.root";
   string SigLabel5 = "350_mX160";
 
   // Backgrounds
-  string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.5/minituple_v3.5_LLPskim_Run2023Cv4_2024_02_21.root";
+  // string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_v3.7_LLPskim_Run2023Cv4_2024_03_14.root";
+  string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_v3.7_LLPskim_Run2023_HADD.root";
   // string BkgLabel = "W+Jets";
   // string BackgroundTree = "WPlusJets";
   string BkgLabel = "W+Jets_perJet";
   string BackgroundTree = "PerJet_WPlusJets";
 
-  // minituple_v3.5_LLPskim_Run2023Bv1_2024_02_21.root
-  // minituple_v3.5_LLPskim_Run2023Cv1_2024_02_21.root
-  // minituple_v3.5_LLPskim_Run2023Cv2_2024_02_21.root
-  // minituple_v3.5_LLPskim_Run2023Cv3_2024_02_21.root
-  // minituple_v3.5_LLPskim_Run2023Cv4_2024_02_21.root
-  // minituple_v3.5_LLPskim_Run2023Dv1_2024_02_21.root
-  // minituple_v3.5_LLPskim_Run2023Dv2_2024_02_21.root
+  // minituple_v3.7_LLPskim_Run2023Bv1_2024_03_14.root
+  // minituple_v3.7_LLPskim_Run2023Cv1_2024_03_14.root
+  // minituple_v3.7_LLPskim_Run2023Cv2_2024_03_14.root
+  // minituple_v3.7_LLPskim_Run2023Cv3_2024_03_14.root
+  // minituple_v3.7_LLPskim_Run2023Cv4_2024_03_14.root
+  // minituple_v3.7_LLPskim_Run2023Dv1_2024_03_14.root
+  // minituple_v3.7_LLPskim_Run2023Dv2_2024_03_14.root
 
   int Color1 = 30;
   int Color2 = 38;
   int Color3 = 48;
 
-  string plotType = ""; // _calor, _HCAL12_calor, _HCAL34_calor, "", _HCAL12, _HCAL34
-
-  BDTPerformancePlots(Signal, SigLabel, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, plotType);
-  SetupPlots();
-  BDTPerformancePlots(Signal2, SigLabel2, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, plotType);
-  SetupPlots();
-  BDTPerformancePlots(Signal3, SigLabel3, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, plotType);
-  SetupPlots();
-  BDTPerformancePlots(Signal4, SigLabel4, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, plotType);
-  SetupPlots();
-  BDTPerformancePlots(Signal5, SigLabel5, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, plotType);
+  vector<string> plotType = {""}; // "_HCAL12", "_HCAL34", "_calor", "_HCAL12_calor", "_HCAL34_calor", 
+  for( auto type: plotType){
+    if (type != "") fs::create_directory(type);
+    BDTPerformancePlots(Signal, SigLabel, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
+    SetupPlots();
+    BDTPerformancePlots(Signal2, SigLabel2, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
+    SetupPlots();
+    BDTPerformancePlots(Signal3, SigLabel3, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
+    SetupPlots();
+    BDTPerformancePlots(Signal4, SigLabel4, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
+    SetupPlots();
+    BDTPerformancePlots(Signal5, SigLabel5, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
+    SetupPlots();
+  }
 }

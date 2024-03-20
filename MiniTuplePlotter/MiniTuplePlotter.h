@@ -1,6 +1,9 @@
 #include "PlotParams.h"
 #include "PlotFunctions.h"
 
+#include <filesystem>
+namespace fs = std::filesystem;
+
 // -------------------------------------------------------------------------------------
 class MiniTuplePlotter{
 public :
@@ -252,6 +255,8 @@ public :
 	// -------------------------------------------------------------------------------------
 	void SetOutputDirectory(string output_directory_tmp){
 		if( debug) cout<<"MiniTuplePlotter::SetOutputDirectory()"<<endl;
+
+    	fs::create_directory("Plots/"+output_directory_tmp);
 
 		output_directory += Form("/%s", output_directory_tmp.c_str() );
 	}
@@ -775,7 +780,7 @@ public :
 				h = GetReverseCDF( h ); 	
 
 			h->SetMaximum( 2. );
-			if( plot_log_ratio ) h->SetMaximum( 10. );
+			if( plot_log_ratio ) h->SetMaximum( 100. );
 
 			h->Divide( h_divisor );
 			h->SetLineColor( colors[i] );

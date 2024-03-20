@@ -135,13 +135,13 @@ class MyTags {
 		vector<string> bdt_tags_;
 		vector<string> bdt_var_names_;
 
-      inline static vector<string> bdt_event_tags_ = {"LLP125_MS15", "LLP350_MS80",  "LLP125_MS50", "LLP250_MS120", "LLP350_MS160", "hadd"};
+      inline static vector<string> bdt_event_tags_ = {"hadd"}; //  {"LLP125_MS15", "LLP350_MS80",  "LLP125_MS50", "LLP250_MS120", "LLP350_MS160", "hadd"};
       inline static vector<string> bdt_jet_tags_ = {"LLP125_MS15_perJet", "LLP350_MS80_perJet", "LLP125_MS50_perJet", "LLP250_MS120_perJet", "LLP350_MS160_perJet", "hadd_perJet",
                                                    "LLP125_MS15_HCAL12_perJet", "LLP350_MS80_HCAL12_perJet", "LLP125_MS50_HCAL12_perJet", "LLP250_MS120_HCAL12_perJet", "LLP350_MS160_HCAL12_perJet", "hadd_HCAL12_perJet",
                                                    "LLP125_MS15_HCAL34_perJet", "LLP350_MS80_HCAL34_perJet", "LLP125_MS50_HCAL34_perJet", "LLP250_MS120_HCAL34_perJet", "LLP350_MS160_HCAL34_perJet", "hadd_HCAL34_perJet"};
-      inline static vector<string> bdt_jet_tags_calor_ = {"LLP125_MS15_calor_perJet", "LLP350_MS80_calor_perJet", "LLP125_MS50_calor_perJet", "LLP250_MS120_calor_perJet", "LLP350_MS160_calor_perJet", "hadd_calor_perJet",
-                                                   "LLP125_MS15_HCAL12_calor_perJet", "LLP350_MS80_HCAL12_calor_perJet", "LLP125_MS50_HCAL12_calor_perJet", "LLP250_MS120_HCAL12_calor_perJet", "LLP350_MS160_HCAL12_calor_perJet", "hadd_HCAL12_calor_perJet",
-                                                   "LLP125_MS15_HCAL34_calor_perJet", "LLP350_MS80_HCAL34_calor_perJet", "LLP125_MS50_HCAL34_calor_perJet", "LLP250_MS120_HCAL34_calor_perJet", "LLP350_MS160_HCAL34_calor_perJet", "hadd_HCAL34_calor_perJet"};
+      inline static vector<string> bdt_jet_tags_calor_ = {}; //  {"LLP125_MS15_calor_perJet", "LLP350_MS80_calor_perJet", "LLP125_MS50_calor_perJet", "LLP250_MS120_calor_perJet", "LLP350_MS160_calor_perJet", "hadd_calor_perJet",
+                                                   // "LLP125_MS15_HCAL12_calor_perJet", "LLP350_MS80_HCAL12_calor_perJet", "LLP125_MS50_HCAL12_calor_perJet", "LLP250_MS120_HCAL12_calor_perJet", "LLP350_MS160_HCAL12_calor_perJet", "hadd_HCAL12_calor_perJet",
+                                                   // "LLP125_MS15_HCAL34_calor_perJet", "LLP350_MS80_HCAL34_calor_perJet", "LLP125_MS50_HCAL34_calor_perJet", "LLP250_MS120_HCAL34_calor_perJet", "LLP350_MS160_HCAL34_calor_perJet", "hadd_HCAL34_calor_perJet"};
                                                    
 };
 

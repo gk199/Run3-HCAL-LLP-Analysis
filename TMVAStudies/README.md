@@ -32,6 +32,7 @@ root -l MakeMVAPerformancePlots.C+'()'
 Run the plotting script over the produced minituples with the bdt scores saved. Signal and background files, labels, and colors are inputs to `BDTPerformancePlots`. For a given signal sample, multiple ROC curves are overlayed (testing on 125, 350, and combination BDTs). To run:
 ```
 root -l MakeMVAPerformancePlots_SigBkg.C+'()'
+root -b -q -l MakeMVAPerformancePlots_SigBkg.C # also works! 
 ```
 
 **5. Weight Files:**
