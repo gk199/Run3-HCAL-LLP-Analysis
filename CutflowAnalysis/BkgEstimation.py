@@ -25,12 +25,12 @@ def latex_setup(file_path):
 		print("\\begin{tabular}{l|llll}")
 		print("\\hline")
 		print("\\textbf{Selection} & \\multicolumn{2}{l}{\\textbf{Number of Entries}} & \\multicolumn{2}{l}{\\textbf{Fraction of Entries}} \\\\ \\hline")
-		print(" & \\textbf{LLP 0} & \\textbf{LLP 1} & \\textbf{LLP 0} & \\textbf{LLP 1} \\\\ \\hline")
+		print(" & \\textbf{LLP 0} & \\textbf{LLP 1} & \\textbf{LLP 0} & \\textbf{LLP 1} \\\\ \\hline \\hline")
 	else:
 		print("\\begin{tabular}{l|llll}")
 		print("\\hline")
 		print("\\textbf{Selection} & \\multicolumn{2}{l}{\\textbf{Number of Weighted Entries}} & \\multicolumn{2}{l}{\\textbf{Fraction of Weighted Entries}} \\\\ \\hline")
-		print(" & \\textbf{LLP 0} & \\textbf{LLP 1} & \\textbf{LLP 0} & \\textbf{LLP 1} \\\\ \\hline")
+		print(" & \\textbf{LLP 0} & \\textbf{LLP 1} & \\textbf{LLP 0} & \\textbf{LLP 1} \\\\ \\hline \\hline")
 
 def jetSplit_event_latex_setup(file_path):
 	print("\\begin{table}[ht]")
@@ -39,12 +39,12 @@ def jetSplit_event_latex_setup(file_path):
 		print("\\begin{tabular}{l|lll}")
 		print("\\hline")
 		print("\\textbf{Selection} & \\textbf{Number of Entries} & \\multicolumn{2}{l}{\\textbf{Fraction of Entries}} \\\\ \\hline")
-		print(" &  & All & Valid Jet \\\\ \\hline")
+		print(" &  & All & Valid Jet \\\\ \\hline \\hline")
 	else:
 		print("\\begin{tabular}{l|lll}")
 		print("\\hline")
 		print("\\textbf{Selection} & \\textbf{Number of Weighted Entries} & \\multicolumn{2}{l}{\\textbf{Fraction of Weighted Entries}} \\\\ \\hline")
-		print(" &  & All & Valid Jet \\\\ \\hline")
+		print(" &  & All & Valid Jet \\\\ \\hline \\hline")
 
 def event_latex_setup(file_path):
 	print("\\begin{table}[ht]")
@@ -52,11 +52,11 @@ def event_latex_setup(file_path):
 	if "Run2023" in file_path: 
 		print("\\begin{tabular}{l|ll}")
 		print("\\hline")
-		print("\\textbf{Selection} & \\textbf{Number of Entries} & \\textbf{Fraction of Entries} \\\\ \\hline")
+		print("\\textbf{Selection} & \\textbf{Number of Entries} & \\textbf{Fraction of Entries} \\\\ \\hline \\hline")
 	else:
 		print("\\begin{tabular}{l|ll}")
 		print("\\hline")
-		print("\\textbf{Selection} & \\textbf{Number of Weighted Entries} & \\textbf{Fraction of Weighted Entries} \\\\ \\hline")
+		print("\\textbf{Selection} & \\textbf{Number of Weighted Entries} & \\textbf{Fraction of Weighted Entries} \\\\ \\hline \\hline")
 
 def latex_end(file_path):
     print("\\hline")
@@ -148,11 +148,26 @@ def main():
 				if i == 8: 
 					total_selection_string += "&& (( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 0 condition
 					total_selection_string += " || ( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 1 condition
-					total_selection_string += " || ( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 2 condition
+					total_selection_string += " || ( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 2 condition
+					total_selection_string += " || ( jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 3 condition
+					total_selection_string += " || ( jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 4 condition
+					total_selection_string += " || ( jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 5 condition
 				if i == 9: 
 					total_selection_string += "&& ((( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 1 condition
+					total_selection_string += " || (( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 2 condition
+					total_selection_string += " || (( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 3 condition
+					total_selection_string += " || (( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 4 condition
+					total_selection_string += " || (( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 5 condition
 					total_selection_string += " || (( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 1 AND 2 condition
-					total_selection_string += " || (( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)))" # jet 2 AND 0 condition
+					total_selection_string += " || (( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99))"
+					total_selection_string += " || (( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99))"	
+					total_selection_string += " || (( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))"				
+					total_selection_string += " || (( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 2 AND 3 condition
+					total_selection_string += " || (( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99))"
+					total_selection_string += " || (( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))"
+					total_selection_string += " || (( jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 3 AND 4 condition
+					total_selection_string += " || (( jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))"
+					total_selection_string += " || (( jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99)))" # jet 4 AND 5 condition
 
 				selval = tree.GetEntries(selection_string)
 				selval1 = tree.GetEntries(selection1_string)
@@ -218,13 +233,28 @@ def main():
 				if i == 1: total_selection_string = "(jet0_Pt >= "+jet_energy+" || jet1_Pt >= "+jet_energy+" || jet2_Pt >= "+jet_energy+")"
 				if i == 2: total_selection_string += "&& ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26) || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26) || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26))"
 				if i == 3: 
-					total_selection_string += " && (( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 0 condition
+					total_selection_string += "&& (( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 0 condition
 					total_selection_string += " || ( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 1 condition
-					total_selection_string += " || ( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 2 condition
+					total_selection_string += " || ( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 2 condition
+					total_selection_string += " || ( jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 3 condition
+					total_selection_string += " || ( jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 4 condition
+					total_selection_string += " || ( jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 5 condition
 				if i == 4: 
 					total_selection_string += "&& ((( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 1 condition
+					total_selection_string += " || (( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 2 condition
+					total_selection_string += " || (( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 3 condition
+					total_selection_string += " || (( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 4 condition
+					total_selection_string += " || (( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 5 condition
 					total_selection_string += " || (( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 1 AND 2 condition
-					total_selection_string += " || (( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)))" # jet 2 AND 0 condition
+					total_selection_string += " || (( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99))"
+					total_selection_string += " || (( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99))"	
+					total_selection_string += " || (( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))"				
+					total_selection_string += " || (( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 2 AND 3 condition
+					total_selection_string += " || (( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99))"
+					total_selection_string += " || (( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))"
+					total_selection_string += " || (( jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 3 AND 4 condition
+					total_selection_string += " || (( jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))"
+					total_selection_string += " || (( jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99) && ( jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99)))" # jet 4 AND 5 condition
 
 				selval = tree.GetEntries(total_selection_string)
 				if i == 2: all_events = selval # but end up doing comparison (denominator) to all LLP events...
@@ -252,7 +282,7 @@ def main():
 		print(" \n")
 		selection_list_noCut = [
 			"All", 
-            "Jet $\\geq "+jet_energy+"$~GeV $p_T$ (one of 3 leading)", 
+            "Jet $\\geq "+jet_energy+"$~GeV $p_T$ (one of 6 valid)", 
             "Jet $\\abs\\eta \\leq 1.26$", 
 			"Event HT > 200 GeV",
             "0 jets with BDT score $\\geq 0.99$",
@@ -284,13 +314,21 @@ def main():
 				selval = tree.GetEntries()
 				init = selval
 			else:
-				if i == 1: total_selection_string = "(jet0_Pt >= "+jet_energy+" || jet1_Pt >= "+jet_energy+" || jet2_Pt >= "+jet_energy+")"
-				if i == 2: total_selection_string += "&& ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26) || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26) || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26))"
+				if i == 1: 
+					total_selection_string = "(jet0_Pt >= "+jet_energy+" || jet1_Pt >= "+jet_energy+" || jet2_Pt >= "+jet_energy+" || "
+					total_selection_string += "jet3_Pt >= "+jet_energy+" || jet4_Pt >= "+jet_energy+" || jet5_Pt >= "+jet_energy+")"
+				if i == 2: 
+					total_selection_string = "((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26) || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26) || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26)"
+					total_selection_string += " || (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26) || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26) || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26))"
 				if i == 3: total_selection_string += " && eventHT > 200"
 				if i == 4: 
-					total_selection_string += " && (( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 0 condition
+					total_selection_string =  " ( (  jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 0 condition
 					total_selection_string += " || ( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 1 condition
-					total_selection_string += " || ( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 2 condition
+					total_selection_string += " || ( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 2 condition
+					total_selection_string += " || ( jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 3 condition
+					total_selection_string += " || ( jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 4 condition
+					total_selection_string += " || ( jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 5 condition
+					total_selection_string += " && eventHT > 200"
 				if i == 6: 
 					total_selection_string += "&& (( HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT240_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT280_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1)"
 					total_selection_string += "|| ( HLT_HT170_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT270_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet60_DisplacedTrack == 1 )"
@@ -321,23 +359,26 @@ def main():
 	if "Run2023" in file_path:
 		# Cutflow table for background estimation: basic event selection
 		print(" \n")
-		print("Background (W+jets) cutflow, done per event")
+		print("Background (W+jets, then NoSel) cutflow, done per event")
 		print(" \n")
+
+		BDT_score = "0.998"
+
 		event_selection_list = [
-            "All events (skim)", 
+            "All events (from skim)", 
             "Jet $\\geq "+jet_energy+"$~GeV $p_T$ (one of 6 leading)", 
             "Jet $\\abs\\eta \\leq 1.26$", 
-            "0 jets with BDT score $\\geq 0.99$",
-            "1 jet with BDT score $\\geq 0.99$",
-            "2 jets with BDT scores $\\geq 0.99$",
+            "0 jets with BDT score $\\geq "+BDT_score+"$",
+            "1 jet with BDT score $\\geq "+BDT_score+"$",
+            "2 jets with BDT scores $\\geq "+BDT_score+"$",
 			"Jet $\\geq "+jet_energy+"$~GeV $p_T$, $\\abs\\eta \\leq 1.26$, triggered",
-			"0 jets with BDT score $\\geq 0.99$",
-            "1 jet with BDT score $\\geq 0.99$",
-            "2 jets with BDT scores $\\geq 0.99$",
+			"0 jets with BDT score $\\geq "+BDT_score+"$",
+            "1 jet with BDT score $\\geq "+BDT_score+"$",
+            "2 jets with BDT scores $\\geq "+BDT_score+"$",
 			"Jet $\\geq "+jet_energy+"$~GeV $p_T$, $\\abs\\eta \\leq 1.26$, not triggered",
-			"0 jets with BDT score $\\geq 0.99$",
-            "1 jet with BDT score $\\geq 0.99$",
-            "2 jets with BDT scores $\\geq 0.99$",
+			"0 jets with BDT score $\\geq "+BDT_score+"$",
+            "1 jet with BDT score $\\geq "+BDT_score+"$",
+            "2 jets with BDT scores $\\geq "+BDT_score+"$",
         ]
         
 		event_selection_list_abbrev = [
@@ -357,142 +398,146 @@ def main():
             "Two jet BDT passed",
         ]
 
-		file = ROOT.TFile.Open(file_path)
-		tree = file.Get("WPlusJets")
-        
-		selection_string = ""
-        
-		if print_latex:
-			jetSplit_event_latex_setup(file_path)
-
-		init = -1
-        
-		for i in range(len(event_selection_list)):
-			selname = event_selection_list[i]
-			selval  = -1
-			Nevents = -1
-
-			if i == 0: 
-				selval = tree.GetEntries()
-				init = selval
-			else:
-				if i == 1: 
-					selection_string = "(jet0_Pt >= "+jet_energy+" || jet1_Pt >= "+jet_energy+" || jet2_Pt >= "+jet_energy+" || jet3_Pt >= "+jet_energy+" || jet4_Pt >= "+jet_energy+" || jet5_Pt >= "+jet_energy+")"
-				if i == 2: 
-					selection_string = "((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26) || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26) || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26)"
-					selection_string += " || (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26) || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26) || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26))"
-				if i == 3: 
-					selection_string = " ( (  jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 0 condition
-					selection_string += " || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 1 condition
-					selection_string += " || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 2 condition
-					selection_string += " || (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 3 condition
-					selection_string += " || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 4 condition
-					selection_string += " || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 5 condition
-				if i == 4: 
-					selection_string = " ( ( ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 1 condition
-					selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 2 condition
-					selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 3 condition
-					selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 4 condition
-					selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 5 condition
-					selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 1 AND 2 condition
-					selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 1 AND 3 condition
-					selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 1 AND 4 condition
-					selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 1 AND 5 condition
-					selection_string += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 2 AND 3 condition
-					selection_string += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 2 AND 4 condition
-					selection_string += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 2 AND 5 condition
-					selection_string += " || ((jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 3 AND 4 condition
-					selection_string += " || ((jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 3 AND 5 condition
-					selection_string += " || ((jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99)))" # jet 4 AND 5 condition
-                # triggered jet
-				if i == 6: 
-					selection_string = "  ( ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1) || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1)"
-					selection_string += " || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1) || (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1)"
-					selection_string += " || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1) || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1))"
-				if i == 7: 
-					selection_string = " ( (  jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 0 condition
-					selection_string += " || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 1 condition
-					selection_string += " || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 2 condition
-					selection_string += " || (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 3 condition
-					selection_string += " || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 4 condition
-					selection_string += " || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 5 condition
-				if i == 8: 
-					selection_string = " ( ( ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 1 condition
-					selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 2 condition
-					selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 3 condition
-					selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 4 condition
-					selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 5 condition
-					selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 1 AND 2 condition
-					selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 1 AND 3 condition
-					selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 1 AND 4 condition
-					selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 1 AND 5 condition
-					selection_string += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 2 AND 3 condition
-					selection_string += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 2 AND 4 condition
-					selection_string += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 2 AND 5 condition
-					selection_string += " || ((jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 3 AND 4 condition
-					selection_string += " || ((jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 3 AND 5 condition
-					selection_string += " || ((jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99)))" # jet 4 AND 5 condition
-                # Non-triggered jet
-				if i == 10: 
-					selection_string = "  ( ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 0) || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 0)"
-					selection_string += " || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 0) || (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 0)"
-					selection_string += " || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 0) || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 0))"
-				if i == 11: 
-					selection_string = " ( (  jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 0 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 0 condition
-					selection_string += " || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 0 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 1 condition
-					selection_string += " || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 0 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 2 condition
-					selection_string += " || (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 0 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 3 condition
-					selection_string += " || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 0 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99)" # jet 4 condition
-					selection_string += " || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 0 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 5 condition
-				if i == 12: 
-					selection_string = " ( ( ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 0 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 0 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 1 condition
-					selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 0 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 0 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 2 condition
-					selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 0 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 0 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 3 condition
-					selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 0 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 0 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 4 condition
-					selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 0 && jet0_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 0 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 0 AND 5 condition
-					selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 0 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 0 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 1 AND 2 condition
-					selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 0 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 0 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 1 AND 3 condition
-					selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 0 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 0 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 1 AND 4 condition
-					selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 0 && jet1_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 0 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 1 AND 5 condition
-					selection_string += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 0 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 0 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 2 AND 3 condition
-					selection_string += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 0 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 0 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 2 AND 4 condition
-					selection_string += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 0 && jet2_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 0 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 2 AND 5 condition
-					selection_string += " || ((jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 0 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 0 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 3 AND 4 condition
-					selection_string += " || ((jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 0 && jet3_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 0 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99))" # jet 3 AND 5 condition
-					selection_string += " || ((jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 0 && jet4_bdtscoreX_LLP350_MS80_perJet >= 0.99) && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 0 && jet5_bdtscoreX_LLP350_MS80_perJet >= 0.99)))" # jet 4 AND 5 condition
-
-
-				selval = tree.GetEntries(selection_string)
-				if i % 4 == 2: all_events = selval # i = 2, 6, 10
-				if i % 4 == 3: one_plus_jets = selval # i = 3, 7, 11
-				if i % 4 == 0: two_plus_jets = selval # i = 4, 8, 12
-				Nevents = tree.GetEntries()
-
+		# trees = ["WPlusJets", "NoSel"]
+		trees = ["WPlusJets"]
+		for tree_sel in trees:
+			print("\n Running fo: " + tree_sel + " \n")
+			file = ROOT.TFile.Open(file_path)
+			tree = file.Get(tree_sel)
+			
+			selection_string = ""
+			
 			if print_latex:
-				if i == 0: print("\\hline")
-				if i < 3: print(selname+" &", round(selval, 4), "&\\multicolumn{2}{l}{", round(selval/init, 4), "} \\\\ ")
-				if i % 4 == 2: print(selname+" &", round(selval, 4), "&", round(selval/init, 4), "&", round(selval/all_events, 4), " \\\\ ")
-				if i % 4 == 3: print(selname+" &", round(all_events - one_plus_jets, 4), "&", round((all_events - one_plus_jets)/init, 4),  "&", round((all_events - one_plus_jets)/all_events, 4), " \\\\ ") # 0 bin is all events - events with at least 1
-				if i > 0 and i % 4 == 0: print(selname+" &", round(one_plus_jets - two_plus_jets, 4), "&", round((one_plus_jets - two_plus_jets)/init, 4),  "&", round((one_plus_jets - two_plus_jets)/all_events, 4), " \\\\ ") # 1 bin is events with at least 1 - events with at least 2
-				if i >= 5 and i % 4 == 1: 
-					print(selname+" &", round(two_plus_jets, 4), "&", round(two_plus_jets/init, 4),  "&", round(two_plus_jets/all_events, 4), " \\\\ ") # 2+ bin is events with at least 2
-					print("\\hline")
-					if i == 13: latex_end(file_path)
+				jetSplit_event_latex_setup(file_path)
 
-			else:
-				print(selection_list_abbrev[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
+			init = -1
+			
+			for i in range(len(event_selection_list)):
+				selname = event_selection_list[i]
+				selval  = -1
+				Nevents = -1
+
+				if i == 0: 
+					selval = tree.GetEntries()
+					init = selval
+				else:
+					if i == 1: 
+						selection_string = "(jet0_Pt >= "+jet_energy+" || jet1_Pt >= "+jet_energy+" || jet2_Pt >= "+jet_energy+" || jet3_Pt >= "+jet_energy+" || jet4_Pt >= "+jet_energy+" || jet5_Pt >= "+jet_energy+")"
+					if i == 2: 
+						selection_string = "((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26) || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26) || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26)"
+						selection_string += " || (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26) || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26) || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26))"
+					if i == 3: 
+						selection_string = " ( (  jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+")" # jet 0 condition
+						selection_string += " || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+")" # jet 1 condition
+						selection_string += " || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+")" # jet 2 condition
+						selection_string += " || (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+")" # jet 3 condition
+						selection_string += " || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+")" # jet 4 condition
+						selection_string += " || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 5 condition
+					if i == 4: 
+						selection_string = " ( ( ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 0 AND 1 condition
+						selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 0 AND 2 condition
+						selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 0 AND 3 condition
+						selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 0 AND 4 condition
+						selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 0 AND 5 condition
+						selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 1 AND 2 condition
+						selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 1 AND 3 condition
+						selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 1 AND 4 condition
+						selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 1 AND 5 condition
+						selection_string += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 2 AND 3 condition
+						selection_string += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 2 AND 4 condition
+						selection_string += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 2 AND 5 condition
+						selection_string += " || ((jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 3 AND 4 condition
+						selection_string += " || ((jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 3 AND 5 condition
+						selection_string += " || ((jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+")))" # jet 4 AND 5 condition
+					# triggered jet
+					if i == 6: 
+						selection_string = "  ( ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1) || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1)"
+						selection_string += " || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1) || (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1)"
+						selection_string += " || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1) || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1))"
+					if i == 7: 
+						selection_string = " ( (  jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 && jet0_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+")" # jet 0 condition
+						selection_string += " || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1 && jet1_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+")" # jet 1 condition
+						selection_string += " || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1 && jet2_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+")" # jet 2 condition
+						selection_string += " || (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1 && jet3_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+")" # jet 3 condition
+						selection_string += " || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1 && jet4_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+")" # jet 4 condition
+						selection_string += " || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1 && jet5_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 5 condition
+					if i == 8: 
+						selection_string = " ( ( ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 && jet0_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1 && jet1_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 0 AND 1 condition
+						selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 && jet0_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1 && jet2_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 0 AND 2 condition
+						selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 && jet0_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1 && jet3_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 0 AND 3 condition
+						selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 && jet0_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1 && jet4_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 0 AND 4 condition
+						selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 && jet0_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1 && jet5_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 0 AND 5 condition
+						selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1 && jet1_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1 && jet2_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 1 AND 2 condition
+						selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1 && jet1_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1 && jet3_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 1 AND 3 condition
+						selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1 && jet1_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1 && jet4_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 1 AND 4 condition
+						selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1 && jet1_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1 && jet5_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 1 AND 5 condition
+						selection_string += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1 && jet2_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1 && jet3_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 2 AND 3 condition
+						selection_string += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1 && jet2_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1 && jet4_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 2 AND 4 condition
+						selection_string += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1 && jet2_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1 && jet5_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 2 AND 5 condition
+						selection_string += " || ((jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1 && jet3_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1 && jet4_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 3 AND 4 condition
+						selection_string += " || ((jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1 && jet3_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1 && jet5_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 3 AND 5 condition
+						selection_string += " || ((jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1 && jet4_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1 && jet5_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+")))" # jet 4 AND 5 condition
+					# Non-triggered jet
+					if i == 10: 
+						selection_string = "  ( ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 0) || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 0)"
+						selection_string += " || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 0) || (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 0)"
+						selection_string += " || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 0) || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 0))"
+					if i == 11: 
+						selection_string = " ( (  jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 0 && jet0_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+")" # jet 0 condition
+						selection_string += " || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 0 && jet1_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+")" # jet 1 condition
+						selection_string += " || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 0 && jet2_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+")" # jet 2 condition
+						selection_string += " || (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 0 && jet3_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+")" # jet 3 condition
+						selection_string += " || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 0 && jet4_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+")" # jet 4 condition
+						selection_string += " || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 0 && jet5_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 5 condition
+					if i == 12: 
+						selection_string = " ( ( ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 0 && jet0_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 0 && jet1_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 0 AND 1 condition
+						selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 0 && jet0_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 0 && jet2_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 0 AND 2 condition
+						selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 0 && jet0_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 0 && jet3_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 0 AND 3 condition
+						selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 0 && jet0_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 0 && jet4_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 0 AND 4 condition
+						selection_string += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 0 && jet0_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 0 && jet5_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 0 AND 5 condition
+						selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 0 && jet1_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 0 && jet2_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 1 AND 2 condition
+						selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 0 && jet1_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 0 && jet3_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 1 AND 3 condition
+						selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 0 && jet1_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 0 && jet4_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 1 AND 4 condition
+						selection_string += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 0 && jet1_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 0 && jet5_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 1 AND 5 condition
+						selection_string += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 0 && jet2_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 0 && jet3_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 2 AND 3 condition
+						selection_string += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 0 && jet2_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 0 && jet4_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 2 AND 4 condition
+						selection_string += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 0 && jet2_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 0 && jet5_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 2 AND 5 condition
+						selection_string += " || ((jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 0 && jet3_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 0 && jet4_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 3 AND 4 condition
+						selection_string += " || ((jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 0 && jet3_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 0 && jet5_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+"))" # jet 3 AND 5 condition
+						selection_string += " || ((jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 0 && jet4_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 0 && jet5_bdtscoreX_LLP350_MS80_perJet >= "+BDT_score+")))" # jet 4 AND 5 condition
+
+
+					selval = tree.GetEntries(selection_string)
+					if i % 4 == 2: all_events = selval # i = 2, 6, 10
+					if i % 4 == 3: one_plus_jets = selval # i = 3, 7, 11
+					if i % 4 == 0: two_plus_jets = selval # i = 4, 8, 12
+					Nevents = tree.GetEntries()
+
+				if print_latex:
+					if i < 2: print(selname+" &", round(selval, 4), "&\\multicolumn{2}{l}{", round(selval/init, 4), "} \\\\ ")
+					if i % 4 == 2: print(selname+" &", round(selval, 4), "&", round(selval/init, 4), "&", round(selval/all_events, 4), " \\\\ ")
+					if i % 4 == 3: print(selname+" &", round(all_events - one_plus_jets, 4), "&", round((all_events - one_plus_jets)/init, 4),  "&", round((all_events - one_plus_jets)/all_events, 4), " \\\\ ") # 0 bin is all events - events with at least 1
+					if i > 0 and i % 4 == 0: print(selname+" &", round(one_plus_jets - two_plus_jets, 4), "&", round((one_plus_jets - two_plus_jets)/init, 4),  "&", round((one_plus_jets - two_plus_jets)/all_events, 4), " \\\\ ") # 1 bin is events with at least 1 - events with at least 2
+					if i >= 5 and i % 4 == 1: 
+						print(selname+" &", round(two_plus_jets, 4), "&", round(two_plus_jets/init, 4),  "&", round(two_plus_jets/all_events, 4), " \\\\ ") # 2+ bin is events with at least 2
+						if i != 13: print("\\hline")
+						if i == 13: latex_end(file_path)
+
+				else:
+					print(selection_list_abbrev[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
+
 
 		print(" \n")
 		print("Background single tag estimation, done per event")
 		print(" \n")
 		event_selection_list = [
-            "All events (skim)", 
-            "Jet $\\geq 40$~GeV $p_T$ (one of 3 leading)", 
+            "All events (2023 LLP skim)", 
+            "Jet $\\geq 40$~GeV $p_T$ (one of 6 valid jets)", 
             "Jet $\\abs\\eta \\leq 1.26$", 
             "One tagged jet prediction ($p=0.0014$)",
-            "Jet $\\geq 60$~GeV $p_T$ (one of 3 leading)", 
+            "Jet $\\geq 60$~GeV $p_T$ (one of 6 valid jets)", 
             "Jet $\\abs\\eta \\leq 1.26$", 
-            "One tagged jet prediction ($p=0.0011$)",
+            "One tagged jet prediction ($p=0.0012$)",
         ]
         
 		event_selection_list_abbrev = [
@@ -532,7 +577,7 @@ def main():
 				selval = tree.GetEntries(selection_string)
 				if (i == 2 or i == 5): all_events = selval
 				if i == 3: selval = all_events * 0.0014
-				if i == 6: selval = all_events * 0.0011
+				if i == 6: selval = all_events * 0.0012
 
 			if print_latex:
 				print(selname+" &", round(selval, 4), "&", round(selval/init, 4), " \\\\ ")

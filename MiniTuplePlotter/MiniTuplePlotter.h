@@ -780,7 +780,7 @@ public :
 				h = GetReverseCDF( h ); 	
 
 			h->SetMaximum( 2. );
-			if( plot_log_ratio ) h->SetMaximum( 10. );
+			if( plot_log_ratio ) h->SetMaximum( 100. );
 
 			h->Divide( h_divisor );
 			h->SetLineColor( colors[i] );

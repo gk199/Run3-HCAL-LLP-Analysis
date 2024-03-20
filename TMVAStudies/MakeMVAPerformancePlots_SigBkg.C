@@ -470,7 +470,7 @@ void SetupPlots()
   GraphLabels.clear();
   PlotnameSpecific.clear();
 
-  legend = new TLegend(0.32,0.14,0.9,0.34);
+  legend = new TLegend(0.32,0.12,0.9,0.34);
   legend->SetTextSize(0.03);
   legend->SetBorderSize(0);
   legend->SetFillStyle(0);
@@ -812,15 +812,37 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
     }
   }
 
-  if (InputFile.find("MH-125_MS-15") != std::string::npos) {
-    TGraphAsymmErrors* WP_jet_cutflow = MakeCurrentWPSigEffVsBkgEffGraph(0.66 , 0.0008, "WP_jet_cutflow"+label); // mh 125 working point, for per jet approach
-    legend->AddEntry(WP_jet_cutflow, "Cutflow Jet WP comparison (mH = 125)", "P");
-    WP_jet_cutflow->SetFillColor(kBlue);
-    WP_jet_cutflow->SetMarkerColor(kBlue);
-    WP_jet_cutflow->SetMarkerStyle(34);
-    WP_jet_cutflow->SetMarkerSize(1.5);
-    WP_jet_cutflow->Draw("Psame");  
+  float signal_eff = 0;
+  string mass = "";
+  if (InputFile.find("MH-125_MS-15") != std::string::npos) { // mh 125 working point, for per jet approach
+    signal_eff = 0.66;
+    mass = "125";
+  }
+  if (InputFile.find("MH-350_MS-80") != std::string::npos) { // mh 350 working point, for per jet approach
+    signal_eff = 0.77;
+    mass = "350";
+  }
+  if (InputFile.find("MH-125_MS-50") != std::string::npos) { // mh 125 working point, for per jet approach
+    signal_eff = 0.58;
+    mass = "125";
+  }
+  if (InputFile.find("MH-250_MS-120") != std::string::npos) { // mh 250 working point, for per jet approach
+    signal_eff = 0.65;
+    mass = "250";
+  }
+  if (InputFile.find("MH-350_MS-160") != std::string::npos) { // mh 125 working point, for per jet approach
+    signal_eff = 0.68;
+    mass = "350";
+  }
+  TGraphAsymmErrors* WP_jet_cutflow = MakeCurrentWPSigEffVsBkgEffGraph(signal_eff , 0.0008, "WP_jet_cutflow"+label); 
+  legend->AddEntry(WP_jet_cutflow, Form("Cutflow Jet WP comparison (mH = %s)", mass.c_str()), "P");
+  WP_jet_cutflow->SetFillColor(kBlue);
+  WP_jet_cutflow->SetMarkerColor(kBlue);
+  WP_jet_cutflow->SetMarkerStyle(34);
+  WP_jet_cutflow->SetMarkerSize(1.5);
+  WP_jet_cutflow->Draw("Psame");  
 
+  // if (InputFile.find("MH-125_MS-15") != std::string::npos) {
     // TGraphAsymmErrors* WP_BDTcut = MakeCurrentWPSigEffVsBkgEffAtCutValueGraph(Signal_MVA125_15, Background_MVA125_15, "Eff at fixed cut", 0.99);
     // legend->AddEntry(WP_BDTcut, "BDT cut = 0.99 point (mH = 125)", "P");
     // WP_BDTcut->SetFillColor(colors[0]);
@@ -828,24 +850,16 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
     // WP_BDTcut->SetMarkerStyle(34);
     // WP_BDTcut->SetMarkerSize(1.5);
     // WP_BDTcut->Draw("Psame"); 
-  }
-  if (InputFile.find("MH-350_MS-80") != std::string::npos) {
-    TGraphAsymmErrors* WP_jet_cutflow = MakeCurrentWPSigEffVsBkgEffGraph(0.77 , 0.0008, "WP_jet_cutflow"+label); // mh 350 working point, for per jet approach
-    legend->AddEntry(WP_jet_cutflow, "Cutflow Jet WP comparison (mH = 350)", "P");
-    WP_jet_cutflow->SetFillColor(kBlue);
-    WP_jet_cutflow->SetMarkerColor(kBlue);
-    WP_jet_cutflow->SetMarkerStyle(34);
-    WP_jet_cutflow->SetMarkerSize(1.5);
-    WP_jet_cutflow->Draw("Psame");  
-
-    TGraphAsymmErrors* WP_BDTcut = MakeCurrentWPSigEffVsBkgEffAtCutValueGraph(Signal_MVA350_80, Background_MVA350_80, "Eff at fixed cut", 0.99);
-    legend->AddEntry(WP_BDTcut, "BDT cut = 0.99 point (mH = 350)", "P");
-    WP_BDTcut->SetFillColor(colors[1]);
-    WP_BDTcut->SetMarkerColor(colors[1]);
+  // }
+  // if (InputFile.find("MH-350_MS-80") != std::string::npos) {
+    TGraphAsymmErrors* WP_BDTcut = MakeCurrentWPSigEffVsBkgEffAtCutValueGraph(Signal_MVA350_80, Background_MVA350_80, "Eff at fixed cut", 0.998);
+    legend->AddEntry(WP_BDTcut, Form("BDT cut = 0.998 (mH = %s)", mass.c_str()), "P");
+    WP_BDTcut->SetFillColor(kBlack);
+    WP_BDTcut->SetMarkerColor(kBlack);
     WP_BDTcut->SetMarkerStyle(34);
     WP_BDTcut->SetMarkerSize(1.5);
     WP_BDTcut->Draw("Psame"); 
-  }
+  // }
 
   // overlay multiple ROC curves -- useful if comparing 125 vs. 350 for instance
   if (overlay) {
@@ -857,24 +871,24 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   }
   
   // separate graph -- signal efficiency vs cut value, full curve
-  TGraphAsymmErrors* WP_BDTcut = MakeCurrentWPSigEffVsCutValueGraph(Signal_MVA125_15, "", 0.99);
+  TGraphAsymmErrors* WP_BDTcut_sig = MakeCurrentWPSigEffVsCutValueGraph(Signal_MVA125_15, "", 0.99);
   TGraphAsymmErrors* WP_BDTcut_bkg = MakeCurrentWPSigEffVsCutValueGraph(Background_MVA125_15, "", 0.99);
   legend->Clear(); 
-  WP_BDTcut->SetFillColor(colors[0]);
-  WP_BDTcut->SetMarkerColor(colors[0]);
-  WP_BDTcut->SetMarkerStyle(34);
-  WP_BDTcut->SetMarkerSize(1.5);
+  WP_BDTcut_sig->SetFillColor(colors[0]);
+  WP_BDTcut_sig->SetMarkerColor(colors[0]);
+  WP_BDTcut_sig->SetMarkerStyle(34);
+  WP_BDTcut_sig->SetMarkerSize(1.5);
   WP_BDTcut_bkg->SetFillColor(colors[1]);
   WP_BDTcut_bkg->SetMarkerColor(colors[1]);
   WP_BDTcut_bkg->SetMarkerStyle(34);
   WP_BDTcut_bkg->SetMarkerSize(1.5);
-  legend->AddEntry(WP_BDTcut, "Signal Efficiency", "P");
+  legend->AddEntry(WP_BDTcut_sig, "Signal Efficiency", "P");
   legend->AddEntry(WP_BDTcut_bkg, "Background Efficiency", "P");
   cv_indiv->cd();
-  WP_BDTcut->GetXaxis()->SetLimits(-1.1,1.1);   
-  WP_BDTcut->GetYaxis()->SetRangeUser(0,1.1);
+  WP_BDTcut_sig->GetXaxis()->SetLimits(-1.1,1.1);   
+  WP_BDTcut_sig->GetYaxis()->SetRangeUser(0,1.1);
   gPad->Update();
-  WP_BDTcut->Draw("AP"); 
+  WP_BDTcut_sig->Draw("AP"); 
   WP_BDTcut_bkg->Draw("Psame"); 
   gPad->SetLogy(0);
   legend->Draw();
