@@ -664,6 +664,10 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	jet_tree_output_vars_int["pho"]			= n_pho;
 	jet_tree_output_vars_float["eventHT"]   = EventHT();
 
+	for (int i = 0; i < HLT_Indices.size(); i++) { 
+		tree_output_vars_bool[HLT_Names[i]] = HLT_Decision->at(i);
+	}
+
 	jet_tree_output_vars_float["perJet_E"] 			= jet_E->at(jetIndex);
 	jet_tree_output_vars_float["perJet_Pt"] 		= jet_Pt->at(jetIndex);
 	jet_tree_output_vars_float["perJet_Eta"] 		= jet_Eta->at(jetIndex);
