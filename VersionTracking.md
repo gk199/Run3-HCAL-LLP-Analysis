@@ -220,6 +220,10 @@ Location of minituples:
 /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/
 ```
 
+### v3.8
+Updates:
+* Fixed bug where HLT results are not saved in per-jet trees (useful for HLT comparison ROC curves)
+
 ## V4
 Ongoing wish list:
 * MET filters

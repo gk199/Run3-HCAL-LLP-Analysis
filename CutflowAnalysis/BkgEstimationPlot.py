@@ -31,23 +31,23 @@ cmsLabel = "#scale[1.0]{#bf{CMS} #it{Internal}}"
 cmsLabel2 = "#scale[0.8]{#sqrt{s} = 13.6 TeV}"
 
 # list inputs and number of events in each bin
-inputs = ["W+Jets", "LLP MC"]
+inputs = ["W+Jets", "LLP MC", "LLP MC passed HLT"] # currently for 350, 80
 
-zero_bin = [49925, 3]
-one_bin = [70, 65]
-two_bin = [1, 272]
+zero_bin = [21906/21907, 0.7779, 0.0416]
+one_bin = [1/21907, 0.056, 0.309]
+two_bin = [0, 0.0013, 0.0009796]
 
 stack = False
-if stack: hs = ROOT.THStack("hs",  "Number of BDT tagged jets in an event; Number of jets with BDT discriminator > 0.99;Number of Events")
+if stack: hs = ROOT.THStack("hs",  "Fraction of events with BDT tagged jets (mH = 350, mS = 80 GeV); Fraction of events with jets with BDT discriminator > 0.9999;Fraction of Events")
 
 JetsPerCategory = {}
-legend = ROOT.TLegend(0.65,0.65,0.85,0.8)
+legend = ROOT.TLegend(0.68,0.65,0.88,0.8)
 canv.cd()
 
 i = 0
 for type in inputs:
     hname = type
-    JetsPerCategory[hname] = ROOT.TH1F(hname, "Number of BDT tagged jets in an event;Number of jets with BDT discriminator > 0.99;Number of Events", 3, 0, 3) 
+    JetsPerCategory[hname] = ROOT.TH1F(hname, "Fraction of events with BDT tagged jets (mH = 350, mS = 80 GeV);Fraction of events with jets with BDT discriminator > 0.9999;Fraction of Events", 3, 0, 3) 
     legend.AddEntry(JetsPerCategory[hname], type)
 
     JetsPerCategory[hname].SetBinContent(1, zero_bin[i]) 
@@ -60,7 +60,7 @@ for type in inputs:
     if "LLP" not in type:
         JetsPerCategory[hname].SetFillStyle(3004)
     if not stack:
-        if i == 0: JetsPerCategory[hname].Draw("PFC")
+        if i == 0: JetsPerCategory[hname].Draw("PLC PFC")
         else: JetsPerCategory[hname].Draw("SAME PLC")
     i += 1
     if stack: hs.Add(JetsPerCategory[hname])

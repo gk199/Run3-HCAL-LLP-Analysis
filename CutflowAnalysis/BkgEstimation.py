@@ -398,7 +398,7 @@ def main():
 				init = tree.GetEntries()
 				total_selection_string = ""
 			if i == 1: total_selection_string = jet_string
-			if i == 2: total_selection_string += " && eventHT > 200"
+			if i == 2: total_selection_string += " && eventHT > 200" # slight difference caused by addition of this as compared to above HLT cutflow
 			if i == 3: 
 				total_selection_string += " && " + one_jet_tagged_string
 				two_selection_string = total_selection_string + " && " + two_jet_tagged_string
