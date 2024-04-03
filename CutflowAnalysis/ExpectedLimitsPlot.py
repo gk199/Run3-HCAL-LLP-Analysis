@@ -31,7 +31,7 @@ cmsLabel = "#scale[1.0]{#bf{CMS} #it{Internal}}"
 cmsLabel2 = "#scale[0.8]{#sqrt{s} = 13.6 TeV}"
 
 # list inputs and number of events in each bin
-inputs = ["LLP 125, 15", "LLP 125, 50", "LLP 250, 120", "LLP 350, 50", "LLP 350, 160"]
+inputs = ["mH=125, mS=15", "mH=125, mS=50", "mH=250, mS=120", "mH=350, mS=50", "mH=350, mS=160"]
 
 ctau_pt5 = [-1, -1, -1, 0.094, -1]
 ctau_1 = [13.5, -1, -1, -1, -1]
@@ -39,7 +39,7 @@ ctau_3 = [-1, 0.71, -1, -1, -1]
 ctau_10 = [-1, -1, 0.56, -1, 0.26]
 
 stack = False
-if stack: hs = ROOT.THStack("hs",  "Expected Limits; LLP c#tau;Branching Ratio")
+if stack: hs = ROOT.THStack("hs",  "Expected Limits based on BDT double jet tag; LLP c#tau;Branching Ratio (%)")
 
 JetsPerCategory = {}
 legend = ROOT.TLegend(0.68,0.65,0.88,0.8)
@@ -48,19 +48,32 @@ canv.cd()
 i = 0
 for type in inputs:
     hname = type
-    JetsPerCategory[hname] = ROOT.TH1F(hname, "Expected Limits;LLP c#tau;Branching Ratio", 4, 0, 4) 
+    bin_num = 4 # 20 # 4
+    JetsPerCategory[hname] = ROOT.TH1F(hname, "Expected Limits based on BDT double jet tag;LLP c#tau (m);Branching Ratio (%)", bin_num, 0, bin_num) 
     legend.AddEntry(JetsPerCategory[hname], type)
 
-    JetsPerCategory[hname].SetBinContent(1, ctau_pt5[i]) 
-    JetsPerCategory[hname].SetBinContent(2, ctau_1[i]) 
-    JetsPerCategory[hname].SetBinContent(3, ctau_3[i]) 
-    JetsPerCategory[hname].SetBinContent(4, ctau_10[i]) 
+    if bin_num == 4:
+        bin1 = 1
+        bin2 = 2
+        bin3 = 3
+        bin4 = 4
+    if bin_num == 20:
+        bin1 = 2
+        bin2 = 3
+        bin3 = 7
+        bin4 = 19
+
+    JetsPerCategory[hname].SetBinContent(bin1, ctau_pt5[i]) 
+    JetsPerCategory[hname].SetBinContent(bin2, ctau_1[i]) 
+    JetsPerCategory[hname].SetBinContent(bin3, ctau_3[i]) 
+    JetsPerCategory[hname].SetBinContent(bin4, ctau_10[i]) 
     JetsPerCategory[hname].SetMarkerSize(1.5)
     JetsPerCategory[hname].SetMarkerStyle(21)
-    JetsPerCategory[hname].GetXaxis().SetBinLabel(1,"c#tau = 0.5 m")
-    JetsPerCategory[hname].GetXaxis().SetBinLabel(2,"c#tau = 1 m")
-    JetsPerCategory[hname].GetXaxis().SetBinLabel(3,"c#tau = 3 m")
-    JetsPerCategory[hname].GetXaxis().SetBinLabel(4,"c#tau = 10 m")
+    if bin_num == 4:
+        JetsPerCategory[hname].GetXaxis().SetBinLabel(bin1,"c#tau = 0.5 m")
+        JetsPerCategory[hname].GetXaxis().SetBinLabel(bin2,"c#tau = 1 m")
+        JetsPerCategory[hname].GetXaxis().SetBinLabel(bin3,"c#tau = 3 m")
+        JetsPerCategory[hname].GetXaxis().SetBinLabel(bin4,"c#tau = 10 m")
     if "LLP" not in type:
         JetsPerCategory[hname].SetFillStyle(3004)
     if not stack:
@@ -73,4 +86,5 @@ ROOT.gPad.SetLogy()
 if stack: hs.Draw("HIST PLC nostack")
 stamp_text.DrawLatex(xpos, ypos, cmsLabel)
 legend.Draw()
-canv.SaveAs("ExpectedLimits.png")
+if bin_num == 4: canv.SaveAs("ExpectedLimits_labeled.png")
+else: canv.SaveAs("ExpectedLimits.png")
