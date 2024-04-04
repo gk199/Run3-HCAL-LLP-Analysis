@@ -33,13 +33,13 @@ cmsLabel2 = "#scale[0.8]{#sqrt{s} = 13.6 TeV}"
 # list inputs and number of events in each bin
 inputs = ["mH=125, mS=15", "mH=125, mS=50", "mH=250, mS=120", "mH=350, mS=50", "mH=350, mS=160"]
 
-ctau_pt5 = [-1, -1, -1, 0.094, -1]
-ctau_1 = [13.5, -1, -1, -1, -1]
-ctau_3 = [-1, 0.71, -1, -1, -1]
-ctau_10 = [-1, -1, 0.56, -1, 0.26]
+ctau_pt5 = [-1, -1, -1, 0.00094, -1]
+ctau_1 = [0.135, -1, -1, -1, -1]
+ctau_3 = [-1, 0.0071, -1, -1, -1]
+ctau_10 = [-1, -1, 0.0056, -1, 0.0026]
 
 stack = False
-if stack: hs = ROOT.THStack("hs",  "Expected Limits based on BDT double jet tag; LLP c#tau;Branching Ratio (%)")
+if stack: hs = ROOT.THStack("hs",  "Expected Limits based on BDT double jet tag; LLP c#tau;Branching Ratio")
 
 JetsPerCategory = {}
 legend = ROOT.TLegend(0.68,0.65,0.88,0.8)
@@ -49,7 +49,7 @@ i = 0
 for type in inputs:
     hname = type
     bin_num = 4 # 20 # 4
-    JetsPerCategory[hname] = ROOT.TH1F(hname, "Expected Limits based on BDT double jet tag;LLP c#tau (m);Branching Ratio (%)", bin_num, 0, bin_num) 
+    JetsPerCategory[hname] = ROOT.TH1F(hname, "Expected Limits based on BDT double jet tag;LLP c#tau (m);Branching Ratio", bin_num, 0, bin_num) 
     legend.AddEntry(JetsPerCategory[hname], type)
 
     if bin_num == 4:
@@ -69,6 +69,7 @@ for type in inputs:
     JetsPerCategory[hname].SetBinContent(bin4, ctau_10[i]) 
     JetsPerCategory[hname].SetMarkerSize(1.5)
     JetsPerCategory[hname].SetMarkerStyle(21)
+    JetsPerCategory[hname].GetYaxis().SetRangeUser(0.00005, 1)
     if bin_num == 4:
         JetsPerCategory[hname].GetXaxis().SetBinLabel(bin1,"c#tau = 0.5 m")
         JetsPerCategory[hname].GetXaxis().SetBinLabel(bin2,"c#tau = 1 m")
@@ -86,5 +87,9 @@ ROOT.gPad.SetLogy()
 if stack: hs.Draw("HIST PLC nostack")
 stamp_text.DrawLatex(xpos, ypos, cmsLabel)
 legend.Draw()
-if bin_num == 4: canv.SaveAs("ExpectedLimits_labeled.png")
-else: canv.SaveAs("ExpectedLimits.png")
+if bin_num == 4: 
+    canv.SaveAs("ExpectedLimits_labeled.png")
+    canv.SaveAs("ExpectedLimits_labeled.pdf")
+else: 
+    canv.SaveAs("ExpectedLimits.png")
+    canv.SaveAs("ExpectedLimits.pdf")

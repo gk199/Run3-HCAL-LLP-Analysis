@@ -322,7 +322,7 @@ def main():
 		]
 		
 		if print_latex:
-			event_latex_setup(file_path)
+			jetSplit_event_latex_setup(file_path)
 
 		init = -1
 		
@@ -340,6 +340,7 @@ def main():
 			if i >= 5: total_selection_string += " && " + HLT_string
 
 			selval = tree.GetEntries(total_selection_string)
+			if i == 1: valid_events = selval
 			if i == 1 or i == 5: all_events = selval # but end up doing comparison (denominator) to all LLP events...
 			if i == 2 or i == 6: one_plus_jets = selval
 			if i == 3 or i == 7: two_plus_jets = selval
@@ -347,12 +348,12 @@ def main():
 			Nevents = tree.GetEntries()
 
 			if print_latex:
-				if i <= 1 or i == 5: 
-					print(selname+" &", round(selval, 4), " &", round(selval/init, 4), " \\\\ ")
-					if i == 0: print("\\hline")
-				if i == 2 or i == 6: print(selname+" & ", round(all_events - one_plus_jets, 4), " &", round((all_events - one_plus_jets)/init, 4), " \\\\ ") # 0 bin is all events - events with at least 1
-				if i == 3 or i == 7: print(selname+" & ", round(one_plus_jets - two_plus_jets, 4), " &", round((one_plus_jets - two_plus_jets)/init, 4), " \\\\ ") # 1 bin is events with at least 1 - events with at least 2
-				if i == 4 or i == 8: print(selname+" & ", round(two_plus_jets, 4), " & ", round(two_plus_jets/init, 4), " \\\\ ") # 2+ bin is events with at least 2
+				if i == 0: print(selname+" &", round(selval, 4), "&\\multicolumn{2}{l}{", round(selval/init, 4), "} \\\\ ")
+				if i == 1 or i == 5: print(selname+" &", round(selval, 4), " &", round(selval/init, 4), " &", round(selval/valid_events, 4), " \\\\ ")
+				if i == 2 or i == 6: print(selname+" & ", round(all_events - one_plus_jets, 4), " &", round((all_events - one_plus_jets)/init, 4), " &", round((all_events - one_plus_jets)/valid_events, 4), " \\\\ ") # 0 bin is all events - events with at least 1
+				if i == 3 or i == 7: print(selname+" & ", round(one_plus_jets - two_plus_jets, 4), " &", round((one_plus_jets - two_plus_jets)/init, 4), " &", round((one_plus_jets - two_plus_jets)/valid_events, 4), " \\\\ ") # 1 bin is events with at least 1 - events with at least 2
+				if i == 4 or i == 8: print(selname+" & ", round(two_plus_jets, 4), " & ", round(two_plus_jets/init, 4), " & ", round(two_plus_jets/valid_events, 4), " \\\\ ") # 2+ bin is events with at least 2
+				if i == 0 or i == 4: print("\\hline")
 				if i == 8: latex_end(file_path)
 
 			else:
@@ -467,8 +468,8 @@ def main():
             "Two jet BDT passed",
         ]
 
-		# trees = ["WPlusJets", "NoSel"]
-		trees = ["WPlusJets"]
+		trees = ["WPlusJets", "NoSel"]
+		# trees = ["WPlusJets"]
 		for tree_sel in trees:
 			print("\n Running for: " + tree_sel + " \n")
 			file = ROOT.TFile.Open(file_path)
@@ -485,6 +486,10 @@ def main():
 				selname = event_selection_list[i]
 				selval  = -1
 				Nevents = -1
+
+				if tree_sel == "NoSel" and i >= 5 and i % 4 == 1: # do not unblind for data!!
+					if i == 13: latex_end(file_path)
+					continue
 
 				if i == 0: 
 					selval = tree.GetEntries()
@@ -562,7 +567,7 @@ def main():
 				if print_latex:
 					if i < 2: print(selname+" &", round(selval, 4), "&\\multicolumn{2}{l}{", round(selval/init, 4), "} \\\\ ")
 					if i % 4 == 2: print(selname+" &", round(selval, 4), "&", round(selval/init, 4), "&", round(selval/all_events, 4), " \\\\ ")
-					if i % 4 == 3: print(selname+" &", round(all_events - one_plus_jets, 4), "&", round((all_events - one_plus_jets)/init, 4),  "&", round((all_events - one_plus_jets)/all_events, 4), " \\\\ ") # 0 bin is all events - events with at least 1
+					if i % 4 == 3 and tree_sel != "NoSel": print(selname+" &", round(all_events - one_plus_jets, 4), "&", round((all_events - one_plus_jets)/init, 4),  "&", round((all_events - one_plus_jets)/all_events, 4), " \\\\ ") # 0 bin is all events - events with at least 1
 					if i > 0 and i % 4 == 0: print(selname+" &", round(one_plus_jets - two_plus_jets, 4), "&", round((one_plus_jets - two_plus_jets)/init, 4),  "&", round((one_plus_jets - two_plus_jets)/all_events, 4), " \\\\ ") # 1 bin is events with at least 1 - events with at least 2
 					if i >= 5 and i % 4 == 1: 
 						print(selname+" &", round(two_plus_jets, 4), "&", round(two_plus_jets/init, 4),  "&", round(two_plus_jets/all_events, 4), " \\\\ ") # 2+ bin is events with at least 2
