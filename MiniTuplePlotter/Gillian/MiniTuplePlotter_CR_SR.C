@@ -24,10 +24,11 @@ void MiniTuplePlotter_CR_SR(){
 	filetags["LLP250"]		= { "v3.7_LLPskim_Run2023Cv4_2024_03_14", "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_03_14_batch2"};
 	filetags["LLP350"]		= { "v3.7_LLPskim_Run2023Cv4_2024_03_14", "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_03_14_batch2"};
 
-	vector<string> filetags_data 		= { "v3.7_LLPskim_Run2023Cv4_2024_03_14" };
+	vector<string> filetags_data 		= { "v3.7_LLPskim_Run2023_HADD" };
 	vector<string> filetags_LLP 		= { "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_14_TEST" };	
 	vector<string> filetags_all 		= { "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_14_TEST", "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TEST", "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_03_14_batch2", "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_03_14_batch2", "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_03_14_batch2"};
 
+	vector<string> BDT_files 			= {"v3.7_LLPskim_Run2023_HADD", "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_14_TEST", "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TEST"};
 	vector<string> filetags_all_v3pt0 	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v2.0_MC_QCD_250k_2023_10_18", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23"};
 	vector<string> filetags_QCD 		= { "v2.0_MC_QCD_250k_2023_10_18" };	
 
@@ -87,9 +88,9 @@ void MiniTuplePlotter_CR_SR(){
 	#include "../RegionCuts.h"
 
 	bool LLP_WJets = false;				// analysis variables for LLP and W+Jets overlayed
-	bool track_dR_study = false;			// track vars with diff dR cuts, dR with diff track cuts
+	bool track_dR_study = false;		// track vars with diff dR cuts, dR with diff track cuts
 	bool overlay_LLP = false;			// overlay analysis variables for each LLP mass point
-	bool Bkg_est = false;				// look at jet tagging vars by jet eta for probability estimations
+	bool Bkg_est = true;				// look at jet tagging vars by jet eta for probability estimations
 
 	bool LLP_all = false;				// all variables, track vars with leading track < 4 study, eta-phi spread
 	bool Jet_vars = false; 				// jet kinematics without a pT cut
@@ -97,8 +98,8 @@ void MiniTuplePlotter_CR_SR(){
 	bool Jet_bins = false;				// bin in jet pT
 	bool BDT_bins = false;				// bin in BDT score
 	bool Overlay_all = false;			// overlay LLP MC, QCD MC, LLP skim
-	bool Matching_efficiency = true;	// LLP - jet matching efficiency
-	bool perJet = true;
+	bool Matching_efficiency = false;	// LLP - jet matching efficiency
+	bool perJet = false;
 
 	// ----- Jet kinematics in control and signal regions -----//
 
@@ -236,22 +237,34 @@ void MiniTuplePlotter_CR_SR(){
 		cout<<" ---------- Background Study 1: Tagging rates by jet eta ---------- "<<endl;
 		cout<<endl;
 
-		TCut Cut_BDTscore0 	= "bdtscore_LLP125_MS15_perJet > 0"; 
-		TCut Cut_BDTscore 	= "bdtscore_LLP125_MS15_perJet > 0.5"; 
+		TCut Cut_BDTscore0 	= "bdtscore_LLP350_MS80_perJet > 0"; 
+		TCut Cut_BDTscore 	= "bdtscore_LLP350_MS80_perJet > 0.5"; 
 
-		// leading jet, all jet variables
 		class MiniTuplePlotter plotter_BkgEst( filetags_data, path );
-		plotter_BkgEst.SetPlots({P_perJet_Eta, P_perJet_Phi, P_perJet_Pt});
 		plotter_BkgEst.SetTreeName( "PerJet_WPlusJets" );	
-		plotter_BkgEst.SetOutputFileTag("Jet40_CR_SR_v3.7_MC"); 	
 		plotter_BkgEst.SetComparisonCuts({Cut_None, Cut_BDTscore0, Cut_BDTscore});
 		plotter_BkgEst.plot_log_ratio   = true; 
 		plotter_BkgEst.plot_norm 		= false;
-		plotter_BkgEst.SetLegendNames({"Jets from W+Jets events", "with BDT 125 (mS 15) score > 0", "with BDT 125 (mS 15) score > 0.5"});
+		plotter_BkgEst.SetLegendNames({"Jets from W+Jets events", "with BDT 350 (mS 80) score > 0", "with BDT 350 (mS 80) score > 0.5"});
 		plotter_BkgEst.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
 		//plotter_BkgEst.plot_cdf = true;
 		//plotter_BkgEst.plot_reverse_cdf = true;
 		plotter_BkgEst.SetOutputDirectory("BackgroundEstimations");
+		plotter_BkgEst.SetOutputFileTag("Jet40_CR_SR_v3.7_MC"); 	
+		plotter_BkgEst.SetPlots({P_perJet_Pt, P_perJet_Phi, P_perJet_Eta});
+		plotter_BkgEst.Plot("ratio");
+		plotter_BkgEst.ClearFileTrees();
+		plotter_BkgEst.SetOutputFileTag("Jet40_CR_SR_v3.7_MC_variableBins"); 
+		plotter_BkgEst.SetPlots({P_perJet_Pt});
+		plotter_BkgEst.SetVariableBins({0,40,60,80,120,160,300});
+		plotter_BkgEst.Plot("ratio");
+		plotter_BkgEst.ClearFileTrees();
+		plotter_BkgEst.SetPlots({P_perJet_Phi});
+		plotter_BkgEst.SetVariableBins({-3.5,0,3.5});
+		plotter_BkgEst.Plot("ratio");
+		plotter_BkgEst.ClearFileTrees();
+		plotter_BkgEst.SetPlots({P_perJet_Eta});
+		plotter_BkgEst.SetVariableBins({-1.5,-1,-0.5,0,0.5,1,1.5});
 		plotter_BkgEst.Plot("ratio");
 	}
 
@@ -402,39 +415,37 @@ void MiniTuplePlotter_CR_SR(){
 	if (BDT_bins) {
 		// ----- Bin in BDT score ----- //
 
-		// for mH = 125 now, BDT score for 125
+		// for mH = 350 now, BDT score for 350, 80
 
 		cout<<endl;
 		cout<<" ---------- Study 5: Bin in BDT score (MC and data) ---------- "<<endl;
 		cout<<endl;
 
-		class MiniTuplePlotter plotter_allVars_BDTbinsData( filetags_data, path );
-		plotter_allVars_BDTbinsData.SetPlots(analysisVars); 
-		plotter_allVars_BDTbinsData.AddPlot({P_jet0_Pt});
-		plotter_allVars_BDTbinsData.SetTreeName( "WPlusJets" );	
-		plotter_allVars_BDTbinsData.SetOutputFileTag("BDTBins_Jet40_v3.7"); 	
-		plotter_allVars_BDTbinsData.SetComparisonCuts({Cut_BDTscoreNPt99, Cut_BDTscoreNPt98, Cut_BDTscoreNPt95, Cut_BDTscore0, Cut_BDTscorePos}); 
-		plotter_allVars_BDTbinsData.plot_log_ratio    = false; 
-		plotter_allVars_BDTbinsData.SetLegendNames({"Data: BDT score -1 to -0.99", "Data: BDT score -0.99 to -0.98", "Data: BDT score -0.98 to -0.95", "Data: BDT score -0.95 to 0", "Data: BDT score 0 to 1"});
-		plotter_allVars_BDTbinsData.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
-		plotter_allVars_BDTbinsData.SetCuts("jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26");
-		plotter_allVars_BDTbinsData.SetSelectiveCuts("LLPskim", "jet0_NeutralHadEFrac < 0.6");  // BLINDED with track energy fraction (jet0_Track0Pt / jet0_Pt > 0.1) or neutral hadron fraction (jet0_NeutralHadEFrac < 0.6)
-		plotter_allVars_BDTbinsData.SetOutputDirectory("Data_BDTBins");
-		plotter_allVars_BDTbinsData.Plot("ratio");
+		class MiniTuplePlotter plotter_run_BDTbinsData( filetags_data, path );
+		plotter_run_BDTbinsData.SetTreeName( "PerJet_WPlusJets" );	
+		plotter_run_BDTbinsData.SetOutputFileTag("BDTBins_Jet40_v3.7"); 	
+		plotter_run_BDTbinsData.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );			
+		plotter_run_BDTbinsData.SetCuts("perJet_Pt >= 40 && abs(perJet_Eta) <= 1.26 && bdtscore_LLP350_MS80_perJet >= 0.99");
+		plotter_run_BDTbinsData.SetOutputDirectory("BDTBins");
+		plotter_run_BDTbinsData.SetPlots2D({Hist1_Hist2(P_bdtscore_LLP350_MS80_perJet, P_run), Hist1_Hist2(P_bdtscore_LLP350_MS80_perJet, P_eventHT)});
+		plotter_run_BDTbinsData.PlotMany2D();
 
-		class MiniTuplePlotter plotter_allVars_BDTBins( filetags_LLP, path );
-		plotter_allVars_BDTBins.SetPlots(analysisVars); 
-		plotter_allVars_BDTBins.AddPlot({P_jet0_Pt});
-		plotter_allVars_BDTBins.SetTreeName( "NoSel" );	
-		plotter_allVars_BDTBins.SetOutputFileTag("BDTBins_Jet40_v3.7_MC"); 	
-		plotter_allVars_BDTBins.SetComparisonCuts({Cut_BDTscoreN, Cut_BDTscorePt5, Cut_BDTscorePt9, Cut_BDTscorePt95, Cut_BDTscore1}); 
-		plotter_allVars_BDTBins.plot_log_ratio    = false; 
-		plotter_allVars_BDTBins.SetLegendNames({"BDT score -1 to 0", "BDT score 0 to 0.5", "BDT score 0.5 to 0.9", "BDT score 0.9 to 0.95", "BDT score 0.95 to 1"});
-		plotter_allVars_BDTBins.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
-		plotter_allVars_BDTBins.SetCuts("jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26 && jet0_Track0Pt > 4");
-		plotter_allVars_BDTBins.SetSelectiveCuts("LLP_MC", Cut_LLPinHCAL_Jet0);
-		plotter_allVars_BDTBins.SetOutputDirectory("MC_BDTBins");
-		plotter_allVars_BDTBins.Plot("ratio");
+		class MiniTuplePlotter plotter_allVars_BDTbinsData( BDT_files, path ); 
+		plotter_allVars_BDTbinsData.SetPlots(analysisVars_perJet); 
+		plotter_allVars_BDTbinsData.AddPlot({P_perJet_Pt});
+		plotter_allVars_BDTbinsData.AddPlot({P_run});
+		plotter_allVars_BDTbinsData.SetTreeNames( {"PerJet_WPlusJets", "PerJet_LLPmatched", "PerJet_LLPmatched"} );	
+		plotter_allVars_BDTbinsData.SetOutputFileTag("BDTBins_Jet40_v3.7"); 	
+		plotter_allVars_BDTbinsData.SetComparisonCuts({"", Cut_BDTscorePt95, Cut_BDTscorePt99, Cut_BDTscore1}, "LLPskim"); 
+		plotter_allVars_BDTbinsData.plot_log_ratio    = false; 
+		plotter_allVars_BDTbinsData.SetLegendNames({"W+jets: all", "W+jets: BDT score 0.95 - 0.99", "W+jets: BDT score 0.99 to 0.999", "W+jets: BDT score 0.999 to 1", "mH=125, mS=15 (LLP in HCAL, BDT>0.99)", "mH=350, mS=80 (LLP in HCAL, BDT>0.99)"});
+		plotter_allVars_BDTbinsData.colors = { kBlack,  kAzure+7, kGreen+2, kOrange, kMagenta-7, kRed  };
+		plotter_allVars_BDTbinsData.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+		plotter_allVars_BDTbinsData.SetCuts("perJet_Pt >= 40 && abs(perJet_Eta) <= 1.26");
+		plotter_allVars_BDTbinsData.SetSelectiveCuts("LLP_MC", Cut_matchedLLPinHCAL);
+		plotter_allVars_BDTbinsData.SetSelectiveCuts("LLP_MC", "bdtscore_LLP350_MS80_perJet >= 0.99"); // only look at high scoring BDT jets
+		plotter_allVars_BDTbinsData.SetOutputDirectory("BDTBins");
+		plotter_allVars_BDTbinsData.Plot();
 	}
 
 	if (Overlay_all) {
