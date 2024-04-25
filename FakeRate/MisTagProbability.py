@@ -205,6 +205,12 @@ def BackgroundComparison(infilepath):
     ActualMisTag(tree, "jet")
 
 # ------------------------------------------------------------------------------
+def SignalDistribution(infilepath):
+    infile = ROOT.TFile.Open( infilepath )
+    tree = infile.Get("NoSel")
+    SignalJetTagged(tree, "jet")
+    
+# ------------------------------------------------------------------------------
 def MakeSelection(variable, radius):
     # variable could be jet or LLP. If jet, account for which LLP it is matched to. If LLP, cut directly on LLP
     if (variable[0:3] == "jet"): variable = variable + "_isMatchedTo"
@@ -500,6 +506,58 @@ def Plot2D(tree, obj_type, radius):
             canvDepth.SaveAs(folder + "_" + radius + "/" + obj_type + var + "_energyProfile" + str(cut) + ".png")
             
 # ------------------------------------------------------------------------------
+def SignalJetTagged(tree, obj_type):
+    if (obj_type == "jet"):
+        number = ["0", "1", "2", "3", "4", "5"]
+        LLP_matching = ["L1trig_Matched"] # jet + number + var = full histogram name
+        LLP_BDTscore = ["bdtscoreX_LLP350_MS80_perJet"]
+
+        LLP_effs = {}
+
+        triggered = [-9999,0,1]
+
+        canv = ROOT.TCanvas()
+        legend = ROOT.TLegend(0.8,0.72,0.87,0.8)
+
+        for trig_matched in triggered:
+            Effs_num = ROOT.TH1F("Numerator ", "Jet " + LLP_matching[0] + "_" + str(trig_matched) +  " ; Tagged jet; Number of tagged jets", 6, 0, 6 ); 
+            for i in number:
+                
+                hname_temp = obj_type + i + "_matched_" + str(trig_matched)
+                LLP_effs[i] = ROOT.TH1F(hname_temp, "Jet " + LLP_matching[0] +  "_" + str(trig_matched) + "; Tagged jet; Number of tagged jets", 100, 0, 1000 ); 
+
+                selection_region = GetCut(obj_type + i + "_" + LLP_matching[0], trig_matched) # require matching trigger set or not set
+                pT_region = GetCut(obj_type + i + "_Pt", [40,1000])                         # require jet pT is over 40 GeV
+                eta_region = GetCut(obj_type + i + "_Eta", [-1.26,1.26])                    # require jet eta is in HB 
+                denom_cut = selection_region + pT_region + eta_region
+                BDTcut_region = GetCut(obj_type + i + "_" + LLP_BDTscore[0], [0.9, 1.1])
+
+                LLP_radius = obj_type + i + "_Pt" # use this as a distribution to draw, then integrate over
+                tree.Draw(LLP_radius +" >> "+hname_temp, denom_cut + BDTcut_region, "", tree.GetEntries(), 0 ) # require matching variable set + LLP pt is high enough
+
+                N_flagged = LLP_effs[i].Integral()
+                print(N_flagged)
+
+                Effs_num.SetBinContent(int(i), N_flagged)
+
+            legend.AddEntry(Effs_num, obj_type)
+            canv.cd()
+            Effs_num.Draw()
+
+            ROOT.gPad.Update()
+
+            mean_text = ROOT.TLatex()
+            mean_text.SetNDC()
+            mean_text.SetTextFont(42)
+            mean_text.SetTextSize(0.036)
+            mean_text.DrawLatex( xpos+0.5, ypos, "mean = %.2f" %(Effs_num.GetMean()))
+            mean_text.DrawLatex( xpos+0.5, ypos-0.05, "#sigma = %.2f" %(Effs_num.GetStdDev()))
+
+            LegendLabel(legend)
+            canv.SaveAs(folder + "/Tagged_" + obj_type +"_trigMatch" + str(trig_matched) + ".png")
+
+
+# ------------------------------------------------------------------------------
 # def SetupNumeratorDenominator(tree, obj_type):
 
 # ------------------------------------------------------------------------------
@@ -710,6 +768,8 @@ def main():
     infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_v3.7_LLPskim_Run2023_HADD.root"
 
     if len(sys.argv) > 1: infilepath = sys.argv[1]
+    
+    SignalDistribution("/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TEST.root")
 
     PlotSetup(infilepath)
     BackgroundPrediction(infilepath)
