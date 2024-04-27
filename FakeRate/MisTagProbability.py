@@ -239,6 +239,7 @@ def MakeSelection(variable, radius):
     if (radius == "all"):      selection_radius = radius_all
     if (radius == "preECAL"):  selection_radius = radius_preECAL
     if (radius == "ECAL"):     selection_radius = radius_ECAL
+    if (radius == "HCAL"):     selection_radius = radius_inHCAL
     if (radius == "depth12"):  selection_radius = radius_depth12
     if (radius == "depth34"):  selection_radius = radius_depth34
     if (radius == "depth3"):   selection_radius = radius_depth3
@@ -546,6 +547,8 @@ def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, o
                 denom_cut = selection_region + pT_region + eta_region
                 BDTcut_region = GetCut(obj_type + i + "_" + LLP_BDTscore[0], [0.9, 1.1])
 
+                LLP_selection_region = MakeSelection(obj_type + i, "HCAL")                  # determine if this jet is matched to a LLP that decays in the region of interest (signal plots only)
+
                 JetPt = obj_type + i + "_Pt" # use this as a distribution to draw, then integrate over
 
                 JetDist[i] = {}
@@ -553,7 +556,7 @@ def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, o
                 for tree_sig, name in zip(tree_list, signal_names):
                     hname_temp = name + "Signal_" + obj_type + i + "_matched_" + str(trig_matched)
                     JetDist[i][name] = ROOT.TH1F(hname_temp, "Jet " + LLP_matching[0] +  "_" + str(trig_matched) + "; pT order of tagged jet; Fraction of tagged jets", 100, 0, 1000 ); 
-                    tree_sig.Draw(JetPt +" >> "+hname_temp, denom_cut + BDTcut_region, "", tree_sig.GetEntries(), 0 ) # require matching variable set + LLP pt is high enough
+                    tree_sig.Draw(JetPt +" >> "+hname_temp, denom_cut + BDTcut_region + LLP_selection_region, "", tree_sig.GetEntries(), 0 ) # require matching variable set + LLP pt is high enough
 
                     N_flagged[name] = JetDist[i][name].Integral()
                     N_tot[name] += N_flagged[name]
@@ -565,8 +568,11 @@ def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, o
                 N_flagged_bkg = JetDist_bkg[i].Integral()
                 N_tot_bkg += N_flagged_bkg
 
-                for name in signal_names: TagJets[name].SetBinContent(int(i)+1, N_flagged[name]) # remember to fill first bin (not 0!)
+                for name in signal_names: 
+                    TagJets[name].SetBinContent(int(i)+1, N_flagged[name]) # remember to fill first bin (not 0!)
+                    if (N_flagged[name] > 0): TagJets[name].SetBinError(int(i)+1, sqrt(1/N_flagged[name]))
                 TagJets_bkg.SetBinContent(int(i)+1, N_flagged_bkg)
+                if (N_flagged_bkg > 0): TagJets_bkg.SetBinError(int(i)+1, sqrt(1/N_flagged_bkg))
 
             for name in signal_names: 
                 TagJets[name].Scale(1/N_tot[name]) # fraction, not number
@@ -584,12 +590,12 @@ def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, o
             mean_text.SetTextSize(0.036)
             for name in signal_names: 
                 TagJets[name].GetYaxis().SetRangeUser(0, 1.05)
-                if iteration > 0: TagJets[name].Draw("SAME HIST PLC")
-                else: TagJets[name].Draw("HIST PLC")
+                if iteration > 0: TagJets[name].Draw("SAME HIST PLC E1")
+                else: TagJets[name].Draw("HIST PLC E1")
                 mean_text.DrawLatex( xpos+0.45, ypos - iteration*0.05, "Sig (" + name + ") mean = %.2f" %(TagJets[name].GetMean()))
                 iteration += 1
             TagJets_bkg.SetFillStyle(3004)
-            TagJets_bkg.Draw("SAME HIST PLC PFC")
+            TagJets_bkg.Draw("SAME HIST PLC PFC E1")
             mean_text.DrawLatex( xpos+0.45, ypos-len(tree_list)*0.05, "Bkg mean = %.2f" %(TagJets_bkg.GetMean()))
 
             LegendLabel(legend)
@@ -754,7 +760,7 @@ def MisTagPrediction(tree, obj_type):
                 legend.AddEntry(allJets_6_actual, "Actual Mis-tag")
                 allJets_6_actual.SetFillStyle(3004) # to keep consistent, data is filled, MC or predictions are lines # but THstack doesn't use different fill styles :( 
                 allJets_6.SetFillStyle(0)
-                hs.Draw("HIST NOSTACK PLC PFC")
+                hs.Draw("HIST NOSTACK PLC PFC E1")
                 LegendLabel(legend)
                 canv.SaveAs(folder + "/PredictedMisTag_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + ".png")
                 
