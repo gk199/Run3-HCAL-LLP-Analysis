@@ -187,7 +187,7 @@ def ExcludedCut( branch_name, branch_sel ):
     return ROOT.TCut( selection + " " )
 
 # ------------------------------------------------------------------------------
-def PlotSetup(infilepath):
+def ProbabilityEst(infilepath):
     infile = ROOT.TFile.Open( infilepath )
     tree = infile.Get("WPlusJets")
     MisTagProbability(tree, "jet")
@@ -199,18 +199,23 @@ def BackgroundPrediction(infilepath):
     MisTagPrediction(tree, "jet")
 
 # ------------------------------------------------------------------------------
-def BackgroundComparison(infilepath):
-    infile = ROOT.TFile.Open( infilepath )
-    tree = infile.Get("NoSel")
-    ActualMisTag(tree, "jet")
+def SignalDistribution(infilepath1, infilepath2, infilepath3, infilepath4, infilepath5, signal_names, selection, infilepath_bkg, selection_bkg):
+    tree_list = []
+    #for path in infilepath_list: # when tried this way, got error "AttributeError: 'CPyCppyy_NoneType' object has no attribute 'Draw'" so doing the slow messy way for now
+    infile1 = ROOT.TFile.Open( infilepath1 )
+    tree1 = infile1.Get( selection ) # selection is tree (NoSel for signal)
+    infile2 = ROOT.TFile.Open( infilepath2 )
+    tree2 = infile2.Get( selection )
+    infile3 = ROOT.TFile.Open( infilepath3 )
+    tree3 = infile3.Get( selection )
+    infile4 = ROOT.TFile.Open( infilepath4 )
+    tree4 = infile4.Get( selection )
+    infile5 = ROOT.TFile.Open( infilepath5 )
+    tree5 = infile5.Get( selection )
 
-# ------------------------------------------------------------------------------
-def SignalDistribution(infilepath, selection, infilepath_bkg, selection_bkg):
-    infile = ROOT.TFile.Open( infilepath )
-    tree = infile.Get( selection ) # selection is tree (NoSel for signal)
     infile_bkg = ROOT.TFile.Open( infilepath_bkg )
     tree_bkg = infile_bkg.Get( selection_bkg )
-    SignalJetTagged(tree, tree_bkg, "jet")
+    SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, "jet")
     
 # ------------------------------------------------------------------------------
 def MakeSelection(variable, radius):
@@ -508,24 +513,29 @@ def Plot2D(tree, obj_type, radius):
             canvDepth.SaveAs(folder + "_" + radius + "/" + obj_type + var + "_energyProfile" + str(cut) + ".png")
             
 # ------------------------------------------------------------------------------
-def SignalJetTagged(tree, tree_bkg, obj_type):
+def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, obj_type):
     if (obj_type == "jet"):
         number = ["0", "1", "2", "3", "4", "5"]
         LLP_matching = ["L1trig_Matched"] # jet + number + var = full histogram name
         LLP_BDTscore = ["bdtscoreX_LLP350_MS80_perJet"]
 
+        tree_list = [tree1, tree2, tree3, tree4, tree5]
+
         JetDist = {}
         JetDist_bkg = {}
+        TagJets = {}
+        N_tot = {}
 
         triggered = [-9999,0,1]
 
         for trig_matched in triggered:
             canv = ROOT.TCanvas()
-            legend = ROOT.TLegend(0.7,0.62,0.87,0.78)
+            legend = ROOT.TLegend(0.6,0.2,0.77,0.2 + 0.07 * len(tree_list))
 
-            TagJets = ROOT.TH1F("Tagged Jet " +  str(trig_matched), "Tagged Jet, for L1 jet matching=" + str(trig_matched) + " ; pT order of tagged jet; Fraction of tagged jets", 6, 0, 6 ); 
+            for name in signal_names: 
+                TagJets[name] = ROOT.TH1F("Tagged Jet " +  str(trig_matched) + name, "Tagged Jet, for L1 jet matching=" + str(trig_matched) + " ; pT order of tagged jet; Fraction of tagged jets", 6, 0, 6 ); 
+                N_tot[name] = 0
             TagJets_bkg = ROOT.TH1F("Tagged Jet Background " +  str(trig_matched), "Tagged Jet, for L1 jet matching=" + str(trig_matched) + " ; pT order of tagged jet; Fraction of tagged jets", 6, 0, 6 ); 
-            N_tot = 0
             N_tot_bkg = 0
 
             for i in number:
@@ -538,41 +548,49 @@ def SignalJetTagged(tree, tree_bkg, obj_type):
 
                 JetPt = obj_type + i + "_Pt" # use this as a distribution to draw, then integrate over
 
-                hname_temp = "Signal_" + obj_type + i + "_matched_" + str(trig_matched)
-                JetDist[i] = ROOT.TH1F(hname_temp, "Jet " + LLP_matching[0] +  "_" + str(trig_matched) + "; pT order of tagged jet; Fraction of tagged jets", 100, 0, 1000 ); 
-                tree.Draw(JetPt +" >> "+hname_temp, denom_cut + BDTcut_region, "", tree.GetEntries(), 0 ) # require matching variable set + LLP pt is high enough
+                JetDist[i] = {}
+                N_flagged = {}
+                for tree_sig, name in zip(tree_list, signal_names):
+                    hname_temp = name + "Signal_" + obj_type + i + "_matched_" + str(trig_matched)
+                    JetDist[i][name] = ROOT.TH1F(hname_temp, "Jet " + LLP_matching[0] +  "_" + str(trig_matched) + "; pT order of tagged jet; Fraction of tagged jets", 100, 0, 1000 ); 
+                    tree_sig.Draw(JetPt +" >> "+hname_temp, denom_cut + BDTcut_region, "", tree_sig.GetEntries(), 0 ) # require matching variable set + LLP pt is high enough
+
+                    N_flagged[name] = JetDist[i][name].Integral()
+                    N_tot[name] += N_flagged[name]
 
                 hname_temp_bkg = "Background_" + obj_type + i + "_matched_" + str(trig_matched)
                 JetDist_bkg[i] = ROOT.TH1F(hname_temp_bkg, "Jet " + LLP_matching[0] +  "_" + str(trig_matched) + "; pT order of tagged jet; Fraction of tagged jets", 100, 0, 1000 ); 
                 tree_bkg.Draw(JetPt +" >> "+hname_temp_bkg, denom_cut + BDTcut_region, "", tree_bkg.GetEntries(), 0 ) # require matching variable set + LLP pt is high enough
 
-                N_flagged = JetDist[i].Integral()
-                N_tot += N_flagged
-
                 N_flagged_bkg = JetDist_bkg[i].Integral()
                 N_tot_bkg += N_flagged_bkg
 
-                TagJets.SetBinContent(int(i)+1, N_flagged) # remember to fill first bin (not 0!)
+                for name in signal_names: TagJets[name].SetBinContent(int(i)+1, N_flagged[name]) # remember to fill first bin (not 0!)
                 TagJets_bkg.SetBinContent(int(i)+1, N_flagged_bkg)
 
-            TagJets.Scale(1/N_tot) # fraction, not number
-            TagJets_bkg.Scale(1/N_tot_bkg) # fraction, not number
+            for name in signal_names: 
+                TagJets[name].Scale(1/N_tot[name]) # fraction, not number
+                legend.AddEntry(TagJets[name], name)
 
-            legend.AddEntry(TagJets, "LLP Signal")
+            TagJets_bkg.Scale(1/N_tot_bkg) # fraction, not number
             legend.AddEntry(TagJets_bkg, "W+Jets")
 
             canv.cd()
-            TagJets.GetYaxis().SetRangeUser(0, 1.05)
-            TagJets.Draw("HIST PLC")
-            TagJets_bkg.SetFillStyle(3004)
-            TagJets_bkg.Draw("SAME HIST PLC PFC")
+            iteration = 0
 
             mean_text = ROOT.TLatex()
             mean_text.SetNDC()
             mean_text.SetTextFont(42)
             mean_text.SetTextSize(0.036)
-            mean_text.DrawLatex( xpos+0.55, ypos, "Sig mean = %.2f" %(TagJets.GetMean()))
-            mean_text.DrawLatex( xpos+0.55, ypos-0.05, "Bkg mean = %.2f" %(TagJets_bkg.GetStdDev()))
+            for name in signal_names: 
+                TagJets[name].GetYaxis().SetRangeUser(0, 1.05)
+                if iteration > 0: TagJets[name].Draw("SAME HIST PLC")
+                else: TagJets[name].Draw("HIST PLC")
+                mean_text.DrawLatex( xpos+0.45, ypos - iteration*0.05, "Sig (" + name + ") mean = %.2f" %(TagJets[name].GetMean()))
+                iteration += 1
+            TagJets_bkg.SetFillStyle(3004)
+            TagJets_bkg.Draw("SAME HIST PLC PFC")
+            mean_text.DrawLatex( xpos+0.45, ypos-len(tree_list)*0.05, "Bkg mean = %.2f" %(TagJets_bkg.GetMean()))
 
             LegendLabel(legend)
             canv.SaveAs(folder + "/Tagged_" + obj_type +"_trigMatch" + str(trig_matched) + ".png")
@@ -584,7 +602,8 @@ def SignalJetTagged(tree, tree_bkg, obj_type):
 def MisTagProbability(tree, obj_type):
     
     if (obj_type == "jet"):
-        number = ["0", "1", "2", "3", "4", "5"]
+        # number = ["0", "1", "2", "3", "4", "5"]
+        number = ["0"]
 
         LLP_matching = ["L1trig_Matched"] # jet + number + var = full histogram name
         LLP_BDTscore = ["bdtscoreX_LLP350_MS80_perJet"]
@@ -637,7 +656,7 @@ def MisTagProbability(tree, obj_type):
                     misTagJets_6.Add(misTagJets[i])
                     allJets_6.Add(allJets[i])
 
-                legend.AddEntry(misTagJets_6, obj_type)
+                legend.AddEntry(misTagJets_6, obj_type + " " + str(len(number)-1))
                 # check efficiency on the whole distribution now
                 if(ROOT.TEfficiency.CheckConsistency(misTagJets_6, allJets_6)):
                     pEff = ROOT.TEfficiency(misTagJets_6,allJets_6)
@@ -664,7 +683,8 @@ def MisTagProbability(tree, obj_type):
 # ------------------------------------------------------------------------------
 def MisTagPrediction(tree, obj_type):
     if (obj_type == "jet"):
-        number = ["0", "1", "2", "3", "4", "5"]
+        # number = ["0", "1", "2", "3", "4", "5"]
+        number = ["0"]
 
         LLP_matching = ["L1trig_Matched"] # jet + number + var = full histogram name
         LLP_BDTscore = ["bdtscoreX_LLP350_MS80_perJet"]
@@ -689,12 +709,13 @@ def MisTagPrediction(tree, obj_type):
                 canv1 = ROOT.TCanvas()
                 legend = ROOT.TLegend(0.7,0.65,0.87,0.8)
 
+                hs = ROOT.THStack( "hs_temp", "Predicted and Actual Mis-Tag Jets for L1 trigger matched = " + str(trig_matched) + "; Jet " + var + "; Number of Mis-tagged Jets ")
                 if var != "Pt":
-                    allJets_6_actual = ROOT.TH1F("Actual "+ var, "Predicted and Actual Mis-Tag Jets for L1 trigger matched = " + str(trig_matched) + "; Jet " + var + "; Number of Mis-tagged Jets", bin_num[counter], -plot_x_range[counter], plot_x_range[counter] ); 
-                    allJets_6 = ROOT.TH1F("Predicted "+ var, "Predicted and Actual Mis-Tag Jets for L1 trigger matched = " + str(trig_matched) + "; Jet " + var + "; Number of Mis-tagged Jets", bin_num[counter], -plot_x_range[counter], plot_x_range[counter] ); 
+                    allJets_6_actual = ROOT.TH1F("Actual "+ var + str(trig_matched), "Predicted and Actual Mis-Tag Jets for L1 trigger matched = " + str(trig_matched) + "; Jet " + var + "; Number of Mis-tagged Jets", bin_num[counter], -plot_x_range[counter], plot_x_range[counter] ); 
+                    allJets_6 = ROOT.TH1F("Predicted "+ var + str(trig_matched), "Predicted and Actual Mis-Tag Jets for L1 trigger matched = " + str(trig_matched) + "; Jet " + var + "; Number of Mis-tagged Jets", bin_num[counter], -plot_x_range[counter], plot_x_range[counter] ); 
                 else:
-                    allJets_6_actual = ROOT.TH1F("Actual "+ var, "Predicted and Actual Mis-Tag Jets for L1 trigger matched = " + str(trig_matched) + "; Jet " + var + "; Number of Mis-tagged Jets", bin_num[counter], bin_widths ); 
-                    allJets_6 = ROOT.TH1F("Predicted "+ var, "Predicted and Actual Mis-Tag Jets for L1 trigger matched = " + str(trig_matched) + "; Jet " + var + "; Number of Mis-tagged Jets", bin_num[counter], bin_widths ); 
+                    allJets_6_actual = ROOT.TH1F("Actual "+ var + str(trig_matched), "Predicted and Actual Mis-Tag Jets for L1 trigger matched = " + str(trig_matched) + "; Jet " + var + "; Number of Mis-tagged Jets", bin_num[counter], bin_widths ); 
+                    allJets_6 = ROOT.TH1F("Predicted "+ var + str(trig_matched), "Predicted and Actual Mis-Tag Jets for L1 trigger matched = " + str(trig_matched) + "; Jet " + var + "; Number of Mis-tagged Jets", bin_num[counter], bin_widths ); 
 
                 for i in number:                    
                     hname_denom_actual = obj_type + i + "_" + var + "_actualData"
@@ -720,75 +741,22 @@ def MisTagPrediction(tree, obj_type):
                     allJets_6.Add(allJets[i])
 
                 canv.cd()
-                legend.AddEntry(allJets_6_actual, "Actual Mis-tag")
-                allJets_6_actual.Draw("HIST PLC") # actual mis-tag number
-
+                #ROOT.gStyle.SetPalette(ROOT.kOcean)
                 MisTagEffDist = mistag_file.Get("Efficiency_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched))  
                 MisTagEff_Denom = MisTagEffDist.GetCopyTotalHisto() # need to get a TH1 from TEff object
                 MisTagEff_Num = MisTagEffDist.GetCopyPassedHisto() # need to get a TH1 from TEff object
                 allJets_6.Multiply(MisTagEff_Num)
                 allJets_6.Divide(MisTagEff_Denom) # confirmed that actual and predicted on W+jets (redundant) gives same answer
+
+                hs.Add(allJets_6) # predicted
                 legend.AddEntry(allJets_6, "Predicted Mis-tag")
-                allJets_6.SetFillStyle(3004)
-                allJets_6.Draw("SAME HIST PLC PFC")
+                hs.Add(allJets_6_actual)
+                legend.AddEntry(allJets_6_actual, "Actual Mis-tag")
+                allJets_6_actual.SetFillStyle(3004) # to keep consistent, data is filled, MC or predictions are lines # but THstack doesn't use different fill styles :( 
+                allJets_6.SetFillStyle(0)
+                hs.Draw("HIST NOSTACK PLC PFC")
                 LegendLabel(legend)
                 canv.SaveAs(folder + "/PredictedMisTag_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + ".png")
-                
-                counter += 1
-
-# ------------------------------------------------------------------------------
-def ActualMisTag(tree, obj_type):
-    if (obj_type == "jet"):
-        number = ["0", "1", "2", "3", "4", "5"]
-
-        LLP_matching = ["L1trig_Matched"] # jet + number + var = full histogram name
-        LLP_BDTscore = ["bdtscoreX_LLP350_MS80_perJet"]
-        jet_kinematics = ["Eta", "Phi", "Pt"]
-        bin_num = [12, 6, 6]
-        plot_x_range = [1.26, 3.2, 1]
-        plot_y_range = [0.01, 0.007, 0.02]
-        bin_widths = np.array([40, 60, 80, 120, 160, 240, 400], dtype='float64') 
-
-        misTagJets = {}
-        allJets = {}
-
-        triggered = [-9999,0,1]
-
-        mistag_file = ROOT.TFile.Open("outfile.root")
-
-        for trig_matched in triggered:
-            counter = 0
-            for var in jet_kinematics:
-                canv = ROOT.TCanvas()
-                legend = ROOT.TLegend(0.8,0.72,0.87,0.8)
-
-                if var != "Pt":
-                    allJets_6 = ROOT.TH1F("Denominator "+ var, "Jet;" + var + " Efficiency by jet; Actual Number of Mis-tagged Jets", bin_num[counter], -plot_x_range[counter], plot_x_range[counter] ); 
-                else:
-                    allJets_6 = ROOT.TH1F("Denominator "+ var, "Jet;" + var + " Efficiency by jet; Actual Number of Mis-tagged Jets", bin_num[counter], bin_widths ); 
-
-                for i in number:                    
-                    hname_denom = obj_type + i + "_" + var
-                    if var != "Pt":
-                        allJets[i] = ROOT.TH1F(hname_denom, "Jet " + LLP_matching[0] + "; " + var +" efficiency by jet; Actual Number of Mis-tagged Jets", bin_num[counter], -plot_x_range[counter], plot_x_range[counter] ); 
-                    else:
-                        allJets[i] = ROOT.TH1F(hname_denom, "Jet " + LLP_matching[0] + "; " + var +" efficiency by jet; Actual Number of Mis-tagged Jets", bin_num[counter], bin_widths ); 
-
-                    selection_region = GetCut(obj_type + i + "_" + LLP_matching[0], trig_matched) # require matching trigger set or not set
-                    pT_region = GetCut(obj_type + i + "_Pt", [40,1000])                         # require jet pT is over 40 GeV
-                    eta_region = GetCut(obj_type + i + "_Eta", [-1.26,1.26])                    # require jet eta is in HB 
-                    BDTcut_region = GetCut(obj_type + i + "_" + LLP_BDTscore[0], [0.9, 1.1])
-                    denom_cut = selection_region + pT_region + eta_region + BDTcut_region
-
-                    LLP_radius = obj_type + i + "_" + var
-                    tree.Draw(LLP_radius +" >> "+hname_denom, denom_cut, "", tree.GetEntries(), 0 ) # require LLP pt is high enough and in HB
-                    
-                    allJets_6.Add(allJets[i])
-
-                canv.cd()
-                allJets_6.Draw()
-                allJets_6.SetTitle("Actual Mis-Tag for L1 trigger matched = " + str(trig_matched))
-                canv.SaveAs(folder + "/ActualMisTag_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + ".png")
                 
                 counter += 1
 
@@ -798,12 +766,19 @@ def main():
     infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_v3.7_LLPskim_Run2023_HADD.root"
 
     if len(sys.argv) > 1: infilepath = sys.argv[1]
-    
-    SignalDistribution("/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TEST.root", "NoSel", "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_v3.7_LLPskim_Run2023_HADD.root", "WPlusJets")
 
-    PlotSetup(infilepath)
+    LLP1 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_14_TEST.root"
+    LLP2 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TEST.root"
+    LLP3 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_03_14_batch2.root"
+    LLP4 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_03_14_batch2.root"
+    LLP5 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_03_14_batch2.root"
+    LLP_list = {LLP1, LLP2, LLP3, LLP4, LLP5}
+    LLP_names = ["LLP 350,80", "LLP 125,15", "LLP 125,50", "LLP 250,120", "LLP 350,160"]
+
+    SignalDistribution(LLP1, LLP2, LLP3, LLP4, LLP5, LLP_names, "NoSel", infilepath, "WPlusJets")
+
+    ProbabilityEst(infilepath)
     BackgroundPrediction(infilepath)
-    # BackgroundComparison(infilepath)
 
 if __name__ == '__main__':
 	main()
