@@ -570,9 +570,9 @@ def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, o
 
                 for name in signal_names: 
                     TagJets[name].SetBinContent(int(i)+1, N_flagged[name]) # remember to fill first bin (not 0!)
-                    if (N_flagged[name] > 0): TagJets[name].SetBinError(int(i)+1, sqrt(1/N_flagged[name]))
+                    if (N_flagged[name] > 0): TagJets[name].SetBinError(int(i)+1, sqrt(N_flagged[name]))
                 TagJets_bkg.SetBinContent(int(i)+1, N_flagged_bkg)
-                if (N_flagged_bkg > 0): TagJets_bkg.SetBinError(int(i)+1, sqrt(1/N_flagged_bkg))
+                if (N_flagged_bkg > 0): TagJets_bkg.SetBinError(int(i)+1, sqrt(N_flagged_bkg))
 
             for name in signal_names: 
                 TagJets[name].Scale(1/N_tot[name]) # fraction, not number

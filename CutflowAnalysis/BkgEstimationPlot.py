@@ -54,9 +54,9 @@ for type in inputs:
     JetsPerCategory[hname].SetBinContent(1, zero_bin[i]) 
     JetsPerCategory[hname].SetBinContent(2, one_bin[i]) 
     JetsPerCategory[hname].SetBinContent(3, two_bin[i]) 
-    if zero_bin[i] > 0: JetsPerCategory[hname].SetBinError(1, sqrt(1/zero_bin[i]))
-    if one_bin[i] > 0: JetsPerCategory[hname].SetBinError(2, sqrt(1/one_bin[i]))
-    if two_bin[i] > 0: JetsPerCategory[hname].SetBinError(3, sqrt(1/two_bin[i])) 
+    if zero_bin[i] > 0: JetsPerCategory[hname].SetBinError(1, sqrt(zero_bin[i]))
+    if one_bin[i] > 0: JetsPerCategory[hname].SetBinError(2, sqrt(one_bin[i]))
+    if two_bin[i] > 0: JetsPerCategory[hname].SetBinError(3, sqrt(two_bin[i])) 
 
     JetsPerCategory[hname].Scale(1/totals[i])
 
