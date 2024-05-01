@@ -12,10 +12,11 @@ debug = False
 time_debug = False
 
 # declare any variables or settings here
-data = False
+data = True
 MC = False
-if sys.argv[2] == "data": data = True
-if sys.argv[2] == "MC": MC = True
+if len(sys.argv) > 1:
+    if sys.argv[2] == "data": data = True
+    if sys.argv[2] == "MC": MC = True
 
 datetime_now = datetime.today().strftime('%Y_%m_%d')
 
@@ -54,8 +55,8 @@ def OutputFolder(name):
 
 OutputFolder("")
 
-path = sys.argv[1] # pass the location of the processed ntuple as an argument 
-infile = ROOT.TFile.Open(path)
+# path = sys.argv[1] # pass the location of the processed ntuple as an argument 
+# infile = ROOT.TFile.Open(path)
 
 # ------------------------------------------------------------------------------
 def GetTag( branch_name, branch_sel ):
@@ -527,11 +528,12 @@ def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, o
         TagJets = {}
         N_tot = {}
 
-        triggered = [-9999,0,1]
+        triggered = [1, 0, -9999]
 
         for trig_matched in triggered:
             canv = ROOT.TCanvas()
-            legend = ROOT.TLegend(0.6,0.2,0.77,0.2 + 0.07 * len(tree_list))
+            legend = ROOT.TLegend(0.55,0.52,0.88,0.52 + 0.07 * len(tree_list))
+            legend_lowerleft = ROOT.TLegend(0.15,0.15,0.48,0.15 + 0.07 * len(tree_list))
 
             for name in signal_names: 
                 TagJets[name] = ROOT.TH1F("Tagged Jet " +  str(trig_matched) + name, "Tagged Jet, for L1 jet matching=" + str(trig_matched) + " ; pT order of tagged jet; Fraction of tagged jets", 6, 0, 6 ); 
@@ -576,10 +578,12 @@ def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, o
 
             for name in signal_names: 
                 TagJets[name].Scale(1/N_tot[name]) # fraction, not number
-                legend.AddEntry(TagJets[name], name)
+                legend.AddEntry(TagJets[name], name + ", mean = %.2f" %(TagJets[name].GetMean()))
+                legend_lowerleft.AddEntry(TagJets[name], name + ", mean = %.2f" %(TagJets[name].GetMean()))
 
             TagJets_bkg.Scale(1/N_tot_bkg) # fraction, not number
-            legend.AddEntry(TagJets_bkg, "W+Jets")
+            legend.AddEntry(TagJets_bkg, "W+Jets, mean = %.2f" %(TagJets_bkg.GetMean()))
+            legend_lowerleft.AddEntry(TagJets_bkg, "W+Jets, mean = %.2f" %(TagJets_bkg.GetMean()))
 
             canv.cd()
             iteration = 0
@@ -592,14 +596,21 @@ def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, o
                 TagJets[name].GetYaxis().SetRangeUser(0, 1.05)
                 if iteration > 0: TagJets[name].Draw("SAME HIST PLC E1")
                 else: TagJets[name].Draw("HIST PLC E1")
-                mean_text.DrawLatex( xpos+0.45, ypos - iteration*0.05, "Sig (" + name + ") mean = %.2f" %(TagJets[name].GetMean()))
+                # mean_text.DrawLatex( xpos+0.45, ypos - iteration*0.05, "Sig (" + name + ") mean = %.2f" %(TagJets[name].GetMean()))
                 iteration += 1
             TagJets_bkg.SetFillStyle(3004)
             TagJets_bkg.Draw("SAME HIST PLC PFC E1")
-            mean_text.DrawLatex( xpos+0.45, ypos-len(tree_list)*0.05, "Bkg mean = %.2f" %(TagJets_bkg.GetMean()))
+            # mean_text.DrawLatex( xpos+0.45, ypos-len(tree_list)*0.05, "Bkg mean = %.2f" %(TagJets_bkg.GetMean()))
 
             LegendLabel(legend)
             canv.SaveAs(folder + "/Tagged_" + obj_type +"_trigMatch" + str(trig_matched) + ".png")
+            for name in signal_names: TagJets[name].GetYaxis().SetRangeUser(0.00001, 10)            
+            ROOT.gPad.SetLogy()
+            if trig_matched != 1: # for 0 and -9999 
+                legend.Delete()
+                LegendLabel(legend_lowerleft)
+            ROOT.gPad.Update()
+            canv.SaveAs(folder + "/Tagged_" + obj_type +"_trigMatch" + str(trig_matched) + "_logY.png")
 
 # ------------------------------------------------------------------------------
 # def SetupNumeratorDenominator(tree, obj_type):
@@ -630,24 +641,25 @@ def MisTagProbability(tree, obj_type):
             counter = 0
             for var in jet_kinematics:
                 canv = ROOT.TCanvas()
+                canv_individual = ROOT.TCanvas()
                 legend = ROOT.TLegend(0.8,0.72,0.87,0.8)
 
                 if var != "Pt":
-                    misTagJets_6 = ROOT.TH1F("Numerator " + var, "Jet;" + var + " Efficiency by jet; Jet Tagging Efficiency", bin_num[counter], -plot_x_range[counter], plot_x_range[counter] ); 
-                    allJets_6 = ROOT.TH1F("Denominator "+ var, "Jet;" + var + " Efficiency by jet; Jet Tagging Efficiency", bin_num[counter], -plot_x_range[counter], plot_x_range[counter] ); 
+                    misTagJets_6 = ROOT.TH1F("Numerator " + var, "Jet; Jet " + var + "; Jet Tagging Efficiency", bin_num[counter], -plot_x_range[counter], plot_x_range[counter] ); 
+                    allJets_6 = ROOT.TH1F("Denominator "+ var, "Jet; Jet " + var + "; Jet Tagging Efficiency", bin_num[counter], -plot_x_range[counter], plot_x_range[counter] ); 
                 else:
-                    misTagJets_6 = ROOT.TH1F("Numerator " + var, "Jet;" + var + " Efficiency by jet; Jet Tagging Efficiency", bin_num[counter], bin_widths ); 
-                    allJets_6 = ROOT.TH1F("Denominator "+ var, "Jet;" + var + " Efficiency by jet; Jet Tagging Efficiency", bin_num[counter], bin_widths ); 
+                    misTagJets_6 = ROOT.TH1F("Numerator " + var, "Jet; Jet " + var + "; Jet Tagging Efficiency", bin_num[counter], bin_widths ); 
+                    allJets_6 = ROOT.TH1F("Denominator "+ var, "Jet; Jet " + var + "; Jet Tagging Efficiency", bin_num[counter], bin_widths ); 
 
                 for i in number:
                     hname_temp = obj_type + i + "_" + var + "_highScore"
                     hname_denom = obj_type + i + "_" + var
                     if var != "Pt":
-                        misTagJets[i] = ROOT.TH1F(hname_temp, "Jet " + LLP_matching[0] + "; " + var +" efficiency by jet; Jet Tagging Efficiency", bin_num[counter], -plot_x_range[counter], plot_x_range[counter] ); 
-                        allJets[i] = ROOT.TH1F(hname_denom, "Jet " + LLP_matching[0] + "; " + var +" efficiency by jet; Jet Tagging Efficiency", bin_num[counter], -plot_x_range[counter], plot_x_range[counter] ); 
+                        misTagJets[i] = ROOT.TH1F(hname_temp, "Jet " + LLP_matching[0] + "; " + var +"; Jet Tagging Efficiency", bin_num[counter], -plot_x_range[counter], plot_x_range[counter] ); 
+                        allJets[i] = ROOT.TH1F(hname_denom, "Jet " + LLP_matching[0] + "; " + var +"; Jet Tagging Efficiency", bin_num[counter], -plot_x_range[counter], plot_x_range[counter] ); 
                     else:
-                        misTagJets[i] = ROOT.TH1F(hname_temp, "Jet " + LLP_matching[0] + "; " + var +" efficiency by jet; Jet Tagging Efficiency", bin_num[counter], bin_widths ); 
-                        allJets[i] = ROOT.TH1F(hname_denom, "Jet " + LLP_matching[0] + "; " + var +" efficiency by jet; Jet Tagging Efficiency", bin_num[counter], bin_widths ); 
+                        misTagJets[i] = ROOT.TH1F(hname_temp, "Jet " + LLP_matching[0] + "; " + var +"; Jet Tagging Efficiency", bin_num[counter], bin_widths ); 
+                        allJets[i] = ROOT.TH1F(hname_denom, "Jet " + LLP_matching[0] + "; " + var +"; Jet Tagging Efficiency", bin_num[counter], bin_widths ); 
 
                     selection_region = GetCut(obj_type + i + "_" + LLP_matching[0], trig_matched) # require matching trigger set or not set
                     pT_region = GetCut(obj_type + i + "_Pt", [40,1000])                         # require jet pT is over 40 GeV
@@ -661,6 +673,15 @@ def MisTagProbability(tree, obj_type):
                     
                     misTagJets_6.Add(misTagJets[i])
                     allJets_6.Add(allJets[i])
+
+                canv_individual.cd()
+                misTagJets_6.Draw()
+                misTagJets_6.SetTitle("Mis-tagged jets, for L1 trigger matched = " + str(trig_matched))
+                canv_individual.SaveAs(folder + "/MisTag_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + ".png")
+                canv_individual.Clear()
+                allJets_6.Draw()
+                allJets_6.SetTitle("All jets, for L1 trigger matched = " + str(trig_matched))
+                canv_individual.SaveAs(folder + "/All_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + ".png")
 
                 legend.AddEntry(misTagJets_6, obj_type + " " + str(len(number)-1))
                 # check efficiency on the whole distribution now
@@ -704,7 +725,7 @@ def MisTagPrediction(tree, obj_type):
         allJets = {}
         allJets_actual = {}
 
-        triggered = [-9999,0,1]
+        triggered = [1, 0, -9999]
 
         mistag_file = ROOT.TFile.Open("outfile.root")
 
@@ -753,6 +774,14 @@ def MisTagPrediction(tree, obj_type):
                 MisTagEff_Num = MisTagEffDist.GetCopyPassedHisto() # need to get a TH1 from TEff object
                 allJets_6.Multiply(MisTagEff_Num)
                 allJets_6.Divide(MisTagEff_Denom) # confirmed that actual and predicted on W+jets (redundant) gives same answer
+                # handle error propagation
+                for bin in range(bin_num[counter]+1):
+                    if bin == 0: continue
+                    # print(MisTagEffDist.GetEfficiencyErrorLow(bin))
+                    # print(MisTagEffDist.GetEfficiencyErrorUp(bin))
+                    # print(MisTagEffDist.GetEfficiencyErrorLow(bin) / (MisTagEff_Num.GetBinContent(bin) / MisTagEff_Denom.GetBinContent(bin)) * allJets_6.GetBinContent(bin))
+                    allJets_6.SetBinError(bin, MisTagEffDist.GetEfficiencyErrorLow(bin) / (MisTagEff_Num.GetBinContent(bin) / MisTagEff_Denom.GetBinContent(bin)) * allJets_6.GetBinContent(bin)) # relative errors
+                    # wondering if should use a TGraph than a TEfficiency plot for easier manipulation... only dealing with one sided errors right now
 
                 hs.Add(allJets_6) # predicted
                 legend.AddEntry(allJets_6, "Predicted Mis-tag")
@@ -779,11 +808,11 @@ def main():
     LLP4 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_03_14_batch2.root"
     LLP5 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_03_14_batch2.root"
     LLP_list = {LLP1, LLP2, LLP3, LLP4, LLP5}
-    LLP_names = ["LLP 350,80", "LLP 125,15", "LLP 125,50", "LLP 250,120", "LLP 350,160"]
+    LLP_names = ["LLP 125,15", "LLP 350,80", "LLP 125,50", "LLP 250,120", "LLP 350,160"]
 
-    SignalDistribution(LLP1, LLP2, LLP3, LLP4, LLP5, LLP_names, "NoSel", infilepath, "WPlusJets")
+    # SignalDistribution(LLP1, LLP2, LLP3, LLP4, LLP5, LLP_names, "NoSel", infilepath, "WPlusJets")
 
-    ProbabilityEst(infilepath)
+    # ProbabilityEst(infilepath)
     BackgroundPrediction(infilepath)
 
 if __name__ == '__main__':
