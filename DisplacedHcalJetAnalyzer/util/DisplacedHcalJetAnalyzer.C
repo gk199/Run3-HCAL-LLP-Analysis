@@ -13,7 +13,7 @@ using namespace std;
 #include "../src/BDTHelper.cxx"
 #include "../src/TruthInfoHelper.cxx"
 
-gSystem->Load("/Users/kiley/Documents/CMS/WorkingDir/Run3-HCAL-LLP-Analysis/pugixml/pugixml_cpp.so");
+// gSystem->Load("/Users/kiley/Documents/CMS/WorkingDir/Run3-HCAL-LLP-Analysis/pugixml/pugixml_cpp.so");
 
 /* ====================================================================================================================== */
 void DisplacedHcalJetAnalyzer::Initialize( string infiletag, string infilepath ){
@@ -27,7 +27,12 @@ void DisplacedHcalJetAnalyzer::Initialize( string infiletag, string infilepath )
 	SetHistCategories();
 
 	// Initialize TMVA Reader
-	DeclareTMVAReader();
+	MyTags jet_based = MyTags(/*event_based=*/ false, /*calor_only=*/ false);
+	DeclareTMVAReader(jet_based);
+	MyTags jet_based_calor = MyTags(/*event_based=*/ false, /*calor_only=*/ true);
+	DeclareTMVAReader(jet_based_calor);
+	MyTags event_based = MyTags(/*event_based=*/ true, /*calor_only=*/ false);
+	DeclareTMVAReader(event_based);
 
 	return;
 }

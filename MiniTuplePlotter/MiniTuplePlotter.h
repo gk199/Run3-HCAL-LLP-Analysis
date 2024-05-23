@@ -1,11 +1,15 @@
 #include "PlotParams.h"
 #include "PlotFunctions.h"
 
+#include <filesystem>
+namespace fs = std::filesystem;
+
 // -------------------------------------------------------------------------------------
 class MiniTuplePlotter{
 public :
 
 	bool debug = false;
+	int class_index = 0;
 
 	// Inputs
 	vector<string> filetags;
@@ -251,6 +255,8 @@ public :
 	// -------------------------------------------------------------------------------------
 	void SetOutputDirectory(string output_directory_tmp){
 		if( debug) cout<<"MiniTuplePlotter::SetOutputDirectory()"<<endl;
+
+    	fs::create_directory("Plots/"+output_directory_tmp);
 
 		output_directory += Form("/%s", output_directory_tmp.c_str() );
 	}
@@ -536,8 +542,9 @@ public :
 
 		TCanvas *c_temp = new TCanvas();
 
-		TString hist_name_full = FormatMyString( Form("%stree:%s__histogram:%s__cut:"+GetBetterCutTitle( cut_compare ), hist_tag_prepend.c_str(), filetag_treename.c_str(), hist_name.c_str()  ) );
-
+		TString hist_name_full = FormatMyString( Form("%stree:%s__histogram:%s__class:%d__cut:"+GetBetterCutTitle( cut_compare ), hist_tag_prepend.c_str(), filetag_treename.c_str(), hist_name.c_str(), class_index  ) );
+		class_index += 1;
+		
 		if( debug ) cout<<"-> Getting "<<hist_name_full<<endl;
 
 		TH1F *h_temp;
@@ -743,7 +750,8 @@ public :
 		if( filetag_treename_divisor == "" ) 
 			filetag_treename_divisor = hist_tags[0];
 
-		string label_y = Form( "Hist / %s", filetag_treename_divisor.c_str() );
+		// string label_y = Form( "Hist / %s", filetag_treename_divisor.c_str() );
+		string label_y = "Ratio"; // testing to simplify ratio y axis name
 		if( plot_norm ) label_y += " (norm)";
 
 		THStack* hs = new THStack(Form( "hs_%s", myPlotParams.hist_name.c_str() ), Form(" ; %s; %s", myPlotParams.label_x.c_str(), label_y.c_str() ));
@@ -772,7 +780,7 @@ public :
 				h = GetReverseCDF( h ); 	
 
 			h->SetMaximum( 2. );
-			if( plot_log_ratio ) h->SetMaximum( 10. );
+			if( plot_log_ratio ) h->SetMaximum( 100. );
 
 			h->Divide( h_divisor );
 			h->SetLineColor( colors[i] );

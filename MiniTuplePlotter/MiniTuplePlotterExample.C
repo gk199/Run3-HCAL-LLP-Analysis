@@ -44,8 +44,8 @@ void MiniTuplePlotterExample(){
 	cout<<endl;
 	
 	vector<string> filetags_example2 = filetags_example1;
-	TCut Cut_DecayTk 	= "LLP0_DecayR < 161.6 && abs(LLP0_DecayZ) < 300";
-	TCut Cut_DecayHCAL 	= "LLP0_DecayR > 183.6 && LLP0_DecayR < 295 && abs(LLP0_DecayZ) < 376"; // Approx 
+	TCut Cut_DecayTk 	= "LLP0_DecayR < 129 && abs(LLP0_DecayZ) < 300";
+	TCut Cut_DecayHCAL 	= "LLP0_DecayR > 177 && LLP0_DecayR < 295 && abs(LLP0_DecayZ) < 376"; // Approx 
 
 	class MiniTuplePlotter plotter_example2( filetags_example2, path );
 

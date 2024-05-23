@@ -2,9 +2,13 @@
 universe                = vanilla
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT_OR_EVICT
-notification   		= never
+notification   		    = never
 
-+JobFlavour = "longlunch"
+# Espresso: batch 1, microcentury: batch 2, longlunch: displaced jet, workday: 2023Bv1
+# +JobFlavour = "espresso" 
++JobFlavour = "microcentury"
+# +JobFlavour = "longlunch"
+# +JobFlavour = "workday"
 
 # Output
 log                     = job$(Process).local.log

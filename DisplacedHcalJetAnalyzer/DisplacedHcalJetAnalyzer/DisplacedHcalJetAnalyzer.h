@@ -55,6 +55,96 @@
 #include "iostream"
 #include "iomanip" 
 
+/* ====================================================================================================================== */
+class MyTags {
+	public:
+		MyTags(bool event_based, bool calor_only) {
+			if (event_based) {
+				bdt_tags_ = bdt_event_tags_;
+				bdt_var_names_ = {
+               //"jet0_Pt","jet0_Phi","jet0_E",
+               "jet0_Eta",
+               "jet0_ChargedHadEFrac",
+               "jet0_NeutralHadEFrac",
+               "jet0_PhoEFrac",
+               "jet0_EleEFrac",
+               // "jet0_MuonEFrac",
+               "jet0_Track0Pt/jet0_Pt",
+               // "jet0_Track0dR",
+               "jet0_Track0dEta",
+               "jet0_Track0dPhi",
+               "jet0_Track1Pt/jet0_Pt",
+               // "jet0_Track1dR",
+               "jet0_Track1dEta",
+               "jet0_Track1dPhi",
+               "jet0_EnergyFrac_Depth1",
+               "jet0_EnergyFrac_Depth2",
+               "jet0_EnergyFrac_Depth3",
+               "jet0_S_phiphi",
+               "jet0_LeadingRechitE/jet0_E",
+				};
+			} else {
+            if (calor_only) {
+				   bdt_tags_ = bdt_jet_tags_calor_;
+               bdt_var_names_ = {
+                  "perJet_Eta", "perJet_EnergyFrac_Depth1", "perJet_EnergyFrac_Depth2", "perJet_EnergyFrac_Depth3", "perJet_S_phiphi", "perJet_LeadingRechitE/perJet_E",
+               };
+            }
+            else {
+				   bdt_tags_ = bdt_jet_tags_;
+               bdt_var_names_ = {
+                  "perJet_Eta",
+                  "perJet_ChargedHadEFrac",
+                  "perJet_NeutralHadEFrac",
+                  "perJet_PhoEFrac",
+                  "perJet_EleEFrac",
+                  // "perJet_MuonEFrac",
+                  "perJet_Track0Pt/perJet_Pt",
+                  // "perJet_Track0dR",
+                  "perJet_Track0dEta",
+                  "perJet_Track0dPhi",
+                  "perJet_Track1Pt/perJet_Pt",
+                  // "perJet_Track1dR",
+                  "perJet_Track1dEta",
+                  "perJet_Track1dPhi",
+                  "perJet_EnergyFrac_Depth1",
+                  "perJet_EnergyFrac_Depth2",
+                  "perJet_EnergyFrac_Depth3",
+                  "perJet_S_phiphi",
+                  "perJet_LeadingRechitE/perJet_E",
+               };
+            }
+			}
+		}
+
+		vector<string> bdt_tags() const {
+			return bdt_tags_;
+		}
+		vector<string> bdt_var_names() const {
+			return bdt_var_names_;
+		}
+
+      static bool isValidTag(string tag) {
+         if ( std::find(bdt_event_tags_.begin(), bdt_event_tags_.end(), tag) != bdt_event_tags_.end() ) return true;
+         if ( std::find(bdt_jet_tags_.begin(), bdt_jet_tags_.end(), tag) != bdt_jet_tags_.end() ) return true;
+         if ( std::find(bdt_jet_tags_calor_.begin(), bdt_jet_tags_calor_.end(), tag) != bdt_jet_tags_calor_.end() ) return true;
+         return false;
+      }
+		
+	private:
+		vector<string> bdt_tags_;
+		vector<string> bdt_var_names_;
+
+      inline static vector<string> bdt_event_tags_ = {"hadd"}; //  {"LLP125_MS15", "LLP350_MS80",  "LLP125_MS50", "LLP250_MS120", "LLP350_MS160", "hadd"};
+      inline static vector<string> bdt_jet_tags_ = {"LLP125_MS15_perJet", "LLP350_MS80_perJet", "LLP125_MS50_perJet", "LLP250_MS120_perJet", "LLP350_MS160_perJet", "hadd_perJet",
+                                                   "LLP125_MS15_HCAL12_perJet", "LLP350_MS80_HCAL12_perJet", "LLP125_MS50_HCAL12_perJet", "LLP250_MS120_HCAL12_perJet", "LLP350_MS160_HCAL12_perJet", "hadd_HCAL12_perJet",
+                                                   "LLP125_MS15_HCAL34_perJet", "LLP350_MS80_HCAL34_perJet", "LLP125_MS50_HCAL34_perJet", "LLP250_MS120_HCAL34_perJet", "LLP350_MS160_HCAL34_perJet", "hadd_HCAL34_perJet"};
+      inline static vector<string> bdt_jet_tags_calor_ = {}; //  {"LLP125_MS15_calor_perJet", "LLP350_MS80_calor_perJet", "LLP125_MS50_calor_perJet", "LLP250_MS120_calor_perJet", "LLP350_MS160_calor_perJet", "hadd_calor_perJet",
+                                                   // "LLP125_MS15_HCAL12_calor_perJet", "LLP350_MS80_HCAL12_calor_perJet", "LLP125_MS50_HCAL12_calor_perJet", "LLP250_MS120_HCAL12_calor_perJet", "LLP350_MS160_HCAL12_calor_perJet", "hadd_HCAL12_calor_perJet",
+                                                   // "LLP125_MS15_HCAL34_calor_perJet", "LLP350_MS80_HCAL34_calor_perJet", "LLP125_MS50_HCAL34_calor_perJet", "LLP250_MS120_HCAL34_calor_perJet", "LLP350_MS160_HCAL34_calor_perJet", "hadd_HCAL34_calor_perJet"};
+                                                   
+};
+
 class DisplacedHcalJetAnalyzer {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
@@ -100,6 +190,13 @@ public :
    map<string,float>    tree_output_vars_float;  
    map<string,string>   tree_output_vars_string;
 
+   vector<string> jet_treenames;
+   map<string,TTree*>   jet_tree_output;
+   map<string,bool>     jet_tree_output_vars_bool;  
+   map<string,int>      jet_tree_output_vars_int;  
+   map<string,float>    jet_tree_output_vars_float;  
+   map<string,string>   jet_tree_output_vars_string;
+
    // ----- Globals ----- //
 
    vector<string> HLT_Names;
@@ -111,6 +208,8 @@ public :
 
    vector<float> gLLP_DecayVtx_R;
    vector<float> gLLP_DecayVtx_Mag;
+
+   float WPlusJets_leptonPhi = -9999.9;
 
    // ----- Variables ----- //
 
@@ -776,14 +875,17 @@ public :
    virtual bool   PassWPlusJetsSelection();
    virtual float  EventHT();
    // BDTHelper.cxx
-   virtual void   DeclareTMVAReader();
+   virtual void   DeclareTMVAReader( MyTags bdt_tag_info );
    virtual float  GetBDTScores( string bdt_tag );
    virtual bool   EventValidForBDTEval();
    vector<string> GetBDTVariableNamesXML( string filepath, bool isSpectator );
    // OutputHelper.cxx
    virtual void   DeclareOutputTrees();
+   virtual void   DeclareOutputJetTrees();
    virtual void   ResetOutputBranches( string treename );
+   virtual vector<pair<float,float>> TrackMatcher( int jetIndex, vector<uint> jet_track_index );
    virtual void   FillOutputTrees( string treename );
+   virtual void   FillOutputJetTrees( string treename, int jetIndex );
    virtual void   WriteOutputTrees();
    virtual void   SetHistCategories();
    virtual void   BookHists();

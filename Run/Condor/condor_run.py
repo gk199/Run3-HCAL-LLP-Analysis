@@ -26,7 +26,8 @@ header_cmd    = os.path.abspath("condor_header.cmd")
 executable_sh = os.path.abspath("condor_executable.sh")
 
 # Global path to executable (& other files to transfer if applicable) -- comma-separated list without spaces
-transfer_input_files = os.path.abspath("../../DisplacedHcalJetAnalyzer/exe/DisplacedHcalJetAnalyzer") # this is made after compiling 
+#transfer_input_files 
+Executable_DisplacedHcalJetAnalyzer = os.path.abspath("../../DisplacedHcalJetAnalyzer/exe/DisplacedHcalJetAnalyzer") # this is made after compiling 
 
 # ------------------------------------------------------------------------------
 def parseArgs():
@@ -39,6 +40,8 @@ def parseArgs():
 
 	parser.add_argument("-i", "--input_file", action="store", help="Input text file containing ROOT inputs", required=True)
 	parser.add_argument("-o", "--output_dir", action="store", default="./", help="Output directory path")
+	parser.add_argument("-b", "--bdt_zipfile",  action="store", default="./BDTWeightFiles.zip", help="Path to directory containing bdt files")
+	# zip -r BDTWeightFiles.zip BDTWeightFiles
 	parser.add_argument("-p", "--proxy",      action="store", help="Proxy path: generate via `voms-proxy-init -voms cms` and copy file from /tmp/ area", required=True) # TODO
 	parser.add_argument("-s", "--setup_only", action="store_true", help="Setup jobs only") 
 	parser.add_argument("-t", "--test",       action="store_true", help="Submit test job only") 
@@ -60,6 +63,7 @@ def main():
 
 	input_file 	= args.input_file
 	output_dir 	= args.output_dir + "_" + datetime_now
+	bdt_zipfile = os.path.abspath( args.bdt_zipfile )
 	proxy 		= os.path.abspath( args.proxy )
 	setup_only 	= args.setup_only
 	test 		= args.test
@@ -91,18 +95,24 @@ def main():
 	else: 
 		os.mkdir( output_dir )
 
-    # ----- Make Submission Dir ----- #
+	# ----- Make Submission Dir ----- #
 
 	DirFlag = ""
 	if (str(flag) != ""): DirFlag = str(flag) + "_"
 	submission_dir = "Jobs_"+DirFlag+datetime_now
 
 	if os.path.exists(submission_dir):
-                print( "ERROR:", submission_dir, "already exists. Please use another name. Check if your output directory will be overwritten! Exiting..." )
-                quit()
+				print( "ERROR:", submission_dir, "already exists. Please use another name. Check if your output directory will be overwritten! Exiting..." )
+				quit()
 
 	os.mkdir( submission_dir )
 	os.chdir( submission_dir )
+
+	# ----- BDT Weight Files ----- #
+
+	os.system( "ln -s " + bdt_zipfile + " BDTWeightFiles.zip" )
+	bdt_zipfile_new = os.path.abspath( "BDTWeightFiles.zip" )
+	transfer_input_files = Executable_DisplacedHcalJetAnalyzer + "," + bdt_zipfile_new
 
 	# ----- Submit Jobs ----- #
 

@@ -1,0 +1,17 @@
+# "v3.7_LLPskim_Run2023Bv1_2024_03_14", { "NoSel", "WPlusJets" } 
+# "v3.7_LLPskim_Run2023Cv1_2024_03_14", { "NoSel", "WPlusJets" } 
+# "v3.7_LLPskim_Run2023Cv2_2024_03_14", { "NoSel", "WPlusJets" }
+# "v3.7_LLPskim_Run2023Cv3_2024_03_14", { "NoSel", "WPlusJets" }
+"v3.7_LLPskim_Run2023Cv4_2024_03_14", { "NoSel", "WPlusJets" }
+# "v3.7_LLPskim_Run2023Dv1_2024_03_14", { "NoSel", "WPlusJets" }
+# "v3.7_LLPskim_Run2023Dv2_2024_03_14", { "NoSel", "WPlusJets" }
+# "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_14_TEST", { "NoSel" }
+# "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_14_TRAIN", { "NoSel" }
+# "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_03_14_batch1", { "NoSel" }
+# "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_03_14_batch2", { "NoSel" }
+# "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_03_14_batch1", { "NoSel" }
+# "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_03_14_batch2", { "NoSel" }
+# "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_03_14_batch1", { "NoSel" }
+# "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_03_14_batch2", { "NoSel" }
+# "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TEST", { "NoSel" }
+# "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TRAIN", { "NoSel" }

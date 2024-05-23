@@ -1,12 +1,10 @@
 /* ====================================================================================================================== */
-void DisplacedHcalJetAnalyzer::DeclareTMVAReader(){
+void DisplacedHcalJetAnalyzer::DeclareTMVAReader( MyTags bdt_tag_info ){
 
-	if( debug ) cout<<"DisplacedHcalJetAnalyzer::DeclareTMVAReader()"<<endl;	
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::DeclareTMVAReader()"<<endl;
 
-	bdt_tags = {
-		"test"
-	};
-
+	vector<string> bdt_tags = bdt_tag_info.bdt_tags();
+	
 	if( !save_bdtscores ) bdt_tags.clear();
 
 	cout<<"Reading in BDT Weight Files..."<<endl;
@@ -15,39 +13,26 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader(){
 
 		// Get filepath
 		bool filepath_exists = false;
-		vector<string> filepaths = {"", "BDTWeightFiles/", "../BDTWeightFiles/", "../../BDTWeightFiles/" };
+		vector<string> filepaths = { "BDTWeightFiles/", "../BDTWeightFiles/", "../../BDTWeightFiles/" };
 		string filepath;
 		for( int i=0; i<filepaths.size(); i++ ){
 			if( !gSystem->AccessPathName( Form("%s", filepaths.at(i).c_str()) ) ){
 				filepath = filepaths.at(i);
 				filepath_exists = true;
+				cout<<"Looking for BDT weight files in "<<filepath<<endl;
 				break;
 			}
 		}
 
-		string filename = Form("%s/v0.0/weights_%s/TMVAClassification_BDTG.weights.xml", filepath.c_str(), bdt_tag.c_str() );
+		string filename = Form("%s/v0.7/weights_%s/TMVAClassification_BDTG.weights.xml", filepath.c_str(), bdt_tag.c_str() );
 
 		// Declare TMVA Reader
-		cout<<"  --> "<<bdt_tag<<endl;
+		cout<<"  --> "<<bdt_tag<<" from  "<<filename<<endl;
 		bdt_reader[bdt_tag] = new TMVA::Reader( "!Color:!Silent", debug );
 
 		// Read in variables // TODO: AUTOMATE
 
-		bdt_var_names[bdt_tag] = {
-			"jet0_Pt",
-			"jet0_Eta",
-			"jet0_Phi",
-			"jet0_E",
-			"jet0_ChargedHadEFrac",
-			"jet0_NeutralHadEFrac",
-			"jet0_Track0Pt",
-			"jet0_Track0dR",
-			"jet0_EnergyFrac_Depth1",
-			"jet0_EnergyFrac_Depth2",
-			"jet0_EnergyFrac_Depth3",
-			"jet0_S_phiphi",
-			"jet0_LeadingRechitE",
-		};
+		bdt_var_names[bdt_tag] = bdt_tag_info.bdt_var_names();
 
 		// TODO bdt_var_names[bdt_tag] = GetBDTVariableNamesXML( filename, false );
 
@@ -58,15 +43,16 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader(){
 
 		// Read in spectators (to do... remove!)
 
+
 		vector<string> bdt_var_spectators = {
-			"LLP0_Pt",
-			"LLP0_E",
-			"LLP0_Beta",
-			"LLP0_TravelTime",
-			"LLP0_DecayR",
-			"LLP0_DecayX",
-			"LLP0_DecayY",
-			"LLP0_DecayZ"
+			// "LLP0_Pt",
+			// "LLP0_E",
+			// "LLP0_Beta",
+			// "LLP0_TravelTime",
+			// "LLP0_DecayR",
+			// "LLP0_DecayX",
+			// "LLP0_DecayY",
+			// "LLP0_DecayZ"
 		};
 
 		// TODO bdt_var_names[bdt_tag] = GetBDTVariableNamesXML( filename, true );
@@ -81,15 +67,41 @@ void DisplacedHcalJetAnalyzer::DeclareTMVAReader(){
 }
 
 /* ====================================================================================================================== */
+// A quick way to split strings separated via any character delimiter (https://www.geeksforgeeks.org/how-to-split-a-string-in-cc-python-and-java/)
+vector<string> AdvTokenizer(string s, char del)
+{
+	vector<string> split_string = {};
+    stringstream ss(s);
+    string word;
+    while (!ss.eof()) {
+        getline(ss, word, del);
+		split_string.push_back(word);
+    }
+	return split_string;
+}
+
+/* ====================================================================================================================== */
 float DisplacedHcalJetAnalyzer::GetBDTScores(string bdt_tag){
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetBDTScores()"<<endl;
 
-	// Check if bdt tag exists...
-	if( std::find(bdt_tags.begin(), bdt_tags.end(), bdt_tag) == bdt_tags.end() ) return -999.9;
+	// Check if bdt tag exists...	
+	if (!MyTags::isValidTag(bdt_tag)) { // BDT tag not found
+		return -999.9;
+	}
 
-	for( auto bdt_var_name: bdt_var_names[bdt_tag] ){
-		bdt_vars[bdt_tag+" "+bdt_var_name] = tree_output_vars_float[bdt_var_name];
+//	if( std::find(bdt_tags.begin(), bdt_tags.end(), bdt_tag) == bdt_tags.end() ) return -999.9;
+
+	for( auto bdt_var_name: bdt_var_names[bdt_tag] ){ 
+		if (bdt_var_name.find( "/" ) != string::npos ) { // handle case where bdt_var_names has division in the name: Need to add the vars individually, with bdt_vars = tree_output_vars[numerator] / tree_output_vars[denominator]
+			vector<string> split_string = AdvTokenizer(bdt_var_name, '/');
+			if (bdt_tag.find("perJet") != std::string::npos) bdt_vars[bdt_tag+" "+bdt_var_name] = jet_tree_output_vars_float[split_string[0]] / jet_tree_output_vars_float[split_string[1]];
+			else bdt_vars[bdt_tag+" "+bdt_var_name] = tree_output_vars_float[split_string[0]] / tree_output_vars_float[split_string[1]];
+		}
+		else {
+			if (bdt_tag.find("perJet") != std::string::npos) bdt_vars[bdt_tag+" "+bdt_var_name] = jet_tree_output_vars_float[bdt_var_name];
+			else bdt_vars[bdt_tag+" "+bdt_var_name] = tree_output_vars_float[bdt_var_name];
+		}
 	}
 
 	return bdt_reader[bdt_tag]->EvaluateMVA("BDT");

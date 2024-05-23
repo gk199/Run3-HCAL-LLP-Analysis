@@ -13,7 +13,9 @@ Copy over output file from `/tmp/` area into local or home area.
 
 **3. Run:**
 
-Remember to recompile the DisplacedHcalJetAnalyzer executable!
+Remember to recompile the DisplacedHcalJetAnalyzer executable! Important: make sure that the environment `DisplacedHcalJetAnalyzer` was compiled in is the same as the CMSSW release `condor_executable.sh` sets up! This is currently `CMSSW_13_2_0`. 
+
+Zip the BDT weights files, `zip -r <zip file name> <directory name>`.
 
 Submit a condor job for each file in input text file:
 ```
@@ -24,6 +26,8 @@ For full usage:
 ```
 python3 condor_run.py --help
 ```
+
+A bash script is set up to submit all the 2023 displaced jet skim and the LLP MC: `./submit_MC.sh`. It is helpful to check the number of files produced in each script to make sure that all the files are processed (may be due to job flavor not allowing for a long enough run time!). Use `ls -1 <directory> | wc -l` to check the number of files in a directory.
 
 ## Examples of submissions
 ```

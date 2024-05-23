@@ -16,10 +16,16 @@ voms-proxy-info -all -file $myproxy
 
 # Environment setup -- no packages sourced, just setting up C++ for compiling needs
 echo "CMSSW environment"
-cmsrel CMSSW_11_3_0_pre1
-cd CMSSW_11_3_0_pre1/src
+cmsrel CMSSW_13_2_0
+cd CMSSW_13_2_0/src
 cmsenv
 cd ../..
+
+echo "Unzipping BDT Score Files..."
+unzip BDTWeightFiles.zip
+
+echo "ls"
+ls *
 
 echo ""
 echo "Infile: $ds_in"

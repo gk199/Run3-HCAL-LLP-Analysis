@@ -16,10 +16,7 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 
 	count["All"]++;
 	
-	// GK, fill the below catergories of histograms
 	if (jet_Pt->size() == 0) return; // added to avoid vector out of range if there are no jets -- issue on signal file 
-
-	FillHists("NoSel"); 
 
 	// check HLT results for these triggers
 	int passedHLT = 0;
@@ -30,18 +27,39 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 		}		
 	}
 	
+	// Fill the below catergories of histograms
+	FillHists("NoSel");
+
 	if (passedHLT > 0) {
 		FillHists("PassedHLT");
 	}
 
-	// check jet energies
-	if (jet_Pt->at(0) > 40 && jet_Pt->size() > 0) {
+	if (jet_Pt->at(0) > 40 && abs(jet_Eta->at(0)) <= 1.26) { // check leading jet energy and eta
 		FillHists("JetPt40");
 	}
 
-	// fill output trees in minituples
+	bool WPlusJetsEvent = false;
+	if (PassWPlusJetsSelection()) WPlusJetsEvent = true;
+
+	// Fill jet based output trees in minituples
+	for (int i = 0; i < jet_Pt->size(); i++) {
+		if (jet_Pt->at(i) > 40 && abs(jet_Eta->at(i)) <= 1.26) { 
+
+			// FillOutputJetTrees("PerJet_NoSel", i);
+			vector<float> matchedInfo = JetIsMatchedTo( jet_Eta->at(i), jet_Phi->at(i) );
+			if (matchedInfo[0] > -1) { 					// if jet is matched to a LLP or LLP decay product
+				FillOutputJetTrees("PerJet_LLPmatched", i);
+			}
+			if (WPlusJetsEvent) {
+				float phiSeparation = deltaPhi(jet_Phi->at(i), WPlusJets_leptonPhi);
+				if ( abs(phiSeparation) > 2 ) FillOutputJetTrees("PerJet_WPlusJets", i);
+			}
+		}
+	}
+
+	// Fill event based output trees in minituples
 	FillOutputTrees("NoSel");
-	if (PassWPlusJetsSelection()) FillOutputTrees("WPlusJets"); // commenting out for LLP MC, keep for data
+	if (WPlusJetsEvent && abs(deltaPhi(jet_Phi->at(0), WPlusJets_leptonPhi)) > 2) FillOutputTrees("WPlusJets");
 
 	return;
 
@@ -60,7 +78,10 @@ void DisplacedHcalJetAnalyzer::Loop(){
 
 	if( save_hists ) BookHists();
 
-	if( save_trees ) DeclareOutputTrees();
+	if( save_trees ) {
+		DeclareOutputJetTrees();
+		DeclareOutputTrees();
+	}
 
 	count["All"] = 0;
 
@@ -102,7 +123,6 @@ void DisplacedHcalJetAnalyzer::Loop(){
 			cout<<"Processing Event: "<<jentry<<"\t |  ";
 			cout<<"Rate: "<<std::fixed<<setprecision(2)<<event_timing<<" events/sec\t |  ";
 			cout<<"Estimated Time Remaining: "<<(nentries-jentry)/event_timing<<" sec \t\t \r"<<flush;
-
 		} 
 
 		if( debug ) cout<<"\n Processing Event "<<jentry<<" "<<endl;
@@ -119,7 +139,6 @@ void DisplacedHcalJetAnalyzer::Loop(){
 	cout<<"Cumulative Event Loop Rate: "<<std::fixed<<setprecision(2)<<GetEventRuntime(clock_start, init_entry, nentries)<<" events/sec \n"<<endl;
 
 	cout<<"\n ----- POST-PROCESSING ----- \n"<<endl;	
-
 
 
 	// ----- Print event counters ----- // 

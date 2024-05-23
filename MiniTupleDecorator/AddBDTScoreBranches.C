@@ -22,25 +22,23 @@
 /* ====================================================================================================================== */
 // Global Inputs 
 
-bool debug = true;
+bool debug = false;
 
 // ----- Input and Output Paths ----- //
 
 string basepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/";
 string vIN 		= "v3.7";
-string vOUT		= vIN+".4";
+string vOUT		= vIN+".1";
 
 string infiledir  = basepath + vIN;
-string outfiledir = basepath + vOUT ; //basepath + vOUT;
+string outfiledir = basepath + vOUT;
 
 // ----- Selections ----- //
 
 TCut cuts = ""; 
 
 // ----- Lifetime Reweighting ----- //
-// fix duplicate info here:
 vector<string> list_lifetime_rw_str = { "100", "300", "1000", "3000", "10000", "30000", "100000" };
-//vector<float> list_lifetime_rw      = {  100.,  300.,  1000.,  3000.,  10000.,  30000.,  100000  };
 
 // ----- BDT Globals ----- //
 
@@ -50,7 +48,6 @@ vector<string> bdt_tags = { "LLP350_MS80_perJet" }; //{ "LLP125", "LLP125_perJet
 map<string,TMVA::Reader*> bdt_reader;
 map<string,vector<string>> bdt_var_names;
 map<string,Float_t> bdt_vars;
-
 
 /* ====================================================================================================================== */
 float GetCTauFromInfiletag( string infiletag ){
@@ -322,7 +319,6 @@ void AddBranchesToTree( TTree* tree, bool tree_perJet, float signal_ctau ){
 		}
 
 		// Lifetime Reweighting // 
-		// signal_ctau
 		for( auto lt_rw: list_lifetime_rw_str ){
 			if( signal_ctau > 0 ){
 				output_vars["weight_ctau_"+lt_rw] = GetLifetimeReweight( signal_ctau, input_vars, std::stof(lt_rw) ); 
@@ -356,7 +352,6 @@ void AddTreesToFile( string infiletag, vector<string> treenames ){
 
         // ----- Infile / Outfile ----- //
 
-		// TODO: FIX
         bool isData = false;
         bool isSignal = false;
         bool isBkgMC = false;
@@ -391,13 +386,13 @@ void AddTreesToFile( string infiletag, vector<string> treenames ){
         for( auto treename: treenames ){
                 cout<<"\n ----- Running Over: "<<treename<<" ----- \n"<<endl;
                 cout<<"Cloning Tree ... (this step could take approx "<<0.0001*NEntries_input[treename]<<" s)"<<endl;
-				//TFile *fscratch = new TFile("minituple_scratch.root", "RECREATE"); // preventing basket WriteBuffer failed -- but causes actual tree to not be filled! need to debug
-                TTree *tree = (TTree*) trees_input[treename]->CloneTree(100000);
+				        //TFile *fscratch = new TFile("minituple_scratch.root", "RECREATE"); // preventing basket WriteBuffer failed -- but causes actual tree to not be filled! need to debug
+                TTree *tree = (TTree*) trees_input[treename]->CloneTree();
                 cout<<" -> Processing time: "<<(clock()-start_clock)/(double)CLOCKS_PER_SEC<<" s"<<endl;
 		
-		bool tree_perJet = false;
-		if( treename.find( "PerJet" ) != string::npos ) tree_perJet = true;
-
+		            bool tree_perJet = false;
+		            if( treename.find( "PerJet" ) != string::npos ) tree_perJet = true;
+          
                 fout->cd();
                 AddBranchesToTree( tree, tree_perJet, signal_ctau );
         }

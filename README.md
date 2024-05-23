@@ -68,6 +68,8 @@ In `HistHelper.cxx` set what histograms are filled (plotted with the outdated Ki
 
 The histograms that are read in are listed in `DisplacedHcalJetAnalyzer.h`. 
 
+Note, if making another tree (jet tree vs. event tree, for example), need to initalize new set of `treenames`, `tree_output`, and `tree_output_vars*` in `DisplacedHcalJetAnalyzer.h`. 
+
 ## Plotting
 Plotting from the minituples tree:
 ```

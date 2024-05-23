@@ -81,8 +81,14 @@ bool DisplacedHcalJetAnalyzer::PassWPlusJetsSelection() {
 	bool matched_jet = false;
 	for (int i = 0; i < n_jet; i++) { 			
 		if (jet_Pt->at(i) > 30 && abs(jet_Eta->at(i)) < 1.26 ) {
-			if (electron) 	jet_lepton_dPhi_ele = deltaPhi(jet_Phi->at(i), phiVectorSum_ele);
-			if (muon) 		jet_lepton_dPhi_muon = deltaPhi(jet_Phi->at(i), phiVectorSum_muon);
+			if (electron) {
+				jet_lepton_dPhi_ele = deltaPhi(jet_Phi->at(i), phiVectorSum_ele);
+				WPlusJets_leptonPhi = phiVectorSum_ele;
+			}
+			if (muon) {
+				jet_lepton_dPhi_muon = deltaPhi(jet_Phi->at(i), phiVectorSum_muon);
+				WPlusJets_leptonPhi = phiVectorSum_muon;
+			}
 
 			if ( (electron && abs(jet_lepton_dPhi_ele) > 2) || (muon && abs(jet_lepton_dPhi_muon) > 2) ) matched_jet = true;
 		}
