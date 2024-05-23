@@ -22,13 +22,13 @@
 /* ====================================================================================================================== */
 // Global Inputs 
 
-bool debug = false;
+bool debug = true;
 
 // ----- Input and Output Paths ----- //
 
 string basepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/";
 string vIN 		= "v3.7";
-string vOUT		= vIN+".3";
+string vOUT		= vIN+".4";
 
 string infiledir  = basepath + vIN;
 string outfiledir = basepath + vOUT ; //basepath + vOUT;
@@ -40,7 +40,7 @@ TCut cuts = "";
 // ----- Lifetime Reweighting ----- //
 // fix duplicate info here:
 vector<string> list_lifetime_rw_str = { "100", "300", "1000", "3000", "10000", "30000", "100000" };
-vector<float> list_lifetime_rw      = {  100.,  300.,  1000.,  3000.,  10000.,  30000.,  100000  };
+//vector<float> list_lifetime_rw      = {  100.,  300.,  1000.,  3000.,  10000.,  30000.,  100000  };
 
 // ----- BDT Globals ----- //
 
@@ -51,14 +51,36 @@ map<string,TMVA::Reader*> bdt_reader;
 map<string,vector<string>> bdt_var_names;
 map<string,Float_t> bdt_vars;
 
+
+/* ====================================================================================================================== */
+float GetCTauFromInfiletag( string infiletag ){
+
+	if( debug ) cout<<"Getting CTau From infiletag..."<<endl;
+
+	// Start String
+	string str_first = "CTau";
+	string infiletag_partial = infiletag.substr( infiletag.find(str_first)+str_first.length(), infiletag.length() );
+
+	// End String (either the following _ or .)
+	vector<string> vecstr_last = {".", "_"};
+	unsigned last = infiletag.length();
+
+	for( auto str_last: vecstr_last ){
+		if( infiletag_partial.find(str_last) == string::npos ) continue;
+		unsigned last_temp = infiletag_partial.find(str_last);
+		if( last_temp < last ) last = last_temp;
+	}
+
+	float lifetime = std::stof( infiletag_partial.substr(0,last))*0.1; // 0.1 to convert from mm to cm
+
+	cout<<"Reading in signal lifetime as: "<<lifetime<<" cm..."<<endl;
+
+	return lifetime;
+
+}
+
 /* ====================================================================================================================== */
 Float_t GetLifetimeReweight( float ctau_sample, map<string,Float_t> input_vars, float ctau_target ){
-
-	// TODO: adapt to displaced jets samples
-
-	//double signal_lifetime = -1;
-	// TO DO: READ IN from filetag --> NO! Entered initially (or done earlier instead of for every single event...)
-	//cout<<"Reading signal lifetime as "<<signal_lifetime<<endl;
 
 	Float_t ctau_llp0 = input_vars["LLP0_DecayCtau"]; //LLP0_DecayCtau"];
     Float_t ctau_llp1 = input_vars["LLP1_DecayCtau"];
@@ -66,19 +88,6 @@ Float_t GetLifetimeReweight( float ctau_sample, map<string,Float_t> input_vars, 
 	Float_t reweight_llp0 = pow ( ctau_sample / ctau_target, 1 ) * exp( -ctau_llp0 * ( 1.0/ctau_target - 1.0/ctau_sample ) );
     Float_t reweight_llp1 = pow ( ctau_sample / ctau_target, 1 ) * exp( -ctau_llp1 * ( 1.0/ctau_target - 1.0/ctau_sample ) );
     return reweight_llp0*reweight_llp1;
-	//cout<<ctau_llp0<<"  "<<ctau_sample<<"  "<<ctau_target<<"  "<<reweight_llp0<<endl;
-	//double lt_rw = event_weight * pow ( signal_lifetime / tau_target, 1.0 ) * exp( -tau_event * ( 1.0/tau_target - 1.0/signal_lifetime ) );
-
-	
-
-	/* Safety checks for low stats...
-	if( lt_rw > 1 && filetag.find("_100_") == string::npos ) {
-		return 1.0;
-	} else if ( lt_rw > 10 && lt_rw/event_weight > 50 && filetag.find("_100_") != string::npos ){
-		return 50*event_weight;
-	} else {
-		return lt_rw;
-	}*/
 
 }
 
@@ -314,12 +323,11 @@ void AddBranchesToTree( TTree* tree, bool tree_perJet, float signal_ctau ){
 
 		// Lifetime Reweighting // 
 		// signal_ctau
-
-		for( int i=0; i<list_lifetime_rw.size(); i++ ){
+		for( auto lt_rw: list_lifetime_rw_str ){
 			if( signal_ctau > 0 ){
-				output_vars["weight_ctau_"+list_lifetime_rw_str.at(i)] = GetLifetimeReweight( signal_ctau, input_vars, list_lifetime_rw.at(i) ); 
+				output_vars["weight_ctau_"+lt_rw] = GetLifetimeReweight( signal_ctau, input_vars, std::stof(lt_rw) ); 
 			} else{
-				output_vars["weight_ctau_"+list_lifetime_rw_str.at(i)] = input_vars["weight"];
+				output_vars["weight_ctau_"+lt_rw] = input_vars["weight"];
 			}
 		}
 
@@ -338,7 +346,7 @@ void AddBranchesToTree( TTree* tree, bool tree_perJet, float signal_ctau ){
 }
 
 /* ====================================================================================================================== */
-void AddTreesToFile( string infiletag, float signal_ctau, vector<string> treenames ){
+void AddTreesToFile( string infiletag, vector<string> treenames ){
 
         cout<<endl;
         cout<<" ----- DECORATING "<<infiletag<<" (vIN = "<<vIN<<", vOUT = "<<vOUT<<") ----- "<<endl;
@@ -348,13 +356,17 @@ void AddTreesToFile( string infiletag, float signal_ctau, vector<string> treenam
 
         // ----- Infile / Outfile ----- //
 
-	// TODO: FIX
+		// TODO: FIX
         bool isData = false;
         bool isSignal = false;
         bool isBkgMC = false;
         if( infiletag.find("Run2023") != string::npos ) isData = true;
         if( infiletag.find("CTau") != string::npos ) isSignal = true; 
         if( !isData && !isSignal ) isBkgMC = true;
+
+        // Get Signal Lifetime
+        float signal_ctau = -1;
+        if( isSignal ) signal_ctau = GetCTauFromInfiletag( infiletag );
 
         // Infile
         TString infilepath = Form( "%s/minituple_%s.root", infiledir.c_str(), infiletag.c_str() );
@@ -399,7 +411,7 @@ void AddTreesToFile( string infiletag, float signal_ctau, vector<string> treenam
 }
 
 /* ====================================================================================================================== */
-void AddBDTScoreBranches(){ //string infilepath, vector<string> infiletags){
+void AddBDTScoreBranches( string infiletag, vector<string> treenames ){
 
 	clock_t start_clock = clock();
 
@@ -426,15 +438,14 @@ void AddBDTScoreBranches(){ //string infilepath, vector<string> infiletags){
 	// AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TEST", vector<string>{ "NoSel" } );
 	// AddTreesToFile( "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TRAIN", vector<string>{ "NoSel" } );
 
-	//AddTreesToFile( infiletag, CTau, vector_of_treenames );
-	// /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_14_TEST.root
     //AddTreesToFile( "HToSSTobbbb_MH-125_MS-50_CTau10000", 1000, vector<string>{ "NoSel" } ); 
     //AddTreesToFile( "HToSSTobbbb_MH-125_MS-50_CTau3000", 300, vector<string>{ "NoSel" } ); 
 
-    AddTreesToFile( "HToSSTobbbb_MH-125_MS-15_CTau10000", 1000, vector<string>{ "NoSel" } ); 
-    AddTreesToFile( "HToSSTobbbb_MH-125_MS-15_CTau3000", 300, vector<string>{ "NoSel" } ); 
-    AddTreesToFile( "HToSSTobbbb_MH-125_MS-15_CTau1000", 100, vector<string>{ "NoSel" } ); 
+   	//AddTreesToFile( "HToSSTobbbb_MH-125_MS-15_CTau10000", vector<string>{ "NoSel" } ); 
+    //AddTreesToFile( "HToSSTobbbb_MH-125_MS-15_CTau3000", 300, vector<string>{ "NoSel" } ); 
+    //AddTreesToFile( "HToSSTobbbb_MH-125_MS-15_CTau1000", 100, vector<string>{ "NoSel" } ); 
 
+	AddTreesToFile( infiletag, treenames );
 
 	std::cout<<"--------------------------------------------------------"<<endl;
 	double duration_sec = (clock()-start_clock)/(double)CLOCKS_PER_SEC;
