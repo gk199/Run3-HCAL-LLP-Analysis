@@ -14,16 +14,20 @@ void MiniTuplePlotter_HLT_Effs(){
 	// vector<string> filetags_MC = 	{ "v1.2_MCsignal_500k_2023_08_31" };
 
 	string path_v3 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.0/minituple_";
-	string path = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.6/minituple_";
+	string path = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_";
 
 	map<string,vector<string>> filetags;
-	// filetags["LLP125"]	= { "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23"};
+	filetags["LLP125"]	= { "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23"};
 	// filetags["LLP350"]	= { "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2023_11_29"};
-	filetags["LLP125_mX15"]	= { "v3.6_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_02_TEST"};
-	filetags["LLP350_mX80"]	= { "v3.6_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_02_TEST"};
-	filetags["LLP125"]		= { "v3.6_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_03_02_batch2"};
-	filetags["LLP250"]		= { "v3.6_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_03_02_batch2"};
-	filetags["LLP350"]		= { "v3.6_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_03_02_batch2"};
+
+	filetags["LLP350"]	= { "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TEST"};
+	filetags["LLP125_50"]	= { "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau10000_13p6TeV_2024_05_09"};
+	
+	// filetags["LLP125_mX15"]	= { "v3.6_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_02_TEST"};
+	// filetags["LLP350_mX80"]	= { "v3.6_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_02_TEST"};
+	// filetags["LLP125"]		= { "v3.6_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_03_02_batch2"};
+	// filetags["LLP250"]		= { "v3.6_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_03_02_batch2"};
+	// filetags["LLP350"]		= { "v3.6_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_03_02_batch2"};
 
 	vector<string> filetags_LLP125	= { "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23"};
 	vector<string> filetags_LLP350	= { "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2023_11_29"};
@@ -40,10 +44,11 @@ void MiniTuplePlotter_HLT_Effs(){
 
 	// to do -- make a new version that is jet based!
 
-	vector<string> filetag_keys_to_loop = {"LLP125", "LLP250", "LLP350", "LLP125_mX15", "LLP350_mX80"};
+	// vector<string> filetag_keys_to_loop = {"LLP125", "LLP250", "LLP350", "LLP125_mX15", "LLP350_mX80"};
+	vector<string> filetag_keys_to_loop = {"LLP350", "LLP125_50"};
 
-	vector<string> jet_E = {"60", "100"};
-	vector<string> event_HT = {"200", "170"};
+	vector<string> jet_E = {"60"}; //{"60", "100"};
+	vector<string> event_HT = {"200"}; // {"200", "170"};
 
 	for( auto key: filetag_keys_to_loop){
 
@@ -64,8 +69,10 @@ void MiniTuplePlotter_HLT_Effs(){
 			eff_LLPdisplacement.SetSelectiveCuts("MC", Form("eventHT > %s && ( (jet0_isMatchedTo == 0 && jet0_Pt >= %s) || (jet1_isMatchedTo == 0 && jet1_Pt >= %s) || (jet2_isMatchedTo == 0 && jet2_Pt >= %s) ) ", event_HT[i].c_str(), jet_E[i].c_str(), jet_E[i].c_str(), jet_E[i].c_str() ) ); // make sure that LLP 0 is matched to jet, and cut on the jet pT
 //			eff_LLPdisplacement.SetSelectiveCuts("MC", Form("eventHT > %s && perJet_Pt >= %s ", event_HT[i].c_str(), jet_E[i].c_str() ) ); // cut on the jet pT
 			eff_LLPdisplacement.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_AnyLLP_HLT}); 
+			// eff_LLPdisplacement.colors = { kWhite, kOrange, kGreen+2 }; // to just see trigger efficiency 
 			eff_LLPdisplacement.SetLegendNames({"No cuts", "Monitoring HLT passed", "LLP HLT passed"});
-			eff_LLPdisplacement.Plot("ratio");
+			// eff_LLPdisplacement.Plot("ratio");
+			eff_LLPdisplacement.Plot("efficiency");
 			eff_LLPdisplacement.ClearFileTrees(); 														// reset, and cut on each HLT group
 			eff_LLPdisplacement.SetOutputFileTag("HLT_v3_MC_"+key+"_jetE"+jet_E[i]+"_HLTsplit");
 			eff_LLPdisplacement.SetComparisonCuts({Cut_HLTpassed1, Cut_AnyLLP_HLT, Cut_HLTpassed2, Cut_HLTpassed9, Cut_HLTpassed5, Cut_HLTpassed11}); 
@@ -86,7 +93,8 @@ void MiniTuplePlotter_HLT_Effs(){
 		plotter_HLTeffMC.SetSelectiveCuts("MC", Cut_LLPinHCAL123_Jet0); // Cut_matchedLLPinHCAL);		// region for LLP decay, and require LLP is matched to jet 0
 		plotter_HLTeffMC.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_AnyLLP_HLT}); 
 		plotter_HLTeffMC.SetLegendNames({"No cuts", "Monitoring HLT passed", "LLP HLT passed"});
-		plotter_HLTeffMC.Plot("ratio");
+		// plotter_HLTeffMC.Plot("ratio");
+		plotter_HLTeffMC.Plot("efficiency");
 		plotter_HLTeffMC.ClearFileTrees(); 																// reset, and cut on each HLT group.
 		plotter_HLTeffMC.SetOutputFileTag("HLT_v3_MC_"+key+"_HLTsplit");
 		plotter_HLTeffMC.SetComparisonCuts({Cut_HLTpassed1, Cut_AnyLLP_HLT, Cut_HLTpassed2, Cut_HLTpassed9, Cut_HLTpassed5, Cut_HLTpassed11}); 
