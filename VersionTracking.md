@@ -218,11 +218,13 @@ Updates:
 Location of minituples:
 ```
 /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/
 ```
 
 ### v3.8
 Updates:
 * Fixed bug where HLT results are not saved in per-jet trees (useful for HLT comparison ROC curves)
+* Fixed bug in calculation of LLP DecayT
 
 ## V4
 Ongoing wish list:

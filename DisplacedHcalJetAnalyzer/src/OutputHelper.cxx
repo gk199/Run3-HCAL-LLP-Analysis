@@ -587,7 +587,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("LLP%d_DecayY", i)] = gLLP_DecayVtx_Y->at(i);
 		tree_output_vars_float[Form("LLP%d_DecayZ", i)] = gLLP_DecayVtx_Z->at(i);
 		tree_output_vars_float[Form("LLP%d_DecayD", i)] = distance;
-		tree_output_vars_float[Form("LLP%d_DecayT", i)] = distance * ( 1 / gLLP_Beta->at(i) - 1) * 0.03336; // 1/c in ns / cm to give answer in ns
+		tree_output_vars_float[Form("LLP%d_DecayT", i)] = distance * ( 1 / gLLP_Beta->at(i) ) * 0.03336; // 1/c in ns / cm to give answer in ns
 		tree_output_vars_float[Form("LLP%d_DecayCtau", i)] = distance * (sqrt( 1 / pow(gLLP_Beta->at(i),2) - 1)); 
 		for (int b = 0; b < 2; b++) tree_output_vars_float[Form("LLP%d_dR_LLP_to_b", i)] = DeltaR_LLP_b(i, b); 
 		tree_output_vars_float[Form("LLP%d_dR_b_to_b", i)] = DeltaR_b(i);
