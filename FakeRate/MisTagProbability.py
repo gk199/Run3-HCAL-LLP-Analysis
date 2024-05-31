@@ -55,6 +55,8 @@ def OutputFolder(name):
 
 OutputFolder("")
 
+jet_number = ["0", "1", "2", "3", "4", "5"]
+
 # path = sys.argv[1] # pass the location of the processed ntuple as an argument 
 # infile = ROOT.TFile.Open(path)
 
@@ -517,7 +519,6 @@ def Plot2D(tree, obj_type, radius):
 # ------------------------------------------------------------------------------
 def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, obj_type):
     if (obj_type == "jet"):
-        number = ["0", "1", "2", "3", "4", "5"]
         LLP_matching = ["L1trig_Matched"] # jet + number + var = full histogram name
         LLP_BDTscore = ["bdtscoreX_LLP350_MS80_perJet"]
 
@@ -541,7 +542,7 @@ def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, o
             TagJets_bkg = ROOT.TH1F("Tagged Jet Background " +  str(trig_matched), "Tagged Jet, for L1 jet matching=" + str(trig_matched) + " ; pT order of tagged jet; Fraction of tagged jets", 6, 0, 6 ); 
             N_tot_bkg = 0
 
-            for i in number:
+            for i in jet_number:
                 
                 selection_region = GetCut(obj_type + i + "_" + LLP_matching[0], trig_matched) # require matching trigger set or not set
                 pT_region = GetCut(obj_type + i + "_Pt", [40,1000])                         # require jet pT is over 40 GeV
@@ -619,16 +620,14 @@ def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, o
 def MisTagProbability(tree, obj_type):
     
     if (obj_type == "jet"):
-        # number = ["0", "1", "2", "3", "4", "5"]
-        number = ["0"]
 
         LLP_matching = ["L1trig_Matched"] # jet + number + var = full histogram name
         LLP_BDTscore = ["bdtscoreX_LLP350_MS80_perJet"]
         jet_kinematics = ["Eta", "Phi", "Pt"]
-        bin_num = [12, 6, 6]
+        bin_num = [12, 6, 8]
         plot_x_range = [1.26, 3.2, 1]
         plot_y_range = [0.01, 0.007, 0.02]
-        bin_widths = np.array([40, 60, 80, 120, 160, 240, 400], dtype='float64') 
+        bin_widths = np.array([40, 50, 60, 70, 80, 120, 160, 240, 400], dtype='float64') 
 
         misTagJets = {}
         allJets = {}
@@ -651,7 +650,7 @@ def MisTagProbability(tree, obj_type):
                     misTagJets_6 = ROOT.TH1F("Numerator " + var, "Jet; Jet " + var + "; Jet Tagging Efficiency", bin_num[counter], bin_widths ); 
                     allJets_6 = ROOT.TH1F("Denominator "+ var, "Jet; Jet " + var + "; Jet Tagging Efficiency", bin_num[counter], bin_widths ); 
 
-                for i in number:
+                for i in jet_number:
                     hname_temp = obj_type + i + "_" + var + "_highScore"
                     hname_denom = obj_type + i + "_" + var
                     if var != "Pt":
@@ -683,7 +682,7 @@ def MisTagProbability(tree, obj_type):
                 allJets_6.SetTitle("All jets, for L1 trigger matched = " + str(trig_matched))
                 canv_individual.SaveAs(folder + "/All_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + ".png")
 
-                legend.AddEntry(misTagJets_6, obj_type + " " + str(len(number)-1))
+                legend.AddEntry(misTagJets_6, obj_type + " " + str(len(jet_number)-1))
                 # check efficiency on the whole distribution now
                 if(ROOT.TEfficiency.CheckConsistency(misTagJets_6, allJets_6)):
                     pEff = ROOT.TEfficiency(misTagJets_6,allJets_6)
@@ -710,16 +709,14 @@ def MisTagProbability(tree, obj_type):
 # ------------------------------------------------------------------------------
 def MisTagPrediction(tree, obj_type):
     if (obj_type == "jet"):
-        # number = ["0", "1", "2", "3", "4", "5"]
-        number = ["0"]
 
         LLP_matching = ["L1trig_Matched"] # jet + number + var = full histogram name
         LLP_BDTscore = ["bdtscoreX_LLP350_MS80_perJet"]
         jet_kinematics = ["Eta", "Phi", "Pt"]
-        bin_num = [12, 6, 6]
+        bin_num = [12, 6, 8]
         plot_x_range = [1.26, 3.2, 1]
         plot_y_range = [0.01, 0.007, 0.02]
-        bin_widths = np.array([40, 60, 80, 120, 160, 240, 400], dtype='float64') 
+        bin_widths = np.array([40, 50, 60, 70, 80, 120, 160, 240, 400], dtype='float64') 
 
         misTagJets = {}
         allJets = {}
@@ -744,14 +741,15 @@ def MisTagPrediction(tree, obj_type):
                     allJets_6_actual = ROOT.TH1F("Actual "+ var + str(trig_matched), "Predicted and Actual Mis-Tag Jets for L1 trigger matched = " + str(trig_matched) + "; Jet " + var + "; Number of Mis-tagged Jets", bin_num[counter], bin_widths ); 
                     allJets_6 = ROOT.TH1F("Predicted "+ var + str(trig_matched), "Predicted and Actual Mis-Tag Jets for L1 trigger matched = " + str(trig_matched) + "; Jet " + var + "; Number of Mis-tagged Jets", bin_num[counter], bin_widths ); 
 
-                for i in number:                    
+                for i in jet_number:  
+                    print (i)                 
                     hname_denom_actual = obj_type + i + "_" + var + "_actualData"
                     hname_denom = obj_type + i + "_" + var + "_forPrediction"
                     if var != "Pt":
                         allJets_actual[i] = ROOT.TH1F(hname_denom_actual, "Jet " + LLP_matching[0] + "; " + var +" efficiency by jet; Predicted and Actual Number of Mis-tagged Jets", bin_num[counter], -plot_x_range[counter], plot_x_range[counter] ); 
                         allJets[i] = ROOT.TH1F(hname_denom, "Jet " + LLP_matching[0] + "; " + var +" efficiency by jet; Predicted and Actual Number of Mis-tagged Jets", bin_num[counter], -plot_x_range[counter], plot_x_range[counter] ); 
                     else:
-                        allJets_actual[i] = ROOT.TH1F(hname_denom_actual, "Jet " + LLP_matching[0] + "; " + var +" efficiency by jet; Predicted and Actual Number of Mis-tagged Jets", bin_num[counter], bin_widths ); 
+                        allJets_actual[i] = ROOT.TH1F(hname_denom_actual, "Jet " + LLP_matching[0] + "; " + var + " efficiency by jet; Predicted and Actual Number of Mis-tagged Jets", bin_num[counter], bin_widths ); 
                         allJets[i] = ROOT.TH1F(hname_denom, "Jet " + LLP_matching[0] + "; " + var +" efficiency by jet; Predicted and Actual Number of Mis-tagged Jets", bin_num[counter], bin_widths ); 
 
                     selection_region = GetCut(obj_type + i + "_" + LLP_matching[0], trig_matched) # require matching trigger set or not set
@@ -780,7 +778,7 @@ def MisTagPrediction(tree, obj_type):
                     # print(MisTagEffDist.GetEfficiencyErrorLow(bin))
                     # print(MisTagEffDist.GetEfficiencyErrorUp(bin))
                     # print(MisTagEffDist.GetEfficiencyErrorLow(bin) / (MisTagEff_Num.GetBinContent(bin) / MisTagEff_Denom.GetBinContent(bin)) * allJets_6.GetBinContent(bin))
-                    allJets_6.SetBinError(bin, MisTagEffDist.GetEfficiencyErrorLow(bin) / (MisTagEff_Num.GetBinContent(bin) / MisTagEff_Denom.GetBinContent(bin)) * allJets_6.GetBinContent(bin)) # relative errors
+                    if (MisTagEff_Num.GetBinContent(bin) > 0): allJets_6.SetBinError(bin, MisTagEffDist.GetEfficiencyErrorLow(bin) / (MisTagEff_Num.GetBinContent(bin) / MisTagEff_Denom.GetBinContent(bin)) * allJets_6.GetBinContent(bin)) # relative errors
                     # wondering if should use a TGraph than a TEfficiency plot for easier manipulation... only dealing with one sided errors right now
 
                 hs.Add(allJets_6) # predicted
@@ -812,7 +810,7 @@ def main():
 
     # SignalDistribution(LLP1, LLP2, LLP3, LLP4, LLP5, LLP_names, "NoSel", infilepath, "WPlusJets")
 
-    # ProbabilityEst(infilepath)
+    ProbabilityEst(infilepath)
     BackgroundPrediction(infilepath)
 
 if __name__ == '__main__':
