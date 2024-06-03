@@ -11,7 +11,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 
 	cout<<"Declaring Output Trees..."<<endl;	
 
-	treenames = { "NoSel", "WPlusJets" }; 
+	treenames = { "NoSel", "PassedHLT", "WPlusJets" }; 
 
 	vector<string> myvars_bool = {};
 	
@@ -229,7 +229,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 
 	cout<<"Declaring Output Trees..."<<endl;	
 
-	jet_treenames = { "PerJet_NoSel", "PerJet_WPlusJets", "PerJet_LLPmatched" }; 
+	jet_treenames = { "PerJet_NoSel", "PerJet_PassedHLT", "PerJet_WPlusJets", "PerJet_LLPmatched" }; 
 
 	vector<string> myvars_bool = {};
 	for (int i = 0; i < HLT_Indices.size(); i++) {
@@ -665,7 +665,7 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	jet_tree_output_vars_float["eventHT"]   = EventHT();
 
 	for (int i = 0; i < HLT_Indices.size(); i++) { 
-		tree_output_vars_bool[HLT_Names[i]] = HLT_Decision->at(i);
+		jet_tree_output_vars_bool[HLT_Names[i]] = HLT_Decision->at(i);
 	}
 
 	jet_tree_output_vars_float["perJet_E"] 			= jet_E->at(jetIndex);
