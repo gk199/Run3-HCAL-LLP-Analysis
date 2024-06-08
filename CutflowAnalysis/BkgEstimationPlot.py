@@ -37,6 +37,7 @@ zero_bin = [21906, 232685, 12447] # second column is comparing to all valid even
 one_bin = [1, 16745, 9242]
 two_bin = [0, 374, 293]
 totals = [21907, 249804, 249804]
+# totals = [21907, 249804, 21982]
 
 stack = False
 if stack: hs = ROOT.THStack("hs",  "Fraction of events with BDT tagged jets (mH = 350, mS = 80 GeV); Fraction of events with jets with BDT discriminator > 0.9999;Fraction of Events")

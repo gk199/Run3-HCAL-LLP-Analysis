@@ -470,7 +470,7 @@ void SetupPlots()
   GraphLabels.clear();
   PlotnameSpecific.clear();
 
-  legend = new TLegend(0.32,0.12,0.9,0.34);
+  legend = new TLegend(0.42,0.12,0.9,0.34);
   legend->SetTextSize(0.03);
   legend->SetBorderSize(0);
   legend->SetFillStyle(0);
@@ -491,19 +491,19 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   //--------------------------------------------------------------------------------------------------------------
   // Histograms
   //==============================================================================================================  
-  TH1F *Signal_MVA125_15 = new TH1F(("Signal_MVA125_15"+label).c_str(), "LLP Signal ; MVA (BDT trained on 125, mX15) score for LLP signal ; Number of Events ",  5500, -1.1 , 1.1);
-  TH1F *Signal_MVA350_80 = new TH1F(("Signal_MVA350_80"+label).c_str(), "LLP Signal ; MVA (BDT trained on 350, mX80) score for LLP signal ; Number of Events ",  5500, -1.1 , 1.1);
-  TH1F *Signal_MVA125_50 = new TH1F(("Signal_MVA125_50"+label).c_str(), "LLP Signal ; MVA (BDT trained on 125, mX50) score for LLP signal ; Number of Events ",  5500, -1.1 , 1.1);
-  TH1F *Signal_MVA250_120 = new TH1F(("Signal_MVA250_120"+label).c_str(), "LLP Signal ; MVA (BDT trained on 250, mX120) score for LLP signal ; Number of Events ",  5500, -1.1 , 1.1);
-  TH1F *Signal_MVA350_160 = new TH1F(("Signal_MVA350_160"+label).c_str(), "LLP Signal ; MVA (BDT trained on 350, mX160) score for LLP signal ; Number of Events ",  5500, -1.1 , 1.1);
-  TH1F *Signal_MVAhadd = new TH1F(("Signal_MVAhadd"+label).c_str(), "LLP Signal ; MVA (BDT trained on combination) score for LLP signal ; Number of Events ",  5500, -1.1 , 1.1);
+  TH1F *Signal_MVA125_15 = new TH1F(("Signal_MVA125_15"+label).c_str(), "LLP Signal ; MVA (BDT trained on 125, mX15) score for LLP signal ; Number of Events ",  55000, -1.1 , 1.1);
+  TH1F *Signal_MVA350_80 = new TH1F(("Signal_MVA350_80"+label).c_str(), "LLP Signal ; MVA (BDT trained on 350, mX80) score for LLP signal ; Number of Events ",  55000, -1.1 , 1.1);
+  TH1F *Signal_MVA125_50 = new TH1F(("Signal_MVA125_50"+label).c_str(), "LLP Signal ; MVA (BDT trained on 125, mX50) score for LLP signal ; Number of Events ",  55000, -1.1 , 1.1);
+  TH1F *Signal_MVA250_120 = new TH1F(("Signal_MVA250_120"+label).c_str(), "LLP Signal ; MVA (BDT trained on 250, mX120) score for LLP signal ; Number of Events ",  55000, -1.1 , 1.1);
+  TH1F *Signal_MVA350_160 = new TH1F(("Signal_MVA350_160"+label).c_str(), "LLP Signal ; MVA (BDT trained on 350, mX160) score for LLP signal ; Number of Events ",  55000, -1.1 , 1.1);
+  TH1F *Signal_MVAhadd = new TH1F(("Signal_MVAhadd"+label).c_str(), "LLP Signal ; MVA (BDT trained on combination) score for LLP signal ; Number of Events ",  55000, -1.1 , 1.1);
 
-  TH1F *Background_MVA125_15 = new TH1F(("Background_MVA125_15"+label).c_str(), "W+Jets Background ; MVA (BDT trained on 125, mX15) score for W+jets background ; Number of Events ",  5500, -1.1 , 1.1);
-  TH1F *Background_MVA350_80 = new TH1F(("Background_MVA350_80"+label).c_str(), "W+Jets Background ; MVA (BDT trained on 350, mX80) score for W+jets background ; Number of Events ",  5500, -1.1 , 1.1);
-  TH1F *Background_MVA125_50 = new TH1F(("Background_MVA125_50"+label).c_str(), "W+jets Background ; MVA (BDT trained on 125, mX50) score for W+jets Background ; Number of Events ",  5500, -1.1 , 1.1);
-  TH1F *Background_MVA250_120 = new TH1F(("Background_MVA250_120"+label).c_str(), "W+jets Background ; MVA (BDT trained on 250, mX120) score for W+jets Background ; Number of Events ",  5500, -1.1 , 1.1);
-  TH1F *Background_MVA350_160 = new TH1F(("Background_MVA350_160"+label).c_str(), "W+jets Background ; MVA (BDT trained on 350, mX160) score for W+jets Background ; Number of Events ",  5500, -1.1 , 1.1);
-  TH1F *Background_MVAhadd = new TH1F(("Background_MVAhadd"+label).c_str(), "W+Jets Background ; MVA (BDT trained on combination) score for W+jets background ; Number of Events ",  5500, -1.1 , 1.1);
+  TH1F *Background_MVA125_15 = new TH1F(("Background_MVA125_15"+label).c_str(), "W+Jets Background ; MVA (BDT trained on 125, mX15) score for W+jets background ; Number of Events ",  55000, -1.1 , 1.1);
+  TH1F *Background_MVA350_80 = new TH1F(("Background_MVA350_80"+label).c_str(), "W+Jets Background ; MVA (BDT trained on 350, mX80) score for W+jets background ; Number of Events ",  55000, -1.1 , 1.1);
+  TH1F *Background_MVA125_50 = new TH1F(("Background_MVA125_50"+label).c_str(), "W+jets Background ; MVA (BDT trained on 125, mX50) score for W+jets Background ; Number of Events ",  55000, -1.1 , 1.1);
+  TH1F *Background_MVA250_120 = new TH1F(("Background_MVA250_120"+label).c_str(), "W+jets Background ; MVA (BDT trained on 250, mX120) score for W+jets Background ; Number of Events ",  55000, -1.1 , 1.1);
+  TH1F *Background_MVA350_160 = new TH1F(("Background_MVA350_160"+label).c_str(), "W+jets Background ; MVA (BDT trained on 350, mX160) score for W+jets Background ; Number of Events ",  55000, -1.1 , 1.1);
+  TH1F *Background_MVAhadd = new TH1F(("Background_MVAhadd"+label).c_str(), "W+Jets Background ; MVA (BDT trained on combination) score for W+jets background ; Number of Events ",  55000, -1.1 , 1.1);
 
   Double_t RealElectrons = 0;
   Double_t FakeElectrons = 0;
@@ -699,42 +699,6 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   plotname = Label;
 
   //*****************************************************************************************
-  // Overlay signal and background BDT scores
-  //*****************************************************************************************
-  THStack *hs = new THStack("hs", Form("Signal and Background BDT Scores (mH=%s) ; BDT (trained on 125) Score ; Number of Entries",Label.c_str()));
-  Signal_MVA125_15->SetFillColorAlpha(kBlue, 0.35);
-  Background_MVA125_15->SetFillColorAlpha(kRed, 0.35);
-  Signal_MVA125_15->Rebin(50);
-  Background_MVA125_15->Rebin(50);
-  hs->Add(Signal_MVA125_15);
-  hs->Add(Background_MVA125_15);
-  cv_indiv->cd();
-  hs->Draw("bar1 nostack");
-  gPad->BuildLegend(0.65,0.65,0.85,0.85,"");
-  StampCMS( "Internal", 140., 0.2, 0.84, 0.045 );
-  cv_indiv->SaveAs((plotDir + "Minituple_BDT125score_" + plotname + ".png").c_str());
-  gPad->SetLogy();
-  cv_indiv->SaveAs((plotDir + "Minituple_BDT125score_" + plotname + "_logY.png").c_str());
-  cv_indiv->Clear();
-
-  THStack *hs2 = new THStack("hs2", Form("Signal and Background BDT Scores (mH=%s) ; BDT (trained on 350) Score ; Number of Entries",Label.c_str()));
-  Signal_MVA350_80->SetFillColorAlpha(kBlue, 0.35);
-  Background_MVA350_80->SetFillColorAlpha(kRed, 0.35);
-  Signal_MVA350_80->Rebin(50);
-  Background_MVA350_80->Rebin(50);
-  hs2->Add(Signal_MVA350_80);
-  hs2->Add(Background_MVA350_80);
-  cv_indiv->cd();
-  hs2->Draw("bar1 nostack");
-  gPad->BuildLegend(0.65,0.65,0.85,0.85,"");
-  StampCMS( "Internal", 140., 0.2, 0.84, 0.045 );
-  gPad->SetLogy(0);
-  cv_indiv->SaveAs((plotDir + "Minituple_BDT350score_" + plotname + ".png").c_str());
-  gPad->SetLogy();
-  cv_indiv->SaveAs((plotDir + "Minituple_BDT350score_" + plotname + "_logY.png").c_str());
-  cv_indiv->Clear();
-
-  //*****************************************************************************************
   //Plot ROC Curves
   //*****************************************************************************************
 
@@ -744,12 +708,12 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   ROCGraphs.push_back(ROC250_120_sigEffBkgEff);
   ROCGraphs.push_back(ROC350_160_sigEffBkgEff);
   ROCGraphs.push_back(ROChadd_sigEffBkgEff);
-  GraphLabels.push_back("MVA trained on 125 (mX15) for LLP vs. W+jets");
-  GraphLabels.push_back("MVA trained on 350 (mX80) for LLP vs. W+jets");
-  GraphLabels.push_back("MVA trained on 125 (mX50) for LLP vs. W+jets");
-  GraphLabels.push_back("MVA trained on 250 (mX120) for LLP vs. W+jets");
-  GraphLabels.push_back("MVA trained on 350 (mX160) for LLP vs. W+jets");
-  GraphLabels.push_back("MVA trained on combination for LLP vs. W+jets");
+  GraphLabels.push_back("MVA trained on 125 (LLP mS=15)"); //  for LLP vs. W+jets");
+  GraphLabels.push_back("MVA trained on 350 (LLP mS=80)");
+  GraphLabels.push_back("MVA trained on 125 (LLP mS=50)");
+  GraphLabels.push_back("MVA trained on 250 (LLP mS=120)");
+  GraphLabels.push_back("MVA trained on 350 (LLP mS=160)");
+  GraphLabels.push_back("MVA trained on LLP combination");
   // colors.push_back(Option);
   // colors.push_back(Option2);
   // colors.push_back(Option3);
@@ -835,7 +799,7 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
     mass = "350";
   }
   TGraphAsymmErrors* WP_jet_cutflow = MakeCurrentWPSigEffVsBkgEffGraph(signal_eff , 0.0008, "WP_jet_cutflow"+label); 
-  legend->AddEntry(WP_jet_cutflow, Form("Cutflow Jet WP comparison (mH = %s)", mass.c_str()), "P");
+  legend->AddEntry(WP_jet_cutflow, Form("Cutflow comparison (mH = %s)", mass.c_str()), "P");
   WP_jet_cutflow->SetFillColor(kBlue);
   WP_jet_cutflow->SetMarkerColor(kBlue);
   WP_jet_cutflow->SetMarkerStyle(34);
@@ -852,8 +816,8 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
     // WP_BDTcut->Draw("Psame"); 
   // }
   // if (InputFile.find("MH-350_MS-80") != std::string::npos) {
-    TGraphAsymmErrors* WP_BDTcut = MakeCurrentWPSigEffVsBkgEffAtCutValueGraph(Signal_MVA350_80, Background_MVA350_80, "Eff at fixed cut", 0.998);
-    legend->AddEntry(WP_BDTcut, Form("BDT cut = 0.998 (mH = %s)", mass.c_str()), "P");
+    TGraphAsymmErrors* WP_BDTcut = MakeCurrentWPSigEffVsBkgEffAtCutValueGraph(Signal_MVA350_80, Background_MVA350_80, "Eff at fixed cut", 0.9999);
+    legend->AddEntry(WP_BDTcut, Form("BDT cut = 0.9999 (mH = %s)", mass.c_str()), "P");
     WP_BDTcut->SetFillColor(kBlack);
     WP_BDTcut->SetMarkerColor(kBlack);
     WP_BDTcut->SetMarkerStyle(34);
@@ -894,6 +858,42 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   legend->Draw();
   StampCMS( "Internal", 140., 0.14, 0.84, 0.045 );
   // cv_indiv->SaveAs((plotDir + "SigEffVsCutValue"+label+".png").c_str());
+
+  //*****************************************************************************************
+  // Overlay signal and background BDT scores
+  //*****************************************************************************************
+  THStack *hs = new THStack("hs", Form("Signal and Background BDT Scores (mH=%s) ; BDT (trained on 125) Score ; Number of Entries",Label.c_str()));
+  Signal_MVA125_15->SetFillColorAlpha(kBlue, 0.35);
+  Background_MVA125_15->SetFillColorAlpha(kRed, 0.35);
+  Signal_MVA125_15->Rebin(50);
+  Background_MVA125_15->Rebin(50);
+  hs->Add(Signal_MVA125_15);
+  hs->Add(Background_MVA125_15);
+  cv_indiv->cd();
+  hs->Draw("bar1 nostack");
+  gPad->BuildLegend(0.65,0.65,0.85,0.85,"");
+  StampCMS( "Internal", 140., 0.2, 0.84, 0.045 );
+  cv_indiv->SaveAs((plotDir + "Minituple_BDT125score_" + plotname + ".png").c_str());
+  gPad->SetLogy();
+  cv_indiv->SaveAs((plotDir + "Minituple_BDT125score_" + plotname + "_logY.png").c_str());
+  cv_indiv->Clear();
+
+  THStack *hs2 = new THStack("hs2", Form("Signal and Background BDT Scores (mH=%s) ; BDT (trained on 350) Score ; Number of Entries",Label.c_str()));
+  Signal_MVA350_80->SetFillColorAlpha(kBlue, 0.35);
+  Background_MVA350_80->SetFillColorAlpha(kRed, 0.35);
+  Signal_MVA350_80->Rebin(50);
+  Background_MVA350_80->Rebin(50);
+  hs2->Add(Signal_MVA350_80);
+  hs2->Add(Background_MVA350_80);
+  cv_indiv->cd();
+  hs2->Draw("bar1 nostack");
+  gPad->BuildLegend(0.65,0.65,0.85,0.85,"");
+  StampCMS( "Internal", 140., 0.2, 0.84, 0.045 );
+  gPad->SetLogy(0);
+  cv_indiv->SaveAs((plotDir + "Minituple_BDT350score_" + plotname + ".png").c_str());
+  gPad->SetLogy();
+  cv_indiv->SaveAs((plotDir + "Minituple_BDT350score_" + plotname + "_logY.png").c_str());
+  cv_indiv->Clear();
 }
 
 

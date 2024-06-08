@@ -223,8 +223,15 @@ Location of minituples:
 
 ### v3.8
 Updates:
-* Fixed bug where HLT results are not saved in per-jet trees (useful for HLT comparison ROC curves)
+* Fixed bug where HLT results are not saved in per-jet trees (useful for HLT comparison ROC curves, and for making trigger efficiency plots on a per jet basis)
 * Fixed bug in calculation of LLP DecayT
+* Saved NoSel trees for LLP skim to enable comparisons of full distributions on dataset and W+jets to understand background estimation limitations
+* BDT (v0.7) trained on v3.6 minituples
+
+Location of minituples:
+```
+/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8/
+```
 
 ## V4
 Ongoing wish list:
