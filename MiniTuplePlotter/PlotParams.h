@@ -33,8 +33,8 @@ struct Hist1_Hist2{
 // Leading Jet 
 // kinematics
 PlotParams P_jet0_RechitN				= {"jet0_RechitN", "Number of HCAL RecHits", "N^{HCAL}_{RecHits}", 0, 60 };
-PlotParams P_jet0_E						= {"jet0_E", "Leading Jet Energy", "Jet E [GeV]", 0, 250 };
-PlotParams P_jet0_Pt					= {"jet0_Pt", "Leading Jet p_{T}", "Jet p_{T} [GeV]", 0, 250 };
+PlotParams P_jet0_E						= {"jet0_E", "Leading Jet Energy", "Jet E [GeV]", 0, 300 };
+PlotParams P_jet0_Pt					= {"jet0_Pt", "Leading Jet p_{T}", "Jet p_{T} [GeV]", 0, 300 };
 PlotParams P_jet0_Eta					= {"jet0_Eta", "Leading Jet #eta", "Jet #eta", -1.5, 1.5 };
 PlotParams P_jet0_Phi					= {"jet0_Phi", "Leading Jet #phi", "Jet #phi", -3.2, 3.2 };
 PlotParams P_jet0_Mass					= {"jet0_Mass", "Leading Jet Mass", "Jet Mass", 0, 40 };
@@ -218,10 +218,10 @@ PlotParams P_LLP0_Pt					= {"LLP0_Pt", "LLP0 p_{T}", "p_{T} [GeV]", 0, 250 };
 PlotParams P_LLP0_E						= {"LLP0_E", "LLP0 Energy", "E [GeV]", 0, 250 };
 PlotParams P_LLP0_Beta					= {"LLP0_Beta", "LLP0 $beta", "$beta", 0, 250 };
 PlotParams P_LLP0_TravelTime			= {"LLP0_TravelTime", "LLP0 Travel Time", "Travel Time [ns]", 0, 25 };
-PlotParams P_LLP0_DecayR				= {"LLP0_DecayR", "LLP0 decay radius", "Decay R [cm]", 0, 350 };
+PlotParams P_LLP0_DecayR				= {"LLP0_DecayR", "LLP0 decay radius", "Decay R [cm]", 0, 300 };
 PlotParams P_LLP0_DecayX				= {"LLP0_DecayX", "LLP0 decay X position", "Decay X [cm]", -2000, 2000 };
 PlotParams P_LLP0_DecayY				= {"LLP0_DecayY", "LLP0 decay Y position", "Decay Y [cm]", -2000, 2000 };
-PlotParams P_LLP0_DecayZ				= {"LLP0_DecayZ", "LLP0 decay Z position", "Decay Z [cm]", -1000, 1000 };
+PlotParams P_LLP0_DecayZ				= {"LLP0_DecayZ", "LLP0 decay Z position", "Decay Z [cm]", -500, 500 };
 PlotParams P_LLP0_DecayT				= {"LLP0_DecayT", "LLP0 decay time", "Decay time [ns]", 0, 10 };
 PlotParams P_LLP0_DecayCtau				= {"LLP0_DecayCtau", "LLP0 c#tau", "c#tau [cm]", 0, 1000 };
 
@@ -256,7 +256,10 @@ PlotParams P_perJet_Eta					= {"perJet_Eta", "Jet #eta", "Jet #eta", -1.5, 1.5 }
 PlotParams P_perJet_Phi					= {"perJet_Phi", "Jet #phi", "Jet #phi", -3.2, 3.2 };
 PlotParams P_perJet_Mass				= {"perJet_Mass", "Jet Mass", "Jet Mass", 0, 40 };
 
-PlotParams P_perJet_NeutralHadEFrac			= {"perJet_NeutralHadEFrac", "Jet: Neutral Hadron Energy Fraction", "Neutral Hadron Energy Fraction", 0, 1.01 };
+PlotParams P_run						= {"run", "Run Number", "Run Number", 366000, 372000};
+PlotParams P_bdtscore_LLP350_MS80_perJet = {"bdtscore_LLP350_MS80_perJet", "BDT Score", "BDT (350, 80) Score", 0.99, 1};
+
+PlotParams P_perJet_NeutralHadEFrac			= {"perJet_NeutralHadEFrac", "Jet: Neutral Hadron Energy Fraction", "Neutral Hadron Energy Fraction", 0, 0.8 }; //1.01 };
 PlotParams P_perJet_ChargedHadEFrac			= {"perJet_ChargedHadEFrac", "Jet: Charged Hadron Energy Fraction", "Charged Hadron Energy Fraction", 0, 1.01 };
 PlotParams P_perJet_PhoEFrac				= {"perJet_PhoEFrac", "Jet: Photon Energy Fraction", "Photon Energy Fraction", 0, 1.01 };
 PlotParams P_perJet_EleEFrac				= {"perJet_EleEFrac", "Jet: Electron Energy Fraction", "Electron Energy Fraction", 0, 1.01 };

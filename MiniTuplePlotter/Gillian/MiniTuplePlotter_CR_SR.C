@@ -15,21 +15,22 @@ void MiniTuplePlotter_CR_SR(){
 	string path_v3pt4 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.4/minituple_";
 	string path_v3pt5 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.5/minituple_";
 	string path_v3pt6 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.6/minituple_";
-	string path 	  = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_";
+	string path_v3pt7 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_";
+	string path 	  = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8/minituple_";
 
 	map<string,vector<string>> filetags;
-	filetags["LLP125_mX15"]	= { "v3.7_LLPskim_Run2023Cv4_2024_03_14", "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_14_TEST"};
-	filetags["LLP350_mX80"]	= { "v3.7_LLPskim_Run2023Cv4_2024_03_14", "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TEST"};
-	filetags["LLP125"]		= { "v3.7_LLPskim_Run2023Cv4_2024_03_14", "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_03_14_batch2"};
-	filetags["LLP250"]		= { "v3.7_LLPskim_Run2023Cv4_2024_03_14", "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_03_14_batch2"};
-	filetags["LLP350"]		= { "v3.7_LLPskim_Run2023Cv4_2024_03_14", "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_03_14_batch2"};
+	filetags["LLP125_mX15"]	= { "v3.8_LLPskim_Run2023Cv4_2024_06_03", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST"};
+	filetags["LLP350_mX80"]	= { "v3.8_LLPskim_Run2023Cv4_2024_06_03", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TEST"};
+	filetags["LLP125"]		= { "v3.8_LLPskim_Run2023Cv4_2024_06_03", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch2"};
+	filetags["LLP250"]		= { "v3.8_LLPskim_Run2023Cv4_2024_06_03", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch2"};
+	filetags["LLP350"]		= { "v3.8_LLPskim_Run2023Cv4_2024_06_03", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch2"};
 
-	vector<string> filetags_data 		= { "v3.7_LLPskim_Run2023_HADD" };
-	vector<string> filetags_data2 		= { "v3.7_LLPskim_Run2023_HADD", "v3.7_LLPskim_Run2023_HADD" };
-	vector<string> filetags_LLP 		= { "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_14_TEST" };	
-	vector<string> filetags_all 		= { "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_14_TEST", "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TEST", "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_03_14_batch2", "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_03_14_batch2", "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_03_14_batch2"};
+	vector<string> filetags_data 		= { "v3.8_LLPskim_Run2023_HADD" };
+	vector<string> filetags_data2 		= { "v3.8_LLPskim_Run2023_HADD", "v3.8_LLPskim_Run2023Cv4_2024_06_03" };
+	vector<string> filetags_LLP 		= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST" };	
+	vector<string> filetags_all 		= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TEST", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch2", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch2", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch2"};
 
-	vector<string> BDT_files 			= {"v3.7_LLPskim_Run2023_HADD", "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_14_TEST", "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TEST"};
+	vector<string> BDT_files 			= {"v3.8_LLPskim_Run2023_HADD", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TEST"};
 	vector<string> filetags_all_v3pt0 	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v2.0_MC_QCD_250k_2023_10_18", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23"};
 	vector<string> filetags_QCD 		= { "v2.0_MC_QCD_250k_2023_10_18" };	
 
@@ -114,7 +115,7 @@ void MiniTuplePlotter_CR_SR(){
 		class MiniTuplePlotter plotter_BDTvars( filetags_data2, path );
 		plotter_BDTvars.SetPlots(analysisVars_perJet); 
 		plotter_BDTvars.SetTreeNames( {"PerJet_WPlusJets", "PerJet_NoSel"} );	
-		plotter_BDTvars.SetOutputFileTag("Overlay_BDTinput_perJet_v3.7");
+		plotter_BDTvars.SetOutputFileTag("Overlay_BDTinput_perJet_v3.8");
 		plotter_BDTvars.plot_log_ratio    = false; 
 		plotter_BDTvars.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
 		plotter_BDTvars.SetLegendNames({"LLP skim - W+jets selection", "LLP skim - all"});
@@ -138,7 +139,7 @@ void MiniTuplePlotter_CR_SR(){
 			// class MiniTuplePlotter plotter_BDTvars( filetags[key], path );
 			// plotter_BDTvars.SetPlots(analysisVars); 
 			// plotter_BDTvars.SetTreeNames( {"WPlusJets", "NoSel"} );	
-			// plotter_BDTvars.SetOutputFileTag("Overlay_"+key+"_v3.7");
+			// plotter_BDTvars.SetOutputFileTag("Overlay_"+key+"_v3.8");
 			// plotter_BDTvars.plot_log_ratio    = false; 
 			// //plotter_BDTvars.plot_cdf 		 = true;
 			// //plotter_BDTvars.plot_reverse_cdf  = true;
@@ -156,7 +157,7 @@ void MiniTuplePlotter_CR_SR(){
 			class MiniTuplePlotter plotter_BDTvars_perJet( filetags[key], path );
 			plotter_BDTvars_perJet.SetPlots(analysisVars_perJet); 
 			plotter_BDTvars_perJet.SetTreeNames( {"PerJet_WPlusJets", "PerJet_LLPmatched"} );	
-			plotter_BDTvars_perJet.SetOutputFileTag("Overlay_perJet_"+key+"_v3.7");
+			plotter_BDTvars_perJet.SetOutputFileTag("Overlay_perJet_"+key+"_v3.8");
 			plotter_BDTvars_perJet.plot_log_ratio    = false; 
 			//plotter_BDTvars_perJet.plot_cdf 		 = true;
 			//plotter_BDTvars_perJet.plot_reverse_cdf  = true;
@@ -191,7 +192,7 @@ void MiniTuplePlotter_CR_SR(){
 			class MiniTuplePlotter plotter_track_dR( filetags[key], path );
 			plotter_track_dR.SetPlots({P_perJet_Track0Pt, P_perJet_Track0PtFrac}); 
 			plotter_track_dR.SetTreeNames( {"PerJet_WPlusJets", "PerJet_LLPmatched"} );	
-			plotter_track_dR.SetOutputFileTag("Overlay_perJet_"+key+"_v3.7");
+			plotter_track_dR.SetOutputFileTag("Overlay_perJet_"+key+"_v3.8");
 			plotter_track_dR.plot_log_ratio    = false; 
 			//plotter_track_dR.plot_cdf 		 = true;
 			//plotter_track_dR.plot_reverse_cdf  = true;
@@ -206,7 +207,7 @@ void MiniTuplePlotter_CR_SR(){
 			class MiniTuplePlotter plotter_dR_track( filetags[key], path );
 			plotter_dR_track.SetPlots({P_perJet_Track0dR}); 
 			plotter_dR_track.SetTreeNames( {"PerJet_WPlusJets", "PerJet_LLPmatched"} );	
-			plotter_dR_track.SetOutputFileTag("Overlay_perJet_"+key+"_v3.7");
+			plotter_dR_track.SetOutputFileTag("Overlay_perJet_"+key+"_v3.8");
 			plotter_dR_track.plot_log_ratio    = false; 
 			plotter_dR_track.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
 			plotter_dR_track.SetLegendNames({"LLP skim - track pT < 2", "LLP skim - 2 < track pT < 4", "LLP skim - 4 < track pT < 8", "LLP skim - 8 < track pT", "LLP MC - track pT < 2", "LLP MC - 2 < track pT < 4", "LLP MC - 4 < track pT < 8", "LLP MC - 8 < track pT", });
@@ -220,7 +221,7 @@ void MiniTuplePlotter_CR_SR(){
 			class MiniTuplePlotter plotter_dR_cdf( filetags[key], path );
 			plotter_dR_cdf.SetPlots({P_perJet_Track0dEta, P_perJet_Track0dPhi, P_perJet_Track0dR}); 
 			plotter_dR_cdf.SetTreeNames( {"PerJet_WPlusJets", "PerJet_LLPmatched"} );	
-			plotter_dR_cdf.SetOutputFileTag("Overlay_perJet_"+key+"_v3.7");
+			plotter_dR_cdf.SetOutputFileTag("Overlay_perJet_"+key+"_v3.8");
 			plotter_dR_cdf.plot_log_ratio    = true;
 			plotter_dR_cdf.plot_cdf  = true;
 			plotter_dR_cdf.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
@@ -241,7 +242,7 @@ void MiniTuplePlotter_CR_SR(){
 		class MiniTuplePlotter plotter_BDTvars_perJet( filetags_all, path );
 		plotter_BDTvars_perJet.SetPlots(analysisVars_perJet); 
 		plotter_BDTvars_perJet.SetTreeName( "PerJet_LLPmatched" );	
-		plotter_BDTvars_perJet.SetOutputFileTag("Overlay_perJet_allLLP_v3.7");
+		plotter_BDTvars_perJet.SetOutputFileTag("Overlay_perJet_allLLP_v3.8");
 		plotter_BDTvars_perJet.plot_log_ratio    = false; 
 		//plotter_BDTvars_perJet.plot_cdf 		 = true;
 		//plotter_BDTvars_perJet.plot_reverse_cdf  = true;
@@ -271,11 +272,11 @@ void MiniTuplePlotter_CR_SR(){
 		plotter_BkgEst.SetLegendNames({"Jets from W+Jets events", "with BDT 350 (mS 80) score > 0.5", "with BDT 350 (mS 80) score > 0.9", "with BDT 350 (mS 80) score > 0.99", "with BDT 350 (mS 80) score > 0.999"});
 		plotter_BkgEst.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
 		plotter_BkgEst.SetOutputDirectory("BackgroundEstimations");
-		plotter_BkgEst.SetOutputFileTag("Jet40_CR_SR_v3.7_MC"); 	
+		plotter_BkgEst.SetOutputFileTag("Jet40_CR_SR_v3.8_MC"); 	
 		plotter_BkgEst.SetPlots({P_perJet_Pt, P_perJet_Phi, P_perJet_Eta});
 		plotter_BkgEst.Plot("ratio");
 		plotter_BkgEst.ClearFileTrees();
-		plotter_BkgEst.SetOutputFileTag("Jet40_CR_SR_v3.7_MC_variableBins"); 
+		plotter_BkgEst.SetOutputFileTag("Jet40_CR_SR_v3.8_MC_variableBins"); 
 		plotter_BkgEst.SetPlots({P_perJet_Pt});
 		plotter_BkgEst.SetVariableBins({0,40,60,80,120,160,300});
 		plotter_BkgEst.Plot("ratio");
@@ -298,7 +299,7 @@ void MiniTuplePlotter_CR_SR(){
 		class MiniTuplePlotter plotter_JetVars( filetags_LLP, path );
 		plotter_JetVars.SetPlots(MC_allPlots);
 		plotter_JetVars.SetTreeName( "NoSel" );	
-		plotter_JetVars.SetOutputFileTag("Jet40_CR_SR_v3.7_MC"); 	
+		plotter_JetVars.SetOutputFileTag("Jet40_CR_SR_v3.8_MC"); 	
 		plotter_JetVars.SetComparisonCuts({Cut_LLPinCR_Jet0, Cut_LLPinTrackerNP_Jet0, Cut_LLPinECAL_Jet0, Cut_LLPinHCAL1_Jet0, Cut_LLPinHCAL2_Jet0, Cut_LLPinHCAL34_Jet0});
 		plotter_JetVars.plot_log_ratio    = false; 
 		plotter_JetVars.SetLegendNames({"Tracker: R < 10cm", "Tracker: R > 10cm", "ECAL", "HCAL-D1", "HCAL-D2", "HCAL-D34"});
@@ -313,7 +314,7 @@ void MiniTuplePlotter_CR_SR(){
 		class MiniTuplePlotter plotter_TrackVars( filetags_LLP, path );
 		plotter_TrackVars.SetPlots(trackVars); 
 		plotter_TrackVars.SetTreeName( "NoSel" );	
-		plotter_TrackVars.SetOutputFileTag("Jet40_Track4_CR_SR_v3.7_MC"); 	
+		plotter_TrackVars.SetOutputFileTag("Jet40_Track4_CR_SR_v3.8_MC"); 	
 		plotter_TrackVars.SetComparisonCuts({Cut_LLPinCR_Jet0, Cut_LLPinTrackerNP_Jet0, Cut_LLPinECAL_Jet0, Cut_LLPinHCAL1_Jet0, Cut_LLPinHCAL2_Jet0, Cut_LLPinHCAL34_Jet0});
 		plotter_TrackVars.plot_log_ratio    = false; 
 		plotter_TrackVars.SetLegendNames({"Tracker: R < 10cm", "Tracker: R > 10cm", "ECAL", "HCAL-D1", "HCAL-D2", "HCAL-D34"});
@@ -325,7 +326,7 @@ void MiniTuplePlotter_CR_SR(){
 		// 2D spread of eta - phi, for leading and subleading jet
 		class MiniTuplePlotter plotter_JetVars2D_etaphi( filetags_LLP, path );
 		plotter_JetVars2D_etaphi.SetTreeName( "NoSel" );	
-		plotter_JetVars2D_etaphi.SetOutputFileTag("Jet40_CR_SR_v3.7_MC"); 	
+		plotter_JetVars2D_etaphi.SetOutputFileTag("Jet40_CR_SR_v3.8_MC"); 	
 		plotter_JetVars2D_etaphi.SetComparisonCuts({Cut_LLPinCR_Jet0, Cut_LLPinHCAL_Jet0});
 		plotter_JetVars2D_etaphi.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );			
 		plotter_JetVars2D_etaphi.SetCuts("jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26");
@@ -348,7 +349,7 @@ void MiniTuplePlotter_CR_SR(){
 		class MiniTuplePlotter plotter_Jet0KinematicVars( filetags_LLP, path );
 		plotter_Jet0KinematicVars.SetPlots(jetPlots0); 
 		plotter_Jet0KinematicVars.SetTreeName( "NoSel" );	
-		plotter_Jet0KinematicVars.SetOutputFileTag("CR_SR_v3.7_MC"); 	
+		plotter_Jet0KinematicVars.SetOutputFileTag("CR_SR_v3.8_MC"); 	
 		plotter_Jet0KinematicVars.SetComparisonCuts({Cut_LLPinCR_Jet0, Cut_LLPinHCAL_Jet0});
 		plotter_Jet0KinematicVars.plot_log_ratio    = true;
 		plotter_Jet0KinematicVars.SetLegendNames({"Tracker: R < 10cm", "HCAL-D1234"});
@@ -359,7 +360,7 @@ void MiniTuplePlotter_CR_SR(){
 		class MiniTuplePlotter plotter_Jet1KinematicVars( filetags_LLP, path );
 		plotter_Jet1KinematicVars.SetPlots(jetPlots1); 
 		plotter_Jet1KinematicVars.SetTreeName( "NoSel" );	
-		plotter_Jet1KinematicVars.SetOutputFileTag("CR_SR_v3.7_MC"); 	
+		plotter_Jet1KinematicVars.SetOutputFileTag("CR_SR_v3.8_MC"); 	
 		plotter_Jet1KinematicVars.SetComparisonCuts({Cut_LLPinCR_Jet1, Cut_LLPinHCAL_Jet1});
 		plotter_Jet1KinematicVars.plot_log_ratio    = true;
 		plotter_Jet1KinematicVars.SetLegendNames({"Tracker: R < 10cm", "HCAL-D1234"});
@@ -378,7 +379,7 @@ void MiniTuplePlotter_CR_SR(){
 		class MiniTuplePlotter plotter_RechitVars_NHBinsData( filetags_data, path );
 		plotter_RechitVars_NHBinsData.SetPlots(allPlots);
 		plotter_RechitVars_NHBinsData.SetTreeName( "NoSel" );	
-		plotter_RechitVars_NHBinsData.SetOutputFileTag("NeutralHadBins_Jet40_v3.7"); 	
+		plotter_RechitVars_NHBinsData.SetOutputFileTag("NeutralHadBins_Jet40_v3.8"); 	
 		plotter_RechitVars_NHBinsData.SetComparisonCuts({Cut_NHadpt1, Cut_NHadpt2, Cut_NHadpt3, Cut_NHadpt4, Cut_NHadpt6, Cut_NHad1}); 
 		plotter_RechitVars_NHBinsData.plot_log_ratio    = false; 
 		plotter_RechitVars_NHBinsData.SetLegendNames({"Data: Neutral Hadron 0-0.1", "Data: Neutral Hadron 0.1-0.2", "Data: Neutral Hadron 0.2-0.3", "Data: Neutral Hadron 0.3-0.4", "Data: Neutral Hadron 0.4-0.6", "Data: Neutral Hadron 0.6-1"});
@@ -391,7 +392,7 @@ void MiniTuplePlotter_CR_SR(){
 		class MiniTuplePlotter plotter_RechitVars_NHBins( filetags_LLP, path );
 		plotter_RechitVars_NHBins.SetPlots(MC_allPlots);
 		plotter_RechitVars_NHBins.SetTreeName( "NoSel" );	
-		plotter_RechitVars_NHBins.SetOutputFileTag("NeutralHadBins_Jet40_v3.7_MC"); 	
+		plotter_RechitVars_NHBins.SetOutputFileTag("NeutralHadBins_Jet40_v3.8_MC"); 	
 		plotter_RechitVars_NHBins.SetComparisonCuts({Cut_NHadpt1, Cut_NHadpt2, Cut_NHadpt3, Cut_NHadpt4, Cut_NHadpt6, Cut_NHad1}); 
 		plotter_RechitVars_NHBins.plot_log_ratio    = false; 
 		plotter_RechitVars_NHBins.SetLegendNames({"Neutral Hadron 0-0.1", "Neutral Hadron 0.1-0.2", "Neutral Hadron 0.2-0.3", "Neutral Hadron 0.3-0.4", "Neutral Hadron 0.4-0.6", "Neutral Hadron 0.6-1"});
@@ -411,7 +412,7 @@ void MiniTuplePlotter_CR_SR(){
 		class MiniTuplePlotter plotter_allVars_JetBinsData( filetags_data, path );
 		plotter_allVars_JetBinsData.SetPlots(analysisVars); 
 		plotter_allVars_JetBinsData.SetTreeName( "WPlusJets" );	
-		plotter_allVars_JetBinsData.SetOutputFileTag("JetpTBins_Jet40_v3.7"); 	
+		plotter_allVars_JetBinsData.SetOutputFileTag("JetpTBins_Jet40_v3.8"); 	
 		plotter_allVars_JetBinsData.SetComparisonCuts({Cut_JetPt40, Cut_JetPt80, Cut_JetPt120, Cut_JetPt160, Cut_JetPt200}); 
 		plotter_allVars_JetBinsData.plot_log_ratio    = false; 
 		plotter_allVars_JetBinsData.SetLegendNames({"Data: Jet p_{T} 40-80 GeV", "Data: Jet p_{T} 80-120 GeV", "Data: Jet p_{T} 120-160 GeV", "Data: Jet p_{T} 160-200 GeV", "Data: Jet p_{T} 200+ GeV"});
@@ -424,7 +425,7 @@ void MiniTuplePlotter_CR_SR(){
 		class MiniTuplePlotter plotter_allVars_JetBins( filetags_LLP, path );
 		plotter_allVars_JetBins.SetPlots(analysisVars); 
 		plotter_allVars_JetBins.SetTreeName( "NoSel" );	
-		plotter_allVars_JetBins.SetOutputFileTag("JetpTBins_Jet40_v3.7_MC"); 	
+		plotter_allVars_JetBins.SetOutputFileTag("JetpTBins_Jet40_v3.8_MC"); 	
 		plotter_allVars_JetBins.SetComparisonCuts({Cut_JetPt40, Cut_JetPt80, Cut_JetPt120, Cut_JetPt160, Cut_JetPt200}); 
 		plotter_allVars_JetBins.plot_log_ratio    = false; 
 		plotter_allVars_JetBins.SetLegendNames({"Jet p_{T} 40-80 GeV", "Jet p_{T} 80-120 GeV", "Jet p_{T} 120-160 GeV", "Jet p_{T} 160-200 GeV", "Jet p_{T} 200+ GeV"});
@@ -445,7 +446,7 @@ void MiniTuplePlotter_CR_SR(){
 
 		class MiniTuplePlotter plotter_run_BDTbinsData( filetags_data, path );
 		plotter_run_BDTbinsData.SetTreeName( "PerJet_WPlusJets" );	
-		plotter_run_BDTbinsData.SetOutputFileTag("BDTBins_Jet40_v3.7"); 	
+		plotter_run_BDTbinsData.SetOutputFileTag("BDTBins_Jet40_v3.8"); 	
 		plotter_run_BDTbinsData.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );			
 		plotter_run_BDTbinsData.SetCuts("perJet_Pt >= 40 && abs(perJet_Eta) <= 1.26 && bdtscore_LLP350_MS80_perJet >= 0.99");
 		plotter_run_BDTbinsData.SetOutputDirectory("BDTBins");
@@ -457,7 +458,7 @@ void MiniTuplePlotter_CR_SR(){
 		plotter_allVars_BDTbinsData.AddPlot({P_perJet_Pt});
 		plotter_allVars_BDTbinsData.AddPlot({P_run});
 		plotter_allVars_BDTbinsData.SetTreeNames( {"PerJet_WPlusJets", "PerJet_LLPmatched", "PerJet_LLPmatched"} );	
-		plotter_allVars_BDTbinsData.SetOutputFileTag("BDTBins_Jet40_v3.7"); 	
+		plotter_allVars_BDTbinsData.SetOutputFileTag("BDTBins_Jet40_v3.8"); 	
 		plotter_allVars_BDTbinsData.SetComparisonCuts({"", Cut_BDTscorePt95, Cut_BDTscorePt99, Cut_BDTscore1}, "LLPskim"); 
 		plotter_allVars_BDTbinsData.plot_log_ratio    = false; 
 		plotter_allVars_BDTbinsData.SetLegendNames({"W+jets: all", "W+jets: BDT score 0.95 - 0.99", "W+jets: BDT score 0.99 to 0.999", "W+jets: BDT score 0.999 to 1", "mH=125, mS=15 (LLP in HCAL, BDT>0.99)", "mH=350, mS=80 (LLP in HCAL, BDT>0.99)"});
@@ -514,7 +515,7 @@ void MiniTuplePlotter_CR_SR(){
 			class MiniTuplePlotter plotter_LLP_Jet_Match( filetags_LLP, path );
 			plotter_LLP_Jet_Match.SetPlots({P_perJet_MatchedLLP_DecayR, P_perJet_MatchedLLP_Eta});
 			plotter_LLP_Jet_Match.SetTreeName( "PerJet_LLPmatched" );	
-			plotter_LLP_Jet_Match.SetOutputFileTag("Jet40_v3.7_MC"); 	
+			plotter_LLP_Jet_Match.SetOutputFileTag("Jet40_v3.8_MC"); 	
 			plotter_LLP_Jet_Match.SetComparisonCuts({"abs(perJet_Eta) <= 1.26", "abs(perJet_Eta) <= 1.26 && perJet_MatchedLLP_DecayR > 0", "abs(perJet_Eta) <= 1.26 && perJet_Pt >= 40", "abs(perJet_Eta) <= 1.26 && perJet_Pt >= 60", "abs(perJet_Eta) <= 1.26 && perJet_Pt >= 80", "abs(perJet_Eta) <= 1.26 && perJet_Pt >= 100"}); 
 			plotter_LLP_Jet_Match.plot_log_ratio    = false; 
 			plotter_LLP_Jet_Match.plot_norm 		= false;
@@ -529,7 +530,7 @@ void MiniTuplePlotter_CR_SR(){
 			class MiniTuplePlotter plotter_LLP_Jet_PtDiff( filetags_LLP, path );
 			plotter_LLP_Jet_PtDiff.SetPlots({P_jet0_llp0_ptDiff, P_jet0_llp1_ptDiff});
 			plotter_LLP_Jet_PtDiff.SetTreeName( "NoSel" );	
-			plotter_LLP_Jet_PtDiff.SetOutputFileTag("Jet40_v3.7_MC"); 	
+			plotter_LLP_Jet_PtDiff.SetOutputFileTag("Jet40_v3.8_MC"); 	
 			plotter_LLP_Jet_PtDiff.SetComparisonCuts({Cut_LLP0inCR, Cut_LLP0inTrackerNP, Cut_LLP0inECAL, Cut_LLPinHCAL_d1, Cut_LLP0inHCAL_d2, Cut_LLP0inHCAL_d34}); 
 			plotter_LLP_Jet_PtDiff.plot_log_ratio    = false; 
 			plotter_LLP_Jet_PtDiff.SetLegendNames({"LLP0: Tracker: R < 10cm", "LLP0: Tracker: R > 10cm", "LLP0: ECAL", "LLP0: HCAL-D1", "LLP0: HCAL-D2", "LLP0: HCAL-D34"});
@@ -541,7 +542,7 @@ void MiniTuplePlotter_CR_SR(){
 			class MiniTuplePlotter plotter_LLP_Jet_Match( filetags_LLP, path );
 			plotter_LLP_Jet_Match.SetPlots({P_LLP0_DecayR, P_LLP0_isTruthMatched_Eta});
 			plotter_LLP_Jet_Match.SetTreeName( "NoSel" );	
-			plotter_LLP_Jet_Match.SetOutputFileTag("Jet40_v3.7_MC"); 	
+			plotter_LLP_Jet_Match.SetOutputFileTag("Jet40_v3.8_MC"); 	
 			plotter_LLP_Jet_Match.SetComparisonCuts({"abs(jet0_Eta) <= 1.26 || abs(jet1_Eta) <= 1.26 || abs(jet2_Eta) <= 1.26 || abs(jet3_Eta) <= 1.26 || abs(jet4_Eta) <= 1.26 || abs(jet5_Eta) <= 1.26", "LLP0_isTruthMatched == 1", "LLP0_isTruthMatched_Jet40 == 1", "LLP0_isTruthMatched_Jet60 == 1", "LLP0_isTruthMatched_Jet80 == 1", "LLP0_isTruthMatched_Jet100 == 1"}); 
 			plotter_LLP_Jet_Match.plot_log_ratio    = false; 
 			plotter_LLP_Jet_Match.plot_norm 		= false;
@@ -555,7 +556,7 @@ void MiniTuplePlotter_CR_SR(){
 			class MiniTuplePlotter plotter_LLP_Jet_Match_tight( filetags_LLP, path );
 			plotter_LLP_Jet_Match_tight.SetPlots({P_LLP0_DecayR});
 			plotter_LLP_Jet_Match_tight.SetTreeName( "NoSel" );	
-			plotter_LLP_Jet_Match_tight.SetOutputFileTag("Jet40_v3.7_MC"); 	
+			plotter_LLP_Jet_Match_tight.SetOutputFileTag("Jet40_v3.8_MC"); 	
 			plotter_LLP_Jet_Match_tight.SetComparisonCuts({"abs(jet0_Eta) <= 1.26 || abs(jet1_Eta) <= 1.26 || abs(jet2_Eta) <= 1.26", "LLP0_isTruthMatched == 1 && abs(LLP0_isTruthMatched_Eta) <= 1.26", "LLP0_isTruthMatched_Jet40 == 1 && abs(LLP0_isTruthMatched_Jet40Eta) <= 1.26", "LLP0_isTruthMatched_Jet60 == 1 && abs(LLP0_isTruthMatched_Jet60Eta) <= 1.26", "LLP0_isTruthMatched_Jet80 == 1 && abs(LLP0_isTruthMatched_Jet80Eta) <= 1.26", "LLP0_isTruthMatched_Jet100 == 1 && abs(LLP0_isTruthMatched_Jet100Eta) <= 1.26"}); 
 			plotter_LLP_Jet_Match_tight.plot_log_ratio    = false; 
 			plotter_LLP_Jet_Match_tight.plot_norm 		= false;

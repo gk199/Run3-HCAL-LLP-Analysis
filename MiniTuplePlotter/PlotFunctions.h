@@ -12,6 +12,7 @@
 #include "THStack.h"
 #include "TLegend.h"
 #include "TString.h"
+#include "TEfficiency.h"
 #include <iostream>
 #include <iomanip>
 
@@ -54,7 +55,7 @@ void SetStyle(){
 }
 
 // -------------------------------------------------------------------------------------
-void StampCMS( const std::string & approvaltext = "Internal", float lumi=140., float x=0.14, float y=0.84, float textsize=0.045) {
+void StampCMS( const std::string & approvaltext = "Internal", float lumi=140., float x=0.14, float y=0.84, float textsize=0.045, float energy=1) {
   // Usage:  StampCMS("Internal", 126.5, 0.12, 0.75);
   
   textsize = 0.045;
@@ -72,14 +73,25 @@ void StampCMS( const std::string & approvaltext = "Internal", float lumi=140., f
   label_approvaltext.SetTextSize(textsize*0.85);
   label_approvaltext.DrawLatex( x+0.075, y, approvaltext.c_str() ); 
 
-  TLatex label_energylumi; 
-  label_energylumi.SetNDC();
-  label_energylumi.SetTextFont(42);
-  label_energylumi.SetTextColor(1);
-  label_energylumi.SetTextSize(textsize*0.65 );
-  label_energylumi.DrawLatex( x, y-.035, "#sqrt{s} = 13.6 TeV" ); // Just energy for now...
-  //label_energylumi.DrawLatex( x, y-.08, Form("L = %.1f fb^{-1}", lumi) );
-  //label_energylumi.DrawLatex( x+.01, y-.2, "SF = #frac{N_{SR}}{N_{CR}} = 0.88" );
+  if (energy == 1) {
+	TLatex label_energylumi; 
+	label_energylumi.SetNDC();
+	label_energylumi.SetTextFont(42);
+	label_energylumi.SetTextColor(1);
+	label_energylumi.SetTextSize(textsize*0.65 );
+	label_energylumi.DrawLatex( x, y-.04, "#sqrt{s} = 13.6 TeV" ); // Just energy for now...
+	//label_energylumi.DrawLatex( x, y-.08, Form("L = %.1f fb^{-1}", lumi) );
+	//label_energylumi.DrawLatex( x+.01, y-.2, "SF = #frac{N_{SR}}{N_{CR}} = 0.88" );
+  }
+
+  if (energy == 2) {
+	TLatex label_energylumi; 
+	label_energylumi.SetNDC();
+	label_energylumi.SetTextFont(42);
+	label_energylumi.SetTextColor(1);
+	label_energylumi.SetTextSize(textsize*0.65 );
+	label_energylumi.DrawLatex( x+0.65, y, "(13.6 TeV)" );
+  }
 
 }
 
