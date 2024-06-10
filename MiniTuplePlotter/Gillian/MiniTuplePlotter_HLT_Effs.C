@@ -51,11 +51,17 @@ void MiniTuplePlotter_HLT_Effs(){
 
 	// to do -- make a new version that is jet based!
 
-	// vector<string> filetag_keys_to_loop = {"LLP125", "LLP250", "LLP350", "LLP125_mX15", "LLP350_mX80"};
 	vector<string> filetag_keys_to_loop = {"LLP350_80_ctau500mm", "LLP125_50_ctau10m", "LLP125_15_ctau10m", "LLP125_15_ctau1m", "LLP125_15_ctau3m", "LLP125_50_ctau3m", "LLP250_120_ctau10m", "LLP350_160_ctau10m"};
 
 	vector<string> jet_E = {"100"}; //{"60", "100"};
 	vector<string> event_HT = {"250"}; // {"200", "170"};
+
+	vector<vector<double>> variable_bins = {{0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 285, 310, 340, 370, 400, 430, 460, 495, 530, 570, 620, 680, 740, 800, 920, 1200},
+											{40, 43, 46, 49, 52, 55, 58, 61, 64, 67, 70, 73, 76, 79, 82, 86, 90, 95, 100, 105, 110, 115, 120, 127, 134, 141, 148, 156, 164, 172, 180, 190, 200, 210, 225, 250},
+											{40, 43, 46, 49, 52, 55, 58, 61, 64, 67, 70, 73, 76, 79, 82, 86, 90, 95, 100, 105, 110, 115, 120, 127, 134, 141, 148, 156, 164, 172, 180, 190, 200, 210, 225, 250},
+											{-1.26, -1.16, -1.06, -0.96, -0.86, -0.76, -0.66, -0.56, -0.46, -0.36, -0.26, -0.16, -0.06, 0.06, 0.16, 0.26, 0.36, 0.46, 0.56, 0.66, 0.76, 0.86, 0.96, 1.06, 1.16, 1.26},
+											{-3.15, -3, -2.85, -2.7, -2.55, -2.4, -2.25, -2.1, -1.95, -1.8, -1.65, -1.5, -1.35, -1.2, -1.05, -0.9, -0.75, -0.6, -0.45, -0.3, -0.15, 0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 1.05, 1.2, 1.35, 1.5, 1.65, 1.8, 1.95, 2.1, 2.25, 2.4, 2.55, 2.7, 2.85, 3.0, 3.15} };
+	vector<vector<PlotParams>> plot_type = { {P_eventHT}, {P_perJet_Pt}, {P_perJet_E}, {P_perJet_Eta}, {P_perJet_Phi} };
 
 	for( auto key: filetag_keys_to_loop){
 
@@ -77,7 +83,7 @@ void MiniTuplePlotter_HLT_Effs(){
 			eff_LLPdisplacement.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_AnyLLP_HLT}); 
 			// eff_LLPdisplacement.colors = { kWhite, kOrange, kGreen+2 }; // to just see trigger efficiency 
 			eff_LLPdisplacement.colors = { kBlack, kAzure+7, kViolet+4 };
-			eff_LLPdisplacement.SetLegendNames({"No cuts", "Monitoring HLT passed", "LLP HLT passed"});
+			eff_LLPdisplacement.SetLegendNames({"No cuts", "LLP L1 passed", "LLP HLT passed"});
 			// eff_LLPdisplacement.Plot("ratio");
 			eff_LLPdisplacement.Plot("efficiency");
 			eff_LLPdisplacement.ClearFileTrees(); 														// reset, and cut on each HLT group
@@ -88,31 +94,34 @@ void MiniTuplePlotter_HLT_Effs(){
 			eff_LLPdisplacement.Plot("ratio");
 		}
 
-		// cut on LLP displacement, plot efficiency vs jet pT, E, eta, phi, event HTT
-		class MiniTuplePlotter plotter_HLTeffMC( filetags[key], path );
-//		plotter_HLTeffMC.SetPlots({P_jet0_E, P_jet0_Pt, P_jet0_Eta, P_jet0_Phi, P_eventHT});
-		plotter_HLTeffMC.SetPlots({P_perJet_E, P_perJet_Pt, P_perJet_Eta, P_perJet_Phi, P_eventHT});
-//		plotter_HLTeffMC.SetTreeName( "NoSel" ); 
-		plotter_HLTeffMC.SetTreeName( "PerJet_LLPmatched" );
-		plotter_HLTeffMC.SetOutputFileTag("HLT_v3_MC_"+key);
-		plotter_HLTeffMC.SetOutputDirectory("HLT_Efficiencies");
-		plotter_HLTeffMC.plot_norm 			= false;
-		plotter_HLTeffMC.plot_log_ratio   	= true;
-		plotter_HLTeffMC.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
-//		plotter_HLTeffMC.SetSelectiveCuts("MC", Cut_LLPinHCAL123_Jet0);
-		plotter_HLTeffMC.SetSelectiveCuts("MC", Cut_matchedLLPinHCAL34);		// region for LLP decay, and require LLP is matched to jet 0
-		plotter_HLTeffMC.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_AnyLLP_HLT}); 
-		plotter_HLTeffMC.colors = { kBlack, kAzure+7, kViolet+4 };
-		plotter_HLTeffMC.SetLegendNames({"No cuts", "Monitoring HLT passed", "LLP HLT passed"});
-		// plotter_HLTeffMC.Plot("ratio");
-		plotter_HLTeffMC.Plot("efficiency");
-		plotter_HLTeffMC.ClearFileTrees(); 																// reset, and cut on each HLT group.
-		plotter_HLTeffMC.SetOutputFileTag("HLT_v3_MC_"+key+"_HLTsplit");
-		plotter_HLTeffMC.colors = { kBlack, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed  };
-		plotter_HLTeffMC.SetComparisonCuts({Cut_HLTpassed1, Cut_AnyLLP_HLT, Cut_HLTpassed2, Cut_HLTpassed9, Cut_HLTpassed5, Cut_HLTpassed11}); 
-		plotter_HLTeffMC.SetLegendNames({"Monitoring HLT passed", "LLP HLT passed", "Displaced dijet, <=1 prompt track", "Displaced dijet, <=2 prompt tracks", "Displaced dijet, 1 displaced track", "Delayed jet, ECAL jet timing"});
-		plotter_HLTeffMC.Plot("ratio");
-
+		for( int i = 0; i < variable_bins.size(); i++ ) {
+			// cut on LLP displacement, plot efficiency vs jet pT, E, eta, phi, event HTT
+			class MiniTuplePlotter plotter_HLTeffMC( filetags[key], path );
+	//		plotter_HLTeffMC.SetPlots({P_jet0_E, P_jet0_Pt, P_jet0_Eta, P_jet0_Phi, P_eventHT});
+	//		plotter_HLTeffMC.SetPlots({P_perJet_E, P_perJet_Pt, P_perJet_Eta, P_perJet_Phi, P_eventHT});
+			plotter_HLTeffMC.SetPlots(plot_type[i]);
+	//		plotter_HLTeffMC.SetTreeName( "NoSel" ); 
+			plotter_HLTeffMC.SetTreeName( "PerJet_LLPmatched" );
+			plotter_HLTeffMC.SetOutputFileTag("HLT_v3_MC_"+key);
+			plotter_HLTeffMC.SetOutputDirectory("HLT_Efficiencies");
+			plotter_HLTeffMC.plot_norm 			= false;
+			plotter_HLTeffMC.plot_log_ratio   	= true;
+			plotter_HLTeffMC.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 ); // works when efficiency legend uses -0.45 for x (upper left) or -0.3 for y (middle right)
+			plotter_HLTeffMC.SetVariableBins( variable_bins[i] );
+	//		plotter_HLTeffMC.SetSelectiveCuts("MC", Cut_LLPinHCAL123_Jet0);
+			plotter_HLTeffMC.SetSelectiveCuts("MC", Cut_matchedLLPinHCAL34);		// region for LLP decay, and require LLP is matched to jet 0
+			plotter_HLTeffMC.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_AnyLLP_HLT}); 
+			plotter_HLTeffMC.colors = { kBlack, kAzure+7, kViolet+4 };
+			plotter_HLTeffMC.SetLegendNames({"No cuts", "LLP L1 passed", "LLP HLT passed"});
+			// plotter_HLTeffMC.Plot("ratio");
+			plotter_HLTeffMC.Plot("efficiency");
+			plotter_HLTeffMC.ClearFileTrees(); 																// reset, and cut on each HLT group.
+			plotter_HLTeffMC.SetOutputFileTag("HLT_v3_MC_"+key+"_HLTsplit");
+			plotter_HLTeffMC.colors = { kBlack, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed  };
+			plotter_HLTeffMC.SetComparisonCuts({Cut_HLTpassed1, Cut_AnyLLP_HLT, Cut_HLTpassed2, Cut_HLTpassed9, Cut_HLTpassed5, Cut_HLTpassed11}); 
+			plotter_HLTeffMC.SetLegendNames({"Monitoring HLT passed", "LLP HLT passed", "Displaced dijet, <=1 prompt track", "Displaced dijet, <=2 prompt tracks", "Displaced dijet, 1 displaced track", "Delayed jet, ECAL jet timing"});
+			plotter_HLTeffMC.Plot("ratio");
+		}
 	}
 
 	if (September) {
