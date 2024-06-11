@@ -634,8 +634,9 @@ def MisTagProbability(tree, obj_type):
 
         triggered = [-9999,0,1]
 
-        frac_track_pt_bins = [[0, 1.1], [0, 0.5], [0.5, 1.1]]
-        label_track_pt_bins = ["inclusive", "<0.5", ">=0.5"]
+        frac_track_pt_bins = [[0, 0.5], [0.5, 1.1], [0, 1.1]]
+        ele_frac_bins = [[0, 0.5], [0.5, 1.1], [0, 1.1]]
+        label_track_pt_bins = ["<0.5", ">=0.5", "inclusive"]
 
         outfile = ROOT.TFile.Open("outfile.root", "RECREATE")
 
@@ -669,7 +670,9 @@ def MisTagProbability(tree, obj_type):
                         pT_region = GetCut(obj_type + i + "_Pt", [40,1000])                         # require jet pT is over 40 GeV
                         eta_region = GetCut(obj_type + i + "_Eta", [-1.26,1.26])                    # require jet eta is in HB 
                         track_region = GetCut("(" + obj_type + i + "_Track0Pt / " + obj_type + i + "_Pt)", track_pt)    # split estimation in different track pT bins
-                        denom_cut = selection_region + pT_region + eta_region + track_region
+                        ele_region = GetCut(obj_type + i + "_EleEFrac", ele_frac_bins[track_counter])    # split estimation in different jet electron energy fraction (low with low track pT, high with high, inclusive together)
+
+                        denom_cut = selection_region + pT_region + eta_region + track_region + ele_region
                         BDTcut_region = GetCut(obj_type + i + "_" + LLP_BDTscore[0], [0.9, 1.1])
 
                         Jet_plots = obj_type + i + "_" + var
@@ -734,6 +737,7 @@ def MisTagPrediction(tree, obj_type):
         triggered = [-9999] # [1, 0, -9999]
 
         frac_track_pt_bins = [[0, 0.5], [0.5, 1.1], [0, 1.1]]
+        ele_frac_bins = [[0, 0.5], [0.5, 1.1], [0, 1.1]]
         label_track_pt_bins = ["<0.5", ">=0.5", "inclusive"]
 
         mistag_file = ROOT.TFile.Open("outfile.root")
@@ -770,9 +774,10 @@ def MisTagPrediction(tree, obj_type):
                         pT_region = GetCut(obj_type + i + "_Pt", [40,1000])                         # require jet pT is over 40 GeV
                         eta_region = GetCut(obj_type + i + "_Eta", [-1.26,1.26])                    # require jet eta is in HB 
                         track_region = GetCut("(" + obj_type + i + "_Track0Pt / " + obj_type + i + "_Pt)", track_pt)    # split estimation in different track pT bins
+                        ele_region = GetCut(obj_type + i + "_EleEFrac", ele_frac_bins[track_counter])    # split estimation in different jet electron energy fraction (low with low track pT, high with high, inclusive together)
 
                         BDTcut_region = GetCut(obj_type + i + "_" + LLP_BDTscore[0], [0.9, 1.1])
-                        denom_cut = selection_region + pT_region + eta_region + track_region
+                        denom_cut = selection_region + pT_region + eta_region + track_region + ele_region
 
                         Jet_plots = obj_type + i + "_" + var
                         tree.Draw(Jet_plots +" >> "+hname_denom, denom_cut, "", tree.GetEntries(), 0 ) # require LLP pt is high enough and in HB

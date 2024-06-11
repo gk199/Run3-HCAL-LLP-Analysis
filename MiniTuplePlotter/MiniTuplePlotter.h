@@ -849,7 +849,8 @@ public :
 				myCanvas->cd(2);
 				// need to get the first hist, this will be the denominator for the efficiency plot when listed first in compare cuts (h_total)
 				int i = 0;
-				TLegend* leg  = new TLegend(legx1-0.45,legy1,legx2-0.45,legy2);
+				// TLegend* leg  = new TLegend(legx1-0.45,legy1,legx2-0.45,legy2);
+				TLegend* leg  = new TLegend(legx1,legy1-0.3,legx2,legy2-0.3);
 				string denom_hist_tag = "";
 				for( auto hist_tag: hist_tags ){
 					// string hist_tag = Form( "%s "+GetBetterCutTitle( selective_cuts[filetag_treename] )+" "+GetBetterCutTitle( cut_compare ), filetag_treename.c_str() );

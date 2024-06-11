@@ -207,7 +207,7 @@ PlotParams P_jet1_NeutralOverChargedHad = {"jet1_NeutralHadEFrac/jet0_ChargedHad
 PlotParams P_met_Pt						= {"met_Pt", "MET p_{T}", "p_{T} [GeV]", 0, 400 };
 PlotParams P_met_Phi					= {"met_Phi", "MET #phi", "#phi", -3.2, 3.2 };
 PlotParams P_met_SumEt					= {"met_SumEt", "MET Sum E_{T}", "E_{T} [GeV]", 0, 5000 };
-PlotParams P_eventHT					= {"eventHT", "Event HT", "HT [GeV]", 0, 2000 };
+PlotParams P_eventHT					= {"eventHT", "Event HT", "HT [GeV]", 0, 1200 };
 
 // --------------------------------------------------------------------- //
 // LLP variables 

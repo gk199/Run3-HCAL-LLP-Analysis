@@ -77,7 +77,7 @@ void MiniTuplePlotter_HLT_Effs(){
 			eff_LLPdisplacement.SetOutputDirectory("HLT_Efficiencies");
 			eff_LLPdisplacement.plot_norm 			= false;
 			eff_LLPdisplacement.plot_log_ratio   	= true;
-			eff_LLPdisplacement.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+			eff_LLPdisplacement.SetLegendPosition( 0.15, 0.95, 0.43, 1.13 );
 //			eff_LLPdisplacement.SetSelectiveCuts("MC", Form("eventHT > %s && ( (jet0_isMatchedTo == 0 && jet0_Pt >= %s) || (jet1_isMatchedTo == 0 && jet1_Pt >= %s) || (jet2_isMatchedTo == 0 && jet2_Pt >= %s) ) ", event_HT[i].c_str(), jet_E[i].c_str(), jet_E[i].c_str(), jet_E[i].c_str() ) ); // make sure that LLP 0 is matched to jet, and cut on the jet pT
 			eff_LLPdisplacement.SetSelectiveCuts("MC", Form("eventHT > %s && perJet_Pt >= %s && perJet_MatchedLLP_DecayR < 300", event_HT[i].c_str(), jet_E[i].c_str() ) ); // cut on the jet pT
 			eff_LLPdisplacement.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_AnyLLP_HLT}); 
@@ -107,6 +107,7 @@ void MiniTuplePlotter_HLT_Effs(){
 			plotter_HLTeffMC.plot_norm 			= false;
 			plotter_HLTeffMC.plot_log_ratio   	= true;
 			plotter_HLTeffMC.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 ); // works when efficiency legend uses -0.45 for x (upper left) or -0.3 for y (middle right)
+			if (key == "LLP350_80_ctau500mm") plotter_HLTeffMC.SetLegendPosition( 0.6, 0.85, 0.88, 1.03 );
 			plotter_HLTeffMC.SetVariableBins( variable_bins[i] );
 	//		plotter_HLTeffMC.SetSelectiveCuts("MC", Cut_LLPinHCAL123_Jet0);
 			plotter_HLTeffMC.SetSelectiveCuts("MC", Cut_matchedLLPinHCAL34);		// region for LLP decay, and require LLP is matched to jet 0
