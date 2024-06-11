@@ -192,18 +192,10 @@ TCut Cut_JetPt200 	= "jet0_Pt >= 200";
 
 
 // cuts for bins of BDT score
-TCut Cut_BDTscoreN 	    = "bdtscore_125GeV >= -1 && bdtscore_125GeV < 0";
-TCut Cut_BDTscorePt5 	= "bdtscore_125GeV >= 0 && bdtscore_125GeV < 0.5";
-TCut Cut_BDTscorePt9 	= "bdtscore_125GeV >= 0.5 && bdtscore_125GeV < 0.9";
-TCut Cut_BDTscorePt95 	= "bdtscore_125GeV >= 0.9 && bdtscore_125GeV < 0.95";
-TCut Cut_BDTscore1   	= "bdtscore_125GeV >= 0.95";
-
-TCut Cut_BDTscoreNPt99 	= "bdtscore_125GeV >= -1 && bdtscore_125GeV < -0.99";
-TCut Cut_BDTscoreNPt98 	= "bdtscore_125GeV >= -0.99 && bdtscore_125GeV < -0.98";
-TCut Cut_BDTscoreNPt95 	= "bdtscore_125GeV >= -0.98 && bdtscore_125GeV < -0.95";
-TCut Cut_BDTscore0   	= "bdtscore_125GeV >= -0.95 && bdtscore_125GeV < 0";
-TCut Cut_BDTscorePos   	= "bdtscore_125GeV >= 0";
-
+TCut Cut_BDTscorePt9    = "bdtscore_LLP350_MS80_perJet >= 0.9 && bdtscore_LLP350_MS80_perJet < 0.95"; // "bdtscore_125GeV >= -1 && bdtscore_125GeV < 0";
+TCut Cut_BDTscorePt95 	= "bdtscore_LLP350_MS80_perJet >= 0.95 && bdtscore_LLP350_MS80_perJet < 0.99";
+TCut Cut_BDTscorePt99 	= "bdtscore_LLP350_MS80_perJet >= 0.99 && bdtscore_LLP350_MS80_perJet < 0.999";
+TCut Cut_BDTscore1   	= "bdtscore_LLP350_MS80_perJet >= 0.999";
 
 // --------------------------------------------------------------------- //
 // ---------------------------- per jet cuts --------------------------- //

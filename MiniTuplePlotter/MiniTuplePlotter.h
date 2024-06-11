@@ -240,7 +240,6 @@ public :
 		filetags_treenames.clear();
 	}
 
-
 	// =====================================================================================
 	// Output File Info and Legend Format (Including Displaying Fit Info) 
 	// =====================================================================================
@@ -446,7 +445,6 @@ public :
 		legy1 = legy1_temp;
 		legx2 = legx2_temp;
 		legy2 = legy2_temp;
-
 	}
 
 	// -------------------------------------------------------------------------------------
@@ -686,7 +684,7 @@ public :
 		if( debug) cout<<"MiniTuplePlotter::GetStackHist()"<<endl;		
 
 		string label_y = "Events / Bin";
-		if( plot_norm ) label_y = "A.U.";
+		if( plot_norm ) label_y = "Normalized Fraction of Events"; //"A.U.";
 		if( plot_cdf  ) label_y = "CDF";
 		if( plot_reverse_cdf ) label_y = "Reverse CDF";
 
@@ -751,7 +749,7 @@ public :
 			filetag_treename_divisor = hist_tags[0];
 
 		// string label_y = Form( "Hist / %s", filetag_treename_divisor.c_str() );
-		string label_y = "Ratio"; // testing to simplify ratio y axis name
+		string label_y = "Ratio"; // "Efficiency"; // testing to simplify ratio y axis name
 		if( plot_norm ) label_y += " (norm)";
 
 		THStack* hs = new THStack(Form( "hs_%s", myPlotParams.hist_name.c_str() ), Form(" ; %s; %s", myPlotParams.label_x.c_str(), label_y.c_str() ));
@@ -779,8 +777,8 @@ public :
 			else if( plot_reverse_cdf )
 				h = GetReverseCDF( h ); 	
 
-			h->SetMaximum( 2. );
-			if( plot_log_ratio ) h->SetMaximum( 100. );
+			h->SetMaximum( 1.1 );
+			if( plot_log_ratio ) h->SetMaximum( 4. );
 
 			h->Divide( h_divisor );
 			h->SetLineColor( colors[i] );
@@ -819,7 +817,11 @@ public :
 
 			THStack* hs = GetStackHist( hists, PlotParams_temp );
 			myCanvas->cd(1);
-			hs->Draw("nostack"); 
+			hs->Draw("nostack"); //, hist"); //, e1"); 
+			gStyle->SetHistTopMargin(0);
+			//hs->SetMinimum(1);
+			//hs->SetMaximum(500000);
+			//gPad->Update();
 			//hs->Draw(); // stacked histograms, with points for each (not bar)
 			//hs->Draw("bar"); // stacked histograms, with bars for each. Use with "h->SetFillColor( colors[i] )"
 
@@ -834,8 +836,53 @@ public :
 				if( plot_log_ratio ) gPad->SetLogy(); 	
 				if( plot_log_x ) gPad->SetLogx(); 
 				THStack* hs_ratio = GetStackRatio( hists, PlotParams_temp, filetag_treename_divisor );	
-				hs_ratio->Draw("nostack");
+				hs_ratio->Draw("nostack"); //, hist"); // bug, not using uncertainty propagation, seems to try to do a per event sqrt N, errors 0-2
+				//hs_ratio->SetMinimum(0.0001);
+				//hs_ratio->SetMaximum(0.1);
+				hs_ratio->SetMaximum(1.);
+				//gPad->Update();
 				myCanvas->cd(1);
+			}
+
+			// put efficiency TEff code here?
+			if( plot_type == "efficiency" ){
+				myCanvas->cd(2);
+				// need to get the first hist, this will be the denominator for the efficiency plot when listed first in compare cuts (h_total)
+				int i = 0;
+				// TLegend* leg  = new TLegend(legx1-0.45,legy1,legx2-0.45,legy2);
+				TLegend* leg  = new TLegend(legx1,legy1-0.3,legx2,legy2-0.3);
+				string denom_hist_tag = "";
+				for( auto hist_tag: hist_tags ){
+					// string hist_tag = Form( "%s "+GetBetterCutTitle( selective_cuts[filetag_treename] )+" "+GetBetterCutTitle( cut_compare ), filetag_treename.c_str() );
+					if (i == 0) denom_hist_tag = hist_tag;
+					// cout << denom_hist_tag << " = denom tag and current tag = " << hist_tag << endl;
+					TH1F *h_total = (TH1F*)hists[denom_hist_tag]->Clone();
+					if (i > 0) {
+						TH1F *h_pass = (TH1F*)hists[hist_tag]->Clone();
+						TEfficiency* pEff = 0;
+ 						// h_pass and h_total are valid and consistent histograms
+						if(TEfficiency::CheckConsistency(*h_pass, *h_total)) {
+							pEff = new TEfficiency(*h_pass, *h_total);
+							string label_y = "Efficiency";
+							pEff->SetTitle(Form("; %s; %s", PlotParams_temp.label_x.c_str(), label_y.c_str())); // HCAL LLP Trigger Efficiencies
+							pEff->SetLineColor( colors[i] );
+							pEff->SetLineWidth(3.);
+							if (i == 1) pEff->Draw();
+							if (i > 1) pEff->Draw("same");
+							gPad->Update();
+							pEff->GetPaintedGraph()->GetYaxis()->SetRangeUser(0,1.);
+
+							leg->AddEntry(pEff, Form("%s", legend_names.at(i).c_str() ) );
+
+							if (i == size(hist_tags)-1 ) {
+								leg->Draw();
+								StampCMS( "Simulation Preliminary", 140., 0.14, 0.92, 0.045, 2 ); // 0 means no energy, 1 means sqrt s, 2 means (13.6 TeV) (should we have this for simulation?)
+							}
+						}
+					}
+					i += 1;
+					// want to use ranges already defined in PlotParams! 
+				}
 			}
 
 			myCanvas->cd(1);

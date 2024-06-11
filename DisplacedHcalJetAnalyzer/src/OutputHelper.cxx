@@ -11,7 +11,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 
 	cout<<"Declaring Output Trees..."<<endl;	
 
-	treenames = { "NoSel", "WPlusJets" }; 
+	treenames = { "NoSel", "PassedHLT", "WPlusJets" }; 
 
 	vector<string> myvars_bool = {};
 	
@@ -229,7 +229,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 
 	cout<<"Declaring Output Trees..."<<endl;	
 
-	jet_treenames = { "PerJet_NoSel", "PerJet_WPlusJets", "PerJet_LLPmatched" }; 
+	jet_treenames = { "PerJet_NoSel", "PerJet_PassedHLT", "PerJet_WPlusJets", "PerJet_LLPmatched" }; 
 
 	vector<string> myvars_bool = {};
 	for (int i = 0; i < HLT_Indices.size(); i++) {
@@ -587,7 +587,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("LLP%d_DecayY", i)] = gLLP_DecayVtx_Y->at(i);
 		tree_output_vars_float[Form("LLP%d_DecayZ", i)] = gLLP_DecayVtx_Z->at(i);
 		tree_output_vars_float[Form("LLP%d_DecayD", i)] = distance;
-		tree_output_vars_float[Form("LLP%d_DecayT", i)] = distance * ( 1 / gLLP_Beta->at(i) - 1) * 0.03336; // 1/c in ns / cm to give answer in ns
+		tree_output_vars_float[Form("LLP%d_DecayT", i)] = distance * ( 1 / gLLP_Beta->at(i) ) * 0.03336; // 1/c in ns / cm to give answer in ns
 		tree_output_vars_float[Form("LLP%d_DecayCtau", i)] = distance * (sqrt( 1 / pow(gLLP_Beta->at(i),2) - 1)); 
 		for (int b = 0; b < 2; b++) tree_output_vars_float[Form("LLP%d_dR_LLP_to_b", i)] = DeltaR_LLP_b(i, b); 
 		tree_output_vars_float[Form("LLP%d_dR_b_to_b", i)] = DeltaR_b(i);
@@ -663,6 +663,10 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	jet_tree_output_vars_int["muon"]		= n_muon;
 	jet_tree_output_vars_int["pho"]			= n_pho;
 	jet_tree_output_vars_float["eventHT"]   = EventHT();
+
+	for (int i = 0; i < HLT_Indices.size(); i++) { 
+		jet_tree_output_vars_bool[HLT_Names[i]] = HLT_Decision->at(i);
+	}
 
 	jet_tree_output_vars_float["perJet_E"] 			= jet_E->at(jetIndex);
 	jet_tree_output_vars_float["perJet_Pt"] 		= jet_Pt->at(jetIndex);

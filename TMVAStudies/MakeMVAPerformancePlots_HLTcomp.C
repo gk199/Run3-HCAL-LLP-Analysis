@@ -470,7 +470,7 @@ void SetupPlots()
   GraphLabels.clear();
   PlotnameSpecific.clear();
 
-  legend = new TLegend(0.15,0.14,0.9,0.34);
+  legend = new TLegend(0.25,0.14,0.9,0.3);
   legend->SetTextSize(0.03);
   legend->SetBorderSize(0);
   legend->SetFillStyle(0);
@@ -491,10 +491,10 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   //--------------------------------------------------------------------------------------------------------------
   // Histograms
   //==============================================================================================================  
-  TH1F *Signal_MVA350_80 = new TH1F(("Signal_MVA350_80"+label).c_str(), "LLP Signal ; MVA (BDT trained on 350, mX80) score for LLP signal ; Number of Events ",  5500, -1.1 , 1.1);
-  TH1F *Signal_MVA350_80_HLT = new TH1F(("Signal_MVA350_80_HLT"+label).c_str(), "LLP Signal ; MVA (BDT trained on 350, mX80) score for LLP signal (with HLT required) ; Number of Events ",  5500, -1.1 , 1.1);
+  TH1F *Signal_MVA350_80 = new TH1F(("Signal_MVA350_80"+label).c_str(), "LLP Signal ; MVA (BDT trained on 350, mX80) score for LLP signal ; Number of Events ",  22000, -1.1 , 1.1);
+  TH1F *Signal_MVA350_80_HLT = new TH1F(("Signal_MVA350_80_HLT"+label).c_str(), "LLP Signal ; MVA (BDT trained on 350, mX80) score for LLP signal (with HLT required) ; Number of Events ",  22000, -1.1 , 1.1);
 
-  TH1F *Background_MVA350_80 = new TH1F(("Background_MVA350_80"+label).c_str(), "W+Jets Background ; MVA (BDT trained on 350, mX80) score for W+jets background ; Number of Events ",  5500, -1.1 , 1.1);
+  TH1F *Background_MVA350_80 = new TH1F(("Background_MVA350_80"+label).c_str(), "W+Jets Background ; MVA (BDT trained on 350, mX80) score for W+jets background ; Number of Events ",  22000, -1.1 , 1.1);
 
   Double_t RealElectrons = 0;
   Double_t FakeElectrons = 0;
@@ -519,8 +519,11 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   float radius_HBend = 295;
   float HBeta = 1.26;
 
+  TCut SafetySelection = "";
   TCut SignalSelection = "";
-  TCut HLT_Selection = "";
+  TCut HLT_Selection = "(HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT240_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT280_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT170_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT270_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet60_DisplacedTrack == 1 || HLT_HT320_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 || HLT_HT420_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay0p5nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay1nsInclusive == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay1nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay2nsInclusive == 1 || HLT_L1SingleLLPJet == 1)";
+  TCut Anti_HLT_Selection = "(HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 0 && HLT_HT240_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 0 && HLT_HT280_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 0 && HLT_HT170_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 0 && HLT_HT200_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 0 && HLT_HT270_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 0 && HLT_HT200_L1SingleLLPJet_DisplacedDijet60_DisplacedTrack == 0 && HLT_HT320_L1SingleLLPJet_DisplacedDijet60_Inclusive == 0 && HLT_HT420_L1SingleLLPJet_DisplacedDijet60_Inclusive == 0 && HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay0p5nsTrackless == 0 && HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay1nsInclusive == 0 && HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay1nsTrackless == 0 && HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay2nsInclusive == 0 && HLT_L1SingleLLPJet == 0)";
+  // TODO bug in v3.7 minituples that HLT results are not saved in jet trees, will be fixed in next version! 
   if (SigTree.find("PerJet") == std::string::npos) { // per event tree
     tree_sig->SetBranchAddress("LLP0_DecayR", &LLP0_DecayR);
     tree_sig->SetBranchAddress("LLP1_DecayR", &LLP1_DecayR);
@@ -529,8 +532,8 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
     tree_sig->SetBranchAddress("jet0_isMatchedTo", &jet0_isMatchedTo);
     tree_sig->SetBranchAddress("jet0_Eta", &jet0_Eta);
     tree_sig->SetBranchAddress("jet0_Pt", &jet0_Pt);
-    SignalSelection = Form("((LLP0_DecayR >= %f && LLP0_DecayR < %f && abs(LLP0_Eta) <= %f && jet0_isMatchedTo == 0) || (LLP1_DecayR >= %f && LLP1_DecayR < %f && abs(LLP1_Eta) <= %f && jet0_isMatchedTo == 1)) && (abs(jet0_Eta) < 1.26 && jet0_Pt > 40)", radius_HB1, radius_HBend, HBeta, radius_HB1, radius_HBend, HBeta);
-    HLT_Selection = "(HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT240_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT280_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT170_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT270_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet60_DisplacedTrack == 1 || HLT_HT320_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 || HLT_HT420_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay0p5nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay1nsInclusive == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay1nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay2nsInclusive == 1)";
+    SafetySelection = "(abs(jet0_Eta) < 1.26 && jet0_Pt > 40)"; // to account for any per event entries with no valid jets
+    SignalSelection = Form("((LLP0_DecayR >= %f && LLP0_DecayR < %f && abs(LLP0_Eta) <= %f && jet0_isMatchedTo == 0) || (LLP1_DecayR >= %f && LLP1_DecayR < %f && abs(LLP1_Eta) <= %f && jet0_isMatchedTo == 1))", radius_HB1, radius_HBend, HBeta, radius_HB1, radius_HBend, HBeta);
     cout << "per event tree, adding signal region cuts on LLP position and matching" << endl;
     // hopefully there is a better way to implement these cuts, had TCut errors when imported RegionCuts.h on first try
     // reduces by a factor of about 10 for mh=125
@@ -539,7 +542,6 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
     tree_sig->SetBranchAddress("perJet_MatchedLLP_DecayR", &perJet_MatchedLLP_DecayR);
     tree_sig->SetBranchAddress("perJet_MatchedLLP_Eta", &perJet_MatchedLLP_Eta);
     SignalSelection = Form("perJet_MatchedLLP_DecayR >= %f && perJet_MatchedLLP_DecayR < %f && abs(perJet_MatchedLLP_Eta) < %f", radius_HB1, radius_HBend, 1.26);
-    HLT_Selection = "(HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT240_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT280_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT170_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT270_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet60_DisplacedTrack == 1 || HLT_HT320_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 || HLT_HT420_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay0p5nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay1nsInclusive == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay1nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay2nsInclusive == 1)";
     if (plotType.find("HCAL12") != std::string::npos) {
       SignalSelection = Form("perJet_MatchedLLP_DecayR >= %f && perJet_MatchedLLP_DecayR < %f && abs(perJet_MatchedLLP_Eta) < %f", radius_HB1, radius_HB3, 1.26);
       cout << "selection = HCAL depth 12 only" << endl;
@@ -552,23 +554,29 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   }
 
   TFile *myReducedFile = new TFile("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/temp.root", "RECREATE"); // preventing error "This error is symptomatic of a Tree created as a memory-resident Tree"
-  TTree *tree_sig_reduced = tree_sig->CopyTree(SignalSelection, "", tree_sig->GetEntries(), 0); // no cuts needed for already jet matched tree
-  TTree *tree_sig_reduced_HLT = tree_sig_reduced->CopyTree(HLT_Selection, "", tree_sig_reduced->GetEntries(), 0); // no cuts needed for already jet matched tree
+  TTree *tree_sig_reduced = tree_sig->CopyTree(SafetySelection, "", tree_sig->GetEntries(), 0);
+  TTree *tree_sig_reduced_signal = tree_sig_reduced->CopyTree(SignalSelection, "", tree_sig_reduced->GetEntries(), 0); // no cuts needed for already jet matched tree
+  TTree *tree_sig_reduced_antiHLT = tree_sig_reduced_signal->CopyTree(Anti_HLT_Selection, "", tree_sig_reduced_signal->GetEntries(), 0); 
+  TTree *tree_sig_reduced_HLT = tree_sig_reduced_signal->CopyTree(HLT_Selection, "", tree_sig_reduced_signal->GetEntries(), 0); 
+  cout << "signal tree reduced, have safety selections, signal selections, and HLT selections applied " << endl;
 
   if (SigTree.find("PerJet") == std::string::npos) {
-    tree_sig_reduced->SetBranchAddress("jet0_bdtscoreX_LLP350_MS80_perJet", &score350_80_sig);
+    tree_sig_reduced_antiHLT->SetBranchAddress("jet0_bdtscoreX_LLP350_MS80_perJet", &score350_80_sig);
     tree_sig_reduced_HLT->SetBranchAddress("jet0_bdtscoreX_LLP350_MS80_perJet", &score350_80_sig_HLT);
   }
   if (SigTree.find("PerJet") != std::string::npos) {
-    tree_sig_reduced->SetBranchAddress(("bdtscore_LLP350_MS80"+plotType+"_perJet").c_str(), &score350_80_sig);
+    tree_sig_reduced_antiHLT->SetBranchAddress(("bdtscore_LLP350_MS80"+plotType+"_perJet").c_str(), &score350_80_sig);
+    tree_sig_reduced_HLT->SetBranchAddress(("bdtscore_LLP350_MS80"+plotType+"_perJet").c_str(), &score350_80_sig);
   }
 
   cout << "Total Entries (signal): " << tree_sig_reduced->GetEntries() << "\n";
-  cout << "Total Entries (signal): " << tree_sig_reduced_HLT->GetEntries() << "\n";
-  int nentries = tree_sig_reduced->GetEntries();
+  cout << "Total Entries (signal, no HLT): " << tree_sig_reduced_antiHLT->GetEntries() << "\n";
+  cout << "Total Entries (signal, with HLT): " << tree_sig_reduced_HLT->GetEntries() << "\n";
+  int nentries_all = tree_sig_reduced->GetEntries();
+  int nentries = tree_sig_reduced_antiHLT->GetEntries();
   int nentries_HLT = tree_sig_reduced_HLT->GetEntries();
   for(int ientry=0; ientry < nentries; ientry++) {       	
-    tree_sig_reduced->GetEntry(ientry);
+    tree_sig_reduced_antiHLT->GetEntry(ientry);
     Signal_MVA350_80->Fill(score350_80_sig);
   }
   for(int ientry=0; ientry < nentries_HLT; ientry++) {       	
@@ -597,10 +605,13 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
       //                                              "LLP125_MS15_HCAL34_calor_perJet", "LLP350_MS80_HCAL34_calor_perJet", "LLP125_MS50_HCAL34_calor_perJet", "LLP250_MS120_HCAL34_calor_perJet", "LLP350_MS160_HCAL34_calor_perJet", "hadd_HCAL34_calor_perJet"};
   }
 
-  cout << "Total Entries (background): " << tree_bkg->GetEntries() << "\n";
-  int nentries_bkg = tree_bkg->GetEntries();
+  TFile *myReducedFile2 = new TFile("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/TMVAStudies/temp.root", "RECREATE"); // preventing error "This error is symptomatic of a Tree created as a memory-resident Tree"
+  TTree *tree_bkg_reduced = tree_bkg->CopyTree(SafetySelection, "", tree_bkg->GetEntries(), 0);
+  cout << "background tree reduced, have safety selections, signal selections, and HLT selections applied " << endl;
+  cout << "Total Entries (background): " << tree_bkg_reduced->GetEntries() << "\n";
+  int nentries_bkg = tree_bkg_reduced->GetEntries();
   for(int ientry=0; ientry < nentries_bkg; ientry++) {       	
-    tree_bkg->GetEntry(ientry);
+    tree_bkg_reduced->GetEntry(ientry);
     
     if (ientry % 100000 == 0) cout << "Event " << ientry << endl;
 
@@ -681,8 +692,8 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
 
   ROCGraphs.push_back(ROC350_80_sigEffBkgEff);
   ROCGraphs.push_back(ROC350_80_sigEffBkgEff_HLT);
-  GraphLabels.push_back("MVA trained on 350 (mX80) for LLP vs. W+jets");
-  GraphLabels.push_back("MVA trained on 350 (mX80) for LLP (HLT required) vs. W+jets");
+  GraphLabels.push_back("MVA trained on 350 (LLP mS=80), HLT not passed");
+  GraphLabels.push_back("MVA trained on 350 (LLP mS=80), HLT passed");
   gStyle->SetPalette(kViridis);
   //colors.push_back(TColor::GetPalette().At(0));
   colors.push_back(TColor::GetPalette().At(50));
@@ -696,6 +707,7 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   Double_t xmin = 0.0;
   Double_t xmax = 1.0;
   Double_t ymin = 0.3;
+  if (InputFile.find("MH-125_MS-15") != std::string::npos) ymin = 0;
   Double_t ymax = 1.0;
 
   bool overlay = true;
@@ -738,39 +750,41 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
     }
   }
 
-  if (InputFile.find("MH-125_MS-15") != std::string::npos) {
-    TGraphAsymmErrors* WP_jet_cutflow = MakeCurrentWPSigEffVsBkgEffGraph(0.66 , 0.0008, "WP_jet_cutflow"+label); // mh 125 working point, for per jet approach
-    legend->AddEntry(WP_jet_cutflow, "Cutflow Jet WP comparison (mH = 125)", "P");
-    WP_jet_cutflow->SetFillColor(kBlue);
-    WP_jet_cutflow->SetMarkerColor(kBlue);
-    WP_jet_cutflow->SetMarkerStyle(34);
-    WP_jet_cutflow->SetMarkerSize(1.5);
-    WP_jet_cutflow->Draw("Psame");  
+  if (SigTree.find("PerJet") != std::string::npos) { // if per event, cutflow does not make sense, as cutflow was done on a per jet basis! 
+    if (InputFile.find("MH-125_MS-15") != std::string::npos) {
+      TGraphAsymmErrors* WP_jet_cutflow = MakeCurrentWPSigEffVsBkgEffGraph(0.66 , 0.0008, "WP_jet_cutflow"+label); // mh 125 working point, for per jet approach
+      legend->AddEntry(WP_jet_cutflow, "Cutflow comparison (mH = 125)", "P");
+      WP_jet_cutflow->SetFillColor(kBlue);
+      WP_jet_cutflow->SetMarkerColor(kBlue);
+      WP_jet_cutflow->SetMarkerStyle(34);
+      WP_jet_cutflow->SetMarkerSize(1.5);
+      WP_jet_cutflow->Draw("Psame");  
 
-    // TGraphAsymmErrors* WP_BDTcut = MakeCurrentWPSigEffVsBkgEffAtCutValueGraph(Signal_MVA125_15, Background_MVA125_15, "Eff at fixed cut", 0.99);
-    // legend->AddEntry(WP_BDTcut, "BDT cut = 0.99 point (mH = 125)", "P");
-    // WP_BDTcut->SetFillColor(colors[0]);
-    // WP_BDTcut->SetMarkerColor(colors[0]);
-    // WP_BDTcut->SetMarkerStyle(34);
-    // WP_BDTcut->SetMarkerSize(1.5);
-    // WP_BDTcut->Draw("Psame"); 
-  }
-  if (InputFile.find("MH-350_MS-80") != std::string::npos) {
-    TGraphAsymmErrors* WP_jet_cutflow = MakeCurrentWPSigEffVsBkgEffGraph(0.77 , 0.0008, "WP_jet_cutflow"+label); // mh 350 working point, for per jet approach
-    legend->AddEntry(WP_jet_cutflow, "Cutflow Jet WP comparison (mH = 350)", "P");
-    WP_jet_cutflow->SetFillColor(kBlue);
-    WP_jet_cutflow->SetMarkerColor(kBlue);
-    WP_jet_cutflow->SetMarkerStyle(34);
-    WP_jet_cutflow->SetMarkerSize(1.5);
-    WP_jet_cutflow->Draw("Psame");  
+      // TGraphAsymmErrors* WP_BDTcut = MakeCurrentWPSigEffVsBkgEffAtCutValueGraph(Signal_MVA125_15, Background_MVA125_15, "Eff at fixed cut", 0.99);
+      // legend->AddEntry(WP_BDTcut, "BDT cut = 0.99 point (mH = 125)", "P");
+      // WP_BDTcut->SetFillColor(colors[0]);
+      // WP_BDTcut->SetMarkerColor(colors[0]);
+      // WP_BDTcut->SetMarkerStyle(34);
+      // WP_BDTcut->SetMarkerSize(1.5);
+      // WP_BDTcut->Draw("Psame"); 
+    }
+    if (InputFile.find("MH-350_MS-80") != std::string::npos) {
+      TGraphAsymmErrors* WP_jet_cutflow = MakeCurrentWPSigEffVsBkgEffGraph(0.77 , 0.0008, "WP_jet_cutflow"+label); // mh 350 working point, for per jet approach
+      legend->AddEntry(WP_jet_cutflow, "Cutflow comparison (mH = 350)", "P");
+      WP_jet_cutflow->SetFillColor(kBlue);
+      WP_jet_cutflow->SetMarkerColor(kBlue);
+      WP_jet_cutflow->SetMarkerStyle(34);
+      WP_jet_cutflow->SetMarkerSize(1.5);
+      WP_jet_cutflow->Draw("Psame");  
 
-    // TGraphAsymmErrors* WP_BDTcut = MakeCurrentWPSigEffVsBkgEffAtCutValueGraph(Signal_MVA350_80, Background_MVA350_80, "Eff at fixed cut", 0.99);
-    // legend->AddEntry(WP_BDTcut, "BDT cut = 0.99 point (mH = 350)", "P");
-    // WP_BDTcut->SetFillColor(colors[1]);
-    // WP_BDTcut->SetMarkerColor(colors[1]);
-    // WP_BDTcut->SetMarkerStyle(34);
-    // WP_BDTcut->SetMarkerSize(1.5);
-    // WP_BDTcut->Draw("Psame"); 
+      // TGraphAsymmErrors* WP_BDTcut = MakeCurrentWPSigEffVsBkgEffAtCutValueGraph(Signal_MVA350_80, Background_MVA350_80, "Eff at fixed cut", 0.99);
+      // legend->AddEntry(WP_BDTcut, "BDT cut = 0.99 point (mH = 350)", "P");
+      // WP_BDTcut->SetFillColor(colors[1]);
+      // WP_BDTcut->SetMarkerColor(colors[1]);
+      // WP_BDTcut->SetMarkerStyle(34);
+      // WP_BDTcut->SetMarkerSize(1.5);
+      // WP_BDTcut->Draw("Psame"); 
+    }
   }
 
   // overlay multiple ROC curves -- useful if comparing 125 vs. 350 for instance
@@ -816,18 +830,21 @@ void MakeMVAPerformancePlots_HLTcomp()
   SetupPlots();
 
   // Signals
-  string SignalTree = "PerJet_LLPmatched";
+  // string SignalTree = "PerJet_LLPmatched";
 
-  string Signal = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_14_TEST.root";
-  string SigLabel = "125_mX15";
+  // string Signal = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_14_TEST.root";
+  // string SigLabel = "125_mX15";
 
-  string Signal2 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TEST.root";
-  string SigLabel2 = "350_mX80";
+  // string Signal2 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TEST.root";
+  // string SigLabel2 = "350_mX80";
 
   // for per event analysis
-  // string Signal2 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TEST.root";
-  // string SigLabel2 = "350_mX80";
-  // string SignalTree = "NoSel";
+  string Signal = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_03_14_TEST.root";
+  string SigLabel = "125_mX15";
+
+  string Signal2 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TEST.root";
+  string SigLabel2 = "350_mX80";
+  string SignalTree = "NoSel";
 
   string Signal3 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_v3.7_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_03_14_batch2.root";
   string SigLabel3 = "125_mX50";
@@ -839,13 +856,13 @@ void MakeMVAPerformancePlots_HLTcomp()
   string SigLabel5 = "350_mX160";
 
   // Backgrounds
-  // string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_v3.7_LLPskim_Run2023_HADD.root";
-  // string BkgLabel = "W+Jets";
-  // string BackgroundTree = "WPlusJets";
+  string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_v3.7_LLPskim_Run2023_HADD.root";
+  string BkgLabel = "W+Jets";
+  string BackgroundTree = "WPlusJets";
   // string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_v3.7_LLPskim_Run2023Cv4_2024_03_14.root";
-  string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_v3.7_LLPskim_Run2023_HADD.root";
-  string BkgLabel = "W+Jets_perJet";
-  string BackgroundTree = "PerJet_WPlusJets";
+  // string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_v3.7_LLPskim_Run2023_HADD.root";
+  // string BkgLabel = "W+Jets_perJet";
+  // string BackgroundTree = "PerJet_WPlusJets";
 
   // minituple_v3.7_LLPskim_Run2023Bv1_2024_03_14.root
   // minituple_v3.7_LLPskim_Run2023Cv1_2024_03_14.root
@@ -862,8 +879,8 @@ void MakeMVAPerformancePlots_HLTcomp()
   vector<string> plotType = {""}; // {"_calor", "_HCAL12_calor", "_HCAL34_calor", "", "_HCAL12", "_HCAL34"};
   for( auto type: plotType){
     if (type != "") fs::create_directory(type);
-    // BDTPerformancePlots(Signal, SigLabel, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
-    // SetupPlots();
+    BDTPerformancePlots(Signal, SigLabel, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
+    SetupPlots();
     BDTPerformancePlots(Signal2, SigLabel2, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
     SetupPlots();
     // BDTPerformancePlots(Signal3, SigLabel3, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);

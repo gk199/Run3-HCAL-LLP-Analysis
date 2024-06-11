@@ -19,11 +19,13 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 	if (jet_Pt->size() == 0) return; // added to avoid vector out of range if there are no jets -- issue on signal file 
 
 	// check HLT results for these triggers
+	// note that this is not just the HCAL based LLP triggers, but all triggers saved in "triggerPathNames" in Run3-HCAL-LLP-NTupler/plugins/DisplacedHcalJetNTuplizer.cc, which is much larger now! 
+	// so add an extra check that the name we are looking at is the HLT L1 HCAL monitoring path
 	int passedHLT = 0;
 	for (int i = 0; i < HLT_Indices.size(); i++) {
 		if (HLT_Decision->at(i) > 0) {
 			if (debug) cout << HLT_Decision->at(i) << " for the trigger " << HLT_Names[i] << "\n" << endl;
-			passedHLT += 1;
+			if (HLT_Names[i] == "HLT_L1SingleLLPJet") passedHLT += 1;
 		}		
 	}
 	
@@ -45,7 +47,8 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 	for (int i = 0; i < jet_Pt->size(); i++) {
 		if (jet_Pt->at(i) > 40 && abs(jet_Eta->at(i)) <= 1.26) { 
 
-			// FillOutputJetTrees("PerJet_NoSel", i);
+			FillOutputJetTrees("PerJet_NoSel", i);
+			if (passedHLT > 0) FillOutputJetTrees("PerJet_PassedHLT", i);
 			vector<float> matchedInfo = JetIsMatchedTo( jet_Eta->at(i), jet_Phi->at(i) );
 			if (matchedInfo[0] > -1) { 					// if jet is matched to a LLP or LLP decay product
 				FillOutputJetTrees("PerJet_LLPmatched", i);
@@ -59,6 +62,7 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 
 	// Fill event based output trees in minituples
 	FillOutputTrees("NoSel");
+	if (passedHLT > 0) FillOutputTrees("PassedHLT");
 	if (WPlusJetsEvent && abs(deltaPhi(jet_Phi->at(0), WPlusJets_leptonPhi)) > 2) FillOutputTrees("WPlusJets");
 
 	return;
