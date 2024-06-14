@@ -65,6 +65,33 @@ void MiniTuplePlotter_HLT_Effs(){
 
 	for( auto key: filetag_keys_to_loop){
 
+		// parse the string to determine input mass and lifetime
+		string s = key;
+		string delimiter = "_";
+		vector<string> remove = {"LLP","ctau"};
+		size_t pos = 0;
+		vector<string> mass_lifetime = {"0","0","0"};
+
+		// remove LLP, ctau
+		for( auto pattern: remove) {
+			std::string::size_type i = s.find(pattern);
+			while (i != std::string::npos) {
+				s.erase(i, pattern.length());
+				i = s.find(pattern, i);
+			}
+		}
+		//std::cout << s << std::endl;
+		int type = 0;
+		while ((pos = s.find(delimiter)) != std::string::npos) {
+			string token = s.substr(0, pos);
+			std::cout << token << std::endl;
+			mass_lifetime[type] = token;
+			type += 1;
+			s.erase(0, pos + delimiter.length());
+		}
+		mass_lifetime[type] = s;
+		std::cout << s << std::endl;
+
 		for( int i = 0; i < jet_E.size(); i++ ){
 
 			// with a jet pT cut, plot efficiency vs LLP displacement in R, Z, eta, travel time
@@ -77,15 +104,15 @@ void MiniTuplePlotter_HLT_Effs(){
 			eff_LLPdisplacement.SetOutputDirectory("HLT_Efficiencies");
 			eff_LLPdisplacement.plot_norm 			= false;
 			eff_LLPdisplacement.plot_log_ratio   	= true;
-			eff_LLPdisplacement.SetLegendPosition( 0.15, 0.95, 0.43, 1.13 );
+			eff_LLPdisplacement.SetLegendPosition( 0.15, 0.9, 0.43, 1.08 );
 //			eff_LLPdisplacement.SetSelectiveCuts("MC", Form("eventHT > %s && ( (jet0_isMatchedTo == 0 && jet0_Pt >= %s) || (jet1_isMatchedTo == 0 && jet1_Pt >= %s) || (jet2_isMatchedTo == 0 && jet2_Pt >= %s) ) ", event_HT[i].c_str(), jet_E[i].c_str(), jet_E[i].c_str(), jet_E[i].c_str() ) ); // make sure that LLP 0 is matched to jet, and cut on the jet pT
 			eff_LLPdisplacement.SetSelectiveCuts("MC", Form("eventHT > %s && perJet_Pt >= %s && perJet_MatchedLLP_DecayR < 300", event_HT[i].c_str(), jet_E[i].c_str() ) ); // cut on the jet pT
 			eff_LLPdisplacement.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_AnyLLP_HLT}); 
 			// eff_LLPdisplacement.colors = { kWhite, kOrange, kGreen+2 }; // to just see trigger efficiency 
 			eff_LLPdisplacement.colors = { kBlack, kAzure+7, kViolet+4 };
-			eff_LLPdisplacement.SetLegendNames({"No cuts", "LLP L1 passed", "LLP HLT passed"});
+			eff_LLPdisplacement.SetLegendNames({"No cuts", "L1 efficiency", "HLT efficiency"});
 			// eff_LLPdisplacement.Plot("ratio");
-			eff_LLPdisplacement.Plot("efficiency");
+			eff_LLPdisplacement.Plot("efficiency", "", mass_lifetime);
 			eff_LLPdisplacement.ClearFileTrees(); 														// reset, and cut on each HLT group
 			eff_LLPdisplacement.SetOutputFileTag("HLT_v3_MC_"+key+"_jetE"+jet_E[i]+"_HLTsplit");
 			eff_LLPdisplacement.colors = { kBlack, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed  };
@@ -113,9 +140,9 @@ void MiniTuplePlotter_HLT_Effs(){
 			plotter_HLTeffMC.SetSelectiveCuts("MC", Cut_matchedLLPinHCAL34);		// region for LLP decay, and require LLP is matched to jet 0
 			plotter_HLTeffMC.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_AnyLLP_HLT}); 
 			plotter_HLTeffMC.colors = { kBlack, kAzure+7, kViolet+4 };
-			plotter_HLTeffMC.SetLegendNames({"No cuts", "LLP L1 passed", "LLP HLT passed"});
+			plotter_HLTeffMC.SetLegendNames({"No cuts", "L1 efficiency", "HLT efficiency"});
 			// plotter_HLTeffMC.Plot("ratio");
-			plotter_HLTeffMC.Plot("efficiency");
+			plotter_HLTeffMC.Plot("efficiency", "", mass_lifetime); // now need to pass other arguments! 
 			plotter_HLTeffMC.ClearFileTrees(); 																// reset, and cut on each HLT group.
 			plotter_HLTeffMC.SetOutputFileTag("HLT_v3_MC_"+key+"_HLTsplit");
 			plotter_HLTeffMC.colors = { kBlack, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed  };

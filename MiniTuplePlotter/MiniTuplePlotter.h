@@ -797,7 +797,7 @@ public :
 	// =====================================================================================
 
 	// -------------------------------------------------------------------------------------
-	void Plot( string plot_type = "", string filetag_treename_divisor = "" ){
+	void Plot( string plot_type = "", string filetag_treename_divisor = "", vector<string> mass_lifetime = {"higgs", "llp", "ctau"} ){
 		if( debug) cout<<"MiniTuplePlotter::Plot()"<<endl;		
 
 		GetTrees();
@@ -844,7 +844,6 @@ public :
 				myCanvas->cd(1);
 			}
 
-			// put efficiency TEff code here?
 			if( plot_type == "efficiency" ){
 				myCanvas->cd(2);
 				// need to get the first hist, this will be the denominator for the efficiency plot when listed first in compare cuts (h_total)
@@ -867,16 +866,28 @@ public :
 							pEff->SetTitle(Form("; %s; %s", PlotParams_temp.label_x.c_str(), label_y.c_str())); // HCAL LLP Trigger Efficiencies
 							pEff->SetLineColor( colors[i] );
 							pEff->SetLineWidth(3.);
+
 							if (i == 1) pEff->Draw();
 							if (i > 1) pEff->Draw("same");
 							gPad->Update();
+
+							float label_size = 0.045;
+							pEff->GetPaintedGraph()->GetXaxis()->SetTitleSize(label_size); // size of X label
+							pEff->GetPaintedGraph()->GetXaxis()->SetLabelSize(label_size); // size of X axis tick labels
+							pEff->GetPaintedGraph()->GetYaxis()->SetTitleSize(label_size);
+							pEff->GetPaintedGraph()->GetYaxis()->SetLabelSize(label_size);
+							gPad->Update();
+
+							pEff->GetPaintedGraph()->GetXaxis()->SetRangeUser(0,PlotParams_temp.xmax); // restrict x range to that listed in plot params
 							pEff->GetPaintedGraph()->GetYaxis()->SetRangeUser(0,1.);
 
 							leg->AddEntry(pEff, Form("%s", legend_names.at(i).c_str() ) );
 
 							if (i == size(hist_tags)-1 ) {
 								leg->Draw();
-								StampCMS( "Simulation Preliminary", 140., 0.14, 0.92, 0.045, 2 ); // 0 means no energy, 1 means sqrt s, 2 means (13.6 TeV) (should we have this for simulation?)
+								StampCMS( "Simulation Preliminary", 140., 0.12, 0.92, 0.06, 2 ); // 0 means no energy, 1 means sqrt s, 2 means (13.6 TeV) (should we have this for simulation?)
+								if (PlotParams_temp.hist_name == "perJet_MatchedLLP_DecayR" ) StampLLP( 0.14, 0.86, 0.03, mass_lifetime ); // top left
+								else StampLLP( 0.6, 0.19, 0.03, mass_lifetime ); // lower right
 							}
 						}
 					}
