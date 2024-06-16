@@ -2,6 +2,8 @@ TString OR		   	= " || ";
 TString AND 		= " && ";
 
 // Setup cuts on HLT paths passed
+TCut Cut_HLTpassedHT350 = "HLT_HT350 == 1";
+
 TCut Cut_None			= "";
 TCut Cut_HLTpassed1 	= "HLT_L1SingleLLPJet == 1"; // monitoring trigger // not in v1 ntuples yet
 TCut Cut_HLTpassed2 	= "HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1";

@@ -878,8 +878,9 @@ public :
 							pEff->GetPaintedGraph()->GetYaxis()->SetLabelSize(label_size);
 							gPad->Update();
 
-							pEff->GetPaintedGraph()->GetXaxis()->SetRangeUser(0,PlotParams_temp.xmax); // restrict x range to that listed in plot params
-							pEff->GetPaintedGraph()->GetYaxis()->SetRangeUser(0,1.);
+							pEff->GetPaintedGraph()->GetXaxis()->SetRangeUser(PlotParams_temp.xmin, PlotParams_temp.xmax); // restrict x range to that listed in plot params
+							// std::cout << "set axis range to " << PlotParams_temp.xmin << ", " << PlotParams_temp.xmax << std::endl;
+							pEff->GetPaintedGraph()->GetYaxis()->SetRangeUser(0, 1.);
 
 							leg->AddEntry(pEff, Form("%s", legend_names.at(i).c_str() ) );
 
@@ -887,6 +888,7 @@ public :
 								leg->Draw();
 								StampCMS( "Simulation Preliminary", 140., 0.12, 0.92, 0.06, 2 ); // 0 means no energy, 1 means sqrt s, 2 means (13.6 TeV) (should we have this for simulation?)
 								if (PlotParams_temp.hist_name == "perJet_MatchedLLP_DecayR" ) StampLLP( 0.14, 0.86, 0.03, mass_lifetime ); // top left
+								else if (PlotParams_temp.hist_name == "eventHT" && mass_lifetime[0] == "125" ) StampLLP( 0.14, 0.86, 0.03, mass_lifetime ); // top left
 								else StampLLP( 0.6, 0.19, 0.03, mass_lifetime ); // lower right
 							}
 						}
