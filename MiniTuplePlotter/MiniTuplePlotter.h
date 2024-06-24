@@ -797,7 +797,7 @@ public :
 	// =====================================================================================
 
 	// -------------------------------------------------------------------------------------
-	void Plot( string plot_type = "", string filetag_treename_divisor = "", vector<string> mass_lifetime = {"higgs", "llp", "ctau"} ){
+	void Plot( string plot_type = "", string filetag_treename_divisor = "", vector<string> mass_lifetime = {"higgs", "llp", "ctau"}, bool multiple = false ){
 		if( debug) cout<<"MiniTuplePlotter::Plot()"<<endl;		
 
 		GetTrees();
@@ -854,9 +854,10 @@ public :
 				for( auto hist_tag: hist_tags ){
 					// string hist_tag = Form( "%s "+GetBetterCutTitle( selective_cuts[filetag_treename] )+" "+GetBetterCutTitle( cut_compare ), filetag_treename.c_str() );
 					if (i == 0) denom_hist_tag = hist_tag;
+					if (multiple && i%2 == 0) denom_hist_tag = hist_tag; // if overlaying multiple mass points, use the first one in each set as the denominiator 
 					// cout << denom_hist_tag << " = denom tag and current tag = " << hist_tag << endl;
 					TH1F *h_total = (TH1F*)hists[denom_hist_tag]->Clone();
-					if (i > 0) {
+					if ((multiple == false && i > 0) || (multiple == true && i%2 == 1)) {
 						TH1F *h_pass = (TH1F*)hists[hist_tag]->Clone();
 						TEfficiency* pEff = 0;
  						// h_pass and h_total are valid and consistent histograms
@@ -887,7 +888,8 @@ public :
 							if (i == size(hist_tags)-1 ) {
 								leg->Draw();
 								StampCMS( "Simulation Preliminary", 140., 0.12, 0.92, 0.06, 2 ); // 0 means no energy, 1 means sqrt s, 2 means (13.6 TeV) (should we have this for simulation?)
-								if (PlotParams_temp.hist_name == "perJet_MatchedLLP_DecayR" ) StampLLP( 0.14, 0.86, 0.03, mass_lifetime ); // top left
+								if (multiple && PlotParams_temp.hist_name != "eventHT") StampLLP( 0.14, 0.86, 0.03, mass_lifetime );
+								else if (PlotParams_temp.hist_name == "perJet_MatchedLLP_DecayR" ) StampLLP( 0.14, 0.86, 0.03, mass_lifetime ); // top left
 								else if (PlotParams_temp.hist_name == "eventHT" && mass_lifetime[0] == "125" ) StampLLP( 0.64, 0.45, 0.03, mass_lifetime ); // top left
 								else StampLLP( 0.6, 0.19, 0.03, mass_lifetime ); // lower right
 							}

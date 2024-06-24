@@ -100,7 +100,7 @@ void StampLLP( float x=0.14, float y=0.74, float textsize = 0.045, vector<string
   label_llp.SetTextColor(1);
   label_llp.SetTextSize(textsize);
   label_llp.DrawLatex( x, y, "H #rightarrow SS #rightarrow 4b" );
-  label_llp.DrawLatex( x, y-0.04, Form("m_{H} = %s, m_{S} = %s, c#tau = %s", mass_lifetime[0].c_str(),mass_lifetime[1].c_str(),mass_lifetime[2].c_str()) );
+  if (mass_lifetime[0] != "0") label_llp.DrawLatex( x, y-0.04, Form("m_{H} = %s, m_{S} = %s, c#tau = %s", mass_lifetime[0].c_str(),mass_lifetime[1].c_str(),mass_lifetime[2].c_str()) );
 }
 
 // ==========================================================================================
