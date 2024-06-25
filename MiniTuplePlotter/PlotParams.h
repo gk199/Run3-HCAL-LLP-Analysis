@@ -207,7 +207,7 @@ PlotParams P_jet1_NeutralOverChargedHad = {"jet1_NeutralHadEFrac/jet0_ChargedHad
 PlotParams P_met_Pt						= {"met_Pt", "MET p_{T}", "p_{T} [GeV]", 0, 400 };
 PlotParams P_met_Phi					= {"met_Phi", "MET #phi", "#phi", -3.2, 3.2 };
 PlotParams P_met_SumEt					= {"met_SumEt", "MET Sum E_{T}", "E_{T} [GeV]", 0, 5000 };
-PlotParams P_eventHT					= {"eventHT", "Event HT", "HT [GeV]", 0, 1200 };
+PlotParams P_eventHT					= {"eventHT", "Event H_{T}", "H_{T} [GeV]", 0, 1200 };
 
 // --------------------------------------------------------------------- //
 // LLP variables 
@@ -251,7 +251,7 @@ PlotParams P_LLP1_DecayCtau				= {"LLP1_DecayCtau", "LLP1 c#tau", "c#tau [cm]", 
 // --------------------------------------------------------------------- //
 
 PlotParams P_perJet_E					= {"perJet_E", "Jet Energy", "Jet E [GeV]", 0, 250 };
-PlotParams P_perJet_Pt					= {"perJet_Pt", "Jet p_{T}", "Offline jet p_{T} [GeV]", 0, 250 };
+PlotParams P_perJet_Pt					= {"perJet_Pt", "Jet p_{T}", "Jet p_{T} [GeV]", 0, 300 };
 PlotParams P_perJet_Eta					= {"perJet_Eta", "Jet #eta", "Jet #eta", -1.5, 1.5 };
 PlotParams P_perJet_Phi					= {"perJet_Phi", "Jet #phi", "Jet #phi", -3.2, 3.2 };
 PlotParams P_perJet_Mass				= {"perJet_Mass", "Jet Mass", "Jet Mass", 0, 40 };

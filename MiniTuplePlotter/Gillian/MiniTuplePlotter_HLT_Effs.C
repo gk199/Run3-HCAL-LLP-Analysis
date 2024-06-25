@@ -26,7 +26,8 @@ void MiniTuplePlotter_HLT_Effs(){
 	filetags["LLP125_15_ctau10m"]	= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau10000_13p6TeV_2024_06_03"};
 	filetags["LLP125_15_ctau1m"]	= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST"};
 	filetags["LLP125_15_ctau3m"]	= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau3000_13p6TeV_2024_06_03"};
-	filetags["LLP125_50_ctau3m"]	= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch1"};
+	filetags["LLP125_50_ctau3m"]	= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_combined"};
+	// filetags["LLP125_50_ctau3m"]	= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch1"};
 	filetags["LLP250_120_ctau10m"]	= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch1"};
 	filetags["LLP350_160_ctau10m"]	= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch1"};
 	
@@ -68,19 +69,19 @@ void MiniTuplePlotter_HLT_Effs(){
 											{P_perJet_Pt}, {P_perJet_E}, {P_perJet_Eta}, {P_perJet_Phi} };
 
 	// overlay each mass point
-	class MiniTuplePlotter overlay_LLPdisplacement( { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_rerun", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch1"}, path );
+	class MiniTuplePlotter overlay_LLPdisplacement( { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_rerun", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_combined"}, path );
 	overlay_LLPdisplacement.SetPlots({P_perJet_MatchedLLP_DecayR});
 	overlay_LLPdisplacement.SetTreeName( "PerJet_LLPmatched" );
 	overlay_LLPdisplacement.SetOutputFileTag("HLT_v3_MC_jetE"+jet_E[0]+"_L1effs");
 	overlay_LLPdisplacement.SetOutputDirectory("HLT_Efficiencies");
 	overlay_LLPdisplacement.plot_norm 			= false;
 	overlay_LLPdisplacement.plot_log_ratio   	= true;
-	overlay_LLPdisplacement.SetLegendPosition( 0.15, 0.9, 0.53, 1.08 );
+	overlay_LLPdisplacement.SetLegendPosition( 0.13, 0.8, 0.6, 0.98 );
 	overlay_LLPdisplacement.SetSelectiveCuts("MC", Form("eventHT > %s && perJet_Pt >= %s && perJet_MatchedLLP_DecayR < 300", event_HT[0].c_str(), jet_E[0].c_str() ) ); // cut on the jet pT
 	overlay_LLPdisplacement.SetComparisonCuts({Cut_None, Cut_HLTpassed1});
 	overlay_LLPdisplacement.colors = { kBlack, kAzure+7, kGray+1, kViolet+4 };
-	overlay_LLPdisplacement.SetLegendNames({"No cuts", "m_{H}=350 GeV, L1 efficiency", "No cuts", "m_{H}=125 GeV, L1 efficiency"});
-	overlay_LLPdisplacement.SetVariableBins( {0,50,100,150,175,190,200,210,220,230,240,250,260,270,280,290,300} );
+	overlay_LLPdisplacement.SetLegendNames({"No cuts", "m_{H}=350 GeV, m_{S}=80 GeV, c#tau=0.5 m", "No cuts", "m_{H}=125 GeV, m_{S}=50 GeV, c#tau=3 m"});
+	overlay_LLPdisplacement.SetVariableBins( {0,50,100,150,175,190,200,208,215,222,229,236,243,250,257,264,271,278,285,292,300} );
 	overlay_LLPdisplacement.Plot("efficiency", "", {"0","0","0"}, true);
 	overlay_LLPdisplacement.ClearFileTrees(); 
 	overlay_LLPdisplacement.SetOutputFileTag("HLT_v3_MC_jetE"+jet_E[0]+"_HLTeffs");
@@ -89,19 +90,20 @@ void MiniTuplePlotter_HLT_Effs(){
 	overlay_LLPdisplacement.SetLegendNames({"L1", "m_{H}=350 GeV, HLT efficiency", "L1", "m_{H}=125 GeV, HLT efficiency"});
 	overlay_LLPdisplacement.Plot("efficiency", "", {"0","0","0"}, true);
 
-	class MiniTuplePlotter overlay_HT( { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_rerun", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch1"}, path );
+	class MiniTuplePlotter overlay_HT( { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_rerun", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_combined"}, path );
 	overlay_HT.SetPlots({P_eventHT});
 	overlay_HT.SetTreeName( "NoSel" ); 
 	overlay_HT.SetOutputFileTag("HLT_v3_MC_eventHT_L1effs");
 	overlay_HT.SetOutputDirectory("HLT_Efficiencies");
 	overlay_HT.plot_norm 			= false;
 	overlay_HT.plot_log_ratio   	= true;
-	overlay_HT.SetLegendPosition( 0.5, 0.65, 0.88, 0.83 );
+	overlay_HT.SetLegendPosition( 0.4, 0.65, 0.87, 0.83 );
 	overlay_HT.SetSelectiveCuts("MC", Cut_LLPinHCAL34_AnyJet); // jet is matched to LLP in HCAL 34 and jet pT > 100 GeV
 	overlay_HT.SetComparisonCuts({Cut_None, Cut_HLTpassed1});
 	overlay_HT.colors = { kBlack, kAzure+7, kGray+1, kViolet+4 };
-	overlay_HT.SetLegendNames({"No cuts", "m_{H}=350 GeV, L1 efficiency", "No cuts", "m_{H}=125 GeV, L1 efficiency"});
-	overlay_HT.SetVariableBins( {0, 20, 40, 60, 80, 100, 120, 140, 160, 190, 220, 250, 290, 330, 390, 490, 610, 760, 950, 1200} );
+	overlay_HT.SetLegendNames({"No cuts", "m_{H}=350 GeV, m_{S}=80 GeV, c#tau=0.5 m", "No cuts", "m_{H}=125 GeV, m_{S}=50 GeV, c#tau=3 m"});
+	overlay_HT.SetVariableBins( {40, 60, 80, 100, 120, 140, 160, 190, 220, 250, 290, 330, 390, 490, 640, 800, 1000, 1200} );
+	overlay_HT.SetVariableBins( {40, 80, 120, 145, 185, 220, 250, 290, 330, 390, 490, 640, 800, 1000, 1200} );
 	overlay_HT.Plot("efficiency", "", {"0","0","0"}, true);
 	overlay_HT.ClearFileTrees(); 
 	overlay_HT.SetOutputFileTag("HLT_v3_MC_eventHT_HLTeffs");
@@ -110,19 +112,20 @@ void MiniTuplePlotter_HLT_Effs(){
 	overlay_HT.SetLegendNames({"L1", "m_{H}=350 GeV, HLT efficiency", "L1", "m_{H}=125 GeV, HLT efficiency"});
 	overlay_HT.Plot("efficiency", "", {"0","0","0"}, true);
 
-	class MiniTuplePlotter overlay_jet( { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_rerun", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch1"}, path );
+	class MiniTuplePlotter overlay_jet( { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_rerun", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_combined"}, path );
 	overlay_jet.SetPlots({P_perJet_Pt});
 	overlay_jet.SetTreeName( "PerJet_LLPmatched" );
 	overlay_jet.SetOutputFileTag("HLT_v3_MC_L1effs");
 	overlay_jet.SetOutputDirectory("HLT_Efficiencies");
 	overlay_jet.plot_norm 			= false;
 	overlay_jet.plot_log_ratio   	= true;
-	overlay_jet.SetLegendPosition( 0.5, 0.75, 0.88, 0.93 ); 
+	overlay_jet.SetLegendPosition( 0.4, 0.75, 0.87, 0.93 );
 	overlay_jet.SetVariableBins( {40, 46, 52, 58, 64, 70, 76, 82, 88, 94, 100, 110, 124, 140, 160, 185, 215, 250} );
+	overlay_jet.SetVariableBins( {40, 54, 63, 72, 81, 90, 100, 110, 120, 140, 165, 200, 250, 300, 350} );	
 	overlay_jet.SetSelectiveCuts("MC", Cut_matchedLLPinHCAL34_eventHT250);		// region for LLP decay, and require LLP is matched to jet 0, and event HT 250
 	overlay_jet.SetComparisonCuts({Cut_None, Cut_HLTpassed1}); 
 	overlay_jet.colors = { kBlack, kAzure+7, kGray+1, kViolet+4 };
-	overlay_jet.SetLegendNames({"No cuts", "m_{H}=350 GeV, L1 efficiency", "No cuts", "m_{H}=125 GeV, L1 efficiency"});
+	overlay_jet.SetLegendNames({"No cuts", "m_{H}=350 GeV, m_{S}=80 GeV, c#tau=0.5 m", "No cuts", "m_{H}=125 GeV, m_{S}=50 GeV, c#tau=3 m"});
 	overlay_jet.Plot("efficiency", "", {"0","0","0"}, true);
 	overlay_jet.ClearFileTrees(); 
 	overlay_jet.SetOutputFileTag("HLT_v3_MC_HLTeffs");
