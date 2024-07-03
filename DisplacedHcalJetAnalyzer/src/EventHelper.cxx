@@ -97,3 +97,50 @@ bool DisplacedHcalJetAnalyzer::PassWPlusJetsSelection() {
 	if ( matched_jet ) return true;
 	else return false;
 }
+
+/* ====================================================================================================================== */
+bool DisplacedHcalJetAnalyzer::PassLeptonVeto() {
+	// given a event, veto on leptons, in high MET sample this will select for Z to neutrinos (20%) or QCD
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::PassLeptonVeto()"<<endl;
+
+	bool electron = false;
+	bool muon = false;
+
+	int n_ele_over20 = 0;
+	int n_muon_over20 = 0;
+
+	// Lepton must be over 20 GeV, eta < 2.4, tight ID, isolated, and select the first (highest pT) lepton passing these requriements. Count number of leptons over 20 GeV
+	for (int i = 0; i < n_ele; i++) {
+		if (! (ele_passCutBasedIDTight->at(i) == 1) ) continue; 								// tight electron ID
+		if ( ! IsElectronIsolatedTight(i) ) continue;											// electron isolation requirement
+
+		float transverseM_ele = TransverseLeptonMass(ele_Pt->at(i), ele_Phi->at(i));
+		if (ele_Pt->at(i) > 20) n_ele_over20 += 1;
+		if (ele_Pt->at(i) > 20 && abs(ele_Eta->at(i)) < 2.4 && transverseM_ele > 55 && electron == false) electron = true;
+	}
+
+	for (int i = 0; i < n_muon; i++) {
+		if (! (muon_IsTight->at(i) == 1 )) continue; 											// tight muon ID
+		if ( ! IsMuonIsolatedTight(i) ) continue; 												// muon isolation requirement 
+
+		float transverseM_muon = TransverseLeptonMass(muon_Pt->at(i), muon_Phi->at(i));
+		if (muon_Pt->at(i) > 20) n_muon_over20 += 1;
+		if (muon_Pt->at(i) > 20 && abs(muon_Eta->at(i)) < 2.4 && transverseM_muon > 55 && muon == false) muon = true;
+	}
+
+	if (met_SumEt < 30) return false;										// should this be met pT or eT?
+	// if ( electron || muon ) return false;								// require neither electron or muon is found
+	if ( (n_ele_over20 + n_muon_over20) > 0 ) return false;					// reject events with any leptons over 20 GeV
+
+	// only check jets once we know there are no leptons
+	bool matched_jet = false;
+	for (int i = 0; i < n_jet; i++) { 			
+		if (jet_Pt->at(i) > 30 && abs(jet_Eta->at(i)) < 1.26 ) {
+			matched_jet = true;
+		}
+	}
+
+	if ( matched_jet ) return true;
+	else return false;
+}

@@ -41,11 +41,14 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 	}
 
 	bool WPlusJetsEvent = false;
+	bool NoLeptonEvent = false;
 	if (PassWPlusJetsSelection()) WPlusJetsEvent = true;
+	if (PassLeptonVeto()) NoLeptonEvent = true;
 
 	// Fill jet based output trees in minituples
 	for (int i = 0; i < jet_Pt->size(); i++) {
-		if (jet_Pt->at(i) > 40 && abs(jet_Eta->at(i)) <= 1.26) { 
+		if (jet_Pt->at(i) > 40 && abs(jet_Eta->at(i)) <= 1.26) { // this is the standard requirement
+		// if (jet_Pt->at(i) >= 0 && abs(jet_Eta->at(i)) <= 1.26) { // edited requirement to make jet pT turn on plot without a 40 GeV cut
 
 			FillOutputJetTrees("PerJet_NoSel", i);
 			if (passedHLT > 0) FillOutputJetTrees("PerJet_PassedHLT", i);
@@ -57,6 +60,9 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 				float phiSeparation = deltaPhi(jet_Phi->at(i), WPlusJets_leptonPhi);
 				if ( abs(phiSeparation) > 2 ) FillOutputJetTrees("PerJet_WPlusJets", i);
 			}
+			if (NoLeptonEvent) {
+				FillOutputJetTrees("PerJet_NoLepton", i);
+			}
 		}
 	}
 
@@ -64,6 +70,7 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 	FillOutputTrees("NoSel");
 	if (passedHLT > 0) FillOutputTrees("PassedHLT");
 	if (WPlusJetsEvent && abs(deltaPhi(jet_Phi->at(0), WPlusJets_leptonPhi)) > 2) FillOutputTrees("WPlusJets");
+	if (NoLeptonEvent) FillOutputTrees("NoLepton");
 
 	return;
 
