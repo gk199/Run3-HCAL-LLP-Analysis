@@ -1,0 +1,7 @@
+root://cmsxrootd.fnal.gov///store/user/gkopp/JetMET1/Run2023B-EXOHighMET-PromptReco-v1_RAW-RECO_20240703_224025/240703_204040/0000/output_1.root
+root://cmsxrootd.fnal.gov///store/user/gkopp/JetMET1/Run2023B-EXOHighMET-PromptReco-v1_RAW-RECO_20240703_224025/240703_204040/0000/output_2.root
+root://cmsxrootd.fnal.gov///store/user/gkopp/JetMET1/Run2023B-EXOHighMET-PromptReco-v1_RAW-RECO_20240703_224025/240703_204040/0000/output_3.root
+root://cmsxrootd.fnal.gov///store/user/gkopp/JetMET1/Run2023B-EXOHighMET-PromptReco-v1_RAW-RECO_20240703_224025/240703_204040/0000/output_4.root
+root://cmsxrootd.fnal.gov///store/user/gkopp/JetMET1/Run2023B-EXOHighMET-PromptReco-v1_RAW-RECO_20240703_224025/240703_204040/0000/output_5.root
+root://cmsxrootd.fnal.gov///store/user/gkopp/JetMET1/Run2023B-EXOHighMET-PromptReco-v1_RAW-RECO_20240703_224025/240703_204040/0000/output_6.root
+root://cmsxrootd.fnal.gov///store/user/gkopp/JetMET1/Run2023B-EXOHighMET-PromptReco-v1_RAW-RECO_20240703_224025/240703_204040/0000/output_7.root
