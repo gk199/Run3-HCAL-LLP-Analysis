@@ -874,6 +874,7 @@ public :
    virtual void   ResetGlobalEventVars();
    virtual bool   PassWPlusJetsSelection();
    virtual bool   PassLeptonVeto();
+   virtual bool   PassZmumuSelection();
    virtual float  EventHT();
    // BDTHelper.cxx
    virtual void   DeclareTMVAReader( MyTags bdt_tag_info );

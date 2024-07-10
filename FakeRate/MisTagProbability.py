@@ -190,16 +190,17 @@ def ExcludedCut( branch_name, branch_sel ):
     return ROOT.TCut( selection + " " )
 
 # ------------------------------------------------------------------------------
-def ProbabilityEst(infilepath):
+def ProbabilityEst(infilepath, label):
     infile = ROOT.TFile.Open( infilepath )
     tree = infile.Get("WPlusJets")
-    MisTagProbability(tree, "jet")
+    MisTagProbability(tree, "jet", label)
 
 # ------------------------------------------------------------------------------
-def BackgroundPrediction(infilepath):
+def BackgroundPrediction(infilepath, label):
     infile = ROOT.TFile.Open( infilepath )
-    tree = infile.Get("NoSel")
-    MisTagPrediction(tree, "jet")
+    if label == "HighMET": tree = infile.Get("NoLepton") # for high MET skim
+    else: tree = infile.Get("NoSel")
+    MisTagPrediction(tree, "jet", label)
 
 # ------------------------------------------------------------------------------
 def SignalDistribution(infilepath1, infilepath2, infilepath3, infilepath4, infilepath5, signal_names, selection, infilepath_bkg, selection_bkg):
@@ -617,7 +618,7 @@ def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, o
 # def SetupNumeratorDenominator(tree, obj_type):
 
 # ------------------------------------------------------------------------------
-def MisTagProbability(tree, obj_type):
+def MisTagProbability(tree, obj_type, label = ""):
     
     if (obj_type == "jet"):
 
@@ -632,13 +633,14 @@ def MisTagProbability(tree, obj_type):
         misTagJets = {}
         allJets = {}
 
-        triggered = [-9999,0,1]
+        # for the high MET dataset, can do a range triggered = [[-10000, 2]] to do an inclusive estimation
+        triggered = [[-10000,2]] # [-9999,0,1]
 
-        frac_track_pt_bins = [[0, 0.5], [0.5, 1.1], [0, 1.1]]
-        ele_frac_bins = [[0, 0.5], [0.5, 1.1], [0, 1.1]]
-        label_track_pt_bins = ["<0.5", ">=0.5", "inclusive"]
+        frac_track_pt_bins = [[0, 1.1], [0, 0.5], [0.5, 1.1]]
+        ele_frac_bins = [[0, 1.1], [0, 0.5], [0.5, 1.1]]
+        label_track_pt_bins = ["inclusive", "<0.5", ">=0.5"]
 
-        outfile = ROOT.TFile.Open("outfile.root", "RECREATE")
+        outfile = ROOT.TFile.Open(label + "outfile.root", "RECREATE")
 
         for trig_matched in triggered:
             track_counter = 0
@@ -685,11 +687,11 @@ def MisTagProbability(tree, obj_type):
                     canv_individual.cd()
                     misTagJets_6.Draw()
                     misTagJets_6.SetTitle("Mis-tagged jets, for L1 trigger matched = " + str(trig_matched) + ", with track " + label_track_pt_bins[track_counter])
-                    canv_individual.SaveAs(folder + "/MisTag_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + "_track_" + label_track_pt_bins[track_counter] + ".png")
+                    canv_individual.SaveAs(folder + "/" + label + "_MisTag_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + "_track_" + label_track_pt_bins[track_counter] + ".png")
                     canv_individual.Clear()
                     allJets_6.Draw()
                     allJets_6.SetTitle("All jets, for L1 trigger matched = " + str(trig_matched) + ", with track " + label_track_pt_bins[track_counter])
-                    canv_individual.SaveAs(folder + "/All_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + "_track_" + label_track_pt_bins[track_counter] + ".png")
+                    canv_individual.SaveAs(folder + "/" + label + "_All_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + "_track_" + label_track_pt_bins[track_counter] + ".png")
 
                     legend.AddEntry(misTagJets_6, obj_type + " " + str(len(jet_number)-1))
                     # check efficiency on the whole distribution now
@@ -710,7 +712,7 @@ def MisTagProbability(tree, obj_type):
                         mean_text.DrawLatex( xpos+0.5, ypos-0.05, "#sigma = %.2f" %(misTagJets_6.GetStdDev()))
 
                         LegendLabel(legend)
-                        canv.SaveAs(folder + "/Efficiency_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + "_track_" + label_track_pt_bins[track_counter] + ".png")
+                        canv.SaveAs(folder + "/" + label + "_Efficiency_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + "_track_" + label_track_pt_bins[track_counter] + ".png")
                         outfile.WriteObject(pEff, "Efficiency_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + "_track" + label_track_pt_bins[track_counter])
                     counter += 1
                 track_counter += 1
@@ -718,7 +720,7 @@ def MisTagProbability(tree, obj_type):
         outfile.Close()
 
 # ------------------------------------------------------------------------------
-def MisTagPrediction(tree, obj_type):
+def MisTagPrediction(tree, obj_type, label = ""):
     
     if (obj_type == "jet"):
 
@@ -734,13 +736,14 @@ def MisTagPrediction(tree, obj_type):
         allJets = {}
         allJets_actual = {}
 
-        triggered = [-9999] # [1, 0, -9999]
+        # for the high MET dataset, can do a range triggered = [[-10000, 2]] to do an inclusive estimation
+        triggered = [[-10000,2]] # [-9999,0,1]
 
-        frac_track_pt_bins = [[0, 0.5], [0.5, 1.1], [0, 1.1]]
-        ele_frac_bins = [[0, 0.5], [0.5, 1.1], [0, 1.1]]
-        label_track_pt_bins = ["<0.5", ">=0.5", "inclusive"]
+        frac_track_pt_bins = [[0, 1.1], [0, 0.5], [0.5, 1.1]]
+        ele_frac_bins = [[0, 1.1], [0, 0.5], [0.5, 1.1]]
+        label_track_pt_bins = ["inclusive", "<0.5", ">=0.5"]
 
-        mistag_file = ROOT.TFile.Open("outfile.root")
+        mistag_file = ROOT.TFile.Open(label + "outfile.root")
 
         for trig_matched in triggered:
             track_counter = 0
@@ -810,7 +813,7 @@ def MisTagPrediction(tree, obj_type):
                     allJets_6.SetFillStyle(0)
                     hs.Draw("HIST NOSTACK PLC PFC E1")
                     LegendLabel(legend)
-                    canv.SaveAs(folder + "/PredictedMisTag_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + "_track_" + label_track_pt_bins[track_counter] + ".png")
+                    canv.SaveAs(folder + "/" + label + "_PredictedMisTag_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + "_track_" + label_track_pt_bins[track_counter] + ".png")
 
                     counter += 1
                 
@@ -819,7 +822,10 @@ def MisTagPrediction(tree, obj_type):
 # ------------------------------------------------------------------------------
 def main():
 
-    infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_v3.7_LLPskim_Run2023_HADD.root"
+    # infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_v3.7_LLPskim_Run2023_HADD.root"
+    # label = "LLPskim"
+    infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8.1/minituple_v3.8_EXOhighMET_Run2023Cv4_2024_07_03.root"
+    label = "HighMET"
 
     if len(sys.argv) > 1: infilepath = sys.argv[1]
 
@@ -833,8 +839,8 @@ def main():
 
     # SignalDistribution(LLP1, LLP2, LLP3, LLP4, LLP5, LLP_names, "NoSel", infilepath, "WPlusJets")
 
-    ProbabilityEst(infilepath)
-    BackgroundPrediction(infilepath)
+    ProbabilityEst(infilepath, label)
+    BackgroundPrediction(infilepath, label)
 
 if __name__ == '__main__':
 	main()

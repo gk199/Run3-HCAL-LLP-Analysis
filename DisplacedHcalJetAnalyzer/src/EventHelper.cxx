@@ -144,3 +144,63 @@ bool DisplacedHcalJetAnalyzer::PassLeptonVeto() {
 	if ( matched_jet ) return true;
 	else return false;
 }
+
+/* ====================================================================================================================== */
+bool DisplacedHcalJetAnalyzer::PassZmumuSelection() {
+	// given a event, check if compatible with Z+mu mu selection
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::PassZmumuSelection()"<<endl;
+
+	bool muon1 = false;
+	bool muon2 = false;
+
+	double muon_pair_pt[2] = {0,0};
+	double muon_pair_phi[2] = {0,0};
+	
+	TLorentzVector M1(0,0,0,0);
+	TLorentzVector M2(0,0,0,0);
+
+	for (int i = 0; i < n_muon; i++) {
+		if (! (muon_IsTight->at(i) == 1 )) continue; 											// tight muon ID
+		if ( ! IsMuonIsolatedTight(i) ) continue; 												// muon isolation requirement 
+
+		if (muon_Pt->at(i) < 20) continue;														// require muon is over 20 GeV
+		if (abs(muon_Eta->at(i)) < 2.4) {
+			if (!muon1) muon1 = true;
+			else if (!muon2) muon2 = true;
+		} 
+
+		if (muon1 && !muon2) { // if this is the first muon found
+			M1.SetPtEtaPhiE(fabs(muon_Pt->at(i)), muon_Eta->at(i), muon_Phi->at(i), muon_E->at(i));
+			muon_pair_pt[0] = muon_Pt->at(i);
+			muon_pair_phi[0] = muon_Phi->at(i);
+			cout << muon_Pt->at(i) << " = muon 1 pT" << endl;
+		}
+		if (muon2) {
+			M2.SetPtEtaPhiE(fabs(muon_Pt->at(i)), muon_Eta->at(i), muon_Phi->at(i), muon_E->at(i));
+			muon_pair_pt[1] = muon_Pt->at(i);
+			muon_pair_phi[1] = muon_Phi->at(i);
+			cout << muon_Pt->at(i) << " = muon 2 pT" << endl;
+		}
+	}
+	double Zmass = 0;
+	if (muon1 && muon2) Zmass = (M1+M2).M();
+	cout << Zmass << " = Z mass" << endl;
+	// likely need to constrain on the Z mass, how tight? check distribution first
+
+	// find the phi vector sum of the two muons
+	float Muon_PhiVectorSum = atan2(muon_pair_pt[0] * sin(muon_pair_phi[0]) + muon_pair_pt[1] * sin(muon_pair_phi[1]), muon_pair_pt[0] * cos(muon_pair_phi[0]) + muon_pair_pt[1] * cos(muon_pair_phi[1]));
+
+	// only check jets once we know two muons have been found
+	bool matched_jet = false;
+	for (int i = 0; i < n_jet; i++) { 			
+		if (jet_Pt->at(i) > 30 && abs(jet_Eta->at(i)) < 1.26 ) {
+			double jet_muon_dPhi = deltaPhi(jet_Phi->at(i), Muon_PhiVectorSum);
+			// need to find jet opposite the muon direction 
+			if (abs(jet_muon_dPhi) > 2) matched_jet = true;
+		}
+	}
+
+	if ( matched_jet ) return true;
+	else return false;
+}

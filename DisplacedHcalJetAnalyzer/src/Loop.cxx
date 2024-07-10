@@ -42,8 +42,10 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 
 	bool WPlusJetsEvent = false;
 	bool NoLeptonEvent = false;
+	bool ZmumuEvent = false;
 	if (PassWPlusJetsSelection()) WPlusJetsEvent = true;
 	if (PassLeptonVeto()) NoLeptonEvent = true;
+	if (PassZmumuSelection()) ZmumuEvent = true;
 
 	// Fill jet based output trees in minituples
 	for (int i = 0; i < jet_Pt->size(); i++) {
@@ -69,7 +71,7 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 	// Fill event based output trees in minituples
 	FillOutputTrees("NoSel");
 	if (passedHLT > 0) FillOutputTrees("PassedHLT");
-	if (WPlusJetsEvent && abs(deltaPhi(jet_Phi->at(0), WPlusJets_leptonPhi)) > 2) FillOutputTrees("WPlusJets");
+	if (WPlusJetsEvent && abs(deltaPhi(jet_Phi->at(0), WPlusJets_leptonPhi)) > 2) FillOutputTrees("WPlusJets"); // leading jet has passed selection
 	if (NoLeptonEvent) FillOutputTrees("NoLepton");
 
 	return;
