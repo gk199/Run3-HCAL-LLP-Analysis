@@ -174,22 +174,18 @@ bool DisplacedHcalJetAnalyzer::PassZmumuSelection() {
 			M1.SetPtEtaPhiE(fabs(muon_Pt->at(i)), muon_Eta->at(i), muon_Phi->at(i), muon_E->at(i));
 			muon_pair_pt[0] = muon_Pt->at(i);
 			muon_pair_phi[0] = muon_Phi->at(i);
-			cout << muon_Pt->at(i) << " = muon 1 pT" << endl;
 		}
 		if (muon2) {
 			M2.SetPtEtaPhiE(fabs(muon_Pt->at(i)), muon_Eta->at(i), muon_Phi->at(i), muon_E->at(i));
 			muon_pair_pt[1] = muon_Pt->at(i);
 			muon_pair_phi[1] = muon_Phi->at(i);
-			cout << muon_Pt->at(i) << " = muon 2 pT" << endl;
 		}
 	}
-	double Zmass = 0;
-	if (muon1 && muon2) Zmass = (M1+M2).M();
-	cout << Zmass << " = Z mass" << endl;
-	// likely need to constrain on the Z mass, how tight? check distribution first
+	if (muon1 && muon2) Z_mass = (M1+M2).M();
+	if (Z_mass < 89 && Z_mass > 93) return false; // need to constrain on the Z mass -- check distribution for verification. Set bounds at 89-93 GeV 
 
 	// find the phi vector sum of the two muons
-	float Muon_PhiVectorSum = atan2(muon_pair_pt[0] * sin(muon_pair_phi[0]) + muon_pair_pt[1] * sin(muon_pair_phi[1]), muon_pair_pt[0] * cos(muon_pair_phi[0]) + muon_pair_pt[1] * cos(muon_pair_phi[1]));
+	Muon_PhiVectorSum = atan2(muon_pair_pt[0] * sin(muon_pair_phi[0]) + muon_pair_pt[1] * sin(muon_pair_phi[1]), muon_pair_pt[0] * cos(muon_pair_phi[0]) + muon_pair_pt[1] * cos(muon_pair_phi[1]));
 
 	// only check jets once we know two muons have been found
 	bool matched_jet = false;

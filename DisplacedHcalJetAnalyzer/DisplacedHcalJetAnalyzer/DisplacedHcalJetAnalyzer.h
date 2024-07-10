@@ -210,6 +210,8 @@ public :
    vector<float> gLLP_DecayVtx_Mag;
 
    float WPlusJets_leptonPhi = -9999.9;
+   float Z_mass = -9999.9;
+   float Muon_PhiVectorSum = -9999.9;
 
    // ----- Variables ----- //
 
