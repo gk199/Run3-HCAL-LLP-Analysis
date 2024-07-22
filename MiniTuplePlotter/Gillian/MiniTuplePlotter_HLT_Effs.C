@@ -112,7 +112,7 @@ void MiniTuplePlotter_HLT_Effs(){
 	overlay_HT.SetLegendNames({"L1", "m_{H}=350 GeV, HLT efficiency", "L1", "m_{H}=125 GeV, HLT efficiency"});
 	overlay_HT.Plot("efficiency", "", {"0","0","0"}, true);
 
-	class MiniTuplePlotter overlay_jet( { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_rerun", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_combined"}, path );
+	class MiniTuplePlotter overlay_jet( { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_noPerJetPt_2024_06_30", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_noPerJetPt_2024_06_30"}, path );
 	overlay_jet.SetPlots({P_perJet_Pt});
 	overlay_jet.SetTreeName( "PerJet_LLPmatched" );
 	overlay_jet.SetOutputFileTag("HLT_v3_MC_L1effs");
@@ -121,7 +121,7 @@ void MiniTuplePlotter_HLT_Effs(){
 	overlay_jet.plot_log_ratio   	= true;
 	overlay_jet.SetLegendPosition( 0.4, 0.75, 0.87, 0.93 );
 	overlay_jet.SetVariableBins( {40, 46, 52, 58, 64, 70, 76, 82, 88, 94, 100, 110, 124, 140, 160, 185, 215, 250} );
-	overlay_jet.SetVariableBins( {40, 54, 63, 72, 81, 90, 100, 110, 120, 140, 165, 200, 250, 300, 350} );	
+	overlay_jet.SetVariableBins( {0, 10, 26, 40, 54, 63, 72, 81, 90, 100, 110, 120, 140, 165, 200, 250, 300} );	
 	overlay_jet.SetSelectiveCuts("MC", Cut_matchedLLPinHCAL34_eventHT250);		// region for LLP decay, and require LLP is matched to jet 0, and event HT 250
 	overlay_jet.SetComparisonCuts({Cut_None, Cut_HLTpassed1}); 
 	overlay_jet.colors = { kBlack, kAzure+7, kGray+1, kViolet+4 };

@@ -927,6 +927,7 @@ public :
 			//fout->cd();
 			//myCanvas->Write();
 			myCanvas->SaveAs( output_directory+"/"+output_file_name+".png", "png" );
+			if( plot_type == "efficiency" ) myCanvas->SaveAs( output_directory+"/"+output_file_name+".pdf", "pdf" );
 			delete myCanvas;
 
 		}
