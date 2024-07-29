@@ -14,6 +14,9 @@ time_debug = False
 # declare any variables or settings here
 data = True
 MC = False
+
+pred_WPlusJets = False
+
 if len(sys.argv) > 1:
     if sys.argv[2] == "data": data = True
     if sys.argv[2] == "MC": MC = True
@@ -55,8 +58,8 @@ def OutputFolder(name):
 
 OutputFolder("")
 
-jet_number = ["0", "1", "2", "3", "4", "5"]
-# jet_number = ["0"]
+# jet_number = ["0", "1", "2", "3", "4", "5"]
+jet_number = ["0"]
 
 # path = sys.argv[1] # pass the location of the processed ntuple as an argument 
 # infile = ROOT.TFile.Open(path)
@@ -193,15 +196,22 @@ def ExcludedCut( branch_name, branch_sel ):
 # ------------------------------------------------------------------------------
 def ProbabilityEst(infilepath, label):
     infile = ROOT.TFile.Open( infilepath )
-    tree = infile.Get("WPlusJets")
+    if (pred_WPlusJets): tree = infile.Get("WPlusJets") # use W+jets to predict
+    else:
+        if label == "HighMET": tree = infile.Get("NoLepton") # for high MET skim
+        if label == "Zmu": tree = infile.Get("Zmumu") # for high MET skim
+        else: tree = infile.Get("NoSel")
     MisTagProbability(tree, "jet", label)
 
 # ------------------------------------------------------------------------------
 def BackgroundPrediction(infilepath, label):
     infile = ROOT.TFile.Open( infilepath )
-    if label == "HighMET": tree = infile.Get("NoLepton") # for high MET skim
-    if label == "Zmu": tree = infile.Get("Zmumu") # for high MET skim
-    else: tree = infile.Get("NoSel")
+    if (pred_WPlusJets): # predict on W+jets, compare against actual in these categories
+        if label == "HighMET": tree = infile.Get("NoLepton") # for high MET skim
+        if label == "Zmu": tree = infile.Get("Zmumu") # for high MET skim
+        else: tree = infile.Get("NoSel")
+    else:
+        tree = infile.Get("WPlusJets")
     MisTagPrediction(tree, "jet", label)
 
 # ------------------------------------------------------------------------------
@@ -519,11 +529,13 @@ def Plot2D(tree, obj_type, radius):
             LegendLabel(legend)
             canvDepth.SaveAs(folder + "_" + radius + "/" + obj_type + var + "_energyProfile" + str(cut) + ".png")
             
+
+LLP_matching = ["L1trig_Matched"] # jet + number + var = full histogram name
+LLP_BDTscore = ["bdtscoreX_LLP350_MS80_perJet"]
+
 # ------------------------------------------------------------------------------
 def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, obj_type):
     if (obj_type == "jet"):
-        LLP_matching = ["L1trig_Matched"] # jet + number + var = full histogram name
-        LLP_BDTscore = ["bdtscoreX_LLP350_MS80_perJet"]
 
         tree_list = [tree1, tree2, tree3, tree4, tree5]
 
@@ -619,28 +631,28 @@ def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, o
 # ------------------------------------------------------------------------------
 # def SetupNumeratorDenominator(tree, obj_type):
 
+
+jet_kinematics = ["Eta", "Phi", "Pt"]
+bin_num = [12, 6, 9]
+plot_x_range = [1.26, 3.2, 1]
+plot_y_range = [0.01, 0.007, 0.02]
+bin_widths = np.array([40, 50, 60, 70, 80, 100, 120, 160, 240, 400], dtype='float64') 
+
+frac_track_pt_bins = [[0, 1.1], [0, 0.5], [0.5, 1.1]]
+ele_frac_bins = [[0, 1.1], [0, 0.5], [0.5, 1.1]]
+label_track_pt_bins = ["inclusive", "<0.5", ">=0.5"]
 # ------------------------------------------------------------------------------
 def MisTagProbability(tree, obj_type, label = ""):
     
     if (obj_type == "jet"):
-
-        LLP_matching = ["L1trig_Matched"] # jet + number + var = full histogram name
-        LLP_BDTscore = ["bdtscoreX_LLP350_MS80_perJet"]
-        jet_kinematics = ["Eta", "Phi", "Pt"]
-        bin_num = [12, 6, 9]
-        plot_x_range = [1.26, 3.2, 1]
-        plot_y_range = [0.01, 0.007, 0.02]
-        bin_widths = np.array([40, 50, 60, 70, 80, 100, 120, 160, 240, 400], dtype='float64') 
-
+        
         misTagJets = {}
         allJets = {}
 
         # for the high MET dataset, can do a range triggered = [[-10000, 2]] to do an inclusive estimation
         triggered = [[-10000,2]] # [-9999,0,1]
 
-        frac_track_pt_bins = [[0, 1.1], [0, 0.5], [0.5, 1.1]]
-        ele_frac_bins = [[0, 1.1], [0, 0.5], [0.5, 1.1]]
-        label_track_pt_bins = ["inclusive", "<0.5", ">=0.5"]
+
 
         outfile = ROOT.TFile.Open(label + "outfile.root", "RECREATE")
 
@@ -726,24 +738,12 @@ def MisTagPrediction(tree, obj_type, label = ""):
     
     if (obj_type == "jet"):
 
-        LLP_matching = ["L1trig_Matched"] # jet + number + var = full histogram name
-        LLP_BDTscore = ["bdtscoreX_LLP350_MS80_perJet"]
-        jet_kinematics = ["Eta", "Phi", "Pt"]
-        bin_num = [12, 6, 9]
-        plot_x_range = [1.26, 3.2, 1]
-        plot_y_range = [0.01, 0.007, 0.02]
-        bin_widths = np.array([40, 50, 60, 70, 80, 100, 120, 160, 240, 400], dtype='float64') 
-
         misTagJets = {}
         allJets = {}
         allJets_actual = {}
 
         # for the high MET dataset, can do a range triggered = [[-10000, 2]] to do an inclusive estimation
         triggered = [[-10000,2]] # [-9999,0,1]
-
-        frac_track_pt_bins = [[0, 1.1], [0, 0.5], [0.5, 1.1]]
-        ele_frac_bins = [[0, 1.1], [0, 0.5], [0.5, 1.1]]
-        label_track_pt_bins = ["inclusive", "<0.5", ">=0.5"]
 
         mistag_file = ROOT.TFile.Open(label + "outfile.root")
 
@@ -818,28 +818,18 @@ def MisTagPrediction(tree, obj_type, label = ""):
                     canv.SaveAs(folder + "/" + label + "_PredictedMisTag_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + "_track_" + label_track_pt_bins[track_counter] + ".png")
 
                     counter += 1
-                
                 track_counter += 1
-
 
 # ------------------------------------------------------------------------------
 def OverlayWPlusJets():
     
-    LLP_matching = ["L1trig_Matched"] # jet + number + var = full histogram name
-    LLP_BDTscore = ["bdtscoreX_LLP350_MS80_perJet"]
-    jet_kinematics = ["Eta", "Phi", "Pt"]
-    bin_num = [12, 6, 9]
-    plot_x_range = [1.26, 3.2, 1]
-    plot_y_range = [0.01, 0.007, 0.02]
-    bin_widths = np.array([40, 50, 60, 70, 80, 100, 120, 160, 240, 400], dtype='float64') 
-
     mistag_file = {}
 
     triggered = [[-10000,2]] # [-9999,0,1]
 
-    frac_track_pt_bins = [[0, 1.1], [0, 0.5], [0.5, 1.1]]
+    frac_track_pt_bins = [[0, 1.1]] #, [0, 0.5], [0.5, 1.1]]
     ele_frac_bins = [[0, 1.1], [0, 0.5], [0.5, 1.1]]
-    label_track_pt_bins = ["inclusive", "<0.5", ">=0.5"]
+    label_track_pt_bins = ["inclusive"] # , "<0.5", ">=0.5"]
 
     type = ["Zmu", "LLPskim", "HighMET"]
     obj_type = "jet"
@@ -847,38 +837,49 @@ def OverlayWPlusJets():
     for trig_matched in triggered:
         track_counter = 0
         for track_pt in frac_track_pt_bins:
+            var_counter = 0
             for var in jet_kinematics:
-                canv = ROOT.TCanvas()
+                canv = ROOT.TCanvas("c"+var,"c"+var,800,600)
                 legend = ROOT.TLegend(0.7,0.65,0.87,0.8)
 
                 canv.cd()
                 counter = 0
+                # draw blank to set axis (x and y) range and labels
+                if (var != "Pt"): blank = ROOT.TH1F("Mistag_"+var, "W+Jets mistag rate; Jet " + var + "; Mistag rate", bin_num[var_counter], -plot_x_range[var_counter], plot_x_range[var_counter])
+                else: blank = ROOT.TH1F("Mistag_"+var, "W+Jets mistag rate; Jet " + var + "; Mistag rate", bin_num[var_counter], bin_widths)
+                blank.GetYaxis().SetRangeUser(0, plot_y_range[var_counter]) 
+                blank.Draw("AXIS")
+
+                # '''
                 for input in type:
-                    mistag_file[input] = ROOT.TFile.Open(input+"outfile.root")
-                    MisTagEffDist = mistag_file[input].Get("Efficiency_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + "_track" + label_track_pt_bins[track_counter])  
-                    if (counter == 0): MisTagEffDist.Draw() 
-                    else: MisTagEffDist.Draw("same")
+                    mistag_file = ROOT.TFile.Open(input+"outfile.root")
+                    MisTagEffDist = mistag_file.Get("Efficiency_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + "_track" + label_track_pt_bins[track_counter])  
+                    MisTagEffDist.Draw("SAME")
                     MisTagEffDist.SetLineColor(counter+2)
                     legend.AddEntry(MisTagEffDist, input+", Observed Mis-tag")
-                    # MisTagEffDist.GetPaintedGraph().GetYaxis().SetRangeUser(0, plot_y_range[counter])
-                    # MisTagEffDist.GetPaintedHistogram().SetMaximum(plot_y_range[counter])
+                    # print("successfully drawn")
+                    # MisTagEffDist.GetPaintedGraph().GetYaxis().SetRangeUser(0, plot_y_range[var_counter])
+                    # MisTagEffDist.GetPaintedHistogram().SetMaximum(plot_y_range[var_counter])
                     counter += 1
+                # '''
+                var_counter += 1
 
-                # need to set different colors, and set range well 
                 LegendLabel(legend)
+                # canv.Update()
                 canv.SaveAs(folder + "/OverlayMisTag_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + "_track_" + label_track_pt_bins[track_counter] + ".png")
+                # canv.Clear()
 
             track_counter += 1
 
 # ------------------------------------------------------------------------------
 def main():
 
-    infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_v3.7_LLPskim_Run2023_HADD.root"
-    label = "LLPskim"
+    # infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7.1/minituple_v3.7_LLPskim_Run2023_HADD.root"
+    # label = "LLPskim"
     # infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8.1/minituple_v3.8_EXOhighMET_Run2023Cv4_2024_07_03.root"
     # label = "HighMET"
-    # infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8.1/minituple_v3.8_Zmu_Run2023Cv4_2024_07_11.root"
-    # label = "Zmu"
+    infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8.1/minituple_v3.8_Zmu_Run2023Cv4_2024_07_11.root"
+    label = "Zmu"
 
     if len(sys.argv) > 1: infilepath = sys.argv[1]
 
@@ -892,10 +893,10 @@ def main():
 
     # SignalDistribution(LLP1, LLP2, LLP3, LLP4, LLP5, LLP_names, "NoSel", infilepath, "WPlusJets")
 
-    OverlayWPlusJets()
+    # OverlayWPlusJets()
 
-    # ProbabilityEst(infilepath, label)
-    # BackgroundPrediction(infilepath, label)
+    ProbabilityEst(infilepath, label)
+    BackgroundPrediction(infilepath, label)
 
 if __name__ == '__main__':
 	main()
