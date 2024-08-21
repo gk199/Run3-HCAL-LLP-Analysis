@@ -15,7 +15,7 @@ from sklearn.metrics import roc_curve, auc
 import csv
 
 
-
+CONSTANTS = pd.read_csv("norm_constants.csv") 
 
 class DataProcessor:
     def __init__(self, num_classes=2, mode=None, sel=True): #counting from 0 
