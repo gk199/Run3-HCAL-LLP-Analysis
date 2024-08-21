@@ -129,7 +129,6 @@ class DataProcessor:
        'perJet_SubLeadingRechitE', 'perJet_SSubLeadingRechitE',
        'perJet_AllRechitE']
         
-        scaler = MinMaxScaler()
         
         labels = None 
         if not self.mode and self.sel:
@@ -152,7 +151,7 @@ class DataProcessor:
     
     def write_to_root(self, scores, filename, labels=None):
         filename = f"{filename}_scores_nosels.root"
-        # only implemented for multiclass for now
+        # only implemented for multiclass for now but easy to change
         dataframe = self.cumulative_df
         dataframe['scores12'] = scores[:, 0]
         dataframe['scores34'] = scores[:, 1]
