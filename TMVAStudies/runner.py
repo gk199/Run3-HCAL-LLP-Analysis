@@ -138,12 +138,16 @@ class DataProcessor:
         if not self.mode and self.sel:
             self.cumulative_df = self.cumulative_df.sample(frac=1).reset_index(drop=True) # shuffling
             labels = self.cumulative_df["classID"].values
-            
-        if norm_type == "MinMax"
-            data = self.cumulative_df[features]
-            data = scaler.fit_transform(data.values)
+
+        data = self.cumulative_df[features]
+        print(data.describe())
+        normed_data = pd.DataFrame()
+        for feature in data.columns:
+            normed_data[feature] = (data[feature] - CONSTANTS[feature][0])/ CONSTANTS[feature][1]
+        print(normed_data.describe()) 
+        print("Processing Complete")
         
-        else:
+        return normed_data, labels
             
         
         print(self.cumulative_df.describe())
@@ -152,7 +156,7 @@ class DataProcessor:
         
         return data, labels
     
-    # needs fixing 
+    
     def write_to_root(self, scores, filename, labels=None):
         filename = f"{filename}_scores_nosels.root"
         # only implemented for multiclass for now
