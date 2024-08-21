@@ -21,7 +21,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 
 	// Add Event Variables //
 	vector<string> myvars_int = {
-		"run","lumi","event","jet","validJet","muon","ele","pho",
+		"run","lumi","event","PV","jet","validJet","muon","ele","pho",
 		"RechitN","RechitN_1GeV","RechitN_5GeV","RechitN_10GeV",
 		"TrackN", "ecalRechitN", "HBHE_Rechit_auxTDC"
 	};	
@@ -238,7 +238,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 
 	// Add Event Variables //
 	vector<string> myvars_int = {
-		"run","lumi","event","jet","muon","ele","pho",
+		"run","lumi","event","PV","jet","muon","ele","pho",
 		"jetIndex"
 	};	
 
@@ -383,6 +383,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 	tree_output_vars_int["run"] 	= runNum;
 	tree_output_vars_int["lumi"] 	= lumiNum;
 	tree_output_vars_int["event"] 	= eventNum;
+	tree_output_vars_int["PV"] 		= n_PV;
 	tree_output_vars_int["jet"]		= n_jet;
 	tree_output_vars_int["ele"]		= n_ele;
 	tree_output_vars_int["muon"]	= n_muon;
@@ -658,6 +659,7 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	jet_tree_output_vars_int["run"] 		= runNum;
 	jet_tree_output_vars_int["lumi"] 		= lumiNum;
 	jet_tree_output_vars_int["event"] 		= eventNum;
+	jet_tree_output_vars_int["PV"] 			= n_PV;
 	jet_tree_output_vars_int["jet"]			= n_jet;
 	jet_tree_output_vars_int["ele"]			= n_ele;
 	jet_tree_output_vars_int["muon"]		= n_muon;
