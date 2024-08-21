@@ -25,9 +25,6 @@ class DataProcessor:
         self.sel = sel
     
     def load_data(self, sig_files=None, bkg_files=None):
-        
-        # need a mode that doesn't pre-classify them but just loads the data and then you can get it to predict
-        # and returns the dataframe unchanged so filenames are the same
         print("Loading Data...")
         bkg_value = self.return_value_bkg
         sig_value = self.return_sig_value
@@ -146,15 +143,11 @@ class DataProcessor:
             normed_data[feature] = (data[feature] - CONSTANTS[feature][0])/ CONSTANTS[feature][1]
         print(normed_data.describe()) 
         print("Processing Complete")
-        
-        return normed_data, labels
-            
-        
         print(self.cumulative_df.describe())
         
         print("Processing Complete")
         
-        return data, labels
+        return normed_data, labels
     
     
     def write_to_root(self, scores, filename, labels=None):
@@ -176,7 +169,7 @@ class ModelHandler:
         
         self.num_classes = num_classes
         self.num_layers = num_layers
-        self.model_name = "norm_trained_model.keras" #"dense_model.keras"
+        self.model_name = "dense_model.keras"
         self.colors = ['red', 'blue', 'green']
         
         self.names = ["HCAL12", "HCAL34", "bkg"] if num_classes == 3 else ["HCAL", "bkg"]
@@ -393,7 +386,7 @@ def main():
         "minituple_v3.6_LLPskim_Run2023Cv4_2024_03_02.root",
         "minituple_v3.6_LLPskim_Run2023Dv2_2024_03_02.root"]
     
-    mode = "filewrite"
+    mode = "train" # "eval", "filewrite"
     
     runner = Runner(sig_files=filenames[:1], mode=mode, num_classes=3)
     runner.run()
