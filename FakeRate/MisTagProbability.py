@@ -629,10 +629,10 @@ def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, o
 # ------------------------------------------------------------------------------
 # def SetupNumeratorDenominator(tree, obj_type):
 
-jet_kinematics = ["Eta", "Phi", "Pt", "run", "lumi"]
-bin_num = [12, 6, 9, 40, 40]
-plot_x_range = [1.26, 3.2, 1, 370000, 1600]
-plot_y_range = [0.01, 0.007, 0.02, 0.02, 0.02]
+jet_kinematics = ["Eta", "Phi", "Pt", "NSV", "run", "lumi"]
+bin_num = [12, 6, 9, 5, 40, 40]
+plot_x_range = [1.26, 3.2, 1, 5, 370000, 1600]
+plot_y_range = [0.01, 0.007, 0.02, 0.02, 0.02, 0.02]
 bin_widths = np.array([40, 50, 60, 70, 80, 100, 120, 160, 240, 400], dtype='float64') 
 
 frac_track_pt_bins = [[0, 1.1], [0, 0.5], [0.5, 1.1]]
@@ -662,7 +662,7 @@ def MisTagProbability(tree, obj_type, label = ""):
                     
                     adj = 0
                     if var == "run": adj = 2*plot_x_range[counter] - 10000
-                    if var == "lumi": adj = plot_x_range[counter]
+                    if (var == "lumi" or var == "NSV"): adj = plot_x_range[counter]
 
                     if var != "Pt":
                         misTagJets_6 = ROOT.TH1F("Numerator " + var, "Jet; Jet " + var + "; Jet Tagging Efficiency", bin_num[counter], -plot_x_range[counter] + adj, plot_x_range[counter] ); 
@@ -745,7 +745,8 @@ def MisTagPrediction(tree, obj_type, label = ""):
         # for the high MET dataset, can do a range triggered = [[-10000, 2]] to do an inclusive estimation
         triggered = [[-10000,2]] # [-9999,0,1]
 
-        mistag_file = ROOT.TFile.Open(label + "outfile.root")
+        mistag_file = ROOT.TFile.Open(label + "outfile.root") # file to read all the mistag rates from (produced from MisTagProbability function above)
+        scaleFile = ROOT.TFile.Open(label + "_Scales.root", "RECREATE") # file to write all the scale factors to
 
         for trig_matched in triggered:
             track_counter = 0
@@ -758,7 +759,7 @@ def MisTagPrediction(tree, obj_type, label = ""):
 
                     adj = 0
                     if var == "run": adj = 2*plot_x_range[counter] - 10000
-                    if var == "lumi": adj = plot_x_range[counter]
+                    if (var == "lumi" or var == "NSV"): adj = plot_x_range[counter]                    
 
                     hs = ROOT.THStack( "hs_temp", "Predicted and Actual Mis-Tag Jets for L1 trigger matched = " + str(trig_matched) + ", with frac. track pT " + label_track_pt_bins[track_counter] + "; Jet " + var + "; Number of Mis-tagged Jets ")
                     if var != "Pt":
@@ -816,6 +817,13 @@ def MisTagPrediction(tree, obj_type, label = ""):
                     legend.AddEntry(allJets_6, "Predicted Mis-tag")
                     hs.Add(allJets_6_actual)
                     legend.AddEntry(allJets_6_actual, "Actual Mis-tag")
+
+                    # need to save factor actual / predicted for use in other ones. Save this in a "scale" histogram to multiply everything else by:
+                    hname_temp = obj_type + "_" + var
+                    factor = allJets_6_actual.Clone("factor") # in c++, this would be with a pointer instead
+                    factor.Divide(allJets_6)
+                    scaleFile.WriteObject(factor, "ScaleFactor_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + "_track" + label_track_pt_bins[track_counter])
+
                     allJets_6_actual.SetFillStyle(3004) # to keep consistent, data is filled, MC or predictions are lines # but THstack doesn't use different fill styles :( 
                     allJets_6.SetFillStyle(0)
                     hs.Draw("HIST NOSTACK PLC PFC E1")
@@ -824,6 +832,7 @@ def MisTagPrediction(tree, obj_type, label = ""):
 
                     counter += 1
                 track_counter += 1
+        scaleFile.Close()
 
 # ------------------------------------------------------------------------------
 def OverlayWPlusJets():
