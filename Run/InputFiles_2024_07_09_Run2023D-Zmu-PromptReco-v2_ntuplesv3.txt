@@ -1,2 +1,0 @@
-root://cmsxrootd.fnal.gov///store/user/gkopp/Muon0/Run2023D-ZMu-PromptReco-v2_RAW-RECO_20240708_232511/240708_212613/0000/output_1-12.root
-root://cmsxrootd.fnal.gov///store/user/gkopp/Muon0/Run2023D-ZMu-PromptReco-v2_RAW-RECO_20240708_232511/240708_212613/0000/output_1-36.root

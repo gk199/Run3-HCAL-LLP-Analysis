@@ -36,6 +36,8 @@ cd ../Run
 ```
 For running in compiled mode, remember to input the file path as `root://cmsxrootd.fnal.gov///store/user...`.
 
+Text files of the ntuples can be made with `find "$PWD" -maxdepth 1 -type f` from the directories in `/hdfs/store/user/gkopp/`.
+
 ## Condor Processing
 Follow the [instructions](https://github.com/gk199/Run3-HCAL-LLP-Analysis/tree/main/Run/Condor) in the condor subdirectory. 
 
