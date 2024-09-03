@@ -92,10 +92,9 @@ def getNTupleFileLists( dataset, tag_version ):
 	#tag_version_mod = "NTupleV"+version
 
 	for user in users:
-		basepath = os.path.join( "TEST/hdfs/store/user/",user,dataset )
+		basepath = os.path.join( "/hdfs/store/user/",user,dataset )
 		
 		for root, dirs, files in os.walk(basepath):
-			
 			if tag_version not in root: continue
 
 			for filename in files:
@@ -202,7 +201,7 @@ def checkEventsProcessed( filelists ):
 		NEvents_ntuple  = -1
 
 		ntuplefilepath = os.path.join( logfilepath.split("log/cmsRun")[0], "output_"+logfilepath.split("_")[-1].split(".log")[0]+".root" )
-		ntuplefilepath = "TEST/hdfs/store/user/gkopp/DisplacedJet/Run2023D-EXOLLPJetHCAL-PromptReco-v2_AOD_20231114_143510/231114_133516/0000/output_1.root"
+		#ntuplefilepath = "TEST/hdfs/store/user/gkopp/DisplacedJet/Run2023D-EXOLLPJetHCAL-PromptReco-v2_AOD_20231114_143510/231114_133516/0000/output_1.root"
 		
 		eventcountreport += "Checking "+ntuplefilepath+"\n"
 
