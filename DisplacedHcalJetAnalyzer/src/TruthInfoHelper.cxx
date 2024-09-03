@@ -358,3 +358,57 @@ vector<TVector3> DisplacedHcalJetAnalyzer::GetLLPDecayProdCoords(int idx_llp, in
 }
 
 
+/* ====================================================================================================================== */
+void DisplacedHcalJetAnalyzer::InitializeLifetimeReweighting( string infiletag ){
+
+	// Set LTRW List //
+
+	list_lifetime_rw_str = { "100", "300", "1000", "3000", "10000", "30000", "100000" };
+
+	cout<<"Initializing lifetime reweighting targets to:"<<endl;
+	for( auto lt_rw: list_lifetime_rw_str ) 
+		cout<<" -> "<<lt_rw<<endl;
+
+	// Get Signal Lifetime from Filetag //
+
+	ctau_sample = -1;
+
+	string str_first = "CTau";
+
+	cout<<infiletag<<endl;
+	if( infiletag.find(str_first) == string::npos ){
+		cout<<"NOTE: Setting lifetime as: "<<ctau_sample<<" (normal for non-signal samples)"<<endl;
+		return; // Not signal
+	}
+
+	string infiletag_partial = infiletag.substr( infiletag.find(str_first)+str_first.length(), infiletag.length() );
+
+	cout<<infiletag_partial<<endl;
+
+	// End String (either the following _ or . or /)
+	vector<string> vecstr_last = {".", "_", "/"};
+	unsigned last = infiletag.length();
+
+	for( auto str_last: vecstr_last ){
+		if( infiletag_partial.find(str_last) == string::npos ) continue;
+		unsigned last_temp = infiletag_partial.find(str_last);
+		if( last_temp < last ) last = last_temp;
+	}
+
+	float ctau_sample = std::stof( infiletag_partial.substr(0,last))*0.1; // 0.1 to convert from mm to cm
+
+	cout<<"Reading in signal lifetime as: "<<ctau_sample<<" cm..."<<endl;
+
+}
+
+/* ====================================================================================================================== */
+Float_t DisplacedHcalJetAnalyzer::GetLifetimeReweight( float ctau_target, float ctau_llp0, float ctau_llp1 ){
+
+	if( ctau_sample < 0 ) return -1; 
+
+	Float_t reweight_llp0 = pow ( ctau_sample / ctau_target, 1 ) * exp( -ctau_llp0 * ( 1.0/ctau_target - 1.0/ctau_sample ) );
+	Float_t reweight_llp1 = pow ( ctau_sample / ctau_target, 1 ) * exp( -ctau_llp1 * ( 1.0/ctau_target - 1.0/ctau_sample ) );
+	return reweight_llp0*reweight_llp1;
+
+}
+

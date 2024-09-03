@@ -27,12 +27,19 @@ void DisplacedHcalJetAnalyzer::Initialize( string infiletag, string infilepath )
 	SetHistCategories();
 
 	// Initialize TMVA Reader
-	MyTags jet_based = MyTags(/*event_based=*/ false, /*calor_only=*/ false);
-	DeclareTMVAReader(jet_based);
-	MyTags jet_based_calor = MyTags(/*event_based=*/ false, /*calor_only=*/ true);
-	DeclareTMVAReader(jet_based_calor);
-	MyTags event_based = MyTags(/*event_based=*/ true, /*calor_only=*/ false);
-	DeclareTMVAReader(event_based);
+	InitializeTMVA(); 
+
+	// Lifetime Reweighting
+	InitializeLifetimeReweighting( infilepath );
+
+	//BookTMVAReader( bdt_version );
+
+	//MyTags jet_based = MyTags(/*event_based=*/ false, /*calor_only=*/ false);
+	//DeclareTMVAReader(jet_based);
+	//MyTags jet_based_calor = MyTags(/*event_based=*/ false, /*calor_only=*/ true);
+	//DeclareTMVAReader(jet_based_calor);
+	//MyTags event_based = MyTags(/*event_based=*/ true, /*calor_only=*/ false);
+	//DeclareTMVAReader(event_based);
 
 	return;
 }
@@ -105,7 +112,7 @@ void DisplacedHcalJetAnalyzer( string infiletag = "", string infilepath = "" ){
 	AnalysisReader.print_counts	= true;
 	AnalysisReader.save_hists	= false;	// For output histograms
 	AnalysisReader.save_trees	= true;		// For minituples
-	AnalysisReader.NEvents 		= -1; 		// Run over specified number of events (set to -1 for ALL)
+	AnalysisReader.NEvents 		= 1000; //-1; 		// Run over specified number of events (set to -1 for ALL)
 
 	// ----- Initialize ----- // 
 

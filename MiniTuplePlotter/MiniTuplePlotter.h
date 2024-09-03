@@ -492,14 +492,15 @@ public :
 
 		if( fit_type.find("exp_decay") != string::npos ){
 
+
 			TF1* fit = new TF1("fit_expdecay","expo"); // exponential decay
 			h->Fit( fit, "Q");
-			float scale  = fit->GetParameter(0);
-			float ctau   = -1/fit->GetParameter(1);
-			float c      = 300.0; // mm/ns
-			double tau   = ctau / c ;
+			float scale  	= fit->GetParameter(0);
+			float decay_len = -1/fit->GetParameter(1);
+			//float c      = 300.0; // mm/ns
+			//double tau   = ctau / c ;
 			//fit_info_str += Form("c#tau = %.2f mm, #tau = %.2f ns, ", ctau, tau );
-			fit_info_str += Form("decaylen = %.2f %s", ctau, units.c_str() );
+			fit_info_str += Form("decay_len = %.1f, scale = %.1f", decay_len, scale); //, ctau, units.c_str() );
 
 		}	
 
@@ -928,7 +929,7 @@ public :
 		myCanvas->SetTopMargin(0.12);
 		myCanvas->SetBottomMargin(0.12);
 
-		gStyle->SetPalette(kCool);
+		//gStyle->SetPalette(kCool);
 
 		if( plot_log ) 
 			gPad->SetLogz();

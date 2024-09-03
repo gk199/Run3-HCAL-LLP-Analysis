@@ -35,6 +35,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <cmath>
 
 #ifdef __ROOTCLING__
 #pragma link C++ class vector<vector <float> >+;
@@ -176,10 +177,13 @@ public :
 
    // ----- TMVA Reader ----- //
 
+
+   string bdt_version;
    vector<string> bdt_tags;
    map<string,TMVA::Reader*> bdt_reader;
    map<string,vector<string>> bdt_var_names;
-   map<string,Float_t> bdt_vars;   
+   map<string,Float_t> bdt_vars;
+   map<string,Float_t*> bdt_vars_pointer;
 
    // ----- My Output Tree ----- //
    
@@ -208,6 +212,9 @@ public :
 
    vector<float> gLLP_DecayVtx_R;
    vector<float> gLLP_DecayVtx_Mag;
+
+   float ctau_sample = -1;
+   vector<string> list_lifetime_rw_str;
 
    float WPlusJets_leptonPhi = -9999.9;
 
@@ -869,16 +876,19 @@ public :
    virtual pair<bool,float> LLPDecayIsTruthMatched_LLP_b( int idx_gLLP, int idx_gParticle, float jetPt_cut=0, float deltaR_cut=0.4 );
    virtual pair<bool,float> LLPIsTruthMatched( int idx_gLLPDecay, float jetPt_cut=0, float deltaR_cut=0.4 );
    virtual vector<TVector3> GetLLPDecayProdCoords(int idx_llp, int idx_llp_decay, vector<float> intersection_depths); // Deprecated
+   virtual void    InitializeLifetimeReweighting( string infilepath );
+   virtual Float_t GetLifetimeReweight( float ctau_target, float ctau_llp0, float ctau_llp1 );
    // EventHelper.cxx
    virtual float  GetEventRuntime( clock_t clock_start, Long64_t init_entry, Long64_t current_entry );
    virtual void   ResetGlobalEventVars();
    virtual bool   PassWPlusJetsSelection();
    virtual float  EventHT();
    // BDTHelper.cxx
-   virtual void   DeclareTMVAReader( MyTags bdt_tag_info );
-   virtual float  GetBDTScores( string bdt_tag );
+   virtual void   InitializeTMVA(); //DeclareTMVAReader( MyTags bdt_tag_info );
+   virtual bool   BookTMVAReader( string bdt_tag );
+   virtual float  GetBDTScores( string bdt_tag, int jet_index = 0 );
    virtual bool   EventValidForBDTEval();
-   vector<string> GetBDTVariableNamesXML( string filepath, bool isSpectator );
+   vector<string> GetBDTVariableNamesXML( string filepath ); 
    // OutputHelper.cxx
    virtual void   DeclareOutputTrees();
    virtual void   DeclareOutputJetTrees();
@@ -1504,8 +1514,7 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("gParticle_ParentId", &gParticle_ParentId, &b_gParticle_ParentId);
    fChain->SetBranchAddress("gParticle_Status", &gParticle_Status, &b_gParticle_Status);
    fChain->SetBranchAddress("gParticle_Id", &gParticle_Id, &b_gParticle_Id);
-   fChain->SetBranchAddress("gParticle_Pt", &
-      gParticle_Pt, &b_gParticle_Pt);
+   fChain->SetBranchAddress("gParticle_Pt", &gParticle_Pt, &b_gParticle_Pt);
    fChain->SetBranchAddress("gParticle_Px", &gParticle_Px, &b_gParticle_Px);
    fChain->SetBranchAddress("gParticle_Py", &gParticle_Py, &b_gParticle_Py);
    fChain->SetBranchAddress("gParticle_Pz", &gParticle_Pz, &b_gParticle_Pz);
