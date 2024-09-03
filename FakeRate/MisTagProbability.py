@@ -529,7 +529,7 @@ def Plot2D(tree, obj_type, radius):
 
 LLP_matching = ["L1trig_Matched"] # jet + number + var = full histogram name
 LLP_BDTscore = ["bdtscoreX_LLP350_MS80_perJet"]
-BDTcut=0.9
+BDTcut=0.5
 
 # ------------------------------------------------------------------------------
 def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, obj_type):
@@ -629,10 +629,10 @@ def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, o
 # ------------------------------------------------------------------------------
 # def SetupNumeratorDenominator(tree, obj_type):
 
-jet_kinematics = ["Eta", "Phi", "Pt", "NSV", "run", "lumi"]
-bin_num = [12, 6, 9, 5, 40, 40]
-plot_x_range = [1.26, 3.2, 1, 5, 370000, 1600]
-plot_y_range = [0.01, 0.007, 0.02, 0.02, 0.02, 0.02]
+jet_kinematics = ["Eta", "Phi", "Pt", "NSV", "run", "lumi", "PV"]
+bin_num = [12, 6, 9, 5, 40, 40, 40]
+plot_x_range = [1.26, 3.2, 1, 5, 371000, 1600, 200]
+plot_y_range = [0.01, 0.007, 0.02, 0.02, 0.02, 0.02, 0.02]
 bin_widths = np.array([40, 50, 60, 70, 80, 100, 120, 160, 240, 400], dtype='float64') 
 
 frac_track_pt_bins = [[0, 1.1], [0, 0.5], [0.5, 1.1]]
@@ -661,8 +661,8 @@ def MisTagProbability(tree, obj_type, label = ""):
                     legend = ROOT.TLegend(0.8,0.72,0.87,0.8)
                     
                     adj = 0
-                    if var == "run": adj = 2*plot_x_range[counter] - 10000
-                    if (var == "lumi" or var == "NSV"): adj = plot_x_range[counter]
+                    if var == "run": adj = 2*plot_x_range[counter] - 5000 # 366 to 371
+                    if (var == "lumi" or var == "NSV" or var == "PV"): adj = plot_x_range[counter]
 
                     if var != "Pt":
                         misTagJets_6 = ROOT.TH1F("Numerator " + var, "Jet; Jet " + var + "; Jet Tagging Efficiency", bin_num[counter], -plot_x_range[counter] + adj, plot_x_range[counter] ); 
@@ -691,7 +691,7 @@ def MisTagProbability(tree, obj_type, label = ""):
                         BDTcut_region = GetCut(obj_type + i + "_" + LLP_BDTscore[0], [BDTcut, 1.1])
 
                         Jet_plots = obj_type + i + "_" + var
-                        if (var == "run" or var == "lumi"): Jet_plots = var
+                        if (var == "run" or var == "lumi" or var == "PV"): Jet_plots = var
                         tree.Draw(Jet_plots +" >> "+hname_temp, denom_cut + BDTcut_region, "", tree.GetEntries(), 0 ) # require matching variable set + LLP pt is high enough
                         tree.Draw(Jet_plots +" >> "+hname_denom, denom_cut, "", tree.GetEntries(), 0 ) # require LLP pt is high enough and in HB
                         
@@ -758,8 +758,8 @@ def MisTagPrediction(tree, obj_type, label = ""):
                     legend = ROOT.TLegend(0.7,0.65,0.87,0.8)
 
                     adj = 0
-                    if var == "run": adj = 2*plot_x_range[counter] - 10000
-                    if (var == "lumi" or var == "NSV"): adj = plot_x_range[counter]                    
+                    if var == "run": adj = 2*plot_x_range[counter] - 5000 # 366 to 371
+                    if (var == "lumi" or var == "NSV" or var == "PV"): adj = plot_x_range[counter]                    
 
                     hs = ROOT.THStack( "hs_temp", "Predicted and Actual Mis-Tag Jets for L1 trigger matched = " + str(trig_matched) + ", with frac. track pT " + label_track_pt_bins[track_counter] + "; Jet " + var + "; Number of Mis-tagged Jets ")
                     if var != "Pt":
@@ -790,7 +790,7 @@ def MisTagPrediction(tree, obj_type, label = ""):
                         denom_cut = selection_region + pT_region + eta_region + track_region + ele_region
 
                         Jet_plots = obj_type + i + "_" + var
-                        if (var == "run" or var == "lumi"): Jet_plots = var
+                        if (var == "run" or var == "lumi" or var == "PV"): Jet_plots = var
                         tree.Draw(Jet_plots +" >> "+hname_denom, denom_cut, "", tree.GetEntries(), 0 ) # require LLP pt is high enough and in HB
                         tree.Draw(Jet_plots +" >> "+hname_denom_actual, denom_cut + BDTcut_region, "", tree.GetEntries(), 0 ) # require LLP pt is high enough and in HB
                         
@@ -895,7 +895,9 @@ def main():
     # label = "LLPskim"
     # infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8.1/minituple_v3.8_EXOhighMET_Run2023Cv4_2024_07_03.root"
     # label = "HighMET"
-    infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8.1/minituple_v3.8_Zmu_Run2023Cv4_2024_07_11.root"
+    # infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8.1/minituple_v3.8_Zmu_Run2023Cv4_2024_07_11.root"
+    infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8.1/minituple_v3.8_Zmu_Run2023Cv4_2024_08_23.root"
+    # infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8.1/minituple_v3.8_Zmu_Run2023_all_08_25.root"
     label = "Zmu"
 
     if len(sys.argv) > 1: infilepath = sys.argv[1]
