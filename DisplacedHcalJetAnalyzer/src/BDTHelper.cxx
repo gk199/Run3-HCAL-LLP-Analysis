@@ -2,7 +2,7 @@
 void DisplacedHcalJetAnalyzer::InitializeTMVA(){
 
 	bdt_version = "v0.7";
-	
+
 	bdt_tags = { 
 		"LLP125_MS15_perJet",
 		"LLP125_MS50_perJet",
@@ -15,27 +15,6 @@ void DisplacedHcalJetAnalyzer::InitializeTMVA(){
 	vector<string> bdt_tags_booked = {};
 	vector<string> bdt_variables_all;
 
-	for( auto bdt_tag: bdt_tags ){
-
-		bool pass = BookTMVAReader( bdt_tag );
-
-		if( pass == false ) {
-			cout<<"WARNING: Unable to book TMVA Reader for bdt_tag "<<bdt_tag<<" -- file not found?"<<endl;
-			continue;
-		}
-
-		bdt_tags_booked.push_back( bdt_tag );
-
-		for( auto var: bdt_var_names[bdt_tag] ){
-			bdt_variables_all.push_back( var );
-		}
-
-	}
-}
-
-/* ====================================================================================================================== */
-bool DisplacedHcalJetAnalyzer::BookTMVAReader( string bdt_tag ){
-
 	// Get filepath
 	bool filepath_exists = false;
 	vector<string> filepaths = { "BDTWeightFiles/", "../BDTWeightFiles/", "../../BDTWeightFiles/" };
@@ -44,21 +23,55 @@ bool DisplacedHcalJetAnalyzer::BookTMVAReader( string bdt_tag ){
 		if( !gSystem->AccessPathName( Form("%s", filepaths.at(i).c_str()) ) ){
 			filepath = filepaths.at(i);
 			filepath_exists = true;
-			cout<<"Looking for BDT weight files in "<<filepath<<endl;
+			cout<<"\nLooking for BDT weight files in "<<filepath<<endl;
 			break;
 		}
 	}
 
-	if( !filepath_exists ) return false; 
+	if( !filepath_exists ){
+		cout<<"WARNING: BDT weight directory not found! Will run withoug BDT..."<<endl;
+		bdt_tags = {};
+		return; 
+	}
+
+	for( auto bdt_tag: bdt_tags ){
+
+		bool pass = BookTMVAReader( filepath, bdt_tag );
+
+		if( pass == false ) {
+			cout<<"WARNING: Unable to book TMVA Reader for bdt_tag "<<bdt_tag<<endl;
+			continue;
+		}
+
+		bdt_tags_booked.push_back( bdt_tag );
+
+		for( auto var: bdt_var_names[bdt_tag] ){
+			bdt_variables_all.push_back( var );
+		}
+	}
+
+	bdt_tags = bdt_tags_booked;
+}
+
+/* ====================================================================================================================== */
+bool DisplacedHcalJetAnalyzer::BookTMVAReader( string filepath, string bdt_tag ){
+
+	cout<<" --> "<<bdt_tag<<endl;
 
 	string filename = Form("%s%s/weights_%s/TMVAClassification_BDTG.weights.xml", filepath.c_str(), bdt_version.c_str(), bdt_tag.c_str() );
-	
+
+	if( debug ) cout<<filename<<endl;
+
+	// To fix
+	//if( !gSystem->AccessPathName( Form("%s", filename.c_str()) ) ){
+	//	cout<<"WARNING: BDT weight file not found for "<<bdt_tag<<endl;
+	//	return false;
+	//}
+
 	// Declare TMVA Reader
-	cout<<"  --> "<<bdt_tag<<" from  "<<filename<<endl;
 	bdt_reader[bdt_tag] = new TMVA::Reader( "!Color:!Silent", debug );
 
 	// Read in Variables (Automated!)
-	
 	bdt_var_names[bdt_tag] = GetBDTVariableNamesXML( filename );
 
 	for( auto bdt_var_name: bdt_var_names[bdt_tag] ){

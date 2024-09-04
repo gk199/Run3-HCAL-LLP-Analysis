@@ -790,8 +790,8 @@ public :
    virtual bool   PassWPlusJetsSelection();
    virtual float  EventHT();
    // BDTHelper.cxx
-   virtual void   InitializeTMVA(); //DeclareTMVAReader( MyTags bdt_tag_info );
-   virtual bool   BookTMVAReader( string bdt_tag );
+   virtual void   InitializeTMVA(); 
+   virtual bool   BookTMVAReader( string filepath, string bdt_tag );
    virtual float  GetBDTScores( string bdt_tag, int jet_index = 0 );
    virtual bool   EventValidForBDTEval();
    vector<string> GetBDTVariableNamesXML( string filepath ); 
