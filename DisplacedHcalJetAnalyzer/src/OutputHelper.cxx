@@ -38,13 +38,6 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		"met_Pt", "met_Phi", "met_SumEt", "eventHT"
 	};
 
-	// Add BDT Scores //
-	//MyTags event_based = MyTags(/*event_based=*/ true, /*calor_only=*/ false);
-	/*for( auto bdt_tag: event_based.bdt_tags() ){
-		myvars_float.push_back( Form("bdtscore_%s", bdt_tag.c_str()) );
-	}*/
-
-
 	// Add Physics Variables //
 
 	for( int i=0; i<6; i++ ) {
@@ -252,16 +245,6 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 	};	
 
 	vector<string> myvars_float = {"eventHT"};
-
-	// Add BDT Scores //
-	MyTags jet_based = MyTags(/*event_based=*/ false, /*calor_only=*/ false);
-	for( auto bdt_tag: jet_based.bdt_tags() ){
-		myvars_float.push_back( Form("bdtscore_%s", bdt_tag.c_str()) );
-	}
-	MyTags jet_based_calor = MyTags(/*event_based=*/ false, /*calor_only=*/ true);
-	for( auto bdt_tag: jet_based_calor.bdt_tags() ){
-		myvars_float.push_back( Form("bdtscore_%s", bdt_tag.c_str()) );
-	}
 
 	// Add Physics Variables //
 	// consider adding L1 jet information
@@ -649,13 +632,6 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet100Eta", gLLPDecay_iLLP.at(i))] = LLPIsTruthMatched( i, 100 ).second;
 	}
 
-	//MyTags event_based = MyTags(/*event_based=*/ true, /*calor_only=*/ false);
-	//if( EventValidForBDTEval() ){
-	//	for( const auto & bdt_tag: event_based.bdt_tags() ) {
-	//		tree_output_vars_float[Form("bdtscore_%s", bdt_tag.c_str())] = GetBDTScores(bdt_tag);
-	//	}
-	//} 
-
 	tree_output[treename]->Fill();
 	
 	if( debug ) cout<<"DONE DisplacedHcalJetAnalyzer::FillOutputTrees()"<<endl;
@@ -767,20 +743,6 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 			}
 		}
 	} // end of track matching 
-
-	//MyTags jet_based = MyTags(/*event_based=*/ false, /*calor_only=*/ false);
-	//if( EventValidForBDTEval() ){
-	//	for(const auto & bdt_tag: jet_based.bdt_tags() ) {
-	//		jet_tree_output_vars_float[Form("bdtscore_%s", bdt_tag.c_str())] = GetBDTScores(bdt_tag);
-	//	}
-	//}
-
-	//MyTags jet_based_calor = MyTags(/*event_based=*/ false, /*calor_only=*/ true);
-	//if( EventValidForBDTEval() ){
-	//	for(const auto & bdt_tag: jet_based_calor.bdt_tags() ) {
-	//		jet_tree_output_vars_float[Form("bdtscore_%s", bdt_tag.c_str())] = GetBDTScores(bdt_tag);
-	//	}
-	//}*/
 
 	jet_tree_output[treename]->Fill();
 	

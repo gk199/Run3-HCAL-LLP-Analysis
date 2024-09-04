@@ -30,15 +30,6 @@ void DisplacedHcalJetAnalyzer::Initialize( string infiletag, string infilepath )
 	// Lifetime Reweighting
 	InitializeLifetimeReweighting( infilepath );
 
-	//BookTMVAReader( bdt_version );
-
-	//MyTags jet_based = MyTags(/*event_based=*/ false, /*calor_only=*/ false);
-	//DeclareTMVAReader(jet_based);
-	//MyTags jet_based_calor = MyTags(/*event_based=*/ false, /*calor_only=*/ true);
-	//DeclareTMVAReader(jet_based_calor);
-	//MyTags event_based = MyTags(/*event_based=*/ true, /*calor_only=*/ false);
-	//DeclareTMVAReader(event_based);
-
 	return;
 }
 
