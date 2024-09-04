@@ -18,6 +18,8 @@ void DisplacedHcalJetAnalyzer::Initialize( string infiletag, string infilepath )
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::Initialize()"<<endl;
 
+	cout<<"\n ----- INITIALIZING ----- \n"<<endl;	
+
 	// Initialize trigger names from NEvents_HLT histogram
 	SetTriggerNames( infilepath, "DisplacedHcalJets/NEvents_HLT");
 
@@ -101,7 +103,7 @@ void DisplacedHcalJetAnalyzer( string infiletag = "", string infilepath = "" ){
 	AnalysisReader.print_counts	= true;
 	AnalysisReader.save_hists	= false;	// For output histograms
 	AnalysisReader.save_trees	= true;		// For minituples
-	AnalysisReader.NEvents 		= 100; //-1; 		// Run over specified number of events (set to -1 for ALL)
+	AnalysisReader.NEvents 		= -1; 		// Run over specified number of events (set to -1 for ALL)
 
 	// ----- Initialize ----- // 
 

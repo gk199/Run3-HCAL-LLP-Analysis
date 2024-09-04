@@ -2,16 +2,12 @@
 void DisplacedHcalJetAnalyzer::InitializeTMVA(){
 
 	bdt_version = "v0.7";
-	bdt_tags = { "LLP350_MS80_perJet" };
+	bdt_tags = { "LLP350_MS80_perJet", "hadd" };
 
 	vector<string> bdt_tags_booked = {};
-	//map<string,bool> bdt_perJet;
 	vector<string> bdt_variables_all;
 
 	for( auto bdt_tag: bdt_tags ){
-
-		//bdt_perJet[bdt_tag] = false;
-		//if( bdt_tag.find( "perJet" ) != string::npos ) bdt_perJet[bdt_tag] = true;
 
 		bool pass = BookTMVAReader( bdt_tag );
 
@@ -27,7 +23,6 @@ void DisplacedHcalJetAnalyzer::InitializeTMVA(){
 		}
 
 	}
-
 }
 
 /* ====================================================================================================================== */
@@ -88,31 +83,25 @@ float DisplacedHcalJetAnalyzer::GetBDTScores( string bdt_tag, int jet_index_int 
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetBDTScores()"<<endl;
 
-	// Check if bdt tag exists...	
-	//if (!MyTags::isValidTag(bdt_tag)) { // BDT tag not found
-	//	return -999.9;
-	//}
-
 	string jet_index = Form("%d", jet_index_int);
 
 	for( auto var: bdt_var_names[bdt_tag] ){
 		
-		if( jet_index == "-1" ){ 
-			if (var.find( "/" ) != string::npos ) { 
-				vector<string> split_string = AdvTokenizer(var, '/');
-				bdt_vars[bdt_tag+" "+var] = tree_output_vars_float[split_string[0]] / tree_output_vars_float[split_string[1]];	// GK: fix for division BDT vars, such that "x/y" becomes input_var["x"] / input_var["y"]
-			}
-			else bdt_vars[bdt_tag+" "+var] = tree_output_vars_float[var];
-		} else {
-			string var_mod = var;
-			var_mod.replace( var.find( "perJet" ), 6, "jet"+jet_index );
-			if (var_mod.find( "perJet" ) != string::npos ) var_mod.replace( var_mod.find( "perJet" ), 6, "jet"+jet_index );
-			if (var_mod.find( "/" ) != string::npos ) {
-				vector<string> split_string = AdvTokenizer(var_mod, '/');
-				bdt_vars[bdt_tag+" "+var] = tree_output_vars_float[split_string[0]] / tree_output_vars_float[split_string[1]];	// GK: fix for division BDT vars, such that "x/y" becomes input_var["x"] / input_var["y"]
-			}
-			else bdt_vars[bdt_tag+" "+var] = tree_output_vars_float[var_mod];
+		string var_mod = var;
+		
+		// It just needs to be done this way 
+		if( var_mod.find("jet0") != string::npos ) var_mod.replace( var.find( "jet0" ), 4, "jet"+jet_index );			
+		if( var_mod.find( "perJet" ) != string::npos ) var_mod.replace( var_mod.find( "perJet" ), 6, "jet"+jet_index );
+
+		if( var_mod.find( "/" ) != string::npos ) {
+			vector<string> var_mod_split = AdvTokenizer(var_mod, '/');
+			if( var_mod_split[1].find("jet0") != string::npos ) var_mod_split[1].replace( var_mod_split[1].find( "jet0" ), 4, "perJet" );			
+			if( var_mod_split[1].find( "perJet" ) != string::npos ) var_mod_split[1].replace( var_mod_split[1].find( "perJet" ), 6, "jet"+jet_index );
+
+			bdt_vars[bdt_tag+" "+var] = tree_output_vars_float[var_mod_split[0]] / tree_output_vars_float[var_mod_split[1]];	// GK: fix for division BDT vars, such that "x/y" becomes input_var["x"] / input_var["y"]
 		}
+		else bdt_vars[bdt_tag+" "+var] = tree_output_vars_float[var_mod];
+	
 	}
 
 	return bdt_reader[bdt_tag]->EvaluateMVA("BDT");
@@ -136,14 +125,14 @@ vector<string> DisplacedHcalJetAnalyzer::GetBDTVariableNamesXML( string filename
 
 	auto mainNode = xml.DocGetRootElement(xmldoc);
 	for (auto node = xml.GetChild(mainNode); node; node = xml.GetNext(node)) {
-			const auto nodeName = std::string(xml.GetNodeName(node));
-			if (nodeName.compare("Variables") == 0) {
-					for (auto thisNode = xml.GetChild(node); thisNode; thisNode = xml.GetNext(thisNode)) {
-							// cout<<std::atoi(xml.GetAttr(thisNode, "VarIndex"))<<"  "<<xml.GetAttr(thisNode, "Title")<<"  "<<xml.GetAttr(thisNode, "Expression")<<endl;
-							bdt_var_names_temp.push_back( xml.GetAttr(thisNode, "Expression") );
-							//cout<<xml.GetAttr(thisNode, "Expression")<<endl;
-					}
+		const auto nodeName = std::string(xml.GetNodeName(node));
+		if (nodeName.compare("Variables") == 0) {
+			for (auto thisNode = xml.GetChild(node); thisNode; thisNode = xml.GetNext(thisNode)) {
+				// cout<<std::atoi(xml.GetAttr(thisNode, "VarIndex"))<<"  "<<xml.GetAttr(thisNode, "Title")<<"  "<<xml.GetAttr(thisNode, "Expression")<<endl;
+				bdt_var_names_temp.push_back( xml.GetAttr(thisNode, "Expression") );
+				//cout<<xml.GetAttr(thisNode, "Expression")<<endl;
 			}
+		}
 	}
 
 	return bdt_var_names_temp;

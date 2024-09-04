@@ -551,9 +551,8 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 			}
 		} // end of track matching 
 
-		for( auto bdt_tag: bdt_tags ){
+		for( auto bdt_tag: bdt_tags )
 			tree_output_vars_float[Form("jet%d_bdtscore_%s", valid_jet, bdt_tag.c_str())] = GetBDTScores( bdt_tag, valid_jet ); // Needs to be valid_jet and not i
-		}
 
 		valid_jet += 1;
 	}
