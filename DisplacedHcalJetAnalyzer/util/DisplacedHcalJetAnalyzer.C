@@ -1,7 +1,5 @@
 #define DisplacedHcalJetAnalyzer_cxx
 
-using namespace std;
-
 #include "../DisplacedHcalJetAnalyzer/DisplacedHcalJetAnalyzer.h"
 
 #include "../src/Loop.cxx"
@@ -20,6 +18,8 @@ void DisplacedHcalJetAnalyzer::Initialize( string infiletag, string infilepath )
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::Initialize()"<<endl;
 
+	cout<<"\n ----- INITIALIZING ----- \n"<<endl;	
+
 	// Initialize trigger names from NEvents_HLT histogram
 	SetTriggerNames( infilepath, "DisplacedHcalJets/NEvents_HLT");
 
@@ -27,12 +27,10 @@ void DisplacedHcalJetAnalyzer::Initialize( string infiletag, string infilepath )
 	SetHistCategories();
 
 	// Initialize TMVA Reader
-	MyTags jet_based = MyTags(/*event_based=*/ false, /*calor_only=*/ false);
-	DeclareTMVAReader(jet_based);
-	MyTags jet_based_calor = MyTags(/*event_based=*/ false, /*calor_only=*/ true);
-	DeclareTMVAReader(jet_based_calor);
-	MyTags event_based = MyTags(/*event_based=*/ true, /*calor_only=*/ false);
-	DeclareTMVAReader(event_based);
+	InitializeTMVA(); 
+
+	// Lifetime Reweighting
+	InitializeLifetimeReweighting( infilepath );
 
 	return;
 }

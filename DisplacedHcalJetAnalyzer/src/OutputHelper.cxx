@@ -24,7 +24,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		"run","lumi","event","jet","validJet","muon","ele","pho",
 		"RechitN","RechitN_1GeV","RechitN_5GeV","RechitN_10GeV",
 		"TrackN", "ecalRechitN", "HBHE_Rechit_auxTDC"
-	};	
+	};
 
 	for ( int i=0; i<3; i++ ) {
 		myvars_int.push_back( Form("jet%d_RechitN", i) );
@@ -37,12 +37,6 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 	vector<string> myvars_float = {
 		"met_Pt", "met_Phi", "met_SumEt", "eventHT"
 	};
-
-	// Add BDT Scores //
-	MyTags event_based = MyTags(/*event_based=*/ true, /*calor_only=*/ false);
-	for( auto bdt_tag: event_based.bdt_tags() ){
-		myvars_float.push_back( Form("bdtscore_%s", bdt_tag.c_str()) );
-	}
 
 	// Add Physics Variables //
 
@@ -142,6 +136,11 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_int.push_back(Form("jet%d_SubLeadingRechitD", i) );
 		myvars_int.push_back(Form("jet%d_SSubLeadingRechitD", i) );
 
+		for( auto bdt_tag: bdt_tags ){
+			myvars_float.push_back( Form("jet%d_bdtscore_%s", i, bdt_tag.c_str()) ); 
+			//cout<<Form("jet%d_bdtscore_%s", i, bdt_tag.c_str())<<endl;
+		}
+
 		if (i < 2) {
 			myvars_float.push_back( Form("LLP%d_Pt", i));
 			myvars_float.push_back( Form("LLP%d_E", i));
@@ -197,6 +196,9 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		}
 	}
 
+	for( auto lt_rw: list_lifetime_rw_str ) 
+		myvars_float.push_back( Form("weight_ctau_%s", lt_rw.c_str()) );
+
 	cout<<"Creating new trees for the following:"<<endl;
 	if( treenames.size() == 0 ) cout<<"WARNING: No treenames specified!"<<endl;
 	for( auto treename: treenames ){
@@ -243,16 +245,6 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 	};	
 
 	vector<string> myvars_float = {"eventHT"};
-
-	// Add BDT Scores //
-	MyTags jet_based = MyTags(/*event_based=*/ false, /*calor_only=*/ false);
-	for( auto bdt_tag: jet_based.bdt_tags() ){
-		myvars_float.push_back( Form("bdtscore_%s", bdt_tag.c_str()) );
-	}
-	MyTags jet_based_calor = MyTags(/*event_based=*/ false, /*calor_only=*/ true);
-	for( auto bdt_tag: jet_based_calor.bdt_tags() ){
-		myvars_float.push_back( Form("bdtscore_%s", bdt_tag.c_str()) );
-	}
 
 	// Add Physics Variables //
 	// consider adding L1 jet information
@@ -558,9 +550,13 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 				}
 			}
 		} // end of track matching 
+
+		for( auto bdt_tag: bdt_tags )
+			tree_output_vars_float[Form("jet%d_bdtscore_%s", valid_jet, bdt_tag.c_str())] = GetBDTScores( bdt_tag, valid_jet ); // Needs to be valid_jet and not i
+
 		valid_jet += 1;
 	}
-	tree_output_vars_int["validJet"]	= valid_jet;
+	tree_output_vars_int["validJet"] = valid_jet;
 
 	for (int i = 0; i < n_gLLP; i++) {
 		float decay_radius = gLLP_DecayVtx_R.at(i); // GetDecayRadiusHB_LLP(i); // -999 default value
@@ -607,6 +603,9 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("LLP%d_RechitEnergy", i)] = energy[4][3];
 	}
 
+	for( auto lt_rw: list_lifetime_rw_str ) 
+		tree_output_vars_float[Form("weight_ctau_%s", lt_rw.c_str())] = GetLifetimeReweight( std::stof(lt_rw), tree_output_vars_float["LLP0_DecayCtau"], tree_output_vars_float["LLP1_DecayCtau"] );
+
 	for (int i = 0; i < gLLPDecay_iParticle.size(); i++) { // size is 4
 		int idx_gParticle = gLLPDecay_iParticle.at(i);
 		tree_output_vars_float[Form("LLPDecay%d_Pt", i)]    = gParticle_Pt->at(idx_gParticle);
@@ -631,13 +630,6 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet100", gLLPDecay_iLLP.at(i))] = LLPIsTruthMatched( i, 100 ).first; 
 		tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet100Eta", gLLPDecay_iLLP.at(i))] = LLPIsTruthMatched( i, 100 ).second;
 	}
-
-	MyTags event_based = MyTags(/*event_based=*/ true, /*calor_only=*/ false);
-	if( EventValidForBDTEval() ){
-		for( const auto & bdt_tag: event_based.bdt_tags() ) {
-			tree_output_vars_float[Form("bdtscore_%s", bdt_tag.c_str())] = GetBDTScores(bdt_tag);
-		}
-	} 
 
 	tree_output[treename]->Fill();
 	
@@ -750,20 +742,6 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 			}
 		}
 	} // end of track matching 
-
-	MyTags jet_based = MyTags(/*event_based=*/ false, /*calor_only=*/ false);
-	if( EventValidForBDTEval() ){
-		for(const auto & bdt_tag: jet_based.bdt_tags() ) {
-			jet_tree_output_vars_float[Form("bdtscore_%s", bdt_tag.c_str())] = GetBDTScores(bdt_tag);
-		}
-	}
-
-	MyTags jet_based_calor = MyTags(/*event_based=*/ false, /*calor_only=*/ true);
-	if( EventValidForBDTEval() ){
-		for(const auto & bdt_tag: jet_based_calor.bdt_tags() ) {
-			jet_tree_output_vars_float[Form("bdtscore_%s", bdt_tag.c_str())] = GetBDTScores(bdt_tag);
-		}
-	}
 
 	jet_tree_output[treename]->Fill();
 	
