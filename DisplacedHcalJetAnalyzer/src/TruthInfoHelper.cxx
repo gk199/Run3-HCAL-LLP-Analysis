@@ -386,15 +386,15 @@ void DisplacedHcalJetAnalyzer::InitializeLifetimeReweighting( string infiletag )
 
 	float ctau_sample = std::stof( infiletag_partial.substr(0,last))*0.1; // 0.1 to convert from mm to cm
 
-	cout<<"Reading in signal lifetime as: "<<ctau_sample<<" cm..."<<endl;
+	cout<<"\nReading in signal lifetime as: "<<ctau_sample<<" cm..."<<endl;
 
 	// Set LTRW List //
 
 	list_lifetime_rw_str = { "30", "100", "300", "1000", "3000", "10000", "30000", "100000" };
 
-	cout<<"Initializing lifetime reweighting targets to:"<<endl;
+	cout<<"\nInitializing lifetime reweighting targets to:"<<endl;
 	for( auto lt_rw: list_lifetime_rw_str ) 
-		cout<<" -> "<<lt_rw<<endl;
+		cout<<" --> "<<lt_rw<<" cm"<<endl;
 
 }
 
