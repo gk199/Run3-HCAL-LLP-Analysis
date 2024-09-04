@@ -42,19 +42,14 @@
 #pragma link C++ class vector<vector <int> >+;
 #endif
 
-// TODO: Load bdt variables from xml file manually
-// #include "../../pugixml/pugixml.hpp"
-//gSystem->Load("../../pugixml/pugixml.hpp") //"$PROJECT/lib/libCustomClass.so")
-//R__LOAD_LIBRARY(../../pugixml/pugixml.hpp)
-// R__LOAD_LIBRARY($PROJECT/lib/libCustomClass.so)
-//using namespace pugi;
-
-
-// Header file for the classes stored in the TTree if any.
 #include "vector"
 #include "map"
 #include "iostream"
 #include "iomanip" 
+
+#include "TXMLEngine.h"
+
+using namespace std;
 
 /* ====================================================================================================================== */
 class MyTags {
