@@ -2,6 +2,8 @@ TString OR		   	= " || ";
 TString AND 		= " && ";
 
 // Setup cuts on HLT paths passed
+TCut Cut_HLTpassedHT350 = "HLT_HT350 == 1";
+
 TCut Cut_None			= "";
 TCut Cut_HLTpassed1 	= "HLT_L1SingleLLPJet == 1"; // monitoring trigger // not in v1 ntuples yet
 TCut Cut_HLTpassed2 	= "HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1";
@@ -19,6 +21,11 @@ TCut Cut_HLTpassed13 	= "HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay1nsTra
 TCut Cut_HLTpassed14 	= "HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay2nsInclusive == 1"; // end of group 4 of triggers
 
 TCut Cut_AnyLLP_HLT     = "HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT240_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT280_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT170_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT270_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet60_DisplacedTrack == 1 || HLT_HT320_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 || HLT_HT420_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay0p5nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_DoubleDelay1nsInclusive == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay1nsTrackless == 1 || HLT_HT200_L1SingleLLPJet_DelayedJet40_SingleDelay2nsInclusive == 1";
+TCut Cut_AnyLLP_HLT_noECAL     = "HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT240_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT280_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5 == 1 || HLT_HT170_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT270_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT200_L1SingleLLPJet_DisplacedDijet60_DisplacedTrack == 1 || HLT_HT320_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 || HLT_HT420_L1SingleLLPJet_DisplacedDijet60_Inclusive == 1 ";
+
+TCut Cut_Run2_HLTs      = "HLT_HT400_DisplacedDijet40_DisplacedTrack == 1 || HLT_HT430_DelayedJet40_DoubleDelay0p5nsInclusive == 1 || HLT_HT430_DelayedJet40_DoubleDelay0p5nsTrackless == 1 || HLT_HT430_DelayedJet40_DoubleDelay0p75nsTrackless == 1 || HLT_HT430_DelayedJet40_DoubleDelay1nsInclusive == 1 || HLT_HT430_DelayedJet40_DoubleDelay1nsTrackless == 1 || HLT_HT430_DelayedJet40_DoubleDelay1p25nsInclusive == 1 || HLT_HT430_DelayedJet40_DoubleDelay1p5nsInclusive == 1 || HLT_HT430_DelayedJet40_SingleDelay0p5nsInclusive == 1 || HLT_HT430_DelayedJet40_SingleDelay0p5nsTrackless == 1 || HLT_HT430_DelayedJet40_SingleDelay1nsInclusive == 1 || HLT_HT430_DelayedJet40_SingleDelay1nsTrackless == 1 || HLT_HT430_DelayedJet40_SingleDelay1p25nsTrackless == 1 || HLT_HT430_DelayedJet40_SingleDelay1p5nsInclusive == 1 || HLT_HT430_DelayedJet40_SingleDelay1p5nsTrackless == 1 || HLT_HT430_DelayedJet40_SingleDelay2nsInclusive == 1 || HLT_HT430_DelayedJet40_SingleDelay2p25nsInclusive == 1 || HLT_HT430_DelayedJet40_SingleDelay2p5nsInclusive == 1 || HLT_HT550_DisplacedDijet60_Inclusive == 1 || HLT_HT350_DelayedJet40_SingleDelay3nsInclusive == 1 || HLT_HT350_DelayedJet40_SingleDelay3p25nsInclusive == 1 || HLT_HT350_DelayedJet40_SingleDelay3p5nsInclusive == 1";
+
+TCut Cut_DisplacedJetHLT_OR = Cut_AnyLLP_HLT_noECAL || Cut_Run2_HLTs;
 
 TCut Cut_HLT_dijet_1promptTrack         = Cut_HLTpassed4 || Cut_HLTpassed3 || Cut_HLTpassed2;                            // displaced dijet with at most 1 associated prompt track
 TCut Cut_HLT_dijet_1displacedTrack      = Cut_HLTpassed5 || Cut_HLTpassed6 || Cut_HLTpassed7 || Cut_HLTpassed8;          // displaced dijet, one displaced track
@@ -81,6 +88,14 @@ TString Jet0_LLP0 		= Form("jet0_isMatchedTo == 0");
 TString Jet0_LLP1 		= Form("jet0_isMatchedTo == 1");
 TString Jet1_LLP0 		= Form("jet1_isMatchedTo == 0");
 TString Jet1_LLP1 		= Form("jet1_isMatchedTo == 1");
+TString Jet2_LLP0 		= Form("jet2_isMatchedTo == 0");
+TString Jet2_LLP1 		= Form("jet2_isMatchedTo == 1");
+TString Jet3_LLP0 		= Form("jet3_isMatchedTo == 0");
+TString Jet3_LLP1 		= Form("jet3_isMatchedTo == 1");
+TString Jet4_LLP0 		= Form("jet4_isMatchedTo == 0");
+TString Jet4_LLP1 		= Form("jet4_isMatchedTo == 1");
+TString Jet5_LLP0 		= Form("jet5_isMatchedTo == 0");
+TString Jet5_LLP1 		= Form("jet5_isMatchedTo == 1");
 
 TCut Cut_LLPinHCAL 	= (LLP0inHCAL + OR + LLP1inHCAL).Data();
 TCut Cut_LLP0inHCAL = LLP0inHCAL.Data();
@@ -130,6 +145,21 @@ TCut Cut_LLPinHCAL12_Jet0	= 	( "(" + LLP0inHCAL_d12 + AND + Jet0_LLP0 + ")" + 	O
 TCut Cut_LLPinHCAL12_Jet1	= 	( "(" + LLP0inHCAL_d12 + AND + Jet1_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d12 + AND + Jet1_LLP1 + ")" ).Data();
 TCut Cut_LLPinHCAL34_Jet0	= 	( "(" + LLP0inHCAL_d34 + AND + Jet0_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet0_LLP1 + ")" ).Data();
 TCut Cut_LLPinHCAL34_Jet1	= 	( "(" + LLP0inHCAL_d34 + AND + Jet1_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet1_LLP1 + ")" ).Data();
+TCut Cut_LLPinHCAL34_Jet2	= 	( "(" + LLP0inHCAL_d34 + AND + Jet2_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet2_LLP1 + ")" ).Data();
+TCut Cut_LLPinHCAL34_Jet3	= 	( "(" + LLP0inHCAL_d34 + AND + Jet3_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet3_LLP1 + ")" ).Data();
+TCut Cut_LLPinHCAL34_Jet4	= 	( "(" + LLP0inHCAL_d34 + AND + Jet4_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet4_LLP1 + ")" ).Data();
+TCut Cut_LLPinHCAL34_Jet5	= 	( "(" + LLP0inHCAL_d34 + AND + Jet5_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet5_LLP1 + ")" ).Data();
+
+// below jet cut is 100 for hard cut plots
+TCut Cut_LLPinHCAL34_AnyJet = ( "( jet0_Pt > 0" + AND + "( (" + LLP0inHCAL_d34 + AND + Jet0_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet0_LLP1 + ") ) )" + OR + 
+                                "( jet1_Pt > 0" + AND + "( (" + LLP0inHCAL_d34 + AND + Jet1_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet1_LLP1 + ") ) )" + OR + 
+                                "( jet2_Pt > 0" + AND + "( (" + LLP0inHCAL_d34 + AND + Jet2_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet2_LLP1 + ") ) )" + OR + 
+                                "( jet3_Pt > 0" + AND + "( (" + LLP0inHCAL_d34 + AND + Jet3_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet3_LLP1 + ") ) )" + OR + 
+                                "( jet4_Pt > 0" + AND + "( (" + LLP0inHCAL_d34 + AND + Jet4_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet4_LLP1 + ") ) )" + OR + 
+                                "( jet5_Pt > 0" + AND + "( (" + LLP0inHCAL_d34 + AND + Jet5_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet5_LLP1 + ") ) )" ).Data();
+
+
+
 TCut Cut_LLPinHCAL123_Jet0	= 	( "( (" + LLP0inHCAL_d2 + OR + LLP0inHCAL_d34 + ")" + AND + Jet0_LLP0 + ")" + 	OR + "( (" + LLP1inHCAL_d2 + OR + LLP1inHCAL_d34 + ")" + AND + Jet0_LLP1 + ")" ).Data();
 
 TCut Cut_LLPinCR_Jet0	    = 	( "(" + LLP0inCR + AND + Jet0_LLP0 + ")" + 	        OR + "(" + LLP1inCR + AND + Jet0_LLP1 + ")" ).Data();
@@ -208,6 +238,8 @@ TString matchedLLPinHCAL1           = Form("perJet_MatchedLLP_DecayR >= %0.1f &&
 TString matchedLLPinHCAL2          = Form("perJet_MatchedLLP_DecayR >= %0.1f && perJet_MatchedLLP_DecayR < %0.1f && abs(perJet_MatchedLLP_Eta) < %f",  radius_depth2[0], radius_depth2[1], HBeta);
 TString matchedLLPinHCAL34         = Form("perJet_MatchedLLP_DecayR >= %0.1f && perJet_MatchedLLP_DecayR < %0.1f && abs(perJet_MatchedLLP_Eta) < %f",  radius_depth34[0], radius_depth34[1], HBeta);
 
+TString eventHT250                  = Form("eventHT > 0"); //250 for hard cut plots
+
 TCut Cut_matchedLLPinCR             = matchedLLPinCR.Data();
 TCut Cut_matchedLLPinTrackerNP      = matchedLLPinTrackerNP.Data();
 TCut Cut_matchedLLPinECAL           = matchedLLPinECAL.Data();
@@ -215,3 +247,5 @@ TCut Cut_matchedLLPinHCAL           = matchedLLPinHCAL.Data();
 TCut Cut_matchedLLPinHCAL1          = matchedLLPinHCAL1.Data();
 TCut Cut_matchedLLPinHCAL2          = matchedLLPinHCAL2.Data();
 TCut Cut_matchedLLPinHCAL34         = matchedLLPinHCAL34.Data();
+
+TCut Cut_matchedLLPinHCAL34_eventHT250 = (matchedLLPinHCAL34 + AND + eventHT250).Data();

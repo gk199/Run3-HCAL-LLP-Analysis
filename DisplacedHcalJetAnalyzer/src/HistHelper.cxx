@@ -5,7 +5,7 @@ void DisplacedHcalJetAnalyzer::SetHistCategories(){
 
 	// histogram category corresponds to selections (jet energy, etc)
 	// decides what is ultimately written
-	categories = {"NoSel"}; //, "JetPt40", "PassedHLT"};
+	categories = {"NoSel", "ZmumuEvent"}; //, "JetPt40", "PassedHLT"};
 
 	if( !save_hists ){
 		cout<<"  NOTE: 'save_hists' is set to false. Will not run over ANY histogram categories..."<<endl;
@@ -129,6 +129,8 @@ void DisplacedHcalJetAnalyzer::BookHists(){
 	h["gen_Ddecay"] = new TH1F("gen_Ddecay", "LLP decay position; #sqrt{x^{2} + y^{2} + z^{2}} Decay Vertex (cm); Events", 100, 0, 5000); 
 	h["gen_cTau"] = new TH1F("gen_cTau", "LLP c#tau; c#tau (cm); Events", 100, 0, 1000); 
 	h["gen_deltaT"] = new TH1F("gen_deltaT", "LLP #Delta t; #Delta T (ns); Events", 100, 0, 10); 
+
+	h["Z_mass"] = new TH1F("Z_mass", "Z to mu mu; Z mass [GeV]; Events", 200, 0, 200);
 
 	for( auto is: istring ) {
 		h["gen_rechitNpt2_"+is] = new TH1F(Form("gen_rechitNpt2_%s",is.c_str()), "Number of HB Rechits Associated with LLP (#Delta R<0.2); Number of HB Rechits; Events", 100,0,100);
@@ -283,6 +285,7 @@ void DisplacedHcalJetAnalyzer::FillHists( string cat ){
 			}
 		}
 	}
+	if (cat == "ZmumuEvent__") h["Z_mass"]->Fill(Z_mass);
 
 	// h["deltaR_"] = new TH1F(Form("gen_energyP_HBdepth4_%s",is.c_str()), "Energy Profile of HB Rechits Associated with LLP (decaying in depth 4 of HB); HB Depth; Fraction of Energy", 6,0,6);
 

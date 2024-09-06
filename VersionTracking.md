@@ -233,6 +233,10 @@ Location of minituples:
 /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8/
 ```
 
+### v3.9
+Updates
+* Updated 2023 HCAL PF rechit thresholds to agree with those in CMSSW, moving from 0.25 to 0.4 GeV in HB depth 1
+
 ## V4
 Ongoing wish list:
 * MET filters

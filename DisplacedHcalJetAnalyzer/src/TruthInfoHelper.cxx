@@ -64,7 +64,11 @@ void DisplacedHcalJetAnalyzer::SetLLPVariables(){
 bool DisplacedHcalJetAnalyzer::isRechitValid(float RechitEnergy, int RechitDepth) {
 	vector<float> energy_cuts_2022initial = {0.1, 0.2, 0.3, 0.3};
 	vector<float> energy_cuts_2022rereco = 	{0.25, 0.25, 0.3, 0.3}; // best agreement with MC
-	vector<float> energy_cuts_2023 = 		{0.25, 0.3, 0.3, 0.3};
+	vector<float> energy_cuts_2023 = 		{0.4, 0.3, 0.3, 0.3};
+	// https://github.com/cms-sw/cmssw/blob/master/RecoParticleFlow/PFClusterProducer/python/particleFlowClusterHBHE_cfi.py#L6
+	// https://github.com/swagata87/cmssw/blob/51067fbc70af1ef57a0f6a0f2d7297deefbeba45/RecoParticleFlow/PFClusterProducer/python/particleFlowClusterHBHE_cfi.py#L13
+	// https://github.com/cms-sw/cmssw/blob/master/RecoParticleFlow/PFClusterProducer/python/particleFlowRecHitHBHE_cfi.py#L8
+
 	if (RechitEnergy >= energy_cuts_2023[RechitDepth-1]) return true;
 	else return false;
 }

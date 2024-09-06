@@ -123,6 +123,8 @@ public :
    vector<string> list_lifetime_rw_str;
 
    float WPlusJets_leptonPhi = -9999.9;
+   float Z_mass = -9999.9;
+   float Muon_PhiVectorSum = -9999.9;
 
    // ----- Variables ----- //
 
@@ -788,6 +790,8 @@ public :
    virtual float  GetEventRuntime( clock_t clock_start, Long64_t init_entry, Long64_t current_entry );
    virtual void   ResetGlobalEventVars();
    virtual bool   PassWPlusJetsSelection();
+   virtual bool   PassLeptonVeto();
+   virtual bool   PassZmumuSelection();
    virtual float  EventHT();
    // BDTHelper.cxx
    virtual void   InitializeTMVA(); 

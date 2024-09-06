@@ -11,7 +11,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 
 	cout<<"Declaring Output Trees..."<<endl;	
 
-	treenames = { "NoSel", "PassedHLT", "WPlusJets" }; 
+	treenames = { "NoSel", "PassedHLT", "WPlusJets", "NoLepton", "Zmumu" }; 
 
 	vector<string> myvars_bool = {};
 	
@@ -21,7 +21,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 
 	// Add Event Variables //
 	vector<string> myvars_int = {
-		"run","lumi","event","jet","validJet","muon","ele","pho",
+		"run","lumi","event","PV","jet","validJet","muon","ele","pho",
 		"RechitN","RechitN_1GeV","RechitN_5GeV","RechitN_10GeV",
 		"TrackN", "ecalRechitN", "HBHE_Rechit_auxTDC"
 	};
@@ -231,7 +231,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 
 	cout<<"Declaring Output Trees..."<<endl;	
 
-	jet_treenames = { "PerJet_NoSel", "PerJet_PassedHLT", "PerJet_WPlusJets", "PerJet_LLPmatched" }; 
+	jet_treenames = { "PerJet_NoSel", "PerJet_PassedHLT", "PerJet_WPlusJets", "PerJet_LLPmatched", "PerJet_NoLepton", "PerJet_Zmumu" }; 
 
 	vector<string> myvars_bool = {};
 	for (int i = 0; i < HLT_Indices.size(); i++) {
@@ -240,7 +240,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 
 	// Add Event Variables //
 	vector<string> myvars_int = {
-		"run","lumi","event","jet","muon","ele","pho",
+		"run","lumi","event","PV","jet","muon","ele","pho",
 		"jetIndex"
 	};	
 
@@ -375,6 +375,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 	tree_output_vars_int["run"] 	= runNum;
 	tree_output_vars_int["lumi"] 	= lumiNum;
 	tree_output_vars_int["event"] 	= eventNum;
+	tree_output_vars_int["PV"] 		= n_PV;
 	tree_output_vars_int["jet"]		= n_jet;
 	tree_output_vars_int["ele"]		= n_ele;
 	tree_output_vars_int["muon"]	= n_muon;
@@ -650,6 +651,7 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	jet_tree_output_vars_int["run"] 		= runNum;
 	jet_tree_output_vars_int["lumi"] 		= lumiNum;
 	jet_tree_output_vars_int["event"] 		= eventNum;
+	jet_tree_output_vars_int["PV"] 			= n_PV;
 	jet_tree_output_vars_int["jet"]			= n_jet;
 	jet_tree_output_vars_int["ele"]			= n_ele;
 	jet_tree_output_vars_int["muon"]		= n_muon;

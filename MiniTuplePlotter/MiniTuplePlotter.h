@@ -798,7 +798,7 @@ public :
 	// =====================================================================================
 
 	// -------------------------------------------------------------------------------------
-	void Plot( string plot_type = "", string filetag_treename_divisor = "" ){
+	void Plot( string plot_type = "", string filetag_treename_divisor = "", vector<string> mass_lifetime = {"higgs", "llp", "ctau"}, bool multiple = false ){
 		if( debug) cout<<"MiniTuplePlotter::Plot()"<<endl;		
 
 		GetTrees();
@@ -845,7 +845,6 @@ public :
 				myCanvas->cd(1);
 			}
 
-			// put efficiency TEff code here?
 			if( plot_type == "efficiency" ){
 				myCanvas->cd(2);
 				// need to get the first hist, this will be the denominator for the efficiency plot when listed first in compare cuts (h_total)
@@ -856,28 +855,46 @@ public :
 				for( auto hist_tag: hist_tags ){
 					// string hist_tag = Form( "%s "+GetBetterCutTitle( selective_cuts[filetag_treename] )+" "+GetBetterCutTitle( cut_compare ), filetag_treename.c_str() );
 					if (i == 0) denom_hist_tag = hist_tag;
+					if (multiple && i%2 == 0) denom_hist_tag = hist_tag; // if overlaying multiple mass points, use the first one in each set as the denominiator 
 					// cout << denom_hist_tag << " = denom tag and current tag = " << hist_tag << endl;
 					TH1F *h_total = (TH1F*)hists[denom_hist_tag]->Clone();
-					if (i > 0) {
+					if ((multiple == false && i > 0) || (multiple == true && i%2 == 1)) {
 						TH1F *h_pass = (TH1F*)hists[hist_tag]->Clone();
 						TEfficiency* pEff = 0;
  						// h_pass and h_total are valid and consistent histograms
 						if(TEfficiency::CheckConsistency(*h_pass, *h_total)) {
 							pEff = new TEfficiency(*h_pass, *h_total);
 							string label_y = "Efficiency";
+							if (multiple) label_y = "L1T Efficiency";
 							pEff->SetTitle(Form("; %s; %s", PlotParams_temp.label_x.c_str(), label_y.c_str())); // HCAL LLP Trigger Efficiencies
 							pEff->SetLineColor( colors[i] );
 							pEff->SetLineWidth(3.);
+
 							if (i == 1) pEff->Draw();
 							if (i > 1) pEff->Draw("same");
 							gPad->Update();
-							pEff->GetPaintedGraph()->GetYaxis()->SetRangeUser(0,1.);
+
+							float label_size = 0.045;
+							pEff->GetPaintedGraph()->GetXaxis()->SetTitleSize(label_size); // size of X label
+							pEff->GetPaintedGraph()->GetXaxis()->SetLabelSize(label_size); // size of X axis tick labels
+							pEff->GetPaintedGraph()->GetYaxis()->SetTitleSize(label_size);
+							pEff->GetPaintedGraph()->GetYaxis()->SetLabelSize(label_size);
+							gPad->Update();
+
+							pEff->GetPaintedGraph()->GetXaxis()->SetRangeUser(PlotParams_temp.xmin, PlotParams_temp.xmax); // restrict x range to that listed in plot params
+							// std::cout << "set axis range to " << PlotParams_temp.xmin << ", " << PlotParams_temp.xmax << std::endl;
+							pEff->GetPaintedGraph()->GetYaxis()->SetRangeUser(0, 1.);
 
 							leg->AddEntry(pEff, Form("%s", legend_names.at(i).c_str() ) );
 
 							if (i == size(hist_tags)-1 ) {
 								leg->Draw();
-								StampCMS( "Simulation Preliminary", 140., 0.14, 0.92, 0.045, 2 ); // 0 means no energy, 1 means sqrt s, 2 means (13.6 TeV) (should we have this for simulation?)
+								StampCMS( "Simulation Preliminary", 140., 0.12, 0.92, 0.06, 2 ); // 0 means no energy, 1 means sqrt s, 2 means (13.6 TeV) (should we have this for simulation?)
+								if (multiple) StampLLP( 0.14, 0.86, 0.03, mass_lifetime ); // top left
+								// else if (multiple && PlotParams_temp.hist_name == "eventHT") StampLLP( 0.56, 0.15, 0.03, mass_lifetime ); // lower right, no mass / ctau written for multiple, works when hard cuts on jet pt and event HT
+								else if (PlotParams_temp.hist_name == "perJet_MatchedLLP_DecayR" ) StampLLP( 0.14, 0.86, 0.03, mass_lifetime ); // top left
+								else if (PlotParams_temp.hist_name == "eventHT" && mass_lifetime[0] == "125" ) StampLLP( 0.6, 0.45, 0.03, mass_lifetime ); // middle right
+								else StampLLP( 0.56, 0.19, 0.03, mass_lifetime ); // lower right
 							}
 						}
 					}
@@ -911,6 +928,7 @@ public :
 			//fout->cd();
 			//myCanvas->Write();
 			myCanvas->SaveAs( output_directory+"/"+output_file_name+".png", "png" );
+			if( plot_type == "efficiency" ) myCanvas->SaveAs( output_directory+"/"+output_file_name+".pdf", "pdf" );
 			delete myCanvas;
 
 		}

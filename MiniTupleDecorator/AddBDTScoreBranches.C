@@ -27,7 +27,7 @@ bool debug = false;
 // ----- Input and Output Paths ----- //
 
 string basepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/";
-string vIN 		= "v3.7";
+string vIN 		= "v3.8";
 string vOUT		= vIN+".1";
 
 string infiledir  = basepath + vIN;
@@ -241,7 +241,7 @@ void AddBranchesToTree( TTree* tree, bool tree_perJet, float signal_ctau ){
 				string var_mod = var;
 				var_mod.replace( var.find( "perJet" ), 6, "jet"+i_jet ); 
 				if (var_mod.find( "perJet" ) != string::npos ) var_mod.replace( var_mod.find( "perJet" ), 6, "jet"+i_jet );
-				if (var_mod.find( "/" ) != string::npos ) { // GK: GK: added if statement to deal with division. push back "x" and push back "y" when x/y is input to BDT
+				if (var_mod.find( "/" ) != string::npos ) { // GK: added if statement to deal with division. push back "x" and push back "y" when x/y is input to BDT
 					vector<string> split_string = AdvTokenizer(var_mod, '/');
 					input_variable_names.push_back(split_string[0]);
 					input_variable_names.push_back(split_string[1]);
@@ -253,7 +253,7 @@ void AddBranchesToTree( TTree* tree, bool tree_perJet, float signal_ctau ){
 
 	// Add Lifetime Reweighting branches //
 	input_variable_names.push_back( "LLP0_DecayCtau" );
-        input_variable_names.push_back( "LLP1_DecayCtau" );	
+    input_variable_names.push_back( "LLP1_DecayCtau" );	
 
 	// Make input_variable_names unique
 	sort( input_variable_names.begin(), input_variable_names.end() );
@@ -441,6 +441,7 @@ void AddBDTScoreBranches( string infiletag, vector<string> treenames ){
     //AddTreesToFile( "HToSSTobbbb_MH-125_MS-15_CTau1000", 100, vector<string>{ "NoSel" } ); 
 
 	AddTreesToFile( infiletag, treenames );
+	// AddTreesToFile( "v3.8_EXOhighMET_Run2023Cv4_2024_07_03", vector<string>{ "WPlusJets", "NoLepton" } );
 
 	std::cout<<"--------------------------------------------------------"<<endl;
 	double duration_sec = (clock()-start_clock)/(double)CLOCKS_PER_SEC;
