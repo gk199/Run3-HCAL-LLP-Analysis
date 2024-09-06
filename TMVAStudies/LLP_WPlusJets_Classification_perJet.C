@@ -268,7 +268,7 @@ int runClassification( TString dir, TString sigTag, TString sigTag_test, TString
    scratchFile->cd();
    TTree *background_test      = (TTree*)background_temp_test->CopyTree(selections_background);
 
-   outputFile->cd();
+   // outputFile->cd(); // started giving errors
 
    // Create the factory object. Later you can choose the methods
    // whose performance you'd like to investigate. The factory is
