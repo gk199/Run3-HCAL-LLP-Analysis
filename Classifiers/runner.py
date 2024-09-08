@@ -127,7 +127,7 @@ class DataProcessor:
        'perJet_EnergyFrac_Depth1',
        'perJet_EnergyFrac_Depth2', 'perJet_EnergyFrac_Depth3', 'perJet_EnergyFrac_Depth4', 'perJet_LeadingRechitE',
        'perJet_SubLeadingRechitE', 'perJet_SSubLeadingRechitE',
-       'perJet_AllRechitE']
+       'perJet_AllRechitE', 'perJet_NeutralHadEFrac', 'perJet_ChargedHadEFrac']
         
         
         labels = None 
