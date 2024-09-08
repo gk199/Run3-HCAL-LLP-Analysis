@@ -6,3 +6,6 @@ Self-contained script that can train (and save the model), evaluate, and write c
 **2. requirements.txt**
 List of all packages within the environment used in SWAN to train and test the models.
 
+**3. keras models**
+Uploaded some trained .keras models; dense_binary is for binary classification, dense_model should be for multi-classification. The runner.py script handles these models in the 'eval' and 'filewrite' modes.
+
