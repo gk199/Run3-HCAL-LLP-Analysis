@@ -21,7 +21,9 @@ void DisplacedHcalJetAnalyzer::SetWeight(string infiletag){
     // MC
     // lumi in fb^-1
     double lumi = 1;
-    // deal with luminosity from different MC samples (how??)
+    double lumi_2022 = 38.01,  lumi_2023 = 30.12; // fb^-1, https://twiki.cern.ch/twiki/bin/view/CMSPublic/LumiPublicResults#2023_proton_proton_collisions_at
+    // deal with luminosity from different MC samples, if year depedent. Now everything is 2023
+    lumi = lumi_2023;
 
     // NEvents
     double NEvents_minituples = GetNEventsProduced(infiletag);
@@ -40,9 +42,9 @@ void DisplacedHcalJetAnalyzer::SetWeight(string infiletag){
     }
 	
     // Weight for each event
-	weight 	    	 = BRxSigma*lumi/NEvents_AOD;
+	weight 	    	 = BRxSigma*lumi/NEvents_minituples;
 	weight_unskimmed = BRxSigma*lumi/NEvents_NTuple;
-	lumi_samplefrac  = lumi/(lumi_mc16a+lumi_mc16d+lumi_mc16e);
+	lumi_samplefrac  = lumi/(lumi_2022+lumi_2023);
 	cout<<"  weight   --> "<<weight<<" (event-by-event weight components included later)"<<endl;
 
 	cout<<endl;
@@ -84,7 +86,7 @@ double DisplacedHcalJetAnalyzer::GetNEventsProduced(string infiletag){
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetNEventsProduced()"<<endl;
 
     map<string, double> MCTag_to_NEvents;
-    MCTag_to_NEvents["ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV"] = 1000;
+    MCTag_to_NEvents["ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV"] = 292437; // nevents in TEST v3.8 NoSel
 
     double NEvents_minituples = MCTag_to_NEvents[infiletag];
 

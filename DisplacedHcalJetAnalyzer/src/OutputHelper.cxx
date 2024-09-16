@@ -35,7 +35,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 	}
 
 	vector<string> myvars_float = {
-		"met_Pt", "met_Phi", "met_SumEt", "eventHT"
+		"met_Pt", "met_Phi", "met_SumEt", "eventHT", "weight"
 	};
 
 	// Add Physics Variables //
@@ -389,6 +389,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 	tree_output_vars_float["met_SumEt"]	= met_SumEt;
 
 	tree_output_vars_float["eventHT"]   = EventHT();
+	tree_output_vars_float["weight"]	= weight; // from SetWeight() in WeightsHelper.cxx
 
 	for (int i = 0; i < HLT_Indices.size(); i++) { 
 		tree_output_vars_bool[HLT_Names[i]] = HLT_Decision->at(i);

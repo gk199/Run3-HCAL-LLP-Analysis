@@ -812,6 +812,11 @@ public :
    virtual void   FillHists(string cat = "");
    virtual void   FillTriggerMatchHists(string cat = "");
    virtual void   WriteHists(); 
+   // WeightsHelper.cxx
+   virtual void   SetWeight( string infiletag );
+	virtual double GetNEventsProduced(string infiletag);
+	virtual double GetSignalBRxSigma(string infiletag);
+
 };
 
 #endif

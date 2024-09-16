@@ -32,6 +32,9 @@ void DisplacedHcalJetAnalyzer::Initialize( string infiletag, string infilepath )
 	// Lifetime Reweighting
 	InitializeLifetimeReweighting( infilepath );
 
+	// Weights for MC
+	SetWeight( infiletag ); // and then added as a branch in OutputHelper.cxx
+
 	return;
 }
 
