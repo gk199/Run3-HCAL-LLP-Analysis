@@ -438,16 +438,21 @@ def main():
     
     mode = "train"
     
-    # running the depth tagger
+    # running the depth and inclusive tagger sequentially, uncomment second part if want to run the depth tagger alone
     print("Running Depth Tagger")
     runner = Runner(sig_files=sig_files[:], bkg_files=bkg_files[:], mode=mode, num_classes=2, inclusive=False)
     runner.run()
-    
-    # running the inclusive tagger
     print("Running Inclusive Tagger")
     runner.set_inclusive(inclusive=True)
     runner.set_load(load=False)
     runner.run()
+    
+    
+    # running the inclusive tagger by itself, uncomment if needed
+    #print("Running Inclusive Tagger")
+    #runner = Runner(sig_files=sig_files[:], bkg_files=bkg_files[:], mode=mode, num_classes=2, inclusive=True)
+    #runner.set_load(load=False)
+    #runner.run()
     
     
     
