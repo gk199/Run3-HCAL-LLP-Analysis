@@ -9,5 +9,8 @@ List of all packages within the environment used in SWAN to train and test the m
 **3. keras models**
 Uploaded some trained .keras models; dense_binary is for binary classification, dense_model should be for multi-classification. The runner.py script handles these models in the 'eval' and 'filewrite' modes.
 
-**3. runner-V2.py**
+**4. runner-V2.py**
 No longer need separate train and test files. Added running of inclusive tagger within the same run of the script as the depth tagger. First run in train mode to obtain the models: best to run this individually as currently saving models to different names isn't implemented (will fix soon). 
+
+**5. All other images**
+Currently having issues with opening up plots on SWAN and Lxplus, so temporary solution is to visualise them on GitHub. This can be ignored.
