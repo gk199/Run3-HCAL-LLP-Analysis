@@ -136,6 +136,7 @@ class DataProcessor:
             bkg_df = bkg_df[bkg_df["classID"] != -1].reset_index(drop=True) # removing junk
             
         self.cumulative_df = pd.concat((sig_df, bkg_df))
+        print("-------------------Cumulative Data---------")
         print(self.cumulative_df)
             
         
@@ -176,8 +177,7 @@ class DataProcessor:
         return normed_data, labels
     
     def write_to_root(self, scores, filename, labels=None):
-        filename = f"{filename}_scores_nosels.root"
-        # only implemented for multiclass for now
+        filename = f"{filename}_scores.root"
         dataframe = self.cumulative_df
         if self.num_classes == 2:
             dataframe['scores12'] = scores[:, 0]
@@ -193,11 +193,11 @@ class DataProcessor:
             
         
 class ModelHandler:
-    def __init__(self, num_classes=3, num_layers=3, optimizer="adam", lr=0.00027848106048644665):
+    def __init__(self, num_classes=3, num_layers=3, optimizer="adam", lr=0.00027848106048644665, model_name="dense_model.keras"):
         
         self.num_classes = num_classes
         self.num_layers = num_layers
-        self.model_name = 'dense_binary.keras' #'inclusive_tagger.keras'
+        self.model_name = model_name
         self.colors = ['red', 'blue', 'green']
         
         self.names = ["HCAL12", "HCAL34", "bkg"] if num_classes == 3 else ["HCAL", "bkg"]
@@ -225,7 +225,7 @@ class ModelHandler:
         
         self.model.compile(optimizer=self.optimizer, loss="sparse_categorical_crossentropy")
                   
-    def train(self, X_train, y_train, epochs=50, batch_size=512, val=0.2):
+    def train(self, X_train, y_train, epochs=15, batch_size=512, val=0.2):
         self.build()
         self.model.fit(X_train, y_train, epochs=epochs, batch_size=512, validation_split=val, verbose=1)
         
@@ -313,6 +313,13 @@ class ModelHandler:
         ax.legend(loc="lower right")
         ax.grid(True)  
         fig.savefig("ROC1vA.png")
+        print("-------ROC data-------")
+        print("fpr shape ", fpr.shape)
+        print("First non-zero TPR", tpr[fpr !=0][0])
+        #index = np.where( fpr <= 1e-4)
+        print("TPR: ", tpr[fpr <=1e-4][-1], "at FPR", fpr[fpr <=1e-4][-1])
+        print("TPR: ", tpr[fpr <=1e-3][-1], "at FPR", fpr[fpr <=1e-3][-1])
+        print("TPR: ", tpr[fpr <=1e-2][-1], "at FPR", fpr[fpr <=1e-2][-1])
        
                 
         
@@ -324,6 +331,7 @@ class Runner:
         self.load = load
         self.sig = sig_files
         self.bkg = bkg_files
+        self.model_name = "dense_model.keras"
      
     def run_training(self):
         # modifying to do per-event splitting
@@ -340,7 +348,7 @@ class Runner:
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         
         
-        handler = ModelHandler(num_classes=self.num_classes)
+        handler = ModelHandler(num_classes=self.num_classes, model_name=self.model_name)
         handler.train(X_train, y_train)
         y_test, scores = handler.test(X_test, y_test)
         handler.save()
@@ -358,7 +366,7 @@ class Runner:
         
         X_eval, y_eval = self.processor.process_data()
         
-        handler = ModelHandler(num_classes=self.num_classes)
+        handler = ModelHandler(num_classes=self.num_classes, model_name=self.model_name)
         handler.load()
         handler.test(X_eval, y_eval)
         handler.one_vs_one_roc()
@@ -383,7 +391,7 @@ class Runner:
             self.fname = self.bkg[0]
             
         predicting_data, labels = self.processor.process_data()
-        handler = ModelHandler(num_classes=self.num_classes)
+        handler = ModelHandler(num_classes=self.num_classes, model_name=self.model_name)
         handler.load()
         preds = handler.predict(predicting_data, labels)
         self.processor.write_to_root(preds, self.fname, labels=None)
@@ -405,7 +413,9 @@ class Runner:
     
     def set_load(self,load=True):
         self.load = load
-        
+    
+    def set_model_name(self, model_name="dense_model.keras"):
+        self.model_name = model_name
     
     
         
@@ -436,15 +446,18 @@ def main():
         "minituple_v3.6_LLPskim_Run2023Dv2_2024_03_02.root"
     ]
     
-    mode = "train"
+    mode = "train" # "eval", "filewrite"
     
     # running the depth and inclusive tagger sequentially, uncomment second part if want to run the depth tagger alone
     print("Running Depth Tagger")
     runner = Runner(sig_files=sig_files[:], bkg_files=bkg_files[:], mode=mode, num_classes=2, inclusive=False)
     runner.run()
+    
     print("Running Inclusive Tagger")
+    # first resetting some parameters for the inclusive tagger
     runner.set_inclusive(inclusive=True)
     runner.set_load(load=False)
+    runner.set_model_name(model_name="inclusive_model.keras")
     runner.run()
     
     
@@ -453,7 +466,7 @@ def main():
     #runner = Runner(sig_files=sig_files[:], bkg_files=bkg_files[:], mode=mode, num_classes=2, inclusive=True)
     #runner.set_load(load=False)
     #runner.run()
-    
+      
     
     
     
