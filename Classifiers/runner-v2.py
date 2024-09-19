@@ -22,6 +22,7 @@ class DataProcessor:
     def __init__(self, num_classes=2, mode=None, sel=True): #counting from 0 
         self.return_value_bkg = num_classes
         self.return_sig_value = num_classes - 1
+        self.num_classes = num_classes
         self.mode = mode
         self.sel = sel
         #self.inclusive = inclusive
@@ -122,6 +123,9 @@ class DataProcessor:
                 return -1
         
         classify_sig = classify_sig_inclusive if inclusive else classify_signal
+
+        sig_df = pd.DataFrame()
+        bkg_df = pd.DataFrame()
         
         if not self.sig_df.empty and self.sel:
             sig_df = self.sig_df.copy(deep=True)
@@ -450,7 +454,7 @@ def main():
     
     # running the depth and inclusive tagger sequentially, uncomment second part if want to run the depth tagger alone
     print("Running Depth Tagger")
-    runner = Runner(sig_files=sig_files[:], bkg_files=bkg_files[:], mode=mode, num_classes=2, inclusive=False)
+    runner = Runner(sig_files=sig_files[:], bkg_files=[:], mode=mode, num_classes=2, inclusive=False)
     runner.run()
     
     print("Running Inclusive Tagger")
