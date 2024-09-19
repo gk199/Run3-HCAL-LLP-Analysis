@@ -168,7 +168,7 @@ class ModelHandler:
         
         self.num_classes = num_classes
         self.num_layers = num_layers
-        self.model_name = "dense_model.keras"
+        self.model_name = "dense_model_v1.keras"
         self.colors = ['red', 'blue', 'green']
         
         self.names = ["HCAL12", "HCAL34", "bkg"] if num_classes == 3 else ["HCAL", "bkg"]

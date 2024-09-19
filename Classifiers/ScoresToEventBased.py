@@ -176,12 +176,12 @@ class DataProcessor:
     
     
     def write_to_root(self, scores, filename, labels=None):
-        filename = f"{filename}_scores_nosels.root"
+        filename = f"{filename}_scores_nosels_v1.root"
         # only implemented for multiclass for now but easy to change
         dataframe = self.cumulative_df
         dataframe['scores12'] = scores[:, 0]
         dataframe['scores34'] = scores[:, 1]
-        # dataframe['scoresbkg'] = scores[:, 2] # giving index errors -- why?
+        dataframe['scoresbkg'] = scores[:, 2]
         if labels is not None:
             dataframe['classID'] = labels
         with uproot.recreate(filename) as f:
@@ -194,7 +194,7 @@ class ModelHandler:
         
         self.num_classes = num_classes
         self.num_layers = num_layers
-        self.model_name = "dense_model.keras"
+        self.model_name = "dense_model_v1.keras"
         self.colors = ['red', 'blue', 'green']
         
         self.names = ["HCAL12", "HCAL34", "bkg"] if num_classes == 3 else ["HCAL", "bkg"]
