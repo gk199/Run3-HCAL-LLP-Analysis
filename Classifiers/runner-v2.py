@@ -69,6 +69,7 @@ class DataProcessor:
         
         
     def apply_selections(self, inclusive=False):
+        print("Applying Selections")
         bkg_value = self.return_value_bkg
         sig_value = self.return_sig_value
         
@@ -141,7 +142,13 @@ class DataProcessor:
             
         self.cumulative_df = pd.concat((sig_df, bkg_df))
         print("-------------------Cumulative Data---------")
-        print(self.cumulative_df)
+        print(self.cumulative_df.describe())
+
+
+    def no_selections_concatenate(self):
+        self.cumulative_df = pd.concat((self.sig_df, self.bkg_df))
+        print("-------------------All Data // No Cuts applied---------")
+        print(self.cumulative_df.describe())
             
         
     def process_data(self):
@@ -229,7 +236,7 @@ class ModelHandler:
         
         self.model.compile(optimizer=self.optimizer, loss="sparse_categorical_crossentropy")
                   
-    def train(self, X_train, y_train, epochs=15, batch_size=512, val=0.2):
+    def train(self, X_train, y_train, epochs=50, batch_size=512, val=0.2):
         self.build()
         self.model.fit(X_train, y_train, epochs=epochs, batch_size=512, validation_split=val, verbose=1)
         
@@ -364,7 +371,7 @@ class Runner:
         # this is when you don't want to rebuild and retrain the model -- just test it
         print("Evaluation")
         if self.load:
-            self.processor = DataProcessor(num_classes=self.num_classes - 1)
+            self.processor = DataProcessor(mode="eval", num_classes=self.num_classes - 1)
             self.processor.load_data(self.sig, self.bkg)
         self.processor.apply_selections(inclusive=self.inclusive)
         
@@ -379,19 +386,18 @@ class Runner:
         
     def run_file_evaluation(self):
         print("Evaluating Single File")
-        processor = DataProcessor(mode="filewrite", sel=False)
         if self.sig:
             # processes one file per run for now
             if self.load:
-                self.processor = DataProcessor(num_classes=self.num_classes - 1)
+                self.processor = DataProcessor(num_classes=self.num_classes - 1, mode="filewrite", sel=False)
                 self.processor.load_data(sig_files=self.sig)
-            self.processor.apply_selections(inclusive=self.inclusive)
+            self.processor.no_selections_concatenate() # automatically inclusive
             self.fname = self.sig[0]
         elif self.bkg:
             if self.load:
-                self.processor = DataProcessor(num_classes=self.num_classes - 1)
+                self.processor = DataProcessor(num_classes=self.num_classes - 1, mode="filewrite", sel=False)
                 self.processor.load_data(bkg_files=self.bkg)
-            self.processor.apply_selections(inclusive=self.inclusive)
+            self.processor.no_selections_concatenate()
             self.fname = self.bkg[0]
             
         predicting_data, labels = self.processor.process_data()
@@ -454,15 +460,15 @@ def main():
     
     # running the depth and inclusive tagger sequentially, uncomment second part if want to run the depth tagger alone
     print("Running Depth Tagger")
-    runner = Runner(sig_files=sig_files[:], bkg_files=[:], mode=mode, num_classes=2, inclusive=False)
+    runner = Runner(sig_files=sig_files[:1], bkg_files=sig_files[:1], mode=mode, num_classes=3, inclusive=False)
     runner.run()
     
     print("Running Inclusive Tagger")
     # first resetting some parameters for the inclusive tagger
-    runner.set_inclusive(inclusive=True)
-    runner.set_load(load=False)
-    runner.set_model_name(model_name="inclusive_model.keras")
-    runner.run()
+    #runner.set_inclusive(inclusive=True)
+    #runner.set_load(load=False)
+    #runner.set_model_name(model_name="inclusive_model.keras")
+    #runner.run()
     
     
     # running the inclusive tagger by itself, uncomment if needed
