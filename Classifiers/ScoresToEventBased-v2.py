@@ -14,14 +14,16 @@ from itertools import combinations
 from sklearn.metrics import roc_curve, auc
 import csv
 
+perJet = False
+num_jets = 1 if perJet else 6
 
 CONSTANTS = pd.read_csv("norm_constants.csv")
-
 
 class DataProcessor:
     def __init__(self, num_classes=2, mode=None, sel=True): #counting from 0 
         self.return_value_bkg = num_classes
         self.return_sig_value = num_classes - 1
+        self.num_classes = num_classes
         self.mode = mode
         self.sel = sel
         #self.inclusive = inclusive
@@ -42,8 +44,9 @@ class DataProcessor:
         
         # aggregating all signal events
         for file in sig_fps:
+            if perJet: sig = uproot.open(file)['PerJet_LLPmatched']
+            else: sig = uproot.open(file)['NoSel']
             # sig = uproot.open(file)['PassedHLT']
-            sig = uproot.open(file)['NoSel']
             print(f"Opened {file}")
             sig = sig.arrays(filter_name=filter_name, library="pd")
             #sig_df = pd.concat((sig_df, sig))
@@ -52,7 +55,8 @@ class DataProcessor:
         
         # aggregating all background events
         for file in bkg_fps:
-            bkg = uproot.open(file)['WPlusJets']
+            if perJet: bkg = uproot.open(file)['PerJet_WPlusJets']
+            else: bkg = uproot.open(file)['WPlusJets']
             print(f"Opened {file}")
             bkg = bkg.arrays(filter_name=filter_name, library="pd")
             #bkg_df = pd.concat((bkg_df, bkg))
@@ -69,41 +73,42 @@ class DataProcessor:
         
         
     def apply_selections(self, inclusive=False):
+        print("Applying Selections")
         bkg_value = self.return_value_bkg
         sig_value = self.return_sig_value
         
         # applying selection to remove Null values/ maxed out values/ etc.
         def select_HCAL12(row):
-            return 177 <= row['jet0_MatchedLLP_DecayR'] < 214.2 and abs(row['jet0_MatchedLLP_Eta']) < 1.26
+            return 177 <= row['perJet_MatchedLLP_DecayR'] < 214.2 and abs(row['perJet_MatchedLLP_Eta']) < 1.26
 
         def select_HCAL34(row):
-            return 214.2 <= row['jet0_MatchedLLP_DecayR'] < 295 and abs(row['jet0_MatchedLLP_Eta']) < 1.26
+            return 214.2 <= row['perJet_MatchedLLP_DecayR'] < 295 and abs(row['perJet_MatchedLLP_Eta']) < 1.26
 
         def select_safety(row):
-            return (row['jet0_Pt'] > 40 and abs(row['jet0_Eta']) < 1.26 and 
-            0 <= row['jet0_EnergyFrac_Depth1'] <= 1 and 
-            0 <= row['jet0_EnergyFrac_Depth2'] <= 1 and 
-            0 <= row['jet0_EnergyFrac_Depth3'] <= 1 and 
-            0 <= row['jet0_EnergyFrac_Depth4'] <= 1 and 
-            0 < row['jet0_S_phiphi'] < 900 and 
-            0 < row['jet0_LeadingRechitE'] < 900 and 
-            0 < row['jet0_Track0Pt'] < 900 and 
-            0 <= row['jet0_Track0dR'] < 1 and 
-            0 < row['jet0_Track1Pt'] < 900 and 
-            0 <= row['jet0_Track1dR'] < 1)
+            return (row['perJet_Pt'] > 40 and abs(row['perJet_Eta']) < 1.26 and 
+            0 <= row['perJet_EnergyFrac_Depth1'] <= 1 and 
+            0 <= row['perJet_EnergyFrac_Depth2'] <= 1 and 
+            0 <= row['perJet_EnergyFrac_Depth3'] <= 1 and 
+            0 <= row['perJet_EnergyFrac_Depth4'] <= 1 and 
+            0 < row['perJet_S_phiphi'] < 900 and 
+            0 < row['perJet_LeadingRechitE'] < 900 and 
+            0 < row['perJet_Track0Pt'] < 900 and 
+            0 <= row['perJet_Track0dR'] < 1 and 
+            0 < row['perJet_Track1Pt'] < 900 and 
+            0 <= row['perJet_Track1dR'] < 1)
 
         def classify_bkg(row): 
-            if (row['jet0_Pt'] > 40 and abs(row['jet0_Eta']) < 1.26 and 
-            0 <= row['jet0_EnergyFrac_Depth1'] <= 1 and 
-            0 <= row['jet0_EnergyFrac_Depth2'] <= 1 and 
-            0 <= row['jet0_EnergyFrac_Depth3'] <= 1 and 
-            0 <= row['jet0_EnergyFrac_Depth4'] <= 1 and 
-            0 < row['jet0_S_phiphi'] < 900 and 
-            0 < row['jet0_LeadingRechitE'] < 900 and 
-            0 < row['jet0_Track0Pt'] < 900 and 
-            0 <= row['jet0_Track0dR'] < 1 and 
-            0 < row['jet0_Track1Pt'] < 900 and 
-            0 <= row['jet0_Track1dR'] < 1):
+            if (row['perJet_Pt'] > 40 and abs(row['perJet_Eta']) < 1.26 and 
+            0 <= row['perJet_EnergyFrac_Depth1'] <= 1 and 
+            0 <= row['perJet_EnergyFrac_Depth2'] <= 1 and 
+            0 <= row['perJet_EnergyFrac_Depth3'] <= 1 and 
+            0 <= row['perJet_EnergyFrac_Depth4'] <= 1 and 
+            0 < row['perJet_S_phiphi'] < 900 and 
+            0 < row['perJet_LeadingRechitE'] < 900 and 
+            0 < row['perJet_Track0Pt'] < 900 and 
+            0 <= row['perJet_Track0dR'] < 1 and 
+            0 < row['perJet_Track1Pt'] < 900 and 
+            0 <= row['perJet_Track1dR'] < 1):
                 return bkg_value # 2 or 1 
             else:
                 return -1
@@ -123,7 +128,10 @@ class DataProcessor:
                 return -1
         
         classify_sig = classify_sig_inclusive if inclusive else classify_signal
-        
+
+        sig_df = pd.DataFrame()
+        bkg_df = pd.DataFrame()
+
         if not self.sig_df.empty and self.sel:
             sig_df = self.sig_df.copy(deep=True)
             # applying selections cut to signal
@@ -138,73 +146,84 @@ class DataProcessor:
             
         self.cumulative_df = pd.concat((sig_df, bkg_df))
         print("-------------------Cumulative Data---------")
-        print(self.cumulative_df)
-            
+        print(self.cumulative_df.describe())
+
+
+    def no_selections_concatenate(self):
+        self.cumulative_df = pd.concat((self.sig_df, self.bkg_df))
+        print("-------------------All Data // No Cuts applied---------")
+        print(self.cumulative_df.describe())
+
         
     def process_data(self):
         
         print("Processing...")
-        features = ['jet0_LeadingRechitD', 'jet0_E', 'jet0_Pt', 'jet0_Eta',
-       'jet0_Phi', 'jet0_Mass', # 'jet0_Area',
-       'jet0_S_phiphi', 'jet0_S_etaeta',
-       'jet0_S_etaphi', 'jet0_Tracks_dR', 'jet0_Track0Pt',
-       'jet0_Track0dR', 'jet0_Track0dEta', 'jet0_Track0dPhi',
-       'jet0_Track0dzToPV', 'jet0_Track0dxyToBS', 'jet0_Track0dzOverErr',
-       'jet0_Track0dxyOverErr', 'jet0_Track1Pt', 'jet0_Track1dR',
-       'jet0_Track1dEta', 'jet0_Track1dPhi', 'jet0_Track1dzToPV',
-       'jet0_Track1dxyToBS', 'jet0_Track1dzOverErr',
-       'jet0_Track1dxyOverErr', 'jet0_Track2Pt', 'jet0_Track2dR',
-       'jet0_Track2dEta', 'jet0_Track2dPhi',
-       'jet0_EnergyFrac_Depth1',
-       'jet0_EnergyFrac_Depth2', 'jet0_EnergyFrac_Depth3', 'jet0_EnergyFrac_Depth4', 'jet0_LeadingRechitE',
-       'jet0_SubLeadingRechitE', 'jet0_SSubLeadingRechitE',
-       'jet0_AllRechitE', 'jet0_NeutralHadEFrac', 'jet0_ChargedHadEFrac']
-        
-        
-        labels = None 
-        if not self.mode and self.sel:
-            self.cumulative_df = self.cumulative_df.sample(frac=1, random_state=42).reset_index(drop=True) # shuffling
-            labels = self.cumulative_df["classID"].values
-        
-        data = self.cumulative_df[features]
-        # in data, would like to rename jetX to perJet to work with the input files
-        # data is already a pandas DataFrame so try "rename" option
-        data = data.rename(columns={'jet0_LeadingRechitD':'perJet_LeadingRechitD', 'jet0_E':'perJet_E', 'jet0_Pt':'perJet_Pt', 'jet0_Eta':'perJet_Eta',
-       'jet0_Phi':'perJet_Phi', 'jet0_Mass':'perJet_Mass', # 'jet0_Area',
-       'jet0_S_phiphi':'perJet_S_phiphi', 'jet0_S_etaeta':'perJet_S_etaeta',
-       'jet0_S_etaphi':'perJet_S_etaphi', 'jet0_Tracks_dR':'perJet_Tracks_dR', 'jet0_Track0Pt':'perJet_Track0Pt',
-       'jet0_Track0dR':'perJet_Track0dR', 'jet0_Track0dEta':'perJet_Track0dEta', 'jet0_Track0dPhi':'perJet_Track0dPhi',
-       'jet0_Track0dzToPV':'perJet_Track0dzToPV', 'jet0_Track0dxyToBS':'perJet_Track0dxyToBS', 'jet0_Track0dzOverErr':'perJet_Track0dzOverErr',
-       'jet0_Track0dxyOverErr':'perJet_Track0dxyOverErr', 'jet0_Track1Pt':'perJet_Track1Pt', 'jet0_Track1dR':'perJet_Track1dR',
-       'jet0_Track1dEta':'perJet_Track1dEta', 'jet0_Track1dPhi':'perJet_Track1dPhi', 'jet0_Track1dzToPV':'perJet_Track1dzToPV',
-       'jet0_Track1dxyToBS':'perJet_Track1dxyToBS', 'jet0_Track1dzOverErr':'perJet_Track1dzOverErr',
-       'jet0_Track1dxyOverErr':'perJet_Track1dxyOverErr', 'jet0_Track2Pt':'perJet_Track2Pt', 'jet0_Track2dR':'perJet_Track2dR',
-       'jet0_Track2dEta':'perJet_Track2dEta', 'jet0_Track2dPhi':'perJet_Track2dPhi',
-       'jet0_EnergyFrac_Depth1':'perJet_EnergyFrac_Depth1',
-       'jet0_EnergyFrac_Depth2':'perJet_EnergyFrac_Depth2', 'jet0_EnergyFrac_Depth3':'perJet_EnergyFrac_Depth3', 'jet0_EnergyFrac_Depth4':'perJet_EnergyFrac_Depth4', 'jet0_LeadingRechitE':'perJet_LeadingRechitE',
-       'jet0_SubLeadingRechitE':'perJet_SubLeadingRechitE', 'jet0_SSubLeadingRechitE':'perJet_SSubLeadingRechitE',
-       'jet0_AllRechitE':'perJet_AllRechitE', 'jet0_NeutralHadEFrac':'perJet_NeutralHadEFrac', 'jet0_ChargedHadEFrac':'perJet_ChargedHadEFrac'})
-       # runs but worry the output isn't sensible yet, the means don't look like they used to, probably due to safety selections relying on the previous names
+        features = ['perJet_LeadingRechitD', 'perJet_E', 'perJet_Pt', 'perJet_Eta',
+        'perJet_Phi', 'perJet_Mass', # 'perJet_Area',
+        'perJet_S_phiphi', 'perJet_S_etaeta',
+        'perJet_S_etaphi', 'perJet_Tracks_dR', 'perJet_Track0Pt',
+        'perJet_Track0dR', 'perJet_Track0dEta', 'perJet_Track0dPhi',
+        'perJet_Track0dzToPV', 'perJet_Track0dxyToBS', 'perJet_Track0dzOverErr',
+        'perJet_Track0dxyOverErr', 'perJet_Track1Pt', 'perJet_Track1dR',
+        'perJet_Track1dEta', 'perJet_Track1dPhi', 'perJet_Track1dzToPV',
+        'perJet_Track1dxyToBS', 'perJet_Track1dzOverErr',
+        'perJet_Track1dxyOverErr', 'perJet_Track2Pt', 'perJet_Track2dR',
+        'perJet_Track2dEta', 'perJet_Track2dPhi',
+        'perJet_EnergyFrac_Depth1',
+        'perJet_EnergyFrac_Depth2', 'perJet_EnergyFrac_Depth3', 'perJet_EnergyFrac_Depth4', 'perJet_LeadingRechitE',
+        'perJet_SubLeadingRechitE', 'perJet_SSubLeadingRechitE',
+        'perJet_AllRechitE', 'perJet_NeutralHadEFrac', 'perJet_ChargedHadEFrac']
 
-        normed_data = pd.DataFrame()
-        for feature in data.columns:
-            normed_data[feature] = (data[feature] - CONSTANTS[feature][0])/ CONSTANTS[feature][1]
+        all_normed_data = []
+        all_labels = []
+
+        for jet in range(num_jets): 
+            if not perJet:
+                new_features = [i.replace('perJet','jet'+str(jet)) for i in features] # list comprehension 
+                feature_dictionary = dict(zip(new_features, features))
+            else: new_features = features
         
-        print(normed_data.describe())
+            labels = None 
+            if not self.mode and self.sel:
+                self.cumulative_df = self.cumulative_df.sample(frac=1, random_state=42).reset_index(drop=True) # shuffling
+                labels = self.cumulative_df["classID"].values
+            
+            data = self.cumulative_df[new_features]
+            print(data.describe())
+            # in data, would like to rename jetX to perJet to work with the input files
+            # data is already a pandas DataFrame so try "rename" option
+            if not perJet: data = data.rename(columns=feature_dictionary)
+            # runs but the means don't look like they used to, probably due to safety selections relying on the previous names. This allows -9999 to be saved. Keeping like this for now
+            print(data.describe())
+
+            normed_data = pd.DataFrame()
+            for feature in data.columns:
+                normed_data[feature] = (data[feature] - CONSTANTS[feature][0])/ CONSTANTS[feature][1]
         
-        print("Processing Complete")
+            print(normed_data.describe())
         
-        return normed_data, labels
+            print("Processing Complete")
+
+            all_normed_data.append(normed_data)
+            all_labels.append(labels)
+
+        return all_normed_data, all_labels
     
     def write_to_root(self, scores, filename, labels=None):
-        filename = f"{filename}_scores.root"
+        filename = f"{filename[:-5]}_scores.root" # remove .root from initial filename
         dataframe = self.cumulative_df
         if self.num_classes == 2:
-            dataframe['scores12'] = scores[:, 0]
-            dataframe['scores34'] = scores[:, 1]
-            dataframe['scoresbkg'] = scores[:, 2]
+            for i in range(num_jets):
+                dataframe['jet'+str(i)+'_scores12'] = scores[i][:, 0]
+                dataframe['jet'+str(i)+'_scores34'] = scores[i][:, 1]
+                dataframe['jet'+str(i)+'_scoresbkg'] = scores[i][:, 2]
+            # dataframe['jet0_scores12'] = scores[:, 0]
+            # dataframe['jet0_scores34'] = scores[:, 1]
+            # dataframe['jet0_scoresbkg'] = scores[:, 2]
         elif self.num_classes == 1:
-            dataframe['scores'] = scores[:, 0] # 0 is the signal class
+            for i in range(num_jets):
+                dataframe['jet'+str(i)+'_scores'] = scores[i][:, 0] # 0 is the signal class
+            # dataframe['jet0_scores'] = scores[:, 0] # 0 is the signal class
         if labels is not None:
             dataframe['classID'] = labels
         with uproot.recreate(filename) as f:
@@ -245,7 +264,7 @@ class ModelHandler:
         
         self.model.compile(optimizer=self.optimizer, loss="sparse_categorical_crossentropy")
                   
-    def train(self, X_train, y_train, epochs=15, batch_size=512, val=0.2):
+    def train(self, X_train, y_train, epochs=50, batch_size=512, val=0.2):
         self.build()
         self.model.fit(X_train, y_train, epochs=epochs, batch_size=512, validation_split=val, verbose=1)
         
@@ -380,7 +399,7 @@ class Runner:
         # this is when you don't want to rebuild and retrain the model -- just test it
         print("Evaluation")
         if self.load:
-            self.processor = DataProcessor(num_classes=self.num_classes - 1)
+            self.processor = DataProcessor(mode="eval", num_classes=self.num_classes - 1)
             self.processor.load_data(self.sig, self.bkg)
         self.processor.apply_selections(inclusive=self.inclusive)
         
@@ -395,25 +414,25 @@ class Runner:
         
     def run_file_evaluation(self):
         print("Evaluating Single File")
-        processor = DataProcessor(mode="filewrite", sel=False)
         if self.sig:
             # processes one file per run for now
             if self.load:
-                self.processor = DataProcessor(num_classes=self.num_classes - 1)
+                self.processor = DataProcessor(num_classes=self.num_classes - 1, mode="filewrite", sel=False)
                 self.processor.load_data(sig_files=self.sig)
-            self.processor.apply_selections(inclusive=self.inclusive)
+            self.processor.no_selections_concatenate() # automatically inclusive
             self.fname = self.sig[0]
         elif self.bkg:
             if self.load:
-                self.processor = DataProcessor(num_classes=self.num_classes - 1)
+                self.processor = DataProcessor(num_classes=self.num_classes - 1, mode="filewrite", sel=False)
                 self.processor.load_data(bkg_files=self.bkg)
-            self.processor.apply_selections(inclusive=self.inclusive)
+            self.processor.no_selections_concatenate()
             self.fname = self.bkg[0]
-            
+                
         predicting_data, labels = self.processor.process_data()
         handler = ModelHandler(num_classes=self.num_classes, model_name=self.model_name)
         handler.load()
-        preds = handler.predict(predicting_data, labels)
+        preds = [ handler.predict(predicting_data[i], labels[i]) for i in range(num_jets) ]
+        # preds = handler.predict(predicting_data, labels)
         self.processor.write_to_root(preds, self.fname, labels=None)
         
         
@@ -465,19 +484,20 @@ def main():
     ]
 
     
-    mode = "eval" # "eval", "filewrite"
+    mode = "filewrite" # "eval", "filewrite"
     
     # running the depth and inclusive tagger sequentially, uncomment second part if want to run the depth tagger alone
     print("Running Depth Tagger")
-    runner = Runner(sig_files=sig_files[:], bkg_files=bkg_files[:], mode=mode, num_classes=2, inclusive=False)
+    runner = Runner(sig_files=sig_files[:1], bkg_files=bkg_files[:1], mode=mode, num_classes=3, inclusive=False)
     runner.run()
     
     print("Running Inclusive Tagger")
     # first resetting some parameters for the inclusive tagger
-    runner.set_inclusive(inclusive=True)
-    runner.set_load(load=False)
+    #runner.set_inclusive(inclusive=True)
+    #runner.set_load(load=False)
+    runner = Runner(sig_files=sig_files[:1], bkg_files=bkg_files[:1], mode=mode, num_classes=2, inclusive=True)
     runner.set_model_name(model_name="inclusive_model.keras")
-    runner.run()
+    # runner.run()
     
     # running the inclusive tagger by itself, uncomment if needed
     #print("Running Inclusive Tagger")
