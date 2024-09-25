@@ -10,6 +10,7 @@
 #include "../src/OutputHelper.cxx"
 #include "../src/BDTHelper.cxx"
 #include "../src/TruthInfoHelper.cxx"
+#include "../src/WeightsHelper.cxx"
 
 // gSystem->Load("/Users/kiley/Documents/CMS/WorkingDir/Run3-HCAL-LLP-Analysis/pugixml/pugixml_cpp.so");
 

@@ -67,6 +67,8 @@ public :
    bool blind_data     = false;
 
    float weight = 1;
+   float weight_unskimmed = 1;
+   double lumi_samplefrac = 1.0;
 
    Long64_t NEvents   = -1; 
    Long64_t NEvents_HLT = -1;

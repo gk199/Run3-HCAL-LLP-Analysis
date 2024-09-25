@@ -34,7 +34,7 @@ void DisplacedHcalJetAnalyzer::SetWeight(string infiletag){
     // Cross section
     double BRxSigma = 1;
 
-    if (isSignal) {
+    if ( !isData && infiletag.find("CTau") != string::npos ) { // isSignal
         BRxSigma = GetSignalBRxSigma(infiletag);
     } else {
         // would also deal with MC background processes here, like W+jets or Z->mu, to get BRxSigma
@@ -43,7 +43,7 @@ void DisplacedHcalJetAnalyzer::SetWeight(string infiletag){
 	
     // Weight for each event
 	weight 	    	 = BRxSigma*lumi/NEvents_minituples;
-	weight_unskimmed = BRxSigma*lumi/NEvents_NTuple;
+	weight_unskimmed = BRxSigma*lumi/NEvents_Ntuple;
 	lumi_samplefrac  = lumi/(lumi_2022+lumi_2023);
 	cout<<"  weight   --> "<<weight<<" (event-by-event weight components included later)"<<endl;
 
