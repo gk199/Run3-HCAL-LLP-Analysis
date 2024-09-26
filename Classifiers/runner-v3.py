@@ -225,7 +225,7 @@ class DataProcessor:
         # assumes that you have already loaded the files and applied safety selections
         constants_df = pd.DataFrame({'Mean': self.cumulative_df.mean().to_dict(), 'Standard Deviation': self.cumulative_df.std().to_dict()})
         # for manual input of other useful variables not included in safety selection:
-        useful_variables = ['perJet_Track0dzOverErr'] 
+        useful_variables = ['perJet_Track0dzOverErr', 'perJet_Track0dxyToBS', 'perJet_Track2dxyOverErr'] 
         for useful_variable in useful_variables:
             data = self.cumulative_df[[useful_variable]].copy()
             mask_condition = (data[useful_variable] <= -900) | (data[useful_variable] >= 900)
@@ -236,7 +236,7 @@ class DataProcessor:
             print(f"{useful_variable} std: {std_value}")
             constants_df.loc[useful_variable, 'Mean'] = mean_value
             constants_df.loc[useful_variable, 'Standard Deviation'] = std_value
-        constants_df.to_csv("norm_constantsv2.csv")
+        constants_df.T.to_csv("norm_constantsv2.csv")
        
 class ModelHandler:
     def __init__(self, num_classes=3, num_layers=1, optimizer="adam", lr=0.00027848106048644665, model_name="dense_model.keras"):
@@ -541,7 +541,7 @@ def main():
         "minituple_v3.6_LLPskim_Run2023Dv2_2024_03_02.root"
     ]
     
-    mode = "constants" # "eval", "filewrite", "constants"
+    mode = "train" # "eval", "filewrite", "constants"
     
     # running the depth and inclusive tagger sequentially, uncomment second part if want to run the depth tagger alone
     print("Running Depth Tagger")
