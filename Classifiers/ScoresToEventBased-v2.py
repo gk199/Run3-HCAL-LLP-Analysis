@@ -45,8 +45,9 @@ class DataProcessor:
         # aggregating all signal events
         for file in sig_fps:
             if perJet: sig = uproot.open(file)['PerJet_LLPmatched']
-            else: sig = uproot.open(file)['NoSel']
-            # sig = uproot.open(file)['PassedHLT']
+            else: 
+                #sig = uproot.open(file)['NoSel']
+                sig = uproot.open(file)['PassedHLT']
             print(f"Opened {file}")
             sig = sig.arrays(filter_name=filter_name, library="pd")
             #sig_df = pd.concat((sig_df, sig))
@@ -215,7 +216,7 @@ class DataProcessor:
         # return normed data, labels,and a list of rows are ok (energy is positive) and which are not (energy is -9999.9)
         return all_normed_data, all_labels, all_jet_valid
     
-    def write_to_root(self, scores, filename, labels=None):
+    def write_to_root(self, scores, scores_inc, filename, labels=None):
         filename = f"{filename[:-5]}_scores.root" # remove .root from initial filename
         dataframe = self.cumulative_df
         if self.num_classes == 2:
@@ -223,12 +224,16 @@ class DataProcessor:
                 dataframe['jet'+str(i)+'_scores12'] = scores[i][:, 0]
                 dataframe['jet'+str(i)+'_scores34'] = scores[i][:, 1]
                 dataframe['jet'+str(i)+'_scoresbkg'] = scores[i][:, 2]
+                dataframe['jet'+str(i)+'_scores12_inc'] = scores_inc[i][:, 0]
+                dataframe['jet'+str(i)+'_scores34_inc'] = scores_inc[i][:, 1]
+                dataframe['jet'+str(i)+'_scoresbkg_inc'] = scores_inc[i][:, 2]
             # dataframe['jet0_scores12'] = scores[:, 0]
             # dataframe['jet0_scores34'] = scores[:, 1]
             # dataframe['jet0_scoresbkg'] = scores[:, 2]
         elif self.num_classes == 1:
             for i in range(num_jets):
                 dataframe['jet'+str(i)+'_scores'] = scores[i][:, 0] # 0 is the signal class
+                dataframe['jet'+str(i)+'_scores_inc'] = scores_inc[i][:, 0] # 0 is the signal class
             # dataframe['jet0_scores'] = scores[:, 0] # 0 is the signal class
         if labels is not None:
             dataframe['classID'] = labels
@@ -238,7 +243,7 @@ class DataProcessor:
             
         
 class ModelHandler:
-    def __init__(self, num_classes=3, num_layers=3, optimizer="adam", lr=0.00027848106048644665, model_name="dense_model.keras"):
+    def __init__(self, num_classes=3, num_layers=3, optimizer="adam", lr=0.00027848106048644665, model_name="dense_model_v3.keras"):
         
         self.num_classes = num_classes
         self.num_layers = num_layers
@@ -376,7 +381,7 @@ class Runner:
         self.load = load
         self.sig = sig_files
         self.bkg = bkg_files
-        self.model_name = "dense_model.keras"
+        self.model_name = "dense_model_v3.keras"
      
     '''
     def run_training(self):
@@ -423,6 +428,7 @@ class Runner:
     def run_file_evaluation(self):
         print("Evaluating Single File")
         if self.sig:
+            print("Loaded signal")
             # processes one file per run for now
             if self.load:
                 self.processor = DataProcessor(num_classes=self.num_classes - 1, mode="filewrite", sel=False)
@@ -430,16 +436,22 @@ class Runner:
             self.processor.no_selections_concatenate() # automatically inclusive
             self.fname = self.sig[0]
         elif self.bkg:
+            print("Loaded background")
             if self.load:
                 self.processor = DataProcessor(num_classes=self.num_classes - 1, mode="filewrite", sel=False)
                 self.processor.load_data(bkg_files=self.bkg)
             self.processor.no_selections_concatenate()
             self.fname = self.bkg[0]
-                
+
         predicting_data, labels, jet_valid = self.processor.process_data()
+        # depth
         handler = ModelHandler(num_classes=self.num_classes, model_name=self.model_name)
         handler.load()
         preds = [ handler.predict(predicting_data[i], labels[i]) for i in range(num_jets) ]
+        # inclusive
+        handler_inc = ModelHandler(num_classes=self.num_classes, model_name="inclusive_model_v3.keras")
+        handler_inc.load()
+        preds_inc = [ handler_inc.predict(predicting_data[i], labels[i]) for i in range(num_jets) ]
         # data is predicting_data, jet valid is jet_valid, scores are preds, all indexed by jet (6 total)
         # to print whole data table, predicting_data[0], to print just values in a list, predicting_data[0].values
 
@@ -448,8 +460,9 @@ class Runner:
             for jet in range(len(predicting_data[i])): # evaluate for every jet, if valid
                 if (jet_valid[i][jet] < -9000): # if jet E is -9999.9, replace score with -9999.9
                     preds[i][jet] = [-9999.9, -9999.9]
+                    preds_inc[i][jet] = [-9999.9, -9999.9]
 
-        self.processor.write_to_root(preds, self.fname, labels=None)
+        self.processor.write_to_root(preds, preds_inc, self.fname, labels=None)
         
         
     def run(self):
@@ -469,58 +482,47 @@ class Runner:
     def set_load(self,load=True):
         self.load = load
     
-    def set_model_name(self, model_name="dense_model.keras"):
+    def set_model_name(self, model_name="dense_model_v3.keras"):
         self.model_name = model_name
         
         
 def main():
     sig_files = [
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TRAIN.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch1.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch1.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch1.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TRAIN.root",
+        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TRAIN.root", # no passed HLT tree 
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch1.root",
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch1.root",
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch1.root",
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TRAIN.root",
         # # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TRAIN-batch1.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch2.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch2.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch2.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TEST.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TEST-batch2.root"
+        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST.root", # no passed HLT tree 
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch2.root",
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch2.root",
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch2.root",
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TEST.root",
+        # # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TEST-batch2.root"
     ]
     
     bkg_files = [
         "minituple_v3.8_LLPskim_Run2023Bv1_2024_06_03.root",
-        # "minituple_v3.8_LLPskim_Run2023Cv1_2024_06_03.root",
-        # "minituple_v3.8_LLPskim_Run2023Cv2_2024_06_03.root",
-        # "minituple_v3.8_LLPskim_Run2023Cv3_2024_06_03.root",
-        # "minituple_v3.8_LLPskim_Run2023Cv4_2024_06_03.root",
-        # "minituple_v3.8_LLPskim_Run2023Dv1_2024_06_03.root",
-        # "minituple_v3.8_LLPskim_Run2023Dv2_2024_06_03.root"
+        "minituple_v3.8_LLPskim_Run2023Cv1_2024_06_03.root",
+        "minituple_v3.8_LLPskim_Run2023Cv2_2024_06_03.root",
+        "minituple_v3.8_LLPskim_Run2023Cv3_2024_06_03.root",
+        "minituple_v3.8_LLPskim_Run2023Cv4_2024_06_03.root",
+        "minituple_v3.8_LLPskim_Run2023Dv1_2024_06_03.root",
+        "minituple_v3.8_LLPskim_Run2023Dv2_2024_06_03.root"
     ]
 
     
     mode = "filewrite" # "eval", "filewrite"
     
-    # running the depth and inclusive tagger sequentially, uncomment second part if want to run the depth tagger alone
-    print("Running Depth Tagger")
-    runner = Runner(sig_files=sig_files[:1], bkg_files=bkg_files[:1], mode=mode, num_classes=2, inclusive=False)
-    runner.run()
-    
-    print("Running Inclusive Tagger")
-    # first resetting some parameters for the inclusive tagger
-    runner.set_inclusive(inclusive=True)
-    runner.set_load(load=False)
-    #runner = Runner(sig_files=sig_files[:1], bkg_files=bkg_files[:1], mode=mode, num_classes=2, inclusive=True)
-    runner.set_model_name(model_name="inclusive_model.keras")
-    runner.run()
-    
-    # running the inclusive tagger by itself, uncomment if needed
-    #print("Running Inclusive Tagger")
-    #runner = Runner(sig_files=sig_files[:], bkg_files=bkg_files[:], mode=mode, num_classes=2, inclusive=True)
-    #runner.set_load(load=False)
-    #runner.run()
-    
+    # pass runner each signal file (as a list, using list slicing), and then each background file, such that scores are appended to each
+    print("Running Depth and Inclusive Tagger over each file")
+    for i in range(len(sig_files)):
+        runner = Runner(sig_files=sig_files[i:i+1], bkg_files=None, mode=mode, num_classes=2, inclusive=False)
+        runner.run()
+    for i in range(len(bkg_files)):
+        runner = Runner(sig_files=None, bkg_files=bkg_files[i:i+1], mode=mode, num_classes=2, inclusive=False)
+        runner.run()    
     
 if __name__ == "__main__":
     main()

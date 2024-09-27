@@ -299,7 +299,7 @@ class ModelHandler:
         
         self.model.compile(optimizer=self.optimizer, loss="sparse_categorical_crossentropy")
                   
-    def train(self, X_train, y_train, epochs=50, batch_size=512, val=0.1):
+    def train(self, X_train, y_train, epochs=50, batch_size=512, val=0.2):
         self.build_resnet() # Residual neural network 
         # self.build() # similar to runner-v2
         name="best_model_v3.keras"
