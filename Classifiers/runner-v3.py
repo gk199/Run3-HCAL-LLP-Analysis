@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Conv1D, Flatten, Dropout, MaxPooling1D, BatchNormalization, AveragePooling1D
 from tensorflow.keras.optimizers import Nadam, Adam
@@ -13,11 +14,30 @@ from sklearn.utils import shuffle
 from itertools import combinations
 from sklearn.metrics import roc_curve, auc
 import csv
+from sklearn.feature_selection import mutual_info_regression
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.initializers import GlorotUniform, GlorotNormal
+from tensorflow.keras import layers, models
 
-perJet = False
-num_jets = 1 if perJet else 6
+tf.random.set_seed(311)
 
+# CONSTANTS = pd.read_csv("norm_constants_v3.csv") # large negative values removed from mean / std dev computation 
 CONSTANTS = pd.read_csv("norm_constants.csv")
+FEATURES = ['perJet_LeadingRechitD', 'perJet_E', 'perJet_Pt', 'perJet_Eta',
+       'perJet_Phi', 'perJet_Mass', # 'perJet_Area',
+       'perJet_S_phiphi', 'perJet_S_etaeta',
+       'perJet_S_etaphi', 'perJet_Tracks_dR', 'perJet_Track0Pt',
+       'perJet_Track0dR', 'perJet_Track0dEta', 'perJet_Track0dPhi',
+       'perJet_Track0dzToPV', 'perJet_Track0dxyToBS', 'perJet_Track0dzOverErr',
+       'perJet_Track0dxyOverErr', 'perJet_Track1Pt', 'perJet_Track1dR',
+       'perJet_Track1dEta', 'perJet_Track1dPhi', 'perJet_Track1dzToPV',
+       'perJet_Track1dxyToBS', 'perJet_Track1dzOverErr',
+       'perJet_Track1dxyOverErr', 'perJet_Track2Pt', 'perJet_Track2dR',
+       'perJet_Track2dEta', 'perJet_Track2dPhi',
+       'perJet_EnergyFrac_Depth1',
+       'perJet_EnergyFrac_Depth2', 'perJet_EnergyFrac_Depth3', 'perJet_EnergyFrac_Depth4', 'perJet_LeadingRechitE',
+       'perJet_SubLeadingRechitE', 'perJet_SSubLeadingRechitE',
+       'perJet_AllRechitE', 'perJet_NeutralHadEFrac', 'perJet_ChargedHadEFrac']
 
 class DataProcessor:
     def __init__(self, num_classes=2, mode=None, sel=True): #counting from 0 
@@ -34,7 +54,7 @@ class DataProcessor:
         # and returns the dataframe unchanged so filenames are the same
         print("Loading Data...")
         
-        filter_name = "*"
+        filter_name = "perJet_*"
         filepath = '/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8/'
     
         sig_fps = [filepath + filename for filename in sig_files] if sig_files is not None else []
@@ -44,9 +64,7 @@ class DataProcessor:
         
         # aggregating all signal events
         for file in sig_fps:
-            if perJet: sig = uproot.open(file)['PerJet_LLPmatched']
-            else: sig = uproot.open(file)['NoSel']
-            # sig = uproot.open(file)['PassedHLT']
+            sig = uproot.open(file)['PerJet_LLPmatched']
             print(f"Opened {file}")
             sig = sig.arrays(filter_name=filter_name, library="pd")
             #sig_df = pd.concat((sig_df, sig))
@@ -55,8 +73,7 @@ class DataProcessor:
         
         # aggregating all background events
         for file in bkg_fps:
-            if perJet: bkg = uproot.open(file)['PerJet_WPlusJets']
-            else: bkg = uproot.open(file)['WPlusJets']
+            bkg = uproot.open(file)['PerJet_WPlusJets']
             print(f"Opened {file}")
             bkg = bkg.arrays(filter_name=filter_name, library="pd")
             #bkg_df = pd.concat((bkg_df, bkg))
@@ -131,7 +148,7 @@ class DataProcessor:
 
         sig_df = pd.DataFrame()
         bkg_df = pd.DataFrame()
-
+        
         if not self.sig_df.empty and self.sel:
             sig_df = self.sig_df.copy(deep=True)
             # applying selections cut to signal
@@ -153,92 +170,80 @@ class DataProcessor:
         self.cumulative_df = pd.concat((self.sig_df, self.bkg_df))
         print("-------------------All Data // No Cuts applied---------")
         print(self.cumulative_df.describe())
-
+            
         
     def process_data(self):
         
         print("Processing...")
         features = ['perJet_LeadingRechitD', 'perJet_E', 'perJet_Pt', 'perJet_Eta',
-        'perJet_Phi', 'perJet_Mass', # 'perJet_Area',
-        'perJet_S_phiphi', 'perJet_S_etaeta',
-        'perJet_S_etaphi', 'perJet_Tracks_dR', 'perJet_Track0Pt',
-        'perJet_Track0dR', 'perJet_Track0dEta', 'perJet_Track0dPhi',
-        'perJet_Track0dzToPV', 'perJet_Track0dxyToBS', 'perJet_Track0dzOverErr',
-        'perJet_Track0dxyOverErr', 'perJet_Track1Pt', 'perJet_Track1dR',
-        'perJet_Track1dEta', 'perJet_Track1dPhi', 'perJet_Track1dzToPV',
-        'perJet_Track1dxyToBS', 'perJet_Track1dzOverErr',
-        'perJet_Track1dxyOverErr', 'perJet_Track2Pt', 'perJet_Track2dR',
-        'perJet_Track2dEta', 'perJet_Track2dPhi',
-        'perJet_EnergyFrac_Depth1',
-        'perJet_EnergyFrac_Depth2', 'perJet_EnergyFrac_Depth3', 'perJet_EnergyFrac_Depth4', 'perJet_LeadingRechitE',
-        'perJet_SubLeadingRechitE', 'perJet_SSubLeadingRechitE',
-        'perJet_AllRechitE', 'perJet_NeutralHadEFrac', 'perJet_ChargedHadEFrac']
-
-        all_normed_data = []
-        all_labels = []
-        all_jet_valid = []
-
-        for jet in range(num_jets): 
-            if not perJet:
-                new_features = [i.replace('perJet','jet'+str(jet)) for i in features] # list comprehension 
-                feature_dictionary = dict(zip(new_features, features))
-            else: new_features = features
+       'perJet_Phi', 'perJet_Mass', # 'perJet_Area',
+       'perJet_S_phiphi', 'perJet_S_etaeta',
+       'perJet_S_etaphi', 'perJet_Tracks_dR', 'perJet_Track0Pt',
+       'perJet_Track0dR', 'perJet_Track0dEta', 'perJet_Track0dPhi',
+       'perJet_Track0dzToPV', 'perJet_Track0dxyToBS', 'perJet_Track0dzOverErr',
+       'perJet_Track0dxyOverErr', 'perJet_Track1Pt', 'perJet_Track1dR',
+       'perJet_Track1dEta', 'perJet_Track1dPhi', 'perJet_Track1dzToPV',
+       'perJet_Track1dxyToBS', 'perJet_Track1dzOverErr',
+       'perJet_Track1dxyOverErr', 'perJet_Track2Pt', 'perJet_Track2dR',
+       'perJet_Track2dEta', 'perJet_Track2dPhi',
+       'perJet_EnergyFrac_Depth1',
+       'perJet_EnergyFrac_Depth2', 'perJet_EnergyFrac_Depth3', 'perJet_EnergyFrac_Depth4', 'perJet_LeadingRechitE',
+       'perJet_SubLeadingRechitE', 'perJet_SSubLeadingRechitE',
+       'perJet_AllRechitE', 'perJet_NeutralHadEFrac', 'perJet_ChargedHadEFrac']
         
-            labels = None 
-            if not self.mode and self.sel:
-                self.cumulative_df = self.cumulative_df.sample(frac=1, random_state=42).reset_index(drop=True) # shuffling
-                labels = self.cumulative_df["classID"].values
-            
-            data = self.cumulative_df[new_features]
-            print(data.describe())
-            # print(self.cumulative_df["jet"+str(jet)+"_E"].values)
-            jet_valid = self.cumulative_df["jet"+str(jet)+"_E"].values
-            # in data, would like to rename jetX to perJet to work with the input files
-            # data is already a pandas DataFrame so try "rename" option
-            if not perJet: data = data.rename(columns=feature_dictionary)
-            # runs but the means don't look like they used to, probably due to safety selections relying on the previous names. This allows -9999 to be saved. Keeping like this for now
-
-            normed_data = pd.DataFrame()
-            for feature in data.columns:
-                # if (data[feature] <= -9000): normed_data[feature] = data[feature]
-                # else: 
-                normed_data[feature] = (data[feature] - CONSTANTS[feature][0])/ CONSTANTS[feature][1]
         
-            print(normed_data.describe())
+        labels = None 
+        if not self.mode and self.sel:
+            self.cumulative_df = self.cumulative_df.sample(frac=1, random_state=42).reset_index(drop=True) # shuffling
+            labels = self.cumulative_df["classID"].values
         
-            print("Processing Complete")
-
-            all_normed_data.append(normed_data)
-            all_labels.append(labels)
-            all_jet_valid.append(jet_valid)
+        data = self.cumulative_df[features]
+        normed_data = pd.DataFrame()
+        for feature in data.columns:
+            normed_data[feature] = (data[feature] - CONSTANTS[feature][0])/ CONSTANTS[feature][1]
         
-        # return normed data, labels,and a list of rows are ok (energy is positive) and which are not (energy is -9999.9)
-        return all_normed_data, all_labels, all_jet_valid
+        print(normed_data.describe())
+        
+        print("Processing Complete")
+        self.data = normed_data
+        return normed_data, labels
     
     def write_to_root(self, scores, filename, labels=None):
-        filename = f"{filename[:-5]}_scores.root" # remove .root from initial filename
+        filename = f"{filename}_scores.root"
         dataframe = self.cumulative_df
         if self.num_classes == 2:
-            for i in range(num_jets):
-                dataframe['jet'+str(i)+'_scores12'] = scores[i][:, 0]
-                dataframe['jet'+str(i)+'_scores34'] = scores[i][:, 1]
-                dataframe['jet'+str(i)+'_scoresbkg'] = scores[i][:, 2]
-            # dataframe['jet0_scores12'] = scores[:, 0]
-            # dataframe['jet0_scores34'] = scores[:, 1]
-            # dataframe['jet0_scoresbkg'] = scores[:, 2]
+            dataframe['scores12'] = scores[:, 0]
+            dataframe['scores34'] = scores[:, 1]
+            dataframe['scoresbkg'] = scores[:, 2]
         elif self.num_classes == 1:
-            for i in range(num_jets):
-                dataframe['jet'+str(i)+'_scores'] = scores[i][:, 0] # 0 is the signal class
-            # dataframe['jet0_scores'] = scores[:, 0] # 0 is the signal class
+            dataframe['scores'] = scores[:, 0] # 0 is the signal class
         if labels is not None:
             dataframe['classID'] = labels
         with uproot.recreate(filename) as f:
             f['Classification'] = {key: dataframe[key] for key in dataframe.columns}
         print(f"Wrote to ROOT file: {filename}")
-            
-        
+
+    def compute_norm_constants(self):
+        # assumes that you have already loaded the files and applied safety selections
+        constants_df = pd.DataFrame({'Mean': self.cumulative_df.mean().to_dict(), 'Standard Deviation': self.cumulative_df.std().to_dict()})
+        # for manual input of other useful variables not included in safety selection:
+        useful_variables = ['perJet_Track0dzToPV', 'perJet_Track0dzOverErr', 'perJet_Track0dxyToBS', 'perJet_Track0dxyOverErr',
+                            'perJet_Track1dzToPV', 'perJet_Track1dzOverErr', 'perJet_Track1dxyToBS', 'perJet_Track1dxyOverErr', 
+                            'perJet_Track2dzToPV', 'perJet_Track2dzOverErr', 'perJet_Track2dxyToBS', 'perJet_Track2dxyOverErr'] 
+        for useful_variable in useful_variables:
+            data = self.cumulative_df[[useful_variable]].copy()
+            mask_condition = (data[useful_variable] <= -900) | (data[useful_variable] >= 900)
+            data.loc[mask_condition, useful_variable] = 0  # Default to 0 for matching entries
+            mean_value = data[useful_variable].mean()
+            std_value = data[useful_variable].std()
+            print(f"{useful_variable} mean: {mean_value}")
+            print(f"{useful_variable} std: {std_value}")
+            constants_df.loc[useful_variable, 'Mean'] = mean_value
+            constants_df.loc[useful_variable, 'Standard Deviation'] = std_value
+        constants_df.T.to_csv("norm_constants_v3.csv")
+       
 class ModelHandler:
-    def __init__(self, num_classes=3, num_layers=3, optimizer="adam", lr=0.00027848106048644665, model_name="dense_model.keras"):
+    def __init__(self, num_classes=3, num_layers=2, optimizer="adam", lr=0.00027848106048644665, model_name="dense_model_v3.keras"):
         
         self.num_classes = num_classes
         self.num_layers = num_layers
@@ -256,6 +261,30 @@ class ModelHandler:
         else:
             self.optimizer= tf.keras.optimizers.SGD(learning_rate=lr)    
             
+    def build_resnet(self):                 
+        inputs = layers.Input(shape=(40,)) # 40 is number of features
+        x = layers.Dense(64, activation="relu", kernel_initializer=GlorotUniform())(inputs)
+        x = layers.BatchNormalization()(x)
+        for _ in range(self.num_layers):
+            shortcut = x
+            x = layers.Dense(64, activation="relu", kernel_initializer=GlorotUniform())(x)
+            #x = layers.BatchNormalization()(x)
+            x = layers.Dropout(0.2)(x)
+            x = layers.Dense(128, activation="relu", kernel_initializer=GlorotUniform())(x)
+            x = layers.Dense(64, activation="relu", kernel_initializer=GlorotUniform())(x)
+            x = layers.BatchNormalization()(x)
+            x = layers.add([x, shortcut])
+            x = layers.Activation("relu")(x)
+        x = layers.Dense(128, activation="relu")(x)
+        outputs = layers.Dense(self.num_classes, activation="softmax", kernel_initializer=GlorotUniform())(x)
+
+        # Create the model
+        self.model = models.Model(inputs=inputs, outputs=outputs)
+        
+        #self.model = model
+        self.model.compile(optimizer=self.optimizer, loss="sparse_categorical_crossentropy")
+        print(self.model.summary())
+
     def build(self):                 
         model = Sequential()
         model.add(Dense(185, activation="sigmoid"))
@@ -270,9 +299,26 @@ class ModelHandler:
         
         self.model.compile(optimizer=self.optimizer, loss="sparse_categorical_crossentropy")
                   
-    def train(self, X_train, y_train, epochs=50, batch_size=512, val=0.2):
-        self.build()
-        self.model.fit(X_train, y_train, epochs=epochs, batch_size=512, validation_split=val, verbose=1)
+    def train(self, X_train, y_train, epochs=50, batch_size=512, val=0.1):
+        self.build_resnet() # Residual neural network 
+        # self.build() # similar to runner-v2
+        name="best_model_v3.keras"
+        early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
+        checkpoint = ModelCheckpoint(name, monitor='val_loss', save_best_only=True, save_weights_only=True)
+        # auc_epoch = [roc_callback(training_data=(x_train, y_train),validation_data=(x_test,y_test))]
+        # self.model.fit(X_train, y_train, epochs=epochs, batch_size=512, validation_split=val, verbose=1, callbacks = [early_stopping]) # this goes to 50 epochs
+        history = self.model.fit(X_train, y_train, epochs=epochs, batch_size=512, validation_split=val, verbose=1, callbacks = [early_stopping, checkpoint])
+        self.model.load_weights(name)
+
+        # plot loss and val_loss vs number of epochs 
+        plt.figure()
+        plt.plot(history.history['loss'])
+        plt.plot(history.history['val_loss'])
+        plt.title('Model Loss')
+        plt.ylabel('Loss')
+        plt.xlabel('Epoch')
+        plt.legend(['train', 'val'], loc='upper left')
+        plt.savefig("ModelLoss.png")
         
     def get_model(self):
         return self.model
@@ -284,6 +330,7 @@ class ModelHandler:
         self.model = tf.keras.models.load_model(self.model_name)
     
     def test(self, X_test, y_test):
+        self.X_test = X_test
         preds = self.model.predict(X_test)
         predictions = np.argmax(preds, axis=1)
         accuracy = np.sum(predictions == y_test) / len(y_test)
@@ -365,6 +412,18 @@ class ModelHandler:
         print("TPR: ", tpr[fpr <=1e-4][-1], "at FPR", fpr[fpr <=1e-4][-1])
         print("TPR: ", tpr[fpr <=1e-3][-1], "at FPR", fpr[fpr <=1e-3][-1])
         print("TPR: ", tpr[fpr <=1e-2][-1], "at FPR", fpr[fpr <=1e-2][-1])
+
+
+    def compute_mutual_info(self):
+        _, scores = self.roc_data 
+        scores = scores[:, 0] # 0 is the signal
+        features = self.X_test
+        mutual_info = mutual_info_regression(features, scores)
+        mi_results = pd.Series(mutual_info, index=FEATURES)
+        mi_results_sorted = mi_results.sort_values(ascending=False)
+        mi_results_sorted.to_csv("mutual_info.csv")
+        print("computed mutual information")
+        
        
                 
         
@@ -376,9 +435,8 @@ class Runner:
         self.load = load
         self.sig = sig_files
         self.bkg = bkg_files
-        self.model_name = "dense_model.keras"
+        self.model_name = "dense_model_v3.keras"
      
-    '''
     def run_training(self):
         # modifying to do per-event splitting
         print("Training")
@@ -397,9 +455,12 @@ class Runner:
         handler = ModelHandler(num_classes=self.num_classes, model_name=self.model_name)
         handler.train(X_train, y_train)
         y_test, scores = handler.test(X_test, y_test)
+        print("-------scores---------")
+        print(scores[:10])
         handler.save()
         handler.one_vs_one_roc()
         handler.one_vs_all_roc()
+        handler.compute_mutual_info()
         
         
     def run_evaluation(self):
@@ -417,8 +478,7 @@ class Runner:
         handler.test(X_eval, y_eval)
         handler.one_vs_one_roc()
         handler.one_vs_all_roc()
-    '''
-    
+        
         
     def run_file_evaluation(self):
         print("Evaluating Single File")
@@ -435,21 +495,21 @@ class Runner:
                 self.processor.load_data(bkg_files=self.bkg)
             self.processor.no_selections_concatenate()
             self.fname = self.bkg[0]
-                
-        predicting_data, labels, jet_valid = self.processor.process_data()
+            
+        predicting_data, labels = self.processor.process_data()
         handler = ModelHandler(num_classes=self.num_classes, model_name=self.model_name)
         handler.load()
-        preds = [ handler.predict(predicting_data[i], labels[i]) for i in range(num_jets) ]
-        # data is predicting_data, jet valid is jet_valid, scores are preds, all indexed by jet (6 total)
-        # to print whole data table, predicting_data[0], to print just values in a list, predicting_data[0].values
-
-        # check if predicting_data[i] has a valid jet. If so, keep DNN score. If not, set score = -9999
-        for i in range(num_jets): # evaluate for all 6 jets
-            for jet in range(len(predicting_data[i])): # evaluate for every jet, if valid
-                if (jet_valid[i][jet] < -9000): # if jet E is -9999.9, replace score with -9999.9
-                    preds[i][jet] = [-9999.9, -9999.9]
-
+        preds = handler.predict(predicting_data, labels)
         self.processor.write_to_root(preds, self.fname, labels=None)
+
+    def update_constants(self):
+        print("Updating constants")
+        if self.load:
+            self.processor = DataProcessor(num_classes=self.num_classes - 1)
+            self.processor.load_data(self.sig, self.bkg)
+        self.processor.apply_selections(inclusive=self.inclusive)
+        self.processor.compute_norm_constants()
+        print("Constants updated")
         
         
     def run(self):
@@ -459,6 +519,8 @@ class Runner:
             self.run_evaluation()
         elif self.mode == "filewrite":
             self.run_file_evaluation()
+        elif self.mode == "constants":
+            self.update_constants()
         else:
             print("No Valid Mode Entered")
             
@@ -471,55 +533,59 @@ class Runner:
     
     def set_model_name(self, model_name="dense_model.keras"):
         self.model_name = model_name
+    
+    
         
         
 def main():
     sig_files = [
         "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TRAIN.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch1.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch1.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch1.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TRAIN.root",
-        # # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TRAIN-batch1.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch2.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch2.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch2.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TEST.root",
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch1.root",
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch1.root",
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch1.root",
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TRAIN.root",
+        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TRAIN-batch1.root",
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST.root",
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch2.root",
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch2.root",
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch2.root",
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TEST.root",
         # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TEST-batch2.root"
     ]
     
     bkg_files = [
         "minituple_v3.8_LLPskim_Run2023Bv1_2024_06_03.root",
-        # "minituple_v3.8_LLPskim_Run2023Cv1_2024_06_03.root",
-        # "minituple_v3.8_LLPskim_Run2023Cv2_2024_06_03.root",
-        # "minituple_v3.8_LLPskim_Run2023Cv3_2024_06_03.root",
-        # "minituple_v3.8_LLPskim_Run2023Cv4_2024_06_03.root",
-        # "minituple_v3.8_LLPskim_Run2023Dv1_2024_06_03.root",
-        # "minituple_v3.8_LLPskim_Run2023Dv2_2024_06_03.root"
+        "minituple_v3.8_LLPskim_Run2023Cv1_2024_06_03.root",
+        "minituple_v3.8_LLPskim_Run2023Cv2_2024_06_03.root",
+        "minituple_v3.8_LLPskim_Run2023Cv3_2024_06_03.root",
+        "minituple_v3.8_LLPskim_Run2023Cv4_2024_06_03.root",
+        "minituple_v3.8_LLPskim_Run2023Dv1_2024_06_03.root",
+        "minituple_v3.8_LLPskim_Run2023Dv2_2024_06_03.root"
     ]
-
     
-    mode = "filewrite" # "eval", "filewrite"
+    mode = "train" # "train", "eval", "filewrite", "constants"
     
     # running the depth and inclusive tagger sequentially, uncomment second part if want to run the depth tagger alone
     print("Running Depth Tagger")
-    runner = Runner(sig_files=sig_files[:1], bkg_files=bkg_files[:1], mode=mode, num_classes=2, inclusive=False)
+    runner = Runner(sig_files=sig_files[:], bkg_files=bkg_files[:], mode=mode, num_classes=2, inclusive=False)
     runner.run()
     
     print("Running Inclusive Tagger")
     # first resetting some parameters for the inclusive tagger
-    runner.set_inclusive(inclusive=True)
-    runner.set_load(load=False)
-    #runner = Runner(sig_files=sig_files[:1], bkg_files=bkg_files[:1], mode=mode, num_classes=2, inclusive=True)
-    runner.set_model_name(model_name="inclusive_model.keras")
-    runner.run()
+    #runner.set_inclusive(inclusive=True)
+    #runner.set_load(load=False)
+    runner = Runner(sig_files=sig_files[:], bkg_files=bkg_files[:], mode=mode, num_classes=2, inclusive=True)
+    runner.set_model_name(model_name="inclusive_model_v3.keras")
+    # runner.run()
+    
     
     # running the inclusive tagger by itself, uncomment if needed
     #print("Running Inclusive Tagger")
     #runner = Runner(sig_files=sig_files[:], bkg_files=bkg_files[:], mode=mode, num_classes=2, inclusive=True)
     #runner.set_load(load=False)
     #runner.run()
+      
+    
     
     
 if __name__ == "__main__":
