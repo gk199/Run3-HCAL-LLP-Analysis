@@ -203,8 +203,12 @@ class DataProcessor:
             for feature in data.columns:
                 # if (data[feature] <= -9000): normed_data[feature] = data[feature]
                 # else: 
+                # or before the loop over features could call default_variables for only specific ones
+                mask_condition = (data[feature] <= -900) | (data[feature] >= 900)
+                data.loc[mask_condition, feature] = 0  # Default to 0 for matching entries
                 normed_data[feature] = (data[feature] - CONSTANTS[feature][0])/ CONSTANTS[feature][1]
-        
+
+            # print(data.describe())
             print(normed_data.describe())
         
             print("Processing Complete")
@@ -215,6 +219,19 @@ class DataProcessor:
         
         # return normed data, labels,and a list of rows are ok (energy is positive) and which are not (energy is -9999.9)
         return all_normed_data, all_labels, all_jet_valid
+    
+    def default_variables(self, jet_index = 0):
+        # assumes that you have already loaded the files and applied safety selections
+        # for manual input of other useful variables not included in safety selection:
+        useful_variables = ['perJet_Track0dzToPV', 'perJet_Track0dzOverErr', 'perJet_Track0dxyToBS', 'perJet_Track0dxyOverErr',
+                            'perJet_Track1dzToPV', 'perJet_Track1dzOverErr', 'perJet_Track1dxyToBS', 'perJet_Track1dxyOverErr', 
+                            'perJet_Track2dzToPV', 'perJet_Track2dzOverErr', 'perJet_Track2dxyToBS', 'perJet_Track2dxyOverErr']
+        # rename to jet i 
+        useful_variables = [i.replace('perJet','jet'+str(jet_index)) for i in useful_variables] # list comprehension
+        for useful_variable in useful_variables:
+            data = self.cumulative_df[[useful_variable]].copy()
+            mask_condition = (data[useful_variable] <= -900) | (data[useful_variable] >= 900)
+            data.loc[mask_condition, useful_variable] = 0  # Default to 0 for matching entries
     
     def write_to_root(self, scores, scores_inc, filename, labels=None):
         filename = f"{filename[:-5]}_scores.root" # remove .root from initial filename
@@ -443,6 +460,8 @@ class Runner:
             self.processor.no_selections_concatenate()
             self.fname = self.bkg[0]
 
+        # for i in range(num_jets): self.processor.default_variables(jet_index = i) # testing writing variables to 0 to avoid model having "peaky" values
+
         predicting_data, labels, jet_valid = self.processor.process_data()
         # depth
         handler = ModelHandler(num_classes=self.num_classes, model_name=self.model_name)
@@ -490,26 +509,26 @@ def main():
     sig_files = [
         # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TRAIN.root", # no passed HLT tree 
         "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch1.root",
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch1.root",
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch1.root",
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TRAIN.root",
+        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch1.root",
+        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch1.root",
+        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TRAIN.root",
         # # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TRAIN-batch1.root",
         # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST.root", # no passed HLT tree 
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch2.root",
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch2.root",
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch2.root",
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TEST.root",
+        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch2.root",
+        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch2.root",
+        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch2.root",
+        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TEST.root",
         # # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TEST-batch2.root"
     ]
     
     bkg_files = [
-        "minituple_v3.8_LLPskim_Run2023Bv1_2024_06_03.root",
-        "minituple_v3.8_LLPskim_Run2023Cv1_2024_06_03.root",
-        "minituple_v3.8_LLPskim_Run2023Cv2_2024_06_03.root",
-        "minituple_v3.8_LLPskim_Run2023Cv3_2024_06_03.root",
-        "minituple_v3.8_LLPskim_Run2023Cv4_2024_06_03.root",
+        # "minituple_v3.8_LLPskim_Run2023Bv1_2024_06_03.root",
+        # "minituple_v3.8_LLPskim_Run2023Cv1_2024_06_03.root",
+        # "minituple_v3.8_LLPskim_Run2023Cv2_2024_06_03.root",
+        # "minituple_v3.8_LLPskim_Run2023Cv3_2024_06_03.root",
+        # "minituple_v3.8_LLPskim_Run2023Cv4_2024_06_03.root",
         "minituple_v3.8_LLPskim_Run2023Dv1_2024_06_03.root",
-        "minituple_v3.8_LLPskim_Run2023Dv2_2024_06_03.root"
+        # "minituple_v3.8_LLPskim_Run2023Dv2_2024_06_03.root"
     ]
 
     
