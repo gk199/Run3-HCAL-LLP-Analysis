@@ -23,21 +23,17 @@ tf.random.set_seed(311)
 
 # CONSTANTS = pd.read_csv("norm_constants_v3.csv") # large negative values removed from mean / std dev computation 
 CONSTANTS = pd.read_csv("norm_constants.csv")
-FEATURES = ['perJet_LeadingRechitD', 'perJet_E', 'perJet_Pt', 'perJet_Eta',
-       'perJet_Phi', 'perJet_Mass', # 'perJet_Area',
-       'perJet_S_phiphi', 'perJet_S_etaeta',
-       'perJet_S_etaphi', 'perJet_Tracks_dR', 'perJet_Track0Pt',
-       'perJet_Track0dR', 'perJet_Track0dEta', 'perJet_Track0dPhi',
-       'perJet_Track0dzToPV', 'perJet_Track0dxyToBS', 'perJet_Track0dzOverErr',
-       'perJet_Track0dxyOverErr', 'perJet_Track1Pt', 'perJet_Track1dR',
-       'perJet_Track1dEta', 'perJet_Track1dPhi', 'perJet_Track1dzToPV',
-       'perJet_Track1dxyToBS', 'perJet_Track1dzOverErr',
-       'perJet_Track1dxyOverErr', 'perJet_Track2Pt', 'perJet_Track2dR',
-       'perJet_Track2dEta', 'perJet_Track2dPhi',
-       'perJet_EnergyFrac_Depth1',
-       'perJet_EnergyFrac_Depth2', 'perJet_EnergyFrac_Depth3', 'perJet_EnergyFrac_Depth4', 'perJet_LeadingRechitE',
-       'perJet_SubLeadingRechitE', 'perJet_SSubLeadingRechitE',
-       'perJet_AllRechitE', 'perJet_NeutralHadEFrac', 'perJet_ChargedHadEFrac']
+FEATURES = ['perJet_Eta', 'perJet_Mass', 
+       'perJet_S_phiphi', 'perJet_S_etaeta', 'perJet_S_etaphi', 
+       'perJet_Tracks_dR', 
+       'perJet_E', 'perJet_Pt',
+       'perJet_Track0Pt', 'perJet_Track0dR', 'perJet_Track0dEta', 'perJet_Track0dPhi', # ideally track pT would be track pT / jet pT
+       'perJet_Track1Pt', 'perJet_Track1dR', 'perJet_Track1dEta', 'perJet_Track1dPhi',
+       'perJet_Track2Pt', 'perJet_Track2dR', 'perJet_Track2dEta', 'perJet_Track2dPhi',
+       'perJet_EnergyFrac_Depth1', 'perJet_EnergyFrac_Depth2', 'perJet_EnergyFrac_Depth3', 'perJet_EnergyFrac_Depth4', 
+       'perJet_LeadingRechitD', 'perJet_LeadingRechitE', 'perJet_SubLeadingRechitE', 'perJet_SSubLeadingRechitE', # ideally rechit E would be rechit E / jet E
+       'perJet_AllRechitE', 
+       'perJet_NeutralHadEFrac', 'perJet_ChargedHadEFrac', 'perJet_PhoEFrac', 'perJet_EleEFrac', 'perJet_MuonEFrac']
 
 class DataProcessor:
     def __init__(self, num_classes=2, mode=None, sel=True): #counting from 0 
@@ -175,22 +171,17 @@ class DataProcessor:
     def process_data(self):
         
         print("Processing...")
-        features = ['perJet_LeadingRechitD', 'perJet_E', 'perJet_Pt', 'perJet_Eta',
-       'perJet_Phi', 'perJet_Mass', # 'perJet_Area',
-       'perJet_S_phiphi', 'perJet_S_etaeta',
-       'perJet_S_etaphi', 'perJet_Tracks_dR', 'perJet_Track0Pt',
-       'perJet_Track0dR', 'perJet_Track0dEta', 'perJet_Track0dPhi',
-       'perJet_Track0dzToPV', 'perJet_Track0dxyToBS', 'perJet_Track0dzOverErr',
-       'perJet_Track0dxyOverErr', 'perJet_Track1Pt', 'perJet_Track1dR',
-       'perJet_Track1dEta', 'perJet_Track1dPhi', 'perJet_Track1dzToPV',
-       'perJet_Track1dxyToBS', 'perJet_Track1dzOverErr',
-       'perJet_Track1dxyOverErr', 'perJet_Track2Pt', 'perJet_Track2dR',
-       'perJet_Track2dEta', 'perJet_Track2dPhi',
-       'perJet_EnergyFrac_Depth1',
-       'perJet_EnergyFrac_Depth2', 'perJet_EnergyFrac_Depth3', 'perJet_EnergyFrac_Depth4', 'perJet_LeadingRechitE',
-       'perJet_SubLeadingRechitE', 'perJet_SSubLeadingRechitE',
-       'perJet_AllRechitE', 'perJet_NeutralHadEFrac', 'perJet_ChargedHadEFrac']
-        
+        features = ['perJet_Eta', 'perJet_Mass', 
+       'perJet_S_phiphi', 'perJet_S_etaeta', 'perJet_S_etaphi', 
+       'perJet_Tracks_dR', 
+       'perJet_E', 'perJet_Pt',
+       'perJet_Track0Pt', 'perJet_Track0dR', 'perJet_Track0dEta', 'perJet_Track0dPhi', # ideally track pT would be track pT / jet pT
+       'perJet_Track1Pt', 'perJet_Track1dR', 'perJet_Track1dEta', 'perJet_Track1dPhi',
+       'perJet_Track2Pt', 'perJet_Track2dR', 'perJet_Track2dEta', 'perJet_Track2dPhi',
+       'perJet_EnergyFrac_Depth1', 'perJet_EnergyFrac_Depth2', 'perJet_EnergyFrac_Depth3', 'perJet_EnergyFrac_Depth4', 
+       'perJet_LeadingRechitD', 'perJet_LeadingRechitE', 'perJet_SubLeadingRechitE', 'perJet_SSubLeadingRechitE', # ideally rechit E would be rechit E / jet E
+       'perJet_AllRechitE', 
+       'perJet_NeutralHadEFrac', 'perJet_ChargedHadEFrac', 'perJet_PhoEFrac', 'perJet_EleEFrac', 'perJet_MuonEFrac']
         
         labels = None 
         if not self.mode and self.sel:
@@ -299,9 +290,9 @@ class ModelHandler:
         
         self.model.compile(optimizer=self.optimizer, loss="sparse_categorical_crossentropy")
                   
-    def train(self, X_train, y_train, epochs=50, batch_size=512, val=0.2):
-        self.build_resnet() # Residual neural network 
-        # self.build() # similar to runner-v2
+    def train(self, X_train, y_train, epochs=200, batch_size=512, val=0.2):
+        # self.build_resnet() # Residual neural network 
+        self.build() # similar to runner-v2
         name="best_model_v3.keras"
         early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
         checkpoint = ModelCheckpoint(name, monitor='val_loss', save_best_only=True, save_weights_only=True)
