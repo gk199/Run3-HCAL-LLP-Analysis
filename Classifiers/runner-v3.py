@@ -22,7 +22,8 @@ from tensorflow.keras import layers, models
 tf.random.set_seed(311)
 
 # CONSTANTS = pd.read_csv("norm_constants_v3.csv") # large negative values removed from mean / std dev computation 
-CONSTANTS = pd.read_csv("norm_constants.csv")
+CONSTANTS = pd.read_csv("norm_constants_v3.csv")
+
 FEATURES = ['perJet_Eta', 'perJet_Mass', 
        'perJet_S_phiphi', 'perJet_S_etaeta', 'perJet_S_etaphi', 
        'perJet_Tracks_dR', 
@@ -309,7 +310,7 @@ class ModelHandler:
         plt.ylabel('Loss')
         plt.xlabel('Epoch')
         plt.legend(['train', 'val'], loc='upper left')
-        plt.savefig("ModelLoss.png")
+        plt.savefig("ModelLoss_v3.png")
         
     def get_model(self):
         return self.model
@@ -351,6 +352,9 @@ class ModelHandler:
         
     def one_vs_one_roc(self):
         fig, ax = plt.subplots()
+        custom_xlim = (0.00001,1)
+        plt.setp(ax, xlim=custom_xlim)
+
         class_pairs = list(combinations(range(self.num_classes), 2))
         
         true_labels, predicted_scores = self.roc_data
@@ -377,10 +381,13 @@ class ModelHandler:
         ax.set_title('One-vs-One ROC Curves')
         ax.legend(loc="lower right")
         ax.grid(True)
-        fig.savefig("ROC1v1.png")
+        fig.savefig("ROC1v1_v3.png")
             
     def one_vs_all_roc(self):       
         fig, ax = plt.subplots()
+        custom_xlim = (0.00001,1)
+        plt.setp(ax, xlim=custom_xlim)
+
         true_labels, predicted_scores = self.roc_data
         for signal_class, color in zip(range(self.num_classes -1), self.colors):
             masked_true_labels = np.where(true_labels == signal_class, 1, 0)
@@ -395,7 +402,7 @@ class ModelHandler:
         ax.set_title('One-vs-All ROC Curves')
         ax.legend(loc="lower right")
         ax.grid(True)  
-        fig.savefig("ROC1vA.png")
+        fig.savefig("ROC1vA_v3.png")
         print("-------ROC data-------")
         print("fpr shape ", fpr.shape)
         print("First non-zero TPR", tpr[fpr !=0][0])
@@ -458,7 +465,8 @@ class Runner:
         # this is when you don't want to rebuild and retrain the model -- just test it
         print("Evaluation")
         if self.load:
-            self.processor = DataProcessor(mode="eval", num_classes=self.num_classes - 1)
+            # self.processor = DataProcessor(mode="eval", num_classes=self.num_classes - 1) # crashes with this because "labels" is none and therefore y_eval is none
+            self.processor = DataProcessor(num_classes=self.num_classes - 1)
             self.processor.load_data(self.sig, self.bkg)
         self.processor.apply_selections(inclusive=self.inclusive)
         
@@ -522,10 +530,8 @@ class Runner:
     def set_load(self,load=True):
         self.load = load
     
-    def set_model_name(self, model_name="dense_model.keras"):
+    def set_model_name(self, model_name="dense_model_v3.keras"):
         self.model_name = model_name
-    
-    
         
         
 def main():
@@ -567,8 +573,7 @@ def main():
     #runner.set_load(load=False)
     runner = Runner(sig_files=sig_files[:], bkg_files=bkg_files[:], mode=mode, num_classes=2, inclusive=True)
     runner.set_model_name(model_name="inclusive_model_v3.keras")
-    # runner.run()
-    
+    runner.run()
     
     # running the inclusive tagger by itself, uncomment if needed
     #print("Running Inclusive Tagger")
@@ -576,9 +581,6 @@ def main():
     #runner.set_load(load=False)
     #runner.run()
       
-    
-    
-    
+
 if __name__ == "__main__":
     main()
-    

@@ -17,7 +17,7 @@ import csv
 perJet = False
 num_jets = 1 if perJet else 6
 
-CONSTANTS = pd.read_csv("norm_constants.csv")
+CONSTANTS = pd.read_csv("norm_constants_v3.csv")
 
 class DataProcessor:
     def __init__(self, num_classes=2, mode=None, sel=True): #counting from 0 
@@ -159,21 +159,17 @@ class DataProcessor:
     def process_data(self):
         
         print("Processing...")
-        features = ['perJet_LeadingRechitD', 'perJet_E', 'perJet_Pt', 'perJet_Eta',
-        'perJet_Phi', 'perJet_Mass', # 'perJet_Area',
-        'perJet_S_phiphi', 'perJet_S_etaeta',
-        'perJet_S_etaphi', 'perJet_Tracks_dR', 'perJet_Track0Pt',
-        'perJet_Track0dR', 'perJet_Track0dEta', 'perJet_Track0dPhi',
-        'perJet_Track0dzToPV', 'perJet_Track0dxyToBS', 'perJet_Track0dzOverErr',
-        'perJet_Track0dxyOverErr', 'perJet_Track1Pt', 'perJet_Track1dR',
-        'perJet_Track1dEta', 'perJet_Track1dPhi', 'perJet_Track1dzToPV',
-        'perJet_Track1dxyToBS', 'perJet_Track1dzOverErr',
-        'perJet_Track1dxyOverErr', 'perJet_Track2Pt', 'perJet_Track2dR',
-        'perJet_Track2dEta', 'perJet_Track2dPhi',
-        'perJet_EnergyFrac_Depth1',
-        'perJet_EnergyFrac_Depth2', 'perJet_EnergyFrac_Depth3', 'perJet_EnergyFrac_Depth4', 'perJet_LeadingRechitE',
-        'perJet_SubLeadingRechitE', 'perJet_SSubLeadingRechitE',
-        'perJet_AllRechitE', 'perJet_NeutralHadEFrac', 'perJet_ChargedHadEFrac']
+        features = ['perJet_Eta', 'perJet_Mass', 
+        'perJet_S_phiphi', 'perJet_S_etaeta', 'perJet_S_etaphi', 
+        'perJet_Tracks_dR', 
+        'perJet_E', 'perJet_Pt',
+        'perJet_Track0Pt', 'perJet_Track0dR', 'perJet_Track0dEta', 'perJet_Track0dPhi', # ideally track pT would be track pT / jet pT
+        'perJet_Track1Pt', 'perJet_Track1dR', 'perJet_Track1dEta', 'perJet_Track1dPhi',
+        'perJet_Track2Pt', 'perJet_Track2dR', 'perJet_Track2dEta', 'perJet_Track2dPhi',
+        'perJet_EnergyFrac_Depth1', 'perJet_EnergyFrac_Depth2', 'perJet_EnergyFrac_Depth3', 'perJet_EnergyFrac_Depth4', 
+        'perJet_LeadingRechitD', 'perJet_LeadingRechitE', 'perJet_SubLeadingRechitE', 'perJet_SSubLeadingRechitE', # ideally rechit E would be rechit E / jet E
+        'perJet_AllRechitE', 
+        'perJet_NeutralHadEFrac', 'perJet_ChargedHadEFrac', 'perJet_PhoEFrac', 'perJet_EleEFrac', 'perJet_MuonEFrac']
 
         all_normed_data = []
         all_labels = []
@@ -464,11 +460,12 @@ class Runner:
 
         predicting_data, labels, jet_valid = self.processor.process_data()
         # depth
-        handler = ModelHandler(num_classes=self.num_classes, model_name=self.model_name)
+        # handler = ModelHandler(num_classes=self.num_classes, model_name=self.model_name)
+        handler = ModelHandler(num_classes=self.num_classes, model_name="dense_model_v3_Oct3.keras")
         handler.load()
         preds = [ handler.predict(predicting_data[i], labels[i]) for i in range(num_jets) ]
         # inclusive
-        handler_inc = ModelHandler(num_classes=self.num_classes, model_name="inclusive_model_v3.keras")
+        handler_inc = ModelHandler(num_classes=self.num_classes, model_name="inclusive_model_v3_Oct3.keras")
         handler_inc.load()
         preds_inc = [ handler_inc.predict(predicting_data[i], labels[i]) for i in range(num_jets) ]
         # data is predicting_data, jet valid is jet_valid, scores are preds, all indexed by jet (6 total)
@@ -509,26 +506,26 @@ def main():
     sig_files = [
         # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TRAIN.root", # no passed HLT tree 
         "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch1.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch1.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch1.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TRAIN.root",
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch1.root",
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch1.root",
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TRAIN.root",
         # # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TRAIN-batch1.root",
         # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST.root", # no passed HLT tree 
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch2.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch2.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch2.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TEST.root",
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch2.root",
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch2.root",
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch2.root",
+        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TEST.root",
         # # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TEST-batch2.root"
     ]
     
     bkg_files = [
-        # "minituple_v3.8_LLPskim_Run2023Bv1_2024_06_03.root",
-        # "minituple_v3.8_LLPskim_Run2023Cv1_2024_06_03.root",
-        # "minituple_v3.8_LLPskim_Run2023Cv2_2024_06_03.root",
-        # "minituple_v3.8_LLPskim_Run2023Cv3_2024_06_03.root",
-        # "minituple_v3.8_LLPskim_Run2023Cv4_2024_06_03.root",
+        "minituple_v3.8_LLPskim_Run2023Bv1_2024_06_03.root",
+        "minituple_v3.8_LLPskim_Run2023Cv1_2024_06_03.root",
+        "minituple_v3.8_LLPskim_Run2023Cv2_2024_06_03.root",
+        "minituple_v3.8_LLPskim_Run2023Cv3_2024_06_03.root",
+        "minituple_v3.8_LLPskim_Run2023Cv4_2024_06_03.root",
         "minituple_v3.8_LLPskim_Run2023Dv1_2024_06_03.root",
-        # "minituple_v3.8_LLPskim_Run2023Dv2_2024_06_03.root"
+        "minituple_v3.8_LLPskim_Run2023Dv2_2024_06_03.root"
     ]
 
     
