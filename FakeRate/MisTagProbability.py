@@ -14,6 +14,7 @@ time_debug = False
 # declare any variables or settings here
 data = True
 MC = False
+DNN = True
 
 pred_WPlusJets = True
 
@@ -197,7 +198,8 @@ def ExcludedCut( branch_name, branch_sel ):
 # ------------------------------------------------------------------------------
 def ProbabilityEst(infilepath, label):
     infile = ROOT.TFile.Open( infilepath )
-    tree = infile.Get("WPlusJets") # use W+jets to predict
+    if not DNN: tree = infile.Get("WPlusJets") # use W+jets to predict
+    if DNN: tree = infile.Get("Classification")
     MisTagProbability(tree, "jet", label)
 
 # ------------------------------------------------------------------------------
@@ -205,7 +207,8 @@ def BackgroundPrediction(infilepath, label):
     infile = ROOT.TFile.Open( infilepath )
     if (pred_WPlusJets): # predict on W+jets, compare against actual in these categories
         if label == "HighMET": tree = infile.Get("NoLepton") # for high MET skim
-        if label == "Zmu": tree = infile.Get("Zmumu") # for high MET skim
+        if label == "Zmu" and not DNN: tree = infile.Get("Zmumu") # for high MET skim
+        if label == "Zmu" and DNN: tree = infile.Get("Classification")
         else: tree = infile.Get("NoSel")
     else:
         tree = infile.Get("WPlusJets")
@@ -529,7 +532,8 @@ def Plot2D(tree, obj_type, radius):
 
 LLP_matching = ["L1trig_Matched"] # jet + number + var = full histogram name
 LLP_BDTscore = ["bdtscoreX_LLP350_MS80_perJet"]
-BDTcut=0.5
+if DNN: LLP_BDTscore = ["scores_inc"]
+BDTcut=0.9
 
 # ------------------------------------------------------------------------------
 def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, obj_type):
@@ -828,6 +832,7 @@ def MisTagPrediction(tree, obj_type, label = ""):
                     allJets_6.SetFillStyle(0)
                     hs.Draw("HIST NOSTACK PLC PFC E1")
                     LegendLabel(legend)
+                    stamp_text.DrawLatex( xpos + 0.6, ypos, "#scale[0.65]{DNN score > "+str(BDTcut)+"}") # write score on the plot
                     canv.SaveAs(folder + "/" + label + "_PredictedMisTag_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + "_track_" + label_track_pt_bins[track_counter] + ".png")
 
                     counter += 1
@@ -896,7 +901,9 @@ def main():
     # infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8.1/minituple_v3.8_EXOhighMET_Run2023Cv4_2024_07_03.root"
     # label = "HighMET"
     # infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8.1/minituple_v3.8_Zmu_Run2023Cv4_2024_07_11.root"
-    infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8.1/minituple_v3.8_Zmu_Run2023Cv4_2024_08_23.root"
+    infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8.1/minituple_v3.8_Zmu_Run2023Cv4_2024_08_23.root" # most recent one to return to
+    infilepath_ZM = "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/minituple_v3.8_Zmu_Run2023Cv4_2024_08_23_Zmumu_scores.root "
+    infilepath_WJ = "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/minituple_v3.8_Zmu_Run2023Cv4_2024_08_23_WPlusJets_scores.root "
     # infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8.1/minituple_v3.8_Zmu_Run2023_all_08_25.root"
     label = "Zmu"
 
@@ -912,8 +919,14 @@ def main():
 
     # SignalDistribution(LLP1, LLP2, LLP3, LLP4, LLP5, LLP_names, "NoSel", infilepath, "WPlusJets")
 
-    ProbabilityEst(infilepath, label)
-    BackgroundPrediction(infilepath, label)
+    if DNN: 
+        print("Running fake rate on W+jets and Z+jets, with DNN scores")
+        ProbabilityEst(infilepath_WJ, label)
+        BackgroundPrediction(infilepath_ZM, label)
+    else:
+        print("Running fake rate on W+jets and Z+jets, with BDT scores")
+        ProbabilityEst(infilepath, label)
+        BackgroundPrediction(infilepath, label)
     # OverlayWPlusJets()
 
 if __name__ == '__main__':
