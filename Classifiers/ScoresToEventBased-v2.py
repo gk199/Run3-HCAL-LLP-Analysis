@@ -58,6 +58,7 @@ class DataProcessor:
         for file in bkg_fps:
             if perJet: bkg = uproot.open(file)['PerJet_WPlusJets']
             else: bkg = uproot.open(file)['WPlusJets']
+            # else: bkg = uproot.open(file)['Zmumu']
             print(f"Opened {file}")
             bkg = bkg.arrays(filter_name=filter_name, library="pd")
             #bkg_df = pd.concat((bkg_df, bkg))
@@ -437,27 +438,8 @@ class Runner:
         handler.one_vs_all_roc()
     '''
     
-        
-    def run_file_evaluation(self):
-        print("Evaluating Single File")
-        if self.sig:
-            print("Loaded signal")
-            # processes one file per run for now
-            if self.load:
-                self.processor = DataProcessor(num_classes=self.num_classes - 1, mode="filewrite", sel=False)
-                self.processor.load_data(sig_files=self.sig)
-            self.processor.no_selections_concatenate() # automatically inclusive
-            self.fname = self.sig[0]
-        elif self.bkg:
-            print("Loaded background")
-            if self.load:
-                self.processor = DataProcessor(num_classes=self.num_classes - 1, mode="filewrite", sel=False)
-                self.processor.load_data(bkg_files=self.bkg)
-            self.processor.no_selections_concatenate()
-            self.fname = self.bkg[0]
-
-        # for i in range(num_jets): self.processor.default_variables(jet_index = i) # testing writing variables to 0 to avoid model having "peaky" values
-
+    def evaluate_scores(self): # this code used to be in run_file_evaluation -- still testing
+        print("Determining Scores")
         predicting_data, labels, jet_valid = self.processor.process_data()
         # depth
         # handler = ModelHandler(num_classes=self.num_classes, model_name=self.model_name)
@@ -479,6 +461,30 @@ class Runner:
                     preds_inc[i][jet] = [-9999.9, -9999.9]
 
         self.processor.write_to_root(preds, preds_inc, self.fname, labels=None)
+
+    def run_file_evaluation(self):
+        print("Evaluating Single File")
+        if self.sig:
+            # processes one file per run for now
+            for i in range(len(self.sig)):
+                print("Loaded signal, #" + str(i))
+                if self.load:
+                    self.processor = DataProcessor(num_classes=self.num_classes - 1, mode="filewrite", sel=False)
+                    self.processor.load_data(sig_files=self.sig)
+                self.processor.no_selections_concatenate() # automatically inclusive
+                self.fname = self.sig[i]
+                self.evaluate_scores()
+        elif self.bkg:
+            for i in range(len(self.bkg)):
+                print("Loaded background, #" + str(i))
+                if self.load:
+                    self.processor = DataProcessor(num_classes=self.num_classes - 1, mode="filewrite", sel=False)
+                    self.processor.load_data(bkg_files=self.bkg)
+                self.processor.no_selections_concatenate()
+                self.fname = self.bkg[i]
+                self.evaluate_scores()
+
+        # for i in range(num_jets): self.processor.default_variables(jet_index = i) # testing writing variables to 0 to avoid model having "peaky" values
         
         
     def run(self):
@@ -505,27 +511,34 @@ class Runner:
 def main():
     sig_files = [
         # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TRAIN.root", # no passed HLT tree 
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch1.root",
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch1.root",
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch1.root",
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TRAIN.root",
+        #"minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch1.root",
+        #"minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch1.root",
+        #"minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch1.root",
+        #"minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TRAIN.root",
         # # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TRAIN-batch1.root",
         # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST.root", # no passed HLT tree 
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch2.root",
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch2.root",
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch2.root",
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TEST.root",
+        #"minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch2.root",
+        #"minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch2.root",
+        #"minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch2.root",
+        #"minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TEST.root",
         # # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TEST-batch2.root"
     ]
     
     bkg_files = [
-        "minituple_v3.8_LLPskim_Run2023Bv1_2024_06_03.root",
-        "minituple_v3.8_LLPskim_Run2023Cv1_2024_06_03.root",
-        "minituple_v3.8_LLPskim_Run2023Cv2_2024_06_03.root",
-        "minituple_v3.8_LLPskim_Run2023Cv3_2024_06_03.root",
-        "minituple_v3.8_LLPskim_Run2023Cv4_2024_06_03.root",
-        "minituple_v3.8_LLPskim_Run2023Dv1_2024_06_03.root",
-        "minituple_v3.8_LLPskim_Run2023Dv2_2024_06_03.root"
+        #"minituple_v3.8_LLPskim_Run2023Bv1_2024_06_03.root",
+        #"minituple_v3.8_LLPskim_Run2023Cv1_2024_06_03.root",
+        #"minituple_v3.8_LLPskim_Run2023Cv2_2024_06_03.root",
+        #"minituple_v3.8_LLPskim_Run2023Cv3_2024_06_03.root",
+        #"minituple_v3.8_LLPskim_Run2023Cv4_2024_06_03.root",
+        #"minituple_v3.8_LLPskim_Run2023Dv1_2024_06_03.root",
+        #"minituple_v3.8_LLPskim_Run2023Dv2_2024_06_03.root"
+        "minituple_v3.8_Zmu_Run2023Bv1_2024_08_25.root",
+        "minituple_v3.8_Zmu_Run2023Cv1_2024_08_25.root",
+        "minituple_v3.8_Zmu_Run2023Cv2_2024_08_25.root",
+        "minituple_v3.8_Zmu_Run2023Cv3_2024_08_25.root",
+        "minituple_v3.8_Zmu_Run2023Cv4_2024_08_23.root",
+        "minituple_v3.8_Zmu_Run2023Dv1_2024_08_25.root",
+        "minituple_v3.8_Zmu_Run2023Dv2_2024_08_25.root"
     ]
 
     
