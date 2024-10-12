@@ -236,6 +236,9 @@ Location of minituples:
 ### v3.9
 Updates
 * Updated 2023 HCAL PF rechit thresholds to agree with those in CMSSW, moving from 0.25 to 0.4 GeV in HB depth 1
+* Added fractional variables to minituples (fractional track pT, fractional rechit E)
+* Added jet-L1 matching result (hwQual of matched L1 jet) to per jet trees
+* Allowed all jet-L1 matching to consider all L1 jets, not just leading 3 as previously done! 
 
 ## V4
 Ongoing wish list:

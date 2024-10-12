@@ -264,6 +264,9 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 	myvars_float.push_back("perJet_EleEFrac");
 	myvars_float.push_back("perJet_MuonEFrac");
 
+	myvars_int.push_back("perJet_L1trig_Matched");
+	myvars_float.push_back("perJet_dR_L1jet");
+
 	myvars_float.push_back("perJet_PtAllTracks");
 	myvars_float.push_back("perJet_PtAllPVTracks");
 
@@ -432,7 +435,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		
 		float dR = 999.9;
 		float L1trig = -999.9;
-		for (int j = 0; j < max_l1jets; j++) { // loop over L1 jets to determine if a reco jet is matched to jet that passed L1
+		for (int j = 0; j < n_l1jet; j++) { // loop over L1 jets to determine if a reco jet is matched to jet that passed L1
 			float dR_to_L1 = DeltaR( jet_Eta->at(i), l1jet_Eta->at(j), jet_Phi->at(i), l1jet_Phi->at(j) );
 			if (dR_to_L1 < dR) { // if matched, save the dR and whether the L1 jet is triggered by HCAL LLP
 				dR = dR_to_L1;
@@ -683,6 +686,18 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	for (int i = 0; i < HLT_Indices.size(); i++) { 
 		jet_tree_output_vars_bool[HLT_Names[i]] = HLT_Decision->at(i);
 	}
+
+	float dR = 999.9;
+	float L1trig = -999.9;
+	for (int j = 0; j < n_l1jet; j++) { // loop over L1 jets to determine if a reco jet is matched to jet that passed L1
+		float dR_to_L1 = DeltaR( jet_Eta->at(jetIndex), l1jet_Eta->at(j), jet_Phi->at(jetIndex), l1jet_Phi->at(j) );
+		if (dR_to_L1 < dR) { // if matched, save the dR and whether the L1 jet is triggered by HCAL LLP
+			dR = dR_to_L1;
+			L1trig = l1jet_hwQual->at(j);
+		}
+	}
+	jet_tree_output_vars_float["perJet_dR_L1jet"] = dR;
+	if (dR < 0.4) jet_tree_output_vars_int["perJet_L1trig_Matched"] = L1trig;
 
 	jet_tree_output_vars_float["perJet_E"] 			= jet_E->at(jetIndex);
 	jet_tree_output_vars_float["perJet_Pt"] 		= jet_Pt->at(jetIndex);
