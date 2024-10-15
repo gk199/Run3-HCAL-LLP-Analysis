@@ -23,16 +23,21 @@ tf.random.set_seed(311)
 
 # CONSTANTS = pd.read_csv("norm_constants_v3.csv") # large negative values removed from mean / std dev computation 
 CONSTANTS = pd.read_csv("norm_constants_v3.csv")
+# CONSTANTS_INCLUSIVE = pd.read_csv("norm_constants_inclusive_v3.csv")
 
 FEATURES = ['perJet_Eta', 'perJet_Mass', 
        'perJet_S_phiphi', 'perJet_S_etaeta', 'perJet_S_etaphi', 
        'perJet_Tracks_dR', 
-       'perJet_E', 'perJet_Pt',
-       'perJet_Track0Pt', 'perJet_Track0dR', 'perJet_Track0dEta', 'perJet_Track0dPhi', # ideally track pT would be track pT / jet pT
-       'perJet_Track1Pt', 'perJet_Track1dR', 'perJet_Track1dEta', 'perJet_Track1dPhi',
-       'perJet_Track2Pt', 'perJet_Track2dR', 'perJet_Track2dEta', 'perJet_Track2dPhi',
+       # 'perJet_E', 'perJet_Pt', # remove when have fractional pT and E variables implemented! 
+       'perJet_Track0dR', 'perJet_Track0dEta', 'perJet_Track0dPhi', # ideally track pT would be track pT / jet pT
+       'perJet_Track1dR', 'perJet_Track1dEta', 'perJet_Track1dPhi',
+       'perJet_Track2dR', 'perJet_Track2dEta', 'perJet_Track2dPhi',
+       # 'perJet_Track0Pt', 'perJet_Track1Pt', 'perJet_Track2Pt',  
+       'perJet_Frac_Track0Pt', 'perJet_Frac_Track1Pt', 'perJet_Frac_Track2Pt',
        'perJet_EnergyFrac_Depth1', 'perJet_EnergyFrac_Depth2', 'perJet_EnergyFrac_Depth3', 'perJet_EnergyFrac_Depth4', 
-       'perJet_LeadingRechitD', 'perJet_LeadingRechitE', 'perJet_SubLeadingRechitE', 'perJet_SSubLeadingRechitE', # ideally rechit E would be rechit E / jet E
+       'perJet_LeadingRechitD', 
+       # 'perJet_LeadingRechitE', 'perJet_SubLeadingRechitE', 'perJet_SSubLeadingRechitE', # ideally rechit E would be rechit E / jet E
+       'perJet_Frac_LeadingRechitE', 'perJet_Frac_SubLeadingRechitE', 'perJet_Frac_SSubLeadingRechitE', 
        'perJet_AllRechitE', 
        'perJet_NeutralHadEFrac', 'perJet_ChargedHadEFrac', 'perJet_PhoEFrac', 'perJet_EleEFrac', 'perJet_MuonEFrac']
 
@@ -52,7 +57,7 @@ class DataProcessor:
         print("Loading Data...")
         
         filter_name = "perJet_*"
-        filepath = '/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8/'
+        filepath = '/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/'
     
         sig_fps = [filepath + filename for filename in sig_files] if sig_files is not None else []
         bkg_fps = [filepath + filename for filename in bkg_files] if bkg_files is not None else []
@@ -77,7 +82,6 @@ class DataProcessor:
             bkg_df.append(bkg)
         self.bkg_df = pd.concat(bkg_df) if bkg_df else pd.DataFrame()
         
-
     
         #cumulative_df = pd.concat((sig_df, bkg_df)) # combining into one large dataset with labels
         
@@ -92,11 +96,17 @@ class DataProcessor:
         sig_value = self.return_sig_value
         
         # applying selection to remove Null values/ maxed out values/ etc.
+        def select_LLPjet(row):
+            return row['perJet_isTruthMatched'] # returns 1 if this jet is matched to an LLP or decay product, 0 otherwise 
+
         def select_HCAL12(row):
             return 177 <= row['perJet_MatchedLLP_DecayR'] < 214.2 and abs(row['perJet_MatchedLLP_Eta']) < 1.26
 
         def select_HCAL34(row):
             return 214.2 <= row['perJet_MatchedLLP_DecayR'] < 295 and abs(row['perJet_MatchedLLP_Eta']) < 1.26
+        
+        def select_L1jet(row):
+            return row['perJet_L1trig_Matched'] > 0 # returns 1 if jet matched to L1 hwQual-set jet, 0 if not (hwQual not set, or not matched to L1)
 
         def select_safety(row):
             return (row['perJet_Pt'] > 40 and abs(row['perJet_Eta']) < 1.26 and 
@@ -111,37 +121,35 @@ class DataProcessor:
             0 <= row['perJet_Track1Pt'] < 900 and 
             0 <= row['perJet_Track1dR'] < 1)
 
-        def classify_bkg(row): 
-            if (row['perJet_Pt'] > 40 and abs(row['perJet_Eta']) < 1.26 and 
-            0 <= row['perJet_EnergyFrac_Depth1'] <= 1 and 
-            0 <= row['perJet_EnergyFrac_Depth2'] <= 1 and 
-            0 <= row['perJet_EnergyFrac_Depth3'] <= 1 and 
-            0 <= row['perJet_EnergyFrac_Depth4'] <= 1 and 
-            0 < row['perJet_S_phiphi'] < 900 and 
-            0 < row['perJet_LeadingRechitE'] < 900 and 
-            0 <= row['perJet_Track0Pt'] < 900 and 
-            0 <= row['perJet_Track0dR'] < 1 and 
-            0 <= row['perJet_Track1Pt'] < 900 and 
-            0 <= row['perJet_Track1dR'] < 1):
+        def classify_background(row): 
+            if select_safety(row) and select_L1jet(row):
                 return bkg_value # 2 or 1 
             else:
                 return -1
 
+        def classify_bkg_inclusive(row): 
+            if select_safety(row):
+                return bkg_value 
+            else:
+                return -1
+
         def classify_signal(row):
-            if select_safety(row) and select_HCAL12(row):
+            if select_safety(row) and select_HCAL12(row) and select_L1jet(row):
                 return 0
-            elif select_safety(row) and select_HCAL34(row):
+            elif select_safety(row) and select_HCAL34(row) and select_L1jet(row):
                 return sig_value # 1 or 0
             else:
                 return -1
             
         def classify_sig_inclusive(row):
-            if select_safety(row):
+            if select_safety(row) and select_LLPjet(row):
                 return 0
             else:
                 return -1
         
         classify_sig = classify_sig_inclusive if inclusive else classify_signal
+
+        classify_bkg = classify_bkg_inclusive if inclusive else classify_background
 
         sig_df = pd.DataFrame()
         bkg_df = pd.DataFrame()
@@ -175,12 +183,16 @@ class DataProcessor:
         features = ['perJet_Eta', 'perJet_Mass', 
        'perJet_S_phiphi', 'perJet_S_etaeta', 'perJet_S_etaphi', 
        'perJet_Tracks_dR', 
-       'perJet_E', 'perJet_Pt',
-       'perJet_Track0Pt', 'perJet_Track0dR', 'perJet_Track0dEta', 'perJet_Track0dPhi', # ideally track pT would be track pT / jet pT
-       'perJet_Track1Pt', 'perJet_Track1dR', 'perJet_Track1dEta', 'perJet_Track1dPhi',
-       'perJet_Track2Pt', 'perJet_Track2dR', 'perJet_Track2dEta', 'perJet_Track2dPhi',
+       # 'perJet_E', 'perJet_Pt', # remove when have fractional pT and E variables implemented! 
+       'perJet_Track0dR', 'perJet_Track0dEta', 'perJet_Track0dPhi',
+       'perJet_Track1dR', 'perJet_Track1dEta', 'perJet_Track1dPhi',
+       'perJet_Track2dR', 'perJet_Track2dEta', 'perJet_Track2dPhi',
+       # 'perJet_Track0Pt', 'perJet_Track1Pt', 'perJet_Track2Pt', # ideally track pT would be track pT / jet pT
+       'perJet_Frac_Track0Pt', 'perJet_Frac_Track1Pt', 'perJet_Frac_Track2Pt',
        'perJet_EnergyFrac_Depth1', 'perJet_EnergyFrac_Depth2', 'perJet_EnergyFrac_Depth3', 'perJet_EnergyFrac_Depth4', 
-       'perJet_LeadingRechitD', 'perJet_LeadingRechitE', 'perJet_SubLeadingRechitE', 'perJet_SSubLeadingRechitE', # ideally rechit E would be rechit E / jet E
+       'perJet_LeadingRechitD', 
+       # 'perJet_LeadingRechitE', 'perJet_SubLeadingRechitE', 'perJet_SSubLeadingRechitE', # ideally rechit E would be rechit E / jet E
+       'perJet_Frac_LeadingRechitE', 'perJet_Frac_SubLeadingRechitE', 'perJet_Frac_SSubLeadingRechitE', 
        'perJet_AllRechitE', 
        'perJet_NeutralHadEFrac', 'perJet_ChargedHadEFrac', 'perJet_PhoEFrac', 'perJet_EleEFrac', 'perJet_MuonEFrac']
         
@@ -193,6 +205,7 @@ class DataProcessor:
         normed_data = pd.DataFrame()
         for feature in data.columns:
             normed_data[feature] = (data[feature] - CONSTANTS[feature][0])/ CONSTANTS[feature][1]
+            # if inclusive: normed_data[feature] = (data[feature] - CONSTANTS_INCLUSIVE[feature][0])/ CONSTANTS_INCLUSIVE[feature][1] 
         
         print(normed_data.describe())
         
@@ -536,28 +549,28 @@ class Runner:
         
 def main():
     sig_files = [
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TRAIN.root",
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch1.root",
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch1.root",
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch1.root",
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TRAIN.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TRAIN-batch1.root",
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST.root",
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch2.root",
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch2.root",
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch2.root",
-        "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TEST.root",
-        # "minituple_v3.8_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TEST-batch2.root"
+        "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_10_14_TRAIN.root",
+        "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_10_14_batch1.root",
+        "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_10_14_batch1.root",
+        "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_10_14_batch1.root",
+        "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_10_14_TRAIN.root",
+        # "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TRAIN-batch1.root",
+        "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_10_14_TEST.root",
+        "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_10_14_batch2.root",
+        "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_10_14_batch2.root",
+        "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_10_14_batch2.root",
+        "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_10_14_TEST.root",
+        # "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TEST-batch2.root"
     ]
     
     bkg_files = [
-        "minituple_v3.8_LLPskim_Run2023Bv1_2024_06_03.root",
-        "minituple_v3.8_LLPskim_Run2023Cv1_2024_06_03.root",
-        "minituple_v3.8_LLPskim_Run2023Cv2_2024_06_03.root",
-        "minituple_v3.8_LLPskim_Run2023Cv3_2024_06_03.root",
-        "minituple_v3.8_LLPskim_Run2023Cv4_2024_06_03.root",
-        "minituple_v3.8_LLPskim_Run2023Dv1_2024_06_03.root",
-        "minituple_v3.8_LLPskim_Run2023Dv2_2024_06_03.root"
+        "minituple_v3.9_LLPskim_Run2023Bv1_2024_10_14.root",
+        "minituple_v3.9_LLPskim_Run2023Cv1_2024_10_14.root",
+        "minituple_v3.9_LLPskim_Run2023Cv2_2024_10_14.root",
+        "minituple_v3.9_LLPskim_Run2023Cv3_2024_10_14.root",
+        "minituple_v3.9_LLPskim_Run2023Cv4_2024_10_14.root",
+        "minituple_v3.9_LLPskim_Run2023Dv1_2024_10_14.root",
+        "minituple_v3.9_LLPskim_Run2023Dv2_2024_10_14.root"
     ]
     
     mode = "train" # "train", "eval", "filewrite", "constants"
@@ -565,6 +578,7 @@ def main():
     # running the depth and inclusive tagger sequentially, uncomment second part if want to run the depth tagger alone
     print("Running Depth Tagger")
     runner = Runner(sig_files=sig_files[:], bkg_files=bkg_files[:], mode=mode, num_classes=2, inclusive=False)
+    runner.set_model_name(model_name="depth_model_v3_Oct15.keras")
     runner.run()
     
     print("Running Inclusive Tagger")
@@ -572,7 +586,7 @@ def main():
     #runner.set_inclusive(inclusive=True)
     #runner.set_load(load=False)
     runner = Runner(sig_files=sig_files[:], bkg_files=bkg_files[:], mode=mode, num_classes=2, inclusive=True)
-    runner.set_model_name(model_name="inclusive_model_v3.keras")
+    runner.set_model_name(model_name="inclusive_model_v3_Oct15.keras")
     runner.run()
     
     # running the inclusive tagger by itself, uncomment if needed
