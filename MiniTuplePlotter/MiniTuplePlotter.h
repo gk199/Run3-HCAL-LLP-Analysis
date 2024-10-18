@@ -845,12 +845,12 @@ public :
 				myCanvas->cd(1);
 			}
 
-			if( plot_type == "efficiency" ){
+			if( plot_type == "efficiency" || plot_type == "acceptance"){
 				myCanvas->cd(2);
 				// need to get the first hist, this will be the denominator for the efficiency plot when listed first in compare cuts (h_total)
 				int i = 0;
 				// TLegend* leg  = new TLegend(legx1-0.45,legy1,legx2-0.45,legy2);
-				TLegend* leg  = new TLegend(legx1,legy1-0.3,legx2,legy2-0.3);
+				TLegend* leg  = new TLegend(legx1,legy1-0.3,legx2,legy2-0.3); // for L1 approval efficiency plots, legend on ratio area
 				string denom_hist_tag = "";
 				for( auto hist_tag: hist_tags ){
 					// string hist_tag = Form( "%s "+GetBetterCutTitle( selective_cuts[filetag_treename] )+" "+GetBetterCutTitle( cut_compare ), filetag_treename.c_str() );
@@ -865,6 +865,9 @@ public :
 						if(TEfficiency::CheckConsistency(*h_pass, *h_total)) {
 							pEff = new TEfficiency(*h_pass, *h_total);
 							string label_y = "Efficiency";
+							if (plot_type == "acceptance") label_y = "Acceptance";
+							std::cout << plot_type << std::endl;
+							std::cout << label_y << std::endl;
 							if (multiple) label_y = "L1T Efficiency";
 							pEff->SetTitle(Form("; %s; %s", PlotParams_temp.label_x.c_str(), label_y.c_str())); // HCAL LLP Trigger Efficiencies
 							pEff->SetLineColor( colors[i] );
@@ -928,7 +931,7 @@ public :
 			//fout->cd();
 			//myCanvas->Write();
 			myCanvas->SaveAs( output_directory+"/"+output_file_name+".png", "png" );
-			if( plot_type == "efficiency" ) myCanvas->SaveAs( output_directory+"/"+output_file_name+".pdf", "pdf" );
+			if( plot_type == "efficiency" || plot_type == "acceptance" ) myCanvas->SaveAs( output_directory+"/"+output_file_name+".pdf", "pdf" );
 			delete myCanvas;
 
 		}
@@ -999,8 +1002,8 @@ public :
 			saveas_name = Form("%s", legend_names.at(i).c_str() );
 
 		//myCanvas->SaveAs( Form( output_directory+"/Plot2D_%s_"+output_file_name+"_"+saveas_name+"_%s.png", filetag_treename.c_str(), output_file_tag.c_str() ) );
-		myCanvas->SaveAs( Form( output_directory+"/Plot2D_%s_"+output_file_name+"_"+saveas_name(0,24)+"_%s.png", (filetag_treename.substr(0,11)).c_str(), output_file_tag.c_str() ) );
-        //myCanvas->SaveAs( Form( output_directory+"/Plot2D_"+output_file_name+"_Cut"+saveas_name(0,24)+"_%s.png", output_file_tag.c_str() ) );
+		//myCanvas->SaveAs( Form( output_directory+"/Plot2D_%s_"+output_file_name+"_"+saveas_name(0,24)+"_%s.png", (filetag_treename.substr(0,11)).c_str(), output_file_tag.c_str() ) );
+        myCanvas->SaveAs( Form( output_directory+"/Plot2D_"+output_file_name+"_Cut"+saveas_name(0,24)+"_%s.png", output_file_tag.c_str() ) );
 		
 		delete myCanvas;
 	}

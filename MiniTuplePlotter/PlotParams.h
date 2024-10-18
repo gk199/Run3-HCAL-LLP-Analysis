@@ -246,6 +246,26 @@ PlotParams P_LLP1_DecayZ				= {"LLP1_DecayZ", "LLP1 decay Z position", "Decay Z 
 PlotParams P_LLP1_DecayT				= {"LLP1_DecayT", "LLP1 decay time", "Decay time [ns]", 0, 10 };
 PlotParams P_LLP1_DecayCtau				= {"LLP1_DecayCtau", "LLP1 c#tau", "c#tau [cm]", 0, 1000 };
 
+PlotParams P_jet0_bdtscoreX_LLP350_MS80_perJet = {"jet0_bdtscoreX_LLP350_MS80_perJet", "BDT Score", "BDT (350, 80) Score", -1, 1};
+PlotParams P_jet1_bdtscoreX_LLP350_MS80_perJet = {"jet1_bdtscoreX_LLP350_MS80_perJet", "BDT Score", "BDT (350, 80) Score", -1, 1};
+PlotParams P_jet2_bdtscoreX_LLP350_MS80_perJet = {"jet2_bdtscoreX_LLP350_MS80_perJet", "BDT Score", "BDT (350, 80) Score", -1, 1};
+
+PlotParams P_jet0_scores = {"jet0_scores", "DNN Depth Score", "DNN Depth Score, jet 0", 0, 1};
+PlotParams P_jet1_scores = {"jet1_scores", "DNN Depth Score", "DNN Depth Score, jet 1", 0, 1};
+PlotParams P_jet2_scores = {"jet2_scores", "DNN Depth Score", "DNN Depth Score, jet 2", 0, 1};
+PlotParams P_jet3_scores = {"jet3_scores", "DNN Depth Score", "DNN Depth Score, jet 3", 0, 1};
+PlotParams P_jet4_scores = {"jet4_scores", "DNN Depth Score", "DNN Depth Score, jet 4", 0, 1};
+PlotParams P_jet5_scores = {"jet5_scores", "DNN Depth Score", "DNN Depth Score, jet 5", 0, 1};
+PlotParams P_jet0_scores_inc = {"jet0_scores_inc", "DNN Inclusive Score", "DNN Inclusive Score, jet 0", 0, 1};
+PlotParams P_jet1_scores_inc = {"jet1_scores_inc", "DNN Inclusive Score", "DNN Inclusive Score, jet 1", 0, 1};
+PlotParams P_jet2_scores_inc = {"jet2_scores_inc", "DNN Inclusive Score", "DNN Inclusive Score, jet 2", 0, 1};
+PlotParams P_jet3_scores_inc = {"jet3_scores_inc", "DNN Inclusive Score", "DNN Inclusive Score, jet 3", 0, 1};
+PlotParams P_jet4_scores_inc = {"jet4_scores_inc", "DNN Inclusive Score", "DNN Inclusive Score, jet 4", 0, 1};
+PlotParams P_jet5_scores_inc = {"jet5_scores_inc", "DNN Inclusive Score", "DNN Inclusive Score, jet 5", 0, 1};
+
+PlotParams P_jet1and2_scores = {"jet1_scores + jet2_scores", "DNN Depth Score", "DNN Depth Score, jet 1 + jet 2", 0, 2};
+PlotParams P_jet1and2_scores_inc = {"jet1_scores_inc + jet2_scores_inc", "DNN Inclusive Score", "DNN Inclusive Score, jet 1 + jet 2", 0, 2};
+
 // --------------------------------------------------------------------- //
 // -------------------------- per jet variables ------------------------ //
 // --------------------------------------------------------------------- //

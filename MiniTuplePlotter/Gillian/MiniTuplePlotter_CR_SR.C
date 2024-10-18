@@ -2,7 +2,7 @@
 #include "TString.h"
 
 // Goals of this study: use the LLP MC sample, split into different regions to understand how variables change by region. Also started overlaying LLP skim data variables.
-// Mostly worked on during October - November 2023.
+// Mostly worked on during October - November 2023, early spring 2024.
 // -------------------------------------------------------------------------------------------------
 void MiniTuplePlotter_CR_SR(){
 
