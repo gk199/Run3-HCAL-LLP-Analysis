@@ -533,6 +533,7 @@ def Plot2D(tree, obj_type, radius):
 LLP_matching = ["L1trig_Matched"] # jet + number + var = full histogram name
 LLP_BDTscore = ["bdtscoreX_LLP350_MS80_perJet"]
 if DNN: LLP_BDTscore = ["scores_inc"]
+# if DNN: LLP_BDTscore = ["scores"]
 BDTcut=0.9
 
 # ------------------------------------------------------------------------------
@@ -634,14 +635,15 @@ def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, o
 # def SetupNumeratorDenominator(tree, obj_type):
 
 jet_kinematics = ["Eta", "Phi", "Pt", "NSV", "run", "lumi", "PV"]
-bin_num = [12, 6, 9, 5, 40, 40, 40]
+bin_num = [12, 6, 8, 5, 40, 40, 40]
 plot_x_range = [1.26, 3.2, 1, 5, 371000, 1600, 200]
-plot_y_range = [0.01, 0.007, 0.02, 0.02, 0.02, 0.02, 0.02]
+plot_y_range = [0.01, 0.007, 1, 0.02, 0.02, 0.02, 0.02]
 bin_widths = np.array([40, 50, 60, 70, 80, 100, 120, 160, 240, 400], dtype='float64') 
+bin_widths = np.array([40, 50, 60, 70, 80, 100, 120, 160, 250], dtype='float64') 
 
-frac_track_pt_bins = [[0, 1.1], [0, 0.5], [0.5, 1.1]]
+frac_track_pt_bins = [[0, 1.1]] #, [0, 0.5], [0.5, 1.1]]
 ele_frac_bins = [[0, 1.1], [0, 0.5], [0.5, 1.1]]
-label_track_pt_bins = ["inclusive", "<0.5", ">=0.5"]
+label_track_pt_bins = ["inclusive"] #, "<0.5", ">=0.5"]
 # ------------------------------------------------------------------------------
 def MisTagProbability(tree, obj_type, label = ""):
     
@@ -747,7 +749,7 @@ def MisTagPrediction(tree, obj_type, label = ""):
         allJets_actual = {}
 
         # for the high MET dataset, can do a range triggered = [[-10000, 2]] to do an inclusive estimation
-        triggered = [[-10000,2]] # [-9999,0,1]
+        triggered = [[-10000,2], -9999,0,1] # change this to run over all trigger sample options
 
         mistag_file = ROOT.TFile.Open(label + "outfile.root") # file to read all the mistag rates from (produced from MisTagProbability function above)
         scaleFile = ROOT.TFile.Open(label + "_Scales.root", "RECREATE") # file to write all the scale factors to
@@ -856,7 +858,7 @@ def OverlayWPlusJets():
     # avoid opening files in a loop, the plots are empty! 
     mistag_file["Zmu"] = ROOT.TFile.Open("Zmuoutfile.root")
     mistag_file["LLPskim"] = ROOT.TFile.Open("LLPskimoutfile.root")
-    mistag_file["HighMET"] = ROOT.TFile.Open("HighMEToutfile.root")
+    # mistag_file["HighMET"] = ROOT.TFile.Open("HighMEToutfile.root")
 
     for trig_matched in triggered:
         track_counter = 0
@@ -902,8 +904,9 @@ def main():
     # label = "HighMET"
     # infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8.1/minituple_v3.8_Zmu_Run2023Cv4_2024_07_11.root"
     infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8.1/minituple_v3.8_Zmu_Run2023Cv4_2024_08_23.root" # most recent one to return to
-    infilepath_ZM = "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/minituple_v3.8_Zmu_Run2023Cv4_2024_08_23_Zmumu_scores.root "
-    infilepath_WJ = "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/minituple_v3.8_Zmu_Run2023Cv4_2024_08_23_WPlusJets_scores.root "
+    infilepath_ZM = "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/minituple_v3.9_Zmu_Run2023_HADD_2024_10_14_Zmumu_scores.root "
+    infilepath_WJ = "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/minituple_v3.9_Zmu_Run2023_HADD_2024_10_14_WPlusJets_scores.root "
+    infilepath_LLPskim = "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/minituple_v3.9_LLPskim_Run2023Cv4_2024_10_14_scores.root "
     # infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8.1/minituple_v3.8_Zmu_Run2023_all_08_25.root"
     label = "Zmu"
 
@@ -927,7 +930,8 @@ def main():
         print("Running fake rate on W+jets and Z+jets, with BDT scores")
         ProbabilityEst(infilepath, label)
         BackgroundPrediction(infilepath, label)
-    # OverlayWPlusJets()
+    ProbabilityEst(infilepath_LLPskim, "LLPskim")
+    OverlayWPlusJets()
 
 if __name__ == '__main__':
 	main()
