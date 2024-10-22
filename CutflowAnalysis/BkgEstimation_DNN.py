@@ -75,114 +75,173 @@ def main():
 	jet_string = "((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26) || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26) || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26)"
 	jet_string += "|| (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26) || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26) || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26))"
 
-	one_jet_tagged_string = " ( (   jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_scores >= "+DNN_score+")" # jet 0 condition
-	one_jet_tagged_string += " || ( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_scores >= "+DNN_score+")" # jet 1 condition
-	one_jet_tagged_string += " || ( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_scores >= "+DNN_score+")" # jet 2 condition
-	one_jet_tagged_string += " || ( jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_scores >= "+DNN_score+")" # jet 3 condition
-	one_jet_tagged_string += " || ( jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_scores >= "+DNN_score+")" # jet 4 condition
-	one_jet_tagged_string += " || ( jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_scores >= "+DNN_score+"))" # jet 5 condition
+	jet0_depth = " ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_scores >= "+DNN_score+")"
+	jet1_depth = " ( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_scores >= "+DNN_score+")"
+	jet2_depth = " ( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_scores >= "+DNN_score+")"
+	jet3_depth = " ( jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_scores >= "+DNN_score+")"
+	jet4_depth = " ( jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_scores >= "+DNN_score+")"
+	jet5_depth = " ( jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_scores >= "+DNN_score+")"
+
+	jet0_inclusive = " ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_scores_inc >= "+DNN_score_inc+")"
+	jet1_inclusive = " ( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_scores_inc >= "+DNN_score_inc+")"
+	jet2_inclusive = " ( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_scores_inc >= "+DNN_score_inc+")"
+	jet3_inclusive = " ( jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_scores_inc >= "+DNN_score_inc+")"
+	jet4_inclusive = " ( jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_scores_inc >= "+DNN_score_inc+")"
+	jet5_inclusive = " ( jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_scores_inc >= "+DNN_score_inc+")"
+
+	# defining single and double tag strings, no trigger requirements
+	one_jet_tagged_string = " ( " + jet0_depth + " || " + jet1_depth + " || " + jet2_depth + " || " + jet3_depth + " || " + jet4_depth + " || " + jet5_depth + ")"
 					
-	two_jet_tagged_string = " ( ( (  jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_scores >= "+DNN_score+") && ( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_scores >= "+DNN_score+"))" # jet 0 AND 1 condition
-	two_jet_tagged_string += " || (( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_scores >= "+DNN_score+") && ( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_scores >= "+DNN_score+"))" # jet 0 AND 2 condition
-	two_jet_tagged_string += " || (( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_scores >= "+DNN_score+") && ( jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_scores >= "+DNN_score+"))" # jet 0 AND 3 condition
-	two_jet_tagged_string += " || (( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_scores >= "+DNN_score+") && ( jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_scores >= "+DNN_score+"))" # jet 0 AND 4 condition
-	two_jet_tagged_string += " || (( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_scores >= "+DNN_score+") && ( jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_scores >= "+DNN_score+"))" # jet 0 AND 5 condition
-	two_jet_tagged_string += " || (( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_scores >= "+DNN_score+") && ( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_scores >= "+DNN_score+"))" # jet 1 AND 2 condition
-	two_jet_tagged_string += " || (( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_scores >= "+DNN_score+") && ( jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_scores >= "+DNN_score+"))"
-	two_jet_tagged_string += " || (( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_scores >= "+DNN_score+") && ( jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_scores >= "+DNN_score+"))"	
-	two_jet_tagged_string += " || (( jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_scores >= "+DNN_score+") && ( jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_scores >= "+DNN_score+"))"				
-	two_jet_tagged_string += " || (( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_scores >= "+DNN_score+") && ( jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_scores >= "+DNN_score+"))" # jet 2 AND 3 condition
-	two_jet_tagged_string += " || (( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_scores >= "+DNN_score+") && ( jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_scores >= "+DNN_score+"))"
-	two_jet_tagged_string += " || (( jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_scores >= "+DNN_score+") && ( jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_scores >= "+DNN_score+"))"
-	two_jet_tagged_string += " || (( jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_scores >= "+DNN_score+") && ( jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_scores >= "+DNN_score+"))" # jet 3 AND 4 condition
-	two_jet_tagged_string += " || (( jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_scores >= "+DNN_score+") && ( jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_scores >= "+DNN_score+"))"
-	two_jet_tagged_string += " || (( jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_scores >= "+DNN_score+") && ( jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_scores >= "+DNN_score+")))" # jet 4 AND 5 condition
+	two_jet_tagged_string = " ( (   " + jet0_depth + " && " + jet1_inclusive + ")" # jet 0 AND 1 condition
+	two_jet_tagged_string += " || ( " + jet0_depth + " && " + jet2_inclusive + ")" # jet 0 AND 2 condition
+	two_jet_tagged_string += " || ( " + jet0_depth + " && " + jet3_inclusive + ")" # jet 0 AND 3 condition
+	two_jet_tagged_string += " || ( " + jet0_depth + " && " + jet4_inclusive + ")" # jet 0 AND 4 condition
+	two_jet_tagged_string += " || ( " + jet0_depth + " && " + jet5_inclusive + ")" # jet 0 AND 5 condition
+	two_jet_tagged_string += " || ( " + jet1_depth + " && " + jet2_inclusive + ")" # jet 1 AND 2 condition
+	two_jet_tagged_string += " || ( " + jet1_depth + " && " + jet3_inclusive + ")"
+	two_jet_tagged_string += " || ( " + jet1_depth + " && " + jet4_inclusive + ")"	
+	two_jet_tagged_string += " || ( " + jet1_depth + " && " + jet5_inclusive + ")"				
+	two_jet_tagged_string += " || ( " + jet2_depth + " && " + jet3_inclusive + ")" # jet 2 AND 3 condition
+	two_jet_tagged_string += " || ( " + jet2_depth + " && " + jet4_inclusive + ")"
+	two_jet_tagged_string += " || ( " + jet2_depth + " && " + jet5_inclusive + ")"
+	two_jet_tagged_string += " || ( " + jet3_depth + " && " + jet4_inclusive + ")" # jet 3 AND 4 condition
+	two_jet_tagged_string += " || ( " + jet3_depth + " && " + jet5_inclusive + ")"
+	two_jet_tagged_string += " || ( " + jet4_depth + " && " + jet5_inclusive + "))" # jet 4 AND 5 condition
 
+	jet1_inclusive_below = jet1_inclusive + " && ( " + jet2_inclusive + " || " + jet3_inclusive + " || " + jet4_inclusive + " || " + jet5_inclusive + " )"
+	jet2_inclusive_below = jet2_inclusive + " && ( " + jet3_inclusive + " || " + jet4_inclusive + " || " + jet5_inclusive + " )"
+	jet3_inclusive_below = jet3_inclusive + " && ( " + jet4_inclusive + " || " + jet5_inclusive + " )"
+	jet4_inclusive_below = jet4_inclusive + " && " + jet5_inclusive
 
+	three_jet_tagged_string = " ( (   " + jet0_depth + " && " + jet1_inclusive_below + ")" # jet 0 AND 1 condition
+	three_jet_tagged_string += " || ( " + jet0_depth + " && " + jet2_inclusive_below + ")" # jet 0 AND 2 condition
+	three_jet_tagged_string += " || ( " + jet0_depth + " && " + jet3_inclusive_below + ")" # jet 0 AND 3 condition
+	three_jet_tagged_string += " || ( " + jet0_depth + " && " + jet4_inclusive_below + ")" # jet 0 AND 4 condition
+	three_jet_tagged_string += " || ( " + jet1_depth + " && " + jet2_inclusive_below + ")" # jet 1 AND 2 condition
+	three_jet_tagged_string += " || ( " + jet1_depth + " && " + jet3_inclusive_below + ")"
+	three_jet_tagged_string += " || ( " + jet1_depth + " && " + jet4_inclusive_below + ")"	
+	three_jet_tagged_string += " || ( " + jet2_depth + " && " + jet3_inclusive_below + ")" # jet 2 AND 3 condition
+	three_jet_tagged_string += " || ( " + jet2_depth + " && " + jet4_inclusive_below + ")"
+	three_jet_tagged_string += " || ( " + jet3_depth + " && " + jet4_inclusive_below + "))" # jet 3 AND 4 condition
+
+	# defining single and double tag strings, require jet is matched to L1 LLP triggered jet
 	jet_string_triggered = "  ( ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1) || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1)"
 	jet_string_triggered += " || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1) || (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1)"
 	jet_string_triggered += " || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1) || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1))"	
 
-	one_jet_tagged_string_triggered = " ( (  jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 && jet0_scores >= "+DNN_score+")" # jet 0 condition
-	one_jet_tagged_string_triggered += " || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1 && jet1_scores >= "+DNN_score+")" # jet 1 condition
-	one_jet_tagged_string_triggered += " || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1 && jet2_scores >= "+DNN_score+")" # jet 2 condition
-	one_jet_tagged_string_triggered += " || (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1 && jet3_scores >= "+DNN_score+")" # jet 3 condition
-	one_jet_tagged_string_triggered += " || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1 && jet4_scores >= "+DNN_score+")" # jet 4 condition
-	one_jet_tagged_string_triggered += " || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1 && jet5_scores >= "+DNN_score+"))" # jet 5 condition
+	one_jet_tagged_string_triggered = " ( (   " + jet0_depth + " && jet0_L1trig_Matched == 1 )" # jet 0 condition
+	one_jet_tagged_string_triggered += " || ( " + jet1_depth + " && jet1_L1trig_Matched == 1 )" # jet 1 condition
+	one_jet_tagged_string_triggered += " || ( " + jet2_depth + " && jet2_L1trig_Matched == 1 )" # jet 2 condition
+	one_jet_tagged_string_triggered += " || ( " + jet3_depth + " && jet3_L1trig_Matched == 1 )" # jet 3 condition
+	one_jet_tagged_string_triggered += " || ( " + jet4_depth + " && jet4_L1trig_Matched == 1 )" # jet 4 condition
+	one_jet_tagged_string_triggered += " || ( " + jet5_depth + " && jet5_L1trig_Matched == 1 ))" # jet 5 condition
 
-	two_jet_tagged_string_triggered = " ( ( ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 && jet0_scores >= "+DNN_score+") && (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1 && jet1_scores >= "+DNN_score+"))" # jet 0 AND 1 condition
-	two_jet_tagged_string_triggered += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 && jet0_scores >= "+DNN_score+") && (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1 && jet2_scores >= "+DNN_score+"))" # jet 0 AND 2 condition
-	two_jet_tagged_string_triggered += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 && jet0_scores >= "+DNN_score+") && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1 && jet3_scores >= "+DNN_score+"))" # jet 0 AND 3 condition
-	two_jet_tagged_string_triggered += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 && jet0_scores >= "+DNN_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1 && jet4_scores >= "+DNN_score+"))" # jet 0 AND 4 condition
-	two_jet_tagged_string_triggered += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 && jet0_scores >= "+DNN_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1 && jet5_scores >= "+DNN_score+"))" # jet 0 AND 5 condition
-	two_jet_tagged_string_triggered += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1 && jet1_scores >= "+DNN_score+") && (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1 && jet2_scores >= "+DNN_score+"))" # jet 1 AND 2 condition
-	two_jet_tagged_string_triggered += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1 && jet1_scores >= "+DNN_score+") && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1 && jet3_scores >= "+DNN_score+"))" # jet 1 AND 3 condition
-	two_jet_tagged_string_triggered += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1 && jet1_scores >= "+DNN_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1 && jet4_scores >= "+DNN_score+"))" # jet 1 AND 4 condition
-	two_jet_tagged_string_triggered += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1 && jet1_scores >= "+DNN_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1 && jet5_scores >= "+DNN_score+"))" # jet 1 AND 5 condition
-	two_jet_tagged_string_triggered += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1 && jet2_scores >= "+DNN_score+") && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1 && jet3_scores >= "+DNN_score+"))" # jet 2 AND 3 condition
-	two_jet_tagged_string_triggered += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1 && jet2_scores >= "+DNN_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1 && jet4_scores >= "+DNN_score+"))" # jet 2 AND 4 condition
-	two_jet_tagged_string_triggered += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1 && jet2_scores >= "+DNN_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1 && jet5_scores >= "+DNN_score+"))" # jet 2 AND 5 condition
-	two_jet_tagged_string_triggered += " || ((jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1 && jet3_scores >= "+DNN_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1 && jet4_scores >= "+DNN_score+"))" # jet 3 AND 4 condition
-	two_jet_tagged_string_triggered += " || ((jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1 && jet3_scores >= "+DNN_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1 && jet5_scores >= "+DNN_score+"))" # jet 3 AND 5 condition
-	two_jet_tagged_string_triggered += " || ((jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1 && jet4_scores >= "+DNN_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1 && jet5_scores >= "+DNN_score+")))" # jet 4 AND 5 condition
+	two_jet_tagged_string_triggered = " ( ( ( " + jet0_depth + " && jet0_L1trig_Matched == 1 ) && ( " + jet1_inclusive + "))" # jet 0 AND 1 condition # & jet1_L1trig_Matched == 1 
+	two_jet_tagged_string_triggered += " || ((" + jet0_depth + " && jet0_L1trig_Matched == 1 ) && ( " + jet2_inclusive + "))" # jet 0 AND 2 condition
+	two_jet_tagged_string_triggered += " || ((" + jet0_depth + " && jet0_L1trig_Matched == 1 ) && ( " + jet3_inclusive + "))" # jet 0 AND 3 condition
+	two_jet_tagged_string_triggered += " || ((" + jet0_depth + " && jet0_L1trig_Matched == 1 ) && ( " + jet4_inclusive + "))" # jet 0 AND 4 condition
+	two_jet_tagged_string_triggered += " || ((" + jet0_depth + " && jet0_L1trig_Matched == 1 ) && ( " + jet5_inclusive + "))" # jet 0 AND 5 condition
+	two_jet_tagged_string_triggered += " || ((" + jet1_depth + " && jet1_L1trig_Matched == 1 ) && ( " + jet2_inclusive + "))" # jet 1 AND 2 condition
+	two_jet_tagged_string_triggered += " || ((" + jet1_depth + " && jet1_L1trig_Matched == 1 ) && ( " + jet3_inclusive + "))" # jet 1 AND 3 condition
+	two_jet_tagged_string_triggered += " || ((" + jet1_depth + " && jet1_L1trig_Matched == 1 ) && ( " + jet4_inclusive + "))" # jet 1 AND 4 condition
+	two_jet_tagged_string_triggered += " || ((" + jet1_depth + " && jet1_L1trig_Matched == 1 ) && ( " + jet5_inclusive + "))" # jet 1 AND 5 condition
+	two_jet_tagged_string_triggered += " || ((" + jet2_depth + " && jet2_L1trig_Matched == 1 ) && ( " + jet3_inclusive + "))" # jet 2 AND 3 condition
+	two_jet_tagged_string_triggered += " || ((" + jet2_depth + " && jet2_L1trig_Matched == 1 ) && ( " + jet4_inclusive + "))" # jet 2 AND 4 condition
+	two_jet_tagged_string_triggered += " || ((" + jet2_depth + " && jet2_L1trig_Matched == 1 ) && ( " + jet5_inclusive + "))" # jet 2 AND 5 condition
+	two_jet_tagged_string_triggered += " || ((" + jet3_depth + " && jet3_L1trig_Matched == 1 ) && ( " + jet4_inclusive + "))" # jet 3 AND 4 condition
+	two_jet_tagged_string_triggered += " || ((" + jet3_depth + " && jet3_L1trig_Matched == 1 ) && ( " + jet5_inclusive + "))" # jet 3 AND 5 condition
+	two_jet_tagged_string_triggered += " || ((" + jet4_depth + " && jet4_L1trig_Matched == 1 ) && ( " + jet5_inclusive + ")))" # jet 4 AND 5 condition
 
+	three_jet_tagged_string_triggered = " ( ( ( " + jet0_depth + " && jet0_L1trig_Matched == 1 ) && ( " + jet1_inclusive_below + "))" # jet 0 AND 1+ condition # & jet1_L1trig_Matched == 1 
+	three_jet_tagged_string_triggered += " || ((" + jet0_depth + " && jet0_L1trig_Matched == 1 ) && ( " + jet2_inclusive_below + "))" # jet 0 AND 2+ condition
+	three_jet_tagged_string_triggered += " || ((" + jet0_depth + " && jet0_L1trig_Matched == 1 ) && ( " + jet3_inclusive_below + "))" # jet 0 AND 3+ condition
+	three_jet_tagged_string_triggered += " || ((" + jet0_depth + " && jet0_L1trig_Matched == 1 ) && ( " + jet4_inclusive_below + "))" # jet 0 AND 4,5 condition
+	three_jet_tagged_string_triggered += " || ((" + jet1_depth + " && jet1_L1trig_Matched == 1 ) && ( " + jet2_inclusive_below + "))" # jet 1 AND 2+ condition
+	three_jet_tagged_string_triggered += " || ((" + jet1_depth + " && jet1_L1trig_Matched == 1 ) && ( " + jet3_inclusive_below + "))" # jet 1 AND 3+ condition
+	three_jet_tagged_string_triggered += " || ((" + jet1_depth + " && jet1_L1trig_Matched == 1 ) && ( " + jet4_inclusive_below + "))" # jet 1 AND 4,5 condition
+	three_jet_tagged_string_triggered += " || ((" + jet2_depth + " && jet2_L1trig_Matched == 1 ) && ( " + jet3_inclusive_below + "))" # jet 2 AND 3+ condition
+	three_jet_tagged_string_triggered += " || ((" + jet2_depth + " && jet2_L1trig_Matched == 1 ) && ( " + jet4_inclusive_below + "))" # jet 2 AND 4,5 condition
+	three_jet_tagged_string_triggered += " || ((" + jet3_depth + " && jet3_L1trig_Matched == 1 ) && ( " + jet4_inclusive_below + ")))" # jet 3 AND 4,5 condition
 
+	# defining single and double tag strings, require jet is matched to L1 LLP not-triggered jet
 	jet_string_not_triggered = "  ( ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 0) || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 0)"
 	jet_string_not_triggered += " || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 0) || (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 0)"
 	jet_string_not_triggered += " || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 0) || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 0))"
 
-	one_jet_tagged_string_not_triggered = " ( (  jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 0 && jet0_scores >= "+DNN_score+")" # jet 0 condition
-	one_jet_tagged_string_not_triggered += " || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 0 && jet1_scores >= "+DNN_score+")" # jet 1 condition
-	one_jet_tagged_string_not_triggered += " || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 0 && jet2_scores >= "+DNN_score+")" # jet 2 condition
-	one_jet_tagged_string_not_triggered += " || (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 0 && jet3_scores >= "+DNN_score+")" # jet 3 condition
-	one_jet_tagged_string_not_triggered += " || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 0 && jet4_scores >= "+DNN_score+")" # jet 4 condition
-	one_jet_tagged_string_not_triggered += " || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 0 && jet5_scores >= "+DNN_score+"))" # jet 5 condition
+	one_jet_tagged_string_not_triggered = " ( (  " + jet0_depth + " && jet0_L1trig_Matched == 0 )" # jet 0 condition
+	one_jet_tagged_string_not_triggered += " || (" + jet1_depth + " && jet1_L1trig_Matched == 0 )" # jet 1 condition
+	one_jet_tagged_string_not_triggered += " || (" + jet2_depth + " && jet2_L1trig_Matched == 0 )" # jet 2 condition
+	one_jet_tagged_string_not_triggered += " || (" + jet3_depth + " && jet3_L1trig_Matched == 0 )" # jet 3 condition
+	one_jet_tagged_string_not_triggered += " || (" + jet4_depth + " && jet4_L1trig_Matched == 0 )" # jet 4 condition
+	one_jet_tagged_string_not_triggered += " || (" + jet5_depth + " && jet5_L1trig_Matched == 0 ))" # jet 5 condition
 
-	two_jet_tagged_string_not_triggered = " ( ( ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 0 && jet0_scores >= "+DNN_score+") && (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 0 && jet1_scores >= "+DNN_score+"))" # jet 0 AND 1 condition
-	two_jet_tagged_string_not_triggered += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 0 && jet0_scores >= "+DNN_score+") && (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 0 && jet2_scores >= "+DNN_score+"))" # jet 0 AND 2 condition
-	two_jet_tagged_string_not_triggered += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 0 && jet0_scores >= "+DNN_score+") && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 0 && jet3_scores >= "+DNN_score+"))" # jet 0 AND 3 condition
-	two_jet_tagged_string_not_triggered += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 0 && jet0_scores >= "+DNN_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 0 && jet4_scores >= "+DNN_score+"))" # jet 0 AND 4 condition
-	two_jet_tagged_string_not_triggered += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 0 && jet0_scores >= "+DNN_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 0 && jet5_scores >= "+DNN_score+"))" # jet 0 AND 5 condition
-	two_jet_tagged_string_not_triggered += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 0 && jet1_scores >= "+DNN_score+") && (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 0 && jet2_scores >= "+DNN_score+"))" # jet 1 AND 2 condition
-	two_jet_tagged_string_not_triggered += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 0 && jet1_scores >= "+DNN_score+") && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 0 && jet3_scores >= "+DNN_score+"))" # jet 1 AND 3 condition
-	two_jet_tagged_string_not_triggered += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 0 && jet1_scores >= "+DNN_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 0 && jet4_scores >= "+DNN_score+"))" # jet 1 AND 4 condition
-	two_jet_tagged_string_not_triggered += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 0 && jet1_scores >= "+DNN_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 0 && jet5_scores >= "+DNN_score+"))" # jet 1 AND 5 condition
-	two_jet_tagged_string_not_triggered += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 0 && jet2_scores >= "+DNN_score+") && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 0 && jet3_scores >= "+DNN_score+"))" # jet 2 AND 3 condition
-	two_jet_tagged_string_not_triggered += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 0 && jet2_scores >= "+DNN_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 0 && jet4_scores >= "+DNN_score+"))" # jet 2 AND 4 condition
-	two_jet_tagged_string_not_triggered += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 0 && jet2_scores >= "+DNN_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 0 && jet5_scores >= "+DNN_score+"))" # jet 2 AND 5 condition
-	two_jet_tagged_string_not_triggered += " || ((jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 0 && jet3_scores >= "+DNN_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 0 && jet4_scores >= "+DNN_score+"))" # jet 3 AND 4 condition
-	two_jet_tagged_string_not_triggered += " || ((jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 0 && jet3_scores >= "+DNN_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 0 && jet5_scores >= "+DNN_score+"))" # jet 3 AND 5 condition
-	two_jet_tagged_string_not_triggered += " || ((jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 0 && jet4_scores >= "+DNN_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 0 && jet5_scores >= "+DNN_score+")))" # jet 4 AND 5 condition
+	two_jet_tagged_string_not_triggered = " ( ( ( " + jet0_depth + " && jet0_L1trig_Matched == 0 ) && ( " + jet1_inclusive + "))" # jet 0 AND 1 condition # & jet1_L1trig_Matched == 0
+	two_jet_tagged_string_not_triggered += " || ((" + jet0_depth + " && jet0_L1trig_Matched == 0 ) && ( " + jet2_inclusive + "))" # jet 0 AND 2 condition
+	two_jet_tagged_string_not_triggered += " || ((" + jet0_depth + " && jet0_L1trig_Matched == 0 ) && ( " + jet3_inclusive + "))" # jet 0 AND 3 condition
+	two_jet_tagged_string_not_triggered += " || ((" + jet0_depth + " && jet0_L1trig_Matched == 0 ) && ( " + jet4_inclusive + "))" # jet 0 AND 4 condition
+	two_jet_tagged_string_not_triggered += " || ((" + jet0_depth + " && jet0_L1trig_Matched == 0 ) && ( " + jet5_inclusive + "))" # jet 0 AND 5 condition
+	two_jet_tagged_string_not_triggered += " || ((" + jet1_depth + " && jet1_L1trig_Matched == 0 ) && ( " + jet2_inclusive + "))" # jet 1 AND 2 condition
+	two_jet_tagged_string_not_triggered += " || ((" + jet1_depth + " && jet1_L1trig_Matched == 0 ) && ( " + jet3_inclusive + "))" # jet 1 AND 3 condition
+	two_jet_tagged_string_not_triggered += " || ((" + jet1_depth + " && jet1_L1trig_Matched == 0 ) && ( " + jet4_inclusive + "))" # jet 1 AND 4 condition
+	two_jet_tagged_string_not_triggered += " || ((" + jet1_depth + " && jet1_L1trig_Matched == 0 ) && ( " + jet5_inclusive + "))" # jet 1 AND 5 condition
+	two_jet_tagged_string_not_triggered += " || ((" + jet2_depth + " && jet2_L1trig_Matched == 0 ) && ( " + jet3_inclusive + "))" # jet 2 AND 3 condition
+	two_jet_tagged_string_not_triggered += " || ((" + jet2_depth + " && jet2_L1trig_Matched == 0 ) && ( " + jet4_inclusive + "))" # jet 2 AND 4 condition
+	two_jet_tagged_string_not_triggered += " || ((" + jet2_depth + " && jet2_L1trig_Matched == 0 ) && ( " + jet5_inclusive + "))" # jet 2 AND 5 condition
+	two_jet_tagged_string_not_triggered += " || ((" + jet3_depth + " && jet3_L1trig_Matched == 0 ) && ( " + jet4_inclusive + "))" # jet 3 AND 4 condition
+	two_jet_tagged_string_not_triggered += " || ((" + jet3_depth + " && jet3_L1trig_Matched == 0 ) && ( " + jet5_inclusive + "))" # jet 3 AND 5 condition
+	two_jet_tagged_string_not_triggered += " || ((" + jet4_depth + " && jet4_L1trig_Matched == 0 ) && ( " + jet5_inclusive + ")))" # jet 4 AND 5 condition
 
+	three_jet_tagged_string_not_triggered = " ( ( ( " + jet0_depth + " && jet0_L1trig_Matched == 0 ) && ( " + jet1_inclusive_below + "))" # jet 0 AND 1+ condition # & jet1_L1trig_Matched == 1 
+	three_jet_tagged_string_not_triggered += " || ((" + jet0_depth + " && jet0_L1trig_Matched == 0 ) && ( " + jet2_inclusive_below + "))" # jet 0 AND 2+ condition
+	three_jet_tagged_string_not_triggered += " || ((" + jet0_depth + " && jet0_L1trig_Matched == 0 ) && ( " + jet3_inclusive_below + "))" # jet 0 AND 3+ condition
+	three_jet_tagged_string_not_triggered += " || ((" + jet0_depth + " && jet0_L1trig_Matched == 0 ) && ( " + jet4_inclusive_below + "))" # jet 0 AND 4,5 condition
+	three_jet_tagged_string_not_triggered += " || ((" + jet1_depth + " && jet1_L1trig_Matched == 0 ) && ( " + jet2_inclusive_below + "))" # jet 1 AND 2+ condition
+	three_jet_tagged_string_not_triggered += " || ((" + jet1_depth + " && jet1_L1trig_Matched == 0 ) && ( " + jet3_inclusive_below + "))" # jet 1 AND 3+ condition
+	three_jet_tagged_string_not_triggered += " || ((" + jet1_depth + " && jet1_L1trig_Matched == 0 ) && ( " + jet4_inclusive_below + "))" # jet 1 AND 4,5 condition
+	three_jet_tagged_string_not_triggered += " || ((" + jet2_depth + " && jet2_L1trig_Matched == 0 ) && ( " + jet3_inclusive_below + "))" # jet 2 AND 3+ condition
+	three_jet_tagged_string_not_triggered += " || ((" + jet2_depth + " && jet2_L1trig_Matched == 0 ) && ( " + jet4_inclusive_below + "))" # jet 2 AND 4,5 condition
+	three_jet_tagged_string_not_triggered += " || ((" + jet3_depth + " && jet3_L1trig_Matched == 0 ) && ( " + jet4_inclusive_below + ")))" # jet 3 AND 4,5 condition
 
+	# defining single and double tag strings, require jet is matched to L1 LLP jet, regardless of trigger result
 	jet_string_matched = "  ( ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched >= 0) || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched >= 0)"
 	jet_string_matched += " || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched >= 0) || (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched >= 0)"
 	jet_string_matched += " || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched >= 0) || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched >= 0))"
 
-	one_jet_tagged_string_matched = " ( (  jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched >= 0 && jet0_scores >= "+DNN_score+")" # jet 0 condition
-	one_jet_tagged_string_matched += " || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched >= 0 && jet1_scores >= "+DNN_score+")" # jet 1 condition
-	one_jet_tagged_string_matched += " || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched >= 0 && jet2_scores >= "+DNN_score+")" # jet 2 condition
-	one_jet_tagged_string_matched += " || (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched >= 0 && jet3_scores >= "+DNN_score+")" # jet 3 condition
-	one_jet_tagged_string_matched += " || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched >= 0 && jet4_scores >= "+DNN_score+")" # jet 4 condition
-	one_jet_tagged_string_matched += " || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched >= 0 && jet5_scores >= "+DNN_score+"))" # jet 5 condition
+	one_jet_tagged_string_matched = " ( (  " + jet0_depth + " && jet0_L1trig_Matched >= 0 )" # jet 0 condition
+	one_jet_tagged_string_matched += " || (" + jet1_depth + " && jet1_L1trig_Matched >= 0 )" # jet 1 condition
+	one_jet_tagged_string_matched += " || (" + jet2_depth + " && jet2_L1trig_Matched >= 0 )" # jet 2 condition
+	one_jet_tagged_string_matched += " || (" + jet3_depth + " && jet3_L1trig_Matched >= 0 )" # jet 3 condition
+	one_jet_tagged_string_matched += " || (" + jet4_depth + " && jet4_L1trig_Matched >= 0 )" # jet 4 condition
+	one_jet_tagged_string_matched += " || (" + jet5_depth + " && jet5_L1trig_Matched >= 0 ))" # jet 5 condition
 
-	two_jet_tagged_string_matched = " ( ( ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched >= 0 && jet0_scores >= "+DNN_score+") && (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched >= 0 && jet1_scores >= "+DNN_score+"))" # jet 0 AND 1 condition
-	two_jet_tagged_string_matched += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched >= 0 && jet0_scores >= "+DNN_score+") && (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched >= 0 && jet2_scores >= "+DNN_score+"))" # jet 0 AND 2 condition
-	two_jet_tagged_string_matched += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched >= 0 && jet0_scores >= "+DNN_score+") && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched >= 0 && jet3_scores >= "+DNN_score+"))" # jet 0 AND 3 condition
-	two_jet_tagged_string_matched += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched >= 0 && jet0_scores >= "+DNN_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched >= 0 && jet4_scores >= "+DNN_score+"))" # jet 0 AND 4 condition
-	two_jet_tagged_string_matched += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched >= 0 && jet0_scores >= "+DNN_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched >= 0 && jet5_scores >= "+DNN_score+"))" # jet 0 AND 5 condition
-	two_jet_tagged_string_matched += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched >= 0 && jet1_scores >= "+DNN_score+") && (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched >= 0 && jet2_scores >= "+DNN_score+"))" # jet 1 AND 2 condition
-	two_jet_tagged_string_matched += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched >= 0 && jet1_scores >= "+DNN_score+") && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched >= 0 && jet3_scores >= "+DNN_score+"))" # jet 1 AND 3 condition
-	two_jet_tagged_string_matched += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched >= 0 && jet1_scores >= "+DNN_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched >= 0 && jet4_scores >= "+DNN_score+"))" # jet 1 AND 4 condition
-	two_jet_tagged_string_matched += " || ((jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched >= 0 && jet1_scores >= "+DNN_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched >= 0 && jet5_scores >= "+DNN_score+"))" # jet 1 AND 5 condition
-	two_jet_tagged_string_matched += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched >= 0 && jet2_scores >= "+DNN_score+") && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched >= 0 && jet3_scores >= "+DNN_score+"))" # jet 2 AND 3 condition
-	two_jet_tagged_string_matched += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched >= 0 && jet2_scores >= "+DNN_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched >= 0 && jet4_scores >= "+DNN_score+"))" # jet 2 AND 4 condition
-	two_jet_tagged_string_matched += " || ((jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched >= 0 && jet2_scores >= "+DNN_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched >= 0 && jet5_scores >= "+DNN_score+"))" # jet 2 AND 5 condition
-	two_jet_tagged_string_matched += " || ((jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched >= 0 && jet3_scores >= "+DNN_score+") && (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched >= 0 && jet4_scores >= "+DNN_score+"))" # jet 3 AND 4 condition
-	two_jet_tagged_string_matched += " || ((jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched >= 0 && jet3_scores >= "+DNN_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched >= 0 && jet5_scores >= "+DNN_score+"))" # jet 3 AND 5 condition
-	two_jet_tagged_string_matched += " || ((jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched >= 0 && jet4_scores >= "+DNN_score+") && (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched >= 0 && jet5_scores >= "+DNN_score+")))" # jet 4 AND 5 condition
+	two_jet_tagged_string_matched = " ( ( ( " + jet0_depth + " && jet0_L1trig_Matched >= 0 ) && ( " + jet1_inclusive + "))" # jet 0 AND 1 condition # & jet1_L1trig_Matched >= 0
+	two_jet_tagged_string_matched += " || ((" + jet0_depth + " && jet0_L1trig_Matched >= 0 ) && ( " + jet2_inclusive + "))" # jet 0 AND 2 condition
+	two_jet_tagged_string_matched += " || ((" + jet0_depth + " && jet0_L1trig_Matched >= 0 ) && ( " + jet3_inclusive + "))" # jet 0 AND 3 condition
+	two_jet_tagged_string_matched += " || ((" + jet0_depth + " && jet0_L1trig_Matched >= 0 ) && ( " + jet4_inclusive + "))" # jet 0 AND 4 condition
+	two_jet_tagged_string_matched += " || ((" + jet0_depth + " && jet0_L1trig_Matched >= 0 ) && ( " + jet5_inclusive + "))" # jet 0 AND 5 condition
+	two_jet_tagged_string_matched += " || ((" + jet1_depth + " && jet1_L1trig_Matched >= 0 ) && ( " + jet2_inclusive + "))" # jet 1 AND 2 condition
+	two_jet_tagged_string_matched += " || ((" + jet1_depth + " && jet1_L1trig_Matched >= 0 ) && ( " + jet3_inclusive + "))" # jet 1 AND 3 condition
+	two_jet_tagged_string_matched += " || ((" + jet1_depth + " && jet1_L1trig_Matched >= 0 ) && ( " + jet4_inclusive + "))" # jet 1 AND 4 condition
+	two_jet_tagged_string_matched += " || ((" + jet1_depth + " && jet1_L1trig_Matched >= 0 ) && ( " + jet5_inclusive + "))" # jet 1 AND 5 condition
+	two_jet_tagged_string_matched += " || ((" + jet2_depth + " && jet2_L1trig_Matched >= 0 ) && ( " + jet3_inclusive + "))" # jet 2 AND 3 condition
+	two_jet_tagged_string_matched += " || ((" + jet2_depth + " && jet2_L1trig_Matched >= 0 ) && ( " + jet4_inclusive + "))" # jet 2 AND 4 condition
+	two_jet_tagged_string_matched += " || ((" + jet2_depth + " && jet2_L1trig_Matched >= 0 ) && ( " + jet5_inclusive + "))" # jet 2 AND 5 condition
+	two_jet_tagged_string_matched += " || ((" + jet3_depth + " && jet3_L1trig_Matched >= 0 ) && ( " + jet4_inclusive + "))" # jet 3 AND 4 condition
+	two_jet_tagged_string_matched += " || ((" + jet3_depth + " && jet3_L1trig_Matched >= 0 ) && ( " + jet5_inclusive + "))" # jet 3 AND 5 condition
+	two_jet_tagged_string_matched += " || ((" + jet4_depth + " && jet4_L1trig_Matched >= 0 ) && ( " + jet5_inclusive + ")))" # jet 4 AND 5 condition
 
+	three_jet_tagged_string_matched = " ( ( ( " + jet0_depth + " && jet0_L1trig_Matched >= 0 ) && ( " + jet1_inclusive_below + "))" # jet 0 AND 1+ condition # & jet1_L1trig_Matched == 1 
+	three_jet_tagged_string_matched += " || ((" + jet0_depth + " && jet0_L1trig_Matched >= 0 ) && ( " + jet2_inclusive_below + "))" # jet 0 AND 2+ condition
+	three_jet_tagged_string_matched += " || ((" + jet0_depth + " && jet0_L1trig_Matched >= 0 ) && ( " + jet3_inclusive_below + "))" # jet 0 AND 3+ condition
+	three_jet_tagged_string_matched += " || ((" + jet0_depth + " && jet0_L1trig_Matched >= 0 ) && ( " + jet4_inclusive_below + "))" # jet 0 AND 4,5 condition
+	three_jet_tagged_string_matched += " || ((" + jet1_depth + " && jet1_L1trig_Matched >= 0 ) && ( " + jet2_inclusive_below + "))" # jet 1 AND 2+ condition
+	three_jet_tagged_string_matched += " || ((" + jet1_depth + " && jet1_L1trig_Matched >= 0 ) && ( " + jet3_inclusive_below + "))" # jet 1 AND 3+ condition
+	three_jet_tagged_string_matched += " || ((" + jet1_depth + " && jet1_L1trig_Matched >= 0 ) && ( " + jet4_inclusive_below + "))" # jet 1 AND 4,5 condition
+	three_jet_tagged_string_matched += " || ((" + jet2_depth + " && jet2_L1trig_Matched >= 0 ) && ( " + jet3_inclusive_below + "))" # jet 2 AND 3+ condition
+	three_jet_tagged_string_matched += " || ((" + jet2_depth + " && jet2_L1trig_Matched >= 0 ) && ( " + jet4_inclusive_below + "))" # jet 2 AND 4,5 condition
+	three_jet_tagged_string_matched += " || ((" + jet3_depth + " && jet3_L1trig_Matched >= 0 ) && ( " + jet4_inclusive_below + ")))" # jet 3 AND 4,5 condition
 
+	# defining single and double tag strings, require jet is matched to L1 LLP triggered jet, no cuts on DNN scores
 	two_jet_string_triggered = " ( ( ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 ) && (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1 ))" # jet 0 AND 1 condition
 	two_jet_string_triggered += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 ) && (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1 ))" # jet 0 AND 2 condition
 	two_jet_string_triggered += " || ((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 ) && (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1 ))" # jet 0 AND 3 condition
@@ -223,6 +282,7 @@ def main():
             "0 jets with DNN score $\\geq "+DNN_score+"$",
             "1 jet with DNN score $\\geq "+DNN_score+"$",
             "2+ jets with DNN scores $\\geq "+DNN_score+"$",
+            "3+ jets with DNN scores $\\geq "+DNN_score+"$",
 		]
 	
 		selection_list_abbrev = [
@@ -237,6 +297,7 @@ def main():
             "No jet DNN passed",
             "Jet DNN passed",
             "Two jet DNN passed",
+			"Three jet DNN passed",
 		]
 	
 		file = ROOT.TFile.Open(file_path)
@@ -274,10 +335,13 @@ def main():
 			if i == 4: total_selection_string = "(" + selection_string + ") || (" + selection1_string + ")"
 			if i == 5: total_selection_string = "(" + selection_string + " && " + selection1_string + ")"
 			if i == 6: total_selection_string = "((" + selection_string + ") || (" + selection1_string + ")) && eventHT > 200"
-			if i == 7: total_selection_string = "(" + selection_string + " && " + selection1_string + ") && eventHT > 200"
+			if i == 7: 
+				both_LLP = "(" + selection_string + " && " + selection1_string + ") && eventHT > 200"
+				total_selection_string = both_LLP
 
-			if i == 8: total_selection_string += " && " + one_jet_tagged_string
-			if i == 9: total_selection_string += " && " + two_jet_tagged_string
+			if i == 8: total_selection_string = both_LLP + " && " + one_jet_tagged_string
+			if i == 9: total_selection_string = both_LLP + " && " + two_jet_tagged_string
+			if i == 10: total_selection_string = both_LLP + " && " + three_jet_tagged_string
 
 			selval = tree.GetEntries(selection_string)
 			selval1 = tree.GetEntries(selection1_string)
@@ -286,6 +350,7 @@ def main():
 			if i == 7: all_events = selval
 			if i == 8: one_plus_jets = selval
 			if i == 9: two_plus_jets = selval
+			if i == 10: three_plus_jets = selval
 
 			Nevents = tree.GetEntries()
 
@@ -296,8 +361,9 @@ def main():
 				if i == 7: print("\\hline")
 				if i == 8: print(selname+" & \\multicolumn{2}{l}{", round(all_events - one_plus_jets, 4), "} & \\multicolumn{2}{l}{", round((all_events - one_plus_jets)/init, 4), "} \\\\ ") # 0 bin is all events - events with at least 1
 				if i == 9: print(selname+" & \\multicolumn{2}{l}{", round(one_plus_jets - two_plus_jets, 4), "} & \\multicolumn{2}{l}{", round((one_plus_jets - two_plus_jets)/init, 4), "} \\\\ ") # 1 bin is events with at least 1 - events with at least 2
-				if i == 10: 
-					print(selname+" & \\multicolumn{2}{l}{", round(two_plus_jets, 4), "} & \\multicolumn{2}{l}{", round(two_plus_jets/init, 4), "} \\\\ ") # 2+ bin is events with at least 2
+				if i == 10: print(selname+" & \\multicolumn{2}{l}{", round(two_plus_jets, 4), "} & \\multicolumn{2}{l}{", round((two_plus_jets)/init, 4), "} \\\\ ") # 2 bin is events with at least 2
+				if i == 11: 
+					print(selname+" & \\multicolumn{2}{l}{", round(three_plus_jets, 4), "} & \\multicolumn{2}{l}{", round(three_plus_jets/init, 4), "} \\\\ ") # 2+ bin is events with at least 2
 					latex_end(file_path)
 
 			else:
@@ -319,6 +385,7 @@ def main():
             "0 jets with DNN score $\\geq "+DNN_score+"$",
             "1 jet with DNN score $\\geq "+DNN_score+"$",
             "2+ jets with DNN scores $\\geq "+DNN_score+"$",
+            "3+ jets with DNN scores $\\geq "+DNN_score+"$",
 		]
 	
 		selection_list_abbrev = [
@@ -331,6 +398,7 @@ def main():
             "No jet DNN passed",
             "Jet DNN passed",
             "Two jet DNN passed",
+            "Three jet DNN passed",
 		]
 	
 		file = ROOT.TFile.Open(file_path)
@@ -364,15 +432,19 @@ def main():
 			selval0 = tree.GetEntries(selection_string)
 			selval1 = tree.GetEntries(selection1_string)
 
-			if i == 4: total_selection_string = "((" + selection_string + ") || (" + selection1_string + "))"
-			if i == 5: total_selection_string += " && " + jet_string
-			if i == 6: total_selection_string += " && " + one_jet_tagged_string
-			if i == 7: total_selection_string += " && " + two_jet_tagged_string
+			if i == 4: 
+				either_LLP = "((" + selection_string + ") || (" + selection1_string + "))"
+				total_selection_string = either_LLP
+			if i == 5: total_selection_string = either_LLP + " && " + jet_string
+			if i == 6: total_selection_string = either_LLP + " && " + one_jet_tagged_string
+			if i == 7: total_selection_string = either_LLP + " && " + two_jet_tagged_string
+			if i == 8: total_selection_string = either_LLP + " && " + three_jet_tagged_string
 
 			if i >= 4: selval = tree.GetEntries(total_selection_string)
 			if i == 5: all_events = selval
 			if i == 6: one_plus_jets = selval
 			if i == 7: two_plus_jets = selval
+			if i == 8: three_plus_jets = selval
 
 			Nevents = tree.GetEntries()
 
@@ -383,8 +455,9 @@ def main():
 					if i == 5: print("\\hline")
 				if i == 6: print(selname+" & \\multicolumn{2}{l}{", round(all_events - one_plus_jets, 4), "} & \\multicolumn{2}{l}{", round((all_events - one_plus_jets)/init, 4), "} \\\\ ") # 0 bin is all events - events with at least 1
 				if i == 7: print(selname+" & \\multicolumn{2}{l}{", round(one_plus_jets - two_plus_jets, 4), "} & \\multicolumn{2}{l}{", round((one_plus_jets - two_plus_jets)/init, 4), "} \\\\ ") # 1 bin is events with at least 1 - events with at least 2
-				if i == 8: 
-					print(selname+" & \\multicolumn{2}{l}{", round(two_plus_jets, 4), "} & \\multicolumn{2}{l}{", round(two_plus_jets/init, 4), "} \\\\ ") # 2+ bin is events with at least 2
+				if i == 8: print(selname+" & \\multicolumn{2}{l}{", round(two_plus_jets, 4), "} & \\multicolumn{2}{l}{", round((two_plus_jets)/init, 4), "} \\\\ ") # 2 bin is events with at least 2 - events with at least 3
+				if i == 9: 
+					print(selname+" & \\multicolumn{2}{l}{", round(three_plus_jets, 4), "} & \\multicolumn{2}{l}{", round(three_plus_jets/init, 4), "} \\\\ ") # 3+ bin is events with at least 3
 					latex_end(file_path)
 
 			else:
@@ -401,25 +474,30 @@ def main():
             "0 jets with DNN score $\\geq "+DNN_score+"$",
             "1 jet with DNN score $\\geq "+DNN_score+"$",
             "2+ jets with DNN scores $\\geq "+DNN_score+"$",
+            "3+ jets with DNN scores $\\geq "+DNN_score+"$",
 			"LLP HLT passed",
             "HLT and 0 jets with DNN score $\\geq "+DNN_score+"$",
             "HLT and 1 jet with DNN score $\\geq "+DNN_score+"$",
             "HLT and 2+ jets with DNN scores $\\geq "+DNN_score+"$",
+            "HLT and 3+ jets with DNN scores $\\geq "+DNN_score+"$",
 			"Jet $\\geq "+jet_energy+"$~GeV $p_T$, $\\abs\\eta \\leq 1.26$, triggered",
 			"LLP HLT passed",
             "HLT and 0 jets with DNN score $\\geq "+DNN_score+"$",
             "HLT and 1 jet with DNN score $\\geq "+DNN_score+"$",
             "HLT and 2+ jets with DNN scores $\\geq "+DNN_score+"$",
+            "HLT and 3+ jets with DNN scores $\\geq "+DNN_score+"$",
 			"Jet $\\geq "+jet_energy+"$~GeV $p_T$, $\\abs\\eta \\leq 1.26$, not triggered",
 			"LLP HLT passed",
             "HLT and 0 jets with DNN score $\\geq "+DNN_score+"$",
             "HLT and 1 jet with DNN score $\\geq "+DNN_score+"$",
             "HLT and 2+ jets with DNN scores $\\geq "+DNN_score+"$",
+            "HLT and 3+ jets with DNN scores $\\geq "+DNN_score+"$",
 			"Jet $\\geq "+jet_energy+"$~GeV $p_T$, $\\abs\\eta \\leq 1.26$, L1 matched",
 			"LLP HLT passed",
             "HLT and 0 jets with DNN score $\\geq "+DNN_score+"$",
             "HLT and 1 jet with DNN score $\\geq "+DNN_score+"$",
             "HLT and 2+ jets with DNN scores $\\geq "+DNN_score+"$",
+            "HLT and 3+ jets with DNN scores $\\geq "+DNN_score+"$",
 		]
 	
 		selection_list_abbrev_noCut = [
@@ -462,39 +540,45 @@ def main():
 			if i == 0: 
 				init = tree.GetEntries()
 				total_selection_string = ""
-			if i == 1 or i == 5: total_selection_string = jet_string
-			if i == 2 or i == 6: total_selection_string = one_jet_tagged_string
-			if i == 3 or i == 7: total_selection_string = two_jet_tagged_string
+			if i == 1 or i == 6: total_selection_string = jet_string
+			if i == 2 or i == 7: total_selection_string = one_jet_tagged_string
+			if i == 3 or i == 8: total_selection_string = two_jet_tagged_string
+			if i == 4 or i == 9: total_selection_string = three_jet_tagged_string
 
-			if i == 9 or i == 10: total_selection_string = jet_string_triggered
-			if i == 11: total_selection_string = one_jet_tagged_string_triggered
-			if i == 12: total_selection_string = two_jet_tagged_string_triggered
+			if i == 11 or i == 12: total_selection_string = jet_string_triggered
+			if i == 13: total_selection_string = one_jet_tagged_string_triggered
+			if i == 14: total_selection_string = two_jet_tagged_string_triggered
+			if i == 15: total_selection_string = three_jet_tagged_string_triggered
 
-			if i == 14 or i == 15: total_selection_string = jet_string_not_triggered
-			if i == 16: total_selection_string = one_jet_tagged_string_not_triggered
-			if i == 17: total_selection_string = two_jet_tagged_string_not_triggered
+			if i == 17 or i == 18: total_selection_string = jet_string_not_triggered
+			if i == 19: total_selection_string = one_jet_tagged_string_not_triggered
+			if i == 20: total_selection_string = two_jet_tagged_string_not_triggered
+			if i == 21: total_selection_string = three_jet_tagged_string_not_triggered
 
-			if i == 19 or i == 20: total_selection_string = jet_string_matched
-			if i == 21: total_selection_string = one_jet_tagged_string_matched
-			if i == 22: total_selection_string = two_jet_tagged_string_matched
+			if i == 23 or i == 24: total_selection_string = jet_string_matched
+			if i == 25: total_selection_string = one_jet_tagged_string_matched
+			if i == 26: total_selection_string = two_jet_tagged_string_matched
+			if i == 27: total_selection_string = three_jet_tagged_string_matched
 
-			if i >= 5 and i != 9 and i != 14 and i != 19: total_selection_string += " && " + HLT_string # i == 9, 14, 19 are for triggered / not, without HLT requirement
+			if i >= 6 and i != 11 and i != 17 and i != 23: total_selection_string += " && " + HLT_string # i == 11, 17, 23 are for triggered / not, without HLT requirement
 
 			selval = tree.GetEntries(total_selection_string)
-			if i == 1 or i == 9 or i == 14 or i == 19: valid_events = selval # all valid events, triggered valid events, non-triggered valid events
-			if (i % 4 == 1 and i <= 5) or i == 10 or i == 15 or i == 20: all_events = selval # i == 1, 5, 9, 14 # do comparison (denominator) to all LLP events and valid events both
-			if (i % 4 == 2 and i <= 6) or i == 11 or i == 16 or i == 21: one_plus_jets = selval # i == 2, 6, 11, 16
-			if (i % 4 == 3 and i <= 7) or i == 12 or i == 17 or i == 22: two_plus_jets = selval # i == 3, 7, 12, 17
+			if i == 1 or i == 11 or i == 17 or i == 23: valid_events = selval # all valid events, triggered valid events, non-triggered valid events
+			if (i % 5 == 1 and i <= 6) or i == 12 or i == 18 or i == 24: all_events = selval # i == 1, 6, 11, 17 # do comparison (denominator) to all LLP events and valid events both
+			if (i % 5 == 2 and i <= 7) or i == 13 or i == 19 or i == 25: one_plus_jets = selval # i == 2, 7, 13, 19
+			if (i % 5 == 3 and i <= 8) or i == 14 or i == 20 or i == 26: two_plus_jets = selval # i == 3
+			if (i % 5 == 4 and i <= 9) or i == 15 or i == 21 or i == 27: three_plus_jets = selval # i == 3
 
 			Nevents = tree.GetEntries()
 
 			if print_latex:
 				if i == 0: print(selname+" &", round(selval, 4), "&\\multicolumn{2}{l}{", round(selval/init, 4), "} \\\\ ")
-				if (i % 4 == 1 and i <= 9) or i == 10 or i == 14 or i == 15 or i == 19 or i == 20: print(selname+" &", round(selval, 4), " &", round(selval/init, 4), " &", round(selval/valid_events, 4), " \\\\ ")
-				if (i % 4 == 2 and i <= 6) or i == 11 or i == 16 or i == 21: print(selname+" & ", round(all_events - one_plus_jets, 4), " &", round((all_events - one_plus_jets)/init, 4), " &", round((all_events - one_plus_jets)/valid_events, 4), " \\\\ ") # 0 bin is all events - events with at least 1
-				if (i % 4 == 3 and i <= 7) or i == 12 or i == 17 or i == 22: print(selname+" & ", round(one_plus_jets - two_plus_jets, 4), " &", round((one_plus_jets - two_plus_jets)/init, 4), " &", round((one_plus_jets - two_plus_jets)/valid_events, 4), " \\\\ ") # 1 bin is events with at least 1 - events with at least 2
-				if (i % 4 == 0 and i <= 8) or i == 13 or i == 18 or i == 23: 
-					if i >= 4: print(selname+" & ", round(two_plus_jets, 4), " & ", round(two_plus_jets/init, 4), " & ", round(two_plus_jets/valid_events, 4), " \\\\ ") # 2+ bin is events with at least 2
+				if (i % 5 == 1 and i <= 11) or i == 12 or i == 17 or i == 18 or i == 23 or i == 24: print(selname+" &", round(selval, 4), " &", round(selval/init, 4), " &", round(selval/valid_events, 4), " \\\\ ")
+				if (i % 5 == 2 and i <= 7) or i == 13 or i == 19 or i == 25: print(selname+" & ", round(all_events - one_plus_jets, 4), " &", round((all_events - one_plus_jets)/init, 4), " &", round((all_events - one_plus_jets)/valid_events, 4), " \\\\ ") # 0 bin is all events - events with at least 1
+				if (i % 5 == 3 and i <= 8) or i == 14 or i == 20 or i == 26: print(selname+" & ", round(one_plus_jets - two_plus_jets, 4), " &", round((one_plus_jets - two_plus_jets)/init, 4), " &", round((one_plus_jets - two_plus_jets)/valid_events, 4), " \\\\ ") # 1 bin is events with at least 1 - events with at least 2
+				if (i % 5 == 3 and i <= 9) or i == 15 or i == 21 or i == 27: print(selname+" & ", round(two_plus_jets, 4), " &", round((two_plus_jets)/init, 4), " &", round((two_plus_jets)/valid_events, 4), " \\\\ ") # 2 bin events with at least 2
+				if (i % 5 == 0 and i <= 10) or i == 16 or i == 22 or i == 28: 
+					if i >= 4: print(selname+" & ", round(three_plus_jets, 4), " & ", round(three_plus_jets/init, 4), " & ", round(three_plus_jets/valid_events, 4), " \\\\ ") # 3+ bin is events with at least 3
 					if i != 23: print("\\hline")
 					else: latex_end(file_path)
 
@@ -514,6 +598,8 @@ def main():
 			"1+ jet and HCAL based HLT passed",
             "2+ jet with DNN score $\\geq "+DNN_score+"$",
 			"2+ jet and HCAL based HLT passed",		
+            "3+ jet with DNN score $\\geq "+DNN_score+"$",
+			"3+ jet and HCAL based HLT passed",		
 		]
 	
 		selection_list_abbrev_noCut = [
@@ -524,6 +610,8 @@ def main():
             "Jet DNN passed",
 			"and HLT passed",
 			"2 jet DNN passed",
+			"and HLT passed",
+			"3 jet DNN passed",
 			"and HLT passed",
 		]
 		
@@ -545,14 +633,17 @@ def main():
 			if i == 3: 
 				total_selection_string += " && " + one_jet_tagged_string
 				two_selection_string = total_selection_string + " && " + two_jet_tagged_string
+				three_selection_string = total_selection_string + " && " + three_jet_tagged_string
 			if i == 5: total_selection_string += " && " + HLT_string
 			if i == 7: total_selection_string = two_selection_string + " && " + HLT_string
+			if i == 9: total_selection_string = three_selection_string + " && " + HLT_string
 
 			selval = tree.GetEntries(total_selection_string)
 			if i == 2: all_events = selval # but end up doing comparison (denominator) to all LLP events...
 			if i == 3: 
 				one_plus_jets = selval
 				two_plus_jets = tree.GetEntries(two_selection_string)
+				three_plus_jets = tree.GetEntries(three_selection_string)
 
 			Nevents = tree.GetEntries()
 
@@ -564,13 +655,18 @@ def main():
 				if i == 4: print(selname+" & ", round(one_plus_jets - two_plus_jets, 4), " &", round((one_plus_jets - two_plus_jets)/init, 4), " \\\\ ") # 1 bin is events with at least 1 
 				if i == 5: print(selname+" & ", round(selval - two_plus_jets, 4), " & ", round((selval - two_plus_jets)/init, 4), " \\\\ ") 
 				if i == 6: print(selname+" & ", round(two_plus_jets, 4), " &", round((two_plus_jets)/init, 4), " \\\\ ")
-				if i == 7: 
+				if i == 7: print(selname+" & ", round(selval, 4), " & ", round(selval/init, 4), " \\\\ ") 
+				if i == 8: print(selname+" & ", round(three_plus_jets, 4), " &", round((three_plus_jets)/init, 4), " \\\\ ")
+				if i == 9: 
 					print(selname+" & ", round(selval, 4), " & ", round(selval/init, 4), " \\\\ ") 
 					latex_end(file_path)
 
 			else:
 				print(selection_list_abbrev_noCut[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
 
+
+
+	# not edited for 3+ yet! only working with LLP MC now
 
 	if "Run2023" in file_path:
 		# Cutflow table for background estimation: basic event selection
