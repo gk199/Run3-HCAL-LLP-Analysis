@@ -576,11 +576,11 @@ def main():
 				if (i % 5 == 1 and i <= 11) or i == 12 or i == 17 or i == 18 or i == 23 or i == 24: print(selname+" &", round(selval, 4), " &", round(selval/init, 4), " &", round(selval/valid_events, 4), " \\\\ ")
 				if (i % 5 == 2 and i <= 7) or i == 13 or i == 19 or i == 25: print(selname+" & ", round(all_events - one_plus_jets, 4), " &", round((all_events - one_plus_jets)/init, 4), " &", round((all_events - one_plus_jets)/valid_events, 4), " \\\\ ") # 0 bin is all events - events with at least 1
 				if (i % 5 == 3 and i <= 8) or i == 14 or i == 20 or i == 26: print(selname+" & ", round(one_plus_jets - two_plus_jets, 4), " &", round((one_plus_jets - two_plus_jets)/init, 4), " &", round((one_plus_jets - two_plus_jets)/valid_events, 4), " \\\\ ") # 1 bin is events with at least 1 - events with at least 2
-				if (i % 5 == 3 and i <= 9) or i == 15 or i == 21 or i == 27: print(selname+" & ", round(two_plus_jets, 4), " &", round((two_plus_jets)/init, 4), " &", round((two_plus_jets)/valid_events, 4), " \\\\ ") # 2 bin events with at least 2
+				if (i % 5 == 4 and i <= 9) or i == 15 or i == 21 or i == 27: print(selname+" & ", round(two_plus_jets, 4), " &", round((two_plus_jets)/init, 4), " &", round((two_plus_jets)/valid_events, 4), " \\\\ ") # 2 bin events with at least 2
 				if (i % 5 == 0 and i <= 10) or i == 16 or i == 22 or i == 28: 
 					if i >= 4: print(selname+" & ", round(three_plus_jets, 4), " & ", round(three_plus_jets/init, 4), " & ", round(three_plus_jets/valid_events, 4), " \\\\ ") # 3+ bin is events with at least 3
-					if i != 23: print("\\hline")
-					else: latex_end(file_path)
+					if i != 23 and i < 28: print("\\hline")
+					if i == 28: latex_end(file_path)
 
 			else:
 				print(selection_list_abbrev_noCut[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))

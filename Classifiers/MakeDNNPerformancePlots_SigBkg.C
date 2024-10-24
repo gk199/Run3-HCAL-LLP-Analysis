@@ -262,7 +262,7 @@ TGraphAsymmErrors* MakeCurrentWPSigEffVsCutValueGraph(TH1F* signalHist, string n
   TGraphAsymmErrors *tmpSigEffVsCut = new TGraphAsymmErrors (nPoints, cutValue, SigEff, cutValueErr, cutValueErr, SigEffErrLow, SigEffErrHigh  );
   tmpSigEffVsCut->SetName(name.c_str());
   tmpSigEffVsCut->SetTitle("");
-  tmpSigEffVsCut->GetXaxis()->SetTitle("BDT Cut Value");
+  tmpSigEffVsCut->GetXaxis()->SetTitle("DNN Cut Value");
   tmpSigEffVsCut->GetYaxis()->SetTitle("Signal Efficiency");
   tmpSigEffVsCut->GetYaxis()->SetTitleOffset(1.1);
   tmpSigEffVsCut->GetXaxis()->SetTitleOffset(1.05);
@@ -491,11 +491,11 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   //--------------------------------------------------------------------------------------------------------------
   // Histograms
   //==============================================================================================================  
-  TH1F *Signal_DNN_depth = new TH1F(("Signal_DNN_depth"+label).c_str(), "LLP Signal ; DNN (trained on combination) score for LLP signal ; Number of Events ",  55000, -1.1 , 1.1);
-  TH1F *Signal_DNN_inclusive = new TH1F(("Signal_DNN_depth"+label).c_str(), "LLP Signal ; Inclusive DNN (trained on combination) score for LLP signal ; Number of Events ",  55000, -1.1 , 1.1);
+  TH1F *Signal_DNN_depth = new TH1F(("Signal_DNN_depth"+label).c_str(), "LLP Signal ; DNN (trained on combination) score for LLP signal ; Number of Events ",  55000, -0.1 , 1.1);
+  TH1F *Signal_DNN_inclusive = new TH1F(("Signal_DNN_depth"+label).c_str(), "LLP Signal ; Inclusive DNN (trained on combination) score for LLP signal ; Number of Events ",  55000, -0.1 , 1.1);
 
-  TH1F *Background_DNN_depth = new TH1F(("Background_DNN_depth"+label).c_str(), "W+Jets Background ; DNN (trained on combination) score for W+jets background ; Number of Events ",  55000, -1.1 , 1.1);
-  TH1F *Background_DNN_inclusive = new TH1F(("Background_DNN_inclusive"+label).c_str(), "W+Jets Background ; Inclusive DNN (trained on combination) score for W+jets background ; Number of Events ",  55000, -1.1 , 1.1);
+  TH1F *Background_DNN_depth = new TH1F(("Background_DNN_depth"+label).c_str(), "W+Jets Background ; DNN (trained on combination) score for W+jets background ; Number of Events ",  55000, -0.1 , 1.1);
+  TH1F *Background_DNN_inclusive = new TH1F(("Background_DNN_inclusive"+label).c_str(), "W+Jets Background ; Inclusive DNN (trained on combination) score for W+jets background ; Number of Events ",  55000, -0.1 , 1.1);
 
   Double_t RealElectrons = 0;
   Double_t FakeElectrons = 0;
@@ -813,7 +813,7 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   //*****************************************************************************************
   // Overlay signal and background BDT scores
   //*****************************************************************************************
-  THStack *hs = new THStack("hs", Form("Signal and Background BDT Scores (mH=%s) ; BDT (trained on 125) Score ; Number of Entries",Label.c_str()));
+  THStack *hs = new THStack("hs", Form("Signal and Background DNN Scores (mH=%s) ; DNN (trained on 125) Score ; Number of Entries",Label.c_str()));
   Signal_DNN_depth->SetFillColorAlpha(kBlue, 0.35);
   Background_DNN_depth->SetFillColorAlpha(kRed, 0.35);
   Signal_DNN_depth->Rebin(50);
@@ -829,7 +829,7 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   cv_indiv->SaveAs((plotDir + "Minituple_DNN_depth_" + plotname + "_logY.png").c_str());
   cv_indiv->Clear();
 
-  THStack *hs2 = new THStack("hs2", Form("Signal and Background BDT Scores (mH=%s) ; BDT (trained on 350) Score ; Number of Entries",Label.c_str()));
+  THStack *hs2 = new THStack("hs2", Form("Signal and Background DNN Scores (mH=%s) ; DNN (trained on 350) Score ; Number of Entries",Label.c_str()));
   Signal_DNN_inclusive->SetFillColorAlpha(kBlue, 0.35);
   Background_DNN_inclusive->SetFillColorAlpha(kRed, 0.35);
   Signal_DNN_inclusive->Rebin(50);
@@ -857,16 +857,16 @@ void MakeDNNPerformancePlots_SigBkg()
   // Signals
   string SignalTree = "Classification";
 
-  string Signal = "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_10_14_HADD_scores.root";
+  string Signal = "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/HLTpassed/minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_10_14_HADD_scores.root";
   string SigLabel = "125_mS50";
 
-  string Signal2 = "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_10_14_HADD_scores.root";
+  string Signal2 = "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/HLTpassed/minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_10_14_HADD_scores.root";
   string SigLabel2 = "250_mS120";
 
-  string Signal3 = "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_10_14_HADD_scores.root";
+  string Signal3 = "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/HLTpassed/minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_10_14_HADD_scores.root";
   string SigLabel3 = "350_mS160";
 
-  string Signal4 = "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_10_14_HADD_scores.root";
+  string Signal4 = "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/HLTpassed/minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_10_14_HADD_scores.root";
   string SigLabel4 = "350_mX80";
 
   // Backgrounds
