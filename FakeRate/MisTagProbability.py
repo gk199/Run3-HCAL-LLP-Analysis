@@ -635,11 +635,11 @@ def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, o
 # def SetupNumeratorDenominator(tree, obj_type):
 
 jet_kinematics = ["Eta", "Phi", "Pt", "NSV", "run", "lumi", "PV"]
-bin_num = [12, 6, 8, 5, 40, 40, 40]
-plot_x_range = [1.26, 3.2, 1, 5, 371000, 1600, 200]
+bin_num = [12, 6, 9, 5, 40, 40, 20]
+bin_num = [6, 6, 9, 5, 30, 20, 15]
+plot_x_range = [1.26, 3.2, 1, 5, 371000, 2000, 100]
 plot_y_range = [0.01, 0.007, 1, 0.02, 0.02, 0.02, 0.02]
 bin_widths = np.array([40, 50, 60, 70, 80, 100, 120, 160, 240, 400], dtype='float64') 
-bin_widths = np.array([40, 50, 60, 70, 80, 100, 120, 160, 250], dtype='float64') 
 
 frac_track_pt_bins = [[0, 1.1]] #, [0, 0.5], [0.5, 1.1]]
 ele_frac_bins = [[0, 1.1], [0, 0.5], [0.5, 1.1]]
@@ -802,7 +802,6 @@ def MisTagPrediction(tree, obj_type, label = ""):
                         allJets_6 = ROOT.TH1F("Predicted "+ var + str(trig_matched) + run_track_label, "Predicted and Actual Mis-Tag Jets for L1 trigger matched = " + str(trig_matched) + run_track_label + "; Jet " + var + "; Number of Mis-tagged Jets", bin_num[counter], bin_widths ); 
 
                     for i in jet_number:  
-                        print (i)                 
                         hname_denom_actual = obj_type + i + "_" + var + "_actualData"
                         hname_denom = obj_type + i + "_" + var + "_forPrediction"
                         if var != "Pt":
