@@ -48,6 +48,7 @@ void MiniTuplePlotter_HLT_Effs(){
 
 	bool HLT_OR = false;
 	bool acceptance = true;
+	bool HLT_only = true;
 
 	// December 2023 studies
 	cout<<endl;
@@ -191,11 +192,17 @@ void MiniTuplePlotter_HLT_Effs(){
 				eff_LLPdisplacement.SetLegendPosition( 0.15, 0.85, 0.5, 1.08 );
 			}
 			else {
-				eff_LLPdisplacement.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_AnyLLP_HLT_noECAL}); 
+				// eff_LLPdisplacement.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_AnyLLP_HLT_noECAL}); 
+				eff_LLPdisplacement.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_AnyLLP_HLT}); 
+				if (HLT_only) eff_LLPdisplacement.SetComparisonCuts({Cut_None, Cut_AnyLLP_HLT}); 
 				eff_LLPdisplacement.colors = { kBlack, kAzure+7, kViolet+4 };
 				if (acceptance) {
 					eff_LLPdisplacement.SetLegendNames({"No cuts", "L1 acceptance", "HLT acceptance"});
 					eff_LLPdisplacement.colors = { kBlack, kCyan+2, kMagenta-2 };
+					if (HLT_only) {
+						eff_LLPdisplacement.SetLegendNames({"No cuts", "HLT acceptance"});
+						eff_LLPdisplacement.colors = { kBlack, kMagenta-2 };
+					}
 				}
 				else eff_LLPdisplacement.SetLegendNames({"No cuts", "L1 efficiency", "HLT efficiency"});
 			}
@@ -203,7 +210,7 @@ void MiniTuplePlotter_HLT_Effs(){
 			// eff_LLPdisplacement.colors = { kWhite, kOrange, kGreen+2 }; // to just see trigger efficiency 
 			// eff_LLPdisplacement.Plot("ratio");
 			if (acceptance) eff_LLPdisplacement.Plot("acceptance", "", mass_lifetime);
-			else eff_LLPdisplacement.Plot("acceptance", "", mass_lifetime);
+			else eff_LLPdisplacement.Plot("efficiency", "", mass_lifetime);
 			eff_LLPdisplacement.ClearFileTrees(); 														// reset, and cut on each HLT group
 			eff_LLPdisplacement.SetOutputFileTag("HLT_v3_MC_"+key+"_jetE"+jet_E[i]+"_HLTsplit");
 			eff_LLPdisplacement.colors = { kBlack, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed  };
@@ -232,7 +239,7 @@ void MiniTuplePlotter_HLT_Effs(){
 			if (key == "LLP350_80_ctau500mm") plotter_HT.SetLegendPosition( 0.55, 0.55, 0.88, 0.78 ); 
 		}
 		else {
-			plotter_HT.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_AnyLLP_HLT_noECAL}); 
+			plotter_HT.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_AnyLLP_HLT}); 
 			plotter_HT.colors = { kBlack, kAzure+7, kViolet+4 };
 			if (acceptance) {
 				plotter_HT.SetLegendNames({"No cuts", "L1 acceptance", "HLT acceptance"});
@@ -286,7 +293,7 @@ void MiniTuplePlotter_HLT_Effs(){
 			else {
 				plotter_HLTeffMC.SetLegendPosition( 0.6, 0.85, 0.88, 1.03 );
 				if (i==0) plotter_HLTeffMC.SetVariableBins( {40, 55, 65, 75, 85, 95, 105, 115, 125, 140, 160, 185, 215, 250} );
-				plotter_HLTeffMC.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_AnyLLP_HLT_noECAL}); 
+				plotter_HLTeffMC.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_AnyLLP_HLT}); 
 				plotter_HLTeffMC.colors = { kBlack, kAzure+7, kViolet+4 };
 				if (acceptance) {
 					plotter_HLTeffMC.colors = { kBlack, kCyan+2, kMagenta-2 };
