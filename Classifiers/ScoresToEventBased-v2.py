@@ -46,10 +46,10 @@ class DataProcessor:
         for file in sig_fps:
             if perJet: sig = uproot.open(file)['PerJet_LLPmatched']
             else: 
-                #sig = uproot.open(file)['NoSel']
-                sig = uproot.open(file)['PassedHLT']
+                sig = uproot.open(file)['NoSel']
+                # sig = uproot.open(file)['PassedHLT']
             print(f"Opened {file}")
-            sig = sig.arrays(filter_name=filter_name, library="pd")
+            sig = sig.arrays(filter_name=filter_name, library="pd") # "ak"
             #sig_df = pd.concat((sig_df, sig))
             sig_df.append(sig)
         self.sig_df = pd.concat(sig_df) if sig_df else pd.DataFrame()
@@ -57,14 +57,19 @@ class DataProcessor:
         # aggregating all background events
         for file in bkg_fps:
             if perJet: bkg = uproot.open(file)['PerJet_WPlusJets']
-            # else: bkg = uproot.open(file)['WPlusJets']
-            else: bkg = uproot.open(file)['Zmumu']
+            else: bkg = uproot.open(file)['WPlusJets']
+            # else: bkg = uproot.open(file)['NoSel']
+            # else: bkg = uproot.open(file)['Zmumu']
             print(f"Opened {file}")
             bkg = bkg.arrays(filter_name=filter_name, library="pd")
+            print("made bkg array")
             #bkg_df = pd.concat((bkg_df, bkg))
             bkg_df.append(bkg)
+            print("appended bkg array")
         self.bkg_df = pd.concat(bkg_df) if bkg_df else pd.DataFrame()
+        print("concatinated bkg array")
         
+        # doesn't make it to this printout with NoSel -- issue is above here
         print("Loaded Data")
         
     def no_selections_concatenate(self):
@@ -310,7 +315,7 @@ def main():
         # # "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TRAIN-batch1.root",
         # "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_10_14_TEST.root", # no passed HLT tree 
         #"minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_10_14_batch2.root",
-        #"minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_10_14_batch2.root",
+        # "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_10_14_batch2.root",
         #"minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_10_14_batch2.root",
         #"minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_10_14_TEST.root",
         # # "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TEST-batch2.root"
@@ -324,13 +329,13 @@ def main():
         #"minituple_v3.9_LLPskim_Run2023Cv4_2024_10_14.root",
         #"minituple_v3.9_LLPskim_Run2023Dv1_2024_10_14.root",
         #"minituple_v3.9_LLPskim_Run2023Dv2_2024_10_14.root",
-        "minituple_v3.9_Zmu_Run2023Bv1_2024_10_14.root",
-        "minituple_v3.9_Zmu_Run2023Cv1_2024_10_14.root",
-        "minituple_v3.9_Zmu_Run2023Cv2_2024_10_14.root",
-        "minituple_v3.9_Zmu_Run2023Cv3_2024_10_14.root",
-        ##"minituple_v3.9_Zmu_Run2023Cv4_2024_10_14.root",# not produced for 3.9
-        "minituple_v3.9_Zmu_Run2023Dv1_2024_10_14.root",
-        "minituple_v3.9_Zmu_Run2023Dv2_2024_10_14.root"
+        #"minituple_v3.9_Zmu_Run2023Bv1_2024_10_14.root",
+        #"minituple_v3.9_Zmu_Run2023Cv1_2024_10_14.root",
+        #"minituple_v3.9_Zmu_Run2023Cv2_2024_10_14.root",
+        #"minituple_v3.9_Zmu_Run2023Cv3_2024_10_14.root",
+        "minituple_v3.9_Zmu_Run2023Cv4_2024_10_24.root",
+        #"minituple_v3.9_Zmu_Run2023Dv1_2024_10_14.root",
+        #"minituple_v3.9_Zmu_Run2023Dv2_2024_10_14.root"
     ]
 
     

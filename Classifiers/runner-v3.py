@@ -573,7 +573,7 @@ def main():
         "minituple_v3.9_LLPskim_Run2023Dv2_2024_10_14.root"
     ]
     
-    mode = "train" # "train", "eval", "filewrite", "constants"
+    mode = "eval" # "train", "eval", "filewrite", "constants"
     
     # running the depth and inclusive tagger sequentially, uncomment second part if want to run the depth tagger alone
     print("Running Depth Tagger")
