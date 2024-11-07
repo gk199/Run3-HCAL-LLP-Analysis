@@ -32,7 +32,7 @@ class DataProcessor:
         self.sel = sel
         #self.inclusive = inclusive
     
-    def load_data(self, input_files=None):
+    def load_data(self, input_files=None, filepath=None):
         
         # need a mode that doesn't pre-classify them but just loads the data and then you can get it to predict
         # and returns the dataframe unchanged so filenames are the same
@@ -40,7 +40,7 @@ class DataProcessor:
         
         filter_name = "*"
         # filepath = '/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/'
-        filepath = '/eos/user/g/gkopp/LLP_Analysis/output_minituples_v3.9_Zmu_2023Cv2_2024_10_14/'
+        # filepath = '/eos/user/g/gkopp/LLP_Analysis/output_minituples_v3.9_Zmu_2023Cv2_2024_10_14/'
     
         fps = [filepath + input_files] if input_files is not None else []
         df = [] #pd.DataFrame()
@@ -135,7 +135,7 @@ class DataProcessor:
             data.loc[mask_condition, useful_variable] = 0  # Default to 0 for matching entries
     
     def write_to_root(self, scores, scores_inc, filename, labels=None):
-        filename = f"{filename[:-5]}_scores.root" # remove .root from initial filename
+        filename = f"{filename[:-5]}_{self.tree}_scores.root" # remove .root from initial filename
         # TODO: know the first time you open this file, call recreate before even starting (when loop over filenames, before loop over tree names), and then here call update
         dataframe = self.cumulative_df
         if self.num_classes == 2:
@@ -159,6 +159,7 @@ class DataProcessor:
         else:  
             with uproot.recreate(filename) as f:
                 f[self.tree] = {key: dataframe[key] for key in dataframe.columns}
+                
         print(f"Wrote to ROOT file: {filename}")
         f.close()
             
@@ -217,12 +218,13 @@ class ModelHandler:
             print("wrote to file")  
 
 class Runner:
-    def __init__(self, input_files=None, mode="train", num_classes=3, inclusive=False, load=True, tree="NoSel"):
+    def __init__(self, input_files=None, filepath=None, mode="train", num_classes=3, inclusive=False, load=True, tree="NoSel"):
         self.mode = mode
         self.num_classes = num_classes
         self.inclusive = inclusive
         self.load = load
         self.sig = input_files
+        self.path = filepath
         self.tree = tree
         self.model_name = "dense_model_v3.keras"
     
@@ -256,7 +258,7 @@ class Runner:
         print("Loaded files")
         if self.load:
             self.processor = DataProcessor(num_classes=self.num_classes - 1, mode="filewrite", sel=False, tree=self.tree)
-            self.processor.load_data(input_files=self.sig)
+            self.processor.load_data(input_files=self.sig, filepath=self.path)
         self.processor.no_selections_concatenate() # automatically inclusive
         self.fname = self.sig
         self.evaluate_scores()
@@ -286,8 +288,11 @@ def main():
     # TODO: pass file as an argument, and then determine if signal or background
 
     input_files = "test.root"
+    filepath = "./"
     if len(sys.argv) > 1:
         input_files  = sys.argv[1]
+    if len(sys.argv) > 2:
+        filepath    = sys.argv[2]
 
     #input_files = [
         # "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_10_14_TRAIN.root", # no passed HLT tree 
@@ -322,7 +327,7 @@ def main():
     mode = "filewrite" # "eval", "filewrite"
 
     trees_to_iterate = ["NoSel", "PassedHLT", "WPlusJets", "Zmumu"] # all event based trees 
-    trees_to_iterate = ["WPlusJets", "Zmumu"] # all event based trees 
+    # trees_to_iterate = ["WPlusJets", "Zmumu"] # all event based trees 
     
     # pass runner each signal file (as a list, using list slicing), and then each background file, such that scores are appended to each
     print("Running Depth and Inclusive Tagger over each file")
@@ -331,8 +336,17 @@ def main():
     # TODO: loop over trees_to_iterate
     print("Infile = " + input_files)
     for tree_selected in trees_to_iterate:
-        runner = Runner(input_files=input_files, mode=mode, num_classes=2, inclusive=False, tree=tree_selected)
-        runner.run()
+
+        with uproot.open(filepath + input_files) as file:
+            # Access the tree
+            tree = file[tree_selected]
+            # Get the number of entries
+            num_entries = tree.num_entries
+            print(tree_selected)
+            print(num_entries)
+            if (num_entries > 0):
+                runner = Runner(input_files=input_files, filepath=filepath, mode=mode, num_classes=2, inclusive=False, tree=tree_selected)
+                runner.run()
     
 if __name__ == "__main__":
     main()

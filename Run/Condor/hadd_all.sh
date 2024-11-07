@@ -39,6 +39,6 @@ hadd -j /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/minituple_v3.
 hadd -j /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/minituple_v3.9_Zmu_Run2023Cv1_2024_10_14.root /eos/user/g/gkopp/LLP_Analysis/output_minituples_v3.9_Zmu_2023Cv1_2024_10_14/*.root
 hadd -j /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/minituple_v3.9_Zmu_Run2023Cv2_2024_10_14.root /eos/user/g/gkopp/LLP_Analysis/output_minituples_v3.9_Zmu_2023Cv2_2024_10_14/*.root
 hadd -j /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/minituple_v3.9_Zmu_Run2023Cv3_2024_10_14.root /eos/user/g/gkopp/LLP_Analysis/output_minituples_v3.9_Zmu_2023Cv3_2024_10_14/*.root
-hadd -j /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/minituple_v3.9_Zmu_Run2023Cv4_2024_10_14.root /eos/user/g/gkopp/LLP_Analysis/output_minituples_v3.9_Zmu_2023Cv4_2024_10_14/*.root
+hadd -j /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/minituple_v3.9_Zmu_Run2023Cv4_2024_10_24.root /eos/user/g/gkopp/LLP_Analysis/output_minituples_v3.9_Zmu_2023Cv4_2024_10_24/*.root
 hadd -j /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/minituple_v3.9_Zmu_Run2023Dv1_2024_10_14.root /eos/user/g/gkopp/LLP_Analysis/output_minituples_v3.9_Zmu_2023Dv1_2024_10_14/*.root
 hadd -j /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/minituple_v3.9_Zmu_Run2023Dv2_2024_10_14.root /eos/user/g/gkopp/LLP_Analysis/output_minituples_v3.9_Zmu_2023Dv2_2024_10_14/*.root
