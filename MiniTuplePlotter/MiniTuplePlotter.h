@@ -866,8 +866,6 @@ public :
 							pEff = new TEfficiency(*h_pass, *h_total);
 							string label_y = "Efficiency";
 							if (plot_type == "acceptance") label_y = "Acceptance";
-							std::cout << plot_type << std::endl;
-							std::cout << label_y << std::endl;
 							if (multiple) label_y = "L1T Efficiency";
 							pEff->SetTitle(Form("; %s; %s", PlotParams_temp.label_x.c_str(), label_y.c_str())); // HCAL LLP Trigger Efficiencies
 							pEff->SetLineColor( colors[i] );
@@ -931,7 +929,10 @@ public :
 			//fout->cd();
 			//myCanvas->Write();
 			myCanvas->SaveAs( output_directory+"/"+output_file_name+".png", "png" );
-			if( plot_type == "efficiency" || plot_type == "acceptance" ) myCanvas->SaveAs( output_directory+"/"+output_file_name+".pdf", "pdf" );
+			if( plot_type == "efficiency" || plot_type == "acceptance" ) {
+				myCanvas->SaveAs( output_directory+"/"+output_file_name+".pdf", "pdf" );
+				// myCanvas->SaveAs( output_directory+"/"+output_file_name+".C", "C" );
+			}
 			delete myCanvas;
 
 		}

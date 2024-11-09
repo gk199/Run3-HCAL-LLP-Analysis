@@ -13,8 +13,8 @@ void MiniTuplePlotter_SignalContamination(){
 	vector<string> filetags_MC = 	{ "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau10000_13p6TeV_2024_06_03" };
 	*/
 	string path = "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/minituple_";
-	vector<string> filetags_both = 	{ "v3.9_LLPskim_Run2023Dv1_2024_10_14_scores", "v3.9_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_10_14_batch1_scores" };
-	vector<string> filetags_data = 	{ "v3.9_LLPskim_Run2023Dv1_2024_10_14_scores" };
+	vector<string> filetags_both = 	{ "v3.9_LLPskim_Run2023Dv1_2024_10_14_WPlusJets_scores", "v3.9_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_10_14_batch1_scores" };
+	vector<string> filetags_data = 	{ "v3.9_LLPskim_Run2023Dv1_2024_10_14_WPlusJets_scores" };
 	vector<string> filetags_MC = 	{ "v3.9_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_10_14_batch1_scores" };
 
 	#include "../RegionCuts.h"

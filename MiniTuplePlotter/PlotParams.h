@@ -279,7 +279,7 @@ PlotParams P_perJet_Mass				= {"perJet_Mass", "Jet Mass", "Jet Mass", 0, 40 };
 PlotParams P_run						= {"run", "Run Number", "Run Number", 366000, 372000};
 PlotParams P_bdtscore_LLP350_MS80_perJet = {"bdtscore_LLP350_MS80_perJet", "BDT Score", "BDT (350, 80) Score", 0.99, 1};
 
-PlotParams P_perJet_NeutralHadEFrac			= {"perJet_NeutralHadEFrac", "Jet: Neutral Hadron Energy Fraction", "Neutral Hadron Energy Fraction", 0, 0.8 }; //1.01 };
+PlotParams P_perJet_NeutralHadEFrac			= {"perJet_NeutralHadEFrac", "Jet: Neutral Hadron Energy Fraction", "Neutral Hadron Energy Fraction", 0, 1.01 };
 PlotParams P_perJet_ChargedHadEFrac			= {"perJet_ChargedHadEFrac", "Jet: Charged Hadron Energy Fraction", "Charged Hadron Energy Fraction", 0, 1.01 };
 PlotParams P_perJet_PhoEFrac				= {"perJet_PhoEFrac", "Jet: Photon Energy Fraction", "Photon Energy Fraction", 0, 1.01 };
 PlotParams P_perJet_EleEFrac				= {"perJet_EleEFrac", "Jet: Electron Energy Fraction", "Electron Energy Fraction", 0, 1.01 };

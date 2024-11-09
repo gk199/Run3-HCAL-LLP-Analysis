@@ -90,8 +90,8 @@ void MiniTuplePlotter_CR_SR(){
 
 	#include "../RegionCuts.h"
 
-	bool Skim_WJets = true;				// BDT input variables, plot LLP skim vs W+Jets selection
-	bool LLP_WJets = false;				// analysis variables for LLP and W+Jets overlayed
+	bool Skim_WJets = false;				// BDT input variables, plot LLP skim vs W+Jets selection
+	bool LLP_WJets = true;				// analysis variables for LLP and W+Jets overlayed
 	bool track_dR_study = false;		// track vars with diff dR cuts, dR with diff track cuts
 	bool overlay_LLP = false;			// overlay analysis variables for each LLP mass point
 	bool Bkg_est = false;				// look at jet tagging vars by jet eta for probability estimations
@@ -153,18 +153,39 @@ void MiniTuplePlotter_CR_SR(){
 			// plotter_BDTvars.SetOutputDirectory("Overlay_"+key);
 			// plotter_BDTvars.Plot("ratio");
 
+			bool simple = false;
+			bool reduced = false;
+			bool hcal_only = true;
 			// HCAL depth variables with LLP regions and data overlayed
 			class MiniTuplePlotter plotter_BDTvars_perJet( filetags[key], path );
 			plotter_BDTvars_perJet.SetPlots(analysisVars_perJet); 
 			plotter_BDTvars_perJet.SetTreeNames( {"PerJet_WPlusJets", "PerJet_LLPmatched"} );	
 			plotter_BDTvars_perJet.SetOutputFileTag("Overlay_perJet_"+key+"_v3.8");
+			if (simple) plotter_BDTvars_perJet.SetOutputFileTag("SimpleOverlay_perJet_"+key+"_v3.8");
+			if (reduced) plotter_BDTvars_perJet.SetOutputFileTag("ReducedOverlay_perJet_"+key+"_v3.8");
+			if (hcal_only) plotter_BDTvars_perJet.SetOutputFileTag("HcalOverlay_perJet_"+key+"_v3.8");
 			plotter_BDTvars_perJet.plot_log_ratio    = false; 
 			//plotter_BDTvars_perJet.plot_cdf 		 = true;
 			//plotter_BDTvars_perJet.plot_reverse_cdf  = true;
 			plotter_BDTvars_perJet.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
-			plotter_BDTvars_perJet.SetLegendNames({"LLP skim - W+jets selection", "Tracker: R <= 10cm", "Tracker: R > 10cm", "ECAL", "HCAL-D1", "HCAL-D2", "HCAL-D34"});
+			plotter_BDTvars_perJet.SetLegendNames({"LLP skim - W+jets selection", "LLP in tracker <= 10cm", "LLP in tacker > 10cm", "LLP in ECAL", "LLP in HCAL, D1", "LLP in HCAL, D2", "LLP in HCAL, D34"});
 			plotter_BDTvars_perJet.colors = { kBlack, kGray, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed };
 			plotter_BDTvars_perJet.SetComparisonCuts({Cut_matchedLLPinCR, Cut_matchedLLPinTrackerNP, Cut_matchedLLPinECAL, Cut_matchedLLPinHCAL1, Cut_matchedLLPinHCAL2, Cut_matchedLLPinHCAL34}, "LLP_MC");
+			if (simple) {
+				plotter_BDTvars_perJet.SetLegendNames({"Prompt background", "LLP in HCAL"});
+				plotter_BDTvars_perJet.colors = { kBlack, kAzure-3 };
+				plotter_BDTvars_perJet.SetComparisonCuts({Cut_matchedLLPinHCAL}, "LLP_MC");
+			}
+			if (reduced) {
+				plotter_BDTvars_perJet.SetLegendNames({"Prompt background", "LLP in tracker <= 10cm", "LLP in tracker > 10cm", "LLP in ECAL", "LLP in HCAL"});
+				plotter_BDTvars_perJet.colors = { kBlack, kGray, kOrange, kGreen+2, kAzure-3 };
+				plotter_BDTvars_perJet.SetComparisonCuts({Cut_matchedLLPinCR, Cut_matchedLLPinTrackerNP, Cut_matchedLLPinECAL, Cut_matchedLLPinHCAL}, "LLP_MC");
+			}
+			if (hcal_only) {
+				plotter_BDTvars_perJet.SetLegendNames({"Prompt background", "LLP in HCAL, D1", "LLP in HCAL, D2", "LLP in HCAL, D34"});
+				plotter_BDTvars_perJet.colors = { kBlack, kAzure+7, kBlue-4, kViolet+4 };
+				plotter_BDTvars_perJet.SetComparisonCuts({Cut_matchedLLPinHCAL1, Cut_matchedLLPinHCAL2, Cut_matchedLLPinHCAL34}, "LLP_MC");
+			}
 			plotter_BDTvars_perJet.SetOutputDirectory("Overlay_perJet_"+key);
 			plotter_BDTvars_perJet.Plot();
 		}
