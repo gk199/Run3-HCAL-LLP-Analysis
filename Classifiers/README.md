@@ -14,3 +14,6 @@ No longer need separate train and test files. Added running of inclusive tagger 
 
 **5. All other images**
 Currently having issues with opening up plots on SWAN and Lxplus, so temporary solution is to visualise them on GitHub. This can be ignored.
+
+**6. running.py**
+This is the main script for training and evaluating the 3DCNN using the 3D jet images in the form of .h5 files. There are several different modes to choose from in main(), the main one is training/evaluation. Filepaths will need to be changed.
