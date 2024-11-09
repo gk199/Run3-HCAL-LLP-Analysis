@@ -16,4 +16,4 @@ No longer need separate train and test files. Added running of inclusive tagger 
 Currently having issues with opening up plots on SWAN and Lxplus, so temporary solution is to visualise them on GitHub. This can be ignored.
 
 **6. running.py**
-This is the main script for training and evaluating the 3DCNN using the 3D jet images in the form of .h5 files. There are several different modes to choose from in main(), the main one is training/evaluation. Filepaths will need to be changed.
+This is the main script for training and evaluating the 3DCNN using the 3D jet images in the form of .h5 files. This code is originally ran on SWAN using a GPU. The code is designed to train and evaluate the 3DCNN models imported from the models.py script, and can plot metrics such as the ROC curve. To run, select the train option first so that the model is trained and saved in.keras format, and which can then be evaluated. Filepaths to the training files will need to be changed.
