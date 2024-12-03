@@ -306,11 +306,11 @@ vector<float> DisplacedHcalJetAnalyzer::GetTDCavg_Jet(int idx_jet, float deltaR_
 }
 
 /* ====================================================================================================================== */
-vector<float> DisplacedHcalJetAnalyzer::GetDepthTowers_Jet(int idx_jet, float deltaR_cut) { // given a jet, find the emulated number of depth flagged towers from associated HB rechits 
+int DisplacedHcalJetAnalyzer::GetDepthTowers_Jet(int idx_jet, float deltaR_cut) { // given a jet, find the emulated number of depth flagged towers from associated HB rechits 
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetDepthTowers_Jet()"<<endl;
 
-	// tracking the dpeth flagged towers 
+	// tracking the depth flagged towers 
 	int depth_flag[4][32][72] = {0};
 
 	vector<float> matchedRechit = GetMatchedHcalRechits_Jet(idx_jet, deltaR_cut); // already accounts for valid rechits
@@ -319,24 +319,22 @@ vector<float> DisplacedHcalJetAnalyzer::GetDepthTowers_Jet(int idx_jet, float de
 		int depth = hbheRechit_depth->at(matchedRechit[i]);
 		float energy = hbheRechit_E->at(matchedRechit[i]);
 		int ieta = hbheRechit_iEta->at(matchedRechit[i]);
-		int iphi = hbheRechit_iPhi->at(matchedRechit[i])
+		int iphi = hbheRechit_iPhi->at(matchedRechit[i]);
 
 		int shift = 15;
 		if (ieta < 0) shift = 16;
-		value = 0;
+		int value = 0;
 		if ((depth == 1 || depth == 2) && energy < 1) value = 1;
 		if ((depth == 3 || depth == 4) && energy >= 5) value = 1;
 		depth_flag[depth - 1][ieta + shift][iphi - 1] = value;
 	}
 
-	n_depth_towers = 0;
-	for ieta in range(32) {
-		for iphi in range(72) {
+	int n_depth_towers = 0;
+	for (int ieta=0; ieta<32; ieta++) {
+		for (int iphi=0; iphi<72; iphi++) {
 			int sum123 = depth_flag[0][ieta][iphi] + depth_flag[1][ieta][iphi] + depth_flag[2][ieta][iphi];
 			int sum124 = depth_flag[0][ieta][iphi] + depth_flag[1][ieta][iphi] + depth_flag[3][ieta][iphi];
-			if (sum123 >= 3 || sum124 >= 3) n_depth_towers += 1;
-			sum123 = 0;
-			sum124 = 0;			
+			if (sum123 >= 3 || sum124 >= 3) n_depth_towers += 1;		
 		}
 	}
 

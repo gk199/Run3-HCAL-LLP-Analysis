@@ -139,6 +139,8 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_int.push_back(Form("jet%d_LeadingRechitD", i) );
 		myvars_int.push_back(Form("jet%d_SubLeadingRechitD", i) );
 		myvars_int.push_back(Form("jet%d_SSubLeadingRechitD", i) );
+		myvars_int.push_back(Form("jet%d_DepthTowers", i) );
+		myvars_int.push_back(Form("jet%d_DepthTowers_pt5", i) );
 
 		for( auto bdt_tag: bdt_tags ){
 			myvars_float.push_back( Form("jet%d_bdtscore_%s", i, bdt_tag.c_str()) ); 
@@ -520,6 +522,8 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("jet%d_S_etaeta", valid_jet)]					= spread_Eta_Phi[4];
 		tree_output_vars_float[Form("jet%d_S_phiphi", valid_jet)]					= spread_Eta_Phi[5];
 		tree_output_vars_float[Form("jet%d_S_etaphi", valid_jet)]					= spread_Eta_Phi[6];
+		tree_output_vars_int[Form("jet%d_DepthTowers", valid_jet)]					= GetDepthTowers_Jet(i, 0.4);
+		tree_output_vars_int[Form("jet%d_DepthTowers_pt5", valid_jet)]				= GetDepthTowers_Jet(i, 0.5);
 
 		tree_output_vars_float[Form("jet%d_TDCavg", valid_jet)] = TDC_TDCenergy[0];
 		tree_output_vars_float[Form("jet%d_TDCavg_energyWeight", valid_jet)] = TDC_TDCenergy[1];
