@@ -23,6 +23,8 @@ void MiniTuplePlotter_HLT_Effs(){
 
 	filetags["LLP350_80_ctau500mm"]	= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_rerun"}; //{ "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TEST"};
 	filetags["LLP125_50_ctau10m"]	= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau10000_13p6TeV_2024_06_03"};
+	filetags["LLP1000_450_ctau100m"] = { "MC_MH-1000_MFF-450_CTau-100000mm_TuneCP5_13p6TeV_Nov15_depthTagger"};
+	filetags["LLP1000_450_ctau10m"] = { "MC_MH-1000_MFF-450_CTau-10000mm_TuneCP5_13p6TeV_Nov15_depthTagger"};
 
 	filetags["LLP125_15_ctau10m"]	= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau10000_13p6TeV_2024_06_03"};
 	filetags["LLP125_15_ctau1m"]	= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST"};
@@ -57,7 +59,7 @@ void MiniTuplePlotter_HLT_Effs(){
 
 	// to do -- make a new version that is jet based!
 
-	vector<string> filetag_keys_to_loop = {"LLP350_80_ctau500mm", "LLP125_50_ctau3m"};
+	vector<string> filetag_keys_to_loop = {"LLP350_80_ctau500mm", "LLP125_50_ctau3m", "LLP1000_450_ctau100m", "LLP1000_450_ctau10m"};
 	// vector<string> filetag_keys_to_loop = {"LLP350_80_ctau500mm", "LLP125_15_ctau3m", "LLP125_50_ctau10m", "LLP125_15_ctau10m", "LLP125_15_ctau1m", "LLP125_50_ctau3m", "LLP250_120_ctau10m", "LLP350_160_ctau10m"};
 
 	vector<string> jet_E = {"100"}; //{"60", "100"};

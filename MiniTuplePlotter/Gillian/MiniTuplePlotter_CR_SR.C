@@ -17,6 +17,7 @@ void MiniTuplePlotter_CR_SR(){
 	string path_v3pt6 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.6/minituple_";
 	string path_v3pt7 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_";
 	string path 	  = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8/minituple_";
+	string path_test  = "/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/Run/minituple_";
 
 	map<string,vector<string>> filetags;
 	filetags["LLP125_mX15"]	= { "v3.8_LLPskim_Run2023Cv4_2024_06_03", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST"};
@@ -29,6 +30,8 @@ void MiniTuplePlotter_CR_SR(){
 	vector<string> filetags_data2 		= { "v3.8_LLPskim_Run2023_HADD", "v3.8_LLPskim_Run2023Cv4_2024_06_03" };
 	vector<string> filetags_LLP 		= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST" };	
 	vector<string> filetags_all 		= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TEST", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch2", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch2", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch2"};
+
+	vector<string> filetags_test		= { "v3.10_MC_MH-125_MS-50_CTau3000_4Dec_DepthFlag_HADD"};
 
 	vector<string> BDT_files 			= {"v3.8_LLPskim_Run2023_HADD", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TEST"};
 	vector<string> filetags_all_v3pt0 	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v2.0_MC_QCD_250k_2023_10_18", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23"};
@@ -90,8 +93,9 @@ void MiniTuplePlotter_CR_SR(){
 
 	#include "../RegionCuts.h"
 
+	bool DepthFlag = true;
 	bool Skim_WJets = false;				// BDT input variables, plot LLP skim vs W+Jets selection
-	bool LLP_WJets = true;				// analysis variables for LLP and W+Jets overlayed
+	bool LLP_WJets = false;				// analysis variables for LLP and W+Jets overlayed
 	bool track_dR_study = false;		// track vars with diff dR cuts, dR with diff track cuts
 	bool overlay_LLP = false;			// overlay analysis variables for each LLP mass point
 	bool Bkg_est = false;				// look at jet tagging vars by jet eta for probability estimations
@@ -104,6 +108,26 @@ void MiniTuplePlotter_CR_SR(){
 	bool Overlay_all = false;			// overlay LLP MC, QCD MC, LLP skim
 	bool Matching_efficiency = false;	// LLP - jet matching efficiency
 	bool perJet = false;
+
+	// ----- Depth flag studies ---- //
+	if (DepthFlag) {
+		cout<<endl;
+		cout<<" ---------- CR / SR Study: Depth flag in PF jets ---------- "<<endl;
+		cout<<endl;
+
+		class MiniTuplePlotter plotter_depth( filetags_test, path_test );
+		plotter_depth.SetPlots({P_jet0_DepthTowers, P_jet0_DepthTowers_pt5}); 
+		plotter_depth.SetTreeNames( {"PassedHLT"} );	
+		plotter_depth.SetOutputFileTag("Overlay_DepthTowers_v3.10");
+		plotter_depth.plot_log_ratio    = false; 
+		plotter_depth.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+		plotter_depth.SetCuts("jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1");
+		plotter_depth.SetComparisonCuts({Cut_LLPinCR_Jet0, Cut_LLPinTrackerNP_Jet0, Cut_LLPinECAL_Jet0, Cut_LLPinHCAL1_Jet0, Cut_LLPinHCAL2_Jet0, Cut_LLPinHCAL34_Jet0}, "MC_MH");
+		plotter_depth.SetLegendNames({"LLP in tracker <= 10cm", "LLP in tracker > 10cm", "LLP in ECAL", "LLP in HCAL, D1", "LLP in HCAL, D2", "LLP in HCAL, D34"});
+		plotter_depth.colors = { kBlack, kGray, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed };
+		plotter_depth.SetOutputDirectory("DepthTowers");
+		plotter_depth.Plot();
+	}
 
 	// ----- Jet kinematics in control and signal regions -----//
 
@@ -168,7 +192,8 @@ void MiniTuplePlotter_CR_SR(){
 			//plotter_BDTvars_perJet.plot_cdf 		 = true;
 			//plotter_BDTvars_perJet.plot_reverse_cdf  = true;
 			plotter_BDTvars_perJet.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
-			plotter_BDTvars_perJet.SetLegendNames({"LLP skim - W+jets selection", "LLP in tracker <= 10cm", "LLP in tacker > 10cm", "LLP in ECAL", "LLP in HCAL, D1", "LLP in HCAL, D2", "LLP in HCAL, D34"});
+			plotter_BDTvars_perJet.SetLegendNames({"LLP skim - W+jets selection", "LLP in tracker <= 10cm", "LLP in tracker > 10cm", "LLP in ECAL", "LLP in HCAL, D1", "LLP in HCAL, D2", "LLP in HCAL, D34"});
+			plotter_BDTvars_perJet.SetLegendNames({"Prompt background", "LLP in tracker <= 10cm", "LLP in tracker > 10cm", "LLP in ECAL", "LLP in HCAL, D1", "LLP in HCAL, D2", "LLP in HCAL, D34"});
 			plotter_BDTvars_perJet.colors = { kBlack, kGray, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed };
 			plotter_BDTvars_perJet.SetComparisonCuts({Cut_matchedLLPinCR, Cut_matchedLLPinTrackerNP, Cut_matchedLLPinECAL, Cut_matchedLLPinHCAL1, Cut_matchedLLPinHCAL2, Cut_matchedLLPinHCAL34}, "LLP_MC");
 			if (simple) {
@@ -183,7 +208,8 @@ void MiniTuplePlotter_CR_SR(){
 			}
 			if (hcal_only) {
 				plotter_BDTvars_perJet.SetLegendNames({"Prompt background", "LLP in HCAL, D1", "LLP in HCAL, D2", "LLP in HCAL, D34"});
-				plotter_BDTvars_perJet.colors = { kBlack, kAzure+7, kBlue-4, kViolet+4 };
+				// plotter_BDTvars_perJet.colors = { kBlack, kAzure+7, kBlue-4, kViolet+4 };
+				plotter_BDTvars_perJet.colors = { kBlack, kAzure+7, kOrange-3, kRed-7 };
 				plotter_BDTvars_perJet.SetComparisonCuts({Cut_matchedLLPinHCAL1, Cut_matchedLLPinHCAL2, Cut_matchedLLPinHCAL34}, "LLP_MC");
 			}
 			plotter_BDTvars_perJet.SetOutputDirectory("Overlay_perJet_"+key);
