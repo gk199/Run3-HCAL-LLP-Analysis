@@ -342,6 +342,45 @@ int DisplacedHcalJetAnalyzer::GetDepthTowers_Jet(int idx_jet, float deltaR_cut) 
 }
 
 /* ====================================================================================================================== */
+int DisplacedHcalJetAnalyzer::GetTimingTowers_Jet(int idx_jet, float deltaR_cut) { // given a jet, find the emulated number of timing flagged towers from associated HB rechits 
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetTimingTowers_Jet()"<<endl;
+
+	// tracking the timing flagged towers 
+	int timing_flag[4][32][72] = {0};
+	int prompt_flag[4][32][72] = {0};
+
+	vector<float> matchedRechit = GetMatchedHcalRechits_Jet(idx_jet, deltaR_cut); // already accounts for valid rechits
+	
+	for (int i = 0; i < matchedRechit.size(); i++) {
+		int depth = hbheRechit_depth->at(matchedRechit[i]);
+		float energy = hbheRechit_E->at(matchedRechit[i]);
+		int TDC = hbheRechit_auxTDC->at(matchedRechit[i]); // decoded in ntupler (six bit mask, bit shifting applied)
+		int ieta = hbheRechit_iEta->at(matchedRechit[i]);
+		int iphi = hbheRechit_iPhi->at(matchedRechit[i]);
+
+		int shift = 15;
+		if (ieta < 0) shift = 16;
+		int prompt = 0;
+		int delayed = 0;
+		if (energy > 4 && TDC < 3) {
+			if (TDC == 0) prompt_flag[depth - 1][ieta + shift][iphi - 1] = 1;
+			if (TDC >= 1) timing_flag[depth - 1][ieta + shift][iphi - 1] = 1;
+		}
+	}
+
+	int n_timing_towers = 0;
+	for (int ieta=0; ieta<32; ieta++) {
+		for (int iphi=0; iphi<72; iphi++) {
+			int prompt = prompt_flag[0][ieta][iphi] + prompt_flag[1][ieta][iphi] + prompt_flag[2][ieta][iphi] + prompt_flag[3][ieta][iphi];
+			int delayed = timing_flag[0][ieta][iphi] + timing_flag[1][ieta][iphi] + timing_flag[2][ieta][iphi] + timing_flag[3][ieta][iphi];
+			if (prompt == 0 && delayed > 0) n_timing_towers += 1;		
+		}
+	}
+	return n_timing_towers;
+}
+
+/* ====================================================================================================================== */
 bool DisplacedHcalJetAnalyzer::IsMuonIsolatedTight(int muon_index) {
 	// given a muon, determine if it is isolated (tight)
 	// https://github.com/cms-lpc-llp/llp_analyzer/blob/master/src/RazorAnalyzer.cc#L2336C32-L2336C32 and https://cds.cern.ch/record/2815162/files/SMP-21-005-pas.pdf 

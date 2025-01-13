@@ -59,6 +59,12 @@ PlotParams P_jet0_TDCaverage 			={"jet0_TDCavg", "Leading Jet Average TDC (2 bit
 PlotParams P_jet0_TDCaverage_Eweight	={"jet0_TDCavg_energyWeight", "Leading Jet Average TDC, energy weighted (2 bits)", "Average TDC (energy weighted)", -0.5, 2.5 };
 PlotParams P_jet0_TDCnDelayed			={"jet0_TDCnDelayed", "Leading Jet Number of Delayed HCAL Cells", "Number of Delayed Cells", 0, 15 };
 
+PlotParams P_jet0_DepthTowers_pt5 		={"jet0_DepthTowers_pt5", "Number of Depth Flagged Towers with dR<0.5", "Number of Depth Flagged Towers", -0.5, 2.5};
+PlotParams P_jet0_DepthTowers	 		={"jet0_DepthTowers", "Number of Depth Flagged Towers with dR<0.4", "Number of Depth Flagged Towers", -0.5, 2.5};
+PlotParams P_jet0_TimingTowers	 		={"jet0_TimingTowers", "Number of Timing Flagged Towers with dR<0.4", "Number of Timing Flagged Towers", -0.5, 2.5};
+PlotParams P_jet0_FlaggedTowers	 		={"jet0_TimingTowers + jet0_DepthTowers", "Number of Timing OR Depth Flagged Towers with dR<0.4", "Number of Timing or Depth Flagged Towers", -0.5, 2.5};
+PlotParams P_jet0_dR_L1jet	 			={"jet0_dR_L1jet", "dR between PF and L1 jet", "dR", 0, 0.5};
+
 // tracks
 PlotParams P_jet0_Track0PtFrac			= {"jet0_Track0Pt / jet0_Pt", "Leading Jet: Leading Track p_{T} / Jet p_{T}", "Track Energy Fraction", 0, 1 };
 PlotParams P_jet0_Track1PtFrac			= {"jet0_Track1Pt / jet0_Pt", "Leading Jet: Subleading Track p_{T} / Jet p_{T}", "Track Energy Fraction", 0, 1 };

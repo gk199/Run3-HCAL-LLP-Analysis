@@ -768,6 +768,7 @@ public :
    virtual vector<float> GetEnergyProfile_Jet( int idx_jet, float deltaR_cut );
    virtual vector<pair<float,int>> Get3RechitE_Jet( int idx_jet, float deltaR_cut );
    virtual vector<float> GetEtaPhiSpread_Jet( int idx_jet, float deltaR_cut );
+   virtual int GetTimingTowers_Jet( int idx_jet, float deltaR_cut );
    virtual int GetDepthTowers_Jet( int idx_jet, float deltaR_cut );
    virtual vector<float> GetTDCavg_Jet( int idx_jet, float deltaR_cut );
    virtual bool IsMuonIsolatedTight( int muon_index ); 
