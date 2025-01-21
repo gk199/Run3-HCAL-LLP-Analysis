@@ -770,6 +770,8 @@ public :
    virtual vector<float> GetEtaPhiSpread_Jet( int idx_jet, float deltaR_cut );
    virtual int GetTimingTowers_Jet( int idx_jet, float deltaR_cut );
    virtual int GetDepthTowers_Jet( int idx_jet, float deltaR_cut );
+   virtual int GetDepthTowers_Jet_lowE( int idx_jet, float deltaR_cut );
+   virtual int GetTotalTowers_Jet( int idx_jet, float deltaR_cut );
    virtual vector<float> GetTDCavg_Jet( int idx_jet, float deltaR_cut );
    virtual bool IsMuonIsolatedTight( int muon_index ); 
    virtual float GetElectronEffectiveAreaMean( int ele_index );

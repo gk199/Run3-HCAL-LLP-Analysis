@@ -342,6 +342,77 @@ int DisplacedHcalJetAnalyzer::GetDepthTowers_Jet(int idx_jet, float deltaR_cut) 
 }
 
 /* ====================================================================================================================== */
+int DisplacedHcalJetAnalyzer::GetDepthTowers_Jet_lowE(int idx_jet, float deltaR_cut) { // given a jet, find the emulated number of depth flagged towers from associated HB rechits 
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetDepthTowers_Jet_lowE()"<<endl;
+
+	// tracking the depth flagged towers 
+	int depth_flag[4][32][72] = {0};
+
+	vector<float> matchedRechit = GetMatchedHcalRechits_Jet(idx_jet, deltaR_cut); // already accounts for valid rechits
+	
+	for (int i = 0; i < matchedRechit.size(); i++) {
+		int depth = hbheRechit_depth->at(matchedRechit[i]);
+		float energy = hbheRechit_E->at(matchedRechit[i]);
+		int ieta = hbheRechit_iEta->at(matchedRechit[i]);
+		int iphi = hbheRechit_iPhi->at(matchedRechit[i]);
+
+		int shift = 15;
+		if (ieta < 0) shift = 16;
+		int value = 0;
+		if ((depth == 1 || depth == 2) && energy < 10) value = 1;
+		if ((depth == 3 || depth == 4) && energy >= 0) value = 1;
+		depth_flag[depth - 1][ieta + shift][iphi - 1] = value;
+	}
+
+	int n_depth_towers = 0;
+	for (int ieta=0; ieta<32; ieta++) {
+		for (int iphi=0; iphi<72; iphi++) {
+			int sum123 = depth_flag[0][ieta][iphi] + depth_flag[1][ieta][iphi] + depth_flag[2][ieta][iphi];
+			int sum124 = depth_flag[0][ieta][iphi] + depth_flag[1][ieta][iphi] + depth_flag[3][ieta][iphi];
+			if (sum123 >= 3 || sum124 >= 3) n_depth_towers += 1;		
+		}
+	}
+
+	return n_depth_towers;
+}
+
+/* ====================================================================================================================== */
+int DisplacedHcalJetAnalyzer::GetTotalTowers_Jet(int idx_jet, float deltaR_cut) { // given a jet, find the emulated number of towers from associated HB rechits 
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetTotalTowers_Jet()"<<endl;
+
+	// tracking the depth flagged towers 
+	int depth_flag[4][32][72] = {0};
+
+	vector<float> matchedRechit = GetMatchedHcalRechits_Jet(idx_jet, deltaR_cut); // already accounts for valid rechits
+	
+	for (int i = 0; i < matchedRechit.size(); i++) {
+		int depth = hbheRechit_depth->at(matchedRechit[i]);
+		float energy = hbheRechit_E->at(matchedRechit[i]);
+		int ieta = hbheRechit_iEta->at(matchedRechit[i]);
+		int iphi = hbheRechit_iPhi->at(matchedRechit[i]);
+
+		int shift = 15;
+		if (ieta < 0) shift = 16;
+		int value = 0;
+		if (depth == 1 || depth == 2 || depth == 3 || depth == 4) value = 1;
+		depth_flag[depth - 1][ieta + shift][iphi - 1] = value;
+	}
+
+	int n_depth_towers = 0;
+	for (int ieta=0; ieta<32; ieta++) {
+		for (int iphi=0; iphi<72; iphi++) {
+			int sum123 = depth_flag[0][ieta][iphi] + depth_flag[1][ieta][iphi] + depth_flag[2][ieta][iphi];
+			int sum124 = depth_flag[0][ieta][iphi] + depth_flag[1][ieta][iphi] + depth_flag[3][ieta][iphi];
+			if (sum123 >= 3 || sum124 >= 3) n_depth_towers += 1;		
+		}
+	}
+
+	return n_depth_towers;
+}
+
+/* ====================================================================================================================== */
 int DisplacedHcalJetAnalyzer::GetTimingTowers_Jet(int idx_jet, float deltaR_cut) { // given a jet, find the emulated number of timing flagged towers from associated HB rechits 
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::GetTimingTowers_Jet()"<<endl;
