@@ -324,17 +324,17 @@ int DisplacedHcalJetAnalyzer::GetDepthTowers_Jet(int idx_jet, float deltaR_cut) 
 		int shift = 15;
 		if (ieta < 0) shift = 16;
 		int value = 0;
-		if ((depth == 1 || depth == 2) && energy < 1) value = 1;
-		if ((depth == 3 || depth == 4) && energy >= 5) value = 1;
+		if ((depth == 1 || depth == 2) && energy >= 1) value = 1; // passes veto if energy < 1 GeV
+		if ((depth == 3 || depth == 4) && energy >= 5) value = 1; // passes depth if energy >= 5 GeV
 		depth_flag[depth - 1][ieta + shift][iphi - 1] = value;
 	}
 
 	int n_depth_towers = 0;
 	for (int ieta=0; ieta<32; ieta++) {
 		for (int iphi=0; iphi<72; iphi++) {
-			int sum123 = depth_flag[0][ieta][iphi] + depth_flag[1][ieta][iphi] + depth_flag[2][ieta][iphi];
-			int sum124 = depth_flag[0][ieta][iphi] + depth_flag[1][ieta][iphi] + depth_flag[3][ieta][iphi];
-			if (sum123 >= 3 || sum124 >= 3) n_depth_towers += 1;		
+			int veto = depth_flag[0][ieta][iphi] + depth_flag[1][ieta][iphi];
+			int depth = depth_flag[2][ieta][iphi] + depth_flag[3][ieta][iphi];
+			if (veto == 0 && depth >= 1) n_depth_towers += 1;		
 		}
 	}
 
@@ -360,17 +360,17 @@ int DisplacedHcalJetAnalyzer::GetDepthTowers_Jet_lowE(int idx_jet, float deltaR_
 		int shift = 15;
 		if (ieta < 0) shift = 16;
 		int value = 0;
-		if ((depth == 1 || depth == 2) && energy < 10) value = 1;
-		if ((depth == 3 || depth == 4) && energy >= 0) value = 1;
+		if ((depth == 1 || depth == 2) && energy >= 1.5) value = 1; // passes veto if energy < 1.5 GeV
+		if ((depth == 3 || depth == 4) && energy >= 4) value = 1; // passes depth if energy >= 4 GeV
 		depth_flag[depth - 1][ieta + shift][iphi - 1] = value;
 	}
 
 	int n_depth_towers = 0;
 	for (int ieta=0; ieta<32; ieta++) {
 		for (int iphi=0; iphi<72; iphi++) {
-			int sum123 = depth_flag[0][ieta][iphi] + depth_flag[1][ieta][iphi] + depth_flag[2][ieta][iphi];
-			int sum124 = depth_flag[0][ieta][iphi] + depth_flag[1][ieta][iphi] + depth_flag[3][ieta][iphi];
-			if (sum123 >= 3 || sum124 >= 3) n_depth_towers += 1;		
+			int veto = depth_flag[0][ieta][iphi] + depth_flag[1][ieta][iphi];
+			int depth = depth_flag[2][ieta][iphi] + depth_flag[3][ieta][iphi];
+			if (veto == 0 && depth >= 1) n_depth_towers += 1;		
 		}
 	}
 
@@ -396,16 +396,15 @@ int DisplacedHcalJetAnalyzer::GetTotalTowers_Jet(int idx_jet, float deltaR_cut) 
 		int shift = 15;
 		if (ieta < 0) shift = 16;
 		int value = 0;
-		if (depth == 1 || depth == 2 || depth == 3 || depth == 4) value = 1;
+		if ((depth == 1 || depth == 2 || depth == 3 || depth == 4) && energy >= 0) value = 1;
 		depth_flag[depth - 1][ieta + shift][iphi - 1] = value;
 	}
 
 	int n_depth_towers = 0;
 	for (int ieta=0; ieta<32; ieta++) {
 		for (int iphi=0; iphi<72; iphi++) {
-			int sum123 = depth_flag[0][ieta][iphi] + depth_flag[1][ieta][iphi] + depth_flag[2][ieta][iphi];
-			int sum124 = depth_flag[0][ieta][iphi] + depth_flag[1][ieta][iphi] + depth_flag[3][ieta][iphi];
-			if (sum123 >= 3 || sum124 >= 3) n_depth_towers += 1;		
+			int sum1234 = depth_flag[0][ieta][iphi] + depth_flag[1][ieta][iphi] + depth_flag[2][ieta][iphi] + depth_flag[3][ieta][iphi];
+			if (sum1234 >= 1 ) n_depth_towers += 1;		// means have at least one depth in the tower that has a non zero energy (passed PF cuts)
 		}
 	}
 
