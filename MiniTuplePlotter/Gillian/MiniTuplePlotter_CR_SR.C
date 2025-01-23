@@ -31,7 +31,8 @@ void MiniTuplePlotter_CR_SR(){
 	vector<string> filetags_LLP 		= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST" };	
 	vector<string> filetags_all 		= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TEST", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch2", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch2", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch2"};
 
-	vector<string> filetags_test		= { "v3.10_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_4Dec_DepthFlag_TimingFlag_HADD"};
+	vector<string> filetags_test		= { "v3.10_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_23Jan_DepthTimingFlag_HADD"};
+	// vector<string> filetags_test		= { "v3.10_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_4Dec_DepthFlag_TimingFlag_HADD"};
 
 	vector<string> BDT_files 			= {"v3.8_LLPskim_Run2023_HADD", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TEST"};
 	vector<string> filetags_all_v3pt0 	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v2.0_MC_QCD_250k_2023_10_18", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23"};
@@ -122,9 +123,13 @@ void MiniTuplePlotter_CR_SR(){
 		plotter_depth.plot_log_ratio    = false; 
 		plotter_depth.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
 		plotter_depth.SetCuts("jet0_Pt >= 100 && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 && jet0_dR_L1jet < 0.4");
-		plotter_depth.SetComparisonCuts({Cut_LLPinCR_Jet0, Cut_LLPinTrackerNP_Jet0, Cut_LLPinECAL_Jet0, Cut_LLPinHCAL1_Jet0, Cut_LLPinHCAL2_Jet0, Cut_LLPinHCAL34_Jet0}, "LLP_MC");
-		plotter_depth.SetLegendNames({"LLP in tracker <= 10cm", "LLP in tracker > 10cm", "LLP in ECAL", "LLP in HCAL, D1", "LLP in HCAL, D2", "LLP in HCAL, D34"});
-		plotter_depth.colors = { kBlack, kGray, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed };
+		// plotter_depth.SetComparisonCuts({Cut_LLPinCR_Jet0, Cut_LLPinTrackerNP_Jet0, Cut_LLPinECAL_Jet0, Cut_LLPinHCAL1_Jet0, Cut_LLPinHCAL2_Jet0, Cut_LLPinHCAL34_Jet0}, "LLP_MC");
+		// plotter_depth.SetLegendNames({"LLP in tracker <= 10cm", "LLP in tracker > 10cm", "LLP in ECAL", "LLP in HCAL, D1", "LLP in HCAL, D2", "LLP in HCAL, D34"});
+		// plotter_depth.colors = { kBlack, kGray, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed };
+		plotter_depth.SetComparisonCuts({Cut_LLPinTrackerNP_Jet0, Cut_LLPinECAL_Jet0, Cut_LLPinHCAL1_Jet0, Cut_LLPinHCAL2_Jet0, Cut_LLPinHCAL34_Jet0}, "LLP_MC");
+		plotter_depth.SetLegendNames({"LLP in tracker > 10cm", "LLP in ECAL", "LLP in HCAL, D1", "LLP in HCAL, D2", "LLP in HCAL, D34"});
+		plotter_depth.colors = { kGray, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed };
+		plotter_depth.SetVariableBins({-0.25,0.25,0.75,1.25,1.75,2.25,2.75,3.25,3.75,4.25,4.75,5.25,5.75,6.25,6.75,7.25,7.75,8.25});
 		plotter_depth.SetOutputDirectory("DepthTowers");
 		plotter_depth.Plot();
 	}
