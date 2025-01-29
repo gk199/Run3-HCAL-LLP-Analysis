@@ -249,3 +249,18 @@ TCut Cut_matchedLLPinHCAL2          = matchedLLPinHCAL2.Data();
 TCut Cut_matchedLLPinHCAL34         = matchedLLPinHCAL34.Data();
 
 TCut Cut_matchedLLPinHCAL34_eventHT250 = (matchedLLPinHCAL34 + AND + eventHT250).Data();
+
+TCut Cut_L1_LLPtriggered1 = Form("jet0_L1trig_Matched == 1");
+TCut Cut_L1_LLPtriggered0 = Form("jet0_L1trig_Matched == 0");
+
+TCut Cut_0DepthTowers = Form("jet0_DepthTowers == 0");
+TCut Cut_1DepthTowers = Form("jet0_DepthTowers == 1");
+TCut Cut_2DepthTowers = Form("jet0_DepthTowers >= 2");
+
+TCut Cut_0TimingTowers = Form("jet0_TimingTowers == 0");
+TCut Cut_1TimingTowers = Form("jet0_TimingTowers == 1");
+TCut Cut_2TimingTowers = Form("jet0_TimingTowers >= 2");
+
+TCut Cut_0Towers = Form("jet0_TimingTowers + jet0_DepthTowers == 0");
+TCut Cut_1Towers = Form("jet0_TimingTowers + jet0_DepthTowers == 1");
+TCut Cut_2Towers = Form("jet0_TimingTowers + jet0_DepthTowers >= 2");
