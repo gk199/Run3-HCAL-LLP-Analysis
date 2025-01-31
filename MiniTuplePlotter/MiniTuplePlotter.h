@@ -74,7 +74,7 @@ public :
 	string significance_formula = "ssqrtb";
 
 	// Outputs
-	//TFile *fout;
+	TFile *fout;
 
 	// =====================================================================================
 	// MiniTuplePlotter 
@@ -111,13 +111,13 @@ public :
 		cout<<"Reading in MiniTupleVersion as \""<<MiniTupleVersion<<"\""<<endl;
 		if( debug ) cout<<"    --> If this is incorrect please fix it manually when you declare the instance of the plotter :)"<<endl;
 
-		//fout = new TFile( "Figures/Figures_test.root", "RECREATE");
+		fout = new TFile( "Figures/Figures_test.root", "RECREATE");
 
 	}
 
 	// -------------------------------------------------------------------------------------
 	~MiniTuplePlotter(){
-		//fout->Close();
+		fout->Close();
 	}
 
 	// =====================================================================================
@@ -831,7 +831,16 @@ public :
 			StampCMS( "Internal", 140., 0.14, 0.84, 0.045 );
 			StampCuts( 0.1, 0.91, 0.015 );			
 			StampText( 0.7, 0.91, 0.04, WriteSelection);
-
+			
+			TString output_file_name = GetOutputFileName(PlotParams_temp, plot_type);
+			// handle long Smajor Sminor filenames! 
+			if (output_file_name == "Plotratio_-1 MULT jet0_S_etaeta MULT jet0_S_phiphi + sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2 MULT jet0_S_etaeta MULT jet0_S_phiphi - sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2_norm_log_Rcdf_Overlay_v3.0") output_file_name = "Plotratio_jet0_Smajor_Sminor_norm_log_Rcdf_Overlay_v3.0";
+			if (output_file_name == "Plotratio_-1 MULT jet0_S_etaeta MULT jet0_S_phiphi + sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2 MULT jet0_S_etaeta MULT jet0_S_phiphi - sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2_norm_log_cdf_Overlay_v3.0") output_file_name = "Plotratio_jet0_Smajor_Sminor_norm_log_cdf_Overlay_v3.0";
+			if (output_file_name == "Plotratio_-1 MULT jet0_S_etaeta MULT jet0_S_phiphi + sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2 MULT jet0_S_etaeta MULT jet0_S_phiphi - sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2_norm_log_Overlay_v3.0") output_file_name = "Plotratio_jet0_Smajor_Sminor_norm_log_Overlay_v3.0";
+			if (output_file_name == "Plotratio_-1 MULT jet0_S_etaeta MULT jet0_S_phiphi + sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2 MULT jet0_S_etaeta MULT jet0_S_phiphi - sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2_norm_log_JetpTBins_Jet40_v3.0_MC") output_file_name = "Plotratio_jet0_Smajor_Sminor_norm_log_JetpTBins_Jet40_v3.0_MC";
+			if (output_file_name == "Plotratio_-1 MULT jet0_S_etaeta MULT jet0_S_phiphi + sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2 MULT jet0_S_etaeta MULT jet0_S_phiphi - sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2_norm_log_JetpTBins_Jet40_v3.0") output_file_name = "Plotratio_jet0_Smajor_Sminor_norm_log_JetpTBins_Jet40_v3.0";
+			// fout = new TFile( "Figures/Figures_"+output_file_name+".root", "RECREATE"); // if want separate root file for each plot
+			
 			if( plot_type == "ratio" ){
 				myCanvas->cd(2);
 				if( plot_log_ratio ) gPad->SetLogy(); 	
@@ -897,6 +906,10 @@ public :
 								else if (PlotParams_temp.hist_name == "eventHT" && mass_lifetime[0] == "125" ) StampLLP( 0.6, 0.45, 0.03, mass_lifetime ); // middle right
 								else StampLLP( 0.56, 0.19, 0.03, mass_lifetime ); // lower right
 							}
+							fout->cd(); // write to a root file
+							std::string temp(legend_names.at(i).c_str());
+							if (plot_type == "efficiency") pEff->Write(output_file_name+"_"+temp.substr(6,3)); // for L1 efficiency with 2 mass points
+							else pEff->Write(output_file_name);
 						}
 					}
 					i += 1;
@@ -919,15 +932,8 @@ public :
 				} 
 			}
 
-			TString output_file_name = GetOutputFileName(PlotParams_temp, plot_type);
-			// handle long Smajor Sminor filenames! 
-			if (output_file_name == "Plotratio_-1 MULT jet0_S_etaeta MULT jet0_S_phiphi + sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2 MULT jet0_S_etaeta MULT jet0_S_phiphi - sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2_norm_log_Rcdf_Overlay_v3.0") output_file_name = "Plotratio_jet0_Smajor_Sminor_norm_log_Rcdf_Overlay_v3.0";
-			if (output_file_name == "Plotratio_-1 MULT jet0_S_etaeta MULT jet0_S_phiphi + sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2 MULT jet0_S_etaeta MULT jet0_S_phiphi - sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2_norm_log_cdf_Overlay_v3.0") output_file_name = "Plotratio_jet0_Smajor_Sminor_norm_log_cdf_Overlay_v3.0";
-			if (output_file_name == "Plotratio_-1 MULT jet0_S_etaeta MULT jet0_S_phiphi + sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2 MULT jet0_S_etaeta MULT jet0_S_phiphi - sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2_norm_log_Overlay_v3.0") output_file_name = "Plotratio_jet0_Smajor_Sminor_norm_log_Overlay_v3.0";
-			if (output_file_name == "Plotratio_-1 MULT jet0_S_etaeta MULT jet0_S_phiphi + sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2 MULT jet0_S_etaeta MULT jet0_S_phiphi - sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2_norm_log_JetpTBins_Jet40_v3.0_MC") output_file_name = "Plotratio_jet0_Smajor_Sminor_norm_log_JetpTBins_Jet40_v3.0_MC";
-			if (output_file_name == "Plotratio_-1 MULT jet0_S_etaeta MULT jet0_S_phiphi + sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2 MULT jet0_S_etaeta MULT jet0_S_phiphi - sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2_norm_log_JetpTBins_Jet40_v3.0") output_file_name = "Plotratio_jet0_Smajor_Sminor_norm_log_JetpTBins_Jet40_v3.0";
-			//fout->cd();
-			//myCanvas->Write();
+			fout->cd(); // write to a root file
+			myCanvas->Write(); 
 			myCanvas->SaveAs( output_directory+"/"+output_file_name+".png", "png" );
 			if( plot_type == "efficiency" || plot_type == "acceptance" ) {
 				myCanvas->SaveAs( output_directory+"/"+output_file_name+".pdf", "pdf" );

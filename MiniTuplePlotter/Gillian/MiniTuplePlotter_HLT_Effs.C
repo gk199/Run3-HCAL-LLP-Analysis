@@ -78,7 +78,7 @@ void MiniTuplePlotter_HLT_Effs(){
 	overlay_LLPdisplacement.SetPlots({P_perJet_MatchedLLP_DecayR});
 	overlay_LLPdisplacement.SetTreeName( "PerJet_LLPmatched" );
 	overlay_LLPdisplacement.SetOutputFileTag("HLT_v3_MC_jetE"+jet_E[0]+"_L1effs");
-	overlay_LLPdisplacement.SetOutputDirectory("HLT_Efficiencies");
+	overlay_LLPdisplacement.SetOutputDirectory("HLT_Efficiencies_31Jan");
 	overlay_LLPdisplacement.plot_norm 			= false;
 	overlay_LLPdisplacement.plot_log_ratio   	= true;
 	overlay_LLPdisplacement.SetLegendPosition( 0.13, 0.8, 0.6, 0.98 );
@@ -99,7 +99,7 @@ void MiniTuplePlotter_HLT_Effs(){
 	overlay_HT.SetPlots({P_eventHT});
 	overlay_HT.SetTreeName( "NoSel" ); 
 	overlay_HT.SetOutputFileTag("HLT_v3_MC_eventHT_L1effs");
-	overlay_HT.SetOutputDirectory("HLT_Efficiencies");
+	overlay_HT.SetOutputDirectory("HLT_Efficiencies_31Jan");
 	overlay_HT.plot_norm 			= false;
 	overlay_HT.plot_log_ratio   	= true;
 	overlay_HT.SetLegendPosition( 0.4, 0.65, 0.87, 0.83 );
@@ -121,7 +121,7 @@ void MiniTuplePlotter_HLT_Effs(){
 	overlay_jet.SetPlots({P_perJet_Pt});
 	overlay_jet.SetTreeName( "PerJet_LLPmatched" );
 	overlay_jet.SetOutputFileTag("HLT_v3_MC_L1effs");
-	overlay_jet.SetOutputDirectory("HLT_Efficiencies");
+	overlay_jet.SetOutputDirectory("HLT_Efficiencies_31Jan");
 	overlay_jet.plot_norm 			= false;
 	overlay_jet.plot_log_ratio   	= true;
 	overlay_jet.SetLegendPosition( 0.4, 0.75, 0.87, 0.93 );
@@ -178,7 +178,7 @@ void MiniTuplePlotter_HLT_Effs(){
 //			eff_LLPdisplacement.SetTreeName( "NoSel" );
 			eff_LLPdisplacement.SetTreeName( "PerJet_LLPmatched" );
 			eff_LLPdisplacement.SetOutputFileTag("HLT_v3_MC_"+key+"_jetE"+jet_E[i]);
-			eff_LLPdisplacement.SetOutputDirectory("HLT_Efficiencies");
+			eff_LLPdisplacement.SetOutputDirectory("HLT_Efficiencies_31Jan");
 			eff_LLPdisplacement.plot_norm 			= false;
 			eff_LLPdisplacement.plot_log_ratio   	= true;
 			eff_LLPdisplacement.SetLegendPosition( 0.15, 0.9, 0.43, 1.08 );
@@ -226,7 +226,7 @@ void MiniTuplePlotter_HLT_Effs(){
 		plotter_HT.SetPlots({P_eventHT});
 		plotter_HT.SetTreeName( "NoSel" ); 
 		plotter_HT.SetOutputFileTag("HLT_v3_MC_"+key);
-		plotter_HT.SetOutputDirectory("HLT_Efficiencies");
+		plotter_HT.SetOutputDirectory("HLT_Efficiencies_31Jan");
 		plotter_HT.plot_norm 			= false;
 		plotter_HT.plot_log_ratio   	= true;
 		plotter_HT.SetVariableBins( {0, 20, 40, 60, 80, 100, 120, 140, 160, 190, 220, 250, 290, 330, 390, 490, 610, 760, 950, 1200} );
@@ -267,7 +267,7 @@ void MiniTuplePlotter_HLT_Effs(){
 	//		plotter_HLTeffMC.SetTreeName( "NoSel" ); 
 			plotter_HLTeffMC.SetTreeName( "PerJet_LLPmatched" );
 			plotter_HLTeffMC.SetOutputFileTag("HLT_v3_MC_"+key);
-			plotter_HLTeffMC.SetOutputDirectory("HLT_Efficiencies");
+			plotter_HLTeffMC.SetOutputDirectory("HLT_Efficiencies_31Jan");
 			plotter_HLTeffMC.plot_norm 			= false;
 			plotter_HLTeffMC.plot_log_ratio   	= true;
 			plotter_HLTeffMC.SetLegendPosition( 0.6, 0.75, 0.88, 0.88 ); // works when efficiency legend uses -0.45 for x (upper left) or -0.3 for y (middle right)

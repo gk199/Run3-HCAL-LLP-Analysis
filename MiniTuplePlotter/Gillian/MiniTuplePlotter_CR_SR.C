@@ -33,7 +33,6 @@ void MiniTuplePlotter_CR_SR(){
 
 	vector<string> filetags_test		= { "v3.10_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_28Jan_DepthTimingFlag_HADD"};
 	vector<string> filetags_test_data	= { "v3.10_Run2023D-EXOLLPJetHCAL-v1_28Jan_DepthTimingFlag_Hadd"};
-	// vector<string> filetags_test		= { "v3.10_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_4Dec_DepthFlag_TimingFlag_HADD"};
 
 	vector<string> BDT_files 			= {"v3.8_LLPskim_Run2023_HADD", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TEST"};
 	vector<string> filetags_all_v3pt0 	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v2.0_MC_QCD_250k_2023_10_18", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23"};
@@ -132,6 +131,7 @@ void MiniTuplePlotter_CR_SR(){
 		plotter_depth.colors = { kGray, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed };
 		plotter_depth.SetVariableBins({-0.25,0.25,0.75,1.25,1.75,2.25,2.75,3.25,3.75,4.25,4.75,5.25,5.75,6.25,6.75,7.25,7.75,8.25});
 		plotter_depth.SetOutputDirectory("DepthTowers");
+		//plotter_depth.plot_norm = false;
 		plotter_depth.Plot();
 		plotter_depth.ClearFileTrees();
 		plotter_depth.SetPlots({P_jet0_DepthTowers, P_jet0_TimingTowers, P_jet0_FlaggedTowers}); 
@@ -152,6 +152,7 @@ void MiniTuplePlotter_CR_SR(){
 		bkg_plotter_depth.colors = { kViolet+4, kMagenta-7, kRed };
 		bkg_plotter_depth.SetVariableBins({-0.25,0.25,0.75,1.25,1.75,2.25,2.75,3.25,3.75,4.25,4.75,5.25,5.75,6.25,6.75,7.25,7.75,8.25});
 		bkg_plotter_depth.SetOutputDirectory("DepthTowers");
+		//bkg_plotter_depth.plot_norm = false;
 		bkg_plotter_depth.Plot();
 		bkg_plotter_depth.ClearFileTrees();
 		bkg_plotter_depth.SetPlots({P_jet0_DepthTowers, P_jet0_TimingTowers, P_jet0_FlaggedTowers}); 
@@ -171,6 +172,7 @@ void MiniTuplePlotter_CR_SR(){
 		decay_R.SetLegendNames({"No flagged towers", "1 flagged tower", "2+ flagged towers"});
 		decay_R.colors = { kViolet+4, kAzure+7, kMagenta-7 };
 		decay_R.SetOutputDirectory("DepthTowers");
+		//decay_R.plot_norm = false;
 		decay_R.Plot();
 		decay_R.ClearFileTrees();
 		decay_R.SetOutputFileTag("Overlay_LLPr_v3.10_depth");
