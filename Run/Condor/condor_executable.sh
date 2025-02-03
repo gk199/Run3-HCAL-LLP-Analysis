@@ -17,8 +17,8 @@ voms-proxy-info -all -file $myproxy
 
 # Environment setup -- no packages sourced, just setting up C++ for compiling needs
 echo "CMSSW environment"
-cmsrel CMSSW_13_2_0
-cd CMSSW_13_2_0/src
+cmsrel CMSSW_14_0_0
+cd CMSSW_14_0_0/src
 cmsenv
 cd ../..
 
