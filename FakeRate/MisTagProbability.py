@@ -935,9 +935,9 @@ def main():
     # label = "HighMET"
     # infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8.1/minituple_v3.8_Zmu_Run2023Cv4_2024_07_11.root"
     infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8.1/minituple_v3.8_Zmu_Run2023Cv4_2024_08_23.root" # most recent one to return to
-    infilepath_ZM = "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/minituple_v3.9_Zmu_Run2023_HADD_2024_10_14_Zmumu_scores.root "
-    infilepath_WJ = "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/minituple_v3.9_Zmu_Run2023_HADD_2024_10_14_WPlusJets_scores.root "
-    infilepath_LLPskim = "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/minituple_v3.9_LLPskim_Run2023Cv4_2024_10_14_WPlusJets_scores.root "
+    infilepath_ZM = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/minituple_v3.9_Zmu_Run2023_HADD_2024_10_14_Zmumu_scores.root " # "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/minituple_v3.9_Zmu_Run2023_HADD_2024_10_14_Zmumu_scores.root "
+    infilepath_WJ = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/minituple_v3.9_Zmu_Run2023_HADD_2024_10_14_WPlusJets_scores.root "
+    infilepath_LLPskim = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/minituple_v3.9_LLPskim_Run2023Cv4_2024_10_14_WPlusJets_scores.root "
     # infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8.1/minituple_v3.8_Zmu_Run2023_all_08_25.root"
     label = "Zmu"
 
