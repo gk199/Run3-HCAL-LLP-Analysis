@@ -234,11 +234,20 @@ Location of minituples:
 ```
 
 ### v3.9
-Updates
+Updates:
 * Updated 2023 HCAL PF rechit thresholds to agree with those in CMSSW, moving from 0.25 to 0.4 GeV in HB depth 1
+* Zmumu selection for fake rate studies 
+* PV saved in minituples
+
+## v3.10
+Updates:
 * Added fractional variables to minituples (fractional track pT, fractional rechit E)
 * Added jet-L1 matching result (hwQual of matched L1 jet) to per jet trees
-* Allowed all jet-L1 matching to consider all L1 jets, not just leading 3 as previously done! 
+* Allowed all jet-L1 matching to consider all L1 jets, not just leading 3 as previously done!
+
+### v3.11
+Updates:
+* Depth and timing tower emulation added, with nominal energy thresholds (4 GeV timing, 1 GeV and 5 GeV depth)
 
 ## V4
 Ongoing wish list:
