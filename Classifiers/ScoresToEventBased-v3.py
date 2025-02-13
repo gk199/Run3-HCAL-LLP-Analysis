@@ -326,8 +326,9 @@ def main():
 
     mode = "filewrite" # "eval", "filewrite"
 
-    trees_to_iterate = ["NoSel", "PassedHLT", "WPlusJets", "Zmumu"] # all event based trees 
-    # trees_to_iterate = ["WPlusJets", "Zmumu"] # all event based trees 
+    # trees_to_iterate = ["NoSel", "PassedHLT", "WPlusJets", "Zmumu"] # all event based trees 
+    # trees_to_iterate = ["Zmumu", "WPlusJets"] # for Zmu skim only 
+    trees_to_iterate = ["NoSel", "PassedHLT"] # for LLP MC 
     
     # pass runner each signal file (as a list, using list slicing), and then each background file, such that scores are appended to each
     print("Running Depth and Inclusive Tagger over each file")
