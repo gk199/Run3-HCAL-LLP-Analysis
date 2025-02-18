@@ -196,6 +196,8 @@ PlotParams P_jet0_track2Pt				= {"jet0_track2Pt", "Leading Jet: Third leading Tr
 // Subleading jet
 PlotParams P_jet1_E						= {"jet1_E", "Sub-Leading Jet Energy", "E [GeV] (sub-leading jet)", 0, 250 };
 PlotParams P_jet1_Pt					= {"jet1_Pt", "Sub-Leading Jet p_{T}", "p_{T} [GeV] (sub-leading jet)", 0, 250 };
+PlotParams P_jet1_Phi					= {"jet1_Phi", "Sub-Leading Jet #phi", "#phi (sub-leading jet)", -3.2, 3.2 };
+PlotParams P_jet1_Eta					= {"jet1_Eta", "Sub-Leading Jet #eta", "#eta (sub-leading jet)", -1.5, 1.5 };
 PlotParams P_jet1_EtaSpread				= {"jet1_EtaSpread", "Sub-Leading Jet #eta Spread", "#eta Spread", 0, 0.4 };
 PlotParams P_jet1_EtaSpread_energy		= {"jet1_EtaSpread_energy", "Sub-Leading Jet #eta Spread Energy", "#eta Spread (energy weighted)", 0, 0.2 };
 PlotParams P_jet1_PhiSpread				= {"jet1_PhiSpread", "Sub-Leading Jet #phi Spread", "#phi Spread", 0, 0.4 };

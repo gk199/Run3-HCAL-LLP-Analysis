@@ -264,3 +264,6 @@ TCut Cut_2TimingTowers = Form("jet0_TimingTowers >= 2");
 TCut Cut_0Towers = Form("jet0_TimingTowers + jet0_DepthTowers == 0");
 TCut Cut_1Towers = Form("jet0_TimingTowers + jet0_DepthTowers == 1");
 TCut Cut_2Towers = Form("jet0_TimingTowers + jet0_DepthTowers >= 2");
+
+TCut Cut_CR = Form("jet1_scores_inc >= 0 && jet1_scores_inc <= 0.5");
+TCut Cut_VR = Form("jet1_scores_inc > 0.5 && jet1_scores_inc <= 0.9");

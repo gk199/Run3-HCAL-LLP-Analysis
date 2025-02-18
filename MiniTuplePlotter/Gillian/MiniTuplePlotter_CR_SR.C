@@ -184,6 +184,20 @@ void MiniTuplePlotter_CR_SR(){
 		decay_R.SetComparisonCuts({Cut_0TimingTowers, Cut_1TimingTowers, Cut_2TimingTowers});
 		decay_R.SetLegendNames({"No flagged timing towers", "1 flagged tower", "2+ flagged towers"});		
 		decay_R.Plot();
+
+		// pT spectrum of CR and VR
+		class MiniTuplePlotter CR_VR_kinematics( {"v3.11_LLPskim_Run2023Cv1_NoSel_scores_2025_02_03"}, {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_"} );
+		CR_VR_kinematics.SetPlots({P_jet1_Pt, P_jet1_Eta, P_jet1_Phi}); 
+		CR_VR_kinematics.SetTreeNames( {"NoSel"} );	
+		CR_VR_kinematics.SetOutputFileTag("Overlay_InclusiveJet_v3.11_data");
+		CR_VR_kinematics.plot_log    = false; 
+		CR_VR_kinematics.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+		CR_VR_kinematics.SetCuts("jet0_Pt >= 40 && abs(jet0_Eta) <= 1.26 && jet0_dR_L1jet < 0.4 && jet0_L1trig_Matched == 1 && jet0_scores >= 0.9");
+		CR_VR_kinematics.SetComparisonCuts({Cut_CR, Cut_VR}),
+		CR_VR_kinematics.SetLegendNames({"CR", "VR"});
+		CR_VR_kinematics.colors = { kViolet+4, kMagenta-7 };
+		CR_VR_kinematics.SetOutputDirectory("CR_VR");
+		CR_VR_kinematics.Plot();
 	}
 
 	// ----- Jet kinematics in control and signal regions -----//
