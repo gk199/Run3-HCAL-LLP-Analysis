@@ -6,6 +6,8 @@ ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
 ROOT.gStyle.SetPalette(ROOT.kCandy)
 
+from ROOT import SetOwnership
+
 debug = False
 
 # ------------------------------------------------------------------------------
@@ -50,11 +52,30 @@ def MisTagParametrization(tree):
     hist3d_CR_mistag_2 = ROOT.TH3F("hist3d_CR_mistag_2", "3D histogram with energy cut (30 < E < 50)", len(pT_bins)-1, pT_bins, len(eta_bins)-1, eta_bins, len(phi_bins)-1, phi_bins)
     hist3d_multiplied = ROOT.TH3F("hist3d_multiplied", "3D histogram multiplied (E > 50 & 30 < E < 50)", len(pT_bins)-1, pT_bins, len(eta_bins)-1, eta_bins, len(phi_bins)-1, phi_bins)
 
+    # Setup cuts for CR and VR
+    # CR = jet1_scores_inc between 0-0.5
+    # VR = jet1_scores_inc between 0.5-0.9
+    # mistag means jet0_scores over 0.9
+    CR = GetCut("jet1_scores_inc", [0,0.5])
+    VR = GetCut("jet1_scores_inc", [0.5,0.9])
+    mistag = GetCut("jet0_scores", [0.9,1.1])
+    # need leading jet to be matched to a LLP, jet0_L1trig_Matched
+    # leading jet pT > 60, subleading > 40
+    # eta restrictions on both jets, 1.26
+    triggered = GetCut("jet0_L1trig_Matched", 1)
+    pt_eta = GetCut("jet0_Pt",[60,1000]) + GetCut("jet0_Eta",[-1.26,1.26]) + GetCut("jet1_Pt",[40,1000]) + GetCut("jet1_Eta",[-1.26,1.26])
+    # emulated towers split with jet0_DepthTowers, TimingTowers
+    depth_emu = GetCut("jet0_DepthTowers", [2,100])
+    timing_emu = GetCut("jet0_TimingTowers", [2,100])
+    depth_timing_emu = GetCut("jet0_DepthTowers", 1) + GetCut("jet0_TimingTowers", 1)
+
     # Fill the histograms using tree.Draw() with cuts
-    tree.Draw("jet0_Phi:jet0_Eta:jet0_Pt >> hist3d_CR_all", "", "")
-    tree.Draw("jet0_Phi:jet0_Eta:jet0_Pt >> hist3d_CR_mistag", "jet1_scores_inc >= 0 && jet1_scores_inc < 0.5", "")
-    tree.Draw("jet0_Phi:jet0_Eta:jet0_Pt >> hist3d_CR_mistag_2", "jet1_scores_inc >= 0 && jet1_scores_inc < 0.7", "")
-    tree.Draw("jet0_Phi:jet0_Eta:jet0_Pt >> hist3d_multiplied", "jet1_scores_inc >= 0 && jet1_scores_inc < 0.9", "")
+    # CR, CR mistag, VR, VR mistag
+    # VR predicted mistag from VR * CR mistag / CR
+    tree.Draw("jet0_Phi:jet0_Eta:jet0_Pt >> hist3d_CR_all", CR + triggered + pt_eta, "")
+    tree.Draw("jet0_Phi:jet0_Eta:jet0_Pt >> hist3d_CR_mistag", CR + triggered + pt_eta + mistag, "")
+    tree.Draw("jet0_Phi:jet0_Eta:jet0_Pt >> hist3d_CR_mistag_2", VR + triggered + pt_eta, "")
+    tree.Draw("jet0_Phi:jet0_Eta:jet0_Pt >> hist3d_multiplied", VR + triggered + pt_eta + mistag, "")
 
     if debug:
         print(f"Entries in the tree: {tree.GetEntries()}")
@@ -101,60 +122,23 @@ def MisTagParametrization(tree):
     c1 = ROOT.TCanvas("c1", "Projection plots with different energy cuts", 2400, 600)
     c1.Divide(3, 1)
 
+    # Legend labels
+    legend_labels = ["no cuts", "low DNN", "mid DNN", "high DNN"]
+
     # Plot the projections for pT
     c1.cd(1)
-    MakePlot([proj_pT_no_cut, proj_pT_with_cut, proj_pT_with_cut_2, proj_pT_multiplied], ["no cuts", "low DNN", "mid DNN", "high DNN"])
+    MakePlot([proj_pT_no_cut, proj_pT_with_cut, proj_pT_with_cut_2, proj_pT_multiplied], legend_labels)
+    proj_pT_no_cut.SetTitle("Jet p_{T} Projection with various cuts")
 
     # Plot the projections for eta
     c1.cd(2)
-    MakePlot([proj_eta_no_cut, proj_eta_with_cut, proj_eta_with_cut_2, proj_eta_multiplied], ["no cuts", "low DNN", "mid DNN", "high DNN"])
-
-    # proj_eta_no_cut.SetLineColor(ROOT.kRed)
-    # proj_eta_with_cut.SetLineColor(ROOT.kBlue)
-    # proj_eta_with_cut_2.SetLineColor(ROOT.kGreen)
-    # proj_eta_multiplied.SetLineColor(ROOT.kBlack)
-
-    # proj_eta_no_cut.Draw()
-    # proj_eta_with_cut.Draw("SAME")
-    # proj_eta_with_cut_2.Draw("SAME")
-    # proj_eta_multiplied.Draw("SAME")
-
-    # # Add legend for eta plot
-    # legend_eta = ROOT.TLegend(0.7, 0.7, 0.9, 0.9)
-    # legend_eta.AddEntry(proj_eta_no_cut, "No Cut", "l")
-    # legend_eta.AddEntry(proj_eta_with_cut, "E > 50 GeV", "l")
-    # legend_eta.AddEntry(proj_eta_with_cut_2, "30 < E < 50 GeV", "l")
-    # legend_eta.AddEntry(proj_eta_multiplied, "E > 50 and 30 < E < 50", "l")
-    # legend_eta.Draw()
-
-    # # Manually set axis limits for eta to ensure all histograms are visible
-    # proj_eta_no_cut.SetMaximum(max(proj_eta_no_cut.GetMaximum(), proj_eta_with_cut.GetMaximum(), proj_eta_with_cut_2.GetMaximum(), proj_eta_multiplied.GetMaximum()) * 1.1)
-    # proj_eta_no_cut.SetMinimum(0)
+    MakePlot([proj_eta_no_cut, proj_eta_with_cut, proj_eta_with_cut_2, proj_eta_multiplied], legend_labels)
+    proj_eta_no_cut.SetTitle("Jet #eta Projection with various cuts")
 
     # Plot the projections for phi
     c1.cd(3)
-    MakePlot([proj_phi_no_cut, proj_phi_with_cut, proj_phi_with_cut_2, proj_phi_multiplied], ["no cuts", "low DNN", "mid DNN", "high DNN"])
-    # proj_phi_no_cut.SetLineColor(ROOT.kRed)
-    # proj_phi_with_cut.SetLineColor(ROOT.kBlue)
-    # proj_phi_with_cut_2.SetLineColor(ROOT.kGreen)
-    # proj_phi_multiplied.SetLineColor(ROOT.kBlack)
-
-    # proj_phi_no_cut.Draw()
-    # proj_phi_with_cut.Draw("SAME")
-    # proj_phi_with_cut_2.Draw("SAME")
-    # proj_phi_multiplied.Draw("SAME")
-
-    # # Add legend for phi plot
-    # legend_phi = ROOT.TLegend(0.7, 0.7, 0.9, 0.9)
-    # legend_phi.AddEntry(proj_phi_no_cut, "No Cut", "l")
-    # legend_phi.AddEntry(proj_phi_with_cut, "E > 50 GeV", "l")
-    # legend_phi.AddEntry(proj_phi_with_cut_2, "30 < E < 50 GeV", "l")
-    # legend_phi.AddEntry(proj_phi_multiplied, "E > 50 and 30 < E < 50", "l")
-    # legend_phi.Draw()
-
-    # # Manually set axis limits for phi to ensure all histograms are visible
-    # proj_phi_no_cut.SetMaximum(max(proj_phi_no_cut.GetMaximum(), proj_phi_with_cut.GetMaximum(), proj_phi_with_cut_2.GetMaximum(), proj_phi_multiplied.GetMaximum()) * 1.1)
-    # proj_phi_no_cut.SetMinimum(0)
+    MakePlot([proj_phi_no_cut, proj_phi_with_cut, proj_phi_with_cut_2, proj_phi_multiplied], legend_labels)
+    proj_phi_no_cut.SetTitle("Jet #phi Projection with various cuts")
 
     # Show the canvas
     c1.Update()
@@ -188,9 +172,32 @@ def MakePlot(hists, legends):
     for i in range(len(hists)):
         legend.AddEntry(hists[i], legends[i], "l")
     legend.Draw()
+    SetOwnership( legend, 0 ) # 0 = release (not keep), 1 = keep # when legend is in a separate function, it is not saved in memory for the canvas outside of function (scoping issue)
 
-    # Update the canvas to ensure the legend is drawn
-    ROOT.gPad.Update()
+# ------------------------------------------------------------------------------
+def GetCut( branch_name, branch_sel):
+
+	selection = ""
+
+	if type(branch_sel) is int:
+		selection = branch_name + " == " + str(branch_sel) 
+
+	elif type(branch_sel) is list:
+		if len(branch_sel) == 0:
+			print("WARNING <GetCut> : Entry error (length = 0). No cut implemented")
+		elif len(branch_sel) == 1:
+			selection = branch_name + " == " + str(branch_sel[0])
+		else:
+			selection = branch_name + " >= " + str(branch_sel[0]) + " && " + branch_name + " < " + str(branch_sel[1])
+
+		if len(branch_sel) > 2:
+			print("WARNING <GetCut> : 'branch_sel' input has more than two entries. Only using the first two!")
+
+	else: 
+		print("WARNING <GetCut> : Type Error. No cut implemented")
+
+	return ROOT.TCut( selection + " " )
+
 # ------------------------------------------------------------------------------
 def main():
 
