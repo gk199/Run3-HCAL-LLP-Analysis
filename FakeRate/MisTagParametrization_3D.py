@@ -10,6 +10,13 @@ from ROOT import SetOwnership
 
 debug = False
 
+# Define the histogram bins
+pT_bins = np.linspace(0, 300, 20)  # pT axis from 0 to 500 GeV, 20 bins
+pT_bins = [0, 40, 50, 60, 70, 80, 100, 120, 160, 240, 400]  # Define pT bins
+pT_bins = np.array(pT_bins, dtype=float)
+eta_bins = np.linspace(-1.3, 1.3, 10)  # eta axis from -2 to 2, 10 bins
+phi_bins = np.linspace(-np.pi, np.pi, 10)  # phi axis from -pi to pi, 10 bins
+
 # ------------------------------------------------------------------------------
 def GetData(infilepath, label):
     # Open the input ROOT file in read mode
@@ -31,25 +38,14 @@ def GetData(infilepath, label):
         input_file.Close()  # Close the file if the tree doesn't exist
         return None
     if tree:
-        print(f"Found tree with label '{label}' and using in MisTagParametrization()")
-        MisTagParametrization(tree)
+        print(f"Found tree with label '{label}'")
+        # Return the tree but make sure to keep the file open while using the tree
+        return tree, input_file
 
 # ------------------------------------------------------------------------------
-def MisTagParametrization(tree):
+def MisTagParametrization(tree, option=""):
 
-    # Define the histogram bins
-    pT_bins = np.linspace(0, 300, 20)  # pT axis from 0 to 500 GeV, 20 bins                 # pT_bins = [0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]  # Define pT bins
-    eta_bins = np.linspace(-1.3, 1.3, 10)  # eta axis from -2 to 2, 10 bins
-    phi_bins = np.linspace(-np.pi, np.pi, 10)  # phi axis from -pi to pi, 10 bins
-
-    # Create four 3D histograms with different cuts
-    hist3d_CR_all = ROOT.TH3F("hist3d_CR_all", "3D histogram in CR (no cuts); p_{T}; #eta; #phi", len(pT_bins)-1, pT_bins, len(eta_bins)-1, eta_bins, len(phi_bins)-1, phi_bins)
-    hist3d_CR_mistag = ROOT.TH3F("hist3d_CR_mistag", "3D histogram of mistag in CR; ; p_{T}; #eta; #phi", len(pT_bins)-1, pT_bins, len(eta_bins)-1, eta_bins, len(phi_bins)-1, phi_bins)
-    hist3d_VR_all = ROOT.TH3F("hist3d_VR_all", "3D histogram in VR (no cuts); ; p_{T}; #eta; #phi", len(pT_bins)-1, pT_bins, len(eta_bins)-1, eta_bins, len(phi_bins)-1, phi_bins)
-    hist3d_VR_mistag = ROOT.TH3F("hist3d_VR_mistag", "3D histogram of mistag in VR; ; p_{T}; #eta; #phi", len(pT_bins)-1, pT_bins, len(eta_bins)-1, eta_bins, len(phi_bins)-1, phi_bins)
-
-    # Setup cuts for CR and VR
-    # CR = jet1_scores_inc between 0-0.5. VR = jet1_scores_inc between 0.5-0.9. Mistag means jet0_scores over 0.9
+    # Setup cuts for CR and VR. CR = jet1_scores_inc between 0-0.5. VR = jet1_scores_inc between 0.5-0.9. Mistag means jet0_scores over 0.9
     CR = GetCut("jet1_scores_inc", [0,0.5])
     VR = GetCut("jet1_scores_inc", [0.5,0.9])
     mistag = GetCut("jet0_scores", [0.9,1.1])
@@ -61,13 +57,30 @@ def MisTagParametrization(tree):
     timing_emu = GetCut("jet0_TimingTowers", [2,100])
     depth_timing_emu = GetCut("jet0_DepthTowers", 1) + GetCut("jet0_TimingTowers", 1)
 
-    # Fill the histograms using tree.Draw() with cuts
-    # CR, CR mistag, VR, VR mistag. Then VR predicted mistag is calculated from VR * CR mistag / CR
-    tree.Draw("jet0_Phi:jet0_Eta:jet0_Pt >> hist3d_CR_all", CR + triggered + pt_eta, "")
-    tree.Draw("jet0_Phi:jet0_Eta:jet0_Pt >> hist3d_CR_mistag", CR + triggered + pt_eta + mistag, "")
-    tree.Draw("jet0_Phi:jet0_Eta:jet0_Pt >> hist3d_VR_all", VR + triggered + pt_eta, "")
-    tree.Draw("jet0_Phi:jet0_Eta:jet0_Pt >> hist3d_VR_mistag", VR + triggered + pt_eta + mistag, "")
+    # Define a mapping of options to their corresponding updates
+    option_map = {
+        "depth": (depth_emu, ": 2+ depth", "_depth"),
+        "timing": (timing_emu, ": 2+ timing", "_timing"),
+        "depth_timing": (depth_timing_emu, ": 1 depth, 1 timing", "_depth_timing")
+    }
 
+    # Default values for label and title
+    label = ""
+    title = ": inclusive"
+
+    # Check if the option exists in the mapping
+    if option in option_map:
+        CR += option_map[option][0]
+        VR += option_map[option][0]
+        title = option_map[option][1]
+        label = option_map[option][2]
+
+    # Create the 3D histograms with different cuts. Arguments to CreateHistograms function are tree, cut, histogram name. Histograms are filled usnig tree.Draw() method
+    hist3d_CR_all = CreateHistograms(tree, CR + triggered + pt_eta, "hist3d_CR_all")
+    hist3d_CR_mistag = CreateHistograms(tree, CR + triggered + pt_eta + mistag, "hist3d_CR_mistag")
+    hist3d_VR_all = CreateHistograms(tree, VR + triggered + pt_eta, "hist3d_VR_all")
+    hist3d_VR_mistag = CreateHistograms(tree, VR + triggered + pt_eta + mistag, "hist3d_VR_mistag")
+    
     if debug:
         print(f"Entries in the tree: {tree.GetEntries()}")
         print("Branches in the tree:")
@@ -89,7 +102,7 @@ def MisTagParametrization(tree):
         print(f"Number of entries in the 3D histogram: {hist3d_CR_all.GetEntries()}")
 
     # Write the base histograms to the output file
-    output_file = ROOT.TFile("output_3D_hists.root", "RECREATE")
+    output_file = ROOT.TFile("output_3D_hists"+label+".root", "RECREATE")
     output_file.WriteObject(hist3d_CR_all)
     output_file.WriteObject(hist3d_CR_mistag)
     output_file.WriteObject(hist3d_VR_all)
@@ -105,27 +118,27 @@ def MisTagParametrization(tree):
     proj_pT_VR_mistag, proj_eta_VR_mistag, proj_phi_VR_mistag = ProjectHistogram(hist3d_VR_mistag)
 
     # Create a canvas to display the plots of CR and VR all and mistag overlayed
-    c1 = ROOT.TCanvas("c1", "Projection plots with different energy cuts", 2400, 600)
+    c1 = ROOT.TCanvas(f"c1_{option}", f"Projection plots for {option}", 2400, 600)
     c1.Divide(3, 1)
     # Legend labels
     legend_labels = ["CR (no cuts)", "CR, mistag", "VR (no cuts)", "VR, mistag"]
     # Plot the projections for pT
     c1.cd(1)
     MakePlot([proj_pT_CR_all, proj_pT_CR_mistag, proj_pT_VR_all, proj_pT_VR_mistag], legend_labels)
-    proj_pT_CR_all.SetTitle("Jet p_{T} Projection with various cuts")
+    proj_pT_CR_all.SetTitle("Jet p_{T} Projection with various cuts" + title)
     # Plot the projections for eta
     c1.cd(2)
     MakePlot([proj_eta_CR_all, proj_eta_CR_mistag, proj_eta_VR_all, proj_eta_VR_mistag], legend_labels)
-    proj_eta_CR_all.SetTitle("Jet #eta Projection with various cuts")
+    proj_eta_CR_all.SetTitle("Jet #eta Projection with various cuts" + title)
     # Plot the projections for phi
     c1.cd(3)
     MakePlot([proj_phi_CR_all, proj_phi_CR_mistag, proj_phi_VR_all, proj_phi_VR_mistag], legend_labels)
-    proj_phi_CR_all.SetTitle("Jet #phi Projection with various cuts")
+    proj_phi_CR_all.SetTitle("Jet #phi Projection with various cuts" + title)
     # Show the canvas
     c1.Update()
     c1.Draw()
     # Save the result as an image or file
-    c1.SaveAs("3d_hist_projection_overlay_CR_VR.png")
+    c1.SaveAs("3d_hist_projection_overlay_CR_VR"+label+".png")
 
     # Clone hist3d_CR_mistag and divide it by hist3d_CR_all to get the mistag rate in CR
     hist3d_CR_mistag_rate = hist3d_CR_mistag.Clone()
@@ -148,42 +161,62 @@ def MisTagParametrization(tree):
     proj_phi_CR_mistag_rate.Divide(proj_phi_CR_all)
 
     # Create a canvas for the mistag rate plots (CR)
-    c2 = ROOT.TCanvas("c2", "Mistag rate projections in the CR", 2400, 600)
+    c2 = ROOT.TCanvas(f"c2_{option}", f"Mistag rate plots in the CR for {option}", 2400, 600)
     c2.Divide(3,1)
     legend_labels = ["Mistag rate (CR)"]
     c2.cd(1)
     MakePlot([proj_pT_CR_mistag_rate], legend_labels)
-    proj_pT_CR_mistag_rate.SetTitle("Jet p_{T} Mistag Rate from CR")
+    proj_pT_CR_mistag_rate.SetTitle("Jet p_{T} Mistag Rate from CR" + title)
     c2.cd(2)
     MakePlot([proj_eta_CR_mistag_rate], legend_labels)
-    proj_eta_CR_mistag_rate.SetTitle("Jet #eta Mistag Rate from CR")
+    proj_eta_CR_mistag_rate.SetTitle("Jet #eta Mistag Rate from CR" + title)
     c2.cd(3)
     MakePlot([proj_phi_CR_mistag_rate], legend_labels) 
-    proj_phi_CR_mistag_rate.SetTitle("Jet #phi Mistag Rate from CR")
+    proj_phi_CR_mistag_rate.SetTitle("Jet #phi Mistag Rate from CR" + title)
     c2.Update()
     c2.Draw()   
-    c2.SaveAs("3d_hist_projection_CR_mistag_rate.png")
+    c2.SaveAs("3d_hist_projection_CR_mistag_rate"+label+".png")
 
     # Create a canvas for the mistag prediction and observation (VR)
-    c3 = ROOT.TCanvas("c3", "Mistag in the VR", 2400, 600)
+    c3 = ROOT.TCanvas(f"c3_{option}", f"Mistag plots in the VR for {option}", 2400, 600)
     c3.Divide(3,1)
     legend_labels = ["Predicted mistag (VR)", "Observed mistag (VR)"]
     c3.cd(1)
     MakePlot([proj_pT_VR_mistag_predict, proj_pT_VR_mistag], legend_labels)
-    proj_pT_VR_mistag_predict.SetTitle("Jet p_{T} Mistags in VR")
+    proj_pT_VR_mistag_predict.SetTitle("Jet p_{T} Mistags in VR" + title)
     c3.cd(2)
     MakePlot([proj_eta_VR_mistag_predict, proj_eta_VR_mistag], legend_labels)
-    proj_eta_VR_mistag_predict.SetTitle("Jet #eta Mistags in VR")
+    proj_eta_VR_mistag_predict.SetTitle("Jet #eta Mistags in VR" + title)
     c3.cd(3)
     MakePlot([proj_phi_VR_mistag_predict, proj_phi_VR_mistag], legend_labels) 
-    proj_phi_VR_mistag_predict.SetTitle("Jet #phi Mistags in VR")
+    proj_phi_VR_mistag_predict.SetTitle("Jet #phi Mistags in VR" + title)
     c3.Update()
     c3.Draw()   
-    c3.SaveAs("3d_hist_projection_VR_mistags.png")    
+    c3.SaveAs("3d_hist_projection_VR_mistags"+label+".png") 
+
+    all_hists = [proj_pT_CR_all, proj_eta_CR_all, proj_phi_CR_all,
+                proj_pT_CR_mistag, proj_eta_CR_mistag, proj_phi_CR_mistag,
+                proj_pT_VR_all, proj_eta_VR_all, proj_phi_VR_all,
+                proj_pT_VR_mistag, proj_eta_VR_mistag, proj_phi_VR_mistag,
+                hist3d_CR_all, hist3d_CR_mistag, hist3d_VR_all, hist3d_VR_mistag,
+                hist3d_CR_mistag_rate, hist3d_VR_mistag_predict,
+                proj_pT_VR_mistag_predict, proj_eta_VR_mistag_predict, proj_phi_VR_mistag_predict,
+                proj_pT_CR_mistag_rate, proj_eta_CR_mistag_rate, proj_phi_CR_mistag_rate]
+    for hist in all_hists:
+        hist.Reset()
+
+# ------------------------------------------------------------------------------
+def CreateHistograms(tree, cut, hist_name):
+    # Check if the histogram already exists and delete it
+    if ROOT.gDirectory.Get(hist_name):
+        ROOT.gDirectory.Get(hist_name).Delete()
+    # Create and fill the histograms
+    hist3d = ROOT.TH3F(hist_name, "3D histogram; p_{T}; #eta; #phi", len(pT_bins)-1, pT_bins, len(eta_bins)-1, eta_bins, len(phi_bins)-1, phi_bins)
+    tree.Draw("jet0_Phi:jet0_Eta:jet0_Pt >> " + hist_name, cut, "")
+    return hist3d
 
 # ------------------------------------------------------------------------------
 def ProjectHistogram(hist3d):
-    
     # Project the histogram in the x, y, and z directions
     proj_pT = hist3d.Project3D("x")
     proj_eta = hist3d.Project3D("y")
@@ -200,10 +233,14 @@ def MakePlot(hists, legends):
     # Draw the histograms and overlay 
     for hist in hists:
         hist.SetLineColor(colors[i])
+        if len(hists) == 2 and i == 1: # Check if only two histograms are passed, and apply shading (for predicted and observed plots)
+            hist.SetFillStyle(3004)
+            hist.SetFillColor(ROOT.kBlue-10)
         i += 1
-    hists[0].Draw()
+    if len(hists) == 1: hists[0].Draw("HIST")
+    else: hists[0].Draw("HIST E")
     for hist in hists[1:]:
-        hist.Draw("SAME")
+        hist.Draw("SAME HIST E")
 
     # Manually set axis limits for pT to ensure all histograms are visible
     hists[0].SetMaximum(max([hist.GetMaximum() for hist in hists]) * 1.1)
@@ -240,6 +277,7 @@ def ResetAxis(hist3d):
     hist3d.GetXaxis().SetTitle("p_{T} (GeV)")
     hist3d.GetYaxis().SetTitle("#eta")
     hist3d.GetZaxis().SetTitle("#phi")
+
 # ------------------------------------------------------------------------------
 def GetCut( branch_name, branch_sel):
 
@@ -270,7 +308,17 @@ def main():
     infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_LLPskim_Run2023Cv1_NoSel_scores_2025_02_03.root"
     label = "NoSel"
 
-    GetData(infilepath, label)
+    tree, input_file = GetData(infilepath, label)
+    if tree:
+        print("Tree successfully passed to MisTagParametrization")
+        # MisTagParametrization(tree)
+        # MisTagParametrization(tree, "depth")
+        # MisTagParametrization(tree, "timing")
+        MisTagParametrization(tree, "depth_timing")
+        # Don't close the file until you're done using the tree
+        input_file.Close()
+    else:
+        print("Tree is invalid!")
 
 if __name__ == '__main__':
 	main()
