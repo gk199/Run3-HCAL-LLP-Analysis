@@ -34,9 +34,10 @@ def LLP_Cutflow(file_path):
 		"LLP $\\abs\\eta \\leq 1.26$", 
 		"LLP $E > 60$~GeV", 
 		"LLP 0 OR LLP 1",
-		"LLP 0 AND LLP 1",
 		"LLP OR, with Event HT $> 200$~GeV", 
+		"LLP 0 AND LLP 1",
 		"LLP AND, with Event HT $> 200$~GeV", 
+		"Either LLP and triggered (any jet 0-5)",
 		"Either LLP and depth towers $\\geq 2$ (any jet 0-5)",
 		"Either LLP and timing towers $\\geq 2$ (any jet 0-5)",
 		"Either LLP and 1 timing, 1 depth tower (any jet 0-5)",
@@ -55,9 +56,10 @@ def LLP_Cutflow(file_path):
 		"LLP eta   ", 
 		"LLP pT    ", 
 		"LLP OR	   ", 
-		"LLP AND   ",
 		"LLP OR with HTT", 
+		"LLP AND   ",
 		"LLP AND with HTT",
+		"Either LLP and triggered",
 		"Either LLP and 2+ depth passed (6 jet)",
 		"Either LLP and 2+ timing passed (6 jet)",
 		"Either LLP and 1 timing, 1 depth passed (6 jet)",
@@ -105,27 +107,28 @@ def LLP_Cutflow(file_path):
 			selection1_string += "&& LLP1_E > 60"
 
 		if i == 4: total_selection_string = "(" + selection_string + ") || (" + selection1_string + ")"
-		if i == 5: total_selection_string = "(" + selection_string + " && " + selection1_string + ")"
-		if i == 6: 
+		if i == 5: 
 			one_LLP = "((" + selection_string + ") || (" + selection1_string + ")) && eventHT > 200"
 			total_selection_string = one_LLP
+		if i == 6: total_selection_string = "(" + selection_string + " && " + selection1_string + ")"
 		if i == 7: total_selection_string = "(" + selection_string + " && " + selection1_string + ") && eventHT > 200"
 
 		# 6 jets
-		if i == 8: total_selection_string = one_LLP + " && (" + one_jet_tagged_string_triggered + " || " + one_jet1_tagged_string_triggered + " || " + one_jet2_tagged_string_triggered + " || " + one_jet3_tagged_string_triggered + " || " + one_jet4_tagged_string_triggered + " || " + one_jet5_tagged_string_triggered + ")"
-		if i == 9: total_selection_string = one_LLP + " && (" + two_jet_tagged_string_triggered + " || " + two_jet1_tagged_string_triggered + " || " + two_jet2_tagged_string_triggered + " || " + two_jet3_tagged_string_triggered + " || " + two_jet4_tagged_string_triggered + " || " + two_jet5_tagged_string_triggered + ")"
-		if i == 10: total_selection_string = one_LLP + " && (" + three_jet_tagged_string_triggered + " || " + three_jet1_tagged_string_triggered + " || " + three_jet2_tagged_string_triggered + " || " + three_jet3_tagged_string_triggered + " || " + three_jet4_tagged_string_triggered + " || " + three_jet5_tagged_string_triggered + ")"
+		if i == 8: total_selection_string = one_LLP + " && " + jet_string_six_triggered
+		if i == 9: total_selection_string = one_LLP + " && (" + one_jet_tagged_string_triggered + " || " + one_jet1_tagged_string_triggered + " || " + one_jet2_tagged_string_triggered + " || " + one_jet3_tagged_string_triggered + " || " + one_jet4_tagged_string_triggered + " || " + one_jet5_tagged_string_triggered + ")"
+		if i == 10: total_selection_string = one_LLP + " && (" + two_jet_tagged_string_triggered + " || " + two_jet1_tagged_string_triggered + " || " + two_jet2_tagged_string_triggered + " || " + two_jet3_tagged_string_triggered + " || " + two_jet4_tagged_string_triggered + " || " + two_jet5_tagged_string_triggered + ")"
+		if i == 11: total_selection_string = one_LLP + " && (" + three_jet_tagged_string_triggered + " || " + three_jet1_tagged_string_triggered + " || " + three_jet2_tagged_string_triggered + " || " + three_jet3_tagged_string_triggered + " || " + three_jet4_tagged_string_triggered + " || " + three_jet5_tagged_string_triggered + ")"
 
 		# 2 jets
-		if i == 11: total_selection_string = one_LLP + " && (" + one_jet_tagged_string_triggered + " || " + one_jet1_tagged_string_triggered + ")"
-		if i == 12: total_selection_string = one_LLP + " && (" + two_jet_tagged_string_triggered + " || " + two_jet1_tagged_string_triggered + ")"
-		if i == 13: total_selection_string = one_LLP + " && (" + three_jet_tagged_string_triggered + " || " + three_jet1_tagged_string_triggered + ")"
+		if i == 12: total_selection_string = one_LLP + " && (" + one_jet_tagged_string_triggered + " || " + one_jet1_tagged_string_triggered + ")"
+		if i == 13: total_selection_string = one_LLP + " && (" + two_jet_tagged_string_triggered + " || " + two_jet1_tagged_string_triggered + ")"
+		if i == 14: total_selection_string = one_LLP + " && (" + three_jet_tagged_string_triggered + " || " + three_jet1_tagged_string_triggered + ")"
 
 		# leading jet
-		if i == 14: total_selection_string = one_LLP + " && " + one_jet_tagged_string_triggered
-		if i == 15: total_selection_string = one_LLP + " && " + two_jet_tagged_string_triggered
-		if i == 16: total_selection_string = one_LLP + " && " + three_jet_tagged_string_triggered
-		if i == 17: total_selection_string = one_LLP + " && " + jet_string_triggered_noFlag # remove "triggered" if want to see just if jet is emulated with these towers
+		if i == 15: total_selection_string = one_LLP + " && " + one_jet_tagged_string_triggered
+		if i == 16: total_selection_string = one_LLP + " && " + two_jet_tagged_string_triggered
+		if i == 17: total_selection_string = one_LLP + " && " + three_jet_tagged_string_triggered
+		if i == 18: total_selection_string = one_LLP + " && " + jet_string_triggered_noFlag # remove "triggered" if want to see just if jet is emulated with these towers
 
 		selval = tree.GetEntries(selection_string)
 		selval1 = tree.GetEntries(selection1_string)
@@ -137,8 +140,8 @@ def LLP_Cutflow(file_path):
 		if print_latex:
 			if i < 4: print(selname+" &", round(selval, 4), "&", round(selval1, 4), "&", round(selval/init, 4), "&", round(selval1/init, 4), "\\\\")
 			if i >= 4: print(selname+" & \\multicolumn{2}{l}{", round(selval, 4), "} & \\multicolumn{2}{l}{", round(selval/init, 4), "} \\\\ ")
-			if i == 3 or i == 7 or i == 10 or i == 13: print("\\hline")
-			if i == 17: latex_end(file_path)
+			if i == 3 or i == 7 or i == 11 or i == 14: print("\\hline")
+			if i == 18: latex_end(file_path)
 
 		else:
 			if (i < 4): print(selection_list_abbrev[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4), "LLP 1:", "\t", round(selval1, 4), "\t", round(selval1/init, 4))
@@ -242,7 +245,7 @@ def LLP_Cutflow(file_path):
 			if (i >= 4): print(selection_list_abbrev[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
 
 # ------------------------------------------------------------------------------
-def SixJetCheck(file_path):
+def SixJetCheck(file_path, tree):
 	# Cutflow table for background estimation
 
 	print(" \n")
@@ -251,22 +254,24 @@ def SixJetCheck(file_path):
 
 	selection_list = [
 		"All", 
-		"Valid jet (any jet 0-5)",
-		"Depth towers $\\geq 2$ (any jet 0-5)",
-		"Timing towers $\\geq 2$ (any jet 0-5)",
-		"1 timing, 1 depth tower (any jet 0-5)",
-		"Depth towers $\\geq 2$ (any jet 0-1)",
-		"Timing towers $\\geq 2$ (any jet 0-1)",
-		"1 timing, 1 depth tower (any jet 0-1)",
-		"Depth towers $\\geq 2$ (jet 0)",
-		"Timing towers $\\geq 2$ (jet 0)",
-		"1 timing, 1 depth tower (jet 0)",
-		"No tower flags (jet 0)",
+		"Valid jet, ($p_T,\\eta$, any jet 0-5)",
+		"Triggered (any jet 0-5)",
+		"Triggered and depth towers $\\geq 2$ (any jet 0-5)",
+		"Triggered and timing towers $\\geq 2$ (any jet 0-5)",
+		"Triggered and 1 timing, 1 depth tower (any jet 0-5)",
+		"Triggered and depth towers $\\geq 2$ (any jet 0-1)",
+		"Triggered and timing towers $\\geq 2$ (any jet 0-1)",
+		"Triggered and 1 timing, 1 depth tower (any jet 0-1)",
+		"Triggered and depth towers $\\geq 2$ (jet 0)",
+		"Triggered and timing towers $\\geq 2$ (jet 0)",
+		"Triggered and 1 timing, 1 depth tower (jet 0)",
+		"Triggered and no tower flags (jet 0)",
 	]
 
 	selection_list_abbrev = [
 		"All       ", 
 		"Valid jet",
+		"Valid jet, triggered",
 		"2+ depth passed (6 jet)",
 		"2+ timing passed (6 jet)",
 		"1 timing, 1 depth passed (6 jet)",
@@ -280,7 +285,7 @@ def SixJetCheck(file_path):
 	]
 
 	file = ROOT.TFile.Open(file_path)
-	tree = file.Get("WPlusJets")
+	tree = file.Get(tree)
 	
 	total_selection_string = ""
 	
@@ -296,20 +301,21 @@ def SixJetCheck(file_path):
 		
 		# 6 jets
 		if i == 1: total_selection_string = jet_string_six
-		if i == 2: total_selection_string = "(" + one_jet_tagged_string_triggered + " || " + one_jet1_tagged_string_triggered + " || " + one_jet2_tagged_string_triggered + " || " + one_jet3_tagged_string_triggered + " || " + one_jet4_tagged_string_triggered + " || " + one_jet5_tagged_string_triggered + ")"
-		if i == 3: total_selection_string = "(" + two_jet_tagged_string_triggered + " || " + two_jet1_tagged_string_triggered + " || " + two_jet2_tagged_string_triggered + " || " + two_jet3_tagged_string_triggered + " || " + two_jet4_tagged_string_triggered + " || " + two_jet5_tagged_string_triggered + ")"
-		if i == 4: total_selection_string = "(" + three_jet_tagged_string_triggered + " || " + three_jet1_tagged_string_triggered + " || " + three_jet2_tagged_string_triggered + " || " + three_jet3_tagged_string_triggered + " || " + three_jet4_tagged_string_triggered + " || " + three_jet5_tagged_string_triggered + ")"
+		if i == 2: total_selection_string = jet_string_six_triggered
+		if i == 3: total_selection_string = "(" + one_jet_tagged_string_triggered + " || " + one_jet1_tagged_string_triggered + " || " + one_jet2_tagged_string_triggered + " || " + one_jet3_tagged_string_triggered + " || " + one_jet4_tagged_string_triggered + " || " + one_jet5_tagged_string_triggered + ")"
+		if i == 4: total_selection_string = "(" + two_jet_tagged_string_triggered + " || " + two_jet1_tagged_string_triggered + " || " + two_jet2_tagged_string_triggered + " || " + two_jet3_tagged_string_triggered + " || " + two_jet4_tagged_string_triggered + " || " + two_jet5_tagged_string_triggered + ")"
+		if i == 5: total_selection_string = "(" + three_jet_tagged_string_triggered + " || " + three_jet1_tagged_string_triggered + " || " + three_jet2_tagged_string_triggered + " || " + three_jet3_tagged_string_triggered + " || " + three_jet4_tagged_string_triggered + " || " + three_jet5_tagged_string_triggered + ")"
 
 		# 2 jets
-		if i == 5: total_selection_string = "(" + one_jet_tagged_string_triggered + " || " + one_jet1_tagged_string_triggered + ")"
-		if i == 6: total_selection_string = "(" + two_jet_tagged_string_triggered + " || " + two_jet1_tagged_string_triggered + ")"
-		if i == 7: total_selection_string = "(" + three_jet_tagged_string_triggered + " || " + three_jet1_tagged_string_triggered + ")"
+		if i == 6: total_selection_string = "(" + one_jet_tagged_string_triggered + " || " + one_jet1_tagged_string_triggered + ")"
+		if i == 7: total_selection_string = "(" + two_jet_tagged_string_triggered + " || " + two_jet1_tagged_string_triggered + ")"
+		if i == 8: total_selection_string = "(" + three_jet_tagged_string_triggered + " || " + three_jet1_tagged_string_triggered + ")"
 
 		# leading jet
-		if i == 8: total_selection_string = one_jet_tagged_string_triggered
-		if i == 9: total_selection_string = two_jet_tagged_string_triggered
-		if i == 10: total_selection_string = three_jet_tagged_string_triggered
-		if i == 11: total_selection_string = jet_string_triggered_noFlag # remove "triggered" if want to see just if jet is emulated with these towers
+		if i == 9: total_selection_string = one_jet_tagged_string_triggered
+		if i == 10: total_selection_string = two_jet_tagged_string_triggered
+		if i == 11: total_selection_string = three_jet_tagged_string_triggered
+		if i == 12: total_selection_string = jet_string_triggered_noFlag # remove "triggered" if want to see just if jet is emulated with these towers
 
 		selval = tree.GetEntries(total_selection_string)
 		if i == 0: init = selval
@@ -318,11 +324,111 @@ def SixJetCheck(file_path):
 
 		if print_latex:
 			print(selname+" & ", round(selval, 4), " & ", round((selval)/init, 4), " \\\\ ") 
-			if i == 4 or i == 7: print("\\hline")
-			if i == 11: latex_end(file_path)
+			if i == 2 or i == 5 or i == 8: print("\\hline")
+			if i == 12: latex_end(file_path)
 
 		else:
 			print(selection_list_abbrev[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
+
+# ------------------------------------------------------------------------------
+def DNN_Passing(file_path):
+	# Cutflow table for fraction of events passing DNN for jet 0 and jet 1
+	print(" \n")
+	print("DNN cutflow, done per event")
+	print(" \n")
+	selection_list_noCut = [
+		"All", 
+		"Jet 0 $\\geq "+jet_energy+"$~GeV $p_T$ and $\\abs\\eta \\leq 1.26$", 
+		"Jet 1 $\\geq "+jet_energy+"$~GeV $p_T$ and $\\abs\\eta \\leq 1.26$", 
+		"Jet 0 or 1 is L1 triggered",
+		"Triggered jet, 2+ depth towers passed",
+		"Triggered jet, 2+ depth towers and both DNN $\\geq 0.9$",
+		"Triggered jet, 2+ timing towers passed",
+		"Triggered jet, 2+ timing towers and both DNN $\\geq 0.9$",		
+		"Triggered jet, 1 timing, 1 depth tower passed",
+		"Triggered jet, 1 timing, 1 depth tower and both DNN $\\geq 0.9$",		
+		"Jet 0 is L1 triggered",
+		"Leading jet, 2+ depth towers passed",
+		"Leading jet, 2+ depth towers and both DNN $\\geq 0.9$",
+		"Leading jet, 2+ timing towers passed",
+		"Leading jet, 2+ timing towers and both DNN $\\geq 0.9$",		
+		"Leading jet, 1 timing, 1 depth tower passed",
+		"Leading jet, 1 timing, 1 depth tower and both DNN $\\geq 0.9$",			]
+
+	selection_list_abbrev_noCut = [
+		"All       ",
+		"Jet 0 pT and eta",
+		"Jet 1 pT and eta",
+		"Jet 0 or 1 triggered",
+		"2+ depth passed",
+		"and DNNs passed",
+		"2+ timing passed",
+		"and DNNs passed",
+		"1 timing, 1 depth passed",
+		"and DNNs passed",
+		"Jet 0 triggered",
+		"2+ depth passed (jet0)",
+		"and DNNs passed",
+		"2+ timing passed (jet0)",
+		"and DNNs passed",
+		"1 timing, 1 depth passed (jet0)",
+		"and DNNs passed",
+	]
+	
+	if print_latex:
+		event_latex_setup(file_path)
+
+	init = -1
+	file = ROOT.TFile.Open(file_path)
+	if "LLPskim" or "Zmu" in file_path: tree = file.Get("WPlusJets")
+	if "LLP_MC" in file_path: tree = file.Get("PassedHLT")
+	
+	for i in range(len(selection_list_noCut)):
+		selname = selection_list_noCut[i]
+		selval  = -1
+		Nevents = -1
+
+		if i == 0: 
+			init = tree.GetEntries()
+			total_selection_string = ""
+		if i == 1: total_selection_string = jet_string
+		if i == 2: total_selection_string += " && " + jet1_string
+		# either jet 1 or jet 2 is triggered
+		if i == 3: total_selection_string += " && (jet0_L1trig_Matched == 1 || jet1_L1trig_Matched == 1)"
+		if i == 4: total_selection_string = "(" + one_jet_tagged_string_triggered + "||" + one_jet1_tagged_string_triggered + ") && ( " + jet_string + " && " + jet1_string + ")"
+		if i == 5: total_selection_string += " && ((jet0_L1trig_Matched == 1 && jet0_scores >= 0.9 && jet1_scores_inc >= 0.9) || (jet0_scores_inc >= 0.9 && jet1_scores >= 0.9 && jet1_L1trig_Matched == 1))"
+		if i == 6: total_selection_string = "(" + two_jet_tagged_string_triggered + "||" + two_jet1_tagged_string_triggered + ") && ( " + jet_string + " && " + jet1_string + ")"
+		if i == 7: total_selection_string += " && ((jet0_L1trig_Matched == 1 && jet0_scores >= 0.9 && jet1_scores_inc >= 0.9) || (jet0_scores_inc >= 0.9 && jet1_scores >= 0.9 && jet1_L1trig_Matched == 1))"
+		if i == 8: total_selection_string = "(" + three_jet_tagged_string_triggered + "||" + three_jet1_tagged_string_triggered + ") &&  ( " + jet_string + " && " + jet1_string + ")"
+		if i == 9: total_selection_string += " && ((jet0_L1trig_Matched == 1 && jet0_scores >= 0.9 && jet1_scores_inc >= 0.9) || (jet0_scores_inc >= 0.9 && jet1_scores >= 0.9 && jet1_L1trig_Matched == 1))"
+
+		# jet 1 is triggered
+		if i == 10: total_selection_string = jet_string_triggered + " && " + jet1_string
+		if i == 11: total_selection_string = one_jet_tagged_string_triggered + " && " + jet1_string
+		if i == 12: total_selection_string += " && jet0_scores >= 0.9 && jet1_scores_inc >= 0.9"
+		if i == 13: total_selection_string = two_jet_tagged_string_triggered + " && " + jet1_string
+		if i == 14: total_selection_string += " && jet0_scores >= 0.9 && jet1_scores_inc >= 0.9"
+		if i == 15: total_selection_string = three_jet_tagged_string_triggered + " && " + jet1_string
+		if i == 16: total_selection_string += " && jet0_scores >= 0.9 && jet1_scores_inc >= 0.9"
+
+		# if i == 10: total_selection_string = jet_string + " && " + jet1_string + "&& jet1_DepthTowers >= 2 && jet1_L1trig_Matched == 1"
+		# if i == 11: total_selection_string += " && jet0_scores_inc >= 0.9 && jet1_scores >= 0.9"
+		# if i == 12: total_selection_string = jet_string + " && " + jet1_string + "&& jet1_TimingTowers >= 2 && jet1_L1trig_Matched == 1"
+		# if i == 13: total_selection_string += " && jet0_scores_inc >= 0.9 && jet1_scores >= 0.9"
+		# if i == 14: total_selection_string = jet_string + " && " + jet1_string + "&& jet1_TimingTowers == 2 && jet1_DepthTowers == 1 && jet1_L1trig_Matched == 1"
+		# if i == 15: total_selection_string += " && jet0_scores_inc >= 0.9 && jet1_scores >= 0.9"
+
+		selval = tree.GetEntries(total_selection_string)
+
+		Nevents = tree.GetEntries()
+
+		if print_latex:
+			print(selname+" & ", round(selval, 4), " & ", round((selval)/init, 4), " \\\\ ") 
+			if i == 0 or i == 2 or i == 9: print("\\hline")
+			if i == 16: latex_end(file_path)
+
+		else:
+			print(selection_list_abbrev_noCut[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
 
 # ------------------------------------------------------------------------------
 def Emulated_Towers(file_path):
@@ -471,89 +577,7 @@ def Emulated_Towers(file_path):
 		else:
 			print(selection_list_abbrev_noCut[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
 
-	# Cutflow table for fraction of events passing DNN for jet 0 and jet 1
-	print(" \n")
-	print("DNN cutflow, done per event")
-	print(" \n")
-	selection_list_noCut = [
-		"All", 
-		"Jet 0 $\\geq "+jet_energy+"$~GeV $p_T$ and $\\abs\\eta \\leq 1.26$", 
-		"Jet 1 $\\geq "+jet_energy+"$~GeV $p_T$ and $\\abs\\eta \\leq 1.26$", 
-		"Jet 0 is L1 triggered",
-		"2+ depth towers passed",
-		"2+ depth towers and both DNN $\\geq 0.9$",
-		"2+ timing towers passed",
-		"2+ timing towers and both DNN $\\geq 0.9$",		
-		"1 timing, 1 depth tower passed",
-		"1 timing, 1 depth tower and both DNN $\\geq 0.9$",		
-		"2+ depth towers passed (jet1)",
-		"2+ depth towers and both DNN $\\geq 0.9$",
-		"2+ timing towers passed (jet1)",
-		"2+ timing towers and both DNN $\\geq 0.9$",		
-		"1 timing, 1 depth tower passed (jet1)",
-		"1 timing, 1 depth tower and both DNN $\\geq 0.9$",			]
-
-	selection_list_abbrev_noCut = [
-		"All       ",
-		"Jet 0 pT and eta",
-		"Jet 1 pT and eta",
-		"Jet 0 triggered",
-		"2+ depth passed",
-		"and DNNs passed",
-		"2+ timing passed",
-		"and DNNs passed",
-		"1 timing, 1 depth passed",
-		"and DNNs passed",
-		"2+ depth passed (jet1)",
-		"and DNNs passed",
-		"2+ timing passed (jet1)",
-		"and DNNs passed",
-		"1 timing, 1 depth passed (jet1)",
-		"and DNNs passed",
-	]
-	
-	if print_latex:
-		event_latex_setup(file_path)
-
-	init = -1
-	
-	for i in range(len(selection_list_noCut)):
-		selname = selection_list_noCut[i]
-		selval  = -1
-		Nevents = -1
-
-		if i == 0: 
-			init = tree.GetEntries()
-			total_selection_string = ""
-		if i == 1: total_selection_string = jet_string
-		if i == 2: total_selection_string += " && " + jet1_string
-		if i == 3: total_selection_string = jet1_string + " && " + jet_string_triggered 
-		if i == 4: total_selection_string = one_jet_tagged_string_triggered + " && " + jet1_string
-		if i == 5: total_selection_string += " && jet0_scores >= 0.9 && jet1_scores_inc >= 0.9"
-		if i == 6: total_selection_string = two_jet_tagged_string_triggered + " && " + jet1_string
-		if i == 7: total_selection_string += " && jet0_scores >= 0.9 && jet1_scores_inc >= 0.9"
-		if i == 8: total_selection_string = three_jet_tagged_string_triggered + " && " + jet1_string
-		if i == 9: total_selection_string += " && jet0_scores >= 0.9 && jet1_scores_inc >= 0.9"
-		if i == 10: total_selection_string = jet_string + " && " + jet1_string + "&& jet1_DepthTowers >= 2 && jet1_L1trig_Matched == 1"
-		if i == 11: total_selection_string += " && jet0_scores_inc >= 0.9 && jet1_scores >= 0.9"
-		if i == 12: total_selection_string = jet_string + " && " + jet1_string + "&& jet1_TimingTowers >= 2 && jet1_L1trig_Matched == 1"
-		if i == 13: total_selection_string += " && jet0_scores_inc >= 0.9 && jet1_scores >= 0.9"
-		if i == 14: total_selection_string = jet_string + " && " + jet1_string + "&& jet1_TimingTowers == 2 && jet1_DepthTowers == 1 && jet1_L1trig_Matched == 1"
-		if i == 15: total_selection_string += " && jet0_scores_inc >= 0.9 && jet1_scores >= 0.9"
-
-		selval = tree.GetEntries(total_selection_string)
-
-		Nevents = tree.GetEntries()
-
-		if print_latex:
-			print(selname+" & ", round(selval, 4), " & ", round((selval)/init, 4), " \\\\ ") 
-			if i == 0: print("\\hline")
-			if i == 15: latex_end(file_path)
-
-		else:
-			print(selection_list_abbrev_noCut[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
-
-	# Cutflow table for fraction of events passing DNN that have HLT set
+	# Cutflow table for fraction of events passing emulation that have HLT set
 	print(" \n")
 	print("Signal cutflow, HLT check, done per event")
 	print(" \n")
@@ -865,11 +889,21 @@ def Bkg_Estimation(file_path):
 def main():
 	
 	file_path = sys.argv[1]
+	
+	# Signal truth cuts, evalute acceptance and then 6, 2, 1 jets
+	#if "LLP_MC" in file_path: LLP_Cutflow(file_path) 
 
-	if "LLP_MC" in file_path: LLP_Cutflow(file_path)
-	# similar to the first table from LLP_Cutflow, but on data:
-	if "Zmu" in file_path: SixJetCheck(file_path)
-	if "LLPskim" or "LLP_MC" in file_path: Emulated_Towers(file_path)
+	# Similar to the first table from LLP_Cutflow, but on data or LLP, using jet/analysis cuts
+	# if "Zmu" in file_path: SixJetCheck(file_path, "WPlusJets") # evaluate 6, 2, and 1 jets that are triggered and pass emulation
+	# if "LLP_MC" in file_path: SixJetCheck(file_path, "PassedHLT")
+
+	# DNN check
+	DNN_Passing(file_path) 
+
+	# Emulated towers check
+	# if "LLPskim" or "LLP_MC" in file_path: Emulated_Towers(file_path)
+
+	# Set up for background estimation now (needs update)
 	# if "Run2023" in file_path: Bkg_Estimation(file_path)
 
 if __name__ == '__main__':

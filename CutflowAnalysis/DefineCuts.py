@@ -7,7 +7,9 @@ jet3_string = "(jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26)"
 jet4_string = "(jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26)"
 jet5_string = "(jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26)"
 
-jet_string_six = jet_string + "||" + jet1_string + "||" + jet2_string + "||" + jet3_string + "||" + jet4_string + "||" + jet5_string
+jet_string_six = "(" + jet_string + "||" + jet1_string + "||" + jet2_string + "||" + jet3_string + "||" + jet4_string + "||" + jet5_string +")"
+
+jet_string_six_triggered = "((" + jet_string + "&& jet0_L1trig_Matched == 1 ) || (" + jet1_string + "&& jet2_L1trig_Matched == 1 ) || (" + jet2_string + "&& jet2_L1trig_Matched == 1 ) || (" + jet3_string + "&& jet3_L1trig_Matched == 1 ) || (" + jet4_string + "&& jet4_L1trig_Matched == 1 ) || (" + jet5_string + "&& jet5_L1trig_Matched == 1 ))"
 
 # Emulated flags 
 jet_string_noFlag = "(jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && (jet0_DepthTowers + jet0_TimingTowers == 0))"
