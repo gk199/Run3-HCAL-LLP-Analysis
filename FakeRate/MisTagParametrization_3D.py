@@ -53,8 +53,8 @@ def MisTagParametrization(tree, option=""):
     triggered = GetCut("jet0_L1trig_Matched", 1)
     pt_eta = GetCut("jet0_Pt",[40,1000]) + GetCut("jet0_Eta",[-1.26,1.26]) + GetCut("jet1_Pt",[40,1000]) + GetCut("jet1_Eta",[-1.26,1.26])
     # Emulated towers are split with jet0_DepthTowers, TimingTowers
-    depth_emu = GetCut("jet0_DepthTowers", [2,100])
-    timing_emu = GetCut("jet0_TimingTowers", [2,100])
+    depth_emu = GetCut("jet0_DepthTowers", [2,100]) # + GetCut("jet0_TimingTowers", 0)
+    timing_emu = GetCut("jet0_TimingTowers", [2,100]) # + GetCut("jet0_DepthTowers", 0)
     depth_timing_emu = GetCut("jet0_DepthTowers", 1) + GetCut("jet0_TimingTowers", 1)
 
     # Define a mapping of options to their corresponding updates
@@ -112,33 +112,22 @@ def MisTagParametrization(tree, option=""):
     output_file.Close()
 
     # Project all histograms onto each axis to form 1D histograms
-    proj_pT_CR_all, proj_eta_CR_all, proj_phi_CR_all = ProjectHistogram(hist3d_CR_all)
-    proj_pT_CR_mistag, proj_eta_CR_mistag, proj_phi_CR_mistag = ProjectHistogram(hist3d_CR_mistag)
-    proj_pT_VR_all, proj_eta_VR_all, proj_phi_VR_all = ProjectHistogram(hist3d_VR_all)
-    proj_pT_VR_mistag, proj_eta_VR_mistag, proj_phi_VR_mistag = ProjectHistogram(hist3d_VR_mistag)
+    proj_pT_CR_all, proj_eta_CR_all, proj_phi_CR_all = ProjectHistogram(hist3d_CR_all, "Number of events")
+    proj_pT_CR_mistag, proj_eta_CR_mistag, proj_phi_CR_mistag = ProjectHistogram(hist3d_CR_mistag, "Number of events")
+    proj_pT_VR_all, proj_eta_VR_all, proj_phi_VR_all = ProjectHistogram(hist3d_VR_all, "Number of events")
+    proj_pT_VR_mistag, proj_eta_VR_mistag, proj_phi_VR_mistag = ProjectHistogram(hist3d_VR_mistag, "Number of events")
 
-    # Create a canvas to display the plots of CR and VR all and mistag overlayed
-    c1 = ROOT.TCanvas(f"c1_{option}", f"Projection plots for {option}", 2400, 600)
-    c1.Divide(3, 1)
-    # Legend labels
+    # Create a canvas to display the plots of CR and VR all and mistags overlayed
     legend_labels = ["CR (no cuts)", "CR, mistag", "VR (no cuts)", "VR, mistag"]
-    # Plot the projections for pT
-    c1.cd(1)
-    MakePlot([proj_pT_CR_all, proj_pT_CR_mistag, proj_pT_VR_all, proj_pT_VR_mistag], legend_labels)
-    proj_pT_CR_all.SetTitle("Jet p_{T} Projection with various cuts" + title)
-    # Plot the projections for eta
-    c1.cd(2)
-    MakePlot([proj_eta_CR_all, proj_eta_CR_mistag, proj_eta_VR_all, proj_eta_VR_mistag], legend_labels)
-    proj_eta_CR_all.SetTitle("Jet #eta Projection with various cuts" + title)
-    # Plot the projections for phi
-    c1.cd(3)
-    MakePlot([proj_phi_CR_all, proj_phi_CR_mistag, proj_phi_VR_all, proj_phi_VR_mistag], legend_labels)
-    proj_phi_CR_all.SetTitle("Jet #phi Projection with various cuts" + title)
-    # Show the canvas
-    c1.Update()
-    c1.Draw()
-    # Save the result as an image or file
-    c1.SaveAs("3d_hist_projection_overlay_CR_VR"+label+".png")
+    DrawCanvasAndPlots(
+        "c1", "Projection plots", option, title,
+        [[proj_pT_CR_all, proj_pT_CR_mistag, proj_pT_VR_all, proj_pT_VR_mistag], 
+        [proj_eta_CR_all, proj_eta_CR_mistag, proj_eta_VR_all, proj_eta_VR_mistag], 
+        [proj_phi_CR_all, proj_phi_CR_mistag, proj_phi_VR_all, proj_phi_VR_mistag]],  # Wrap each plot in a list
+        legend_labels,
+        "3d_hist_projection_overlay_CR_VR",
+        ["Jet p_{T} Projection with various cuts", "Jet #eta Projection with various cuts", "Jet #phi Projection with various cuts"], label
+    )
 
     # Clone hist3d_CR_mistag and divide it by hist3d_CR_all to get the mistag rate in CR
     hist3d_CR_mistag_rate = hist3d_CR_mistag.Clone()
@@ -150,60 +139,61 @@ def MisTagParametrization(tree, option=""):
     ResetAxis(hist3d_VR_mistag_predict)
     # Use this to predict the mistag rate in the VR
     # proj_pT_CR_mistag_rate, proj_eta_CR_mistag_rate, proj_phi_CR_mistag_rate = ProjectHistogram(hist3d_CR_mistag_rate) # mistag rate from CR -- but this projection adds bins together to give a rate > 1! Use 1D from below
-    proj_pT_VR_mistag_predict, proj_eta_VR_mistag_predict, proj_phi_VR_mistag_predict = ProjectHistogram(hist3d_VR_mistag_predict) # predicted mistag in VR
+    proj_pT_VR_mistag_predict, proj_eta_VR_mistag_predict, proj_phi_VR_mistag_predict = ProjectHistogram(hist3d_VR_mistag_predict, "Number of events") # predicted mistag in VR
 
     # Find mistag rate in 1D histograms to evaluate plots
     hist3d_CR_mistag_rate = hist3d_CR_mistag.Clone()
     ResetAxis(hist3d_CR_mistag_rate)
-    proj_pT_CR_mistag_rate, proj_eta_CR_mistag_rate, proj_phi_CR_mistag_rate = ProjectHistogram(hist3d_CR_mistag_rate)
+    proj_pT_CR_mistag_rate, proj_eta_CR_mistag_rate, proj_phi_CR_mistag_rate = ProjectHistogram(hist3d_CR_mistag_rate, "Mistag rate")
     proj_pT_CR_mistag_rate.Divide(proj_pT_CR_all)
     proj_eta_CR_mistag_rate.Divide(proj_eta_CR_all)
     proj_phi_CR_mistag_rate.Divide(proj_phi_CR_all)
 
-    # Create a canvas for the mistag rate plots (CR)
-    c2 = ROOT.TCanvas(f"c2_{option}", f"Mistag rate plots in the CR for {option}", 2400, 600)
-    c2.Divide(3,1)
+    # Create mistag rate plots in the CR
     legend_labels = ["Mistag rate (CR)"]
-    c2.cd(1)
-    MakePlot([proj_pT_CR_mistag_rate], legend_labels)
-    proj_pT_CR_mistag_rate.SetTitle("Jet p_{T} Mistag Rate from CR" + title)
-    c2.cd(2)
-    MakePlot([proj_eta_CR_mistag_rate], legend_labels)
-    proj_eta_CR_mistag_rate.SetTitle("Jet #eta Mistag Rate from CR" + title)
-    c2.cd(3)
-    MakePlot([proj_phi_CR_mistag_rate], legend_labels) 
-    proj_phi_CR_mistag_rate.SetTitle("Jet #phi Mistag Rate from CR" + title)
-    c2.Update()
-    c2.Draw()   
-    c2.SaveAs("3d_hist_projection_CR_mistag_rate"+label+".png")
+    DrawCanvasAndPlots(
+        "c2", "Mistag rate plots in the CR", option, title,
+        [[proj_pT_CR_mistag_rate], [proj_eta_CR_mistag_rate], [proj_phi_CR_mistag_rate]],  # Wrap each plot in a list
+        legend_labels,
+        "3d_hist_projection_CR_mistag_rate",
+        ["Jet p_{T} Mistag Rate from CR", "Jet #eta Mistag Rate from CR", "Jet #phi Mistag Rate from CR"], label
+    )
 
-    # Create a canvas for the mistag prediction and observation (VR)
-    c3 = ROOT.TCanvas(f"c3_{option}", f"Mistag plots in the VR for {option}", 2400, 600)
-    c3.Divide(3,1)
-    legend_labels = ["Predicted mistag (VR)", "Observed mistag (VR)"]
-    c3.cd(1)
-    MakePlot([proj_pT_VR_mistag_predict, proj_pT_VR_mistag], legend_labels)
-    proj_pT_VR_mistag_predict.SetTitle("Jet p_{T} Mistags in VR" + title)
-    c3.cd(2)
-    MakePlot([proj_eta_VR_mistag_predict, proj_eta_VR_mistag], legend_labels)
-    proj_eta_VR_mistag_predict.SetTitle("Jet #eta Mistags in VR" + title)
-    c3.cd(3)
-    MakePlot([proj_phi_VR_mistag_predict, proj_phi_VR_mistag], legend_labels) 
-    proj_phi_VR_mistag_predict.SetTitle("Jet #phi Mistags in VR" + title)
-    c3.Update()
-    c3.Draw()   
-    c3.SaveAs("3d_hist_projection_VR_mistags"+label+".png") 
+    # Create mistag plots in the VR (with two histograms per plot)
+    legend_labels = ["Observed mistag (VR)", "Predicted mistag (VR)"]
+    DrawCanvasAndPlots(
+        "c3", "Mistag plots in the VR", option, title,
+        [[proj_pT_VR_mistag, proj_pT_VR_mistag_predict], 
+        [proj_eta_VR_mistag, proj_eta_VR_mistag_predict, ], 
+        [proj_phi_VR_mistag, proj_phi_VR_mistag_predict]],  # Each group has two histograms
+        legend_labels,
+        "3d_hist_projection_VR_mistags",
+        ["Jet p_{T} Mistags in VR", "Jet #eta Mistags in VR", "Jet #phi Mistags in VR"], label
+    )
 
-    all_hists = [proj_pT_CR_all, proj_eta_CR_all, proj_phi_CR_all,
-                proj_pT_CR_mistag, proj_eta_CR_mistag, proj_phi_CR_mistag,
-                proj_pT_VR_all, proj_eta_VR_all, proj_phi_VR_all,
-                proj_pT_VR_mistag, proj_eta_VR_mistag, proj_phi_VR_mistag,
-                hist3d_CR_all, hist3d_CR_mistag, hist3d_VR_all, hist3d_VR_mistag,
-                hist3d_CR_mistag_rate, hist3d_VR_mistag_predict,
-                proj_pT_VR_mistag_predict, proj_eta_VR_mistag_predict, proj_phi_VR_mistag_predict,
-                proj_pT_CR_mistag_rate, proj_eta_CR_mistag_rate, proj_phi_CR_mistag_rate]
-    for hist in all_hists:
-        hist.Reset()
+    legend_labels = ["Observed mistag (VR)", "Predicted mistag (VR)"]
+    MakePlotWithRatio([proj_pT_VR_mistag, proj_pT_VR_mistag_predict], legend_labels, label + "_pT")
+
+    MakePlotWithRatio([proj_eta_VR_mistag, proj_eta_VR_mistag_predict], legend_labels, label + "_eta")
+
+    MakePlotWithRatio([proj_phi_VR_mistag, proj_phi_VR_mistag_predict], legend_labels, label + "_phi") 
+
+    # below code is now done in DrawCanvasAndPlots to avoid so much duplication
+    # c3 = ROOT.TCanvas(f"c3_{option}", f"Mistag plots in the VR for {option}", 2400, 600)
+    # c3.Divide(3,1)
+    # legend_labels = ["Observed mistag (VR)", "Predicted mistag (VR)"]
+    # c3.cd(1)
+    # MakePlot([proj_pT_VR_mistag, proj_pT_VR_mistag_predict], legend_labels)
+    # proj_pT_VR_mistag.SetTitle("Jet p_{T} Mistags in VR" + title)
+    # c3.cd(2)
+    # MakePlot([proj_eta_VR_mistag, proj_eta_VR_mistag_predict], legend_labels)
+    # proj_eta_VR_mistag.SetTitle("Jet #eta Mistags in VR" + title)
+    # c3.cd(3)
+    # MakePlot([proj_phi_VR_mistag, proj_phi_VR_mistag_predict], legend_labels) 
+    # proj_phi_VR_mistag.SetTitle("Jet #phi Mistags in VR" + title)
+    # c3.Update()
+    # c3.Draw()   
+    # c3.SaveAs("3d_hist_projection_VR_mistags"+label+".png") 
 
 # ------------------------------------------------------------------------------
 def CreateHistograms(tree, cut, hist_name):
@@ -216,26 +206,51 @@ def CreateHistograms(tree, cut, hist_name):
     return hist3d
 
 # ------------------------------------------------------------------------------
-def ProjectHistogram(hist3d):
+def ProjectHistogram(hist3d, y_label = ""):
     # Project the histogram in the x, y, and z directions
     proj_pT = hist3d.Project3D("x")
     proj_eta = hist3d.Project3D("y")
     proj_phi = hist3d.Project3D("z")
+
+    proj_pT.SetYTitle(y_label)
+    proj_eta.SetYTitle(y_label)
+    proj_phi.SetYTitle(y_label)
     
     # Return the projections
     return proj_pT, proj_eta, proj_phi
 
 # ------------------------------------------------------------------------------
+def DrawCanvasAndPlots(canvas_name, canvas_title, option, title, plots, legend_labels, save_name, plot_titles, label):
+    # Create canvas
+    canvas = ROOT.TCanvas(f"{canvas_name}_{option}", f"{canvas_title} for {option}", 2400, 600)
+    canvas.Divide(3, 1)
+    
+    # Loop over the plots and generate them
+    for i, plot_group in enumerate(plots):
+        canvas.cd(i + 1)  # Navigate to the correct pad
+        # MakePlot can take a list of histograms, so pass the group of histograms
+        MakePlot(plot_group, legend_labels)
+        
+        # Set the title for the plot group
+        plot_group[0].SetTitle(plot_titles[i] + title)  # Just set the title for the first plot in the group
+    
+    canvas.Update()
+    canvas.Draw()
+    canvas.SaveAs(f"{save_name}{label}.png")
+
+# ------------------------------------------------------------------------------
 def MakePlot(hists, legends):
     colors = [ROOT.kBlue, ROOT.kBlue-9, ROOT.kGreen+3, ROOT.kGreen-6]
+    if len(hists) == 2: colors = [49, 29]
     i = 0
 
     # Draw the histograms and overlay 
     for hist in hists:
-        hist.SetLineColor(colors[i])
         if len(hists) == 2 and i == 1: # Check if only two histograms are passed, and apply shading (for predicted and observed plots)
             hist.SetFillStyle(3004)
-            hist.SetFillColor(ROOT.kBlue-10)
+            hist.SetFillColor(colors[i])
+        hist.SetLineColor(colors[i])
+        hist.SetLineWidth(2)
         i += 1
     if len(hists) == 1: hists[0].Draw("HIST")
     else: hists[0].Draw("HIST E")
@@ -253,6 +268,87 @@ def MakePlot(hists, legends):
     legend.Draw()
     SetOwnership( legend, 0 ) # 0 = release (not keep), 1 = keep # when legend is in a separate function, it is not saved in memory for the canvas outside of function (scoping issue)
     LabelCMS()
+
+# ------------------------------------------------------------------------------
+def MakePlotWithRatio(hists, legends, type):
+    # Check if there are exactly two histograms
+    if len(hists) != 2:
+        print("This function requires exactly two histograms.")
+        return
+
+    # Create a canvas with enough space for the main plot and ratio plot
+    c_ratio = ROOT.TCanvas("c_ratio", "Canvas with Ratio", 800, 800)
+    
+    # Create the ratio plot (TRatioPlot)
+    ratio_plot = ROOT.TRatioPlot(hists[0], hists[1])  # h1 / h2
+    ratio_plot.Draw()
+    
+    # Set the ratio plot's y-axis limits
+    ratio_plot.GetLowerRefGraph().SetMinimum(0.5)  # Minimum for ratio plot
+    ratio_plot.GetLowerRefGraph().SetMaximum(1.5)  # Maximum for ratio plot
+
+    # Draw a horizontal line at y = 1 in the ratio plot
+    horizontal_line = ROOT.TLine(ratio_plot.GetLowerRefGraph().GetXaxis().GetXmin(), 1,
+                                 ratio_plot.GetLowerRefGraph().GetXaxis().GetXmax(), 1)
+    horizontal_line.SetLineColor(ROOT.kRed)
+    horizontal_line.SetLineStyle(2)
+    horizontal_line.Draw()
+
+    # Update the canvas
+    c_ratio.Update()
+    c_ratio.Draw()
+
+    # Save the canvas
+    c_ratio.SaveAs("3d_hist_projection_VR_mistags" + type + "_ratio_v2.png")
+
+# ------------------------------------------------------------------------------
+def MakePlotWithRatio_v1(hists, legends, type):
+    # Check if there are exactly two histograms
+    if len(hists) != 2:
+        print("This function requires exactly two histograms.")
+        return
+
+    # Create a canvas with two pads: one for the main plot, one for the ratio
+    c_ratio = ROOT.TCanvas("c_ratio", "Canvas with Ratio", 800, 800)
+    c_ratio.Divide(1, 2)  # First pad takes up 70% of the canvas, second pad (for ratio) takes 30%
+
+    # Main plot: top pad
+    c_ratio.cd(1)
+    MakePlot(hists, legends)  # Reuse the MakePlot function for the main plot
+
+    # Ratio plot: bottom pad
+    c_ratio.cd(2)
+    ratio = hists[0].Clone("ratio")  # Clone the first histogram for the ratio
+    ratio.Divide(hists[1])  # Divide the first histogram by the second (observed / predicted)
+
+    # Style the ratio plot
+    ratio.SetLineColor(ROOT.kBlack)
+    ratio.SetMarkerStyle(20)  # Set markers for the ratio plot
+    ratio.SetMarkerColor(ROOT.kBlack)
+
+    # Draw the ratio plot
+    ratio.Draw("E")
+
+    # Set the y-axis limits for the ratio plot
+    ratio.SetMinimum(0.5)
+    ratio.SetMaximum(1.5)
+
+    # Set axis titles for the ratio plot
+    ratio.SetXTitle(hists[0].GetXaxis().GetTitle())
+    ratio.SetYTitle("Ratio")
+
+    # Optional: Add a horizontal line at y = 1
+    horizontal_line = ROOT.TLine(ratio.GetXaxis().GetXmin(), 1, ratio.GetXaxis().GetXmax(), 1)
+    horizontal_line.SetLineColor(ROOT.kRed)
+    horizontal_line.SetLineStyle(2)
+    horizontal_line.Draw()
+
+    # Update and display the canvas
+    c_ratio.Update()
+    c_ratio.Draw()
+
+    # Save the canvas
+    c_ratio.SaveAs("3d_hist_projection_VR_mistags" + type + "_ratio.png")
 
 # ------------------------------------------------------------------------------
 def LabelCMS():
@@ -312,9 +408,9 @@ def main():
     if tree:
         print("Tree successfully passed to MisTagParametrization")
         # MisTagParametrization(tree)
-        # MisTagParametrization(tree, "depth")
+        MisTagParametrization(tree, "depth")
         # MisTagParametrization(tree, "timing")
-        MisTagParametrization(tree, "depth_timing")
+        # MisTagParametrization(tree, "depth_timing")
         # Don't close the file until you're done using the tree
         input_file.Close()
     else:
