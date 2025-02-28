@@ -280,19 +280,23 @@ def MakePlotWithRatio(hists, legends, type):
     c_ratio = ROOT.TCanvas("c_ratio", "Canvas with Ratio", 800, 800)
     
     # Create the ratio plot (TRatioPlot)
+    hists[1].SetFillStyle(3004)
+    hists[1].SetFillColor(29)
     ratio_plot = ROOT.TRatioPlot(hists[0], hists[1])  # h1 / h2
-    ratio_plot.Draw()
-    
+    ratio_plot.Draw("HIST E F")
+    ratio_plot.GetLowerRefYaxis().SetTitle("Observed / Predicted")
+
     # Set the ratio plot's y-axis limits
     ratio_plot.GetLowerRefGraph().SetMinimum(0.5)  # Minimum for ratio plot
-    ratio_plot.GetLowerRefGraph().SetMaximum(1.5)  # Maximum for ratio plot
+    ratio_plot.GetLowerRefGraph().SetMaximum(2)  # Maximum for ratio plot
 
-    # Draw a horizontal line at y = 1 in the ratio plot
-    horizontal_line = ROOT.TLine(ratio_plot.GetLowerRefGraph().GetXaxis().GetXmin(), 1,
-                                 ratio_plot.GetLowerRefGraph().GetXaxis().GetXmax(), 1)
-    horizontal_line.SetLineColor(ROOT.kRed)
-    horizontal_line.SetLineStyle(2)
-    horizontal_line.Draw()
+    # Add legend 
+    legend = ROOT.TLegend(0.6, 0.7, 0.9, 0.9)
+    for i in range(len(hists)):
+        legend.AddEntry(hists[i], legends[i], "lef")
+    legend.Draw()
+    SetOwnership( legend, 0 ) # 0 = release (not keep), 1 = keep # when legend is in a separate function, it is not saved in memory for the canvas outside of function (scoping issue)
+    # LabelCMS()
 
     # Update the canvas
     c_ratio.Update()
