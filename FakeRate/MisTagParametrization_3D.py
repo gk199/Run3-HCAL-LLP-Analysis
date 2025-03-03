@@ -173,9 +173,7 @@ def MisTagParametrization(tree, option=""):
 
     legend_labels = ["Observed mistag (VR)", "Predicted mistag (VR)"]
     MakePlotWithRatio([proj_pT_VR_mistag, proj_pT_VR_mistag_predict], legend_labels, label + "_pT")
-
     MakePlotWithRatio([proj_eta_VR_mistag, proj_eta_VR_mistag_predict], legend_labels, label + "_eta")
-
     MakePlotWithRatio([proj_phi_VR_mistag, proj_phi_VR_mistag_predict], legend_labels, label + "_phi") 
 
     # below code is now done in DrawCanvasAndPlots to avoid so much duplication
@@ -237,6 +235,7 @@ def DrawCanvasAndPlots(canvas_name, canvas_title, option, title, plots, legend_l
     canvas.Update()
     canvas.Draw()
     canvas.SaveAs(f"{save_name}{label}.png")
+    canvas.Clear()
 
 # ------------------------------------------------------------------------------
 def MakePlot(hists, legends):
@@ -279,31 +278,34 @@ def MakePlotWithRatio(hists, legends, type):
     # Create a canvas with enough space for the main plot and ratio plot
     c_ratio = ROOT.TCanvas("c_ratio", "Canvas with Ratio", 800, 800)
     
-    # Create the ratio plot (TRatioPlot)
+    # Create the ratio plot (TRatioPlot). Set the second histogram (hists[1]) to be shaded
     hists[1].SetFillStyle(3004)
     hists[1].SetFillColor(29)
     ratio_plot = ROOT.TRatioPlot(hists[0], hists[1])  # h1 / h2
-    ratio_plot.Draw("HIST E F")
-    ratio_plot.GetLowerRefYaxis().SetTitle("Observed / Predicted")
+    ratio_plot.SetH1DrawOpt("HIST E")
+    ratio_plot.SetH2DrawOpt("HIST E F")
+    ratio_plot.Draw("HIST E F") # F for filled (second histogram), E for errors
 
     # Set the ratio plot's y-axis limits
-    ratio_plot.GetLowerRefGraph().SetMinimum(0.5)  # Minimum for ratio plot
-    ratio_plot.GetLowerRefGraph().SetMaximum(2)  # Maximum for ratio plot
+    ratio_plot.GetLowYaxis().SetNdivisions(7)
+    ratio_plot.GetLowerRefYaxis().SetRangeUser(0.5, 2)  # Minimum and maximum for ratio plot
+    ratio_plot.GetLowerRefYaxis().SetTitle("Obs. / Predicted")
 
     # Add legend 
-    legend = ROOT.TLegend(0.6, 0.7, 0.9, 0.9)
+    legend = ROOT.TLegend(0.6, 0.75, 0.89, 0.92)
     for i in range(len(hists)):
         legend.AddEntry(hists[i], legends[i], "lef")
     legend.Draw()
     SetOwnership( legend, 0 ) # 0 = release (not keep), 1 = keep # when legend is in a separate function, it is not saved in memory for the canvas outside of function (scoping issue)
-    # LabelCMS()
+    LabelCMS(0.13, 0.9, 0.03)
 
     # Update the canvas
     c_ratio.Update()
     c_ratio.Draw()
 
     # Save the canvas
-    c_ratio.SaveAs("3d_hist_projection_VR_mistags" + type + "_ratio_v2.png")
+    c_ratio.SaveAs("3d_hist_projection_VR_mistags" + type + "_ratio.png")
+    c_ratio.Clear()
 
 # ------------------------------------------------------------------------------
 def MakePlotWithRatio_v1(hists, legends, type):
@@ -355,21 +357,19 @@ def MakePlotWithRatio_v1(hists, legends, type):
     c_ratio.SaveAs("3d_hist_projection_VR_mistags" + type + "_ratio.png")
 
 # ------------------------------------------------------------------------------
-def LabelCMS():
+def LabelCMS(xpos=0.13, ypos=0.85, text_size=0.036):
     cmsLabel = "#scale[1]{#bf{CMS} }"
     cmsLabelExtra = "#scale[0.8]{#it{Private Work}}"
     yearLumi = "#scale[0.85]{2023 (13.6 TeV)}" # #sqrt{s} = 
 
-    xpos = 0.13
-    ypos = 0.85
-
     stamp_text = ROOT.TLatex()
     stamp_text.SetNDC()
     stamp_text.SetTextFont(42)
-    stamp_text.SetTextSize(0.036)
+    stamp_text.SetTextSize(text_size)
     stamp_text.DrawLatex( xpos, ypos, cmsLabel)
     stamp_text.DrawLatex( xpos+0.07, ypos, cmsLabelExtra)
-    stamp_text.DrawLatex( 0.75, 0.91, yearLumi)
+    if ypos == 0.85: stamp_text.DrawLatex( xpos+0.62, ypos+0.06, yearLumi)
+    else: stamp_text.DrawLatex( xpos+0.6, ypos+0.03, yearLumi)
 
 # ------------------------------------------------------------------------------
 def ResetAxis(hist3d):
@@ -411,10 +411,10 @@ def main():
     tree, input_file = GetData(infilepath, label)
     if tree:
         print("Tree successfully passed to MisTagParametrization")
-        # MisTagParametrization(tree)
-        MisTagParametrization(tree, "depth")
-        # MisTagParametrization(tree, "timing")
-        # MisTagParametrization(tree, "depth_timing")
+        #MisTagParametrization(tree)
+        #MisTagParametrization(tree, "depth")
+        #MisTagParametrization(tree, "timing")
+        MisTagParametrization(tree, "depth_timing")
         # Don't close the file until you're done using the tree
         input_file.Close()
     else:
