@@ -17,6 +17,8 @@ pT_bins = np.array(pT_bins, dtype=float)
 eta_bins = np.linspace(-1.3, 1.3, 10)  # eta axis from -2 to 2, 10 bins
 phi_bins = np.linspace(-np.pi, np.pi, 10)  # phi axis from -pi to pi, 10 bins
 
+DNN_cut = 0.9
+
 # ------------------------------------------------------------------------------
 def GetData(infilepath, label):
     # Open the input ROOT file in read mode
@@ -43,12 +45,12 @@ def GetData(infilepath, label):
         return tree, input_file
 
 # ------------------------------------------------------------------------------
-def MisTagParametrization(tree, option=""):
+def MisTagParametrization(tree, option="", tree2=""):
 
-    # Setup cuts for CR and VR. CR = jet1_scores_inc between 0-0.5. VR = jet1_scores_inc between 0.5-0.9. Mistag means jet0_scores over 0.9
+    # Setup cuts for CR and VR. CR = jet1_scores_inc between 0-0.5. VR = jet1_scores_inc between 0.5-0.9. Mistag means jet0_scores over "DNN_cut"
     CR = GetCut("jet1_scores_inc", [0,0.5])
     VR = GetCut("jet1_scores_inc", [0.5,0.9])
-    mistag = GetCut("jet0_scores", [0.9,1.1])
+    mistag = GetCut("jet0_scores", [DNN_cut,1.1])
     # Need leading jet to be matched to a LLP, jet0_L1trig_Matched. Leading jet pT > 60, subleading > 40. Eta restrictions on both jets at 1.26
     triggered = GetCut("jet0_L1trig_Matched", 1)
     pt_eta = GetCut("jet0_Pt",[40,1000]) + GetCut("jet0_Eta",[-1.26,1.26]) + GetCut("jet1_Pt",[40,1000]) + GetCut("jet1_Eta",[-1.26,1.26])
@@ -70,8 +72,7 @@ def MisTagParametrization(tree, option=""):
 
     # Check if the option exists in the mapping
     if option in option_map:
-        CR += option_map[option][0]
-        VR += option_map[option][0]
+        pt_eta += option_map[option][0]
         title = option_map[option][1]
         label = option_map[option][2]
 
@@ -80,6 +81,14 @@ def MisTagParametrization(tree, option=""):
     hist3d_CR_mistag = CreateHistograms(tree, CR + triggered + pt_eta + mistag, "hist3d_CR_mistag")
     hist3d_VR_all = CreateHistograms(tree, VR + triggered + pt_eta, "hist3d_VR_all")
     hist3d_VR_mistag = CreateHistograms(tree, VR + triggered + pt_eta + mistag, "hist3d_VR_mistag")
+
+    comparison = ""
+    if tree2 != "": # means using two orthogonal datasets to predict and measure on, instead of CR / VR based on DNN scores
+        hist3d_CR_all = CreateHistograms(tree, triggered + pt_eta, "hist3d_CR_all")
+        hist3d_CR_mistag = CreateHistograms(tree, triggered + pt_eta + mistag, "hist3d_CR_mistag")
+        hist3d_VR_all = CreateHistograms(tree2, triggered + pt_eta, "hist3d_VR_all")
+        hist3d_VR_mistag = CreateHistograms(tree2, triggered + pt_eta + mistag, "hist3d_VR_mistag")
+        comparison = "_Wjets_Zmu"
     
     if debug:
         print(f"Entries in the tree: {tree.GetEntries()}")
@@ -102,7 +111,7 @@ def MisTagParametrization(tree, option=""):
         print(f"Number of entries in the 3D histogram: {hist3d_CR_all.GetEntries()}")
 
     # Write the base histograms to the output file
-    output_file = ROOT.TFile("output_3D_hists"+label+".root", "RECREATE")
+    output_file = ROOT.TFile("output_3D_hists"+label+comparison+".root", "RECREATE")
     output_file.WriteObject(hist3d_CR_all)
     output_file.WriteObject(hist3d_CR_mistag)
     output_file.WriteObject(hist3d_VR_all)
@@ -119,13 +128,17 @@ def MisTagParametrization(tree, option=""):
 
     # Create a canvas to display the plots of CR and VR all and mistags overlayed
     legend_labels = ["CR (no cuts)", "CR, mistag", "VR (no cuts)", "VR, mistag"]
+    png_title = "3d_hist_projection_overlay_CR_VR"
+    if tree2 != "": 
+        legend_labels = ["W+jets (no cuts)", "W+jets, mistag", "Zmu (no cuts)", "Zmu, mistag"]
+        png_title = "3d_hist_projection_overlay_Wjets_Zmu"
     DrawCanvasAndPlots(
         "c1", "Projection plots", option, title,
         [[proj_pT_CR_all, proj_pT_CR_mistag, proj_pT_VR_all, proj_pT_VR_mistag], 
         [proj_eta_CR_all, proj_eta_CR_mistag, proj_eta_VR_all, proj_eta_VR_mistag], 
         [proj_phi_CR_all, proj_phi_CR_mistag, proj_phi_VR_all, proj_phi_VR_mistag]],  # Wrap each plot in a list
         legend_labels,
-        "3d_hist_projection_overlay_CR_VR",
+        png_title,
         ["Jet p_{T} Projection with various cuts", "Jet #eta Projection with various cuts", "Jet #phi Projection with various cuts"], label
     )
 
@@ -151,30 +164,37 @@ def MisTagParametrization(tree, option=""):
 
     # Create mistag rate plots in the CR
     legend_labels = ["Mistag rate (CR)"]
+    png_title = "3d_hist_projection_CR_mistag_rate"
+    if tree2 != "": 
+        legend_labels = ["Mistag rate (W+jets)"]
+        png_title = "3d_hist_projection_Wjets_mistag_rate"
     DrawCanvasAndPlots(
         "c2", "Mistag rate plots in the CR", option, title,
         [[proj_pT_CR_mistag_rate], [proj_eta_CR_mistag_rate], [proj_phi_CR_mistag_rate]],  # Wrap each plot in a list
         legend_labels,
-        "3d_hist_projection_CR_mistag_rate",
+        png_title,
         ["Jet p_{T} Mistag Rate from CR", "Jet #eta Mistag Rate from CR", "Jet #phi Mistag Rate from CR"], label
     )
 
     # Create mistag plots in the VR (with two histograms per plot)
     legend_labels = ["Observed mistag (VR)", "Predicted mistag (VR)"]
+    png_title = "3d_hist_projection_VR_mistags"
+    if tree2 != "": 
+        legend_labels = ["Observed mistag (W+jets)", "Predicted mistag (Zmu)"]
+        png_title = "3d_hist_projection_Zmu_mistags"    
     DrawCanvasAndPlots(
         "c3", "Mistag plots in the VR", option, title,
         [[proj_pT_VR_mistag, proj_pT_VR_mistag_predict], 
         [proj_eta_VR_mistag, proj_eta_VR_mistag_predict, ], 
         [proj_phi_VR_mistag, proj_phi_VR_mistag_predict]],  # Each group has two histograms
         legend_labels,
-        "3d_hist_projection_VR_mistags",
+        png_title,
         ["Jet p_{T} Mistags in VR", "Jet #eta Mistags in VR", "Jet #phi Mistags in VR"], label
     )
-
-    legend_labels = ["Observed mistag (VR)", "Predicted mistag (VR)"]
-    MakePlotWithRatio([proj_pT_VR_mistag, proj_pT_VR_mistag_predict], legend_labels, label + "_pT")
-    MakePlotWithRatio([proj_eta_VR_mistag, proj_eta_VR_mistag_predict], legend_labels, label + "_eta")
-    MakePlotWithRatio([proj_phi_VR_mistag, proj_phi_VR_mistag_predict], legend_labels, label + "_phi") 
+ 
+    MakePlotWithRatio([proj_pT_VR_mistag, proj_pT_VR_mistag_predict], legend_labels, label + "_pT", png_title)
+    MakePlotWithRatio([proj_eta_VR_mistag, proj_eta_VR_mistag_predict], legend_labels, label + "_eta", png_title)
+    MakePlotWithRatio([proj_phi_VR_mistag, proj_phi_VR_mistag_predict], legend_labels, label + "_phi", png_title) 
 
     # below code is now done in DrawCanvasAndPlots to avoid so much duplication
     # c3 = ROOT.TCanvas(f"c3_{option}", f"Mistag plots in the VR for {option}", 2400, 600)
@@ -267,9 +287,9 @@ def MakePlot(hists, legends):
     legend.Draw()
     SetOwnership( legend, 0 ) # 0 = release (not keep), 1 = keep # when legend is in a separate function, it is not saved in memory for the canvas outside of function (scoping issue)
     LabelCMS()
-
+    
 # ------------------------------------------------------------------------------
-def MakePlotWithRatio(hists, legends, type):
+def MakePlotWithRatio(hists, legends, type, png_label):
     # Check if there are exactly two histograms
     if len(hists) != 2:
         print("This function requires exactly two histograms.")
@@ -304,7 +324,7 @@ def MakePlotWithRatio(hists, legends, type):
     c_ratio.Draw()
 
     # Save the canvas
-    c_ratio.SaveAs("3d_hist_projection_VR_mistags" + type + "_ratio.png")
+    c_ratio.SaveAs(png_label + type + "_ratio.png")
     c_ratio.Clear()
 
 # ------------------------------------------------------------------------------
@@ -368,7 +388,9 @@ def LabelCMS(xpos=0.13, ypos=0.85, text_size=0.036):
     stamp_text.SetTextSize(text_size)
     stamp_text.DrawLatex( xpos, ypos, cmsLabel)
     stamp_text.DrawLatex( xpos+0.07, ypos, cmsLabelExtra)
-    if ypos == 0.85: stamp_text.DrawLatex( xpos+0.62, ypos+0.06, yearLumi)
+    if ypos == 0.85: 
+        stamp_text.DrawLatex( xpos+0.62, ypos+0.06, yearLumi)
+        stamp_text.DrawLatex( xpos+0.4, 0.85, "#scale[0.65]{DNN score > "+str(DNN_cut)+"}") # write score on the plot
     else: stamp_text.DrawLatex( xpos+0.6, ypos+0.03, yearLumi)
 
 # ------------------------------------------------------------------------------
@@ -405,18 +427,42 @@ def GetCut( branch_name, branch_sel):
 # ------------------------------------------------------------------------------
 def main():
 
+    tree = False
+    tree_Zmu = False
+    tree_Wjets = False
+
     infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_LLPskim_Run2023Cv1_NoSel_scores_2025_02_03.root"
     label = "NoSel"
-
     tree, input_file = GetData(infilepath, label)
+
+    infilepath_Zmu = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_Zmu_Run2023_HADD_Zmumu_scores_2025_02_10.root"
+    infilepath_Wjets = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_Zmu_Run2023_HADD_WPlusJets_scores_2025_02_10.root"
+    label_Zmu = "Zmumu"
+    label_Wjets = "WPlusJets"
+
+    #tree_Zmu, input_file_Zmu = GetData(infilepath_Zmu, label_Zmu)
+    #tree_Wjets, input_file_Wjets = GetData(infilepath_Wjets, label_Wjets)
+
     if tree:
         print("Tree successfully passed to MisTagParametrization")
         #MisTagParametrization(tree)
-        #MisTagParametrization(tree, "depth")
+        MisTagParametrization(tree, "depth")
         #MisTagParametrization(tree, "timing")
-        MisTagParametrization(tree, "depth_timing")
+        #MisTagParametrization(tree, "depth_timing")
         # Don't close the file until you're done using the tree
         input_file.Close()
+    else:
+        print("Tree is invalid!")
+
+    if tree_Wjets and tree_Zmu:
+        print("Tree successfully passed to MisTagParametrization")
+        #MisTagParametrization(tree_Wjets, "", tree_Zmu)
+        #MisTagParametrization(tree_Wjets, "depth", tree_Zmu)
+        #MisTagParametrization(tree_Wjets, "timing", tree_Zmu)
+        MisTagParametrization(tree_Wjets, "depth_timing", tree_Zmu)
+        # Don't close the file until you're done using the tree
+        input_file_Zmu.Close()
+        input_file_Wjets.Close()
     else:
         print("Tree is invalid!")
 
