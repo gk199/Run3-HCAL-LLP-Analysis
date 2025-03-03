@@ -50,6 +50,7 @@ def MisTagParametrization(tree, option="", tree2=""):
     # Setup cuts for CR and VR. CR = jet1_scores_inc between 0-0.5. VR = jet1_scores_inc between 0.5-0.9. Mistag means jet0_scores over "DNN_cut"
     CR = GetCut("jet1_scores_inc", [0,0.5])
     VR = GetCut("jet1_scores_inc", [0.5,0.9])
+    SR = GetCut("jet1_scores_inc", [0.9,1.1])
     mistag = GetCut("jet0_scores", [DNN_cut,1.1])
     # Need leading jet to be matched to a LLP, jet0_L1trig_Matched. Leading jet pT > 60, subleading > 40. Eta restrictions on both jets at 1.26
     triggered = GetCut("jet0_L1trig_Matched", 1)
@@ -58,6 +59,18 @@ def MisTagParametrization(tree, option="", tree2=""):
     depth_emu = GetCut("jet0_DepthTowers", [2,100]) # + GetCut("jet0_TimingTowers", 0)
     timing_emu = GetCut("jet0_TimingTowers", [2,100]) # + GetCut("jet0_DepthTowers", 0)
     depth_timing_emu = GetCut("jet0_DepthTowers", 1) + GetCut("jet0_TimingTowers", 1)
+
+    # Setup cuts for CR and VR. CR = jet1_scores_inc between 0-0.5. VR = jet1_scores_inc between 0.5-0.9. Mistag means jet0_scores over "DNN_cut"
+    CR_0 = GetCut("jet0_scores_inc", [0,0.5])
+    VR_0 = GetCut("jet0_scores_inc", [0.5,0.9])
+    SR_0 = GetCut("jet0_scores_inc", [0.9,1.1])
+    mistag_1 = GetCut("jet1_scores", [DNN_cut,1.1])
+    # Need leading jet to be matched to a LLP, jet0_L1trig_Matched. Leading jet pT > 60, subleading > 40. Eta restrictions on both jets at 1.26
+    triggered_1 = GetCut("jet1_L1trig_Matched", 1)
+    # Emulated towers are split with jet0_DepthTowers, TimingTowers
+    depth_emu_1 = GetCut("jet1_DepthTowers", [2,100]) 
+    timing_emu_1 = GetCut("jet1_TimingTowers", [2,100])
+    depth_timing_emu_1 = GetCut("jet1_DepthTowers", 1) + GetCut("jet1_TimingTowers", 1)
 
     # Define a mapping of options to their corresponding updates
     option_map = {
@@ -72,15 +85,29 @@ def MisTagParametrization(tree, option="", tree2=""):
 
     # Check if the option exists in the mapping
     if option in option_map:
-        pt_eta += option_map[option][0]
+        pt_eta += option_map[option][0] # emulated option
         title = option_map[option][1]
         label = option_map[option][2]
 
     # Create the 3D histograms with different cuts. Arguments to CreateHistograms function are tree, cut, histogram name. Histograms are filled usnig tree.Draw() method
+    # jet 0 is triggered, jet 1 defines CR / VR
     hist3d_CR_all = CreateHistograms(tree, CR + triggered + pt_eta, "hist3d_CR_all")
     hist3d_CR_mistag = CreateHistograms(tree, CR + triggered + pt_eta + mistag, "hist3d_CR_mistag")
     hist3d_VR_all = CreateHistograms(tree, VR + triggered + pt_eta, "hist3d_VR_all")
     hist3d_VR_mistag = CreateHistograms(tree, VR + triggered + pt_eta + mistag, "hist3d_VR_mistag")
+    hist3d_SR_all = CreateHistograms(tree, SR + triggered + pt_eta, "hist3d_SR_all")
+    # jet 1 is triggered, jet 0 defines CR / VR
+    hist3d_CR_all_1 = CreateHistograms(tree, CR_0 + triggered_1 + pt_eta, "hist3d_CR_all_1")
+    hist3d_CR_mistag_1 = CreateHistograms(tree, CR_0 + triggered_1 + pt_eta + mistag_1, "hist3d_CR_mistag_1")
+    hist3d_VR_all_1 = CreateHistograms(tree, VR_0 + triggered_1 + pt_eta, "hist3d_VR_all_1")
+    hist3d_VR_mistag_1 = CreateHistograms(tree, VR_0 + triggered_1 + pt_eta + mistag_1, "hist3d_VR_mistag_1")
+    hist3d_SR_all_1 = CreateHistograms(tree, SR_0 + triggered_1 + pt_eta, "hist3d_SR_all_1")
+    # OR the above options by adding together the two histograms. Remove these lines if just want to evaluate the mis-tag rates on leading or sub-leading triggered jets instead
+    hist3d_CR_all.Add(hist3d_CR_all_1)
+    hist3d_CR_mistag.Add(hist3d_CR_mistag_1)
+    hist3d_VR_all.Add(hist3d_VR_all_1)
+    hist3d_VR_mistag.Add(hist3d_VR_mistag_1)
+    hist3d_SR_all.Add(hist3d_SR_all_1)
 
     comparison = ""
     if tree2 != "": # means using two orthogonal datasets to predict and measure on, instead of CR / VR based on DNN scores
@@ -154,6 +181,14 @@ def MisTagParametrization(tree, option="", tree2=""):
     # proj_pT_CR_mistag_rate, proj_eta_CR_mistag_rate, proj_phi_CR_mistag_rate = ProjectHistogram(hist3d_CR_mistag_rate) # mistag rate from CR -- but this projection adds bins together to give a rate > 1! Use 1D from below
     proj_pT_VR_mistag_predict, proj_eta_VR_mistag_predict, proj_phi_VR_mistag_predict = ProjectHistogram(hist3d_VR_mistag_predict, "Number of events") # predicted mistag in VR
 
+    print("\nNumber of events in CR = " + str(hist3d_CR_all.Integral()))
+    print("Number of events in VR = " + str(hist3d_VR_all.Integral()))
+    print("Number of events in SR = " + str(hist3d_SR_all.Integral()) + "\n")
+    # Predict mistag in the SR
+    hist3d_SR_all.Multiply(hist3d_CR_mistag_rate)
+    print("Predicted number of mistagged events in SR = " + str(hist3d_SR_all.Integral()) + "\n")
+    proj_pT_SR_mistag_predict, proj_eta_SR_mistag_predict, proj_phi_SR_mistag_predict = ProjectHistogram(hist3d_SR_all, "Number of events") # predicted mistag in SR
+
     # Find mistag rate in 1D histograms to evaluate plots
     hist3d_CR_mistag_rate = hist3d_CR_mistag.Clone()
     ResetAxis(hist3d_CR_mistag_rate)
@@ -195,6 +230,26 @@ def MisTagParametrization(tree, option="", tree2=""):
     MakePlotWithRatio([proj_pT_VR_mistag, proj_pT_VR_mistag_predict], legend_labels, label + "_pT", png_title)
     MakePlotWithRatio([proj_eta_VR_mistag, proj_eta_VR_mistag_predict], legend_labels, label + "_eta", png_title)
     MakePlotWithRatio([proj_phi_VR_mistag, proj_phi_VR_mistag_predict], legend_labels, label + "_phi", png_title) 
+
+    print("\npredicted VR events (pT) = " + str(proj_pT_VR_mistag_predict.Integral()))
+    print("predicted VR events (eta) = " + str(proj_eta_VR_mistag_predict.Integral()))
+    print("predicted VR events (phi) = " + str(proj_phi_VR_mistag_predict.Integral()) + "\n")
+
+    # Create predicted mistag plots in the SR, but DO NOT plot observed mistag. SR is blinded
+    legend_labels = ["Predicted mistag (SR)"]
+    png_title = "3d_hist_projection_SR_mistags"
+    if tree2 != "": 
+        return # this is only set up for CR, VR, SR, not for W+jets and Zmu
+    DrawCanvasAndPlots(
+        "c4", "Mistag plots in the SR", option, title,
+        [[proj_pT_SR_mistag_predict], [proj_eta_SR_mistag_predict], [proj_phi_SR_mistag_predict]],  # Wrap each plot in a list
+        legend_labels,
+        png_title,
+        ["Jet p_{T} Projected Mistags from CR", "Jet #eta Projected Mistags from CR", "Jet #phi Projected Mistags from CR"], label
+    )
+    print("\npredicted SR events (pT) = " + str(proj_pT_SR_mistag_predict.Integral()))
+    print("predicted SR events (eta) = " + str(proj_eta_SR_mistag_predict.Integral()))
+    print("predicted SR events (phi) = " + str(proj_phi_SR_mistag_predict.Integral()) + "\n")
 
     # below code is now done in DrawCanvasAndPlots to avoid so much duplication
     # c3 = ROOT.TCanvas(f"c3_{option}", f"Mistag plots in the VR for {option}", 2400, 600)
