@@ -71,7 +71,7 @@ def MisTagParametrization(tree, option="", tree2=""):
     CR = GetCut("jet1_scores_inc", [0,0.5])
     VR = GetCut("jet1_scores_inc", [0.5,0.9])
     SR = GetCut("jet1_scores_inc", [0.9,1.1])
-    mistag = GetCut("jet0_scores", [DNN_cut,1.1])
+    mistag = GetCut("jet0_scores", [DNN_cut,1.1]) + GetCut("jet0_Pt", [60,1000])
     # Need leading jet to be matched to a LLP, jet0_L1trig_Matched. Leading jet pT > 60, subleading > 40. Eta restrictions on both jets at 1.26
     triggered = GetCut("jet0_L1trig_Matched", 1)
     pt_eta = GetCut("jet0_Pt",[40,1000]) + GetCut("jet0_Eta",[-1.26,1.26]) + GetCut("jet1_Pt",[40,1000]) + GetCut("jet1_Eta",[-1.26,1.26])
@@ -83,7 +83,7 @@ def MisTagParametrization(tree, option="", tree2=""):
     # Setup cuts for CR and VR. CR = jet1_scores_inc between 0-0.5. VR = jet1_scores_inc between 0.5-0.9. Mistag means jet0_scores over "DNN_cut"
     CR_0 = GetCut("jet0_scores_inc", [0,0.5])
     VR_0 = GetCut("jet0_scores_inc", [0.5,0.9])
-    SR_0 = GetCut("jet0_scores_inc", [0.9,1.1])
+    SR_0 = GetCut("jet0_scores_inc", [0.9,1.1]) + GetCut("jet1_Pt", [60,1000])
     mistag_1 = GetCut("jet1_scores", [DNN_cut,1.1])
     # Need leading jet to be matched to a LLP, jet0_L1trig_Matched. Leading jet pT > 60, subleading > 40. Eta restrictions on both jets at 1.26
     triggered_1 = GetCut("jet1_L1trig_Matched", 1)
@@ -503,8 +503,8 @@ def GetCut( branch_name, branch_sel):
 def main():
 
     combined_tree = False
-    tree_Zmu = False
-    tree_Wjets = False
+    combined_tree_Zmu = False
+    combined_tree_Wjets = False
 
     infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_LLPskim_Run2023Bv1_NoSel_scores_2025_02_03.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_LLPskim_Run2023Cv1_NoSel_scores_2025_02_03.root",
@@ -513,12 +513,12 @@ def main():
     label = "NoSel"
     combined_tree = GetData(infilepath_list, label)
 
-    infilepath_list_Zmu = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_Zmu_Run2023_HADD_Zmumu_scores_2025_02_10.root"
-    infilepath_list_Wjets = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_Zmu_Run2023_HADD_WPlusJets_scores_2025_02_10.root"
+    infilepath_list_Zmu = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_Zmu_Run2023_HADD_Zmumu_scores_2025_02_10.root"]
+    infilepath_list_Wjets = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_Zmu_Run2023_HADD_WPlusJets_scores_2025_02_10.root"]
     label_Zmu = "Zmumu"
     label_Wjets = "WPlusJets"
-    combined_tree_Zmu = GetData(infilepath_list_Zmu, label_Zmu)
-    combined_tree_Wjets = GetData(infilepath_list_Wjets, label_Wjets)
+    # combined_tree_Zmu = GetData(infilepath_list_Zmu, label_Zmu)
+    # combined_tree_Wjets = GetData(infilepath_list_Wjets, label_Wjets)
 
     if combined_tree:
         print("Tree successfully accessed, will be passed to MisTagParametrization")
