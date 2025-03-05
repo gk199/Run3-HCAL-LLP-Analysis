@@ -20,7 +20,27 @@ phi_bins = np.linspace(-np.pi, np.pi, 10)  # phi axis from -pi to pi, 10 bins
 DNN_cut = 0.9
 
 # ------------------------------------------------------------------------------
-def GetData(infilepath, label):
+def GetData(infilepaths, label):
+    # Create a TChain to hold the trees from all files
+    chain = ROOT.TChain(label) # Access the tree by label
+
+    # Loop over the list of file paths and add each file's tree to the chain
+    for infilepath in infilepaths:
+        print(f"Adding file: {infilepath}")
+        chain.Add(infilepath)  # Add the tree from the current file to the chain
+    
+    # Check if the chain has any entries
+    if chain.GetEntries() == 0:
+        print(f"No entries found in the tree '{label}' across all files.")
+        return None  # Return None if no data is found
+    else:
+        print(f"Found tree with label '{label}'")
+
+    # Return the chain (holding trees from all files) 
+    return chain  # No need to return the file, as TChain handles it
+
+# ------------------------------------------------------------------------------
+def GetData_single(infilepath, label): # get tree from a single filepath (not a list -- replaced by GetData now)
     # Open the input ROOT file in read mode
     input_file = ROOT.TFile(infilepath, "READ")
     
@@ -231,9 +251,9 @@ def MisTagParametrization(tree, option="", tree2=""):
     MakePlotWithRatio([proj_eta_VR_mistag, proj_eta_VR_mistag_predict], legend_labels, label + "_eta", png_title)
     MakePlotWithRatio([proj_phi_VR_mistag, proj_phi_VR_mistag_predict], legend_labels, label + "_phi", png_title) 
 
-    print("\npredicted VR events (pT) = " + str(proj_pT_VR_mistag_predict.Integral()))
-    print("predicted VR events (eta) = " + str(proj_eta_VR_mistag_predict.Integral()))
-    print("predicted VR events (phi) = " + str(proj_phi_VR_mistag_predict.Integral()) + "\n")
+    print("\npredicted VR events (pT) = " + str(proj_pT_VR_mistag_predict.Integral()) + 
+            "\npredicted VR events (eta) = " + str(proj_eta_VR_mistag_predict.Integral()) + 
+            "\npredicted VR events (phi) = " + str(proj_phi_VR_mistag_predict.Integral()) + "\n")
 
     # Create predicted mistag plots in the SR, but DO NOT plot observed mistag. SR is blinded
     legend_labels = ["Predicted mistag (SR)"]
@@ -247,9 +267,9 @@ def MisTagParametrization(tree, option="", tree2=""):
         png_title,
         ["Jet p_{T} Projected Mistags from CR", "Jet #eta Projected Mistags from CR", "Jet #phi Projected Mistags from CR"], label
     )
-    print("\npredicted SR events (pT) = " + str(proj_pT_SR_mistag_predict.Integral()))
-    print("predicted SR events (eta) = " + str(proj_eta_SR_mistag_predict.Integral()))
-    print("predicted SR events (phi) = " + str(proj_phi_SR_mistag_predict.Integral()) + "\n")
+    print("\npredicted SR events (pT) = " + str(proj_pT_SR_mistag_predict.Integral()) +
+        "\npredicted SR events (eta) = " + str(proj_eta_SR_mistag_predict.Integral()) + 
+        "\npredicted SR events (phi) = " + str(proj_phi_SR_mistag_predict.Integral()) + "\n")
 
     # below code is now done in DrawCanvasAndPlots to avoid so much duplication
     # c3 = ROOT.TCanvas(f"c3_{option}", f"Mistag plots in the VR for {option}", 2400, 600)
@@ -482,42 +502,39 @@ def GetCut( branch_name, branch_sel):
 # ------------------------------------------------------------------------------
 def main():
 
-    tree = False
+    combined_tree = False
     tree_Zmu = False
     tree_Wjets = False
 
-    infilepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_LLPskim_Run2023Cv1_NoSel_scores_2025_02_03.root"
+    infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_LLPskim_Run2023Bv1_NoSel_scores_2025_02_03.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_LLPskim_Run2023Cv1_NoSel_scores_2025_02_03.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_LLPskim_Run2023Cv2_NoSel_scores_2025_02_03.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_LLPskim_Run2023Cv3_NoSel_scores_2025_02_03.root"]
     label = "NoSel"
-    tree, input_file = GetData(infilepath, label)
+    combined_tree = GetData(infilepath_list, label)
 
-    infilepath_Zmu = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_Zmu_Run2023_HADD_Zmumu_scores_2025_02_10.root"
-    infilepath_Wjets = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_Zmu_Run2023_HADD_WPlusJets_scores_2025_02_10.root"
+    infilepath_list_Zmu = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_Zmu_Run2023_HADD_Zmumu_scores_2025_02_10.root"
+    infilepath_list_Wjets = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_Zmu_Run2023_HADD_WPlusJets_scores_2025_02_10.root"
     label_Zmu = "Zmumu"
     label_Wjets = "WPlusJets"
+    combined_tree_Zmu = GetData(infilepath_list_Zmu, label_Zmu)
+    combined_tree_Wjets = GetData(infilepath_list_Wjets, label_Wjets)
 
-    #tree_Zmu, input_file_Zmu = GetData(infilepath_Zmu, label_Zmu)
-    #tree_Wjets, input_file_Wjets = GetData(infilepath_Wjets, label_Wjets)
-
-    if tree:
-        print("Tree successfully passed to MisTagParametrization")
-        #MisTagParametrization(tree)
-        MisTagParametrization(tree, "depth")
-        #MisTagParametrization(tree, "timing")
-        #MisTagParametrization(tree, "depth_timing")
-        # Don't close the file until you're done using the tree
-        input_file.Close()
+    if combined_tree:
+        print("Tree successfully accessed, will be passed to MisTagParametrization")
+        #MisTagParametrization(combined_tree)
+        MisTagParametrization(combined_tree, "depth")
+        #MisTagParametrization(combined_tree, "timing")
+        #MisTagParametrization(combined_tree, "depth_timing")
     else:
         print("Tree is invalid!")
 
-    if tree_Wjets and tree_Zmu:
-        print("Tree successfully passed to MisTagParametrization")
-        #MisTagParametrization(tree_Wjets, "", tree_Zmu)
-        #MisTagParametrization(tree_Wjets, "depth", tree_Zmu)
-        #MisTagParametrization(tree_Wjets, "timing", tree_Zmu)
-        MisTagParametrization(tree_Wjets, "depth_timing", tree_Zmu)
-        # Don't close the file until you're done using the tree
-        input_file_Zmu.Close()
-        input_file_Wjets.Close()
+    if combined_tree_Wjets and combined_tree_Zmu:
+        print("Tree successfully accessed, will be passed to MisTagParametrization")
+        #MisTagParametrization(combined_tree_Wjets, "", combined_tree_Zmu)
+        #MisTagParametrization(combined_tree_Wjets, "depth", combined_tree_Zmu)
+        #MisTagParametrization(combined_tree_Wjets, "timing", combined_tree_Zmu)
+        MisTagParametrization(combined_tree_Wjets, "depth_timing", combined_tree_Zmu)
     else:
         print("Tree is invalid!")
 
