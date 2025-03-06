@@ -69,9 +69,7 @@ double DisplacedHcalJetAnalyzer::GetSignalBRxSigma(string infiletag){
     H_LLP_to_xs["350"] = 48500;
 
     // Find the position of "MH" and extract the mass
-    cout << infiletag << endl;
     string HiggsMass = infiletag.substr( infiletag.find("MH")+2,3 );
-    cout << HiggsMass << endl;
 	double BRxSigma = H_LLP_to_xs[HiggsMass];
 
 	cout<<"  HiggsMass --> "<<HiggsMass<<endl;
@@ -79,7 +77,7 @@ double DisplacedHcalJetAnalyzer::GetSignalBRxSigma(string infiletag){
 
 	// Branching Ratios //
 
-	if( infiletag.find("LLP_MC_ggH_HToSSTobbbb_MH") != string::npos && infiletag.find("HToSSTo4B") != string::npos ) BRxSigma *= 0.01; // BR for H to LLP
+	if( infiletag.find("LLP_MC_ggH_HToSSTobbbb_MH") != string::npos || infiletag.find("HToSSTo4B") != string::npos ) BRxSigma *= 0.01; // BR for H to LLP
 	else { 
 		weight = 1.0;
 		cout<<"WARNING: Could not identify the proper weight value for this signal sample..."<<endl;
