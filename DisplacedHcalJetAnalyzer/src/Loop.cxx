@@ -50,6 +50,7 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 	if (ZmumuEvent) FillHists("ZmumuEvent");
 
 	// Fill jet based output trees in minituples
+	/*
 	for (int i = 0; i < jet_Pt->size(); i++) {
 		if (jet_Pt->at(i) > 40 && abs(jet_Eta->at(i)) <= 1.26) { // this is the standard requirement
 		// if (jet_Pt->at(i) >= 0 && abs(jet_Eta->at(i)) <= 1.26) { // edited requirement to make jet pT turn on plot without a 40 GeV cut
@@ -73,6 +74,7 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 			}
 		}
 	}
+	*/
 
 	// Fill event based output trees in minituples
 	FillOutputTrees("NoSel");

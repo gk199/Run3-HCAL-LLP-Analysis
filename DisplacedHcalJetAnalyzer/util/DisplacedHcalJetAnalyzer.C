@@ -34,7 +34,7 @@ void DisplacedHcalJetAnalyzer::Initialize( string infiletag, string infilepath )
 	InitializeLifetimeReweighting( infilepath );
 
 	// Weights for MC
-	SetWeight( infiletag ); // and then added as a branch in OutputHelper.cxx
+	SetWeight( infilepath ); // and then added as a branch in OutputHelper.cxx
 
 	return;
 }
@@ -107,7 +107,7 @@ void DisplacedHcalJetAnalyzer( string infiletag = "", string infilepath = "" ){
 	AnalysisReader.print_counts	= true;
 	AnalysisReader.save_hists	= false;	// For output histograms
 	AnalysisReader.save_trees	= true;		// For minituples
-	AnalysisReader.NEvents 		= -1; 		// Run over specified number of events (set to -1 for ALL)
+	AnalysisReader.NEvents 		= 10; //-1; 		// Run over specified number of events (set to -1 for ALL)
 
 	// ----- Initialize ----- // 
 

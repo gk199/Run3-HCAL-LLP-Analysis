@@ -2,11 +2,19 @@
 void DisplacedHcalJetAnalyzer::SetWeight(string infiletag){
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::SetWeight()"<<endl;
-
+    
 	// determine weights for MC to add as a new branch to the minituples
     cout << "Getting samples weight" << endl;
 
-	if( isData ){
+    bool data = false, signal = false;
+    cout << infiletag << endl;
+    if (infiletag.find("CTau") != string::npos ) signal = true;
+    if (infiletag.find("PromptReco") != string::npos ) data = true;
+
+    cout << data << " = is data flag" << endl;
+    cout << signal << " = is signal flag" << endl;
+
+	if( data ){
         weight == 1;
 
         cout << "weight --> " << weight << endl;
@@ -26,15 +34,14 @@ void DisplacedHcalJetAnalyzer::SetWeight(string infiletag){
     lumi = lumi_2023;
 
     // NEvents
-    double NEvents_minituples = GetNEventsProduced(infiletag);
+    double NEvents_produced = GetNEventsProduced(infiletag);
     if (fChain == 0) return;
-    NEvents = fChain->GetEntriesFast();
-    double NEvents_Ntuple = NEvents;
+    double NEvents_Ntuple = fChain->GetEntriesFast();
 
     // Cross section
     double BRxSigma = 1;
 
-    if ( !isData && infiletag.find("CTau") != string::npos ) { // isSignal
+    if ( !data && infiletag.find("CTau") != string::npos ) { // isSignal
         BRxSigma = GetSignalBRxSigma(infiletag);
     } else {
         // would also deal with MC background processes here, like W+jets or Z->mu, to get BRxSigma
@@ -42,8 +49,8 @@ void DisplacedHcalJetAnalyzer::SetWeight(string infiletag){
     }
 	
     // Weight for each event
-	weight 	    	 = BRxSigma*lumi/NEvents_minituples;
-	weight_unskimmed = BRxSigma*lumi/NEvents_Ntuple;
+	// weight 	    	 = BRxSigma*lumi/NEvents_produced;
+	weight = BRxSigma*lumi/NEvents_Ntuple;
 	lumi_samplefrac  = lumi/(lumi_2022+lumi_2023);
 	cout<<"  weight   --> "<<weight<<" (event-by-event weight components included later)"<<endl;
 
@@ -61,7 +68,10 @@ double DisplacedHcalJetAnalyzer::GetSignalBRxSigma(string infiletag){
     H_LLP_to_xs["250"] = 48500;
     H_LLP_to_xs["350"] = 48500;
 
-    string HiggsMass = infiletag.substr( infiletag.find("MH-")+26,3 );
+    // Find the position of "MH" and extract the mass
+    cout << infiletag << endl;
+    string HiggsMass = infiletag.substr( infiletag.find("MH")+2,3 );
+    cout << HiggsMass << endl;
 	double BRxSigma = H_LLP_to_xs[HiggsMass];
 
 	cout<<"  HiggsMass --> "<<HiggsMass<<endl;
@@ -69,7 +79,7 @@ double DisplacedHcalJetAnalyzer::GetSignalBRxSigma(string infiletag){
 
 	// Branching Ratios //
 
-	if( infiletag.find("LLP_MC_ggH_HToSSTobbbb_MH") != string::npos ) BRxSigma *= 0.01; // BR for H to LLP
+	if( infiletag.find("LLP_MC_ggH_HToSSTobbbb_MH") != string::npos && infiletag.find("HToSSTo4B") != string::npos ) BRxSigma *= 0.01; // BR for H to LLP
 	else { 
 		weight = 1.0;
 		cout<<"WARNING: Could not identify the proper weight value for this signal sample..."<<endl;

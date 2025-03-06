@@ -1,6 +1,8 @@
 /* ====================================================================================================================== */
 void DisplacedHcalJetAnalyzer::InitializeTMVA(){
 
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::InitializeTMVA()"<<endl;
+
 	bdt_version = "v0.7";
 
 	bdt_tags = {
