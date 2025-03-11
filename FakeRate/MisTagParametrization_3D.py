@@ -17,7 +17,14 @@ pT_bins = np.array(pT_bins, dtype=float)
 eta_bins = np.linspace(-1.3, 1.3, 10)  # eta axis from -2 to 2, 10 bins
 phi_bins = np.linspace(-np.pi, np.pi, 10)  # phi axis from -pi to pi, 10 bins
 
-DNN_cut = 0.9
+DNN_cut = 0.99
+DNN_cut_inc = 0.99
+
+era = "2023 Bv1-Cv3" # automatically switches which input minituples to use based on this name
+era_name = era.replace(" ", "") # for plot saving
+
+Zmu = False
+LLPskim = True
 
 # ------------------------------------------------------------------------------
 def GetData(infilepaths, label):
@@ -69,8 +76,8 @@ def MisTagParametrization(tree, option="", tree2=""):
 
     # Setup cuts for CR and VR. CR = jet1_scores_inc between 0-0.5. VR = jet1_scores_inc between 0.5-0.9. Mistag means jet0_scores over "DNN_cut"
     CR = GetCut("jet1_scores_inc", [0,0.5])
-    VR = GetCut("jet1_scores_inc", [0.5,0.9])
-    SR = GetCut("jet1_scores_inc", [0.9,1.1])
+    VR = GetCut("jet1_scores_inc", [0.5,DNN_cut_inc])
+    SR = GetCut("jet1_scores_inc", [DNN_cut_inc,1.1])
     mistag = GetCut("jet0_scores", [DNN_cut,1.1])
     # Need leading jet to be matched to a LLP, jet0_L1trig_Matched. Leading jet pT > 60, subleading > 40. Eta restrictions on both jets at 1.26
     triggered = GetCut("jet0_L1trig_Matched", 1) 
@@ -83,11 +90,11 @@ def MisTagParametrization(tree, option="", tree2=""):
 
     # Setup cuts for CR and VR. CR = jet0_scores_inc between 0-0.5. VR = jet0_scores_inc between 0.5-0.9. Mistag means jet1_scores over "DNN_cut"
     CR_0 = GetCut("jet0_scores_inc", [0,0.5])
-    VR_0 = GetCut("jet0_scores_inc", [0.5,0.9])
-    SR_0 = GetCut("jet0_scores_inc", [0.9,1.1]) 
+    VR_0 = GetCut("jet0_scores_inc", [0.5,DNN_cut_inc])
+    SR_0 = GetCut("jet0_scores_inc", [DNN_cut_inc,1.1]) 
     mistag_1 = GetCut("jet1_scores", [DNN_cut,1.1])
     # Need sub-leading jet to be matched to a LLP, jet1_L1trig_Matched. Sub-leading jet pT > 60, leading > 40. Eta restrictions on both jets at 1.26
-    triggered_1 = GetCut("jet1_L1trig_Matched", 1) # + GetCut("jet0_L1trig_Matched", 0) # veto on both jet 0 and jet 1 being triggered to remove overlap
+    triggered_1 = GetCut("jet1_L1trig_Matched", 1) + GetCut("jet0_L1trig_Matched", [-10000,0.5]) # veto on both jet 0 and jet 1 being triggered to remove overlap
     # triggered_1 += GetCut("jet1_Pt", [60,1000]) 
     # Emulated towers are split with jet0_DepthTowers, TimingTowers
     depth_emu_1 = GetCut("jet1_DepthTowers", [2,100]) 
@@ -145,6 +152,7 @@ def MisTagParametrization(tree, option="", tree2=""):
 
     for i, (CR_all, CR_mistag, VR_all, VR_mistag, SR_all) in enumerate(zip(CR_all_list, CR_mistag_list, VR_all_list, VR_mistag_list, SR_all_list)):
         print (mistag_jet_list[i])
+        if i > 0 and tree2 != "": return # For this option, can only look at leading jet!
 
         comparison = ""
         if tree2 != "": # means using two orthogonal datasets to predict and measure on, instead of CR / VR based on DNN scores
@@ -153,7 +161,6 @@ def MisTagParametrization(tree, option="", tree2=""):
             VR_all = CreateHistograms(tree2, triggered + pt_eta, "hist3d_VR_all")
             VR_mistag = CreateHistograms(tree2, triggered + pt_eta + mistag, "hist3d_VR_mistag")
             comparison = "_Wjets_Zmu"
-            if i > 0: continue # For this option, can only look at leading jet!
         
         if debug:
             print(f"Entries in the tree: {tree.GetEntries()}")
@@ -276,8 +283,7 @@ def MisTagParametrization(tree, option="", tree2=""):
         # Create predicted mistag plots in the SR, but DO NOT plot observed mistag. SR is blinded
         legend_labels = ["Predicted mistag (SR)"]
         png_title = "3d_hist_projection_SR_mistags_"+mistag_jet_list[i]
-        if tree2 != "": 
-            return # this is only set up for CR, VR, SR, not for W+jets and Zmu
+        if tree2 != "": continue # this is only set up for CR, VR, SR, not for W+jets and Zmu
         DrawCanvasAndPlots(
             "c4", "Mistag plots in the SR", option, title,
             [[proj_pT_SR_mistag_predict], [proj_eta_SR_mistag_predict], [proj_phi_SR_mistag_predict]],  # Wrap each plot in a list
@@ -347,7 +353,7 @@ def DrawCanvasAndPlots(canvas_name, canvas_title, option, title, plots, legend_l
     
     canvas.Update()
     canvas.Draw()
-    canvas.SaveAs(f"{save_name}{label}.png")
+    canvas.SaveAs(f"outPlots_3D/{save_name}{label}_{era_name}.png")
     canvas.Clear()
 
 # ------------------------------------------------------------------------------
@@ -417,7 +423,7 @@ def MakePlotWithRatio(hists, legends, type, png_label):
     c_ratio.Draw()
 
     # Save the canvas
-    c_ratio.SaveAs(png_label + type + "_ratio.png")
+    c_ratio.SaveAs("outPlots_3D/"+png_label + type + "_ratio_"+era_name+".png")
     c_ratio.Clear()
 
 # ------------------------------------------------------------------------------
@@ -481,10 +487,15 @@ def LabelCMS(xpos=0.13, ypos=0.85, text_size=0.036):
     stamp_text.SetTextSize(text_size)
     stamp_text.DrawLatex( xpos, ypos, cmsLabel)
     stamp_text.DrawLatex( xpos+0.07, ypos, cmsLabelExtra)
+
     if ypos == 0.85: 
         stamp_text.DrawLatex( xpos+0.62, ypos+0.06, yearLumi)
-        stamp_text.DrawLatex( xpos+0.4, 0.85, "#scale[0.65]{DNN score > "+str(DNN_cut)+"}") # write score on the plot
-    else: stamp_text.DrawLatex( xpos+0.6, ypos+0.03, yearLumi)
+        stamp_text.DrawLatex( xpos+0.4, ypos, "#scale[0.65]{DNN score > "+str(DNN_cut)+"}") # write score on the plot
+        stamp_text.DrawLatex( xpos+0.4, ypos-0.04, "#scale[0.65]{Era = "+era+"}") 
+    else: 
+        stamp_text.DrawLatex( xpos+0.6, ypos+0.03, yearLumi)
+        stamp_text.DrawLatex( xpos+0.3, ypos, "#scale[0.65]{DNN score > "+str(DNN_cut)+"}") # write score on the plot
+        stamp_text.DrawLatex( xpos+0.3, ypos-0.04, "#scale[0.65]{Era = "+era+"}") 
 
 # ------------------------------------------------------------------------------
 def ResetAxis(hist3d):
@@ -524,19 +535,26 @@ def main():
     combined_tree_Zmu = False
     combined_tree_Wjets = False
 
-    infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_LLPskim_Run2023Bv1_NoSel_scores_2025_02_03.root",
+    print(era)
+
+    if era == "2023 Bv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_LLPskim_Run2023Bv1_NoSel_scores_2025_02_03.root"]
+    elif era == "2023 Cv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_LLPskim_Run2023Cv1_NoSel_scores_2025_02_03.root"]
+    elif era == "2023 Cv2": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_LLPskim_Run2023Cv2_NoSel_scores_2025_02_03.root"]
+    elif era == "2023 Cv3": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_LLPskim_Run2023Cv3_NoSel_scores_2025_02_03.root"]
+    else: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_LLPskim_Run2023Bv1_NoSel_scores_2025_02_03.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_LLPskim_Run2023Cv1_NoSel_scores_2025_02_03.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_LLPskim_Run2023Cv2_NoSel_scores_2025_02_03.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_LLPskim_Run2023Cv3_NoSel_scores_2025_02_03.root"]
     label = "NoSel"
-    combined_tree = GetData(infilepath_list, label)
+    if LLPskim: combined_tree = GetData(infilepath_list, label)
 
     infilepath_list_Zmu = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_Zmu_Run2023_HADD_Zmumu_scores_2025_02_10.root"]
     infilepath_list_Wjets = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_Zmu_Run2023_HADD_WPlusJets_scores_2025_02_10.root"]
     label_Zmu = "Zmumu"
     label_Wjets = "WPlusJets"
-    # combined_tree_Zmu = GetData(infilepath_list_Zmu, label_Zmu)
-    # combined_tree_Wjets = GetData(infilepath_list_Wjets, label_Wjets)
+    if Zmu:
+        combined_tree_Zmu = GetData(infilepath_list_Zmu, label_Zmu)
+        combined_tree_Wjets = GetData(infilepath_list_Wjets, label_Wjets)
 
     if combined_tree:
         print("Tree successfully accessed, will be passed to MisTagParametrization")
