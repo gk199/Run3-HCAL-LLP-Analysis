@@ -17,14 +17,14 @@ pT_bins = np.array(pT_bins, dtype=float)
 eta_bins = np.linspace(-1.3, 1.3, 10)  # eta axis from -2 to 2, 10 bins
 phi_bins = np.linspace(-np.pi, np.pi, 10)  # phi axis from -pi to pi, 10 bins
 
-DNN_cut = 0.99
-DNN_cut_inc = 0.99
+DNN_cut = 0.9
+DNN_cut_inc = 0.9
 
-era = "2023 Bv1-Cv3" # automatically switches which input minituples to use based on this name
+era = "2023 Bv1-Dv2 Zmu" # automatically switches which input minituples to use based on this name
 era_name = era.replace(" ", "") # for plot saving
 
-Zmu = False
-LLPskim = True
+Zmu = True
+LLPskim = False
 
 # ------------------------------------------------------------------------------
 def GetData(infilepaths, label):
@@ -260,7 +260,7 @@ def MisTagParametrization(tree, option="", tree2=""):
         legend_labels = ["Observed mistag (VR)", "Predicted mistag (VR)"]
         png_title = "3d_hist_projection_VR_mistags_"+mistag_jet_list[i]
         if tree2 != "": 
-            legend_labels = ["Observed mistag (W+jets)", "Predicted mistag (Zmu)"]
+            legend_labels = ["Observed mistag (Zmu)", "Predicted mistag (W+jets)"]
             png_title = "3d_hist_projection_Zmu_mistags_"+mistag_jet_list[i]
         DrawCanvasAndPlots(
             "c3", "Mistag plots in the VR", option, title,
@@ -279,6 +279,26 @@ def MisTagParametrization(tree, option="", tree2=""):
         print("\npredicted VR events (pT) = " + str(proj_pT_VR_mistag_predict.Integral()) + 
                 "\npredicted VR events (eta) = " + str(proj_eta_VR_mistag_predict.Integral()) + 
                 "\npredicted VR events (phi) = " + str(proj_phi_VR_mistag_predict.Integral()) + "\n")
+
+        # Find mistag rate in "VR" for Zmu to compare with W+jets
+        # This is having issues! And messes up W+jets and Zmu overlay if done before that...
+        if tree2 != "":
+            Zmu_mistag_rate = VR_mistag.Clone()
+            ResetAxis(Zmu_mistag_rate)
+            proj_pT_Zmu_mistag_rate, proj_eta_Zmu_mistag_rate, proj_phi_Zmu_mistag_rate = ProjectHistogram(Zmu_mistag_rate, "Mistag rate")
+            proj_pT_Zmu_mistag_rate.Divide(proj_pT_VR_all)
+            proj_eta_Zmu_mistag_rate.Divide(proj_eta_VR_all)
+            proj_phi_Zmu_mistag_rate.Divide(proj_phi_VR_all)
+            
+            legend_labels = ["Mistag rate (Zmu)"]
+            png_title = "3d_hist_projection_Zmu_mistag_rate_"+mistag_jet_list[i]
+            DrawCanvasAndPlots(
+                "c2_zmu", "Mistag rate plots in Zmu", option, title,
+                [[proj_pT_Zmu_mistag_rate], [proj_eta_Zmu_mistag_rate], [proj_phi_Zmu_mistag_rate]],  # Wrap each plot in a list
+                legend_labels,
+                png_title,
+                ["Jet p_{T} Mistag Rate from Zmu, "+mistag_jet_list[i], "Jet #eta Mistag Rate from Zmu, "+mistag_jet_list[i], "Jet #phi Mistag Rate from Zmu, "+mistag_jet_list[i]], label
+            )
 
         # Create predicted mistag plots in the SR, but DO NOT plot observed mistag. SR is blinded
         legend_labels = ["Predicted mistag (SR)"]
@@ -370,7 +390,7 @@ def MakePlot(hists, legends):
         hist.SetLineColor(colors[i])
         hist.SetLineWidth(2)
         i += 1
-    if len(hists) == 1: hists[0].Draw("HIST")
+    if len(hists) == 1: hists[0].Draw("HIST") # huge error bars for rate plots -- why?
     else: hists[0].Draw("HIST E")
     for hist in hists[1:]:
         hist.Draw("SAME HIST E")
