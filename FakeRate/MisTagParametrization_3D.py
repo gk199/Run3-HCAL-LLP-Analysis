@@ -20,11 +20,11 @@ phi_bins = np.linspace(-np.pi, np.pi, 10)  # phi axis from -pi to pi, 10 bins
 DNN_cut = 0.9
 DNN_cut_inc = 0.9
 
-era = "2023 Bv1-Dv2 Zmu" # automatically switches which input minituples to use based on this name
+era = "2023 Cv1" # "2023 Bv1-Dv2 Zmu" # automatically switches which input minituples to use based on this name
 era_name = era.replace(" ", "") # for plot saving
 
-Zmu = True
-LLPskim = False
+Zmu = False
+LLPskim = True
 
 # ------------------------------------------------------------------------------
 def GetData(infilepaths, label):
@@ -103,9 +103,9 @@ def MisTagParametrization(tree, option="", tree2=""):
 
     # Define a mapping of options to their corresponding updates
     option_map = {
-        "depth": (depth_emu, ": 2+ depth", "_depth"),
-        "timing": (timing_emu, ": 2+ timing", "_timing"),
-        "depth_timing": (depth_timing_emu, ": 1 depth, 1 timing", "_depth_timing")
+        "depth": (depth_emu, depth_emu_1, ": 2+ depth", "_depth"),
+        "timing": (timing_emu, timing_emu_1, ": 2+ timing", "_timing"),
+        "depth_timing": (depth_timing_emu, depth_timing_emu_1, ": 1 depth, 1 timing", "_depth_timing")
     }
 
     # Default values for label and title
@@ -114,9 +114,10 @@ def MisTagParametrization(tree, option="", tree2=""):
 
     # Check if the option exists in the mapping
     if option in option_map:
-        pt_eta += option_map[option][0] # emulated option
-        title = option_map[option][1]
-        label = option_map[option][2]
+        triggered += option_map[option][0] # emulated option
+        triggered_1 += option_map[option][1] # emulated option, to handle the case when jet 1 is triggered and also require depth/timing emulated! 
+        title = option_map[option][2]
+        label = option_map[option][3]
 
     # Create the 3D histograms with different cuts. Arguments to CreateHistograms function are tree, cut, histogram name. Histograms are filled usnig tree.Draw() method
     # jet 0 is triggered, jet 1 defines CR / VR
@@ -237,49 +238,13 @@ def MisTagParametrization(tree, option="", tree2=""):
         print("Predicted number of mistagged events in SR = " + str(SR_all.Integral()) + "\n")
         proj_pT_SR_mistag_predict, proj_eta_SR_mistag_predict, proj_phi_SR_mistag_predict = ProjectHistogram(SR_all, "Number of events") # predicted mistag in SR
 
-        # Find mistag rate in 1D histograms to evaluate plots
-        CR_mistag_rate = CR_mistag.Clone("CR_mistag_rate_1")
-        ResetAxis(CR_mistag_rate)
-        proj_pT_CR_mistag_rate, proj_eta_CR_mistag_rate, proj_phi_CR_mistag_rate = ProjectHistogram(CR_mistag_rate, "Mistag rate")
-        proj_pT_CR_mistag_rate.Divide(proj_pT_CR_all)
-        proj_eta_CR_mistag_rate.Divide(proj_eta_CR_all)
-        proj_phi_CR_mistag_rate.Divide(proj_phi_CR_all)
+        # Mistag rate in CR (W+jets) and VR (Zmu), plotted as a 1D histogram 
+        if LLPskim: MistagRate(CR_mistag, CR_all, "CR", option, title, label, mistag_jet_list[i])
+        if Zmu: MistagRate(CR_mistag, CR_all, "Wjets", option, title, label, mistag_jet_list[i])
+        if LLPskim: MistagRate(VR_mistag, VR_all, "VR", option, title, label, mistag_jet_list[i])
+        if Zmu: MistagRate(VR_mistag, VR_all, "Zmu", option, title, label, mistag_jet_list[i])
 
-        # Create mistag rate plots in the CR
-        legend_labels = ["Mistag rate (CR)"]
-        png_title = "3d_hist_projection_CR_mistag_rate_"+mistag_jet_list[i]
-        if tree2 != "": 
-            legend_labels = ["Mistag rate (W+jets)"]
-            png_title = "3d_hist_projection_Wjets_mistag_rate_"+mistag_jet_list[i]
-        DrawCanvasAndPlots(
-            "c2", "Mistag rate plots in the CR", option, title,
-            [[proj_pT_CR_mistag_rate], [proj_eta_CR_mistag_rate], [proj_phi_CR_mistag_rate]],  # Wrap each plot in a list
-            legend_labels,
-            png_title,
-            ["Jet p_{T} Mistag Rate from CR, "+mistag_jet_list[i], "Jet #eta Mistag Rate from CR, "+mistag_jet_list[i], "Jet #phi Mistag Rate from CR, "+mistag_jet_list[i]], label
-        )
-
-        # Find mistag rate in "VR" for Zmu to compare with W+jets
-        # This is having issues! And messes up W+jets and Zmu overlay if done before that...
-        if tree2 != "":
-            Zmu_mistag_rate = VR_mistag.Clone("Zmu_mistag_rate")
-            ResetAxis(Zmu_mistag_rate)
-            proj_pT_Zmu_mistag_rate, proj_eta_Zmu_mistag_rate, proj_phi_Zmu_mistag_rate = ProjectHistogram(Zmu_mistag_rate, "Mistag rate")
-            proj_pT_Zmu_mistag_rate.Divide(proj_pT_VR_all)
-            proj_eta_Zmu_mistag_rate.Divide(proj_eta_VR_all)
-            proj_phi_Zmu_mistag_rate.Divide(proj_phi_VR_all)
-            
-            legend_labels = ["Mistag rate (Zmu)"]
-            png_title = "3d_hist_projection_Zmu_mistag_rate_"+mistag_jet_list[i]
-            DrawCanvasAndPlots(
-                "c2_zmu", "Mistag rate plots in Zmu", option, title,
-                [[proj_pT_Zmu_mistag_rate], [proj_eta_Zmu_mistag_rate], [proj_phi_Zmu_mistag_rate]],  # Wrap each plot in a list
-                legend_labels,
-                png_title,
-                ["Jet p_{T} Mistag Rate from Zmu, "+mistag_jet_list[i], "Jet #eta Mistag Rate from Zmu, "+mistag_jet_list[i], "Jet #phi Mistag Rate from Zmu, "+mistag_jet_list[i]], label
-            )
-
-        # Create mistag plots in the VR (with two histograms per plot)
+        # Create predicted and actual mistag plots in the VR (with two histograms per plot)
         legend_labels = ["Observed mistag (VR)", "Predicted mistag (VR)"]
         png_title = "3d_hist_projection_VR_mistags_"+mistag_jet_list[i]
         if tree2 != "": 
@@ -410,6 +375,37 @@ def MakePlot(hists, legends):
     SetOwnership( legend, 0 ) # 0 = release (not keep), 1 = keep # when legend is in a separate function, it is not saved in memory for the canvas outside of function (scoping issue)
     LabelCMS()
     
+# -----------------------------------------------------------------------------
+def MistagRate(mistag_hist, all_hist, plot_type, option, title, label, type_of_jet):
+    # Find mistag rate in 1D histograms to evaluate plots
+    mistag_rate = mistag_hist.Clone("mistag_rate_"+plot_type)
+    ResetAxis(mistag_rate)
+    proj_pT_mistag_rate, proj_eta_mistag_rate, proj_phi_mistag_rate = ProjectHistogram(mistag_rate, "Mistag rate")
+
+    total = all_hist.Clone("total_"+plot_type)
+    proj_pT_total, proj_eta_total, proj_phi_total = ProjectHistogram(total, "Number of events")
+
+    proj_pT_mistag_rate.Divide(proj_pT_total)
+    proj_eta_mistag_rate.Divide(proj_eta_total)
+    proj_phi_mistag_rate.Divide(proj_phi_total)
+
+    # Create mistag rate plots
+    legend_labels = ["Mistag rate (" + plot_type + ")"] # CR, W+jets, VR, Zmu
+    png_title = "3d_hist_projection_"+ plot_type + "_mistag_rate_"+type_of_jet
+
+    # need option and title and label passed to label all plots properly
+    DrawCanvasAndPlots(
+        "c_"+plot_type, "Mistag rate plots in the " + plot_type + " with " + type_of_jet, option, title,
+        [[proj_pT_mistag_rate], [proj_eta_mistag_rate], [proj_phi_mistag_rate]],  # Wrap each plot in a list
+        legend_labels,
+        png_title,
+        ["Jet p_{T} Mistag Rate from " + plot_type + ", "+type_of_jet, "Jet #eta Mistag Rate from " + plot_type + ", "+type_of_jet, "Jet #phi Mistag Rate from " + plot_type + ", "+type_of_jet], label
+    )
+    # clear histograms to prevent axis ranges being set strangly on the second run through 
+    proj_pT_mistag_rate.Clear()
+    proj_eta_mistag_rate.Clear() 
+    proj_phi_mistag_rate.Clear()
+
 # ------------------------------------------------------------------------------
 def MakePlotWithRatio(hists, legends, type, png_label):
     # Check if there are exactly two histograms
