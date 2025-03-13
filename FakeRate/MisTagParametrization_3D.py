@@ -143,24 +143,25 @@ def MisTagParametrization(tree, option="", tree2=""):
     hist3d_SR_all_combined = hist3d_SR_all.Clone("hist3d_SR_all_combined")
     hist3d_SR_all_combined.Add(hist3d_SR_all_1)
 
-    CR_all_list = [hist3d_CR_all, hist3d_CR_all_1, hist3d_CR_all_combined]
-    CR_mistag_list = [hist3d_CR_mistag, hist3d_CR_mistag_1, hist3d_CR_mistag_combined]
-    VR_all_list = [hist3d_VR_all, hist3d_VR_all_1, hist3d_VR_all_combined]
-    VR_mistag_list = [hist3d_VR_mistag, hist3d_VR_mistag_1, hist3d_VR_mistag_combined]
-    SR_all_list = [hist3d_SR_all, hist3d_SR_all_1, hist3d_SR_all_combined]
-    mistag_jet_list = ["leading", "sub-leading", "combined"]
+    if tree2 == "": 
+        CR_all_list = [hist3d_CR_all, hist3d_CR_all_1, hist3d_CR_all_combined]
+        CR_mistag_list = [hist3d_CR_mistag, hist3d_CR_mistag_1, hist3d_CR_mistag_combined]
+        VR_all_list = [hist3d_VR_all, hist3d_VR_all_1, hist3d_VR_all_combined]
+        VR_mistag_list = [hist3d_VR_mistag, hist3d_VR_mistag_1, hist3d_VR_mistag_combined]
+        SR_all_list = [hist3d_SR_all, hist3d_SR_all_1, hist3d_SR_all_combined]
+        mistag_jet_list = ["leading", "sub-leading", "combined"]
+        comparison = ""
+    else: # means using two orthogonal datasets to predict and measure on, instead of CR / VR based on DNN scores
+        CR_all_list = [CreateHistograms(tree, triggered + pt_eta, "hist3d_Wjet_all")]
+        CR_mistag_list = [CreateHistograms(tree, triggered + pt_eta + mistag, "hist3d_Wjet_mistag")]
+        VR_all_list = [CreateHistograms(tree2, triggered + pt_eta, "hist3d_Zmu_all")]
+        VR_mistag_list = [CreateHistograms(tree2, triggered + pt_eta + mistag, "hist3d_Zmu_mistag")]
+        SR_all_list = [CreateHistograms(tree2, triggered + pt_eta, "hist3d_Zmu_all_duplicate")] # placeholder
+        mistag_jet_list = ["leading"]
+        comparison = "_Wjets_Zmu"  
 
     for i, (CR_all, CR_mistag, VR_all, VR_mistag, SR_all) in enumerate(zip(CR_all_list, CR_mistag_list, VR_all_list, VR_mistag_list, SR_all_list)):
         print (mistag_jet_list[i])
-        if i > 0 and tree2 != "": return # For this option, can only look at leading jet!
-
-        comparison = ""
-        if tree2 != "": # means using two orthogonal datasets to predict and measure on, instead of CR / VR based on DNN scores
-            CR_all = CreateHistograms(tree, triggered + pt_eta, "hist3d_CR_all")
-            CR_mistag = CreateHistograms(tree, triggered + pt_eta + mistag, "hist3d_CR_mistag")
-            VR_all = CreateHistograms(tree2, triggered + pt_eta, "hist3d_VR_all")
-            VR_mistag = CreateHistograms(tree2, triggered + pt_eta + mistag, "hist3d_VR_mistag")
-            comparison = "_Wjets_Zmu"
         
         if debug:
             print(f"Entries in the tree: {tree.GetEntries()}")
@@ -183,11 +184,12 @@ def MisTagParametrization(tree, option="", tree2=""):
             print(f"Number of entries in the 3D histogram: {CR_all.GetEntries()}")
 
         # Write the base histograms to the output file
-        output_file = ROOT.TFile("output_3D_hists"+label+comparison+"_"+mistag_jet_list[i]+".root", "RECREATE")
+        output_file = ROOT.TFile("output_3D_hists"+label+comparison+"_"+mistag_jet_list[i]+"_"+era_name+".root", "RECREATE")
         output_file.WriteObject(CR_all)
         output_file.WriteObject(CR_mistag)
         output_file.WriteObject(VR_all)
         output_file.WriteObject(VR_mistag)
+        output_file.WriteObject(SR_all)
         print("Created root file for output, wrote 3D histograms")
         # Close the ROOT file
         output_file.Close()
@@ -215,16 +217,17 @@ def MisTagParametrization(tree, option="", tree2=""):
         )
 
         # Clone CR_mistag and divide it by CR_all to get the mistag rate in CR
-        CR_mistag_rate = CR_mistag.Clone()
+        CR_mistag_rate = CR_mistag.Clone("CR_mistag_rate")
         CR_mistag_rate.Divide(CR_all)
-        VR_mistag_predict = VR_all.Clone()
+        VR_mistag_predict = VR_all.Clone("VR_mistag_predict")
         VR_mistag_predict.Multiply(CR_mistag_rate)
         # Explicitly set axis labels after cloning
         ResetAxis(CR_mistag_rate)
         ResetAxis(VR_mistag_predict)
         # Use this to predict the mistag rate in the VR
-        # proj_pT_CR_mistag_rate, proj_eta_CR_mistag_rate, proj_phi_CR_mistag_rate = ProjectHistogram(CR_mistag_rate) # mistag rate from CR -- but this projection adds bins together to give a rate > 1! Use 1D from below
-        proj_pT_VR_mistag_predict, proj_eta_VR_mistag_predict, proj_phi_VR_mistag_predict = ProjectHistogram(VR_mistag_predict, "Number of events") # predicted mistag in VR
+        # proj_pT_CR_mistag_rate, proj_eta_CR_mistag_rate, proj_phi_CR_mistag_rate = ProjectHistogram(CR_mistag_rate) 
+        # Above mistag rate from CR -- but this projection adds bins (each of which is a probability) together to give a rate > 1! Use 1D from below
+        proj_pT_VR_mistag_predict, proj_eta_VR_mistag_predict, proj_phi_VR_mistag_predict = ProjectHistogram(VR_mistag_predict, "Number of events") # predicted mistag in VR, accounting for each dimension
 
         print("\nNumber of events in CR = " + str(CR_all.Integral()))
         print("Number of events in VR = " + str(VR_all.Integral()))
@@ -235,7 +238,7 @@ def MisTagParametrization(tree, option="", tree2=""):
         proj_pT_SR_mistag_predict, proj_eta_SR_mistag_predict, proj_phi_SR_mistag_predict = ProjectHistogram(SR_all, "Number of events") # predicted mistag in SR
 
         # Find mistag rate in 1D histograms to evaluate plots
-        CR_mistag_rate = CR_mistag.Clone()
+        CR_mistag_rate = CR_mistag.Clone("CR_mistag_rate_1")
         ResetAxis(CR_mistag_rate)
         proj_pT_CR_mistag_rate, proj_eta_CR_mistag_rate, proj_phi_CR_mistag_rate = ProjectHistogram(CR_mistag_rate, "Mistag rate")
         proj_pT_CR_mistag_rate.Divide(proj_pT_CR_all)
@@ -255,6 +258,26 @@ def MisTagParametrization(tree, option="", tree2=""):
             png_title,
             ["Jet p_{T} Mistag Rate from CR, "+mistag_jet_list[i], "Jet #eta Mistag Rate from CR, "+mistag_jet_list[i], "Jet #phi Mistag Rate from CR, "+mistag_jet_list[i]], label
         )
+
+        # Find mistag rate in "VR" for Zmu to compare with W+jets
+        # This is having issues! And messes up W+jets and Zmu overlay if done before that...
+        if tree2 != "":
+            Zmu_mistag_rate = VR_mistag.Clone("Zmu_mistag_rate")
+            ResetAxis(Zmu_mistag_rate)
+            proj_pT_Zmu_mistag_rate, proj_eta_Zmu_mistag_rate, proj_phi_Zmu_mistag_rate = ProjectHistogram(Zmu_mistag_rate, "Mistag rate")
+            proj_pT_Zmu_mistag_rate.Divide(proj_pT_VR_all)
+            proj_eta_Zmu_mistag_rate.Divide(proj_eta_VR_all)
+            proj_phi_Zmu_mistag_rate.Divide(proj_phi_VR_all)
+            
+            legend_labels = ["Mistag rate (Zmu)"]
+            png_title = "3d_hist_projection_Zmu_mistag_rate_"+mistag_jet_list[i]
+            DrawCanvasAndPlots(
+                "c2_zmu", "Mistag rate plots in Zmu", option, title,
+                [[proj_pT_Zmu_mistag_rate], [proj_eta_Zmu_mistag_rate], [proj_phi_Zmu_mistag_rate]],  # Wrap each plot in a list
+                legend_labels,
+                png_title,
+                ["Jet p_{T} Mistag Rate from Zmu, "+mistag_jet_list[i], "Jet #eta Mistag Rate from Zmu, "+mistag_jet_list[i], "Jet #phi Mistag Rate from Zmu, "+mistag_jet_list[i]], label
+            )
 
         # Create mistag plots in the VR (with two histograms per plot)
         legend_labels = ["Observed mistag (VR)", "Predicted mistag (VR)"]
@@ -280,30 +303,10 @@ def MisTagParametrization(tree, option="", tree2=""):
                 "\npredicted VR events (eta) = " + str(proj_eta_VR_mistag_predict.Integral()) + 
                 "\npredicted VR events (phi) = " + str(proj_phi_VR_mistag_predict.Integral()) + "\n")
 
-        # Find mistag rate in "VR" for Zmu to compare with W+jets
-        # This is having issues! And messes up W+jets and Zmu overlay if done before that...
-        if tree2 != "":
-            Zmu_mistag_rate = VR_mistag.Clone()
-            ResetAxis(Zmu_mistag_rate)
-            proj_pT_Zmu_mistag_rate, proj_eta_Zmu_mistag_rate, proj_phi_Zmu_mistag_rate = ProjectHistogram(Zmu_mistag_rate, "Mistag rate")
-            proj_pT_Zmu_mistag_rate.Divide(proj_pT_VR_all)
-            proj_eta_Zmu_mistag_rate.Divide(proj_eta_VR_all)
-            proj_phi_Zmu_mistag_rate.Divide(proj_phi_VR_all)
-            
-            legend_labels = ["Mistag rate (Zmu)"]
-            png_title = "3d_hist_projection_Zmu_mistag_rate_"+mistag_jet_list[i]
-            DrawCanvasAndPlots(
-                "c2_zmu", "Mistag rate plots in Zmu", option, title,
-                [[proj_pT_Zmu_mistag_rate], [proj_eta_Zmu_mistag_rate], [proj_phi_Zmu_mistag_rate]],  # Wrap each plot in a list
-                legend_labels,
-                png_title,
-                ["Jet p_{T} Mistag Rate from Zmu, "+mistag_jet_list[i], "Jet #eta Mistag Rate from Zmu, "+mistag_jet_list[i], "Jet #phi Mistag Rate from Zmu, "+mistag_jet_list[i]], label
-            )
-
+        if tree2 != "": continue # this is only set up for CR, VR, SR, not for W+jets and Zmu
         # Create predicted mistag plots in the SR, but DO NOT plot observed mistag. SR is blinded
         legend_labels = ["Predicted mistag (SR)"]
         png_title = "3d_hist_projection_SR_mistags_"+mistag_jet_list[i]
-        if tree2 != "": continue # this is only set up for CR, VR, SR, not for W+jets and Zmu
         DrawCanvasAndPlots(
             "c4", "Mistag plots in the SR", option, title,
             [[proj_pT_SR_mistag_predict], [proj_eta_SR_mistag_predict], [proj_phi_SR_mistag_predict]],  # Wrap each plot in a list
