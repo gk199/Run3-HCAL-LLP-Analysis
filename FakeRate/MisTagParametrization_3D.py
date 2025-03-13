@@ -20,11 +20,11 @@ phi_bins = np.linspace(-np.pi, np.pi, 10)  # phi axis from -pi to pi, 10 bins
 DNN_cut = 0.9
 DNN_cut_inc = 0.9
 
-era = "2023 Cv1" # "2023 Bv1-Dv2 Zmu" # automatically switches which input minituples to use based on this name
+era = "2023 Bv1-Dv2 Zmu" # "2023 Bv1-Dv2 Zmu" # automatically switches which input minituples to use based on this name
 era_name = era.replace(" ", "") # for plot saving
 
-Zmu = False
-LLPskim = True
+Zmu = True
+LLPskim = False
 
 # ------------------------------------------------------------------------------
 def GetData(infilepaths, label):
@@ -101,11 +101,16 @@ def MisTagParametrization(tree, option="", tree2=""):
     timing_emu_1 = GetCut("jet1_TimingTowers", [2,100])
     depth_timing_emu_1 = GetCut("jet1_DepthTowers", 1) + GetCut("jet1_TimingTowers", 1)
 
+    run_before = GetCut("run", [360000, 368770])
+    run_after = GetCut("run", [368770, 375000])
+
     # Define a mapping of options to their corresponding updates
     option_map = {
         "depth": (depth_emu, depth_emu_1, ": 2+ depth", "_depth"),
         "timing": (timing_emu, timing_emu_1, ": 2+ timing", "_timing"),
-        "depth_timing": (depth_timing_emu, depth_timing_emu_1, ": 1 depth, 1 timing", "_depth_timing")
+        "depth_timing": (depth_timing_emu, depth_timing_emu_1, ": 1 depth, 1 timing", "_depth_timing"),
+        "before alignment": (run_before, run_before, ": before alignment", "_before_align"),
+        "after alignment": (run_after, run_after, ": after alignment", "_after_align")
     }
 
     # Default values for label and title
@@ -153,11 +158,12 @@ def MisTagParametrization(tree, option="", tree2=""):
         mistag_jet_list = ["leading", "sub-leading", "combined"]
         comparison = ""
     else: # means using two orthogonal datasets to predict and measure on, instead of CR / VR based on DNN scores
-        CR_all_list = [CreateHistograms(tree, triggered + pt_eta, "hist3d_Wjet_all")]
-        CR_mistag_list = [CreateHistograms(tree, triggered + pt_eta + mistag, "hist3d_Wjet_mistag")]
-        VR_all_list = [CreateHistograms(tree2, triggered + pt_eta, "hist3d_Zmu_all")]
-        VR_mistag_list = [CreateHistograms(tree2, triggered + pt_eta + mistag, "hist3d_Zmu_mistag")]
-        SR_all_list = [CreateHistograms(tree2, triggered + pt_eta, "hist3d_Zmu_all_duplicate")] # placeholder
+        ZW_pt_eta = GetCut("jet0_Pt",[40,1000]) + GetCut("jet0_Eta",[-1.26,1.26])  # only need first jet in HB
+        CR_all_list = [CreateHistograms(tree, triggered + ZW_pt_eta, "hist3d_Wjet_all")]
+        CR_mistag_list = [CreateHistograms(tree, triggered + ZW_pt_eta + mistag, "hist3d_Wjet_mistag")]
+        VR_all_list = [CreateHistograms(tree2, triggered + ZW_pt_eta, "hist3d_Zmu_all")]
+        VR_mistag_list = [CreateHistograms(tree2, triggered + ZW_pt_eta + mistag, "hist3d_Zmu_mistag")]
+        SR_all_list = [CreateHistograms(tree2, triggered + ZW_pt_eta, "hist3d_Zmu_all_duplicate")] # placeholder
         mistag_jet_list = ["leading"]
         comparison = "_Wjets_Zmu"  
 
@@ -548,6 +554,52 @@ def GetCut( branch_name, branch_sel):
 	return ROOT.TCut( selection + " " )
 
 # ------------------------------------------------------------------------------
+def PlotFromFile(filelist):
+    return
+    # # Create a canvas for plotting
+    # c1 = ROOT.TCanvas("c1", "Canvas", 800, 600)
+    
+    # # Define the histograms to overlay
+    # hist_combined = None
+    # hist_mistag = None
+    
+    # # Loop over the files in the list
+    # for file_name in filelist:
+    #     # Open the ROOT file
+    #     file = ROOT.TFile(file_name, "READ")
+        
+    #     # Extract histogram names based on the filename
+    #     if "combined" in file_name:
+    #         hist_combined = file.Get("hist3d_CR_all_combined")
+    #         hist_mistag = file.Get("hist3d_CR_mistag_combined")
+        
+    #     # Optionally, you can style each histogram differently based on the filename
+    #     if hist_combined:
+    #         hist_combined.SetLineColor(ROOT.kRed)  # Set color to red
+    #         hist_combined.SetLineWidth(2)           # Set line width to 2
+        
+    #     if hist_mistag:
+    #         hist_mistag.SetLineColor(ROOT.kBlue)  # Set color to blue
+    #         hist_mistag.SetLineWidth(2)            # Set line width to 2
+        
+    #     # If it's the first file, draw the histograms
+    #     if file_name == filelist[0]:
+    #         hist_combined.Draw("HIST")
+    #         hist_mistag.Draw("HIST SAME")  # Overlay the second histogram
+    #     else:
+    #         # For subsequent files, just overlay the histograms
+    #         hist_combined.Draw("HIST SAME")
+    #         hist_mistag.Draw("HIST SAME")
+        
+    #     # Close the file after use
+    #     file.Close()
+    
+    # # Update the canvas and show the plot
+    # c1.Update()
+    # c1.Draw()
+
+
+# ------------------------------------------------------------------------------
 def main():
 
     combined_tree = False
@@ -571,6 +623,10 @@ def main():
     infilepath_list_Wjets = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_Zmu_Run2023_HADD_WPlusJets_scores_2025_02_10.root"]
     label_Zmu = "Zmumu"
     label_Wjets = "WPlusJets"
+    #infilepath_list_Zmu = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/minituple_v3.9_Zmu_Run2023_HADD_2024_10_14_Zmumu_scores.root"] # "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/minituple_v3.9_Zmu_Run2023_HADD_2024_10_14_Zmumu_scores.root "
+    #infilepath_list_Wjets = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/minituple_v3.9_Zmu_Run2023_HADD_2024_10_14_WPlusJets_scores.root"]
+    #label_Zmu = "Classification"
+    #label_Wjets = "Classification"
     if Zmu:
         combined_tree_Zmu = GetData(infilepath_list_Zmu, label_Zmu)
         combined_tree_Wjets = GetData(infilepath_list_Wjets, label_Wjets)
@@ -587,11 +643,16 @@ def main():
     if combined_tree_Wjets and combined_tree_Zmu:
         print("Tree successfully accessed, will be passed to MisTagParametrization")
         #MisTagParametrization(combined_tree_Wjets, "", combined_tree_Zmu)
-        MisTagParametrization(combined_tree_Wjets, "depth", combined_tree_Zmu)
+        #MisTagParametrization(combined_tree_Wjets, "depth", combined_tree_Zmu)
         #MisTagParametrization(combined_tree_Wjets, "timing", combined_tree_Zmu)
         #MisTagParametrization(combined_tree_Wjets, "depth_timing", combined_tree_Zmu)
+        MisTagParametrization(combined_tree_Wjets, "before alignment", combined_tree_Zmu)
+        # MisTagParametrization(combined_tree_Wjets, "after alignment", combined_tree_Zmu)
     else:
         print("Tree is invalid!")
+
+    filelist = ["output_3D_hists_depth_combined_2023Cv1.root", "output_3D_hists_depth_combined_2023Cv2.root"]
+    PlotFromFile(filelist)
 
 if __name__ == '__main__':
 	main()
