@@ -535,7 +535,7 @@ LLP_matching = ["L1trig_Matched"] # jet + number + var = full histogram name
 LLP_BDTscore = ["bdtscoreX_LLP350_MS80_perJet"]
 # if DNN: LLP_BDTscore = ["scores_inc"]
 if DNN: LLP_BDTscore = ["scores"]
-BDTcut=0.5
+BDTcut=0.9
 
 # ------------------------------------------------------------------------------
 def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, obj_type):
@@ -638,8 +638,8 @@ def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, o
 jet_kinematics = ["Eta", "Phi", "Pt", "NSV", "run", "lumi", "PV"]
 bin_num = [12, 6, 9, 5, 40, 40, 20]
 bin_num = [6, 6, 9, 5, 30, 20, 15]
-plot_x_range = [1.26, 3.2, 1, 5, 371000, 2000, 100]
-plot_y_range = [0.01, 0.007, 1, 0.02, 0.02, 0.02, 0.02]
+plot_x_range = [1.26, np.pi, 1, 5, 371000, 2000, 100]
+plot_y_range = [0.04, 0.04, 0.08, 0.02, 0.02, 0.02, 0.02]
 bin_widths = np.array([40, 50, 60, 70, 80, 100, 120, 160, 240, 400], dtype='float64') 
 
 frac_track_pt_bins = [[0, 1.1]] #, [0, 0.5], [0.5, 1.1]]
@@ -707,14 +707,19 @@ def MisTagProbability(tree, obj_type, label = ""):
                         else: run_region = GetCut("run", run_range[0])
                         ele_region = GetCut(obj_type + i + "_EleEFrac", ele_frac_bins[track_counter])    # split estimation in different jet electron energy fraction (low with low track pT, high with high, inclusive together)
 
-                        denom_cut = selection_region + pT_region + eta_region + track_region + run_region 
+                        denom_cut = selection_region + pT_region + eta_region + run_region + track_region
+                        # print(denom_cut)
+                        # print(tree)
+                        # print(tree.GetEntries())
+                        # print(tree.GetEntries("(((jet0_L1trig_Matched == 1 )&&(jet0_Pt >= 40 && jet0_Pt < 1000 ))&&(jet0_Eta >= -1.26 && jet0_Eta < 1.26 ))&&(run >= 368770 && run < 375000 )"))
+                        # print(tree.GetEntries("((((jet0_L1trig_Matched == 1 )&&(jet0_Pt >= 40 && jet0_Pt < 1000 ))&&(jet0_Eta >= -1.26 && jet0_Eta < 1.26 ))&&(run >= 368770 && run < 375000 ))&&((jet0_Track0Pt / jet0_Pt) >= 0 && (jet0_Track0Pt / jet0_Pt) < 1.1 )"))
                         BDTcut_region = GetCut(obj_type + i + "_" + LLP_BDTscore[0], [BDTcut, 1.1])
 
                         Jet_plots = obj_type + i + "_" + var
                         if (var == "run" or var == "lumi" or var == "PV"): Jet_plots = var
                         tree.Draw(Jet_plots +" >> "+hname_temp, denom_cut + BDTcut_region, "", tree.GetEntries(), 0 ) # require matching variable set + LLP pt is high enough
                         tree.Draw(Jet_plots +" >> "+hname_denom, denom_cut, "", tree.GetEntries(), 0 ) # require LLP pt is high enough and in HB
-                        
+
                         misTagJets_6.Add(misTagJets[i])
                         allJets_6.Add(allJets[i])
 
@@ -823,7 +828,7 @@ def MisTagPrediction(tree, obj_type, label = ""):
                         ele_region = GetCut(obj_type + i + "_EleEFrac", ele_frac_bins[track_counter])    # split estimation in different jet electron energy fraction (low with low track pT, high with high, inclusive together)
 
                         BDTcut_region = GetCut(obj_type + i + "_" + LLP_BDTscore[0], [BDTcut, 1.1])
-                        denom_cut = selection_region + pT_region + eta_region + track_region + run_region 
+                        denom_cut = selection_region + pT_region + eta_region + run_region + track_region
 
                         Jet_plots = obj_type + i + "_" + var
                         if (var == "run" or var == "lumi" or var == "PV"): Jet_plots = var

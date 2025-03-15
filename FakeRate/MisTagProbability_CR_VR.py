@@ -526,8 +526,8 @@ def Plot2D(tree, obj_type, radius):
 
 LLP_matching = ["L1trig_Matched"] # jet + number + var = full histogram name
 LLP_BDTscore = ["bdtscoreX_LLP350_MS80_perJet"]
-if DNN: LLP_BDTscore = ["scores"]
-BDTcut=0.5
+if DNN: LLP_BDTscore = ["scores"] # depth DNN
+BDTcut=0.9
 
 # ------------------------------------------------------------------------------
 def SignalJetTagged(tree1, tree2, tree3, tree4, tree5, signal_names, tree_bkg, obj_type):
@@ -685,7 +685,7 @@ def MisTagProbability(tree, obj_type, label = ""):
                         misTagJets_6 = ROOT.TH1F("Numerator " + var, "Jet; Jet " + var + "; Jet Tagging Efficiency", bin_num[counter], bin_widths ); 
                         allJets_6 = ROOT.TH1F("Denominator "+ var, "Jet; Jet " + var + "; Jet Tagging Efficiency", bin_num[counter], bin_widths ); 
                         # misTagJets_6 = ROOT.TH1F("Numerator " + var, "Jet; Jet " + var + "; Jet Tagging Efficiency", bin_num[counter], 0, 400 ); 
-                        # allJets_6 = ROOT.TH1F("Denominator "+ var, "Jet; Jet " + var + "; Jet Tagging Efficiency", bin_num[counter], 0, 400 ); 
+                        # allJets_6 = ROOT.TH1F("Denominator "+ var, "Jet; Jet " + var + "; Jet Tagging Efficiency", bin_num[counter], 0, 400 );
 
                     for i in jet_number:
                         hname_temp = obj_type + i + "_" + var + "_highScore"
@@ -717,6 +717,7 @@ def MisTagProbability(tree, obj_type, label = ""):
 
                         # estimate backgrounds based on fraction of events with subleading jet scoring in inclusive DNN with 0-0.5
                         inclusive_score = GetCut(obj_type + "1_scores_inc", [0, 0.5])
+                        inclusive_score += GetCut(obj_type + "1_Pt", [40,400])
 
                         denom_cut = selection_region + pT_region + eta_region + track_region + run_region + emu_region + inclusive_score
                         BDTcut_region = GetCut(obj_type + i + "_" + LLP_BDTscore[0], [BDTcut, 1.1])
@@ -768,6 +769,8 @@ def MisTagProbability(tree, obj_type, label = ""):
 
                         LegendLabel(legend)
                         canv.SaveAs(folder + "/" + label + "_Efficiency_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + run_track_label_png + ".png")
+                        canv.SetLogy()
+                        canv.SaveAs(folder + "/" + label + "_Efficiency_Log_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + run_track_label_png + ".png")
                         outfile.WriteObject(pEff, "Efficiency_" + obj_type + "_" +var+"_trigMatch" + str(trig_matched) + run_track_label_png)
                     counter += 1
                 track_counter += 1
@@ -851,6 +854,7 @@ def MisTagPrediction(tree, obj_type, label = ""):
 
                         # measure backgrounds based on fraction of events with subleading jet scoring in inclusive DNN with 0.5-0.9
                         inclusive_score = GetCut(obj_type + "1_scores_inc", [0.5, 0.9])
+                        inclusive_score += GetCut(obj_type + "1_Pt", [40,400])
 
                         BDTcut_region = GetCut(obj_type + i + "_" + LLP_BDTscore[0], [BDTcut, 1.1])
                         denom_cut = selection_region + pT_region + eta_region + track_region + run_region + emu_region + inclusive_score

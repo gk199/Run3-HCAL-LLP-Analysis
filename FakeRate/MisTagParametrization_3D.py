@@ -14,8 +14,8 @@ debug = False
 pT_bins = np.linspace(0, 300, 20)  # pT axis from 0 to 500 GeV, 20 bins
 pT_bins = [0, 40, 50, 60, 70, 80, 100, 120, 160, 240, 400]  # Define pT bins
 pT_bins = np.array(pT_bins, dtype=float)
-eta_bins = np.linspace(-1.3, 1.3, 10)  # eta axis from -2 to 2, 10 bins
-phi_bins = np.linspace(-np.pi, np.pi, 10)  # phi axis from -pi to pi, 10 bins
+eta_bins = np.linspace(-1.26, 1.26, 7)  # eta axis from -2 to 2, 10 bins
+phi_bins = np.linspace(-np.pi, np.pi, 7)  # phi axis from -pi to pi, 10 bins
 
 DNN_cut = 0.9
 DNN_cut_inc = 0.9
@@ -88,6 +88,8 @@ def MisTagParametrization(tree, option="", tree2=""):
     timing_emu = GetCut("jet0_TimingTowers", [2,100]) # + GetCut("jet0_DepthTowers", 0)
     depth_timing_emu = GetCut("jet0_DepthTowers", 1) + GetCut("jet0_TimingTowers", 1)
 
+    track_pT = GetCut("jet0_Track0Pt / jet0_Pt",[0,1.1])
+
     # Setup cuts for CR and VR. CR = jet0_scores_inc between 0-0.5. VR = jet0_scores_inc between 0.5-0.9. Mistag means jet1_scores over "DNN_cut"
     CR_0 = GetCut("jet0_scores_inc", [0,0.5])
     VR_0 = GetCut("jet0_scores_inc", [0.5,DNN_cut_inc])
@@ -158,7 +160,13 @@ def MisTagParametrization(tree, option="", tree2=""):
         mistag_jet_list = ["leading", "sub-leading", "combined"]
         comparison = ""
     else: # means using two orthogonal datasets to predict and measure on, instead of CR / VR based on DNN scores
-        ZW_pt_eta = GetCut("jet0_Pt",[40,1000]) + GetCut("jet0_Eta",[-1.26,1.26])  # only need first jet in HB
+        ZW_pt_eta = GetCut("jet0_Pt",[40,1000]) + GetCut("jet0_Eta",[-1.26,1.26]) + track_pT  # only need first jet in HB
+        # print(triggered + ZW_pt_eta)
+        # print(tree)
+        # print(tree.GetEntries())
+        # print(tree.GetEntries("((jet0_L1trig_Matched == 1 )&&(run >= 368770 && run < 375000 ))&&((jet0_Pt >= 40 && jet0_Pt < 1000 )&&(jet0_Eta >= -1.26 && jet0_Eta < 1.26 ))")) #new code
+        # print(tree.GetEntries("((jet0_L1trig_Matched == 1 )&&(run >= 368770 && run < 375000 ))&&((jet0_Pt >= 40 && jet0_Pt < 1000 )&&(jet0_Eta >= -1.26 && jet0_Eta < 1.26 ))&&(jet0_Track0Pt >= 0 && jet0_Track0Pt < 10000 )")) #new code
+        # print(tree.GetEntries("((jet0_L1trig_Matched == 1 )&&(run >= 368770 && run < 375000 ))&&((jet0_Pt >= 40 && jet0_Pt < 1000 )&&(jet0_Eta >= -1.26 && jet0_Eta < 1.26 ))&&(jet0_Track0Pt / jet0_Pt >= 0 && jet0_Track0Pt / jet0_Pt < 1.1 )")) #new code
         CR_all_list = [CreateHistograms(tree, triggered + ZW_pt_eta, "hist3d_Wjet_all")]
         CR_mistag_list = [CreateHistograms(tree, triggered + ZW_pt_eta + mistag, "hist3d_Wjet_mistag")]
         VR_all_list = [CreateHistograms(tree2, triggered + ZW_pt_eta, "hist3d_Zmu_all")]
@@ -228,6 +236,28 @@ def MisTagParametrization(tree, option="", tree2=""):
         CR_mistag_rate.Divide(CR_all)
         VR_mistag_predict = VR_all.Clone("VR_mistag_predict")
         VR_mistag_predict.Multiply(CR_mistag_rate)
+        # For testing (comparison with October results), do 1D predictions instead
+        if tree2 != "": 
+            proj_pT_1D = proj_pT_VR_all.Clone("pt_1d_predict")
+            proj_pT_1D.Multiply(proj_pT_CR_mistag)
+            proj_pT_1D.Divide(proj_pT_CR_all)
+            proj_eta_1D = proj_eta_VR_all.Clone("eta_1d_predict")
+            proj_eta_1D.Multiply(proj_eta_CR_mistag)
+            proj_eta_1D.Divide(proj_eta_CR_all)
+            proj_phi_1D = proj_phi_VR_all.Clone("phi_1d_predict")
+            proj_phi_1D.Multiply(proj_phi_CR_mistag)
+            proj_phi_1D.Divide(proj_phi_CR_all)
+            legend_labels = ["Observed mistag (Zmu)", "Predicted mistag (W+jets)"]
+            png_title = "1d_hist_projection_Zmu_mistags_"+mistag_jet_list[i]
+            DrawCanvasAndPlots(
+                "c1_1d", "1D Mistag Plots in the VR", option, title,
+                [[proj_pT_VR_mistag, proj_pT_1D], 
+                [proj_eta_VR_mistag, proj_eta_1D], 
+                [proj_phi_VR_mistag, proj_phi_1D]],  # Wrap each plot in a list
+                legend_labels,
+                png_title,
+                ["Jet p_{T} Mistags in VR, "+mistag_jet_list[i], "Jet #eta Mistags in VR, "+mistag_jet_list[i], "Jet #phi Mistags in VR, "+mistag_jet_list[i]], label
+            )
         # Explicitly set axis labels after cloning
         ResetAxis(CR_mistag_rate)
         ResetAxis(VR_mistag_predict)
@@ -619,14 +649,14 @@ def main():
     label = "NoSel"
     if LLPskim: combined_tree = GetData(infilepath_list, label)
 
-    infilepath_list_Zmu = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_Zmu_Run2023_HADD_Zmumu_scores_2025_02_10.root"]
-    infilepath_list_Wjets = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_Zmu_Run2023_HADD_WPlusJets_scores_2025_02_10.root"]
-    label_Zmu = "Zmumu"
-    label_Wjets = "WPlusJets"
-    #infilepath_list_Zmu = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/minituple_v3.9_Zmu_Run2023_HADD_2024_10_14_Zmumu_scores.root"] # "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/minituple_v3.9_Zmu_Run2023_HADD_2024_10_14_Zmumu_scores.root "
-    #infilepath_list_Wjets = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/minituple_v3.9_Zmu_Run2023_HADD_2024_10_14_WPlusJets_scores.root"]
-    #label_Zmu = "Classification"
-    #label_Wjets = "Classification"
+    #infilepath_list_Zmu = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_Zmu_Run2023_HADD_Zmumu_scores_2025_02_10.root"]
+    #infilepath_list_Wjets = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_Zmu_Run2023_HADD_WPlusJets_scores_2025_02_10.root"]
+    #label_Zmu = "Zmumu"
+    #label_Wjets = "WPlusJets"
+    infilepath_list_Zmu = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/minituple_v3.9_Zmu_Run2023_HADD_2024_10_14_Zmumu_scores.root"] # "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/minituple_v3.9_Zmu_Run2023_HADD_2024_10_14_Zmumu_scores.root "
+    infilepath_list_Wjets = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/minituple_v3.9_Zmu_Run2023_HADD_2024_10_14_WPlusJets_scores.root"]
+    label_Zmu = "Classification"
+    label_Wjets = "Classification"
     if Zmu:
         combined_tree_Zmu = GetData(infilepath_list_Zmu, label_Zmu)
         combined_tree_Wjets = GetData(infilepath_list_Wjets, label_Wjets)
