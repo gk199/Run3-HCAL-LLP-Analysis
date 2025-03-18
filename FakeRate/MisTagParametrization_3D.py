@@ -14,8 +14,8 @@ debug = False
 pT_bins = np.linspace(0, 300, 20)  # pT axis from 0 to 500 GeV, 20 bins
 pT_bins = [0, 40, 50, 60, 70, 80, 100, 120, 160, 240, 400]  # Define pT bins
 pT_bins = np.array(pT_bins, dtype=float)
-eta_bins = np.linspace(-1.26, 1.26, 7)  # eta axis from -2 to 2, 10 bins
-phi_bins = np.linspace(-np.pi, np.pi, 7)  # phi axis from -pi to pi, 10 bins
+eta_bins = np.linspace(-1.26, 1.26, 10)  # eta axis from -2 to 2, 10 bins
+phi_bins = np.linspace(-np.pi, np.pi, 10)  # phi axis from -pi to pi, 10 bins
 
 DNN_cut = 0.9
 DNN_cut_inc = 0.9
@@ -122,6 +122,7 @@ def MisTagParametrization(tree, option="", tree2=""):
     # Check if the option exists in the mapping
     if option in option_map:
         triggered += option_map[option][0] # emulated option
+        print(triggered)
         triggered_1 += option_map[option][1] # emulated option, to handle the case when jet 1 is triggered and also require depth/timing emulated! 
         title = option_map[option][2]
         label = option_map[option][3]
@@ -649,14 +650,14 @@ def main():
     label = "NoSel"
     if LLPskim: combined_tree = GetData(infilepath_list, label)
 
-    #infilepath_list_Zmu = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_Zmu_Run2023_HADD_Zmumu_scores_2025_02_10.root"]
-    #infilepath_list_Wjets = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_Zmu_Run2023_HADD_WPlusJets_scores_2025_02_10.root"]
-    #label_Zmu = "Zmumu"
-    #label_Wjets = "WPlusJets"
-    infilepath_list_Zmu = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/minituple_v3.9_Zmu_Run2023_HADD_2024_10_14_Zmumu_scores.root"] # "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/minituple_v3.9_Zmu_Run2023_HADD_2024_10_14_Zmumu_scores.root "
-    infilepath_list_Wjets = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/minituple_v3.9_Zmu_Run2023_HADD_2024_10_14_WPlusJets_scores.root"]
-    label_Zmu = "Classification"
-    label_Wjets = "Classification"
+    infilepath_list_Zmu = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_Zmu_Run2023_HADD_Zmumu_scores_2025_02_10.root"]
+    infilepath_list_Wjets = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_v3.11_Zmu_Run2023_HADD_WPlusJets_scores_2025_02_10.root"]
+    label_Zmu = "Zmumu"
+    label_Wjets = "WPlusJets"
+    #infilepath_list_Zmu = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/minituple_v3.9_Zmu_Run2023_HADD_2024_10_14_Zmumu_scores.root"] # "/eos/user/g/gkopp/SWAN_projects/LLP_DNN_Tagger/minituple_v3.9_Zmu_Run2023_HADD_2024_10_14_Zmumu_scores.root "
+    #infilepath_list_Wjets = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/minituple_v3.9_Zmu_Run2023_HADD_2024_10_14_WPlusJets_scores.root"]
+    #label_Zmu = "Classification"
+    #label_Wjets = "Classification"
     if Zmu:
         combined_tree_Zmu = GetData(infilepath_list_Zmu, label_Zmu)
         combined_tree_Wjets = GetData(infilepath_list_Wjets, label_Wjets)
@@ -665,6 +666,7 @@ def main():
         print("Tree successfully accessed, will be passed to MisTagParametrization")
         #MisTagParametrization(combined_tree)
         MisTagParametrization(combined_tree, "depth")
+        #MisTagParametrization(combined_tree, "after alignment")
         #MisTagParametrization(combined_tree, "timing")
         #MisTagParametrization(combined_tree, "depth_timing")
     else:
@@ -673,10 +675,10 @@ def main():
     if combined_tree_Wjets and combined_tree_Zmu:
         print("Tree successfully accessed, will be passed to MisTagParametrization")
         #MisTagParametrization(combined_tree_Wjets, "", combined_tree_Zmu)
-        #MisTagParametrization(combined_tree_Wjets, "depth", combined_tree_Zmu)
+        MisTagParametrization(combined_tree_Wjets, "depth", combined_tree_Zmu)
         #MisTagParametrization(combined_tree_Wjets, "timing", combined_tree_Zmu)
         #MisTagParametrization(combined_tree_Wjets, "depth_timing", combined_tree_Zmu)
-        MisTagParametrization(combined_tree_Wjets, "before alignment", combined_tree_Zmu)
+        # MisTagParametrization(combined_tree_Wjets, "before alignment", combined_tree_Zmu)
         # MisTagParametrization(combined_tree_Wjets, "after alignment", combined_tree_Zmu)
     else:
         print("Tree is invalid!")

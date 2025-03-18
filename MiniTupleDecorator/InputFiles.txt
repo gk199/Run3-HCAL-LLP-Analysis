@@ -17,11 +17,21 @@
 # "v3.7_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_03_14_TRAIN", { "NoSel" }
 #
 #
-"v3.8_Zmu_Run2023Bv1_2024_08_25", {"WPlusJets", "Zmumu" }
-"v3.8_Zmu_Run2023Cv1_2024_08_25", {"WPlusJets", "Zmumu" }
-"v3.8_Zmu_Run2023Cv2_2024_08_25", {"WPlusJets", "Zmumu" }
-"v3.8_Zmu_Run2023Cv3_2024_08_25", {"WPlusJets", "Zmumu" }
-"v3.8_Zmu_Run2023Cv4_2024_07_11", {"WPlusJets", "Zmumu" }
-"v3.8_Zmu_Run2023Cv4_2024_08_23", {"WPlusJets", "Zmumu" }
-"v3.8_Zmu_Run2023Dv1_2024_08_25", {"WPlusJets", "Zmumu" }
-"v3.8_Zmu_Run2023Dv2_2024_08_25", {"WPlusJets", "Zmumu" }
+# "v3.8_Zmu_Run2023Bv1_2024_08_25", {"WPlusJets", "Zmumu" }
+# "v3.8_Zmu_Run2023Cv1_2024_08_25", {"WPlusJets", "Zmumu" }
+# "v3.8_Zmu_Run2023Cv2_2024_08_25", {"WPlusJets", "Zmumu" }
+# "v3.8_Zmu_Run2023Cv3_2024_08_25", {"WPlusJets", "Zmumu" }
+# "v3.8_Zmu_Run2023Cv4_2024_07_11", {"WPlusJets", "Zmumu" }
+# "v3.8_Zmu_Run2023Cv4_2024_08_23", {"WPlusJets", "Zmumu" }
+# "v3.8_Zmu_Run2023Dv1_2024_08_25", {"WPlusJets", "Zmumu" }
+# "v3.8_Zmu_Run2023Dv2_2024_08_25", {"WPlusJets", "Zmumu" }
+
+# "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau10000_13p6TeV_2024_06_03", {"PassedHLT"}
+
+"v3.8_LLPskim_Run2023Bv1_2024_06_03", {"NoSel"}
+"v3.8_LLPskim_Run2023Cv1_2024_06_03", {"NoSel"}
+"v3.8_LLPskim_Run2023Cv2_2024_06_03", {"NoSel"}
+"v3.8_LLPskim_Run2023Cv3_2024_06_03", {"NoSel"}
+"v3.8_LLPskim_Run2023Cv4_2024_06_03", {"NoSel"}
+"v3.8_LLPskim_Run2023Dv1_2024_06_03", {"NoSel"}
+"v3.8_LLPskim_Run2023Dv2_2024_06_03", {"NoSel"}

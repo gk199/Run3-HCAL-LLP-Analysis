@@ -894,7 +894,7 @@ def main():
 	#if "LLP_MC" in file_path: LLP_Cutflow(file_path) 
 
 	# Similar to the first table from LLP_Cutflow, but on data or LLP, using jet/analysis cuts
-	# if "Zmu" in file_path: SixJetCheck(file_path, "WPlusJets") # evaluate 6, 2, and 1 jets that are triggered and pass emulation
+	if "Zmu" or "LLPskim" in file_path: SixJetCheck(file_path, "WPlusJets") # evaluate 6, 2, and 1 jets that are triggered and pass emulation
 	# if "LLP_MC" in file_path: SixJetCheck(file_path, "PassedHLT")
 
 	# DNN check
