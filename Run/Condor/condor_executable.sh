@@ -6,6 +6,7 @@ echo "RUNNING..."
 myproxy=$1
 filetag=$2
 ds_in=$3
+filepath=$4
 
 # Proxy
 echo ""
@@ -16,8 +17,8 @@ voms-proxy-info -all -file $myproxy
 
 # Environment setup -- no packages sourced, just setting up C++ for compiling needs
 echo "CMSSW environment"
-cmsrel CMSSW_13_2_0
-cd CMSSW_13_2_0/src
+cmsrel CMSSW_14_0_0
+cd CMSSW_14_0_0/src
 cmsenv
 cd ../..
 
@@ -36,5 +37,15 @@ echo ""
 echo "Running executable..."
 echo "./DisplacedHcalJetAnalyzer $filetag $ds_in"
 ./DisplacedHcalJetAnalyzer $filetag $ds_in
+
+echo "Setting up environment for DNN"
+echo "conda create, conda activate CondaDNNenv"
+# conda create --name CondaDNNenv
+conda activate CondaDNNenv
+source /cvmfs/sft.cern.ch/lcg/views/LCG_105a_cuda/x86_64-el9-gcc11-opt/setup.sh
+
+echo "Evaluating DNN..."
+echo "python3 ScoresToEventBased-v3.py minituple_$filetag.root"
+python3 ScoresToEventBased-v3.py minituple_$filetag.root # $filepath
 
 sleep 5

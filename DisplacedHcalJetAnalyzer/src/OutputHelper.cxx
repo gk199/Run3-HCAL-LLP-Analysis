@@ -35,7 +35,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 	}
 
 	vector<string> myvars_float = {
-		"met_Pt", "met_Phi", "met_SumEt", "eventHT"
+		"met_Pt", "met_Phi", "met_SumEt", "eventHT", "weight"
 	};
 
 	// Add Physics Variables //
@@ -112,6 +112,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 
 		for (int t=0; t<3; t++) {
 			myvars_float.push_back( Form("jet%d_Track%dPt", i, t) );
+			myvars_float.push_back( Form("jet%d_Frac_Track%dPt", i, t) );
 			myvars_float.push_back( Form("jet%d_Track%ddzToPV", i, t) );
 			myvars_float.push_back( Form("jet%d_Track%ddxyToBS", i, t) );
 			myvars_float.push_back( Form("jet%d_Track%ddzOverErr", i, t) );
@@ -131,10 +132,17 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back(Form("jet%d_LeadingRechitE", i) );
 		myvars_float.push_back(Form("jet%d_SubLeadingRechitE", i) );
 		myvars_float.push_back(Form("jet%d_SSubLeadingRechitE", i) );
+		myvars_float.push_back(Form("jet%d_Frac_LeadingRechitE", i) );
+		myvars_float.push_back(Form("jet%d_Frac_SubLeadingRechitE", i) );
+		myvars_float.push_back(Form("jet%d_Frac_SSubLeadingRechitE", i) );
 		myvars_float.push_back(Form("jet%d_AllRechitE", i) );
 		myvars_int.push_back(Form("jet%d_LeadingRechitD", i) );
 		myvars_int.push_back(Form("jet%d_SubLeadingRechitD", i) );
 		myvars_int.push_back(Form("jet%d_SSubLeadingRechitD", i) );
+		myvars_int.push_back(Form("jet%d_TimingTowers", i) );
+		myvars_int.push_back(Form("jet%d_TimingTowers_pt1", i) );
+		myvars_int.push_back(Form("jet%d_DepthTowers", i) );
+		myvars_int.push_back(Form("jet%d_DepthTowers_pt1", i) );
 
 		for( auto bdt_tag: bdt_tags ){
 			myvars_float.push_back( Form("jet%d_bdtscore_%s", i, bdt_tag.c_str()) ); 
@@ -260,6 +268,9 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 	myvars_float.push_back("perJet_EleEFrac");
 	myvars_float.push_back("perJet_MuonEFrac");
 
+	myvars_int.push_back("perJet_L1trig_Matched");
+	myvars_float.push_back("perJet_dR_L1jet");
+
 	myvars_float.push_back("perJet_PtAllTracks");
 	myvars_float.push_back("perJet_PtAllPVTracks");
 
@@ -279,6 +290,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 
 	for (int t=0; t<3; t++) {
 		myvars_float.push_back( Form("perJet_Track%dPt", t) );
+		myvars_float.push_back( Form("perJet_Frac_Track%dPt", t) );
 		myvars_float.push_back( Form("perJet_Track%ddR", t) );
 		myvars_float.push_back( Form("perJet_Track%ddEta", t) );
 		myvars_float.push_back( Form("perJet_Track%ddPhi", t) );
@@ -294,6 +306,9 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 	myvars_float.push_back("perJet_LeadingRechitE" );
 	myvars_float.push_back("perJet_SubLeadingRechitE" );
 	myvars_float.push_back("perJet_SSubLeadingRechitE" );
+	myvars_float.push_back("perJet_Frac_LeadingRechitE" );
+	myvars_float.push_back("perJet_Frac_SubLeadingRechitE" );
+	myvars_float.push_back("perJet_Frac_SSubLeadingRechitE" );
 	myvars_float.push_back("perJet_AllRechitE" );
 	myvars_int.push_back("perJet_LeadingRechitD" );
 
@@ -389,6 +404,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 	tree_output_vars_float["met_SumEt"]	= met_SumEt;
 
 	tree_output_vars_float["eventHT"]   = EventHT();
+	tree_output_vars_float["weight"]	= weight; // from SetWeight() in WeightsHelper.cxx
 
 	for (int i = 0; i < HLT_Indices.size(); i++) { 
 		tree_output_vars_bool[HLT_Names[i]] = HLT_Decision->at(i);
@@ -423,7 +439,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		
 		float dR = 999.9;
 		float L1trig = -999.9;
-		for (int j = 0; j < max_l1jets; j++) { // loop over L1 jets to determine if a reco jet is matched to jet that passed L1
+		for (int j = 0; j < n_l1jet; j++) { // loop over L1 jets to determine if a reco jet is matched to jet that passed L1
 			float dR_to_L1 = DeltaR( jet_Eta->at(i), l1jet_Eta->at(j), jet_Phi->at(i), l1jet_Phi->at(j) );
 			if (dR_to_L1 < dR) { // if matched, save the dR and whether the L1 jet is triggered by HCAL LLP
 				dR = dR_to_L1;
@@ -491,6 +507,9 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("jet%d_LeadingRechitE", valid_jet)] 			= energeticRechits[0].first;
 		tree_output_vars_float[Form("jet%d_SubLeadingRechitE", valid_jet)] 			= energeticRechits[1].first;
 		tree_output_vars_float[Form("jet%d_SSubLeadingRechitE", valid_jet)] 		= energeticRechits[2].first;
+		tree_output_vars_float[Form("jet%d_Frac_LeadingRechitE", valid_jet)] 		= energeticRechits[0].first / jet_E->at(i);
+		tree_output_vars_float[Form("jet%d_Frac_SubLeadingRechitE", valid_jet)] 	= energeticRechits[1].first / jet_E->at(i);
+		tree_output_vars_float[Form("jet%d_Frac_SSubLeadingRechitE", valid_jet)] 	= energeticRechits[2].first / jet_E->at(i);
 		tree_output_vars_float[Form("jet%d_AllRechitE", valid_jet)] 				= energeticRechits[3].first;
 		tree_output_vars_int[Form("jet%d_LeadingRechitD", valid_jet)] 				= energeticRechits[0].second;
 		tree_output_vars_int[Form("jet%d_SubLeadingRechitD", valid_jet)] 			= energeticRechits[1].second;
@@ -505,6 +524,10 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 		tree_output_vars_float[Form("jet%d_S_etaeta", valid_jet)]					= spread_Eta_Phi[4];
 		tree_output_vars_float[Form("jet%d_S_phiphi", valid_jet)]					= spread_Eta_Phi[5];
 		tree_output_vars_float[Form("jet%d_S_etaphi", valid_jet)]					= spread_Eta_Phi[6];
+		tree_output_vars_int[Form("jet%d_TimingTowers", valid_jet)]					= GetTimingTowers_Jet(i, 0.4);
+		tree_output_vars_int[Form("jet%d_TimingTowers_pt1", valid_jet)]				= GetTimingTowers_Jet(i, 0.1);
+		tree_output_vars_int[Form("jet%d_DepthTowers", valid_jet)]					= GetDepthTowers_Jet(i, 0.4);
+		tree_output_vars_int[Form("jet%d_DepthTowers_pt1", valid_jet)]				= GetDepthTowers_Jet(i, 0.1);
 
 		tree_output_vars_float[Form("jet%d_TDCavg", valid_jet)] = TDC_TDCenergy[0];
 		tree_output_vars_float[Form("jet%d_TDCavg_energyWeight", valid_jet)] = TDC_TDCenergy[1];
@@ -517,12 +540,18 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 
 		for (int track = 0; track < 3; track++) {
 			tree_output_vars_float[Form("jet%d_Track%dPt", valid_jet, track)] = 0; // default value for track pT (in case no tracks are matched)
+			tree_output_vars_float[Form("jet%d_Frac_Track%dPt", valid_jet, track)] = 0; // default value for fractional track pT (in case no tracks are matched)
 			tree_output_vars_float[Form("jet%d_Track%ddR", valid_jet, track)] = 0.5; // default value for track dR (in case no tracks are matched)
 			tree_output_vars_float[Form("jet%d_Track%ddEta", valid_jet, track)] = 0.5;
 			tree_output_vars_float[Form("jet%d_Track%ddPhi", valid_jet, track)] = 0.5;
+			//tree_output_vars_float[Form("jet%d_Track%ddzToPV", valid_jet, track)] = 0;
+			//tree_output_vars_float[Form("jet%d_Track%ddxyToBS", valid_jet, track)] = 0;
+			//tree_output_vars_float[Form("jet%d_Track%ddzOverErr", valid_jet, track)] = 0;
+			//tree_output_vars_float[Form("jet%d_Track%ddxyOverErr", valid_jet, track)] = 0;
 		}
 		if (track_pt_index.size() > 0) {
 			std::sort (track_pt_index.begin(), track_pt_index.end(), greater<pair<float, float>>()); // sort to find highest pt tracks
+
 			// int n_track = std::min(3, (int) jet_track_index.size());
 			int n_track = jet_track_index.size();
 			int valid_tracks = 0;
@@ -532,21 +561,25 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename ){
 				// could put requirement here that track matches with PV
 				valid_tracks += 1; 
 				if (valid_tracks > 3) continue;			
-				tree_output_vars_float[Form("jet%d_Track%dPt", valid_jet, track)] 			= track_pt_index[track].first;
-				tree_output_vars_float[Form("jet%d_Track%ddzToPV", valid_jet, track)] 		= track_dzToPV->at(track_num); 
-				tree_output_vars_float[Form("jet%d_Track%ddxyToBS", valid_jet, track)] 		= track_dxyToBS->at(track_num); 
-				tree_output_vars_float[Form("jet%d_Track%ddzOverErr", valid_jet, track)]	= track_dzToPV->at(track_num) / track_dzErr->at(track_num); 
-				tree_output_vars_float[Form("jet%d_Track%ddxyOverErr", valid_jet, track)] 	= track_dxyToBS->at(track_num) / track_dxyErr->at(track_num); 
+				tree_output_vars_float[Form("jet%d_Track%dPt", valid_jet, valid_tracks -1)] 			= track_Pt->at(track_num); //track_pt_index[track].first;
+				tree_output_vars_float[Form("jet%d_Frac_Track%dPt", valid_jet, valid_tracks -1)] 		= track_Pt->at(track_num) / jet_Pt->at(i); 
+				tree_output_vars_float[Form("jet%d_Track%ddzToPV", valid_jet, valid_tracks -1)] 		= track_dzToPV->at(track_num); 
+				tree_output_vars_float[Form("jet%d_Track%ddxyToBS", valid_jet, valid_tracks -1)] 		= track_dxyToBS->at(track_num); 
+				tree_output_vars_float[Form("jet%d_Track%ddzOverErr", valid_jet, valid_tracks -1)]		= track_dzToPV->at(track_num) / track_dzErr->at(track_num); 
+				tree_output_vars_float[Form("jet%d_Track%ddxyOverErr", valid_jet, valid_tracks -1)] 	= track_dxyToBS->at(track_num) / track_dxyErr->at(track_num); 
 
-				tree_output_vars_float[Form("jet%d_Track%dnMissingInnerHits", valid_jet, track)] 	= track_nMissingInnerHits->at(track_num);
-				tree_output_vars_float[Form("jet%d_Track%dnMissingOuterHits", valid_jet, track)] 	= track_nMissingOuterHits->at(track_num); 
-				tree_output_vars_float[Form("jet%d_Track%dnPixelHits", valid_jet, track)] 			= track_nPixelHits->at(track_num); 
-				tree_output_vars_float[Form("jet%d_Track%dnHits", valid_jet, track)] 				= track_nHits->at(track_num); 
+				tree_output_vars_float[Form("jet%d_Track%dnMissingInnerHits", valid_jet, valid_tracks -1)] 	= track_nMissingInnerHits->at(track_num);
+				tree_output_vars_float[Form("jet%d_Track%dnMissingOuterHits", valid_jet, valid_tracks -1)] 	= track_nMissingOuterHits->at(track_num); 
+				tree_output_vars_float[Form("jet%d_Track%dnPixelHits", valid_jet, valid_tracks -1)] 		= track_nPixelHits->at(track_num); 
+				tree_output_vars_float[Form("jet%d_Track%dnHits", valid_jet, valid_tracks -1)] 				= track_nHits->at(track_num); 
 
-				tree_output_vars_float[Form("jet%d_Track%ddR", valid_jet, track)] 			= DeltaR( jet_Eta->at(i), track_Eta->at(track_num), jet_Phi->at(i), track_Phi->at(track_num) ); 
-				tree_output_vars_float[Form("jet%d_Track%ddEta", valid_jet, track)] 		= jet_Eta->at(i) - track_Eta->at(track_num);
-				tree_output_vars_float[Form("jet%d_Track%ddPhi", valid_jet, track)] 		= deltaPhi( jet_Phi->at(i), track_Phi->at(track_num) ); 
-				if (track == 1) {															// dR for two leading tracks
+				tree_output_vars_float[Form("jet%d_Track%ddR", valid_jet, valid_tracks -1)] 		= DeltaR( jet_Eta->at(i), track_Eta->at(track_num), jet_Phi->at(i), track_Phi->at(track_num) ); 
+				tree_output_vars_float[Form("jet%d_Track%ddEta", valid_jet, valid_tracks -1)] 		= jet_Eta->at(i) - track_Eta->at(track_num);
+				tree_output_vars_float[Form("jet%d_Track%ddPhi", valid_jet, valid_tracks -1)] 		= deltaPhi( jet_Phi->at(i), track_Phi->at(track_num) ); 
+				if (valid_tracks == 1 && track_Pt->at(track_num) > 0) {
+					tree_output_vars_float[Form("jet%d_Tracks_dR", valid_jet)] = 1; // default for if second track doesn't pass, set tracks_dR to 1
+				}
+				if (valid_tracks == 2 && track_Pt->at(track_num) > 0) { // dR for two leading tracks, make sure both tracks are within 0.4 of jet and have valid pT
 					tree_output_vars_float[Form("jet%d_Tracks_dR", valid_jet)] 				= DeltaR( track_Eta->at(track_pt_index[0].second), track_Eta->at(track_num), track_Phi->at(track_pt_index[0].second), track_Phi->at(track_num) );
 				}
 			}
@@ -662,6 +695,18 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 		jet_tree_output_vars_bool[HLT_Names[i]] = HLT_Decision->at(i);
 	}
 
+	float dR = 999.9;
+	float L1trig = -999.9;
+	for (int j = 0; j < n_l1jet; j++) { // loop over L1 jets to determine if a reco jet is matched to jet that passed L1
+		float dR_to_L1 = DeltaR( jet_Eta->at(jetIndex), l1jet_Eta->at(j), jet_Phi->at(jetIndex), l1jet_Phi->at(j) );
+		if (dR_to_L1 < dR) { // if matched, save the dR and whether the L1 jet is triggered by HCAL LLP
+			dR = dR_to_L1;
+			L1trig = l1jet_hwQual->at(j);
+		}
+	}
+	jet_tree_output_vars_float["perJet_dR_L1jet"] = dR;
+	if (dR < 0.4) jet_tree_output_vars_int["perJet_L1trig_Matched"] = L1trig;
+
 	jet_tree_output_vars_float["perJet_E"] 			= jet_E->at(jetIndex);
 	jet_tree_output_vars_float["perJet_Pt"] 		= jet_Pt->at(jetIndex);
 	jet_tree_output_vars_float["perJet_Eta"] 		= jet_Eta->at(jetIndex);
@@ -706,6 +751,9 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	jet_tree_output_vars_float["perJet_LeadingRechitE"] 		= energeticRechits[0].first;
 	jet_tree_output_vars_float["perJet_SubLeadingRechitE"] 		= energeticRechits[1].first;
 	jet_tree_output_vars_float["perJet_SSubLeadingRechitE"] 	= energeticRechits[2].first;
+	jet_tree_output_vars_float["perJet_Frac_LeadingRechitE"] 	= energeticRechits[0].first / jet_E->at(jetIndex);
+	jet_tree_output_vars_float["perJet_Frac_SubLeadingRechitE"] = energeticRechits[1].first / jet_E->at(jetIndex);
+	jet_tree_output_vars_float["perJet_Frac_SSubLeadingRechitE"]= energeticRechits[2].first / jet_E->at(jetIndex);
 	jet_tree_output_vars_float["perJet_AllRechitE"] 			= energeticRechits[3].first;
 	jet_tree_output_vars_int["perJet_LeadingRechitD"] 			= energeticRechits[0].second;
 	
@@ -715,6 +763,7 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 
 	for (int track = 0; track < 3; track++) {
 		jet_tree_output_vars_float[Form("perJet_Track%dPt", track)] = 0; // default value for track pT (in case no tracks are matched)
+		jet_tree_output_vars_float[Form("perJet_Frac_Track%dPt", track)] = 0; // default value for fractional track pT (in case no tracks are matched)
 		jet_tree_output_vars_float[Form("perJet_Track%ddR", track)] = 0.5; // default value for track dR (in case no tracks are matched)
 		jet_tree_output_vars_float[Form("perJet_Track%ddEta", track)] = 0.5;
 		jet_tree_output_vars_float[Form("perJet_Track%ddPhi", track)] = 0.5;
@@ -730,16 +779,20 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 			// could put requirement here that track matches with PV
 			valid_tracks += 1; 
 			if (valid_tracks > 3) continue;
-			jet_tree_output_vars_float[Form("perJet_Track%dPt", track)] 			= track_pt_index[track].first;
-			jet_tree_output_vars_float[Form("perJet_Track%ddzToPV", track)] 		= track_dzToPV->at(track_num); 
-			jet_tree_output_vars_float[Form("perJet_Track%ddxyToBS", track)] 		= track_dxyToBS->at(track_num); 
-			jet_tree_output_vars_float[Form("perJet_Track%ddzOverErr", track)]		= track_dzToPV->at(track_num) / track_dzErr->at(track_num); 
-			jet_tree_output_vars_float[Form("perJet_Track%ddxyOverErr", track)] 	= track_dxyToBS->at(track_num) / track_dxyErr->at(track_num); 
+			jet_tree_output_vars_float[Form("perJet_Track%dPt", valid_tracks -1)] 			= track_Pt->at(track_num); // track_pt_index[track].first;
+			jet_tree_output_vars_float[Form("perJet_Frac_Track%dPt", valid_tracks -1)] 		= track_Pt->at(track_num) / jet_Pt->at(jetIndex); 
+			jet_tree_output_vars_float[Form("perJet_Track%ddzToPV", valid_tracks -1)] 		= track_dzToPV->at(track_num); 
+			jet_tree_output_vars_float[Form("perJet_Track%ddxyToBS", valid_tracks -1)] 		= track_dxyToBS->at(track_num); 
+			jet_tree_output_vars_float[Form("perJet_Track%ddzOverErr", valid_tracks -1)]	= track_dzToPV->at(track_num) / track_dzErr->at(track_num); 
+			jet_tree_output_vars_float[Form("perJet_Track%ddxyOverErr", valid_tracks -1)] 	= track_dxyToBS->at(track_num) / track_dxyErr->at(track_num); 
 
-			jet_tree_output_vars_float[Form( "perJet_Track%ddR", track) ] 		= DeltaR( jet_Eta->at(jetIndex), track_Eta->at(track_num), jet_Phi->at(jetIndex), track_Phi->at(track_num) ); 
-			jet_tree_output_vars_float[Form( "perJet_Track%ddEta", track) ] 	= jet_Eta->at(jetIndex) - track_Eta->at(track_num);
-			jet_tree_output_vars_float[Form( "perJet_Track%ddPhi", track) ] 	= deltaPhi( jet_Phi->at(jetIndex), track_Phi->at(track_num) ); 
-			if (track == 1) {									// dR for two leading tracks
+			jet_tree_output_vars_float[Form( "perJet_Track%ddR", valid_tracks -1) ] 		= DeltaR( jet_Eta->at(jetIndex), track_Eta->at(track_num), jet_Phi->at(jetIndex), track_Phi->at(track_num) ); 
+			jet_tree_output_vars_float[Form( "perJet_Track%ddEta", valid_tracks -1) ] 		= jet_Eta->at(jetIndex) - track_Eta->at(track_num);
+			jet_tree_output_vars_float[Form( "perJet_Track%ddPhi", valid_tracks -1) ] 		= deltaPhi( jet_Phi->at(jetIndex), track_Phi->at(track_num) ); 
+			if (valid_tracks == 1 && track_Pt->at(track_num) > 0) {
+				jet_tree_output_vars_float["perJet_Tracks_dR"] 	= 1; // default for if second track doesn't pass, set tracks_dR to 1
+			}
+			if (valid_tracks == 2 && track_Pt->at(track_num) > 0) {	// dR for two leading tracks, make sure both tracks are within 0.4 of jet and have valid pT
 				jet_tree_output_vars_float["perJet_Tracks_dR"] 	= DeltaR( track_Eta->at(track_pt_index[0].second), track_Eta->at(track_num), track_Phi->at(track_pt_index[0].second), track_Phi->at(track_num) );
 			}
 		}

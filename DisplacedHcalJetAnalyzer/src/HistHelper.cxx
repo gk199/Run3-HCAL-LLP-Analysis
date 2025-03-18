@@ -1,7 +1,7 @@
 /* ====================================================================================================================== */
 void DisplacedHcalJetAnalyzer::SetHistCategories(){
 
-	if( debug ) cout<<"DisplacedHcalJetAnalyzer::SetCategories()"<<endl;
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::SetHistCategories()"<<endl;
 
 	// histogram category corresponds to selections (jet energy, etc)
 	// decides what is ultimately written

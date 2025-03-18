@@ -4,6 +4,7 @@
 // Goals of this study: use the LLP MC sample, understand efficiency of each HLT passed, as a function of various kinematic (jet) variables
 // Mostly worked on during September.
 // Returning to in December 2023 to compare mH 125 and 350 GeV samples
+// Used in June / July 2024 for L1 approval plots
 // -------------------------------------------------------------------------------------------------
 void MiniTuplePlotter_HLT_Effs(){
 
@@ -22,6 +23,8 @@ void MiniTuplePlotter_HLT_Effs(){
 
 	filetags["LLP350_80_ctau500mm"]	= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_rerun"}; //{ "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TEST"};
 	filetags["LLP125_50_ctau10m"]	= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau10000_13p6TeV_2024_06_03"};
+	filetags["LLP1000_450_ctau100m"] = { "MC_MH-1000_MFF-450_CTau-100000mm_TuneCP5_13p6TeV_Nov15_depthTagger"};
+	filetags["LLP1000_450_ctau10m"] = { "MC_MH-1000_MFF-450_CTau-10000mm_TuneCP5_13p6TeV_Nov15_depthTagger"};
 
 	filetags["LLP125_15_ctau10m"]	= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau10000_13p6TeV_2024_06_03"};
 	filetags["LLP125_15_ctau1m"]	= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST"};
@@ -46,6 +49,8 @@ void MiniTuplePlotter_HLT_Effs(){
 	bool September = false;
 
 	bool HLT_OR = false;
+	bool acceptance = true;
+	bool HLT_only = true;
 
 	// December 2023 studies
 	cout<<endl;
@@ -54,7 +59,7 @@ void MiniTuplePlotter_HLT_Effs(){
 
 	// to do -- make a new version that is jet based!
 
-	vector<string> filetag_keys_to_loop = {"LLP350_80_ctau500mm", "LLP125_50_ctau3m"};
+	vector<string> filetag_keys_to_loop = {"LLP350_80_ctau500mm", "LLP125_50_ctau3m", "LLP1000_450_ctau100m", "LLP1000_450_ctau10m"};
 	// vector<string> filetag_keys_to_loop = {"LLP350_80_ctau500mm", "LLP125_15_ctau3m", "LLP125_50_ctau10m", "LLP125_15_ctau10m", "LLP125_15_ctau1m", "LLP125_50_ctau3m", "LLP250_120_ctau10m", "LLP350_160_ctau10m"};
 
 	vector<string> jet_E = {"100"}; //{"60", "100"};
@@ -73,7 +78,7 @@ void MiniTuplePlotter_HLT_Effs(){
 	overlay_LLPdisplacement.SetPlots({P_perJet_MatchedLLP_DecayR});
 	overlay_LLPdisplacement.SetTreeName( "PerJet_LLPmatched" );
 	overlay_LLPdisplacement.SetOutputFileTag("HLT_v3_MC_jetE"+jet_E[0]+"_L1effs");
-	overlay_LLPdisplacement.SetOutputDirectory("HLT_Efficiencies");
+	overlay_LLPdisplacement.SetOutputDirectory("HLT_Efficiencies_31Jan");
 	overlay_LLPdisplacement.plot_norm 			= false;
 	overlay_LLPdisplacement.plot_log_ratio   	= true;
 	overlay_LLPdisplacement.SetLegendPosition( 0.13, 0.8, 0.6, 0.98 );
@@ -94,7 +99,7 @@ void MiniTuplePlotter_HLT_Effs(){
 	overlay_HT.SetPlots({P_eventHT});
 	overlay_HT.SetTreeName( "NoSel" ); 
 	overlay_HT.SetOutputFileTag("HLT_v3_MC_eventHT_L1effs");
-	overlay_HT.SetOutputDirectory("HLT_Efficiencies");
+	overlay_HT.SetOutputDirectory("HLT_Efficiencies_31Jan");
 	overlay_HT.plot_norm 			= false;
 	overlay_HT.plot_log_ratio   	= true;
 	overlay_HT.SetLegendPosition( 0.4, 0.65, 0.87, 0.83 );
@@ -116,7 +121,7 @@ void MiniTuplePlotter_HLT_Effs(){
 	overlay_jet.SetPlots({P_perJet_Pt});
 	overlay_jet.SetTreeName( "PerJet_LLPmatched" );
 	overlay_jet.SetOutputFileTag("HLT_v3_MC_L1effs");
-	overlay_jet.SetOutputDirectory("HLT_Efficiencies");
+	overlay_jet.SetOutputDirectory("HLT_Efficiencies_31Jan");
 	overlay_jet.plot_norm 			= false;
 	overlay_jet.plot_log_ratio   	= true;
 	overlay_jet.SetLegendPosition( 0.4, 0.75, 0.87, 0.93 );
@@ -173,7 +178,7 @@ void MiniTuplePlotter_HLT_Effs(){
 //			eff_LLPdisplacement.SetTreeName( "NoSel" );
 			eff_LLPdisplacement.SetTreeName( "PerJet_LLPmatched" );
 			eff_LLPdisplacement.SetOutputFileTag("HLT_v3_MC_"+key+"_jetE"+jet_E[i]);
-			eff_LLPdisplacement.SetOutputDirectory("HLT_Efficiencies");
+			eff_LLPdisplacement.SetOutputDirectory("HLT_Efficiencies_31Jan");
 			eff_LLPdisplacement.plot_norm 			= false;
 			eff_LLPdisplacement.plot_log_ratio   	= true;
 			eff_LLPdisplacement.SetLegendPosition( 0.15, 0.9, 0.43, 1.08 );
@@ -184,18 +189,30 @@ void MiniTuplePlotter_HLT_Effs(){
 				std::cout << "comparing to general displaced jet paths" << std::endl;
 				eff_LLPdisplacement.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_Run2_HLTs, Cut_DisplacedJetHLT_OR});
 				eff_LLPdisplacement.colors = { kBlack, kAzure+7, kGray+1, kViolet+4 };
-				eff_LLPdisplacement.SetLegendNames({"No cuts", "L1 efficiency", "HLT baseline efficiency", "HLT combined efficiency"});
+				if (acceptance) eff_LLPdisplacement.SetLegendNames({"No cuts", "L1 acceptance", "HLT baseline acceptance", "HLT combined acceptance"});
+				else eff_LLPdisplacement.SetLegendNames({"No cuts", "L1 efficiency", "HLT baseline efficiency", "HLT combined efficiency"});
 				eff_LLPdisplacement.SetLegendPosition( 0.15, 0.85, 0.5, 1.08 );
 			}
 			else {
-				eff_LLPdisplacement.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_AnyLLP_HLT_noECAL}); 
+				// eff_LLPdisplacement.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_AnyLLP_HLT_noECAL}); 
+				eff_LLPdisplacement.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_AnyLLP_HLT}); 
+				if (HLT_only) eff_LLPdisplacement.SetComparisonCuts({Cut_None, Cut_AnyLLP_HLT}); 
 				eff_LLPdisplacement.colors = { kBlack, kAzure+7, kViolet+4 };
-				eff_LLPdisplacement.SetLegendNames({"No cuts", "L1 efficiency", "HLT efficiency"});
+				if (acceptance) {
+					eff_LLPdisplacement.SetLegendNames({"No cuts", "L1 acceptance", "HLT acceptance"});
+					eff_LLPdisplacement.colors = { kBlack, kCyan+2, kMagenta-2 };
+					if (HLT_only) {
+						eff_LLPdisplacement.SetLegendNames({"No cuts", "HLT acceptance"});
+						eff_LLPdisplacement.colors = { kBlack, kMagenta-2 };
+					}
+				}
+				else eff_LLPdisplacement.SetLegendNames({"No cuts", "L1 efficiency", "HLT efficiency"});
 			}
 			if (key == "LLP125_50_ctau3m") eff_LLPdisplacement.SetVariableBins( {0,50,100,150,175,190,200,210,220,230,240,250,260,270,280,290,300} );
 			// eff_LLPdisplacement.colors = { kWhite, kOrange, kGreen+2 }; // to just see trigger efficiency 
 			// eff_LLPdisplacement.Plot("ratio");
-			eff_LLPdisplacement.Plot("efficiency", "", mass_lifetime);
+			if (acceptance) eff_LLPdisplacement.Plot("acceptance", "", mass_lifetime);
+			else eff_LLPdisplacement.Plot("efficiency", "", mass_lifetime);
 			eff_LLPdisplacement.ClearFileTrees(); 														// reset, and cut on each HLT group
 			eff_LLPdisplacement.SetOutputFileTag("HLT_v3_MC_"+key+"_jetE"+jet_E[i]+"_HLTsplit");
 			eff_LLPdisplacement.colors = { kBlack, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed  };
@@ -209,7 +226,7 @@ void MiniTuplePlotter_HLT_Effs(){
 		plotter_HT.SetPlots({P_eventHT});
 		plotter_HT.SetTreeName( "NoSel" ); 
 		plotter_HT.SetOutputFileTag("HLT_v3_MC_"+key);
-		plotter_HT.SetOutputDirectory("HLT_Efficiencies");
+		plotter_HT.SetOutputDirectory("HLT_Efficiencies_31Jan");
 		plotter_HT.plot_norm 			= false;
 		plotter_HT.plot_log_ratio   	= true;
 		plotter_HT.SetVariableBins( {0, 20, 40, 60, 80, 100, 120, 140, 160, 190, 220, 250, 290, 330, 390, 490, 610, 760, 950, 1200} );
@@ -219,16 +236,21 @@ void MiniTuplePlotter_HLT_Effs(){
 			std::cout << "comparing to general displaced jet paths" << std::endl;
 			plotter_HT.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_Run2_HLTs, Cut_DisplacedJetHLT_OR});
 			plotter_HT.colors = { kBlack, kAzure+7, kGray+1, kViolet+4 };
-			plotter_HT.SetLegendNames({"No cuts", "L1 efficiency", "HLT baseline efficiency", "HLT combined efficiency"});
+			plotter_HT.SetLegendNames({"No cuts", "L1 acceptance", "HLT baseline acceptance", "HLT combined acceptance"});
 			plotter_HT.SetLegendPosition( 0.55, 0.8, 0.88, 1.03 );
 			if (key == "LLP350_80_ctau500mm") plotter_HT.SetLegendPosition( 0.55, 0.55, 0.88, 0.78 ); 
 		}
 		else {
-			plotter_HT.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_AnyLLP_HLT_noECAL}); 
+			plotter_HT.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_AnyLLP_HLT}); 
 			plotter_HT.colors = { kBlack, kAzure+7, kViolet+4 };
-			plotter_HT.SetLegendNames({"No cuts", "L1 efficiency", "HLT efficiency"});
+			if (acceptance) {
+				plotter_HT.SetLegendNames({"No cuts", "L1 acceptance", "HLT acceptance"});
+				plotter_HT.colors = { kBlack, kCyan+2, kMagenta-2 };
+			}
+			else plotter_HT.SetLegendNames({"No cuts", "L1 efficiency", "HLT efficiency"});
 		}
-		plotter_HT.Plot("efficiency", "", mass_lifetime); // now need to pass other arguments! 
+		if (acceptance) plotter_HT.Plot("acceptance", "", mass_lifetime); // now need to pass other arguments! 
+		else plotter_HT.Plot("efficiency", "", mass_lifetime); // now need to pass other arguments! 
 		plotter_HT.ClearFileTrees(); 																// reset, and cut on each HLT group.
 		plotter_HT.SetOutputFileTag("HLT_v3_MC_"+key+"_HLTsplit");
 		plotter_HT.colors = { kBlack, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed  };
@@ -245,7 +267,7 @@ void MiniTuplePlotter_HLT_Effs(){
 	//		plotter_HLTeffMC.SetTreeName( "NoSel" ); 
 			plotter_HLTeffMC.SetTreeName( "PerJet_LLPmatched" );
 			plotter_HLTeffMC.SetOutputFileTag("HLT_v3_MC_"+key);
-			plotter_HLTeffMC.SetOutputDirectory("HLT_Efficiencies");
+			plotter_HLTeffMC.SetOutputDirectory("HLT_Efficiencies_31Jan");
 			plotter_HLTeffMC.plot_norm 			= false;
 			plotter_HLTeffMC.plot_log_ratio   	= true;
 			plotter_HLTeffMC.SetLegendPosition( 0.6, 0.75, 0.88, 0.88 ); // works when efficiency legend uses -0.45 for x (upper left) or -0.3 for y (middle right)
@@ -258,25 +280,32 @@ void MiniTuplePlotter_HLT_Effs(){
 				std::cout << "expect to cut on HT 350 " << std::endl;
 				plotter_HLTeffMC.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_AnyLLP_HLT_noECAL, Cut_HLTpassedHT350}); 
 				plotter_HLTeffMC.colors = { kBlack, kAzure+7, kViolet+4, kGray };
-				plotter_HLTeffMC.SetLegendNames({"No cuts", "L1 efficiency", "HLT efficiency", "HT 350 efficiency"});
+				if (acceptance) plotter_HLTeffMC.SetLegendNames({"No cuts", "L1 acceptance", "HLT acceptance", "HT 350 acceptance"});
+				else plotter_HLTeffMC.SetLegendNames({"No cuts", "L1 efficiency", "HLT efficiency", "HT 350 efficiency"});
 			}
 			else if (HLT_OR) {
 				std::cout << "comparing to general displaced jet paths" << std::endl;
 				plotter_HLTeffMC.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_Run2_HLTs, Cut_DisplacedJetHLT_OR});
 				plotter_HLTeffMC.colors = { kBlack, kAzure+7, kGray+1, kViolet+4 };
-				plotter_HLTeffMC.SetLegendNames({"No cuts", "L1 efficiency", "HLT baseline efficiency", "HLT combined efficiency"});
+				if (acceptance) plotter_HLTeffMC.SetLegendNames({"No cuts", "L1 acceptance", "HLT baseline acceptance", "HLT combined acceptance"});
+				else plotter_HLTeffMC.SetLegendNames({"No cuts", "L1 efficiency", "HLT baseline efficiency", "HLT combined efficiency"});
 				plotter_HLTeffMC.SetLegendPosition( 0.55, 0.8, 0.88, 1.0 ); 
 				if (key == "LLP350_80_ctau500mm") plotter_HLTeffMC.SetLegendPosition( 0.55, 0.9, 0.88, 1.1 ); 
 			}
 			else {
 				plotter_HLTeffMC.SetLegendPosition( 0.6, 0.85, 0.88, 1.03 );
 				if (i==0) plotter_HLTeffMC.SetVariableBins( {40, 55, 65, 75, 85, 95, 105, 115, 125, 140, 160, 185, 215, 250} );
-				plotter_HLTeffMC.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_AnyLLP_HLT_noECAL}); 
+				plotter_HLTeffMC.SetComparisonCuts({Cut_None, Cut_HLTpassed1, Cut_AnyLLP_HLT}); 
 				plotter_HLTeffMC.colors = { kBlack, kAzure+7, kViolet+4 };
-				plotter_HLTeffMC.SetLegendNames({"No cuts", "L1 efficiency", "HLT efficiency"});
+				if (acceptance) {
+					plotter_HLTeffMC.colors = { kBlack, kCyan+2, kMagenta-2 };
+					plotter_HLTeffMC.SetLegendNames({"No cuts", "L1 acceptance", "HLT acceptance"});
+				}
+				else plotter_HLTeffMC.SetLegendNames({"No cuts", "L1 efficiency", "HLT efficiency"});
 			}
 			// plotter_HLTeffMC.Plot("ratio");
-			plotter_HLTeffMC.Plot("efficiency", "", mass_lifetime); // now need to pass other arguments! 
+			if (acceptance) plotter_HLTeffMC.Plot("acceptance", "", mass_lifetime); // now need to pass other arguments! 
+			else plotter_HLTeffMC.Plot("efficiency", "", mass_lifetime); 
 			plotter_HLTeffMC.ClearFileTrees(); 																// reset, and cut on each HLT group.
 			plotter_HLTeffMC.SetOutputFileTag("HLT_v3_MC_"+key+"_HLTsplit");
 			plotter_HLTeffMC.colors = { kBlack, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed  };

@@ -67,6 +67,8 @@ public :
    bool blind_data     = false;
 
    float weight = 1;
+   float weight_unskimmed = 1;
+   double lumi_samplefrac = 1.0;
 
    Long64_t NEvents   = -1; 
    Long64_t NEvents_HLT = -1;
@@ -766,6 +768,10 @@ public :
    virtual vector<float> GetEnergyProfile_Jet( int idx_jet, float deltaR_cut );
    virtual vector<pair<float,int>> Get3RechitE_Jet( int idx_jet, float deltaR_cut );
    virtual vector<float> GetEtaPhiSpread_Jet( int idx_jet, float deltaR_cut );
+   virtual int GetTimingTowers_Jet( int idx_jet, float deltaR_cut );
+   virtual int GetDepthTowers_Jet( int idx_jet, float deltaR_cut );
+   virtual int GetDepthTowers_Jet_lowE( int idx_jet, float deltaR_cut );
+   virtual int GetTotalTowers_Jet( int idx_jet, float deltaR_cut );
    virtual vector<float> GetTDCavg_Jet( int idx_jet, float deltaR_cut );
    virtual bool IsMuonIsolatedTight( int muon_index ); 
    virtual float GetElectronEffectiveAreaMean( int ele_index );
@@ -812,6 +818,11 @@ public :
    virtual void   FillHists(string cat = "");
    virtual void   FillTriggerMatchHists(string cat = "");
    virtual void   WriteHists(); 
+   // WeightsHelper.cxx
+   virtual void   SetWeight( string infiletag );
+	virtual double GetNEventsProduced(string infiletag);
+	virtual double GetSignalBRxSigma(string infiletag);
+
 };
 
 #endif

@@ -13,7 +13,9 @@ Copy over output file from `/tmp/` area into local or home area.
 
 **3. Run:**
 
-Remember to recompile the DisplacedHcalJetAnalyzer executable! Important: make sure that the environment `DisplacedHcalJetAnalyzer` was compiled in is the same as the CMSSW release `condor_executable.sh` sets up! This is currently `CMSSW_13_2_0`. 
+Remember to recompile the DisplacedHcalJetAnalyzer executable! Important: make sure that the environment `DisplacedHcalJetAnalyzer` was compiled in is the same as the CMSSW release `condor_executable.sh` sets up! This is currently `CMSSW_14_0_0`. Do `cmsenv` in this release, logout, and login to submit the Condor jobs. 
+
+Check the trees that are run over in `ScoreSToEventBased-v3.py` with `trees_to_iterate`. 
 
 Zip the BDT weights files, `zip -r <zip file name> <directory name>`.
 

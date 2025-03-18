@@ -112,7 +112,11 @@ def main():
 
 	os.system( "ln -s " + bdt_zipfile + " BDTWeightFiles.zip" )
 	bdt_zipfile_new = os.path.abspath( "BDTWeightFiles.zip" )
-	transfer_input_files = Executable_DisplacedHcalJetAnalyzer + "," + bdt_zipfile_new
+	add_scores = os.path.abspath( "../../../Classifiers/ScoresToEventBased-v3.py" )
+	keras_depth = os.path.abspath( "../../../Classifiers/depth_model_v3_Oct15.keras" )
+	keras_inclusive = os.path.abspath( "../../../Classifiers/inclusive_model_v3_Oct15.keras" )
+	norm_constants = os.path.abspath( "../../../Classifiers/norm_constants_v3.csv" )
+	transfer_input_files = Executable_DisplacedHcalJetAnalyzer + "," + bdt_zipfile_new + "," + add_scores + "," + keras_depth + "," + keras_inclusive + "," + norm_constants
 
 	# ----- Submit Jobs ----- #
 
@@ -142,7 +146,7 @@ def main():
 			infile_tag = "job"+str(ii)+"_"+str(i)+"_"+input_list[j][0]
 			infile_path = input_list[j][1]
 
-			os.system("echo 'arguments = "+proxy+"   "+infile_tag+"   "+infile_path+"' >> condor_submit.cmd ")
+			os.system("echo 'arguments = "+proxy+"   "+infile_tag+"   "+infile_path+"   "+output_dir+"/' >> condor_submit.cmd ")
 			os.system("echo queue >> condor_submit.cmd")
 			os.system("echo >> condor_submit.cmd")
 

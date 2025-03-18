@@ -2,7 +2,7 @@
 #include "TString.h"
 
 // Goals of this study: use the LLP MC sample, split into different regions to understand how variables change by region. Also started overlaying LLP skim data variables.
-// Mostly worked on during October - November 2023.
+// Mostly worked on during October - November 2023, early spring 2024.
 // -------------------------------------------------------------------------------------------------
 void MiniTuplePlotter_CR_SR(){
 
@@ -17,6 +17,7 @@ void MiniTuplePlotter_CR_SR(){
 	string path_v3pt6 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.6/minituple_";
 	string path_v3pt7 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.7/minituple_";
 	string path 	  = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.8/minituple_";
+	string path_test  = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.10/minituple_";
 
 	map<string,vector<string>> filetags;
 	filetags["LLP125_mX15"]	= { "v3.8_LLPskim_Run2023Cv4_2024_06_03", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST"};
@@ -29,6 +30,9 @@ void MiniTuplePlotter_CR_SR(){
 	vector<string> filetags_data2 		= { "v3.8_LLPskim_Run2023_HADD", "v3.8_LLPskim_Run2023Cv4_2024_06_03" };
 	vector<string> filetags_LLP 		= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST" };	
 	vector<string> filetags_all 		= { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TEST", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_batch2", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_06_03_batch2", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_06_03_batch2"};
+
+	vector<string> filetags_test		= { "v3.10_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_28Jan_DepthTimingFlag_HADD"};
+	vector<string> filetags_test_data	= { "v3.10_Run2023D-EXOLLPJetHCAL-v1_28Jan_DepthTimingFlag_Hadd"};
 
 	vector<string> BDT_files 			= {"v3.8_LLPskim_Run2023_HADD", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_06_03_TEST", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_TEST"};
 	vector<string> filetags_all_v3pt0 	= { "v3.0_LLPskim_Run2023Bv1_2023Cv2_2023_11_23", "v2.0_MC_QCD_250k_2023_10_18", "v3.0_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2023_11_23"};
@@ -90,7 +94,8 @@ void MiniTuplePlotter_CR_SR(){
 
 	#include "../RegionCuts.h"
 
-	bool Skim_WJets = true;				// BDT input variables, plot LLP skim vs W+Jets selection
+	bool DepthFlag = true;
+	bool Skim_WJets = false;				// BDT input variables, plot LLP skim vs W+Jets selection
 	bool LLP_WJets = false;				// analysis variables for LLP and W+Jets overlayed
 	bool track_dR_study = false;		// track vars with diff dR cuts, dR with diff track cuts
 	bool overlay_LLP = false;			// overlay analysis variables for each LLP mass point
@@ -104,6 +109,106 @@ void MiniTuplePlotter_CR_SR(){
 	bool Overlay_all = false;			// overlay LLP MC, QCD MC, LLP skim
 	bool Matching_efficiency = false;	// LLP - jet matching efficiency
 	bool perJet = false;
+
+	// ----- Depth flag studies ---- //
+	if (DepthFlag) {
+		cout<<endl;
+		cout<<" ---------- CR / SR Study: Depth flag in PF jets ---------- "<<endl;
+		cout<<endl;
+/*
+		class MiniTuplePlotter plotter_depth( filetags_test, path_test );
+		plotter_depth.SetPlots({P_jet0_dR_L1jet, P_jet0_DepthTowers, P_jet0_TimingTowers, P_jet0_FlaggedTowers}); 
+		plotter_depth.SetTreeNames( {"NoSel"} );	
+		plotter_depth.SetOutputFileTag("Overlay_DepthTowers_v3.10");
+		plotter_depth.plot_log_ratio    = false; 
+		plotter_depth.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+		plotter_depth.SetCuts("jet0_Pt >= 100 && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 && jet0_dR_L1jet < 0.4");
+		// plotter_depth.SetComparisonCuts({Cut_LLPinCR_Jet0, Cut_LLPinTrackerNP_Jet0, Cut_LLPinECAL_Jet0, Cut_LLPinHCAL1_Jet0, Cut_LLPinHCAL2_Jet0, Cut_LLPinHCAL34_Jet0}, "LLP_MC");
+		// plotter_depth.SetLegendNames({"LLP in tracker <= 10cm", "LLP in tracker > 10cm", "LLP in ECAL", "LLP in HCAL, D1", "LLP in HCAL, D2", "LLP in HCAL, D34"});
+		// plotter_depth.colors = { kBlack, kGray, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed };
+		plotter_depth.SetComparisonCuts({Cut_LLPinTrackerNP_Jet0, Cut_LLPinECAL_Jet0, Cut_LLPinHCAL1_Jet0, Cut_LLPinHCAL2_Jet0, Cut_LLPinHCAL34_Jet0}, "LLP_MC");
+		plotter_depth.SetLegendNames({"LLP in tracker > 10cm", "LLP in ECAL", "LLP in HCAL, D1", "LLP in HCAL, D2", "LLP in HCAL, D34"});
+		plotter_depth.colors = { kGray, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed };
+		plotter_depth.SetVariableBins({-0.25,0.25,0.75,1.25,1.75,2.25,2.75,3.25,3.75,4.25,4.75,5.25,5.75,6.25,6.75,7.25,7.75,8.25});
+		plotter_depth.SetOutputDirectory("DepthTowers");
+		//plotter_depth.plot_norm = false;
+		plotter_depth.Plot();
+		plotter_depth.ClearFileTrees();
+		plotter_depth.SetPlots({P_jet0_DepthTowers, P_jet0_TimingTowers, P_jet0_FlaggedTowers}); 
+		plotter_depth.SetOutputFileTag("Overlay_DepthTowers_v3.10_2plus");
+		plotter_depth.SetVariableBins({-0.25,0.25,0.75,1.25,1.75,8});
+		plotter_depth.Plot();
+
+		// W+jets background
+		class MiniTuplePlotter bkg_plotter_depth( filetags_test_data, path_test );
+		bkg_plotter_depth.SetPlots({P_jet0_DepthTowers, P_jet0_TimingTowers, P_jet0_FlaggedTowers}); 
+		bkg_plotter_depth.SetTreeNames( {"WPlusJets"} );	
+		bkg_plotter_depth.SetOutputFileTag("Overlay_DepthTowers_v3.10_data");
+		bkg_plotter_depth.plot_log_ratio    = false; 
+		bkg_plotter_depth.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+		bkg_plotter_depth.SetCuts("jet0_Pt >= 100 && abs(jet0_Eta) <= 1.26 && jet0_dR_L1jet < 0.4");
+		bkg_plotter_depth.SetComparisonCuts({Cut_L1_LLPtriggered0, Cut_L1_LLPtriggered1}, "EXOLLPJetHCAL");
+		bkg_plotter_depth.SetLegendNames({"W+jets, not triggered", "W+jets, triggered"});
+		bkg_plotter_depth.colors = { kViolet+4, kMagenta-7, kRed };
+		bkg_plotter_depth.SetVariableBins({-0.25,0.25,0.75,1.25,1.75,2.25,2.75,3.25,3.75,4.25,4.75,5.25,5.75,6.25,6.75,7.25,7.75,8.25});
+		bkg_plotter_depth.SetOutputDirectory("DepthTowers");
+		//bkg_plotter_depth.plot_norm = false;
+		bkg_plotter_depth.Plot();
+		bkg_plotter_depth.ClearFileTrees();
+		bkg_plotter_depth.SetPlots({P_jet0_DepthTowers, P_jet0_TimingTowers, P_jet0_FlaggedTowers}); 
+		bkg_plotter_depth.SetOutputFileTag("Overlay_DepthTowers_v3.10_data_2plus");
+		bkg_plotter_depth.SetVariableBins({-0.25,0.25,0.75,1.25,1.75,8});
+		bkg_plotter_depth.Plot();
+
+		// plot vs LLP decay R
+		class MiniTuplePlotter decay_R( filetags_test, path_test );
+		decay_R.SetPlots({P_jet0_MatchedLLP_DecayR}); 
+		decay_R.SetTreeNames( {"NoSel"} );	
+		decay_R.SetOutputFileTag("Overlay_LLPr_v3.10");
+		decay_R.plot_log_ratio    = false; 
+		decay_R.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+		decay_R.SetCuts("jet0_Pt >= 100 && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 && jet0_dR_L1jet < 0.4");
+		decay_R.SetComparisonCuts({Cut_0Towers, Cut_1Towers, Cut_2Towers});
+		decay_R.SetLegendNames({"No flagged towers", "1 flagged tower", "2+ flagged towers"});
+		decay_R.colors = { kViolet+4, kAzure+7, kMagenta-7 };
+		decay_R.SetOutputDirectory("DepthTowers");
+		//decay_R.plot_norm = false;
+		decay_R.Plot();
+		decay_R.ClearFileTrees();
+		decay_R.SetOutputFileTag("Overlay_LLPr_v3.10_depth");
+		decay_R.SetComparisonCuts({Cut_0DepthTowers, Cut_1DepthTowers, Cut_2DepthTowers});
+		decay_R.SetLegendNames({"No flagged depth towers", "1 flagged tower", "2+ flagged towers"});		
+		decay_R.Plot();
+		decay_R.ClearFileTrees();
+		decay_R.SetOutputFileTag("Overlay_LLPr_v3.10_timing");
+		decay_R.SetComparisonCuts({Cut_0TimingTowers, Cut_1TimingTowers, Cut_2TimingTowers});
+		decay_R.SetLegendNames({"No flagged timing towers", "1 flagged tower", "2+ flagged towers"});		
+		decay_R.Plot();
+*/
+		// pT spectrum of CR and VR
+		class MiniTuplePlotter CR_VR_kinematics( {"v3.11_LLPskim_Run2023Cv1_NoSel_scores_2025_02_03"}, {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_"} );
+		CR_VR_kinematics.SetPlots({P_jet1_Pt, P_jet1_Eta, P_jet1_Phi}); 
+		CR_VR_kinematics.SetTreeNames( {"NoSel"} );	
+		CR_VR_kinematics.SetOutputFileTag("Overlay_InclusiveJet_v3.11_data");
+		CR_VR_kinematics.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+		CR_VR_kinematics.SetCuts("jet0_Pt >= 60 && abs(jet0_Eta) <= 1.26 && jet0_dR_L1jet < 0.4 && jet0_L1trig_Matched == 1 && jet0_scores >= 0.9");
+		CR_VR_kinematics.SetComparisonCuts({Cut_CR, Cut_VR}),
+		CR_VR_kinematics.SetLegendNames({"CR", "VR"});
+		CR_VR_kinematics.colors = { kViolet+4, kMagenta-7 };
+		CR_VR_kinematics.SetOutputDirectory("CR_VR");
+		CR_VR_kinematics.Plot();
+		CR_VR_kinematics.ClearFileTrees();
+		CR_VR_kinematics.SetOutputFileTag("Overlay_InclusiveJet_v3.11_data");
+		CR_VR_kinematics.SetComparisonCuts({Cut_CR, Cut_VR}),
+		CR_VR_kinematics.SetLegendNames({"CR", "VR"});
+		CR_VR_kinematics.plot_log    = false; 
+		CR_VR_kinematics.Plot();
+		CR_VR_kinematics.ClearFileTrees();
+		CR_VR_kinematics.SetOutputFileTag("Overlay_InclusiveJetBins_v3.11_data");
+		CR_VR_kinematics.SetComparisonCuts({"jet1_scores_inc >= 0 && jet1_scores_inc <= 0.2", "jet1_scores_inc > 0.2 && jet1_scores_inc <= 0.4", "jet1_scores_inc > 0.4 && jet1_scores_inc <= 0.6", "jet1_scores_inc > 0.6 && jet1_scores_inc <= 0.8"}),
+		CR_VR_kinematics.SetLegendNames({"Inclusive DNN 0-0.2", "Inclusive DNN 0.2-0.4", "Inclusive DNN 0.4-0.6", "Inclusive DNN 0.6-0.8"});
+		CR_VR_kinematics.Plot();
+	}
 
 	// ----- Jet kinematics in control and signal regions -----//
 
@@ -153,18 +258,41 @@ void MiniTuplePlotter_CR_SR(){
 			// plotter_BDTvars.SetOutputDirectory("Overlay_"+key);
 			// plotter_BDTvars.Plot("ratio");
 
+			bool simple = false;
+			bool reduced = false;
+			bool hcal_only = true;
 			// HCAL depth variables with LLP regions and data overlayed
 			class MiniTuplePlotter plotter_BDTvars_perJet( filetags[key], path );
 			plotter_BDTvars_perJet.SetPlots(analysisVars_perJet); 
 			plotter_BDTvars_perJet.SetTreeNames( {"PerJet_WPlusJets", "PerJet_LLPmatched"} );	
 			plotter_BDTvars_perJet.SetOutputFileTag("Overlay_perJet_"+key+"_v3.8");
+			if (simple) plotter_BDTvars_perJet.SetOutputFileTag("SimpleOverlay_perJet_"+key+"_v3.8");
+			if (reduced) plotter_BDTvars_perJet.SetOutputFileTag("ReducedOverlay_perJet_"+key+"_v3.8");
+			if (hcal_only) plotter_BDTvars_perJet.SetOutputFileTag("HcalOverlay_perJet_"+key+"_v3.8");
 			plotter_BDTvars_perJet.plot_log_ratio    = false; 
 			//plotter_BDTvars_perJet.plot_cdf 		 = true;
 			//plotter_BDTvars_perJet.plot_reverse_cdf  = true;
 			plotter_BDTvars_perJet.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
-			plotter_BDTvars_perJet.SetLegendNames({"LLP skim - W+jets selection", "Tracker: R <= 10cm", "Tracker: R > 10cm", "ECAL", "HCAL-D1", "HCAL-D2", "HCAL-D34"});
+			plotter_BDTvars_perJet.SetLegendNames({"LLP skim - W+jets selection", "LLP in tracker <= 10cm", "LLP in tracker > 10cm", "LLP in ECAL", "LLP in HCAL, D1", "LLP in HCAL, D2", "LLP in HCAL, D34"});
+			plotter_BDTvars_perJet.SetLegendNames({"Prompt background", "LLP in tracker <= 10cm", "LLP in tracker > 10cm", "LLP in ECAL", "LLP in HCAL, D1", "LLP in HCAL, D2", "LLP in HCAL, D34"});
 			plotter_BDTvars_perJet.colors = { kBlack, kGray, kOrange, kGreen+2, kAzure+7, kBlue-4, kViolet+4, kMagenta-7, kRed };
 			plotter_BDTvars_perJet.SetComparisonCuts({Cut_matchedLLPinCR, Cut_matchedLLPinTrackerNP, Cut_matchedLLPinECAL, Cut_matchedLLPinHCAL1, Cut_matchedLLPinHCAL2, Cut_matchedLLPinHCAL34}, "LLP_MC");
+			if (simple) {
+				plotter_BDTvars_perJet.SetLegendNames({"Prompt background", "LLP in HCAL"});
+				plotter_BDTvars_perJet.colors = { kBlack, kAzure-3 };
+				plotter_BDTvars_perJet.SetComparisonCuts({Cut_matchedLLPinHCAL}, "LLP_MC");
+			}
+			if (reduced) {
+				plotter_BDTvars_perJet.SetLegendNames({"Prompt background", "LLP in tracker <= 10cm", "LLP in tracker > 10cm", "LLP in ECAL", "LLP in HCAL"});
+				plotter_BDTvars_perJet.colors = { kBlack, kGray, kOrange, kGreen+2, kAzure-3 };
+				plotter_BDTvars_perJet.SetComparisonCuts({Cut_matchedLLPinCR, Cut_matchedLLPinTrackerNP, Cut_matchedLLPinECAL, Cut_matchedLLPinHCAL}, "LLP_MC");
+			}
+			if (hcal_only) {
+				plotter_BDTvars_perJet.SetLegendNames({"Prompt background", "LLP in HCAL, D1", "LLP in HCAL, D2", "LLP in HCAL, D34"});
+				// plotter_BDTvars_perJet.colors = { kBlack, kAzure+7, kBlue-4, kViolet+4 };
+				plotter_BDTvars_perJet.colors = { kBlack, kAzure+7, kOrange-3, kRed-7 };
+				plotter_BDTvars_perJet.SetComparisonCuts({Cut_matchedLLPinHCAL1, Cut_matchedLLPinHCAL2, Cut_matchedLLPinHCAL34}, "LLP_MC");
+			}
 			plotter_BDTvars_perJet.SetOutputDirectory("Overlay_perJet_"+key);
 			plotter_BDTvars_perJet.Plot();
 		}

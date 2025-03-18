@@ -10,6 +10,7 @@
 #include "../src/OutputHelper.cxx"
 #include "../src/BDTHelper.cxx"
 #include "../src/TruthInfoHelper.cxx"
+#include "../src/WeightsHelper.cxx"
 
 // gSystem->Load("/Users/kiley/Documents/CMS/WorkingDir/Run3-HCAL-LLP-Analysis/pugixml/pugixml_cpp.so");
 
@@ -31,6 +32,9 @@ void DisplacedHcalJetAnalyzer::Initialize( string infiletag, string infilepath )
 
 	// Lifetime Reweighting
 	InitializeLifetimeReweighting( infilepath );
+
+	// Weights for MC
+	SetWeight( infilepath ); // and then added as a branch in OutputHelper.cxx
 
 	return;
 }
