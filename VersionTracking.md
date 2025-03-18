@@ -239,7 +239,7 @@ Updates:
 * Zmumu selection for fake rate studies 
 * PV saved in minituples
 
-## v3.10
+### v3.10
 Updates:
 * Added fractional variables to minituples (fractional track pT, fractional rechit E)
 * Added jet-L1 matching result (hwQual of matched L1 jet) to per jet trees
