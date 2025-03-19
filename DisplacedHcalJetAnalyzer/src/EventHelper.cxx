@@ -45,6 +45,7 @@ bool DisplacedHcalJetAnalyzer::PassL1SingleLLPJet(){
 		if (HLT_Decision->at(i) > 0) {
 			if (debug) cout << HLT_Decision->at(i) << " for the trigger " << HLT_Names[i] << "\n" << endl;
 			if (HLT_Names[i] == "HLT_L1SingleLLPJet") return true;
+			if (HLT_Names[i].find("L1SingleLLPJet") != std::string::npos ) return true;
 
 		}		
 	}

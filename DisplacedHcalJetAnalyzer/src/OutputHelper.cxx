@@ -407,10 +407,9 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 
 	ResetOutputBranches( treename );
 
-	/* // Fill Pass_EventSelections
+	// Fill Pass_EventSelections
 	for( const auto &pair : Pass_EventSelections )
 		tree_output_vars_bool[pair.first] = pair.second;
-	}*/
 
 	tree_output_vars_int["run"] 	= runNum;
 	tree_output_vars_int["lumi"] 	= lumiNum;
@@ -706,10 +705,9 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	ResetOutputBranches( treename );
 
 	// Fill Pass_EventSelections
-	/*for( const auto &pair : Pass_EventSelections )
+	for( const auto &pair : Pass_EventSelections )
 		jet_tree_output_vars_bool[pair.first] = pair.second;
-	}*/
-
+	
 	jet_tree_output_vars_int["run"] 		= runNum;
 	jet_tree_output_vars_int["lumi"] 		= lumiNum;
 	jet_tree_output_vars_int["event"] 		= eventNum;

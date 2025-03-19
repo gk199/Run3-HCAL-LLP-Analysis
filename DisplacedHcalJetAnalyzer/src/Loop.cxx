@@ -71,6 +71,7 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 			}
 
 			// Depth and Inclusive Tag Candidates
+			if( Pass_EventSelections["Pass_PreSel"] ) cout<<jetIndex_DepthTagCand<<"  "<<jetIndex_InclTagCand<<endl;
 			if( jetIndex_DepthTagCand == i ) Pass_EventSelections_PerJet["Pass_DepthTagCand"] = true;
 			if( jetIndex_InclTagCand  == i ) Pass_EventSelections_PerJet["Pass_InclTagCand"] = true;
 			
