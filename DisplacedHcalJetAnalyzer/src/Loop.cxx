@@ -28,10 +28,6 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 	Pass_EventSelections["Pass_ZPlusJets"]       = PassZmumuSelection();	
 	Pass_EventSelections["Pass_NoLepton"]        = PassLeptonVeto();
 
-	// Fill Output Trees //
-
-	FillOutputTrees("NoSel", Pass_EventSelections);
-
 	// Fill Histograms [Generally Deprecated] // 
 
 	FillHists("NoSel");
@@ -43,7 +39,7 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 
 	int max_jets = std::min((int)jet_Pt->size(), N_PFJets_ToSave);
 
-	for (int i = 0; i < max_jets; i++) {
+	for (int i = 0; i < jet_Pt->size(); i++) {
 		if (jet_Pt->at(i) > 40 && abs(jet_Eta->at(i)) <= 1.26) { // this is the standard requirement
 		// if (jet_Pt->at(i) >= 0 && abs(jet_Eta->at(i)) <= 1.26) { // edited requirement to make jet pT turn on plot without a 40 GeV cut
 
@@ -71,14 +67,24 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 			}
 
 			// Depth and Inclusive Tag Candidates
-			if( Pass_EventSelections["Pass_PreSel"] ) cout<<jetIndex_DepthTagCand<<"  "<<jetIndex_InclTagCand<<endl;
+			//if( Pass_EventSelections["Pass_PreSel"] ) cout<<jetIndex_DepthTagCand<<"  "<<jetIndex_InclTagCand<<endl;
 			if( jetIndex_DepthTagCand == i ) Pass_EventSelections_PerJet["Pass_DepthTagCand"] = true;
 			if( jetIndex_InclTagCand  == i ) Pass_EventSelections_PerJet["Pass_InclTagCand"] = true;
 			
-			FillOutputJetTrees("PerJet_NoSel", i, Pass_EventSelections);
+			FillOutputJetTrees("PerJet_NoSel", i, Pass_EventSelections_PerJet);
 
 		}
 	}
+
+	// Fill Output Trees //
+
+	// First, modify selections:
+	Pass_EventSelections["Pass_WPlusJets"] = PassWPlusJetsSelection() && abs(DeltaPhi(jet_Phi->at(0), WPlusJets_leptonPhi)) > 2;
+	Pass_EventSelections["Pass_ZPlusJets"] = PassZmumuSelection() && abs(DeltaPhi(jet_Phi->at(0), Muon_PhiVectorSum)) > 2;
+
+	FillOutputTrees("NoSel", Pass_EventSelections);
+
+
 	/*
 	// Fill event based output trees in minituples
 	FillOutputTrees("NoSel");
