@@ -6,6 +6,7 @@
 #include "../src/EventHelper.cxx"
 #include "../src/TriggerHelper.cxx"
 #include "../src/ObjectHelper.cxx"
+#include "../src/HcalRechitHelper.cxx"
 #include "../src/HistHelper.cxx"
 #include "../src/OutputHelper.cxx"
 #include "../src/BDTHelper.cxx"
@@ -108,7 +109,7 @@ void DisplacedHcalJetAnalyzer( string infiletag = "", string infilepath = "" ){
 	AnalysisReader.print_counts	= true;
 	AnalysisReader.save_hists	= false;	// For output histograms
 	AnalysisReader.save_trees	= true;		// For minituples
-	AnalysisReader.NEvents 		= -1; 		// Run over specified number of events (set to -1 for ALL)
+	AnalysisReader.NEvents 		= 1000; 		// Run over specified number of events (set to -1 for ALL)
 
 	// ----- Initialize ----- // 
 

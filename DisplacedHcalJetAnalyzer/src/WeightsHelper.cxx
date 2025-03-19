@@ -11,14 +11,12 @@ void DisplacedHcalJetAnalyzer::SetWeight(string infiletag){
     if (infiletag.find("CTau") != string::npos ) signal = true;
     if (infiletag.find("PromptReco") != string::npos ) data = true;
 
-    cout << data << " = is data flag" << endl;
-    cout << signal << " = is signal flag" << endl;
+    //cout << data << " = is data flag" << endl;
+    //cout << signal << " = is signal flag" << endl;
 
 	if( data ){
-        weight == 1;
-
+        weight = 1;
         cout << "weight --> " << weight << endl;
-
         return;
 	}
 

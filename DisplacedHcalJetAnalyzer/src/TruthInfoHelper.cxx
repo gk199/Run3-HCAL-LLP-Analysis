@@ -177,7 +177,7 @@ vector<float> DisplacedHcalJetAnalyzer::DeltaEta_Phi_b( int idx_llp){
 	int idx_gParticle1 = map_gLLP_to_gParticle_indices.at(idx_llp).at(0);
 	int idx_gParticle2 = map_gLLP_to_gParticle_indices.at(idx_llp).at(1);
 	delta_eta_phi.push_back( abs(gParticle_Eta->at(idx_gParticle1) - gParticle_Eta->at(idx_gParticle2)) );
-	delta_eta_phi.push_back(deltaPhi(gParticle_Phi->at(idx_gParticle1), gParticle_Phi->at(idx_gParticle2)));
+	delta_eta_phi.push_back( DeltaPhi(gParticle_Phi->at(idx_gParticle1), gParticle_Phi->at(idx_gParticle2)));
 	return delta_eta_phi;
 }
 

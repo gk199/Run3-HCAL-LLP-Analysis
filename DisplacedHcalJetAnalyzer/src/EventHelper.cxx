@@ -15,6 +15,9 @@ void DisplacedHcalJetAnalyzer::ResetGlobalEventVars(){
 	gLLPDecay_iParticle.clear();
 	map_gLLP_to_gParticle_indices.clear();
 
+	jetIndex_DepthTagCand = -1;
+	jetIndex_InclTagCand = -1;
+
 }
 
 /* ====================================================================================================================== */
@@ -29,31 +32,46 @@ float DisplacedHcalJetAnalyzer::EventHT(){
 	return HT;
 }
 
+
 /* ====================================================================================================================== */
-int DisplacedHcalJetAnalyzer::PassDisplacedJetHLT(){
+bool DisplacedHcalJetAnalyzer::PassL1SingleLLPJet(){
 
-	if( debug ) cout<<"DisplacedHcalJetAnalyzer::PassDisplacedJetHLT()"<<endl;
+	// note that this is not just the HCAL based LLP triggers, but all triggers saved in "triggerPathNames" in Run3-HCAL-LLP-NTupler/plugins/DisplacedHcalJetNTuplizer.cc, which is much larger now! 
+	// so add an extra check that the name we are looking at is the HLT L1 HCAL monitoring path
 
-	int passedHLT = 0;
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::PassL1SingleLLPJet()"<<endl;
+
 	for (int i = 0; i < HLT_Indices.size(); i++) {
 		if (HLT_Decision->at(i) > 0) {
 			if (debug) cout << HLT_Decision->at(i) << " for the trigger " << HLT_Names[i] << "\n" << endl;
-			// This is for L1
-			// if (HLT_Names[i] == "HLT_L1SingleLLPJet") passedHLT += 1;
-
-			// This is for HLT (HLT_L1SingleLLPJet is highly prescaled)
-			if (HLT_Names[i] != "HLT_L1SingleLLPJet") passedHLT += 1;
+			if (HLT_Names[i] == "HLT_L1SingleLLPJet") return true;
 
 		}		
-		//cout<<HLT_Names[i]<<endl;
 	}
 
-	return passedHLT;
+	return false;
+}
+
+/* ====================================================================================================================== */
+bool DisplacedHcalJetAnalyzer::PassHLTDisplacedJet(){
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::PassHLTDisplacedJet()"<<endl;
+
+	for (int i = 0; i < HLT_Indices.size(); i++) {
+		if (HLT_Decision->at(i) > 0) {
+			if (debug) cout << HLT_Decision->at(i) << " for the trigger " << HLT_Names[i] << "\n" << endl;
+
+			if (HLT_Names[i].find("L1SingleLLPJet") != std::string::npos && HLT_Names[i] != "HLT_L1SingleLLPJet" ) 
+				return true;
+		}		
+	}
+
+	return false;
 
 }
 
 /* ====================================================================================================================== */
-bool DisplacedHcalJetAnalyzer::PassEventPreselection( int passedHLT ){
+bool DisplacedHcalJetAnalyzer::PassEventPreselection( bool PassedHLT ){
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::PassEventPreselection()"<<endl;
 
@@ -63,8 +81,8 @@ bool DisplacedHcalJetAnalyzer::PassEventPreselection( int passedHLT ){
 
 	// Pass HLT // 
 
-	if( passedHLT < 0 ){ // Only check if HLT hasn't been checked before
-		if( !PassDisplacedJetHLT() ) return false;
+	if( !PassedHLT ){  // check again if already false
+		if( !PassHLTDisplacedJet() ) return false;
 	}
 
 	// Depth Tag Jet //
@@ -91,6 +109,7 @@ bool DisplacedHcalJetAnalyzer::PassEventPreselection( int passedHLT ){
 		if( dR > 0.4 || L1trig < 1 ) continue;
 		
 		depthtag_jet_candidate = i;
+
 		break;
 	}	
 
@@ -111,6 +130,10 @@ bool DisplacedHcalJetAnalyzer::PassEventPreselection( int passedHLT ){
 	}
 
 	if( incltag_jet_candidate < 0 ) return false;
+
+	// Set Globals! 
+	jetIndex_DepthTagCand = depthtag_jet_candidate;
+	jetIndex_InclTagCand  = incltag_jet_candidate;
 
 	return true;
 
@@ -169,11 +192,11 @@ bool DisplacedHcalJetAnalyzer::PassWPlusJetsSelection() {
 	for (int i = 0; i < n_jet; i++) { 			
 		if (jet_Pt->at(i) > 30 && abs(jet_Eta->at(i)) < 1.26 ) {
 			if (electron) {
-				jet_lepton_dPhi_ele = deltaPhi(jet_Phi->at(i), phiVectorSum_ele);
+				jet_lepton_dPhi_ele = DeltaPhi(jet_Phi->at(i), phiVectorSum_ele);
 				WPlusJets_leptonPhi = phiVectorSum_ele;
 			}
 			if (muon) {
-				jet_lepton_dPhi_muon = deltaPhi(jet_Phi->at(i), phiVectorSum_muon);
+				jet_lepton_dPhi_muon = DeltaPhi(jet_Phi->at(i), phiVectorSum_muon);
 				WPlusJets_leptonPhi = phiVectorSum_muon;
 			}
 
@@ -278,7 +301,7 @@ bool DisplacedHcalJetAnalyzer::PassZmumuSelection() {
 	bool matched_jet = false;
 	for (int i = 0; i < n_jet; i++) { 			
 		if (jet_Pt->at(i) > 30 && abs(jet_Eta->at(i)) < 1.26 ) {
-			double jet_muon_dPhi = deltaPhi(jet_Phi->at(i), Muon_PhiVectorSum);
+			double jet_muon_dPhi = DeltaPhi(jet_Phi->at(i), Muon_PhiVectorSum);
 			// need to find jet opposite the muon direction 
 			if (abs(jet_muon_dPhi) > 2) matched_jet = true;
 		}
