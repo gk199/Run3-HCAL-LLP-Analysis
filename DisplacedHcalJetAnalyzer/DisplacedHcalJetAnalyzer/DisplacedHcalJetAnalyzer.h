@@ -130,7 +130,7 @@ public :
    float Z_mass = -9999.9;
    float Muon_PhiVectorSum = -9999.9;
 
-   int N_PFJets_ToSave = 6;
+   int N_PFJets_ToSave = 4;
 
    int jetIndex_DepthTagCand = -1;
    int jetIndex_InclTagCand = -1;
