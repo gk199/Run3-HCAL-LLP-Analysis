@@ -211,6 +211,7 @@ PlotParams P_jet1_EleEFrac				= {"jet1_EleEFrac", "Sub-Leading Jet: Electron Ene
 PlotParams P_jet1_MuonEFrac				= {"jet1_MuonEFrac", "Sub-Leading Jet: Muon Energy Fraction", "Muon Energy Fraction", 0, 1 };
 PlotParams P_jet1_HoverE				= {"jet1_HoverE", "Sub-Leading Jet: H/E Energy Ratio", "H/E Energy Ratio", 0, 100 };
 PlotParams P_jet1_NeutralOverChargedHad = {"jet1_NeutralHadEFrac/jet0_ChargedHadEFrac", "Sub-Leading Jet: Neutral / Charged Hadronic Energy Fraction", "Neutral / Charged Hadronic Energy Fraction", 0, 100};
+PlotParams P_jet2_Pt					= {"jet2_Pt", "Third Leading Jet p_{T}", "p_{T} [GeV] (third-leading jet)", 0, 250 };
 
 // --------------------------------------------------------------------- //
 // Event Quantities
