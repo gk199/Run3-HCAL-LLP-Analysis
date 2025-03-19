@@ -101,6 +101,8 @@ public :
    map<string,int>      tree_output_vars_int;  
    map<string,float>    tree_output_vars_float;  
    map<string,string>   tree_output_vars_string;
+   map<string,vector<float>>  tree_output_vars_vec;
+
 
    vector<string> jet_treenames;
    map<string,TTree*>   jet_tree_output;
@@ -108,6 +110,7 @@ public :
    map<string,int>      jet_tree_output_vars_int;  
    map<string,float>    jet_tree_output_vars_float;  
    map<string,string>   jet_tree_output_vars_string;
+   map<string,vector<float>>  jet_tree_output_vars_vec;
 
    // ----- Globals ----- //
 
@@ -127,6 +130,8 @@ public :
    float WPlusJets_leptonPhi = -9999.9;
    float Z_mass = -9999.9;
    float Muon_PhiVectorSum = -9999.9;
+
+   int N_PFJets_ToSave = 4;
 
    // ----- Variables ----- //
 
@@ -762,20 +767,21 @@ public :
    virtual float  DeltaR( float eta1, float eta2, float phi1, float phi2);
    virtual double deltaPhi( double phi1, double phi2);
    // virtual double deltaR( double eta1, double phi1, double eta2, double phi2);
-   virtual vector<int> GetRechitMult( int idx_llp, float deltaR_cut );
-   virtual vector<vector<float>> GetEnergyProfile( int idx_llp, float deltaR_cut );
-   virtual vector<float> GetMatchedHcalRechits_Jet( int idx_jet, float deltaR_cut );
-   virtual vector<float> GetEnergyProfile_Jet( int idx_jet, float deltaR_cut );
+   virtual vector<int>             GetRechitMult( int idx_llp, float deltaR_cut );
+   virtual vector<vector<float>>   GetEnergyProfile( int idx_llp, float deltaR_cut );
+   virtual vector<float>           GetMatchedHcalRechits_Jet( int idx_jet, float deltaR_cut );
+   virtual vector<vector<float>>   GetHcalRechitValues_Jet( int idx_jet );
+   virtual vector<float>           GetEnergyProfile_Jet( int idx_jet, float deltaR_cut );
    virtual vector<pair<float,int>> Get3RechitE_Jet( int idx_jet, float deltaR_cut );
    virtual vector<float> GetEtaPhiSpread_Jet( int idx_jet, float deltaR_cut );
-   virtual int GetTimingTowers_Jet( int idx_jet, float deltaR_cut );
-   virtual int GetDepthTowers_Jet( int idx_jet, float deltaR_cut );
-   virtual int GetDepthTowers_Jet_lowE( int idx_jet, float deltaR_cut );
-   virtual int GetTotalTowers_Jet( int idx_jet, float deltaR_cut );
+   virtual int           GetTimingTowers_Jet( int idx_jet, float deltaR_cut );
+   virtual int           GetDepthTowers_Jet( int idx_jet, float deltaR_cut );
+   virtual int           GetDepthTowers_Jet_lowE( int idx_jet, float deltaR_cut );
+   virtual int           GetTotalTowers_Jet( int idx_jet, float deltaR_cut );
    virtual vector<float> GetTDCavg_Jet( int idx_jet, float deltaR_cut );
-   virtual bool IsMuonIsolatedTight( int muon_index ); 
+   virtual bool  IsMuonIsolatedTight( int muon_index ); 
    virtual float GetElectronEffectiveAreaMean( int ele_index );
-   virtual bool IsElectronIsolatedTight( int ele_index );
+   virtual bool  IsElectronIsolatedTight( int ele_index );
    virtual float TransverseLeptonMass( float pT, float phi );
    virtual float PhiVectorSum( float pT, float phi );
    // TruthInfoHelper.cxx
@@ -795,6 +801,8 @@ public :
    // EventHelper.cxx
    virtual float  GetEventRuntime( clock_t clock_start, Long64_t init_entry, Long64_t current_entry );
    virtual void   ResetGlobalEventVars();
+   virtual int    PassDisplacedJetHLT();
+   virtual bool   PassEventPreselection( int passedHLT = -1 );
    virtual bool   PassWPlusJetsSelection();
    virtual bool   PassLeptonVeto();
    virtual bool   PassZmumuSelection();

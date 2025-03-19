@@ -30,6 +30,93 @@ float DisplacedHcalJetAnalyzer::EventHT(){
 }
 
 /* ====================================================================================================================== */
+int DisplacedHcalJetAnalyzer::PassDisplacedJetHLT(){
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::PassDisplacedJetHLT()"<<endl;
+
+	int passedHLT = 0;
+	for (int i = 0; i < HLT_Indices.size(); i++) {
+		if (HLT_Decision->at(i) > 0) {
+			if (debug) cout << HLT_Decision->at(i) << " for the trigger " << HLT_Names[i] << "\n" << endl;
+			// This is for L1
+			// if (HLT_Names[i] == "HLT_L1SingleLLPJet") passedHLT += 1;
+
+			// This is for HLT (HLT_L1SingleLLPJet is highly prescaled)
+			if (HLT_Names[i] != "HLT_L1SingleLLPJet") passedHLT += 1;
+
+		}		
+		//cout<<HLT_Names[i]<<endl;
+	}
+
+	return passedHLT;
+
+}
+
+/* ====================================================================================================================== */
+bool DisplacedHcalJetAnalyzer::PassEventPreselection( int passedHLT ){
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::PassEventPreselection()"<<endl;
+
+	// Description:
+	// At least 1 jet with L1 HW Qual, pt > 60 GeV, aeta < 1.26	-- depth tag jet
+	// At least 1 other jet with pt > 40 GeV, aeta < 2.4 -- inclusive tag jet
+
+	// Pass HLT // 
+
+	if( passedHLT < 0 ){ // Only check if HLT hasn't been checked before
+		if( !PassDisplacedJetHLT() ) return false;
+	}
+
+	// Depth Tag Jet //
+
+	int depthtag_jet_candidate = -1;
+
+	for (int i = 0; i < n_jet; i++) { 	
+
+		// Kinematic cuts
+		if( jet_Pt->at(i) < 60 || fabs(jet_Eta->at(i)) > 1.26 ) continue;
+
+		// Get L1 Trigger Status 
+		float dR = 999.9;
+		float L1trig = -999.9;
+		for (int j = 0; j < l1jet_Pt->size(); j++) { // loop over L1 jets to determine if a reco jet is matched to jet that passed L1
+			float dR_to_L1 = DeltaR( jet_Eta->at(i), l1jet_Eta->at(j), jet_Phi->at(i), l1jet_Phi->at(j) );
+			if( dR_to_L1 < dR ){ // if matched, save the dR and whether the L1 jet is triggered by HCAL LLP
+				dR = dR_to_L1;
+				L1trig = l1jet_hwQual->at(j);
+			}
+		}
+
+		// Reject if fails HW qual 
+		if( dR > 0.4 || L1trig < 1 ) continue;
+		
+		depthtag_jet_candidate = i;
+		break;
+	}	
+
+	if( depthtag_jet_candidate < 0 ) return false;
+
+	// Inclusive Tag Jet // 
+
+	int incltag_jet_candidate  = -1;
+	for (int i = 0; i < n_jet; i++) { 	
+		// Kinematic cuts
+		if( jet_Pt->at(i) < 40 || fabs(jet_Eta->at(i)) > 2.4 ) continue;
+
+		// Reject if it is the depth tag jet
+		if( i == depthtag_jet_candidate ) continue;
+
+		incltag_jet_candidate = i;
+		break;
+	}
+
+	if( incltag_jet_candidate < 0 ) return false;
+
+	return true;
+
+}
+
+/* ====================================================================================================================== */
 bool DisplacedHcalJetAnalyzer::PassWPlusJetsSelection() {
 	// given a event, determine if it is a W + jets event, based off of lepton and jet selections
 

@@ -135,6 +135,38 @@ vector<float> DisplacedHcalJetAnalyzer::GetMatchedHcalRechits_Jet( int idx_jet, 
 	return hbhe_matched_indices;
 
 }
+/* ====================================================================================================================== */
+vector<vector<float>> DisplacedHcalJetAnalyzer::GetHcalRechitValues_Jet( int idx_jet ){
+
+	vector<float> rechit_indices = GetMatchedHcalRechits_Jet( idx_jet, 0.4);
+
+	float iEtaBin = 0.087;
+	float iPhiBin = 0.087266; // = 2pi/72
+
+	vector<float> rechit_values_E;
+	vector<float> rechit_values_iEta;
+	vector<float> rechit_values_iPhi;
+	vector<float> rechit_values_depth;
+
+	for( int i=0; i<rechit_indices.size(); i++ ){
+		int i_rec = rechit_indices.at(i);
+
+		float E_temp       = hbheRechit_E->at(i_rec);
+		float reliEta_temp = floor( ( hbheRechit_Eta->at(i_rec) - jet_Eta->at(idx_jet) ) / iEtaBin + 5 );
+		float reliPhi_temp = floor( deltaPhi( hbheRechit_Phi->at(i_rec), jet_Phi->at(idx_jet) ) / iPhiBin + 5 );
+		float depth_temp   = hbheRechit_depth->at(i_rec);
+
+		rechit_values_E.push_back( E_temp );
+		rechit_values_iEta.push_back( reliEta_temp );
+		rechit_values_iPhi.push_back( reliPhi_temp );
+		rechit_values_depth.push_back( depth_temp );
+
+	}
+
+	return { rechit_values_E, rechit_values_iEta, rechit_values_iPhi, rechit_values_depth };
+
+}
+
 
 /* ====================================================================================================================== */
 vector<float> DisplacedHcalJetAnalyzer::GetEnergyProfile_Jet(int idx_jet, float deltaR_cut) { // given a jet, find the normalized energy profile from associated HB rechits 
