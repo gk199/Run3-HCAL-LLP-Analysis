@@ -6,6 +6,7 @@
 #include "../src/EventHelper.cxx"
 #include "../src/TriggerHelper.cxx"
 #include "../src/ObjectHelper.cxx"
+#include "../src/HcalRechitHelper.cxx"
 #include "../src/HistHelper.cxx"
 #include "../src/OutputHelper.cxx"
 #include "../src/BDTHelper.cxx"
@@ -14,12 +15,13 @@
 
 // gSystem->Load("/Users/kiley/Documents/CMS/WorkingDir/Run3-HCAL-LLP-Analysis/pugixml/pugixml_cpp.so");
 
+
 /* ====================================================================================================================== */
 void DisplacedHcalJetAnalyzer::Initialize( string infiletag, string infilepath ){
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::Initialize()"<<endl;
 
-	cout<<"\n ----- INITIALIZING ----- \n"<<endl;	
+	cout<<"\n ----- INITIALIZING ----- \n"<<endl;
 
 	// Initialize trigger names from NEvents_HLT histogram
 	SetTriggerNames( infilepath, "DisplacedHcalJets/NEvents_HLT");

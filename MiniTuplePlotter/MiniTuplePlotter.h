@@ -57,6 +57,7 @@ public :
 
 	Int_t NBins = 100; 
 	bool set_variable_bins = false;
+	bool variable_binwidth_equal = false;
 	vector<Double_t> Bins_variable;
 
 	// Fit to write to legend
@@ -522,10 +523,11 @@ public :
 	// =====================================================================================
 
 	// -------------------------------------------------------------------------------------
-	void SetVariableBins( vector<Double_t> Bins_variable_temp ){
+	void SetVariableBins( vector<Double_t> Bins_variable_temp, bool variable_binwidth_equal_temp = false ){
 		if( debug) cout<<"MiniTuplePlotter::SetVariableBins()"<<endl;		
 
 		set_variable_bins = true;
+		variable_binwidth_equal = variable_binwidth_equal_temp;
 		Bins_variable = Bins_variable_temp;
 
 	}
@@ -563,8 +565,26 @@ public :
 
 		if( debug ) cout<<"  Drawing: "<<Form( "%s >> "+hist_name_full, hist_name.c_str() )<<endl;
 
-		trees[filetag_treename]->Draw( Form( "%s >> "+hist_name_full, hist_name.c_str() ), cut_total , "");					
-		TH1F *h = (TH1F*)h_temp->Clone(); 
+		trees[filetag_treename]->Draw( Form( "%s >> "+hist_name_full, hist_name.c_str() ), cut_total , "");	
+
+		TH1F *h;
+
+		if( variable_binwidth_equal ){
+			const int NBins_temp = Bins_variable.size() - 1;
+			TH1F *h_equal = new TH1F(hist_name_full+"equal", "", NBins_temp, Bins_variable.at(0), Bins_variable.at(NBins_temp) );
+			for (int i = 1; i <= NBins_temp; i++) {
+				h_equal->SetBinContent(i, h_temp->GetBinContent(i));
+				h_equal->SetBinError(i, h_temp->GetBinError(i));
+
+				double lower = h_temp->GetBinLowEdge(i);
+				double upper = lower + h_temp->GetBinWidth(i);
+				h_equal->GetXaxis()->SetBinLabel(i, Form("%.2f - %.2f", lower, upper));
+			}
+			//h_equal->GetXaxis()->SetLabelSize(0.06);
+			h = (TH1F*)h_equal->Clone();
+		} else {
+			h = (TH1F*)h_temp->Clone(); 
+		}
 
 		if( debug ) cout<<"  NEvents = "<<h->GetEntries()<<endl;
 
@@ -722,8 +742,12 @@ public :
 			else if( plot_reverse_cdf )
 				h = GetReverseCDF( h ); 
 
-			if( plot_log ) h->SetMaximum( h->GetMaximum()*20. );
-			else  		   h->SetMaximum( h->GetMaximum()*1.25 );
+			if( plot_log ){ 
+				h->SetMaximum( h->GetMaximum()*20. );
+			}
+			else {
+				h->SetMaximum( h->GetMaximum()*1.25 );
+			}
 
 			h->SetLineColor( colors[i] );
 			h->SetLineStyle( linestyle[i] );
@@ -934,6 +958,7 @@ public :
 
 			fout->cd(); // write to a root file
 			myCanvas->Write(); 
+
 			myCanvas->SaveAs( output_directory+"/"+output_file_name+".png", "png" );
 			if( plot_type == "efficiency" || plot_type == "acceptance" ) {
 				myCanvas->SaveAs( output_directory+"/"+output_file_name+".pdf", "pdf" );

@@ -18,69 +18,85 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 	
 	if (jet_Pt->size() == 0) return; // added to avoid vector out of range if there are no jets -- issue on signal file 
 
-	// check HLT results for these triggers
-	// note that this is not just the HCAL based LLP triggers, but all triggers saved in "triggerPathNames" in Run3-HCAL-LLP-NTupler/plugins/DisplacedHcalJetNTuplizer.cc, which is much larger now! 
-	// so add an extra check that the name we are looking at is the HLT L1 HCAL monitoring path
-	int passedHLT = 0;
-	for (int i = 0; i < HLT_Indices.size(); i++) {
-		if (HLT_Decision->at(i) > 0) {
-			if (debug) cout << HLT_Decision->at(i) << " for the trigger " << HLT_Names[i] << "\n" << endl;
-			if (HLT_Names[i] == "HLT_L1SingleLLPJet") passedHLT += 1;
-		}		
-	}
-	
-	// Fill the below catergories of histograms
+	// Check Various Event Selections // 
+
+	map<string, bool> Pass_EventSelections = {};
+	Pass_EventSelections["Pass_L1SingleLLPJet"]  = PassL1SingleLLPJet();
+	Pass_EventSelections["Pass_HLTDisplacedJet"] = PassHLTDisplacedJet();
+	Pass_EventSelections["Pass_PreSel"]          = PassEventPreselection( Pass_EventSelections["Pass_HLTDisplacedJet"] );
+	Pass_EventSelections["Pass_WPlusJets"]       = PassWPlusJetsSelection();
+	Pass_EventSelections["Pass_ZPlusJets"]       = PassZmumuSelection();	
+	Pass_EventSelections["Pass_NoLepton"]        = PassLeptonVeto();
+
+	// Fill Histograms [Generally Deprecated] // 
+
 	FillHists("NoSel");
+	if ( Pass_EventSelections["Pass_HLTDisplacedJet"] ) FillHists("PassedHLT");
+	if (jet_Pt->at(0) > 40 && abs(jet_Eta->at(0)) <= 1.26) FillHists("JetPt40");
+	if ( Pass_EventSelections["Pass_ZPlusJets"] ) FillHists("ZmumuEvent");
 
-	if (passedHLT > 0) {
-		FillHists("PassedHLT");
-	}
+	// Fill Jet Trees // 
 
-	if (jet_Pt->at(0) > 40 && abs(jet_Eta->at(0)) <= 1.26) { // check leading jet energy and eta
-		FillHists("JetPt40");
-	}
+	int max_jets = std::min((int)jet_Pt->size(), N_PFJets_ToSave);
 
-	bool WPlusJetsEvent = false;
-	bool NoLeptonEvent = false;
-	bool ZmumuEvent = false;
-	if (PassWPlusJetsSelection()) WPlusJetsEvent = true;
-	if (PassLeptonVeto()) NoLeptonEvent = true;
-	if (PassZmumuSelection()) ZmumuEvent = true;
-
-	if (ZmumuEvent) FillHists("ZmumuEvent");
-
-	// Fill jet based output trees in minituples
-	for (int i = 0; i < jet_Pt->size(); i++) {
+	for (int i = 0; i < max_jets; i++) {
 		if (jet_Pt->at(i) > 40 && abs(jet_Eta->at(i)) <= 1.26) { // this is the standard requirement
 		// if (jet_Pt->at(i) >= 0 && abs(jet_Eta->at(i)) <= 1.26) { // edited requirement to make jet pT turn on plot without a 40 GeV cut
 
-			FillOutputJetTrees("PerJet_NoSel", i);
-			if (passedHLT > 0) FillOutputJetTrees("PerJet_PassedHLT", i);
+			// Update/Modify Pass_EventSelections for Jets // 
+
+			map<string, bool> Pass_EventSelections_PerJet  = Pass_EventSelections;
+			Pass_EventSelections_PerJet["Pass_LLPMatched"] = false;
+			Pass_EventSelections_PerJet["Pass_DepthTagCand"]     = false;
+			Pass_EventSelections_PerJet["Pass_InclTagCand"] = false;
+
+			// LLP Matching
 			vector<float> matchedInfo = JetIsMatchedTo( jet_Eta->at(i), jet_Phi->at(i) );
-			if (matchedInfo[0] > -1) { 					// if jet is matched to a LLP or LLP decay product
-				FillOutputJetTrees("PerJet_LLPmatched", i);
+			if (matchedInfo[0] > -1) Pass_EventSelections_PerJet["Pass_LLPMatched"] = true;
+
+			// WPlusJets
+			if( Pass_EventSelections["Pass_WPlusJets"] ){
+				float phiSeparation = DeltaPhi(jet_Phi->at(i), WPlusJets_leptonPhi);
+				if ( abs(phiSeparation) <= 2 ) Pass_EventSelections_PerJet["Pass_WPlusJets"] = false;
 			}
-			if (WPlusJetsEvent) {
-				float phiSeparation = deltaPhi(jet_Phi->at(i), WPlusJets_leptonPhi);
-				if ( abs(phiSeparation) > 2 ) FillOutputJetTrees("PerJet_WPlusJets", i);
+
+			// ZPlusJets
+			if( Pass_EventSelections["Pass_ZPlusJets"] ){
+				float phiSeparation = DeltaPhi(jet_Phi->at(i), Muon_PhiVectorSum);
+				if (abs(phiSeparation) <= 2) Pass_EventSelections_PerJet["Pass_ZPlusJets"] = false;		
 			}
-			if (NoLeptonEvent) {
-				FillOutputJetTrees("PerJet_NoLepton", i);
-			}
-			if (ZmumuEvent) {
-				float phiSeparation = deltaPhi(jet_Phi->at(i), Muon_PhiVectorSum);
-				if (abs(phiSeparation) > 2) FillOutputJetTrees("PerJet_Zmumu", i);
-			}
+
+			// Depth and Inclusive Tag Candidates
+			//if( Pass_EventSelections["Pass_PreSel"] ) cout<<jetIndex_DepthTagCand<<"  "<<jetIndex_InclTagCand<<endl;
+			if( jetIndex_DepthTagCand == i ) Pass_EventSelections_PerJet["Pass_DepthTagCand"] = true;
+			if( jetIndex_InclTagCand  == i ) Pass_EventSelections_PerJet["Pass_InclTagCand"] = true;
+			
+			FillOutputJetTrees("PerJet_NoSel", i, Pass_EventSelections_PerJet);
+
 		}
 	}
 
+	// Fill Output Trees //
+
+	// First, modify selections:
+	Pass_EventSelections["Pass_WPlusJets"] = PassWPlusJetsSelection() && abs(DeltaPhi(jet_Phi->at(0), WPlusJets_leptonPhi)) > 2;
+	Pass_EventSelections["Pass_ZPlusJets"] = PassZmumuSelection() && abs(DeltaPhi(jet_Phi->at(0), Muon_PhiVectorSum)) > 2;
+
+	FillOutputTrees("NoSel", Pass_EventSelections);
+
+	/*
 	// Fill event based output trees in minituples
 	FillOutputTrees("NoSel");
-	if (passedHLT > 0) FillOutputTrees("PassedHLT");
-	if (WPlusJetsEvent && abs(deltaPhi(jet_Phi->at(0), WPlusJets_leptonPhi)) > 2) FillOutputTrees("WPlusJets"); // leading jet has passed selection
-	if (NoLeptonEvent) FillOutputTrees("NoLepton");
-	if (ZmumuEvent && abs(deltaPhi(jet_Phi->at(0), Muon_PhiVectorSum)) > 2) FillOutputTrees("Zmumu"); // leading jet is opposite dimuons
 
+	if( passEventPreselection ){
+		FillOutputTrees("PreSel");
+	}
+
+	if (passedHLT > 0) FillOutputTrees("PassedHLT");
+	if (WPlusJetsEvent && abs(DeltaPhi(jet_Phi->at(0), WPlusJets_leptonPhi)) > 2) FillOutputTrees("WPlusJets"); // leading jet has passed selection
+	if (NoLeptonEvent) FillOutputTrees("NoLepton");
+	if (ZmumuEvent && abs(DeltaPhi(jet_Phi->at(0), Muon_PhiVectorSum)) > 2) FillOutputTrees("Zmumu"); // leading jet is opposite dimuons
+	*/
 	return;
 
 }
