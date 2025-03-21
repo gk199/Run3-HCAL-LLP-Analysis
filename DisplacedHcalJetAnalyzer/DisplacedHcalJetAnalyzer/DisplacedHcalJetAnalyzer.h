@@ -26,7 +26,7 @@
 
 #include <TStyle.h>
 #include <TCanvas.h>
-
+#include "TRandom3.h"
 #include <TMath.h>
 
 //#include "Math/GSLMinimizer.h"
@@ -76,6 +76,9 @@ public :
    // Numbers for cutflow
    map<string, Double32_t> count; //Long64_t
 
+   // Random number generator
+   TRandom3 *randomGenerator = new TRandom3();
+
    // ----- My Hists ----- //
 
    vector<string> categories;
@@ -84,7 +87,6 @@ public :
    map<string, TProfile*> hp;
 
    // ----- TMVA Reader ----- //
-
 
    string bdt_version;
    vector<string> bdt_tags;
