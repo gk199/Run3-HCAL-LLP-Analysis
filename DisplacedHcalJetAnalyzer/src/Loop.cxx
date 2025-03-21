@@ -40,15 +40,15 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 	int max_jets = std::min((int)jet_Pt->size(), N_PFJets_ToSave);
 
 	for (int i = 0; i < max_jets; i++) {
-		if (jet_Pt->at(i) > 40 && abs(jet_Eta->at(i)) <= 1.26) { // this is the standard requirement
+		if (jet_Pt->at(i) > 40 && abs(jet_Eta->at(i)) <= 2.4) { // this is the standard requirement
 		// if (jet_Pt->at(i) >= 0 && abs(jet_Eta->at(i)) <= 1.26) { // edited requirement to make jet pT turn on plot without a 40 GeV cut
 
 			// Update/Modify Pass_EventSelections for Jets // 
 
-			map<string, bool> Pass_EventSelections_PerJet  = Pass_EventSelections;
-			Pass_EventSelections_PerJet["Pass_LLPMatched"] = false;
-			Pass_EventSelections_PerJet["Pass_DepthTagCand"]     = false;
-			Pass_EventSelections_PerJet["Pass_InclTagCand"] = false;
+			map<string, bool> Pass_EventSelections_PerJet    = Pass_EventSelections;
+			Pass_EventSelections_PerJet["Pass_LLPMatched"]   = false;
+			Pass_EventSelections_PerJet["Pass_DepthTagCand"] = false;
+			Pass_EventSelections_PerJet["Pass_InclTagCand"]  = false;
 
 			// LLP Matching
 			vector<float> matchedInfo = JetIsMatchedTo( jet_Eta->at(i), jet_Phi->at(i) );

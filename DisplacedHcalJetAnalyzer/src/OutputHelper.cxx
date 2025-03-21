@@ -43,7 +43,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 	}
 
 	vector<string> myvars_float = {
-		"met_Pt", "met_Phi", "met_SumEt", "eventHT", "weight"
+		"met_Pt", "met_Phi", "met_SumEt", "eventHT", "weight", "randomFloat"
 	};
 
 	// Add Physics Variables //
@@ -272,11 +272,11 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 
 	// Add Event Variables //
 	vector<string> myvars_int = {
-		"run","lumi","event","PV","jet","muon","ele","pho",
-		"jetIndex"
+		"run","lumi","event","jetIndex",
+		"PV","jet","muon","ele","pho",
 	};	
 
-	vector<string> myvars_float = {"eventHT"};
+	vector<string> myvars_float = {"eventHT", "randomFloat"};
 
 	// Add Physics Variables //
 
@@ -368,11 +368,11 @@ void DisplacedHcalJetAnalyzer::ResetOutputBranches( string treename ){
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::ResetOutputTrees()"<<endl;
 
-	for( const auto &pair : tree_output_vars_bool )
-		tree_output_vars_bool[pair.first] = false;
-	
 	for( const auto &pair : tree_output_vars_int )
 		tree_output_vars_int[pair.first] = -9999;
+
+	for( const auto &pair : tree_output_vars_bool )
+		tree_output_vars_bool[pair.first] = false;
 
 	for( const auto &pair : tree_output_vars_float )
 		tree_output_vars_float[pair.first] = -9999.9;
@@ -380,11 +380,11 @@ void DisplacedHcalJetAnalyzer::ResetOutputBranches( string treename ){
 	for( const auto &pair : tree_output_vars_string )
 		tree_output_vars_string[pair.first] = "";
 
-	for( const auto &pair : jet_tree_output_vars_bool )
-		jet_tree_output_vars_bool[pair.first] = false;
-	
 	for( const auto &pair : jet_tree_output_vars_int )
 		jet_tree_output_vars_int[pair.first] = -9999;
+
+	for( const auto &pair : jet_tree_output_vars_bool )
+		jet_tree_output_vars_bool[pair.first] = false;
 
 	for( const auto &pair : jet_tree_output_vars_float )
 		jet_tree_output_vars_float[pair.first] = -9999.9;
@@ -688,6 +688,9 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 		tree_output_vars_float[Form("LLP%d_isTruthMatched_Jet100Eta", gLLPDecay_iLLP.at(i))] = LLPIsTruthMatched( i, 100 ).second;
 	}
 
+	// Random Float
+	tree_output_vars_float["randomFloat"] = randomGenerator->Rndm(); 
+
 	tree_output[treename]->Fill();
 	
 	if( debug ) cout<<"DONE DisplacedHcalJetAnalyzer::FillOutputTrees()"<<endl;
@@ -711,6 +714,7 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	jet_tree_output_vars_int["run"] 		= runNum;
 	jet_tree_output_vars_int["lumi"] 		= lumiNum;
 	jet_tree_output_vars_int["event"] 		= eventNum;
+	jet_tree_output_vars_int["jetIndex"] 	= jetIndex;
 	jet_tree_output_vars_int["PV"] 			= n_PV;
 	jet_tree_output_vars_int["jet"]			= n_jet;
 	jet_tree_output_vars_int["ele"]			= n_ele;
@@ -831,6 +835,9 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 		jet_tree_output_vars_vec["perJet_rechit_depth"]   = rechit_values.at(3); // 
 	}
 	
+	// Random Float
+	jet_tree_output_vars_float["randomFloat"] = randomGenerator->Rndm(); 
+
 	jet_tree_output[treename]->Fill();
 	
 	if( debug ) cout<<"DONE DisplacedHcalJetAnalyzer::FillOutputJetTrees()"<<endl;
