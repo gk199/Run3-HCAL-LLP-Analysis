@@ -456,7 +456,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 	// jets are already sorted in jet Pt (not jet E!). Loop over first three reco jets, and save quantities in the ntuples
 	int valid_jet = 0;
 	for (int i = 0; i < n_jet; i++) {
-		if (jet_Pt->at(i) < 40 || abs(jet_Eta->at(i)) > 1.26) continue; // not interested if low energy (< 40) or in HE (eta > 1.26) 
+		if (jet_Pt->at(i) < 40 || abs(jet_Eta->at(i)) > 2.0 ) continue; //1.26) continue; // not interested if low energy (< 40) or in HE (eta > 1.26) 
 		if (valid_jet >= N_PFJets_ToSave) continue; // below output variables are only designed to be used for first 12 jets
 
 		tree_output_vars_int[Form("jet%d_Index", valid_jet)]	= i; // needed if only filling for valid_jet
