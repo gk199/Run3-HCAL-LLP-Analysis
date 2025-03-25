@@ -14,8 +14,8 @@ debug = False
 pT_bins = np.linspace(0, 300, 20)  # pT axis from 0 to 500 GeV, 20 bins
 pT_bins = [0, 40, 50, 60, 70, 80, 100, 120, 160, 240, 400]  # Define pT bins
 pT_bins = np.array(pT_bins, dtype=float)
-eta_bins = np.linspace(-1.26, 1.26, 10)  # eta axis from -2 to 2, 10 bins
-phi_bins = np.linspace(-np.pi, np.pi, 10)  # phi axis from -pi to pi, 10 bins
+eta_bins = np.linspace(-1.26, 1.26, 7)  # eta axis from -2 to 2, 10 bins
+phi_bins = np.linspace(-np.pi, np.pi, 7)  # phi axis from -pi to pi, 10 bins
 
 DNN_cut = 0.9
 DNN_cut_inc = 0.9
@@ -89,6 +89,7 @@ def MisTagParametrization(tree, option="", tree2=""):
     depth_timing_emu = GetCut("jet0_DepthTowers", 1) + GetCut("jet0_TimingTowers", 1)
 
     track_pT = GetCut("jet0_Track0Pt / jet0_Pt",[0,1.1])
+    track_pT_1 = GetCut("jet1_Track0Pt / jet1_Pt",[0,1.1])
 
     # Setup cuts for CR and VR. CR = jet0_scores_inc between 0-0.5. VR = jet0_scores_inc between 0.5-0.9. Mistag means jet1_scores over "DNN_cut"
     CR_0 = GetCut("jet0_scores_inc", [0,0.5])
@@ -109,6 +110,7 @@ def MisTagParametrization(tree, option="", tree2=""):
     # Define a mapping of options to their corresponding updates
     option_map = {
         "depth": (depth_emu, depth_emu_1, ": 2+ depth", "_depth"),
+        "depth_trackPt": (depth_emu + track_pT, depth_emu_1 + track_pT_1, ": 2+ depth, frac. track pT", "_depth_trackPt"),
         "timing": (timing_emu, timing_emu_1, ": 2+ timing", "_timing"),
         "depth_timing": (depth_timing_emu, depth_timing_emu_1, ": 1 depth, 1 timing", "_depth_timing"),
         "before alignment": (run_before, run_before, ": before alignment", "_before_align"),
@@ -127,6 +129,21 @@ def MisTagParametrization(tree, option="", tree2=""):
         title = option_map[option][2]
         label = option_map[option][3]
 
+    # First create 1D histograms for determining the mistag rate. 3D projections can be used, but the errors aren't propagated correctly by default so cross check with this method
+    # currently crashing on all datasets -- need to debug still TODO 
+    # still producing rates plots with high errors, making this lower priority
+    # hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi = CreateHistograms_1D(tree, CR + triggered + pt_eta, "hist1d_CR_all")
+    # hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi = CreateHistograms_1D(tree, CR + triggered + pt_eta + mistag, "hist1d_CR_mistag")
+    # hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi = CreateHistograms_1D(tree, VR + triggered + pt_eta, "hist1d_VR_all")
+    # hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi = CreateHistograms_1D(tree, VR + triggered + pt_eta + mistag, "hist1d_VR_mistag")
+    # print("created histograms for 1D rate evaluation")
+
+    # if LLPskim: MistagRate_1D([hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi], [hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi], "CR", option, title, label, "leading") # mistag_jet_list[i])
+    # if Zmu: MistagRate_1D([hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi], [hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi], "Wjets", option, title, label, "leading")
+    # #if LLPskim: MistagRate_1D([hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi], [hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi], "VR", option, title, label, "leading")
+    # if Zmu: MistagRate_1D([hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi], [hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi], "Zmu", option, title, label, "leading")
+    # print("completed 1D rate evaluation")
+
     # Create the 3D histograms with different cuts. Arguments to CreateHistograms function are tree, cut, histogram name. Histograms are filled usnig tree.Draw() method
     # jet 0 is triggered, jet 1 defines CR / VR
     hist3d_CR_all = CreateHistograms(tree, CR + triggered + pt_eta, "hist3d_CR_all")
@@ -134,6 +151,7 @@ def MisTagParametrization(tree, option="", tree2=""):
     hist3d_VR_all = CreateHistograms(tree, VR + triggered + pt_eta, "hist3d_VR_all")
     hist3d_VR_mistag = CreateHistograms(tree, VR + triggered + pt_eta + mistag, "hist3d_VR_mistag")
     hist3d_SR_all = CreateHistograms(tree, SR + triggered + pt_eta, "hist3d_SR_all")
+
     # jet 1 is triggered, jet 0 defines CR / VR
     hist3d_CR_all_1 = CreateHistograms(tree, CR_0 + triggered_1 + pt_eta, "hist3d_CR_all_1")
     hist3d_CR_mistag_1 = CreateHistograms(tree, CR_0 + triggered_1 + pt_eta + mistag_1, "hist3d_CR_mistag_1")
@@ -161,13 +179,7 @@ def MisTagParametrization(tree, option="", tree2=""):
         mistag_jet_list = ["leading", "sub-leading", "combined"]
         comparison = ""
     else: # means using two orthogonal datasets to predict and measure on, instead of CR / VR based on DNN scores
-        ZW_pt_eta = GetCut("jet0_Pt",[40,1000]) + GetCut("jet0_Eta",[-1.26,1.26]) + track_pT  # only need first jet in HB
-        # print(triggered + ZW_pt_eta)
-        # print(tree)
-        # print(tree.GetEntries())
-        # print(tree.GetEntries("((jet0_L1trig_Matched == 1 )&&(run >= 368770 && run < 375000 ))&&((jet0_Pt >= 40 && jet0_Pt < 1000 )&&(jet0_Eta >= -1.26 && jet0_Eta < 1.26 ))")) #new code
-        # print(tree.GetEntries("((jet0_L1trig_Matched == 1 )&&(run >= 368770 && run < 375000 ))&&((jet0_Pt >= 40 && jet0_Pt < 1000 )&&(jet0_Eta >= -1.26 && jet0_Eta < 1.26 ))&&(jet0_Track0Pt >= 0 && jet0_Track0Pt < 10000 )")) #new code
-        # print(tree.GetEntries("((jet0_L1trig_Matched == 1 )&&(run >= 368770 && run < 375000 ))&&((jet0_Pt >= 40 && jet0_Pt < 1000 )&&(jet0_Eta >= -1.26 && jet0_Eta < 1.26 ))&&(jet0_Track0Pt / jet0_Pt >= 0 && jet0_Track0Pt / jet0_Pt < 1.1 )")) #new code
+        ZW_pt_eta = GetCut("jet0_Pt",[40,1000]) + GetCut("jet0_Eta",[-1.26,1.26])  # only need first jet in HB
         CR_all_list = [CreateHistograms(tree, triggered + ZW_pt_eta, "hist3d_Wjet_all")]
         CR_mistag_list = [CreateHistograms(tree, triggered + ZW_pt_eta + mistag, "hist3d_Wjet_mistag")]
         VR_all_list = [CreateHistograms(tree2, triggered + ZW_pt_eta, "hist3d_Zmu_all")]
@@ -395,8 +407,9 @@ def MakePlot(hists, legends):
         hist.SetLineColor(colors[i])
         hist.SetLineWidth(2)
         i += 1
-    if len(hists) == 1: hists[0].Draw("HIST") # huge error bars for rate plots -- why?
-    else: hists[0].Draw("HIST E")
+    # if len(hists) == 1: hists[0].Draw("HIST") # huge error bars for rate plots -- why?
+    # else: 
+    hists[0].Draw("HIST E")
     for hist in hists[1:]:
         hist.Draw("SAME HIST E")
 
@@ -438,10 +451,60 @@ def MistagRate(mistag_hist, all_hist, plot_type, option, title, label, type_of_j
         png_title,
         ["Jet p_{T} Mistag Rate from " + plot_type + ", "+type_of_jet, "Jet #eta Mistag Rate from " + plot_type + ", "+type_of_jet, "Jet #phi Mistag Rate from " + plot_type + ", "+type_of_jet], label
     )
+    # this is done via projections of a 3D histogram, and thinking that this method does not handle errors very well. Do with 1D histogram division instead
     # clear histograms to prevent axis ranges being set strangly on the second run through 
     proj_pT_mistag_rate.Clear()
     proj_eta_mistag_rate.Clear() 
     proj_phi_mistag_rate.Clear()
+
+# ------------------------------------------------------------------------------
+def CreateHistograms_1D(tree, cut, hist_name):
+    # use this to get the 1D mistag rates, instead of using projections of 3D histograms (TODO)
+    # Check if the histogram already exists and delete it
+    if ROOT.gDirectory.Get(hist_name):
+        ROOT.gDirectory.Get(hist_name).Delete()
+    # Create and fill the histograms
+    hist1d_pt = ROOT.TH1F(hist_name + "_pt", "1D histogram; p_{T}", len(pT_bins)-1, pT_bins)
+    hist1d_eta = ROOT.TH1F(hist_name + "_eta", "1D histogram; #eta", len(eta_bins)-1, eta_bins)
+    hist1d_phi = ROOT.TH1F(hist_name + "_phi", "1D histogram; #phi", len(phi_bins)-1, phi_bins)
+    tree.Draw("jet0_Pt >> " + hist_name + "_pt", cut, "")
+    tree.Draw("jet0_Eta >> " + hist_name + "_eta", cut, "")
+    tree.Draw("jet0_Phi >> " + hist_name + "_phi", cut, "")
+    return hist1d_pt, hist1d_eta, hist1d_phi
+
+# -----------------------------------------------------------------------------
+def MistagRate_1D(mistag_hists, all_hists, plot_type, option, title, label, type_of_jet):
+    # MistagRate() is done via projections of a 3D histogram, and thinking that this method does not handle errors very well. Do with 1D histogram division instead (TODO)
+    # Find mistag rate in 1D histograms to evaluate plots
+    # Input is a list of 3 histograms (pT, eta, phi) to find the mistag rate of. Get these from CreateHistograms_1D 
+
+    print("about to clone input histograms")
+    mistag_rate_pt = mistag_hists[0].Clone("mistag_rate_pt")
+    mistag_rate_eta = mistag_hists[1].Clone("mistag_rate_eta")
+    mistag_rate_phi = mistag_hists[2].Clone("mistag_rate_phi")
+    mistag_rate_pt.Divide(all_hists[0])
+    mistag_rate_eta.Divide(all_hists[1])
+    mistag_rate_phi.Divide(all_hists[2])
+    print("cloned and divided input histograms")
+
+    # Create mistag rate plots
+    legend_labels = ["Mistag rate (" + plot_type + ")"] # CR, W+jets, VR, Zmu
+    png_title = "1d_hist_"+ plot_type + "_mistag_rate_"+type_of_jet
+
+    # need option and title and label passed to label all plots properly
+    DrawCanvasAndPlots(
+        "c_"+plot_type, "Mistag rate plots in the " + plot_type + " with " + type_of_jet, option, title,
+        [[mistag_rate_pt], [mistag_rate_eta], [mistag_rate_phi]],  # Wrap each plot in a list
+        legend_labels,
+        png_title,
+        ["Jet p_{T} Mistag Rate from " + plot_type + ", "+type_of_jet, "Jet #eta Mistag Rate from " + plot_type + ", "+type_of_jet, "Jet #phi Mistag Rate from " + plot_type + ", "+type_of_jet], label
+    )
+    # clear histograms to prevent axis ranges being set strangly on the second run through 
+    mistag_rate_pt.Clear()
+    mistag_rate_eta.Clear()
+    mistag_rate_phi.Clear()
+    for i in range(len(mistag_hists)): mistag_hists[i].Clear()
+    print("histograms cleared")
 
 # ------------------------------------------------------------------------------
 def MakePlotWithRatio(hists, legends, type, png_label):
@@ -629,7 +692,6 @@ def PlotFromFile(filelist):
     # c1.Update()
     # c1.Draw()
 
-
 # ------------------------------------------------------------------------------
 def main():
 
@@ -676,6 +738,7 @@ def main():
         print("Tree successfully accessed, will be passed to MisTagParametrization")
         #MisTagParametrization(combined_tree_Wjets, "", combined_tree_Zmu)
         MisTagParametrization(combined_tree_Wjets, "depth", combined_tree_Zmu)
+        #MisTagParametrization(combined_tree_Wjets, "depth_trackPt", combined_tree_Zmu)
         #MisTagParametrization(combined_tree_Wjets, "timing", combined_tree_Zmu)
         #MisTagParametrization(combined_tree_Wjets, "depth_timing", combined_tree_Zmu)
         # MisTagParametrization(combined_tree_Wjets, "before alignment", combined_tree_Zmu)
