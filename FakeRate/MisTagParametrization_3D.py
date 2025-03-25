@@ -110,11 +110,13 @@ def MisTagParametrization(tree, option="", tree2=""):
     # Define a mapping of options to their corresponding updates
     option_map = {
         "depth": (depth_emu, depth_emu_1, ": 2+ depth", "_depth"),
-        "depth_trackPt": (depth_emu + track_pT, depth_emu_1 + track_pT_1, ": 2+ depth, frac. track pT", "_depth_trackPt"),
+        "depth, trackPt": (depth_emu + track_pT, depth_emu_1 + track_pT_1, ": 2+ depth, frac. track pT", "_depth_trackPt"),
         "timing": (timing_emu, timing_emu_1, ": 2+ timing", "_timing"),
-        "depth_timing": (depth_timing_emu, depth_timing_emu_1, ": 1 depth, 1 timing", "_depth_timing"),
+        "depth, timing": (depth_timing_emu, depth_timing_emu_1, ": 1 depth, 1 timing", "_depth_timing"),
         "before alignment": (run_before, run_before, ": before alignment", "_before_align"),
-        "after alignment": (run_after, run_after, ": after alignment", "_after_align")
+        "after alignment": (run_after, run_after, ": after alignment", "_after_align"),
+        "before alignment, depth": (run_before + depth_emu, run_before + depth_emu_1, ": 2+ depth, before alignment", "_depth_before_align"),
+        "after alignment, depth": (run_after + depth_emu, run_after + depth_emu_1, ": 2+ depth, after alignment", "_depth_after_align")
     }
 
     # Default values for label and title
@@ -730,19 +732,21 @@ def main():
         MisTagParametrization(combined_tree, "depth")
         #MisTagParametrization(combined_tree, "after alignment")
         #MisTagParametrization(combined_tree, "timing")
-        #MisTagParametrization(combined_tree, "depth_timing")
+        #MisTagParametrization(combined_tree, "depth, timing")
     else:
         print("Tree is invalid!")
 
     if combined_tree_Wjets and combined_tree_Zmu:
         print("Tree successfully accessed, will be passed to MisTagParametrization")
         #MisTagParametrization(combined_tree_Wjets, "", combined_tree_Zmu)
-        MisTagParametrization(combined_tree_Wjets, "depth", combined_tree_Zmu)
-        #MisTagParametrization(combined_tree_Wjets, "depth_trackPt", combined_tree_Zmu)
+        #MisTagParametrization(combined_tree_Wjets, "depth", combined_tree_Zmu)
+        #MisTagParametrization(combined_tree_Wjets, "depth, trackPt", combined_tree_Zmu)
         #MisTagParametrization(combined_tree_Wjets, "timing", combined_tree_Zmu)
-        #MisTagParametrization(combined_tree_Wjets, "depth_timing", combined_tree_Zmu)
+        #MisTagParametrization(combined_tree_Wjets, "depth, timing", combined_tree_Zmu)
         # MisTagParametrization(combined_tree_Wjets, "before alignment", combined_tree_Zmu)
         # MisTagParametrization(combined_tree_Wjets, "after alignment", combined_tree_Zmu)
+        # MisTagParametrization(combined_tree_Wjets, "before alignment, depth", combined_tree_Zmu)
+        MisTagParametrization(combined_tree_Wjets, "after alignment, depth", combined_tree_Zmu)
     else:
         print("Tree is invalid!")
 
