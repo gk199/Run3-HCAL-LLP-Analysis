@@ -20,11 +20,12 @@ phi_bins = np.linspace(-np.pi, np.pi, 7)  # phi axis from -pi to pi, 10 bins
 DNN_cut = 0.9
 DNN_cut_inc = 0.9
 
-era = "2023 Bv1-Dv2 Zmu" # "2023 Bv1-Dv2 Zmu" # automatically switches which input minituples to use based on this name
+era = "2023 Cv3" # automatically switches which input minituples to use based on this name
 era_name = era.replace(" ", "") # for plot saving
 
-Zmu = True
-LLPskim = False
+Zmu = False
+if Zmu: era = "2023 Bv1-Dv2 Zmu"
+LLPskim = True
 
 # ------------------------------------------------------------------------------
 def GetData(infilepaths, label):
@@ -409,9 +410,8 @@ def MakePlot(hists, legends):
         hist.SetLineColor(colors[i])
         hist.SetLineWidth(2)
         i += 1
-    # if len(hists) == 1: hists[0].Draw("HIST") # huge error bars for rate plots -- why?
-    # else: 
-    hists[0].Draw("HIST E")
+    if len(hists) == 1: hists[0].Draw("HIST") # huge error bars for rate plots -- why?
+    else: hists[0].Draw("HIST E")
     for hist in hists[1:]:
         hist.Draw("SAME HIST E")
 
