@@ -16,7 +16,9 @@ void DisplacedHcalJetAnalyzer::ResetGlobalEventVars(){
 	map_gLLP_to_gParticle_indices.clear();
 
 	jetIndex_DepthTagCand = -1;
-	jetIndex_InclTagCand = -1;
+	jetIndex_InclTagCand  = -1;
+	WPlusJets_leptonPhi   = -9999.9;
+	Muon_PhiVectorSum     = -9999.9;
 
 }
 
@@ -121,7 +123,7 @@ bool DisplacedHcalJetAnalyzer::PassEventPreselection( bool PassedHLT ){
 	int incltag_jet_candidate  = -1;
 	for (int i = 0; i < n_jet; i++) { 	
 		// Kinematic cuts
-		if( jet_Pt->at(i) < 40 || fabs(jet_Eta->at(i)) > 2.4 ) continue;
+		if( jet_Pt->at(i) < 40 || fabs(jet_Eta->at(i)) > 2.0 ) continue;
 
 		// Reject if it is the depth tag jet
 		if( i == depthtag_jet_candidate ) continue;
@@ -154,6 +156,8 @@ bool DisplacedHcalJetAnalyzer::PassWPlusJetsSelection() {
 
 	int n_ele_over20 = 0;
 	int n_muon_over20 = 0;
+
+	WPlusJets_leptonPhi = -9999.9;
 
 	// Lepton must be over 20 GeV, eta < 2.4, tight ID, isolated, and select the first (highest pT) lepton passing these requriements. Count number of leptons over 20 GeV
 	for (int i = 0; i < n_ele; i++) {
@@ -262,11 +266,16 @@ bool DisplacedHcalJetAnalyzer::PassZmumuSelection() {
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::PassZmumuSelection()"<<endl;
 
+	Muon_PhiVectorSum = -9999.9; 
+
+	float Z_mass = -9999.9;
+	
 	bool muon1 = false;
 	bool muon2 = false;
 
 	double muon_pair_pt[2] = {0,0};
 	double muon_pair_phi[2] = {0,0};
+	double muon_pair_q[2] = {0,0};
 	
 	TLorentzVector M1(0,0,0,0);
 	TLorentzVector M2(0,0,0,0);
@@ -276,6 +285,7 @@ bool DisplacedHcalJetAnalyzer::PassZmumuSelection() {
 		if ( ! IsMuonIsolatedTight(i) ) continue; 												// muon isolation requirement 
 
 		if (muon_Pt->at(i) < 20) continue;														// require muon is over 20 GeV
+
 		if (abs(muon_Eta->at(i)) < 2.4) {
 			if (!muon1) muon1 = true;
 			else if (!muon2) muon2 = true;
@@ -285,15 +295,24 @@ bool DisplacedHcalJetAnalyzer::PassZmumuSelection() {
 			M1.SetPtEtaPhiE(fabs(muon_Pt->at(i)), muon_Eta->at(i), muon_Phi->at(i), muon_E->at(i));
 			muon_pair_pt[0] = muon_Pt->at(i);
 			muon_pair_phi[0] = muon_Phi->at(i);
+			muon_pair_q[0] = muon_Charge->at(i);
 		}
 		if (muon2) {
 			M2.SetPtEtaPhiE(fabs(muon_Pt->at(i)), muon_Eta->at(i), muon_Phi->at(i), muon_E->at(i));
 			muon_pair_pt[1] = muon_Pt->at(i);
 			muon_pair_phi[1] = muon_Phi->at(i);
+			muon_pair_q[1] = muon_Charge->at(i);
+			break;
 		}
 	}
+
+	if( !muon2 ) return false;
+
+	if( muon_pair_q[0]*muon_pair_q[1] >= 0 ) return false;
+
 	if (muon1 && muon2) Z_mass = (M1+M2).M();
-	if (Z_mass < 89 && Z_mass > 93) return false; // need to constrain on the Z mass -- check distribution for verification. Set bounds at 89-93 GeV 
+
+	if (Z_mass < 81 || Z_mass > 101) return false; // need to constrain on the Z mass -- check distribution for verification. Set bounds at 89-93 GeV 
 
 	// find the phi vector sum of the two muons
 	Muon_PhiVectorSum = atan2(muon_pair_pt[0] * sin(muon_pair_phi[0]) + muon_pair_pt[1] * sin(muon_pair_phi[1]), muon_pair_pt[0] * cos(muon_pair_phi[0]) + muon_pair_pt[1] * cos(muon_pair_phi[1]));
@@ -304,10 +323,12 @@ bool DisplacedHcalJetAnalyzer::PassZmumuSelection() {
 		if (jet_Pt->at(i) > 30 && abs(jet_Eta->at(i)) < 1.26 ) {
 			double jet_muon_dPhi = DeltaPhi(jet_Phi->at(i), Muon_PhiVectorSum);
 			// need to find jet opposite the muon direction 
-			if (abs(jet_muon_dPhi) > 2) matched_jet = true;
+			if (abs(jet_muon_dPhi) > 2){ 
+				matched_jet = true;
+			}
 		}
 	}
 
-	if ( matched_jet ) return true;
+	if ( matched_jet )return true;
 	else return false;
 }

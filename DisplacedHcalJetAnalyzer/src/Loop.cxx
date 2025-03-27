@@ -28,6 +28,13 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 	Pass_EventSelections["Pass_ZPlusJets"]       = PassZmumuSelection();	
 	Pass_EventSelections["Pass_NoLepton"]        = PassLeptonVeto();
 
+	if( Pass_EventSelections["Pass_ZPlusJets"] ) Pass_EventSelections["Pass_WPlusJets"] = false;
+
+	// Event Counts // 
+
+	if( Pass_EventSelections["Pass_WPlusJets"] ) count["Pass_WPlusJets"]++;	
+	if( Pass_EventSelections["Pass_ZPlusJets"] ) count["Pass_ZPlusJets"]++;
+
 	// Fill Histograms [Generally Deprecated] // 
 
 	FillHists("NoSel");
@@ -79,8 +86,8 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 	// Fill Output Trees //
 
 	// First, modify selections:
-	Pass_EventSelections["Pass_WPlusJets"] = PassWPlusJetsSelection() && abs(DeltaPhi(jet_Phi->at(0), WPlusJets_leptonPhi)) > 2;
-	Pass_EventSelections["Pass_ZPlusJets"] = PassZmumuSelection() && abs(DeltaPhi(jet_Phi->at(0), Muon_PhiVectorSum)) > 2;
+	Pass_EventSelections["Pass_WPlusJets"] = Pass_EventSelections["Pass_WPlusJets"] && abs(DeltaPhi(jet_Phi->at(0), WPlusJets_leptonPhi)) > 2;
+	Pass_EventSelections["Pass_ZPlusJets"] = Pass_EventSelections["Pass_ZPlusJets"] && abs(DeltaPhi(jet_Phi->at(0), Muon_PhiVectorSum)) > 2;
 
 	FillOutputTrees("NoSel", Pass_EventSelections);
 
@@ -120,6 +127,9 @@ void DisplacedHcalJetAnalyzer::Loop(){
 	}
 
 	count["All"] = 0;
+	count["Pass_WPlusJets"] = 0;
+	count["Pass_ZPlusJets"] = 0;
+	count["Pass_WZPlusJets"] = 0;
 
 	// ----- Initialize Values ----- // 
 
