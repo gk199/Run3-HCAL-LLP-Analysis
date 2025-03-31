@@ -18,7 +18,7 @@ import sys, os, argparse, time, errno
 import os.path
 
 perJet = False
-num_jets = 1 if perJet else 6
+num_jets = 1 if perJet else 4 # in v3.13 only 4 jets are saved! In earlier versions, 6 jets are saved
 
 CONSTANTS = pd.read_csv("norm_constants_v3.csv")
 
@@ -234,10 +234,12 @@ class Runner:
         # depth
         # handler = ModelHandler(num_classes=self.num_classes, model_name=self.model_name)
         handler = ModelHandler(num_classes=self.num_classes, model_name="depth_model_v3_Oct15.keras")
+        print("Loading the depth model")
         handler.load()
         preds = [ handler.predict(predicting_data[i], labels[i]) for i in range(num_jets) ]
         # inclusive
         handler_inc = ModelHandler(num_classes=self.num_classes, model_name="inclusive_model_v3_Oct15.keras")
+        print("Loading the inclusive model")
         handler_inc.load()
         preds_inc = [ handler_inc.predict(predicting_data[i], labels[i]) for i in range(num_jets) ]
         # data is predicting_data, jet valid is jet_valid, scores are preds, all indexed by jet (6 total)
@@ -326,9 +328,10 @@ def main():
 
     mode = "filewrite" # "eval", "filewrite"
 
+    trees_to_iterate = ["NoSel"]
     # trees_to_iterate = ["NoSel", "PassedHLT", "WPlusJets", "Zmumu"] # all event based trees 
     # trees_to_iterate = ["Zmumu", "WPlusJets"] # for Zmu skim only 
-    trees_to_iterate = ["NoSel", "PassedHLT"] # for LLP MC 
+    # trees_to_iterate = ["NoSel", "PassedHLT"] # for LLP MC 
     
     # pass runner each signal file (as a list, using list slicing), and then each background file, such that scores are appended to each
     print("Running Depth and Inclusive Tagger over each file")

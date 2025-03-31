@@ -45,3 +45,31 @@ condor_watch_q
 Proxy should be copied to local directory, had issues when copied elsewhere. A CMSSW environment is be set up from the condor run script. `-t` is for test, remove this argument to run over the whole dataset. `-f` gives the flag for the job directory, such that multiple submissions can be made one after the other without overwriting the job directory.
 
 outputs:
+
+## Scrape Condor Output
+This script can be used to check the run time of condor jobs, to inform setting a reasonable job flavor in `condor_header.cmd`. 
+
+```
+python3 scrape_condor_output.py <directory>
+```
+The script will look at all the `Job*` subdirectories and plot the runtime in minutes.
+
+## Debugging issues with DNN score addition
+The DNN score addition is done by setting up a virtual environment and then running the DNN model over the trees. 
+
+The virtual environment is set up based on the requirements file from the SWAN area where the DNN model was created:
+```
+pip freeze > requirements.txt # in SWAN area
+conda create --name <env_name> --file requirements.txt
+```
+
+The environment name is choosen to be `CondaDNNenv`, and then scores are added with:
+```
+conda activate CondaDNNenv
+source /cvmfs/sft.cern.ch/lcg/views/LCG_105a_cuda/x86_64-el9-gcc11-opt/setup.sh
+python3 ScoresToEventBased-v3.py minituple_$filetag.root
+```
+
+In November 2024 the above sourcing worked, however in March 2025 it did not work. This was added based on the recommendation to source a LCG file with an up to date tensorflow: https://root-forum.cern.ch/t/incompatibility-among-tensorflow-of-lxplus-with-tensorflow-macbook-pro-colab-notebook-and-swan/56336. Without this, the DNN model would not work on lxplus / Condor area. 
+
+Still debugging March issue.... Newer versions of the `setup.sh` file have not worked yet.

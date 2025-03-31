@@ -7,7 +7,6 @@ void DisplacedHcalJetAnalyzer::InitializeTMVA(){
 
 	bdt_tags = {};
 	/*	"LLP125_MS15_perJet",
-
 		"LLP125_MS50_perJet",
 		"LLP250_MS120_perJet",
 		"LLP350_MS160_perJet",
@@ -32,7 +31,7 @@ void DisplacedHcalJetAnalyzer::InitializeTMVA(){
 	}
 
 	if( !filepath_exists ){
-		cout<<"WARNING: BDT weight directory not found! Will run withoug BDT..."<<endl;
+		cout<<"WARNING: BDT weight directory not found! Will run without BDT..."<<endl;
 		bdt_tags = {};
 		return; 
 	}
