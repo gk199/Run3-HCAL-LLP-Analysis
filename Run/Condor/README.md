@@ -62,6 +62,7 @@ The virtual environment is set up based on the requirements file from the SWAN a
 pip freeze > requirements.txt # in SWAN area
 conda create --name <env_name> --file requirements.txt
 ```
+In both November and March, had issues with the requirements.txt, as many package are not available (including tensorflow, keras, and uproot!). Instead used an approach of sourcing the LCG environment. 
 
 The environment name is choosen to be `CondaDNNenv`, and then scores are added with:
 ```
