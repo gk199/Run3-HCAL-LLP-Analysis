@@ -54,6 +54,12 @@ python3 scrape_condor_output.py <directory>
 ```
 The script will look at all the `Job*` subdirectories and plot the runtime in minutes.
 
+## TestBeforeCondor submission
+```
+./TestBeforeCondor.sh <test filename> <path to ROOT file with root://cmsxrootd.fnal.gov// prefix>
+```
+Test the file running before submitting to Condor.
+
 ## Debugging issues with DNN score addition
 The DNN score addition is done by setting up a virtual environment and then running the DNN model over the trees. 
 
