@@ -1,0 +1,10 @@
+# Name                    Version
+awkward-pandas==2023.8.0
+matplotlib==3.9.4
+numpy==2.0.2
+pandas==2.2.3
+pip==25.0
+scikit-learn==1.6.1
+tensorflow==2.19.0
+tensorflow-io-gcs-filesystem==0.37.1
+uproot==5.6.0
