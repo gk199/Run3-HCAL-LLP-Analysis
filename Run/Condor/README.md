@@ -66,9 +66,12 @@ The DNN score addition is done by setting up a virtual environment and then runn
 The virtual environment is set up based on the requirements file from the SWAN area where the DNN model was created:
 ```
 pip freeze > requirements.txt # in SWAN area
-conda create --name <env_name> --file requirements.txt
+
+conda create --name CondaDNNenv_py3pt9 python=3.9
+conda activate CondaDNNenv_py3pt9
+pip install -r requirements_minimal.txt 
 ```
-In both November and March, had issues with the requirements.txt, as many package are not available (including tensorflow, keras, and uproot!). Instead used an approach of sourcing the LCG environment. 
+In both November, had issues with the requirements.txt, as many package are not available (including tensorflow, keras, and uproot!). Instead in November, used an approach of sourcing the LCG environment. 
 
 The environment name is choosen to be `CondaDNNenv`, and then scores are added with:
 ```
@@ -80,3 +83,5 @@ python3 ScoresToEventBased-v3.py minituple_$filetag.root
 In November 2024 the above sourcing worked, however in March 2025 it did not work. This was added based on the recommendation to source a LCG file with an up to date tensorflow: https://root-forum.cern.ch/t/incompatibility-among-tensorflow-of-lxplus-with-tensorflow-macbook-pro-colab-notebook-and-swan/56336. Without this, the DNN model would not work on lxplus / Condor area. 
 
 Still debugging March issue.... Newer versions of the `setup.sh` file have not worked yet.
+
+March: ended up creating a new `requirements_minimal.txt` to setup the environment, with the same keras version that the DNN model was created with. This allows `ScoresToEventBased` to run as well. 

@@ -22,8 +22,8 @@ cd CMSSW_14_0_0/src
 cmsenv
 cd ../..
 
-echo "Unzipping BDT Score Files..."
-unzip BDTWeightFiles.zip
+# echo "Unzipping BDT Score Files..."
+# unzip BDTWeightFiles.zip
 
 echo "ls"
 ls *
@@ -41,8 +41,10 @@ echo "./DisplacedHcalJetAnalyzer $filetag $ds_in"
 echo "Setting up environment for DNN"
 echo "conda create, conda activate CondaDNNenv"
 # conda create --name CondaDNNenv
-conda activate CondaDNNenv
-source /cvmfs/sft.cern.ch/lcg/views/LCG_105a_cuda/x86_64-el9-gcc11-opt/setup.sh
+# conda activate CondaDNNenv
+# source /cvmfs/sft.cern.ch/lcg/views/LCG_105a_cuda/x86_64-el9-gcc11-opt/setup.sh # try updating this after the DNN part did not work
+
+conda activate CondaDNNenv_py3pt9
 
 echo "Evaluating DNN..."
 echo "python3 ScoresToEventBased-v3.py minituple_$filetag.root"

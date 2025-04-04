@@ -17,14 +17,16 @@ echo ""
 
 echo "Running executable..."
 echo "./DisplacedHcalJetAnalyzer $filetag $ds_in"
-# ./../../DisplacedHcalJetAnalyzer/exe/DisplacedHcalJetAnalyzer $filetag $ds_in
+./../../DisplacedHcalJetAnalyzer/exe/DisplacedHcalJetAnalyzer $filetag $ds_in
 
 echo "Setting up environment for DNN"
 echo "conda create, conda activate CondaDNNenv"
 # conda create --name CondaDNNenv
-conda activate CondaDNNenv
+# conda activate CondaDNNenv
 # source /cvmfs/sft.cern.ch/lcg/views/LCG_105a_cuda/x86_64-el9-gcc11-opt/setup.sh
-source /cvmfs/sft.cern.ch/lcg/views/LCG_107_cuda/x86_64-el9-gcc11-opt/setup.sh
+# source /cvmfs/sft.cern.ch/lcg/views/LCG_107_cuda/x86_64-el9-gcc11-opt/setup.sh
+
+conda activate CondaDNNenv_py3pt9
 
 echo "Evaluating DNN..."
 cd ../../Classifiers/
