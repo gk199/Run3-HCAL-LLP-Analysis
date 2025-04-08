@@ -3,6 +3,7 @@
 echo "RUNNING..."
 
 # Inputs
+# Example: ./TestBeforeCondor.sh Filetag ntuple-file.root
 filetag=$1
 ds_in=$2 # root://cmsxrootd.fnal.gov///store/user/gkopp/DisplacedJet/Run2023C-EXOLLPJetHCAL-PromptReco-v4_AOD_20231114_143556/231114_133610/0000/output_104.root
 
@@ -20,17 +21,12 @@ echo "./DisplacedHcalJetAnalyzer $filetag $ds_in"
 ./../../DisplacedHcalJetAnalyzer/exe/DisplacedHcalJetAnalyzer $filetag $ds_in
 
 echo "Setting up environment for DNN"
-echo "conda create, conda activate CondaDNNenv"
-# conda create --name CondaDNNenv
-# conda activate CondaDNNenv
-# source /cvmfs/sft.cern.ch/lcg/views/LCG_105a_cuda/x86_64-el9-gcc11-opt/setup.sh
-# source /cvmfs/sft.cern.ch/lcg/views/LCG_107_cuda/x86_64-el9-gcc11-opt/setup.sh
-
-conda activate CondaDNNenv_py3pt9
+echo "source /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/Run/Condor/VirtualEnvs/keras2pt13pt1/bin/activate"
+source /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/Run/Condor/VirtualEnvs/keras2pt13pt1/bin/activate
 
 echo "Evaluating DNN..."
-cd ../../Classifiers/
 echo "python3 ScoresToEventBased-v3.py minituple_$filetag.root"
+cd ../../Classifiers/
 python3 ScoresToEventBased-v3.py ../Run/Condor/minituple_$filetag.root # $filepath
 
 sleep 5

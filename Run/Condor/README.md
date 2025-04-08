@@ -13,11 +13,11 @@ Copy over output file from `/tmp/` area into local or home area.
 
 **3. Run:**
 
-Remember to recompile the DisplacedHcalJetAnalyzer executable! Important: make sure that the environment `DisplacedHcalJetAnalyzer` was compiled in is the same as the CMSSW release `condor_executable.sh` sets up! This is currently `CMSSW_14_0_0`. Do `cmsenv` in this release, logout, and login to submit the Condor jobs. 
+Remember to recompile the DisplacedHcalJetAnalyzer executable! Important: If no CMSSW is setup in the Condor submission, then do not compile DisplacedHcalJetAnalyzer within a CMSSW release. If CMSSW is used, make sure that the environment `DisplacedHcalJetAnalyzer` was compiled in is the same as the CMSSW release `condor_executable.sh` sets up! This is currently `CMSSW_14_0_0`. Do `cmsenv` in this release, logout, and login to submit the Condor jobs. 
 
-Check the trees that are run over in `ScoreSToEventBased-v3.py` with `trees_to_iterate`. 
+Check the trees that are run over in `ScoresToEventBased-v3.py` with `trees_to_iterate`. After 3.13 only `NoSel` can be run over.
 
-Zip the BDT weights files, `zip -r <zip file name> <directory name>`.
+(Outdated: Zip the BDT weights files, `zip -r <zip file name> <directory name>`.)
 
 Submit a condor job for each file in input text file:
 ```
@@ -70,18 +70,19 @@ pip freeze > requirements.txt # in SWAN area
 conda create --name CondaDNNenv_py3pt9 python=3.9
 conda activate CondaDNNenv_py3pt9
 pip install -r requirements_minimal.txt 
-```
-In both November, had issues with the requirements.txt, as many package are not available (including tensorflow, keras, and uproot!). Instead in November, used an approach of sourcing the LCG environment. 
 
-The environment name is choosen to be `CondaDNNenv`, and then scores are added with:
+python3.9 -m venv keras2pt13pt1
+source keras2pt13pt1/bin/activate
+pip install -r ../../../Classifiers/requirements_minimal.txt
 ```
-conda activate CondaDNNenv
+In November, used an approach of sourcing the LCG environment. This was added based on the recommendation to source a LCG file with an up to date tensorflow: https://root-forum.cern.ch/t/incompatibility-among-tensorflow-of-lxplus-with-tensorflow-macbook-pro-colab-notebook-and-swan/56336. Without this, the DNN model would not work on lxplus / Condor area. Then the scores are added with:
+```
 source /cvmfs/sft.cern.ch/lcg/views/LCG_105a_cuda/x86_64-el9-gcc11-opt/setup.sh
 python3 ScoresToEventBased-v3.py minituple_$filetag.root
 ```
 
-In November 2024 the above sourcing worked, however in March 2025 it did not work. This was added based on the recommendation to source a LCG file with an up to date tensorflow: https://root-forum.cern.ch/t/incompatibility-among-tensorflow-of-lxplus-with-tensorflow-macbook-pro-colab-notebook-and-swan/56336. Without this, the DNN model would not work on lxplus / Condor area. 
+In November 2024 the above sourcing worked, however in March 2025 it did not work. 
 
-Still debugging March issue.... Newer versions of the `setup.sh` file have not worked yet.
+Debugging notes: Newer versions of the `setup.sh` file have not worked yet. Activating a conda virtual environment within Condor submission did not work. Recovering the DNN scores in a newer keras version worked inconsistently (possibly due to weights issues). 
 
-March: ended up creating a new `requirements_minimal.txt` to setup the environment, with the same keras version that the DNN model was created with. This allows `ScoresToEventBased` to run as well. 
+The keras and tensorflow versions end up being the most important. After debugging, realized that CMSSW is not needed for DisplacedHcalJetAnalyzer, so remove that. For the DNN scores, created a new `requirements_minimal.txt` to setup the environment, with the same keras version that the DNN model was created with. This allows `ScoresToEventBased` to run as well. This is done in a python virtual environment, which can be activated inside the Condor submission. For all debugging, remember to use only about 100 events in `DisplacedHcalJetAnalyzer.C`! 
