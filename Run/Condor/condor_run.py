@@ -116,8 +116,7 @@ def main():
 	keras_depth = os.path.abspath( "../../../Classifiers/depth_model_v3_Oct15.keras" )
 	keras_inclusive = os.path.abspath( "../../../Classifiers/inclusive_model_v3_Oct15.keras" )
 	norm_constants = os.path.abspath( "../../../Classifiers/norm_constants_v3.csv" )
-	requirements = os.path.abspath( "../../../Classifiers/requirements_minimal.txt" )
-	transfer_input_files = Executable_DisplacedHcalJetAnalyzer + "," + add_scores + "," + keras_depth + "," + keras_inclusive + "," + norm_constants + "," + requirements
+	transfer_input_files = Executable_DisplacedHcalJetAnalyzer + "," + add_scores + "," + keras_depth + "," + keras_inclusive + "," + norm_constants
 
 	# ----- Submit Jobs ----- #
 

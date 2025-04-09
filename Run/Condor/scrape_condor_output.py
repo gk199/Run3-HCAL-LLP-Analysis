@@ -64,8 +64,12 @@ def main():
 		for run_time in run_times:
 			run_times_all.append(run_time)
 
+	# Print average and max run times
+	avg_run_time = sum(run_times_all) / float(len(run_times_all))
+	print("Average run time = " + str(round(avg_run_time, 1)) + " mins")
+	print("Max run time = " + str(round(max(run_times_all),1)) + " mins")
 
-
+	# Plot the run times
 	plt.figure(figsize=(8, 6))
 	plt.hist(run_times) #, bins=bins, edgecolor='black', alpha=0.7)
 	plt.title('Minituple Job Run Time')
