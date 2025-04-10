@@ -5,6 +5,8 @@ ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
 ROOT.gStyle.SetPalette(ROOT.kCandy)
 
+nColors = ROOT.TColor.GetNumberOfColors()
+
 from ROOT import SetOwnership
 
 from MisTagParametrization_3D import ProjectHistogram, LabelCMS, ResetAxis # DrawCanvasAndPlots, MakePlot
@@ -77,14 +79,14 @@ def OverlayHistograms(file_paths, hist_name_all, hist_name_mistag):
         phi_ratios.append(phi_ratio)
         root_files.append(root_file)
         
-    legend_labels = ["2023 Bv1", "2023 Cv1", "2023 Cv2", "2023 Cv4"]
+    legend_labels = ["2023 Bv1", "2023 Cv1", "2023 Cv2", "2023 Cv3", "2023 Cv4", "2023 Dv1", "2023 Dv2"]
     png_title = "Overlay_LLPskim_Mistag"
     
     DrawCanvasAndPlots_overlay(
         "c1", "Projection plots", ": LLP skim, different eras", " in CR for different eras",
-        [[pt_ratios[0], pt_ratios[1], pt_ratios[2], pt_ratios[3]], 
-        [eta_ratios[0], eta_ratios[1], eta_ratios[2], eta_ratios[3]], 
-        [phi_ratios[0], phi_ratios[1], phi_ratios[2], phi_ratios[3]]],  # Wrap each plot in a list
+        [[pt_ratios[0], pt_ratios[1], pt_ratios[2], pt_ratios[3], pt_ratios[4], pt_ratios[5], pt_ratios[6]], 
+        [eta_ratios[0], eta_ratios[1], eta_ratios[2], eta_ratios[3], eta_ratios[4], eta_ratios[5], eta_ratios[6]], 
+        [phi_ratios[0], phi_ratios[1], phi_ratios[2], phi_ratios[3], phi_ratios[4], phi_ratios[5], phi_ratios[6]]],  # Wrap each plot in a list
         legend_labels,
         png_title,
         ["Jet p_{T} Mistag", "Jet #eta Mistag", "Jet #phi Mistag"], "OverlayEra"
@@ -114,15 +116,18 @@ def DrawCanvasAndPlots_overlay(canvas_name, canvas_title, option, title, plots, 
 
 # ------------------------------------------------------------------------------
 def MakePlot_overlay(hists, legends):
-    colors = [30, 38, 40, 46, 49]
+    # colors = [30, 38, 40, 46, 49]
+    nHists = len(hists)
     i = 0
 
     # Draw the histograms and overlay 
-    for hist in hists:
+    for i, hist in enumerate(hists):
+        color_index = int(i / nHists * nColors)
+        color = ROOT.TColor.GetColorPalette(color_index)
         if len(hists) == 2 and i == 1: # Check if only two histograms are passed, and apply shading (for predicted and observed plots)
             hist.SetFillStyle(3004)
-            hist.SetFillColor(colors[i])
-        hist.SetLineColor(colors[i])
+            hist.SetFillColor(color)
+        hist.SetLineColor(color)
         hist.SetLineWidth(2)
         i += 1
     if len(hists) == 1: hists[0].Draw("HIST") # huge error bars for rate plots -- why?
@@ -145,7 +150,8 @@ def MakePlot_overlay(hists, legends):
 # ------------------------------------------------------------------------------
 if __name__ == "__main__":
     # List of ROOT files to process
-    root_files = ["output_3D_hists_depth_combined_2023Bv1.root", "output_3D_hists_depth_combined_2023Cv1.root", "output_3D_hists_depth_combined_2023Cv2.root", "output_3D_hists_depth_combined_2023Cv3.root"]
+    root_files = ["output_3D_hists_depth_combined_2023Bv1.root", "output_3D_hists_depth_combined_2023Cv1.root", "output_3D_hists_depth_combined_2023Cv2.root", "output_3D_hists_depth_combined_2023Cv3.root",
+                    "output_3D_hists_depth_combined_2023Cv4.root", "output_3D_hists_depth_combined_2023Dv1.root", "output_3D_hists_depth_combined_2023Dv2.root"]
 
     # Names of the histograms in the ROOT files
     hist_name_all = "hist3d_CR_all_combined"
