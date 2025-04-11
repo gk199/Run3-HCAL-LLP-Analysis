@@ -245,7 +245,7 @@ def LLP_Cutflow(file_path):
 			if (i >= 4): print(selection_list_abbrev[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
 
 # ------------------------------------------------------------------------------
-def SixJetCheck(file_path, tree):
+def SixJetCheck(file_path, tree_name):
 	# Cutflow table for background estimation
 
 	print(" \n")
@@ -254,11 +254,11 @@ def SixJetCheck(file_path, tree):
 
 	selection_list = [
 		"All", 
-		"Valid jet, ($p_T,\\eta$, any jet 0-5)",
-		"Triggered (any jet 0-5)",
-		"Triggered and depth towers $\\geq 2$ (any jet 0-5)",
-		"Triggered and timing towers $\\geq 2$ (any jet 0-5)",
-		"Triggered and 1 timing, 1 depth tower (any jet 0-5)",
+		"Valid jet, ($p_T,\\eta$, any jet 0-3)",
+		"Triggered (any jet 0-3)",
+		"Triggered and depth towers $\\geq 2$ (any jet 0-3)",
+		"Triggered and timing towers $\\geq 2$ (any jet 0-3)",
+		"Triggered and 1 timing, 1 depth tower (any jet 0-3)",
 		"Triggered and depth towers $\\geq 2$ (any jet 0-1)",
 		"Triggered and timing towers $\\geq 2$ (any jet 0-1)",
 		"Triggered and 1 timing, 1 depth tower (any jet 0-1)",
@@ -272,9 +272,9 @@ def SixJetCheck(file_path, tree):
 		"All       ", 
 		"Valid jet",
 		"Valid jet, triggered",
-		"2+ depth passed (6 jet)",
-		"2+ timing passed (6 jet)",
-		"1 timing, 1 depth passed (6 jet)",
+		"2+ depth passed (4 jet)",
+		"2+ timing passed (4 jet)",
+		"1 timing, 1 depth passed (4 jet)",
 		"2+ depth passed (2 jet)",
 		"2+ timing passed (2 jet)",
 		"1 timing, 1 depth passed (2 jet)",
@@ -285,8 +285,16 @@ def SixJetCheck(file_path, tree):
 	]
 
 	file = ROOT.TFile.Open(file_path)
-	tree = file.Get(tree)
+	tree = file.Get(tree_name)
 	
+	baseline_selection_string = "Pass_WPlusJets == 1"
+	if "LLP_MC" in file_path: baseline_selection_string = "Pass_HLTDisplacedJet == 1"
+	f_out = ROOT.TFile.Open("skimmed_file.root", "RECREATE")
+	print("about to copy tree")
+	tree_reduced = tree.CopyTree(baseline_selection_string)
+	tree_reduced.Write() # write to disk
+	print("made smaller tree")
+
 	total_selection_string = ""
 	
 	if print_latex:
@@ -302,9 +310,9 @@ def SixJetCheck(file_path, tree):
 		# 6 jets
 		if i == 1: total_selection_string = jet_string_six
 		if i == 2: total_selection_string = jet_string_six_triggered
-		if i == 3: total_selection_string = "(" + one_jet_tagged_string_triggered + " || " + one_jet1_tagged_string_triggered + " || " + one_jet2_tagged_string_triggered + " || " + one_jet3_tagged_string_triggered + " || " + one_jet4_tagged_string_triggered + " || " + one_jet5_tagged_string_triggered + ")"
-		if i == 4: total_selection_string = "(" + two_jet_tagged_string_triggered + " || " + two_jet1_tagged_string_triggered + " || " + two_jet2_tagged_string_triggered + " || " + two_jet3_tagged_string_triggered + " || " + two_jet4_tagged_string_triggered + " || " + two_jet5_tagged_string_triggered + ")"
-		if i == 5: total_selection_string = "(" + three_jet_tagged_string_triggered + " || " + three_jet1_tagged_string_triggered + " || " + three_jet2_tagged_string_triggered + " || " + three_jet3_tagged_string_triggered + " || " + three_jet4_tagged_string_triggered + " || " + three_jet5_tagged_string_triggered + ")"
+		if i == 3: total_selection_string = "(" + one_jet_tagged_string_triggered + " || " + one_jet1_tagged_string_triggered + " || " + one_jet2_tagged_string_triggered + " || " + one_jet3_tagged_string_triggered + ")" # " || " + one_jet4_tagged_string_triggered + " || " + one_jet5_tagged_string_triggered + ")"
+		if i == 4: total_selection_string = "(" + two_jet_tagged_string_triggered + " || " + two_jet1_tagged_string_triggered + " || " + two_jet2_tagged_string_triggered + " || " + two_jet3_tagged_string_triggered + ")" # " || " + two_jet4_tagged_string_triggered + " || " + two_jet5_tagged_string_triggered + ")"
+		if i == 5: total_selection_string = "(" + three_jet_tagged_string_triggered + " || " + three_jet1_tagged_string_triggered + " || " + three_jet2_tagged_string_triggered + " || " + three_jet3_tagged_string_triggered + ")" # " || " + three_jet4_tagged_string_triggered + " || " + three_jet5_tagged_string_triggered + ")"
 
 		# 2 jets
 		if i == 6: total_selection_string = "(" + one_jet_tagged_string_triggered + " || " + one_jet1_tagged_string_triggered + ")"
@@ -317,10 +325,10 @@ def SixJetCheck(file_path, tree):
 		if i == 11: total_selection_string = three_jet_tagged_string_triggered
 		if i == 12: total_selection_string = jet_string_triggered_noFlag # remove "triggered" if want to see just if jet is emulated with these towers
 
-		selval = tree.GetEntries(total_selection_string)
+		selval = tree_reduced.GetEntries(total_selection_string)
 		if i == 0: init = selval
 
-		Nevents = tree.GetEntries()
+		Nevents = tree_reduced.GetEntries()
 
 		if print_latex:
 			print(selname+" & ", round(selval, 4), " & ", round((selval)/init, 4), " \\\\ ") 
@@ -894,11 +902,11 @@ def main():
 	#if "LLP_MC" in file_path: LLP_Cutflow(file_path) 
 
 	# Similar to the first table from LLP_Cutflow, but on data or LLP, using jet/analysis cuts
-	if "Zmu" or "LLPskim" in file_path: SixJetCheck(file_path, "WPlusJets") # evaluate 6, 2, and 1 jets that are triggered and pass emulation
-	# if "LLP_MC" in file_path: SixJetCheck(file_path, "PassedHLT")
+	if "Zmu" or "LLPskim" in file_path: SixJetCheck(file_path, "NoSel") # evaluate 6, 2, and 1 jets that are triggered and pass emulation
+	# if "LLP_MC" in file_path: SixJetCheck(file_path, "NoSel")
 
 	# DNN check
-	DNN_Passing(file_path) 
+	# DNN_Passing(file_path) 
 
 	# Emulated towers check
 	# if "LLPskim" or "LLP_MC" in file_path: Emulated_Towers(file_path)
