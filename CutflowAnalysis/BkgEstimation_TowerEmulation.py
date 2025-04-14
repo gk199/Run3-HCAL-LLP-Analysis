@@ -38,9 +38,9 @@ def LLP_Cutflow(file_path):
 		"LLP 0 AND LLP 1",
 		"LLP AND, with Event HT $> 200$~GeV", 
 		"Either LLP and triggered (any jet 0-5)",
-		"Either LLP and depth towers $\\geq 2$ (any jet 0-5)",
-		"Either LLP and timing towers $\\geq 2$ (any jet 0-5)",
-		"Either LLP and 1 timing, 1 depth tower (any jet 0-5)",
+		"Either LLP and depth towers $\\geq 2$ (any jet 0-3)",
+		"Either LLP and timing towers $\\geq 2$ (any jet 0-3)",
+		"Either LLP and 1 timing, 1 depth tower (any jet 0-3)",
 		"Either LLP and depth towers $\\geq 2$ (any jet 0-1)",
 		"Either LLP and timing towers $\\geq 2$ (any jet 0-1)",
 		"Either LLP and 1 timing, 1 depth tower (any jet 0-1)",
@@ -60,9 +60,9 @@ def LLP_Cutflow(file_path):
 		"LLP AND   ",
 		"LLP AND with HTT",
 		"Either LLP and triggered",
-		"Either LLP and 2+ depth passed (6 jet)",
-		"Either LLP and 2+ timing passed (6 jet)",
-		"Either LLP and 1 timing, 1 depth passed (6 jet)",
+		"Either LLP and 2+ depth passed (4 jet)",
+		"Either LLP and 2+ timing passed (4 jet)",
+		"Either LLP and 1 timing, 1 depth passed (4 jet)",
 		"Either LLP and 2+ depth passed (2 jet)",
 		"Either LLP and 2+ timing passed (2 jet)",
 		"Either LLP and 1 timing, 1 depth passed (2 jet)",
@@ -73,10 +73,18 @@ def LLP_Cutflow(file_path):
 	]
 
 	file = ROOT.TFile.Open(file_path)
-	# tree = file.Get("Classification")
-	# tree = file.Get("NoSel")
-	tree = file.Get("PassedHLT")
-	
+	tree = file.Get("NoSel")
+		
+	baseline_selection_string = "Pass_HLTDisplacedJet == 1"
+	if "LLP_MC" not in file_path: 
+		print("Not LLP signal!")
+		return
+	f_out = ROOT.TFile.Open("skimmed_file.root", "RECREATE")
+	print("about to copy tree")
+	tree_reduced = tree.CopyTree(baseline_selection_string)
+	tree_reduced.Write() # write to disk
+	print("made smaller tree")
+
 	selection_string = ""
 	selection1_string = ""
 	total_selection_string = ""
@@ -93,8 +101,8 @@ def LLP_Cutflow(file_path):
 		Nevents = -1
 
 		if i == 0: 
-			selval = tree.GetEntries()
-			selval1 = tree.GetEntries()
+			selval = tree_reduced.GetEntries()
+			selval1 = tree_reduced.GetEntries()
 			init = selval
 		if i == 1: 
 			selection_string += "(LLP0_DecayR >= 214.2 && LLP0_DecayR < 295)" # 214.2 for depth 3,4. 177 for d 1-4
@@ -115,9 +123,9 @@ def LLP_Cutflow(file_path):
 
 		# 6 jets
 		if i == 8: total_selection_string = one_LLP + " && " + jet_string_six_triggered
-		if i == 9: total_selection_string = one_LLP + " && (" + one_jet_tagged_string_triggered + " || " + one_jet1_tagged_string_triggered + " || " + one_jet2_tagged_string_triggered + " || " + one_jet3_tagged_string_triggered + " || " + one_jet4_tagged_string_triggered + " || " + one_jet5_tagged_string_triggered + ")"
-		if i == 10: total_selection_string = one_LLP + " && (" + two_jet_tagged_string_triggered + " || " + two_jet1_tagged_string_triggered + " || " + two_jet2_tagged_string_triggered + " || " + two_jet3_tagged_string_triggered + " || " + two_jet4_tagged_string_triggered + " || " + two_jet5_tagged_string_triggered + ")"
-		if i == 11: total_selection_string = one_LLP + " && (" + three_jet_tagged_string_triggered + " || " + three_jet1_tagged_string_triggered + " || " + three_jet2_tagged_string_triggered + " || " + three_jet3_tagged_string_triggered + " || " + three_jet4_tagged_string_triggered + " || " + three_jet5_tagged_string_triggered + ")"
+		if i == 9: total_selection_string = one_LLP + " && (" + one_jet_tagged_string_triggered + " || " + one_jet1_tagged_string_triggered + " || " + one_jet2_tagged_string_triggered + " || " + one_jet3_tagged_string_triggered + ")" # || " + one_jet4_tagged_string_triggered + " || " + one_jet5_tagged_string_triggered + ")"
+		if i == 10: total_selection_string = one_LLP + " && (" + two_jet_tagged_string_triggered + " || " + two_jet1_tagged_string_triggered + " || " + two_jet2_tagged_string_triggered + " || " + two_jet3_tagged_string_triggered + ")" # || " + two_jet4_tagged_string_triggered + " || " + two_jet5_tagged_string_triggered + ")"
+		if i == 11: total_selection_string = one_LLP + " && (" + three_jet_tagged_string_triggered + " || " + three_jet1_tagged_string_triggered + " || " + three_jet2_tagged_string_triggered + " || " + three_jet3_tagged_string_triggered + ")" # || " + three_jet4_tagged_string_triggered + " || " + three_jet5_tagged_string_triggered + ")"
 
 		# 2 jets
 		if i == 12: total_selection_string = one_LLP + " && (" + one_jet_tagged_string_triggered + " || " + one_jet1_tagged_string_triggered + ")"
@@ -130,12 +138,12 @@ def LLP_Cutflow(file_path):
 		if i == 17: total_selection_string = one_LLP + " && " + three_jet_tagged_string_triggered
 		if i == 18: total_selection_string = one_LLP + " && " + jet_string_triggered_noFlag # remove "triggered" if want to see just if jet is emulated with these towers
 
-		selval = tree.GetEntries(selection_string)
-		selval1 = tree.GetEntries(selection1_string)
+		selval = tree_reduced.GetEntries(selection_string)
+		selval1 = tree_reduced.GetEntries(selection1_string)
 
-		if i >= 4: selval = tree.GetEntries(total_selection_string)
+		if i >= 4: selval = tree_reduced.GetEntries(total_selection_string)
 
-		Nevents = tree.GetEntries()
+		Nevents = tree_reduced.GetEntries()
 
 		if print_latex:
 			if i < 4: print(selname+" &", round(selval, 4), "&", round(selval1, 4), "&", round(selval/init, 4), "&", round(selval1/init, 4), "\\\\")
@@ -159,10 +167,14 @@ def LLP_Cutflow(file_path):
 		"LLP $E > 40$~GeV", 
 		"LLP 0 OR LLP 1",
 		"Jet $\\geq "+jet_energy+"$~GeV $p_T$ and $\\abs\\eta \\leq 1.26$", 
+		"Depth towers $\\geq 2$ (2 jets)",
+		"Timing towers $\\geq 2$ (2 jets)",
+		"1 timing, 1 depth tower (2 jets)",
 		"No tower flags",
 		"Depth towers $\\geq 2$",
 		"Timing towers $\\geq 2$",
 		"1 timing, 1 depth tower",
+
 	]
 
 	selection_list_abbrev = [
@@ -172,16 +184,15 @@ def LLP_Cutflow(file_path):
 		"LLP pT    ", 
 		"LLP OR    ",
 		"Jet pT and eta",
+		"2+ depth passed (2 jets)",
+		"2+ timing passed (2 jets)",
+		"1 timing, 1 depth passed (2 jets)",
 		"No tower flags",
 		"2+ depth passed",
 		"2+ timing passed",
 		"1 timing, 1 depth passed",
-	]
 
-	file = ROOT.TFile.Open(file_path)
-	# tree = file.Get("Classification")
-	# tree = file.Get("NoSel")
-	tree = file.Get("PassedHLT")
+	]
 	
 	if print_latex:
 		latex_setup(file_path)
@@ -195,7 +206,7 @@ def LLP_Cutflow(file_path):
 		Nevents = -1
 
 		if i == 0: 
-			init = tree.GetEntries()
+			init = tree_reduced.GetEntries()
 			selection_string = ""
 			selection1_string = ""
 		if i == 1: 
@@ -208,37 +219,37 @@ def LLP_Cutflow(file_path):
 			selection_string += "&& LLP0_E > 40"
 			selection1_string += "&& LLP1_E > 40"
 
-		selval0 = tree.GetEntries(selection_string)
-		selval1 = tree.GetEntries(selection1_string)
+		selval0 = tree_reduced.GetEntries(selection_string)
+		selval1 = tree_reduced.GetEntries(selection1_string)
 
 		if i == 4: 
 			either_LLP = "((" + selection_string + ") || (" + selection1_string + "))"
 			total_selection_string = either_LLP
 		if i == 5: total_selection_string = either_LLP + " && " + jet_string
-		if i == 6: total_selection_string = either_LLP + " && " + jet_string_noFlag
-		if i == 7: total_selection_string = either_LLP + " && " + one_jet_tagged_string
-		if i == 8: total_selection_string = either_LLP + " && " + two_jet_tagged_string
-		if i == 9: total_selection_string = either_LLP + " && " + three_jet_tagged_string
+		# 2 jets
+		if i == 6: total_selection_string = either_LLP + " && (" + one_jet_tagged_string_triggered + " || " + one_jet1_tagged_string_triggered + ")"
+		if i == 7: total_selection_string = either_LLP + " && (" + two_jet_tagged_string_triggered + " || " + two_jet1_tagged_string_triggered + ")"
+		if i == 8: total_selection_string = either_LLP + " && (" + three_jet_tagged_string_triggered + " || " + three_jet1_tagged_string_triggered + ")"
+		# 1 jet
+		if i == 9: total_selection_string = either_LLP + " && " + jet_string_noFlag
+		if i == 10: total_selection_string = either_LLP + " && " + one_jet_tagged_string_triggered
+		if i == 11: total_selection_string = either_LLP + " && " + two_jet_tagged_string_triggered
+		if i == 12: total_selection_string = either_LLP + " && " + three_jet_tagged_string_triggered
 
-		if i >= 4: selval = tree.GetEntries(total_selection_string)
-		if i == 6: all_events = selval
-		if i == 7: one_plus_jets = selval
-		if i == 8: two_plus_jets = selval
-		if i == 9: three_plus_jets = selval
 
-		Nevents = tree.GetEntries()
+
+		if i >= 4: selval = tree_reduced.GetEntries(total_selection_string)
+		if i >= 6: all_events = selval
+
+		Nevents = tree_reduced.GetEntries()
 
 		if print_latex:
 			if i < 4: print(selname+" &", round(selval0, 4), "&", round(selval1, 4), "&", round(selval0/init, 4), "&", round(selval1/init, 4), "\\\\")
 			if i == 4 or i == 5: 
 				print(selname+" & \\multicolumn{2}{l}{", round(selval, 4), "}& \\multicolumn{2}{l}{", round(selval/init, 4), "} \\\\")
 				if i == 5: print("\\hline")
-			if i == 6: print(selname+" & \\multicolumn{2}{l}{", round(all_events, 4), "} & \\multicolumn{2}{l}{", round((all_events)/init, 4), "} \\\\ ") # 0 bin is all events - events with at least 1
-			if i == 7: print(selname+" & \\multicolumn{2}{l}{", round(one_plus_jets , 4), "} & \\multicolumn{2}{l}{", round((one_plus_jets)/init, 4), "} \\\\ ") # 1 bin is events with at least 1 - events with at least 2
-			if i == 8: print(selname+" & \\multicolumn{2}{l}{", round(two_plus_jets, 4), "} & \\multicolumn{2}{l}{", round((two_plus_jets)/init, 4), "} \\\\ ") # 2 bin is events with at least 2 - events with at least 3
-			if i == 9: 
-				print(selname+" & \\multicolumn{2}{l}{", round(three_plus_jets, 4), "} & \\multicolumn{2}{l}{", round(three_plus_jets/init, 4), "} \\\\ ") # 3+ bin is events with at least 3
-				latex_end(file_path)
+			if i >= 6: print(selname+" & \\multicolumn{2}{l}{", round(all_events, 4), "} & \\multicolumn{2}{l}{", round((all_events)/init, 4), "} \\\\ ") # 0 bin is all events - events with at least 1
+			if i == 12: latex_end(file_path)
 
 		else:
 			if (i < 4): print(selection_list_abbrev[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4), "LLP 1:", "\t", round(selval1, 4), "\t", round(selval1/init, 4))
@@ -388,8 +399,14 @@ def DNN_Passing(file_path):
 
 	init = -1
 	file = ROOT.TFile.Open(file_path)
-	if "LLPskim" or "Zmu" in file_path: tree = file.Get("WPlusJets")
-	if "LLP_MC" in file_path: tree = file.Get("PassedHLT")
+
+	baseline_selection_string = "Pass_WPlusJets == 1"
+	if "LLP_MC" in file_path: baseline_selection_string = "Pass_HLTDisplacedJet == 1"
+	
+	f_out = ROOT.TFile.Open("skimmed_file.root", "RECREATE")
+	tree = file.Get("NoSel")
+	tree_reduced = tree.CopyTree(baseline_selection_string)
+	tree_reduced.Write() # write to disk
 	
 	for i in range(len(selection_list_noCut)):
 		selname = selection_list_noCut[i]
@@ -397,7 +414,7 @@ def DNN_Passing(file_path):
 		Nevents = -1
 
 		if i == 0: 
-			init = tree.GetEntries()
+			init = tree_reduced.GetEntries()
 			total_selection_string = ""
 		if i == 1: total_selection_string = jet_string
 		if i == 2: total_selection_string += " && " + jet1_string
@@ -426,9 +443,9 @@ def DNN_Passing(file_path):
 		# if i == 14: total_selection_string = jet_string + " && " + jet1_string + "&& jet1_TimingTowers == 2 && jet1_DepthTowers == 1 && jet1_L1trig_Matched == 1"
 		# if i == 15: total_selection_string += " && jet0_scores_inc >= 0.9 && jet1_scores >= 0.9"
 
-		selval = tree.GetEntries(total_selection_string)
+		selval = tree_reduced.GetEntries(total_selection_string)
 
-		Nevents = tree.GetEntries()
+		Nevents = tree_reduced.GetEntries()
 
 		if print_latex:
 			print(selname+" & ", round(selval, 4), " & ", round((selval)/init, 4), " \\\\ ") 
@@ -899,10 +916,10 @@ def main():
 	file_path = sys.argv[1]
 	
 	# Signal truth cuts, evalute acceptance and then 6, 2, 1 jets
-	#if "LLP_MC" in file_path: LLP_Cutflow(file_path) 
+	if "LLP_MC" in file_path: LLP_Cutflow(file_path) 
 
 	# Similar to the first table from LLP_Cutflow, but on data or LLP, using jet/analysis cuts
-	if "Zmu" or "LLPskim" in file_path: SixJetCheck(file_path, "NoSel") # evaluate 6, 2, and 1 jets that are triggered and pass emulation
+	# if "Zmu" or "LLPskim" in file_path: SixJetCheck(file_path, "NoSel") # evaluate 6, 2, and 1 jets that are triggered and pass emulation
 	# if "LLP_MC" in file_path: SixJetCheck(file_path, "NoSel")
 
 	# DNN check

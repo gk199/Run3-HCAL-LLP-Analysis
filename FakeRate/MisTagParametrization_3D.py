@@ -22,7 +22,7 @@ phi_bins = np.linspace(-np.pi, np.pi, 10)  # phi axis from -pi to pi, 10 bins
 DNN_cut = 0.9
 DNN_cut_inc = 0.9
 
-era = "2023 Bv1-Cv3" # automatically switches which input minituples to use based on this name
+era = "2023 Bv1-Dv2" # automatically switches which input minituples to use based on this name
 
 Zmu = False
 if Zmu: era = "2023 Bv1-Dv2 Zmu"
@@ -147,8 +147,8 @@ def MisTagParametrization(tree, option=""):
     # still producing rates plots with high errors, making this lower priority
     hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run = CreateHistograms_1D(tree, CR + triggered + pt_eta, "hist1d_CR_all")
     hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run = CreateHistograms_1D(tree, CR + triggered + pt_eta + mistag, "hist1d_CR_mistag")
-    hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi, hist1D_VR_all_run = CreateHistograms_1D(tree, VR + triggered + pt_eta, "hist1d_VR_all")
-    hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi, hist1D_VR_mistag_run = CreateHistograms_1D(tree, VR + triggered + pt_eta + mistag, "hist1d_VR_mistag")
+    # hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi, hist1D_VR_all_run = CreateHistograms_1D(tree, VR + triggered + pt_eta, "hist1d_VR_all")
+    # hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi, hist1D_VR_mistag_run = CreateHistograms_1D(tree, VR + triggered + pt_eta + mistag, "hist1d_VR_mistag")
     print("created histograms for 1D rate evaluation")
 
     if LLPskim: MistagRate_1D([hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run], [hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run], "CR", option, title, label, "leading") # mistag_jet_list[i])
@@ -493,7 +493,7 @@ def CreateHistograms_1D(tree, cut, hist_name):
 def MistagRate_1D(mistag_hists, all_hists, plot_type, option, title, label, type_of_jet):
     # MistagRate() is done via projections of a 3D histogram, and thinking that this method does not handle errors very well. Do with 1D histogram division instead (TODO)
     # Find mistag rate in 1D histograms to evaluate plots
-    # Input is a list of 3 histograms (pT, eta, phi) to find the mistag rate of. Get these from CreateHistograms_1D 
+    # Input is a list of 3 histograms (pT, eta, phi / run) to find the mistag rate of. Get these from CreateHistograms_1D 
 
     print("about to clone input histograms")
     mistag_rate_pt = mistag_hists[0].Clone("mistag_rate_pt")
@@ -505,6 +505,16 @@ def MistagRate_1D(mistag_hists, all_hists, plot_type, option, title, label, type
     mistag_rate_phi.Divide(all_hists[2])
     mistag_rate_run.Divide(all_hists[3])
     print("cloned and divided input histograms")
+
+    # For the run number histogram, determine what run numbers have high mistag rates
+    threshold = 0.04
+    nBins = mistag_rate_run.GetNbinsX()
+    # Loop through bins, check content
+    for bin in range(1, nBins + 1): # since bin numbers start at 1
+        content = mistag_rate_run.GetBinContent(bin)
+        if content > threshold:
+            run_number = mistag_rate_run.GetBinCenter(bin)
+            print(f"run number = {run_number} with a mistag rate of {content}")
 
     # Create mistag rate plots
     legend_labels = ["Mistag rate (" + plot_type + ")"] # CR, W+jets, VR, Zmu
@@ -735,10 +745,10 @@ def main():
     else: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Bv1.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Cv1.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Cv2.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Cv3.root"]
-                        # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Cv4.root",
-                        # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Dv1.root",
-                        # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Dv2.root"]
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Cv3.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Cv4.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Dv1.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Dv2.root"]
     if LLPskim: combined_tree = GetData(infilepath_list, label)
 
     infilepath_list_Zmu = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_Zmu_Run2023Bv1.root",

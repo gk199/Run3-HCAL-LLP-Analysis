@@ -7,9 +7,9 @@ jet3_string = "(jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26)"
 jet4_string = "(jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26)"
 jet5_string = "(jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26)"
 
-jet_string_six = "(" + jet_string + "||" + jet1_string + "||" + jet2_string + "||" + jet3_string + "||" + jet4_string + "||" + jet5_string +")"
+jet_string_six = "(" + jet_string + "||" + jet1_string + "||" + jet2_string + "||" + jet3_string + ")" # ||" + jet4_string + "||" + jet5_string +")"
 
-jet_string_six_triggered = "((" + jet_string + "&& jet0_L1trig_Matched == 1 ) || (" + jet1_string + "&& jet2_L1trig_Matched == 1 ) || (" + jet2_string + "&& jet2_L1trig_Matched == 1 ) || (" + jet3_string + "&& jet3_L1trig_Matched == 1 ) || (" + jet4_string + "&& jet4_L1trig_Matched == 1 ) || (" + jet5_string + "&& jet5_L1trig_Matched == 1 ))"
+jet_string_six_triggered = "((" + jet_string + "&& jet0_L1trig_Matched == 1 ) || (" + jet1_string + "&& jet2_L1trig_Matched == 1 ) || (" + jet2_string + "&& jet2_L1trig_Matched == 1 ) || (" + jet3_string + "&& jet3_L1trig_Matched == 1 ) )" #|| (" + jet4_string + "&& jet4_L1trig_Matched == 1 ) || (" + jet5_string + "&& jet5_L1trig_Matched == 1 ))"
 
 # Emulated flags 
 jet_string_noFlag = "(jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && (jet0_DepthTowers + jet0_TimingTowers == 0))"
@@ -55,12 +55,12 @@ three_jet_tagged_string_six = " ( " + jet0_depth_timing + " || " + jet1_depth_ti
 # defining single and double tag strings, require jet is matched to L1 LLP triggered jet
 jet_string_triggered = "  ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1) "
 jet_string_six_triggered = "  ( ( jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1) || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1)"
-jet_string_six_triggered += " || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1) || (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1)"
-jet_string_six_triggered += " || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1) || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1))"
+jet_string_six_triggered += " || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1) || (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1))"
+# jet_string_six_triggered += " || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1) || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1))"
 
 jet_string_triggered_noFlag = "(jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 && (jet0_DepthTowers + jet0_TimingTowers == 0)) "
 jet_string_six_triggered_noFlag = "((jet0_Pt >= "+jet_energy+" && abs(jet0_Eta) <= 1.26 && jet0_L1trig_Matched == 1 && (jet0_DepthTowers + jet0_TimingTowers == 0)) || (jet1_Pt >= "+jet_energy+" && abs(jet1_Eta) <= 1.26 && jet1_L1trig_Matched == 1 && (jet1_DepthTowers + jet1_TimingTowers == 0)) || (jet2_Pt >= "+jet_energy+" && abs(jet2_Eta) <= 1.26 && jet2_L1trig_Matched == 1 && (jet2_DepthTowers + jet2_TimingTowers == 0))"
-jet_string_six_triggered_noFlag += "|| (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1 && (jet3_DepthTowers + jet3_TimingTowers == 0)) || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1 && (jet4_DepthTowers + jet4_TimingTowers == 0)) || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1 && (jet5_DepthTowers + jet5_TimingTowers == 0)))"
+jet_string_six_triggered_noFlag += "|| (jet3_Pt >= "+jet_energy+" && abs(jet3_Eta) <= 1.26 && jet3_L1trig_Matched == 1 && (jet3_DepthTowers + jet3_TimingTowers == 0)))" # || (jet4_Pt >= "+jet_energy+" && abs(jet4_Eta) <= 1.26 && jet4_L1trig_Matched == 1 && (jet4_DepthTowers + jet4_TimingTowers == 0)) || (jet5_Pt >= "+jet_energy+" && abs(jet5_Eta) <= 1.26 && jet5_L1trig_Matched == 1 && (jet5_DepthTowers + jet5_TimingTowers == 0)))"
 
 one_jet_tagged_string_triggered = " (  " + jet0_depth + " && jet0_L1trig_Matched == 1 )" # jet 0 condition
 one_jet1_tagged_string_triggered = " ( " + jet1_depth + " && jet1_L1trig_Matched == 1 )"
