@@ -14,7 +14,7 @@ debug = False
 # Define the histogram bins
 pT_bins = np.linspace(0, 300, 20)  # pT axis from 0 to 500 GeV, 20 bins
 pT_bins = [0, 40, 50, 60, 70, 80, 100, 120, 160, 240, 400]  # Define pT bins
-# pT_bins = [0, 40, 60, 70, 100, 150, 240, 400]  # Define pT bins
+#pT_bins = [0, 40, 60, 70, 100, 150, 240, 400]  # Define pT bins
 pT_bins = np.array(pT_bins, dtype=float)
 eta_bins = np.linspace(-1.26, 1.26, 10)  # eta axis from -2 to 2, 10 bins
 phi_bins = np.linspace(-np.pi, np.pi, 10)  # phi axis from -pi to pi, 10 bins
@@ -22,13 +22,17 @@ phi_bins = np.linspace(-np.pi, np.pi, 10)  # phi axis from -pi to pi, 10 bins
 DNN_cut = 0.9
 DNN_cut_inc = 0.9
 
-era = "2023 Bv1-Dv2" # automatically switches which input minituples to use based on this name
+runs_to_exclude = [367230, 367772, 368331, 368440, 368764, 370436, 370579, 370790] # 2023 runs
+
+era = "2023 Dv2" # automatically switches which input minituples to use based on this name
 
 Zmu = False
 if Zmu: era = "2023 Bv1-Dv2 Zmu"
 LLPskim = True
 
 era_name = era.replace(" ", "") # for plot saving
+
+CNN = False
 
 # Check if the directory exists, and create it if not
 output_dir = "outPlots_3D"
@@ -85,10 +89,15 @@ def GetData_single(infilepath, label): # get tree from a single filepath (not a 
 def MisTagParametrization(tree, option=""):
 
     # Setup cuts for CR and VR. CR = jet1_scores_inc between 0-0.5. VR = jet1_scores_inc between 0.5-0.9. Mistag means jet0_scores over "DNN_cut"
+    run_exclusion = ExcludedCut("run", runs_to_exclude)
+    print(run_exclusion)
+
     CR = GetCut("jet1_scores_inc", [0,0.5])
     VR = GetCut("jet1_scores_inc", [0.5,DNN_cut_inc])
     SR = GetCut("jet1_scores_inc", [DNN_cut_inc,1.1])
     mistag = GetCut("jet0_scores", [DNN_cut,1.1])
+    if CNN:
+        mistag = GetCut("CNN3D_classifier3", [DNN_cut,1.1])
     # Need leading jet to be matched to a LLP, jet0_L1trig_Matched. Leading jet pT > 60, subleading > 40. Eta restrictions on both jets at 1.26
     triggered = GetCut("jet0_L1trig_Matched", 1) 
     # triggered += GetCut("jet0_Pt", [60,1000])
@@ -126,7 +135,8 @@ def MisTagParametrization(tree, option=""):
         "before alignment": (run_before, run_before, ": before alignment", "_before_align"),
         "after alignment": (run_after, run_after, ": after alignment", "_after_align"),
         "before alignment, depth": (run_before + depth_emu, run_before + depth_emu_1, ": 2+ depth, before alignment", "_depth_before_align"),
-        "after alignment, depth": (run_after + depth_emu, run_after + depth_emu_1, ": 2+ depth, after alignment", "_depth_after_align")
+        "after alignment, depth": (run_after + depth_emu, run_after + depth_emu_1, ": 2+ depth, after alignment", "_depth_after_align"),
+        "after alignment, trackPt": (run_after + track_pT, run_after + track_pT_1, ": frac. track pT, after alignment", "_trackPt_after_align")
     }
 
     # Default values for label and title
@@ -145,32 +155,32 @@ def MisTagParametrization(tree, option=""):
     # First create 1D histograms for determining the mistag rate. 3D projections can be used, but the errors aren't propagated correctly by default so cross check with this method
     # currently crashing on all datasets -- makes plot and then immediately crashes, so works to see one plot but not good -- need to debug still TODO 
     # still producing rates plots with high errors, making this lower priority
-    hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run = CreateHistograms_1D(tree, CR + triggered + pt_eta, "hist1d_CR_all")
-    hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run = CreateHistograms_1D(tree, CR + triggered + pt_eta + mistag, "hist1d_CR_mistag")
+    # hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run = CreateHistograms_1D(tree, CR + triggered + pt_eta, "hist1d_CR_all")
+    # hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run = CreateHistograms_1D(tree, CR + triggered + pt_eta + mistag, "hist1d_CR_mistag")
     # hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi, hist1D_VR_all_run = CreateHistograms_1D(tree, VR + triggered + pt_eta, "hist1d_VR_all")
     # hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi, hist1D_VR_mistag_run = CreateHistograms_1D(tree, VR + triggered + pt_eta + mistag, "hist1d_VR_mistag")
     print("created histograms for 1D rate evaluation")
 
-    if LLPskim: MistagRate_1D([hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run], [hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run], "CR", option, title, label, "leading") # mistag_jet_list[i])
-    if Zmu: MistagRate_1D([hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run], [hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run], "Wjets", option, title, label, "leading")
+    # if LLPskim: MistagRate_1D([hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run], [hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run], "CR", option, title, label, "leading") # mistag_jet_list[i])
+    # if Zmu: MistagRate_1D([hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run], [hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run], "Wjets", option, title, label, "leading")
     # if LLPskim: MistagRate_1D([hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi, hist1D_VR_mistag_run], [hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi, hist1D_VR_all_run], "VR", option, title, label, "leading")
     # if Zmu: MistagRate_1D([hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi, hist1D_VR_mistag_run], [hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi, hist1D_VR_all_run], "Zjets", option, title, label, "leading")
     print("completed 1D rate evaluation")
 
     # Create the 3D histograms with different cuts. Arguments to CreateHistograms function are tree, cut, histogram name. Histograms are filled usnig tree.Draw() method
     # jet 0 is triggered, jet 1 defines CR / VR
-    hist3d_CR_all = CreateHistograms(tree, CR + triggered + pt_eta, "hist3d_CR_all")
-    hist3d_CR_mistag = CreateHistograms(tree, CR + triggered + pt_eta + mistag, "hist3d_CR_mistag")
-    hist3d_VR_all = CreateHistograms(tree, VR + triggered + pt_eta, "hist3d_VR_all")
-    hist3d_VR_mistag = CreateHistograms(tree, VR + triggered + pt_eta + mistag, "hist3d_VR_mistag")
-    hist3d_SR_all = CreateHistograms(tree, SR + triggered + pt_eta, "hist3d_SR_all")
+    hist3d_CR_all = CreateHistograms(tree, CR + triggered + pt_eta + run_exclusion, "hist3d_CR_all")
+    hist3d_CR_mistag = CreateHistograms(tree, CR + triggered + pt_eta + run_exclusion + mistag, "hist3d_CR_mistag")
+    hist3d_VR_all = CreateHistograms(tree, VR + triggered + pt_eta + run_exclusion, "hist3d_VR_all")
+    hist3d_VR_mistag = CreateHistograms(tree, VR + triggered + pt_eta + run_exclusion + mistag, "hist3d_VR_mistag")
+    hist3d_SR_all = CreateHistograms(tree, SR + triggered + pt_eta + run_exclusion, "hist3d_SR_all")
 
     # jet 1 is triggered, jet 0 defines CR / VR
-    hist3d_CR_all_1 = CreateHistograms(tree, CR_0 + triggered_1 + pt_eta, "hist3d_CR_all_1")
-    hist3d_CR_mistag_1 = CreateHistograms(tree, CR_0 + triggered_1 + pt_eta + mistag_1, "hist3d_CR_mistag_1")
-    hist3d_VR_all_1 = CreateHistograms(tree, VR_0 + triggered_1 + pt_eta, "hist3d_VR_all_1")
-    hist3d_VR_mistag_1 = CreateHistograms(tree, VR_0 + triggered_1 + pt_eta + mistag_1, "hist3d_VR_mistag_1")
-    hist3d_SR_all_1 = CreateHistograms(tree, SR_0 + triggered_1 + pt_eta, "hist3d_SR_all_1")
+    hist3d_CR_all_1 = CreateHistograms(tree, CR_0 + triggered_1 + pt_eta + run_exclusion, "hist3d_CR_all_1")
+    hist3d_CR_mistag_1 = CreateHistograms(tree, CR_0 + triggered_1 + pt_eta + run_exclusion + mistag_1, "hist3d_CR_mistag_1")
+    hist3d_VR_all_1 = CreateHistograms(tree, VR_0 + triggered_1 + pt_eta + run_exclusion, "hist3d_VR_all_1")
+    hist3d_VR_mistag_1 = CreateHistograms(tree, VR_0 + triggered_1 + pt_eta + run_exclusion + mistag_1, "hist3d_VR_mistag_1")
+    hist3d_SR_all_1 = CreateHistograms(tree, SR_0 + triggered_1 + pt_eta + run_exclusion, "hist3d_SR_all_1")
     # OR the above options by adding together the two histograms
     hist3d_CR_all_combined = hist3d_CR_all.Clone("hist3d_CR_all_combined")
     hist3d_CR_all_combined.Add(hist3d_CR_all_1)
@@ -195,11 +205,11 @@ def MisTagParametrization(tree, option=""):
         ZW_pt_eta = GetCut("jet0_Pt",[40,1000]) + GetCut("jet0_Eta",[-1.26,1.26])  # only need first jet in HB
         WPlusJets = GetCut("Pass_WPlusJets", 1)
         ZPlusJets = GetCut("Pass_ZPlusJets", 1)
-        CR_all_list = [CreateHistograms(tree, WPlusJets + triggered + ZW_pt_eta, "hist3d_Wjet_all")]
-        CR_mistag_list = [CreateHistograms(tree, WPlusJets + triggered + ZW_pt_eta + mistag, "hist3d_Wjet_mistag")]
-        VR_all_list = [CreateHistograms(tree, ZPlusJets + triggered + ZW_pt_eta, "hist3d_Zjet_all")]
-        VR_mistag_list = [CreateHistograms(tree, ZPlusJets + triggered + ZW_pt_eta + mistag, "hist3d_Zjet_mistag")]
-        SR_all_list = [CreateHistograms(tree, triggered + ZW_pt_eta, "hist3d_Zjet_all_duplicate")] # placeholder
+        CR_all_list = [CreateHistograms(tree, WPlusJets + triggered + ZW_pt_eta + run_exclusion, "hist3d_Wjet_all")]
+        CR_mistag_list = [CreateHistograms(tree, WPlusJets + triggered + ZW_pt_eta + run_exclusion + mistag, "hist3d_Wjet_mistag")]
+        VR_all_list = [CreateHistograms(tree, ZPlusJets + triggered + ZW_pt_eta + run_exclusion, "hist3d_Zjet_all")]
+        VR_mistag_list = [CreateHistograms(tree, ZPlusJets + triggered + ZW_pt_eta + run_exclusion + mistag, "hist3d_Zjet_mistag")]
+        SR_all_list = [CreateHistograms(tree, triggered + ZW_pt_eta + run_exclusion, "hist3d_Zjet_all_duplicate")] # placeholder
         mistag_jet_list = ["leading"]
         comparison = "_Wjets_Zjets"  
 
@@ -680,6 +690,30 @@ def GetCut( branch_name, branch_sel):
 	return ROOT.TCut( selection + " " )
 
 # ------------------------------------------------------------------------------
+def ExcludedCut( branch_name, branch_sel ):
+
+    selection = ""
+
+    if type(branch_sel) is int:
+        selection = branch_name + " != " + str(branch_sel) 
+
+    elif type(branch_sel) is list:
+        if len(branch_sel) == 0:
+            print("WARNING <ExcludedCut> : Entry error (length = 0). No cut implemented")
+        elif len(branch_sel) == 1:
+            selection = branch_name + " != " + str(branch_sel[0])
+        else:
+            for exclude in branch_sel[:-1]:
+                selection += branch_name + " != " + str(exclude) + " && "
+            selection += branch_name + " != " + str(branch_sel[-1])
+
+    else: 
+        print("WARNING <ExcludedCut> : Type Error. No cut implemented")
+
+    if debug: print(selection + "  in Excluded Cut ")
+    return ROOT.TCut( selection + " " )
+
+# ------------------------------------------------------------------------------
 def PlotFromFile(filelist):
     return
     # # Create a canvas for plotting
@@ -741,7 +775,8 @@ def main():
     elif era == "2023 Cv3": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Cv3.root"]
     elif era == "2023 Cv4": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Cv4.root"]
     elif era == "2023 Dv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Dv1.root"]
-    elif era == "2023 Dv2": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Dv2.root"]
+    elif era == "2023 Dv2" and not CNN: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Dv2.root"]
+    elif era == "2023 Dv2" and CNN: infilepath_list = ["/afs/cern.ch/work/f/fsimpson/public/minituple_outputs/minituple_Run2023D-EXOLLPJetHCAL-PromptReco-v2_partial28k-v4-scores_added.root"]
     else: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Bv1.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Cv1.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Cv2.root",
@@ -777,11 +812,12 @@ def main():
         #MisTagParametrization(combined_tree_Zmu, "depth")
         #MisTagParametrization(combined_tree_Zmu, "timing")
         #MisTagParametrization(combined_tree_Zmu, "depth, timing")
-        #MisTagParametrization(combined_tree_Zmu, "depth, trackPt")
+        MisTagParametrization(combined_tree_Zmu, "depth, trackPt")
         # MisTagParametrization(combined_tree_Zmu, "before alignment")
         # MisTagParametrization(combined_tree_Zmu, "after alignment")
         # MisTagParametrization(combined_tree_Zmu, "before alignment, depth")
-        MisTagParametrization(combined_tree_Zmu, "after alignment, depth")
+        # MisTagParametrization(combined_tree_Zmu, "after alignment, depth")
+        # MisTagParametrization(combined_tree_Zmu, "after alignment, trackPt")
     else:
         print("Z+jets / W+jets tree is invalid!")
 
