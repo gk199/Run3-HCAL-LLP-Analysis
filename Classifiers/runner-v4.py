@@ -98,9 +98,14 @@ class DataProcessor:
 
         def depth(row):
             return row['Pass_DepthTagCand'] # returns 1 if this jet is a depth tag candidate (leading L1 LLP hwQual matched jet + kinematic requirements)
+            # return row['Pass_DepthTagCand'] and row['perJet_DepthTowers'] >= 2
+            # returns 1 if this jet is a depth tag candidate (leading L1 LLP hwQual matched jet + kinematic requirements)
             # TODO also need to add a requirement on the perJet_DepthTowers >= 2, but this is not in v3.13 minituples!! 
         def inclusive(row):
             return row['Pass_IncTagCand'] # returns 1 if this jet is a inclusive tag candidate (leading jet that is not a depth tag candidate + kinematic requirements)
+
+        def WPlusJets(row):
+            return row['Pass_WPlusJets']
 
         def select_safety(row):
             return (row['perJet_Pt'] > 40 and abs(row['perJet_Eta']) < 1.26 and 
@@ -117,13 +122,13 @@ class DataProcessor:
             0 <= row['jetIndex'] <= 1                           # only consider the leading or subleading jet
 
         def classify_background(row): 
-            if select_safety(row) and depth(row):
+            if select_safety(row) and WPlusJets(row) and depth(row):
                 return bkg_value # 2 or 1 
             else:
                 return -1
 
         def classify_bkg_inclusive(row): 
-            if select_safety(row) and inclusive(row):
+            if select_safety(row) and WPlusJets(row) and inclusive(row):
                 return bkg_value 
             else:
                 return -1
