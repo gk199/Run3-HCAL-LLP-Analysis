@@ -24,7 +24,7 @@ tf.random.set_seed(311)
 # CONSTANTS = pd.read_csv("norm_constants_v3.csv") # large negative values removed from mean / std dev computation 
 CONSTANTS = pd.read_csv("norm_constants_v3.csv")
 # CONSTANTS_INCLUSIVE = pd.read_csv("norm_constants_inclusive_v3.csv")
-
+      
 FEATURES = ['perJet_Eta', 'perJet_Mass', 
        'perJet_S_phiphi', 'perJet_S_etaeta', 'perJet_S_etaphi', 
        'perJet_Tracks_dR', 
@@ -53,7 +53,7 @@ class DataProcessor:
         # and returns the dataframe unchanged so filenames are the same
         print("Loading Data...")
         
-        filter_name = ["perJet_*", "Pass*"] # TODO need to change filter name to save booleans
+        filter_name = ["perJet_*", "Pass*", "jetIndex", "randomFloat"] 
         filepath = '/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/'
     
         sig_fps = [filepath + filename for filename in sig_files] if sig_files is not None else []
@@ -63,7 +63,7 @@ class DataProcessor:
         
         # aggregating all signal events
         for file in sig_fps:
-            sig = uproot.open(file)['PerJet_NoSel'] # TODO change tree to the boolean Pass_HLTDisplacedJet
+            sig = uproot.open(file)['PerJet_NoSel'] 
             print(f"Opened {file}")
             sig = sig.arrays(filter_name=filter_name, library="pd")
             sig_df.append(sig)
@@ -71,7 +71,7 @@ class DataProcessor:
         
         # aggregating all background events
         for file in bkg_fps:
-            bkg = uproot.open(file)['PerJet_NoSel'] # TODO change tree to the boolean Pass_WPlusJets
+            bkg = uproot.open(file)['PerJet_NoSel'] 
             print(f"Opened {file}")
             bkg = bkg.arrays(filter_name=filter_name, library="pd") 
             bkg_df.append(bkg)
@@ -85,7 +85,6 @@ class DataProcessor:
         sig_value = self.return_sig_value
         
         # applying selection to remove Null values/ maxed out values/ etc.
-        # TODO change this to use "Pass_DepthTagCand" or "Pass_InclTagCand", but still require L1 trig matched for the background
         def select_LLPjet(row):
             return row['perJet_isTruthMatched'] # returns 1 if this jet is matched to an LLP or decay product, 0 otherwise
         def select_L1jet(row):
@@ -96,13 +95,15 @@ class DataProcessor:
         def select_HCAL34(row):
             return 214.2 <= row['perJet_MatchedLLP_DecayR'] < 295 and abs(row['perJet_MatchedLLP_Eta']) < 1.26
 
+        # only consider events that pass the displaced jet HLT (Pass_HLTDisplacedJet) -- both the depth and inclusive tag canidates already require this
+        # use "Pass_DepthTagCand" or "Pass_InclTagCand", but still require L1 trig matched for the background
         def depth(row):
             return row['Pass_DepthTagCand'] # returns 1 if this jet is a depth tag candidate (leading L1 LLP hwQual matched jet + kinematic requirements)
             # return row['Pass_DepthTagCand'] and row['perJet_DepthTowers'] >= 2
             # returns 1 if this jet is a depth tag candidate (leading L1 LLP hwQual matched jet + kinematic requirements)
             # TODO also need to add a requirement on the perJet_DepthTowers >= 2, but this is not in v3.13 minituples!! 
         def inclusive(row):
-            return row['Pass_IncTagCand'] # returns 1 if this jet is a inclusive tag candidate (leading jet that is not a depth tag candidate + kinematic requirements)
+            return row['Pass_InclTagCand'] # returns 1 if this jet is a inclusive tag candidate (leading jet that is not a depth tag candidate + kinematic requirements)
 
         def WPlusJets(row):
             return row['Pass_WPlusJets']
@@ -118,8 +119,8 @@ class DataProcessor:
             0 <= row['perJet_Track0Pt'] < 900 and 
             0 <= row['perJet_Track0dR'] < 1 and 
             0 <= row['perJet_Track1Pt'] < 900 and 
-            0 <= row['perJet_Track1dR'] < 1) and
-            0 <= row['jetIndex'] <= 1                           # only consider the leading or subleading jet
+            0 <= row['perJet_Track1dR'] < 1 and
+            0 <= row['jetIndex'] <= 1)                           # only consider the leading or subleading jet
 
         def classify_background(row): 
             if select_safety(row) and WPlusJets(row) and depth(row):
@@ -170,45 +171,33 @@ class DataProcessor:
         print("-------------------Cumulative Data---------")
         print(self.cumulative_df.describe())
 
-
     def no_selections_concatenate(self):
         self.cumulative_df = pd.concat((self.sig_df, self.bkg_df))
         print("-------------------All Data // No Cuts applied---------")
         print(self.cumulative_df.describe())
-            
         
     def process_data(self):
-        
         print("Processing...")
-        features = ['perJet_Eta', 'perJet_Mass', 
-       'perJet_S_phiphi', 'perJet_S_etaeta', 'perJet_S_etaphi', 
-       'perJet_Tracks_dR', 
-       'perJet_Track0dR', 'perJet_Track0dEta', 'perJet_Track0dPhi',
-       'perJet_Track1dR', 'perJet_Track1dEta', 'perJet_Track1dPhi',
-       'perJet_Track2dR', 'perJet_Track2dEta', 'perJet_Track2dPhi',
-       'perJet_Frac_Track0Pt', 'perJet_Frac_Track1Pt', 'perJet_Frac_Track2Pt',
-       'perJet_EnergyFrac_Depth1', 'perJet_EnergyFrac_Depth2', 'perJet_EnergyFrac_Depth3', 'perJet_EnergyFrac_Depth4', 
-       'perJet_LeadingRechitD', 
-       'perJet_Frac_LeadingRechitE', 'perJet_Frac_SubLeadingRechitE', 'perJet_Frac_SSubLeadingRechitE', 
-       'perJet_AllRechitE', 
-       'perJet_NeutralHadEFrac', 'perJet_ChargedHadEFrac', 'perJet_PhoEFrac', 'perJet_EleEFrac', 'perJet_MuonEFrac']
-        
+
         labels = None 
         if not self.mode and self.sel:
             self.cumulative_df = self.cumulative_df.sample(frac=1, random_state=42).reset_index(drop=True) # shuffling
             labels = self.cumulative_df["classID"].values
         
-        data = self.cumulative_df[features]
+        randFloat = self.cumulative_df[['randomFloat']]
+        data = self.cumulative_df[FEATURES]
         normed_data = pd.DataFrame()
         for feature in data.columns:
             normed_data[feature] = (data[feature] - CONSTANTS[feature][0])/ CONSTANTS[feature][1]
             # if inclusive: normed_data[feature] = (data[feature] - CONSTANTS_INCLUSIVE[feature][0])/ CONSTANTS_INCLUSIVE[feature][1] 
         
         print(normed_data.describe())
+        print(randFloat.describe())
+        print(labels) # labels is 1 if signal and 0 if background
         
         print("Processing Complete")
         self.data = normed_data
-        return normed_data, labels
+        return normed_data, labels, randFloat
     
     def write_to_root(self, scores, filename, labels=None):
         filename = f"{filename}_scores.root"
@@ -244,6 +233,9 @@ class DataProcessor:
             constants_df.loc[useful_variable, 'Standard Deviation'] = std_value
         constants_df.T.to_csv("norm_constants_v4.csv")
        
+    #def get_random_float(self):
+    #    return self.
+
 class ModelHandler:
     def __init__(self, num_classes=3, num_layers=2, optimizer="adam", lr=0.00027848106048644665, model_name="dense_model_v4.keras"):
         # this function is passed num_classes = 2
@@ -271,7 +263,6 @@ class ModelHandler:
         for _ in range(self.num_layers):
             shortcut = x
             x = layers.Dense(64, activation="relu", kernel_initializer=GlorotUniform())(x)
-            #x = layers.BatchNormalization()(x)
             x = layers.Dropout(0.2)(x)
             x = layers.Dense(128, activation="relu", kernel_initializer=GlorotUniform())(x)
             x = layers.Dense(64, activation="relu", kernel_initializer=GlorotUniform())(x)
@@ -303,15 +294,14 @@ class ModelHandler:
         self.model.compile(optimizer=self.optimizer, loss="sparse_categorical_crossentropy")
                   
     def train(self, X_train, y_train, epochs=200, batch_size=512, val=0.2):
-        # self.build_resnet() # Residual neural network 
         self.build() # similar to runner-v2
         name="best_model_v4.keras"
         early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
         checkpoint = ModelCheckpoint(name, monitor='val_loss', save_best_only=True, save_weights_only=True)
-        # auc_epoch = [roc_callback(training_data=(x_train, y_train),validation_data=(x_test,y_test))]
-        # self.model.fit(X_train, y_train, epochs=epochs, batch_size=512, validation_split=val, verbose=1, callbacks = [early_stopping]) # this goes to 50 epochs
         history = self.model.fit(X_train, y_train, epochs=epochs, batch_size=512, validation_split=val, verbose=1, callbacks = [early_stopping, checkpoint])
         self.model.load_weights(name)
+        print("Total Train Samples: ", len(y_train))
+
 
         # plot loss and val_loss vs number of epochs 
         plt.figure()
@@ -434,7 +424,7 @@ class ModelHandler:
         mutual_info = mutual_info_regression(features, scores)
         mi_results = pd.Series(mutual_info, index=FEATURES)
         mi_results_sorted = mi_results.sort_values(ascending=False)
-        mi_results_sorted.to_csv("mutual_info.csv")
+        mi_results_sorted.to_csv("mutual_info_v4.csv")
         print("computed mutual information")
         
         
@@ -460,7 +450,7 @@ class Runner:
         
         #processor.load_data(self.sig_test, self.bkg_test)
         #X_test, y_test = processor.process_data()
-        X, y = self.processor.process_data() # no longer processing train and test samples separately
+        X, y, randFloat = self.processor.process_data() # no longer processing train and test samples separately
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         
         
@@ -484,7 +474,7 @@ class Runner:
             self.processor.load_data(self.sig, self.bkg)
         self.processor.apply_selections(inclusive=self.inclusive)
         
-        X_eval, y_eval = self.processor.process_data()
+        X_eval, y_eval, randFloat = self.processor.process_data()
         
         handler = ModelHandler(num_classes=self.num_classes, model_name=self.model_name)
         handler.load()
@@ -509,7 +499,7 @@ class Runner:
             self.processor.no_selections_concatenate()
             self.fname = self.bkg[0]
             
-        predicting_data, labels = self.processor.process_data()
+        predicting_data, labels, randFloat = self.processor.process_data()
         handler = ModelHandler(num_classes=self.num_classes, model_name=self.model_name)
         handler.load()
         preds = handler.predict(predicting_data, labels)
@@ -550,28 +540,11 @@ class Runner:
         
 def main():
     sig_files = [
-        "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_10_14_TRAIN.root",
-        #"minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_10_14_batch1.root",
-        #"minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_10_14_batch1.root",
-        #"minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_10_14_batch1.root",
-        #"minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_10_14_TRAIN.root",
-        ## "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TRAIN-batch1.root",
-        #"minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_10_14_TEST.root",
-        #"minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_10_14_batch2.root",
-        #"minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_10_14_batch2.root",
-        #"minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_10_14_batch2.root",
-        #"minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_10_14_TEST.root",
-        ## "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TEST-batch2.root"
+        "minituple_HToSSTo4B_MH250_MS120_CTau10000_partial15k.root"
     ]
     
     bkg_files = [
-        "minituple_v3.9_LLPskim_Run2023Bv1_2024_10_14.root",
-        #"minituple_v3.9_LLPskim_Run2023Cv1_2024_10_14.root",
-        #"minituple_v3.9_LLPskim_Run2023Cv2_2024_10_14.root",
-        #"minituple_v3.9_LLPskim_Run2023Cv3_2024_10_14.root",
-        #"minituple_v3.9_LLPskim_Run2023Cv4_2024_10_14.root",
-        #"minituple_v3.9_LLPskim_Run2023Dv1_2024_10_14.root",
-        #"minituple_v3.9_LLPskim_Run2023Dv2_2024_10_14.root"
+        "minituple_Run2023D-EXOLLPJetHCAL-PromptReco-v2_partial28k.root"
     ]
     
     mode = "train" # "train", "eval", "filewrite", "constants"
@@ -596,6 +569,5 @@ def main():
     #runner.set_load(load=False)
     #runner.run()
       
-
 if __name__ == "__main__":
     main()
