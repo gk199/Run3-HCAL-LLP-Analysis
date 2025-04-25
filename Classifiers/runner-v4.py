@@ -38,6 +38,8 @@ FEATURES = ['perJet_Eta', 'perJet_Mass',
        'perJet_AllRechitE', 
        'perJet_NeutralHadEFrac', 'perJet_ChargedHadEFrac', 'perJet_PhoEFrac', 'perJet_EleEFrac', 'perJet_MuonEFrac']
 
+debug_mode = False
+
 class DataProcessor:
     def __init__(self, num_classes=2, mode=None, sel=True): # counting from 0
         # this function is passed num_classes - 1 = 1. value_bkg = 1, sig_value = 0
@@ -46,7 +48,6 @@ class DataProcessor:
         self.num_classes = num_classes
         self.mode = mode
         self.sel = sel
-        #self.inclusive = inclusive
     
     def load_data(self, sig_files=None, bkg_files=None):
         # need a mode that doesn't pre-classify them but just loads the data and then you can get it to predict
@@ -168,13 +169,15 @@ class DataProcessor:
             bkg_df = bkg_df[bkg_df["classID"] != -1].reset_index(drop=True) # removing junk
             
         self.cumulative_df = pd.concat((sig_df, bkg_df))
-        print("-------------------Cumulative Data---------")
-        print(self.cumulative_df.describe())
+        if debug_mode:
+            print("-------------------Cumulative Data---------")
+            print(self.cumulative_df.describe())
 
     def no_selections_concatenate(self):
         self.cumulative_df = pd.concat((self.sig_df, self.bkg_df))
-        print("-------------------All Data // No Cuts applied---------")
-        print(self.cumulative_df.describe())
+        if debug_mode:
+            print("-------------------All Data -- No Cuts applied---------")
+            print(self.cumulative_df.describe())
         
     def process_data(self):
         print("Processing...")
@@ -191,10 +194,11 @@ class DataProcessor:
             normed_data[feature] = (data[feature] - CONSTANTS[feature][0])/ CONSTANTS[feature][1]
             # if inclusive: normed_data[feature] = (data[feature] - CONSTANTS_INCLUSIVE[feature][0])/ CONSTANTS_INCLUSIVE[feature][1] 
         
-        print(normed_data.describe())
-        print(randFloat.describe())
-        print(labels) # labels is 1 if signal and 0 if background
-        
+        if debug_mode:
+            print(normed_data.describe())
+            print(randFloat.describe())
+            print(labels) # labels is 1 if signal and 0 if background
+
         print("Processing Complete")
         self.data = normed_data
         return normed_data, labels, randFloat
@@ -232,9 +236,6 @@ class DataProcessor:
             constants_df.loc[useful_variable, 'Mean'] = mean_value
             constants_df.loc[useful_variable, 'Standard Deviation'] = std_value
         constants_df.T.to_csv("norm_constants_v4.csv")
-       
-    #def get_random_float(self):
-    #    return self.
 
 class ModelHandler:
     def __init__(self, num_classes=3, num_layers=2, optimizer="adam", lr=0.00027848106048644665, model_name="dense_model_v4.keras"):
@@ -277,6 +278,7 @@ class ModelHandler:
         
         #self.model = model
         self.model.compile(optimizer=self.optimizer, loss="sparse_categorical_crossentropy")
+        print("Model summary:")
         print(self.model.summary())
 
     def build(self):                 
@@ -300,8 +302,7 @@ class ModelHandler:
         checkpoint = ModelCheckpoint(name, monitor='val_loss', save_best_only=True, save_weights_only=True)
         history = self.model.fit(X_train, y_train, epochs=epochs, batch_size=512, validation_split=val, verbose=1, callbacks = [early_stopping, checkpoint])
         self.model.load_weights(name)
-        print("Total Train Samples: ", len(y_train))
-
+        if debug_mode: print("Total Train Samples: ", len(y_train))
 
         # plot loss and val_loss vs number of epochs 
         plt.figure()
@@ -353,7 +354,7 @@ class ModelHandler:
 
             # Write all rows at once
             writer.writerows(roc_data)
-            print("wrote to file")
+            print("Wrote ROC data to file")
         
     def one_vs_one_roc(self):
         fig, ax = plt.subplots()
@@ -425,7 +426,7 @@ class ModelHandler:
         mi_results = pd.Series(mutual_info, index=FEATURES)
         mi_results_sorted = mi_results.sort_values(ascending=False)
         mi_results_sorted.to_csv("mutual_info_v4.csv")
-        print("computed mutual information")
+        print("Computed mutual information")
         
         
 class Runner:
@@ -446,14 +447,33 @@ class Runner:
             self.processor = DataProcessor(num_classes=self.num_classes - 1)
             self.processor.load_data(self.sig, self.bkg)
         self.processor.apply_selections(inclusive=self.inclusive)
-        #X_train, y_train = processor.process_data()
-        
-        #processor.load_data(self.sig_test, self.bkg_test)
-        #X_test, y_test = processor.process_data()
+
         X, y, randFloat = self.processor.process_data() # no longer processing train and test samples separately
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        randFloat_values = randFloat["randomFloat"].values # floats between 0 and 1
+        train_mask = randFloat_values < 0.6
+        test_mask = ~train_mask  # or randFloat_values >= 0.6
+
+        X_train, y_train = X[train_mask], y[train_mask]
+        X_test, y_test = X[test_mask], y[test_mask]
+
+        if debug_mode:
+            print("Test and train masks based on the random float")
+            print(type(X), type(y), type(randFloat)) # X is a Pandas DataFrame (features), y is a numpy array (labels), randFloat is a Pandas DataFrame
+            print(randFloat)
+            print(randFloat_values)
+            print(train_mask)
+            print(test_mask)
+
+            print("Data and labels (signal or background) before train / test split")
+            print(X)
+            print(y)
+            print(X_train)
+            print(X_test)
         
-        
+        print("Total length of data (signal + background) = " + str(len(y)))
+        print("Total length of training data (signal + background) = " + str(len(y_train)))
+        print("Total length of testing data (signal + background) = " + str(len(y_test)))
+
         handler = ModelHandler(num_classes=self.num_classes, model_name=self.model_name)
         handler.train(X_train, y_train) # calls build()
         y_test, scores = handler.test(X_test, y_test)
@@ -513,7 +533,6 @@ class Runner:
         self.processor.apply_selections(inclusive=self.inclusive)
         self.processor.compute_norm_constants()
         print("Constants updated")
-        
         
     def run(self):
         if self.mode == "train":
