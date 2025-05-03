@@ -809,7 +809,7 @@ public :
    virtual void   ResetGlobalEventVars();
    virtual bool   PassL1SingleLLPJet();
    virtual bool   PassHLTDisplacedJet();
-   virtual bool   PassEventPreselection( bool passedHLT = false );
+   virtual bool   PassEventPreselection( bool PassedHLT = false, bool PassedWPlusJets = true );
    virtual bool   PassWPlusJetsSelection();
    virtual bool   PassLeptonVeto();
    virtual bool   PassZmumuSelection();
