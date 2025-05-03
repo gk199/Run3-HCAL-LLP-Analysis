@@ -74,7 +74,7 @@ bool DisplacedHcalJetAnalyzer::PassHLTDisplacedJet(){
 }
 
 /* ====================================================================================================================== */
-bool DisplacedHcalJetAnalyzer::PassEventPreselection( bool PassedHLT ){
+bool DisplacedHcalJetAnalyzer::PassEventPreselection( bool PassedHLT, bool PassedWPlusJets ){
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::PassEventPreselection()"<<endl;
 
@@ -86,6 +86,12 @@ bool DisplacedHcalJetAnalyzer::PassEventPreselection( bool PassedHLT ){
 
 	if( !PassedHLT ){  // check again if already false
 		if( !PassHLTDisplacedJet() ) return false;
+	}
+
+	// Veto on W Plus Jets //
+
+	if( PassedWPlusJets ){ // Default is true
+		if( PassWPlusJetsSelection() ) return false;
 	}
 
 	// Depth Tag Jet //
@@ -110,6 +116,9 @@ bool DisplacedHcalJetAnalyzer::PassEventPreselection( bool PassedHLT ){
 
 		// Reject if fails HW qual 
 		if( dR > 0.4 || L1trig < 1 ) continue;
+
+		// Require 2+ depth towers
+		if( GetDepthTowers_Jet(i, 0.4) < 2 ) continue;
 		
 		depthtag_jet_candidate = i;
 

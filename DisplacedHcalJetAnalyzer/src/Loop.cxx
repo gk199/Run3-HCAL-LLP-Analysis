@@ -23,10 +23,11 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 	map<string, bool> Pass_EventSelections = {};
 	Pass_EventSelections["Pass_L1SingleLLPJet"]  = PassL1SingleLLPJet();
 	Pass_EventSelections["Pass_HLTDisplacedJet"] = PassHLTDisplacedJet();
-	Pass_EventSelections["Pass_PreSel"]          = PassEventPreselection( Pass_EventSelections["Pass_HLTDisplacedJet"] );
 	Pass_EventSelections["Pass_WPlusJets"]       = PassWPlusJetsSelection();
 	Pass_EventSelections["Pass_ZPlusJets"]       = PassZmumuSelection();	
 	Pass_EventSelections["Pass_NoLepton"]        = PassLeptonVeto();
+
+	Pass_EventSelections["Pass_PreSel"]          = PassEventPreselection( Pass_EventSelections["Pass_HLTDisplacedJet"], Pass_EventSelections["Pass_WPlusJets"] );
 
 	if( Pass_EventSelections["Pass_ZPlusJets"] ) Pass_EventSelections["Pass_WPlusJets"] = false;
 
