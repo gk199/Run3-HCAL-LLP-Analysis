@@ -30,7 +30,6 @@ class DataProcessor:
         self.mode = mode
         self.tree = tree
         self.sel = sel
-        #self.inclusive = inclusive
     
     def load_data(self, input_files=None, filepath=None):
         
@@ -39,23 +38,19 @@ class DataProcessor:
         print("Loading Data...")
         
         filter_name = "*"
-        # filepath = '/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.9/'
-        # filepath = '/eos/user/g/gkopp/LLP_Analysis/output_minituples_v3.9_Zmu_2023Cv2_2024_10_14/'
-    
+
         fps = [filepath + input_files] if input_files is not None else []
         df = [] #pd.DataFrame()
         
         # aggregating all signal events
         for file in fps:
             sig = uproot.open(file)[self.tree]
-            # TODO: modify this so branches are not hardcoded in, iterate over possible branches, maybe in another python script determine what trees exist
             print(f"Opened {file}")
             print(f"Evaluating on tree: {self.tree}")
-            sig = sig.arrays(filter_name=filter_name, library="pd") # "ak"
+            sig = sig.arrays(filter_name=filter_name, library="pd") 
             df.append(sig)
         self.df = pd.concat(df) if df else pd.DataFrame()
         
-        # doesn't make it to this printout with NoSel -- issue is above here
         print("Loaded Data")
         
     def no_selections_concatenate(self):
@@ -69,15 +64,12 @@ class DataProcessor:
         features = ['perJet_Eta', 'perJet_Mass', 
        'perJet_S_phiphi', 'perJet_S_etaeta', 'perJet_S_etaphi', 
        'perJet_Tracks_dR', 
-       # 'perJet_E', 'perJet_Pt', # remove when have fractional pT and E variables implemented! 
-       'perJet_Track0dR', 'perJet_Track0dEta', 'perJet_Track0dPhi', # ideally track pT would be track pT / jet pT
+       'perJet_Track0dR', 'perJet_Track0dEta', 'perJet_Track0dPhi', 
        'perJet_Track1dR', 'perJet_Track1dEta', 'perJet_Track1dPhi',
        'perJet_Track2dR', 'perJet_Track2dEta', 'perJet_Track2dPhi',
-       # 'perJet_Track0Pt', 'perJet_Track1Pt', 'perJet_Track2Pt',  
        'perJet_Frac_Track0Pt', 'perJet_Frac_Track1Pt', 'perJet_Frac_Track2Pt',
        'perJet_EnergyFrac_Depth1', 'perJet_EnergyFrac_Depth2', 'perJet_EnergyFrac_Depth3', 'perJet_EnergyFrac_Depth4', 
        'perJet_LeadingRechitD', 
-       # 'perJet_LeadingRechitE', 'perJet_SubLeadingRechitE', 'perJet_SSubLeadingRechitE', # ideally rechit E would be rechit E / jet E
        'perJet_Frac_LeadingRechitE', 'perJet_Frac_SubLeadingRechitE', 'perJet_Frac_SSubLeadingRechitE', 
        'perJet_AllRechitE', 
        'perJet_NeutralHadEFrac', 'perJet_ChargedHadEFrac', 'perJet_PhoEFrac', 'perJet_EleEFrac', 'perJet_MuonEFrac']
@@ -100,6 +92,7 @@ class DataProcessor:
             data = self.cumulative_df[new_features]
             print(data.describe())
             jet_valid = self.cumulative_df["jet"+str(jet)+"_E"].values
+            jet_trained_on = self.cumulative_df
             # in data, would like to rename jetX to perJet to work with the input files
             if not perJet: data = data.rename(columns=feature_dictionary)
 
@@ -118,7 +111,7 @@ class DataProcessor:
             all_labels.append(labels)
             all_jet_valid.append(jet_valid)
         
-        # return normed data, labels,and a list of rows are ok (energy is positive) and which are not (energy is -9999.9)
+        # return normed data, labels, and a list of rows are ok (energy is positive) and which are not (energy is -9999.9)
         return all_normed_data, all_labels, all_jet_valid
     
     def default_variables(self, jet_index = 0):
@@ -161,11 +154,10 @@ class DataProcessor:
                 f[self.tree] = {key: dataframe[key] for key in dataframe.columns}
                 
         print(f"Wrote to ROOT file: {filename}")
-        f.close()
-            
+        f.close()            
         
 class ModelHandler:
-    def __init__(self, num_classes=3, num_layers=3, optimizer="adam", lr=0.00027848106048644665, model_name="dense_model_v3.keras"):
+    def __init__(self, num_classes=3, num_layers=3, optimizer="adam", lr=0.00027848106048644665, model_name="dense_model_v4.keras"):
         
         self.num_classes = num_classes
         self.num_layers = num_layers
@@ -226,19 +218,19 @@ class Runner:
         self.sig = input_files
         self.path = filepath
         self.tree = tree
-        self.model_name = "dense_model_v3.keras"
+        self.model_name = "dense_model_v4.keras"
     
     def evaluate_scores(self): # this code used to be in run_file_evaluation -- still testing
         print("Determining Scores")
         predicting_data, labels, jet_valid = self.processor.process_data()
         # depth
         # handler = ModelHandler(num_classes=self.num_classes, model_name=self.model_name)
-        handler = ModelHandler(num_classes=self.num_classes, model_name="depth_model_v3_Oct15.keras")
+        handler = ModelHandler(num_classes=self.num_classes, model_name="depth_model_v4.keras")
         print("Loading the depth model")
         handler.load()
         preds = [ handler.predict(predicting_data[i], labels[i]) for i in range(num_jets) ]
         # inclusive
-        handler_inc = ModelHandler(num_classes=self.num_classes, model_name="inclusive_model_v3_Oct15.keras")
+        handler_inc = ModelHandler(num_classes=self.num_classes, model_name="inclusive_model_v4.keras")
         print("Loading the inclusive model")
         handler_inc.load()
         preds_inc = [ handler_inc.predict(predicting_data[i], labels[i]) for i in range(num_jets) ]
@@ -282,13 +274,11 @@ class Runner:
     def set_load(self,load=True):
         self.load = load
     
-    def set_model_name(self, model_name="dense_model_v3.keras"):
+    def set_model_name(self, model_name="dense_model_v4.keras"):
         self.model_name = model_name
         
         
 def main():
-    # TODO: pass file as an argument, and then determine if signal or background
-
     input_files = "test.root"
     filepath = "./"
     if len(sys.argv) > 1:
@@ -296,48 +286,11 @@ def main():
     if len(sys.argv) > 2:
         filepath    = sys.argv[2]
 
-    #input_files = [
-        # "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_10_14_TRAIN.root", # no passed HLT tree 
-        #"minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_10_14_batch1.root",
-        #"minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_10_14_batch1.root",
-        #"minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_10_14_batch1.root",
-        #"minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_10_14_TRAIN.root",
-        # # "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TRAIN-batch1.root",
-        # "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_10_14_TEST.root", # no passed HLT tree 
-        #"minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_10_14_batch2.root",
-        # "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-250_MS-120_CTau10000_13p6TeV_2024_10_14_batch2.root",
-        #"minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-160_CTau10000_13p6TeV_2024_10_14_batch2.root",
-        #"minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_10_14_TEST.root",
-        # # "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-HADD_TEST-batch2.root",
-        #"minituple_v3.9_LLPskim_Run2023Bv1_2024_10_14.root",
-        #"minituple_v3.9_LLPskim_Run2023Cv1_2024_10_14.root",
-        #"minituple_v3.9_LLPskim_Run2023Cv2_2024_10_14.root",
-        #"minituple_v3.9_LLPskim_Run2023Cv3_2024_10_14.root",
-        #"minituple_v3.9_LLPskim_Run2023Cv4_2024_10_14.root",
-        #"minituple_v3.9_LLPskim_Run2023Dv1_2024_10_14.root",
-        #"minituple_v3.9_LLPskim_Run2023Dv2_2024_10_14.root",
-        #"minituple_v3.9_Zmu_Run2023Bv1_2024_10_14.root",
-        #"minituple_v3.9_Zmu_Run2023Cv1_2024_10_14.root",
-        #"minituple_v3.9_Zmu_Run2023Cv2_2024_10_14.root",
-        #"minituple_v3.9_Zmu_Run2023Cv3_2024_10_14.root",
-        #"minituple_v3.9_Zmu_Run2023Cv4_2024_10_24.root",
-        #"minituple_v3.9_Zmu_Run2023Dv1_2024_10_14.root",
-        #"minituple_v3.9_Zmu_Run2023Dv2_2024_10_14.root"
-    #    "minituple_job1_0_output_1-31.root"
-    #]
-
     mode = "filewrite" # "eval", "filewrite"
 
     trees_to_iterate = ["NoSel"]
-    # trees_to_iterate = ["NoSel", "PassedHLT", "WPlusJets", "Zmumu"] # all event based trees 
-    # trees_to_iterate = ["Zmumu", "WPlusJets"] # for Zmu skim only 
-    # trees_to_iterate = ["NoSel", "PassedHLT"] # for LLP MC 
     
-    # pass runner each signal file (as a list, using list slicing), and then each background file, such that scores are appended to each
     print("Running Depth and Inclusive Tagger over each file")
-    #filename = f"{input_files[:-5]}_scores.root" # remove .root from initial filename
-    #uproot.recreate(filename)
-    # TODO: loop over trees_to_iterate
     print("Infile = " + input_files)
     for tree_selected in trees_to_iterate:
 

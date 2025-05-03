@@ -40,7 +40,7 @@ def parseArgs():
 
 	parser.add_argument("-i", "--input_file", action="store", help="Input text file containing ROOT inputs", required=True)
 	parser.add_argument("-o", "--output_dir", action="store", default="./", help="Output directory path")
-	parser.add_argument("-b", "--bdt_zipfile",  action="store", default="./BDTWeightFiles.zip", help="Path to directory containing bdt files")
+	# parser.add_argument("-b", "--bdt_zipfile",  action="store", default="./BDTWeightFiles.zip", help="Path to directory containing bdt files")
 	# zip -r BDTWeightFiles.zip BDTWeightFiles
 	parser.add_argument("-p", "--proxy",      action="store", help="Proxy path: generate via `voms-proxy-init -voms cms` and copy file from /tmp/ area", required=True) # TODO
 	parser.add_argument("-s", "--setup_only", action="store_true", help="Setup jobs only") 
@@ -63,7 +63,7 @@ def main():
 
 	input_file 	= args.input_file
 	output_dir 	= args.output_dir + "_" + datetime_now
-	bdt_zipfile = os.path.abspath( args.bdt_zipfile )
+	# bdt_zipfile = os.path.abspath( args.bdt_zipfile )
 	proxy 		= os.path.abspath( args.proxy )
 	setup_only 	= args.setup_only
 	test 		= args.test
@@ -110,13 +110,13 @@ def main():
 
 	# ----- BDT Weight Files ----- #
 
-	os.system( "ln -s " + bdt_zipfile + " BDTWeightFiles.zip" )
-	bdt_zipfile_new = os.path.abspath( "BDTWeightFiles.zip" )
+	#os.system( "ln -s " + bdt_zipfile + " BDTWeightFiles.zip" )
+	#bdt_zipfile_new = os.path.abspath( "BDTWeightFiles.zip" )
 	add_scores = os.path.abspath( "../../../Classifiers/ScoresToEventBased-v3.py" )
 	keras_depth = os.path.abspath( "../../../Classifiers/depth_model_v3_Oct15.keras" )
 	keras_inclusive = os.path.abspath( "../../../Classifiers/inclusive_model_v3_Oct15.keras" )
 	norm_constants = os.path.abspath( "../../../Classifiers/norm_constants_v3.csv" )
-	transfer_input_files = Executable_DisplacedHcalJetAnalyzer + "," + bdt_zipfile_new + "," + add_scores + "," + keras_depth + "," + keras_inclusive + "," + norm_constants
+	transfer_input_files = Executable_DisplacedHcalJetAnalyzer + "," + add_scores + "," + keras_depth + "," + keras_inclusive + "," + norm_constants
 
 	# ----- Submit Jobs ----- #
 

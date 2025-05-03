@@ -249,6 +249,23 @@ Updates:
 Updates:
 * Depth and timing tower emulation added, with nominal energy thresholds (4 GeV timing, 1 GeV and 5 GeV depth)
 
+### v3.12
+Updates:
+* Added randomFloat output branch (0-1) for training / testinig splits
+* Jet eta requirement moved from 1.26 to 2.4 (tightened in v3.13)
+* Save up to 4 jets (instead of 6)
+* Add HCAL rechits to PerJet trees
+* Different output trees are replaced with boolean branches (NoSel and PerJet_NoSel are the only trees saved)
+* PassEventPreselection added to EventHelper.cxx, and define depth and inclusive canidate 
+
+### v3.13
+Updates:
+* Major: Z+jets selection fixed (had a bug), expanded mass range selection to 81-101 GeV, and required muon pair has opposite charge
+* Z+jets and W+jets are explicitly orthogonal
+* Global variables are initalized consistently 
+* Eta cut on inclusive tag canidate is set to 2.0
+* Changes needed for adding CNN scores to event trees
+
 ## V4
 Ongoing wish list:
 * MET filters

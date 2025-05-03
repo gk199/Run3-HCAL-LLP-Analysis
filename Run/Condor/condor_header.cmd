@@ -9,8 +9,8 @@ request_gpus            = 1
 # Espresso: batch 1, microcentury: batch 2, longlunch: displaced jet LLP dataset, workday: 2023Bv1
 # +JobFlavour = "espresso" 
 # +JobFlavour = "microcentury"
-# +JobFlavour = "longlunch"
-+JobFlavour = "workday"
++JobFlavour = "longlunch"
+# +JobFlavour = "workday"
 
 # Output
 log                     = job$(Process).local.log

@@ -321,6 +321,8 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 
 	myvars_float.push_back("perJet_Tracks_dR");
 
+	myvars_int.push_back(Form("perJet_DepthTowers") );
+
 	for (int t=0; t<3; t++) {
 		myvars_float.push_back( Form("perJet_Track%dPt", t) );
 		myvars_float.push_back( Form("perJet_Frac_Track%dPt", t) );
@@ -805,7 +807,9 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	jet_tree_output_vars_float["perJet_Frac_SSubLeadingRechitE"]= energeticRechits[2].first / jet_E->at(jetIndex);
 	jet_tree_output_vars_float["perJet_AllRechitE"] 			= energeticRechits[3].first;
 	jet_tree_output_vars_int["perJet_LeadingRechitD"] 			= energeticRechits[0].second;
-	
+
+	jet_tree_output_vars_int["perJet_DepthTowers"]				= GetDepthTowers_Jet(jetIndex, 0.4);
+
 	// find three highest pT tracks matched to a jet, and save the generalTrack index for use later (in dzToPV and dzyToBS)
 	vector<uint> jet_track_index = jet_TrackIndices->at(jetIndex);
 	vector<pair<float, float>> track_pt_index = TrackMatcher(jetIndex, jet_track_index);

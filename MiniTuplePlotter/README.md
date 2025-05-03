@@ -23,3 +23,11 @@ root -q -b -l MiniTuplePlotterExample.C
 
 * Better cut names in the legend
 * Different debug levels
+
+# Additional Scripts
+
+## Phase Scan Triggers
+```
+python3 PhaseScanEnergyInvestigations.py
+```
+Evaluate the multiplicity of HCAL rechits > 4 GeV vs jet pT or event HT. The rechits in the minituples (v3.13 and above) are saved within dR < 0.4 of a L1 LLP flagged L1 jet, so there is some bias due to this (these jets will have 2+ rechits as they are triggered, and we are not evaluating rechits for jets that don't pass the trigger or rechits not affiliated with a jet). 
