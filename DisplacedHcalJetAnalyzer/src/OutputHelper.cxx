@@ -86,6 +86,11 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_int.push_back( Form("jet%d_EleMult", i) );
 		myvars_int.push_back( Form("jet%d_MuonMult", i) );
 
+		myvars_float.push_back( Form("jet%d_DeepCSV_prob_b", i) );
+		myvars_float.push_back( Form("jet%d_DeepCSV_prob_c", i) );
+		myvars_float.push_back( Form("jet%d_DeepCSV_prob_bb", i) );
+		myvars_float.push_back( Form("jet%d_DeepCSV_prob_udsg", i) );
+
 		myvars_float.push_back( Form("jet%d_PtAllTracks", i) );
 		myvars_float.push_back( Form("jet%d_PtAllPVTracks", i) );
 		myvars_int.push_back( Form("jet%d_NVertexTracks", i) );
@@ -224,6 +229,36 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 
 	for( auto lt_rw: list_lifetime_rw_str ) 
 		myvars_float.push_back( Form("weight_ctau_%s", lt_rw.c_str()) );
+
+	// Flags
+	myvars_bool.push_back("Flag_HBHENoiseFilter");
+	myvars_bool.push_back("Flag_HBHENoiseIsoFilter");
+	myvars_bool.push_back("Flag_CSCTightHaloFilter");
+	myvars_bool.push_back("Flag_CSCTightHaloTrkMuUnvetoFilter");
+	myvars_bool.push_back("Flag_CSCTightHalo2015Filter");
+	myvars_bool.push_back("Flag_globalTightHalo2016Filter");
+	myvars_bool.push_back("Flag_globalSuperTightHalo2016Filter");
+	myvars_bool.push_back("Flag_HcalStripHaloFilter");
+	myvars_bool.push_back("Flag_hcalLaserEventFilter");
+	myvars_bool.push_back("Flag_EcalDeadCellTriggerPrimitiveFilter");
+	myvars_bool.push_back("Flag_EcalDeadCellBoundaryEnergyFilter");
+	myvars_bool.push_back("Flag_ecalBadCalibFilter");
+	myvars_bool.push_back("Flag_goodVertices");
+	myvars_bool.push_back("Flag_eeBadScFilter");
+	myvars_bool.push_back("Flag_ecalLaserCorrFilter");
+	myvars_bool.push_back("Flag_trkPOGFilters");
+	myvars_bool.push_back("Flag_chargedHadronTrackResolutionFilter");
+	myvars_bool.push_back("Flag_muonBadTrackFilter");
+	myvars_bool.push_back("Flag_BadChargedCandidateFilter");
+	myvars_bool.push_back("Flag_BadPFMuonFilter");
+	myvars_bool.push_back("Flag_BadPFMuonDzFilter");
+	myvars_bool.push_back("Flag_hfNoisyHitsFilter");
+	myvars_bool.push_back("Flag_BadChargedCandidateSummer16Filter");
+	myvars_bool.push_back("Flag_BadPFMuonSummer16Filter");
+	myvars_bool.push_back("Flag_trkPOG_manystripclus53X");
+	myvars_bool.push_back("Flag_trkPOG_toomanystripclus53X");
+	myvars_bool.push_back("Flag_trkPOG_logErrorTooManyClusters");
+	myvars_bool.push_back("Flag_METFilters_2022_2023_PromptReco");
 
 	cout<<"Creating new trees for the following:"<<endl;
 	if( treenames.size() == 0 ) cout<<"WARNING: No treenames specified!"<<endl;
@@ -451,6 +486,35 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 		tree_output_vars_bool[HLT_Names[i]] = HLT_Decision->at(i);
 	}
 
+	tree_output_vars_bool["Flag_HBHENoiseFilter"] = Flag_HBHENoiseFilter;
+	tree_output_vars_bool["Flag_HBHENoiseIsoFilter"] = Flag_HBHENoiseIsoFilter;
+	tree_output_vars_bool["Flag_CSCTightHaloFilter"] = Flag_CSCTightHaloFilter;
+	tree_output_vars_bool["Flag_CSCTightHaloTrkMuUnvetoFilter"] = Flag_CSCTightHaloTrkMuUnvetoFilter;
+	tree_output_vars_bool["Flag_CSCTightHalo2015Filter"] = Flag_CSCTightHalo2015Filter;
+	tree_output_vars_bool["Flag_globalTightHalo2016Filter"] = Flag_globalTightHalo2016Filter;
+	tree_output_vars_bool["Flag_globalSuperTightHalo2016Filter"] = Flag_globalSuperTightHalo2016Filter;
+	tree_output_vars_bool["Flag_HcalStripHaloFilter"] = Flag_HcalStripHaloFilter;
+	tree_output_vars_bool["Flag_hcalLaserEventFilter"] = Flag_hcalLaserEventFilter;
+	tree_output_vars_bool["Flag_EcalDeadCellTriggerPrimitiveFilter"] = Flag_EcalDeadCellTriggerPrimitiveFilter;
+	tree_output_vars_bool["Flag_EcalDeadCellBoundaryEnergyFilter"] = Flag_EcalDeadCellBoundaryEnergyFilter;
+	tree_output_vars_bool["Flag_ecalBadCalibFilter"] = Flag_ecalBadCalibFilter;
+	tree_output_vars_bool["Flag_goodVertices"] = Flag_goodVertices;
+	tree_output_vars_bool["Flag_eeBadScFilter"] = Flag_eeBadScFilter;
+	tree_output_vars_bool["Flag_ecalLaserCorrFilter"] = Flag_ecalLaserCorrFilter;
+	tree_output_vars_bool["Flag_trkPOGFilters"] = Flag_trkPOGFilters;
+	tree_output_vars_bool["Flag_chargedHadronTrackResolutionFilter"] = Flag_chargedHadronTrackResolutionFilter;
+	tree_output_vars_bool["Flag_muonBadTrackFilter"] = Flag_muonBadTrackFilter;
+	tree_output_vars_bool["Flag_BadChargedCandidateFilter"] = Flag_BadChargedCandidateFilter;
+	tree_output_vars_bool["Flag_BadPFMuonFilter"] = Flag_BadPFMuonFilter;
+	tree_output_vars_bool["Flag_BadPFMuonDzFilter"] = Flag_BadPFMuonDzFilter;
+	tree_output_vars_bool["Flag_hfNoisyHitsFilter"] = Flag_hfNoisyHitsFilter;
+	tree_output_vars_bool["Flag_BadChargedCandidateSummer16Filter"] = Flag_BadChargedCandidateSummer16Filter;
+	tree_output_vars_bool["Flag_BadPFMuonSummer16Filter"] = Flag_BadPFMuonSummer16Filter;
+	tree_output_vars_bool["Flag_trkPOG_manystripclus53X"] = Flag_trkPOG_manystripclus53X;
+	tree_output_vars_bool["Flag_trkPOG_toomanystripclus53X"] = Flag_trkPOG_toomanystripclus53X;
+	tree_output_vars_bool["Flag_trkPOG_logErrorTooManyClusters"] = Flag_trkPOG_logErrorTooManyClusters;
+	tree_output_vars_bool["Flag_METFilters_2022_2023_PromptReco"] = Flag_METFilters_2022_2023_PromptReco;
+
 	tree_output_vars_int["RechitN_1GeV"] = 0; 
 	tree_output_vars_int["RechitN_5GeV"] = 0; 
 	tree_output_vars_int["RechitN_10GeV"] = 0; 
@@ -507,6 +571,11 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 		tree_output_vars_int[Form("jet%d_PhoMult", valid_jet)] 					= jet_PhoMult->at(i);
 		tree_output_vars_int[Form("jet%d_EleMult", valid_jet)] 					= jet_EleMult->at(i);
 		tree_output_vars_int[Form("jet%d_MuonMult", valid_jet)] 				= jet_MuonMult->at(i);
+
+		tree_output_vars_float[Form("jet%d_DeepCSV_prob_b", valid_jet)] 		= jet_DeepCSV_prob_b->at(i);
+		tree_output_vars_float[Form("jet%d_DeepCSV_prob_c", valid_jet)] 		= jet_DeepCSV_prob_c->at(i);
+		tree_output_vars_float[Form("jet%d_DeepCSV_prob_bb", valid_jet)] 		= jet_DeepCSV_prob_bb->at(i);
+		tree_output_vars_float[Form("jet%d_DeepCSV_prob_udsg", valid_jet)] 		= jet_DeepCSV_prob_udsg->at(i);
 
 		tree_output_vars_float[Form("jet%d_PtAllTracks", valid_jet)] 			= jet_PtAllTracks->at(i);
 		tree_output_vars_float[Form("jet%d_PtAllPVTracks", valid_jet)] 			= jet_PtAllPVTracks->at(i);
