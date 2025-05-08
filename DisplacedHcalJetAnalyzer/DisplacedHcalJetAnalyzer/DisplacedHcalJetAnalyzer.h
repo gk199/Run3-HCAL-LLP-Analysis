@@ -252,6 +252,10 @@ public :
    vector<int>     *jet_PhoMult;
    vector<int>     *jet_EleMult;
    vector<int>     *jet_MuonMult;
+   vector<float>   *jet_DeepCSV_prob_b;
+   vector<float>   *jet_DeepCSV_prob_c;
+   vector<float>   *jet_DeepCSV_prob_bb;
+   vector<float>   *jet_DeepCSV_prob_udsg;
    vector<float>   *jet_PtAllTracks;
    vector<float>   *jet_PtAllPVTracks;
    vector<int>     *jet_NVertexTracks;
@@ -445,6 +449,34 @@ public :
    vector<float>   *gLLP_ProdVtx_X;
    vector<float>   *gLLP_ProdVtx_Y;
    vector<float>   *gLLP_ProdVtx_Z;
+   bool Flag_HBHENoiseFilter;
+   bool Flag_HBHENoiseIsoFilter;
+   bool Flag_CSCTightHaloFilter;
+   bool Flag_CSCTightHaloTrkMuUnvetoFilter;
+   bool Flag_CSCTightHalo2015Filter;
+   bool Flag_globalTightHalo2016Filter;
+   bool Flag_globalSuperTightHalo2016Filter;
+   bool Flag_HcalStripHaloFilter;
+   bool Flag_hcalLaserEventFilter;
+   bool Flag_EcalDeadCellTriggerPrimitiveFilter;
+   bool Flag_EcalDeadCellBoundaryEnergyFilter;
+   bool Flag_ecalBadCalibFilter;
+   bool Flag_goodVertices;
+   bool Flag_eeBadScFilter;
+   bool Flag_ecalLaserCorrFilter;
+   bool Flag_trkPOGFilters;
+   bool Flag_chargedHadronTrackResolutionFilter;
+   bool Flag_muonBadTrackFilter;
+   bool Flag_BadChargedCandidateFilter;
+   bool Flag_BadPFMuonFilter;
+   bool Flag_BadPFMuonDzFilter;
+   bool Flag_hfNoisyHitsFilter;
+   bool Flag_BadChargedCandidateSummer16Filter;
+   bool Flag_BadPFMuonSummer16Filter;
+   bool Flag_trkPOG_manystripclus53X;
+   bool Flag_trkPOG_toomanystripclus53X;
+   bool Flag_trkPOG_logErrorTooManyClusters;
+   bool Flag_METFilters_2022_2023_PromptReco;
 
    // List of branches
    TBranch        *b_isData;   //!
@@ -557,6 +589,10 @@ public :
    TBranch        *b_jet_PhoMult;   //!
    TBranch        *b_jet_EleMult;   //!
    TBranch        *b_jet_MuonMult;   //!
+   TBranch        *b_jet_DeepCSV_prob_b;   //!
+   TBranch        *b_jet_DeepCSV_prob_c;   //!
+   TBranch        *b_jet_DeepCSV_prob_bb;   //!
+   TBranch        *b_jet_DeepCSV_prob_udsg;   //!
    TBranch        *b_jet_PtAllTracks;   //!
    TBranch        *b_jet_PtAllPVTracks;   //!
    TBranch        *b_jet_NVertexTracks;   //!
@@ -750,6 +786,34 @@ public :
    TBranch        *b_gLLP_ProdVtx_X;   //!
    TBranch        *b_gLLP_ProdVtx_Y;   //!
    TBranch        *b_gLLP_ProdVtx_Z;   //!
+   TBranch        *b_Flag_HBHENoiseFilter;   //!
+   TBranch        *b_Flag_HBHENoiseIsoFilter;   //!
+   TBranch        *b_Flag_CSCTightHaloFilter;   //!
+   TBranch        *b_Flag_CSCTightHaloTrkMuUnvetoFilter;   //!
+   TBranch        *b_Flag_CSCTightHalo2015Filter;   //!
+   TBranch        *b_Flag_globalTightHalo2016Filter;   //!
+   TBranch        *b_Flag_globalSuperTightHalo2016Filter;   //!
+   TBranch        *b_Flag_HcalStripHaloFilter;   //!
+   TBranch        *b_Flag_hcalLaserEventFilter;   //!
+   TBranch        *b_Flag_EcalDeadCellTriggerPrimitiveFilter;   //!
+   TBranch        *b_Flag_EcalDeadCellBoundaryEnergyFilter;   //!
+   TBranch        *b_Flag_ecalBadCalibFilter;   //!
+   TBranch        *b_Flag_goodVertices;   //!
+   TBranch        *b_Flag_eeBadScFilter;   //!
+   TBranch        *b_Flag_ecalLaserCorrFilter;   //!
+   TBranch        *b_Flag_trkPOGFilters;   //!
+   TBranch        *b_Flag_chargedHadronTrackResolutionFilter;   //!
+   TBranch        *b_Flag_muonBadTrackFilter;   //!
+   TBranch        *b_Flag_BadChargedCandidateFilter;   //!
+   TBranch        *b_Flag_BadPFMuonFilter;   //!
+   TBranch        *b_Flag_BadPFMuonDzFilter;   //!
+   TBranch        *b_Flag_hfNoisyHitsFilter;   //!
+   TBranch        *b_Flag_BadChargedCandidateSummer16Filter;   //!
+   TBranch        *b_Flag_BadPFMuonSummer16Filter;   //!
+   TBranch        *b_Flag_trkPOG_manystripclus53X;   //!
+   TBranch        *b_Flag_trkPOG_toomanystripclus53X;   //!
+   TBranch        *b_Flag_trkPOG_logErrorTooManyClusters;   //!
+   TBranch        *b_Flag_METFilters_2022_2023_PromptReco;   //!
 
    DisplacedHcalJetAnalyzer(TTree *tree=0);
    virtual ~DisplacedHcalJetAnalyzer();
@@ -981,6 +1045,10 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    jet_PhoMult = 0;
    jet_EleMult = 0;
    jet_MuonMult = 0;
+   jet_DeepCSV_prob_b = 0;
+   jet_DeepCSV_prob_c = 0;
+   jet_DeepCSV_prob_bb = 0;
+   jet_DeepCSV_prob_udsg = 0;
    jet_PtAllTracks = 0;
    jet_PtAllPVTracks = 0;
    jet_NVertexTracks = 0;
@@ -1163,6 +1231,35 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    gLLP_ProdVtx_X = 0;
    gLLP_ProdVtx_Y = 0;
    gLLP_ProdVtx_Z = 0;
+   Flag_HBHENoiseFilter = 0;
+   Flag_HBHENoiseIsoFilter = 0;
+   Flag_CSCTightHaloFilter = 0;
+   Flag_CSCTightHaloTrkMuUnvetoFilter = 0;
+   Flag_CSCTightHalo2015Filter = 0;
+   Flag_globalTightHalo2016Filter = 0;
+   Flag_globalSuperTightHalo2016Filter = 0;
+   Flag_HcalStripHaloFilter = 0;
+   Flag_hcalLaserEventFilter = 0;
+   Flag_EcalDeadCellTriggerPrimitiveFilter = 0;
+   Flag_EcalDeadCellBoundaryEnergyFilter = 0;
+   Flag_ecalBadCalibFilter = 0;
+   Flag_goodVertices = 0;
+   Flag_eeBadScFilter = 0;
+   Flag_ecalLaserCorrFilter = 0;
+   Flag_trkPOGFilters = 0;
+   Flag_chargedHadronTrackResolutionFilter = 0;
+   Flag_muonBadTrackFilter = 0;
+   Flag_BadChargedCandidateFilter = 0;
+   Flag_BadPFMuonFilter = 0;
+   Flag_BadPFMuonDzFilter = 0;
+   Flag_hfNoisyHitsFilter = 0;
+   Flag_BadChargedCandidateSummer16Filter = 0;
+   Flag_BadPFMuonSummer16Filter = 0;
+   Flag_trkPOG_manystripclus53X = 0;
+   Flag_trkPOG_toomanystripclus53X = 0;
+   Flag_trkPOG_logErrorTooManyClusters = 0;
+   Flag_METFilters_2022_2023_PromptReco = 0;
+
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
@@ -1280,6 +1377,10 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("jet_PhoMult", &jet_PhoMult, &b_jet_PhoMult);
    fChain->SetBranchAddress("jet_EleMult", &jet_EleMult, &b_jet_EleMult);
    fChain->SetBranchAddress("jet_MuonMult", &jet_MuonMult, &b_jet_MuonMult);
+   fChain->SetBranchAddress("jet_DeepCSV_prob_b", &jet_DeepCSV_prob_b, &b_jet_DeepCSV_prob_b);
+   fChain->SetBranchAddress("jet_DeepCSV_prob_c", &jet_DeepCSV_prob_c, &b_jet_DeepCSV_prob_c);
+   fChain->SetBranchAddress("jet_DeepCSV_prob_bb", &jet_DeepCSV_prob_bb, &b_jet_DeepCSV_prob_bb);
+   fChain->SetBranchAddress("jet_DeepCSV_prob_udsg", &jet_DeepCSV_prob_udsg, &b_jet_DeepCSV_prob_udsg);
    fChain->SetBranchAddress("jet_PtAllTracks", &jet_PtAllTracks, &b_jet_PtAllTracks);
    fChain->SetBranchAddress("jet_PtAllPVTracks", &jet_PtAllPVTracks, &b_jet_PtAllPVTracks);
    fChain->SetBranchAddress("jet_NVertexTracks", &jet_NVertexTracks, &b_jet_NVertexTracks);
@@ -1473,6 +1574,35 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("gLLP_ProdVtx_X", &gLLP_ProdVtx_X, &b_gLLP_ProdVtx_X);
    fChain->SetBranchAddress("gLLP_ProdVtx_Y", &gLLP_ProdVtx_Y, &b_gLLP_ProdVtx_Y);
    fChain->SetBranchAddress("gLLP_ProdVtx_Z", &gLLP_ProdVtx_Z, &b_gLLP_ProdVtx_Z);
+   fChain->SetBranchAddress("Flag_HBHENoiseFilter", &Flag_HBHENoiseFilter, &b_Flag_HBHENoiseFilter);
+   fChain->SetBranchAddress("Flag_HBHENoiseIsoFilter", &Flag_HBHENoiseIsoFilter, &b_Flag_HBHENoiseIsoFilter);
+   fChain->SetBranchAddress("Flag_CSCTightHaloFilter", &Flag_CSCTightHaloFilter, &b_Flag_CSCTightHaloFilter);
+   fChain->SetBranchAddress("Flag_CSCTightHaloTrkMuUnvetoFilter", &Flag_CSCTightHaloTrkMuUnvetoFilter, &b_Flag_CSCTightHaloTrkMuUnvetoFilter);
+   fChain->SetBranchAddress("Flag_CSCTightHalo2015Filter", &Flag_CSCTightHalo2015Filter, &b_Flag_CSCTightHalo2015Filter);
+   fChain->SetBranchAddress("Flag_globalTightHalo2016Filter", &Flag_globalTightHalo2016Filter, &b_Flag_globalTightHalo2016Filter);
+   fChain->SetBranchAddress("Flag_globalSuperTightHalo2016Filter", &Flag_globalSuperTightHalo2016Filter, &b_Flag_globalSuperTightHalo2016Filter);
+   fChain->SetBranchAddress("Flag_HcalStripHaloFilter", &Flag_HcalStripHaloFilter, &b_Flag_HcalStripHaloFilter);
+   fChain->SetBranchAddress("Flag_hcalLaserEventFilter", &Flag_hcalLaserEventFilter, &b_Flag_hcalLaserEventFilter);
+   fChain->SetBranchAddress("Flag_EcalDeadCellTriggerPrimitiveFilter", &Flag_EcalDeadCellTriggerPrimitiveFilter, &b_Flag_EcalDeadCellTriggerPrimitiveFilter);
+   fChain->SetBranchAddress("Flag_EcalDeadCellBoundaryEnergyFilter", &Flag_EcalDeadCellBoundaryEnergyFilter, &b_Flag_EcalDeadCellBoundaryEnergyFilter);
+   fChain->SetBranchAddress("Flag_ecalBadCalibFilter", &Flag_ecalBadCalibFilter, &b_Flag_ecalBadCalibFilter);
+   fChain->SetBranchAddress("Flag_goodVertices", &Flag_goodVertices, &b_Flag_goodVertices);
+   fChain->SetBranchAddress("Flag_eeBadScFilter", &Flag_eeBadScFilter, &b_Flag_eeBadScFilter);
+   fChain->SetBranchAddress("Flag_ecalLaserCorrFilter", &Flag_ecalLaserCorrFilter, &b_Flag_ecalLaserCorrFilter);
+   fChain->SetBranchAddress("Flag_trkPOGFilters", &Flag_trkPOGFilters, &b_Flag_trkPOGFilters);
+   fChain->SetBranchAddress("Flag_chargedHadronTrackResolutionFilter", &Flag_chargedHadronTrackResolutionFilter, &b_Flag_chargedHadronTrackResolutionFilter);
+   fChain->SetBranchAddress("Flag_muonBadTrackFilter", &Flag_muonBadTrackFilter, &b_Flag_muonBadTrackFilter);
+   fChain->SetBranchAddress("Flag_BadChargedCandidateFilter", &Flag_BadChargedCandidateFilter, &b_Flag_BadChargedCandidateFilter);
+   fChain->SetBranchAddress("Flag_BadPFMuonFilter", &Flag_BadPFMuonFilter, &b_Flag_BadPFMuonFilter);
+   fChain->SetBranchAddress("Flag_BadPFMuonDzFilter", &Flag_BadPFMuonDzFilter, &b_Flag_BadPFMuonDzFilter);
+   fChain->SetBranchAddress("Flag_hfNoisyHitsFilter", &Flag_hfNoisyHitsFilter, &b_Flag_hfNoisyHitsFilter);
+   fChain->SetBranchAddress("Flag_BadChargedCandidateSummer16Filter", &Flag_BadChargedCandidateSummer16Filter, &b_Flag_BadChargedCandidateSummer16Filter);
+   fChain->SetBranchAddress("Flag_BadPFMuonSummer16Filter", &Flag_BadPFMuonSummer16Filter, &b_Flag_BadPFMuonSummer16Filter);
+   fChain->SetBranchAddress("Flag_trkPOG_manystripclus53X", &Flag_trkPOG_manystripclus53X, &b_Flag_trkPOG_manystripclus53X);
+   fChain->SetBranchAddress("Flag_trkPOG_toomanystripclus53X", &Flag_trkPOG_toomanystripclus53X, &b_Flag_trkPOG_toomanystripclus53X);
+   fChain->SetBranchAddress("Flag_trkPOG_logErrorTooManyClusters", &Flag_trkPOG_logErrorTooManyClusters, &b_Flag_trkPOG_logErrorTooManyClusters);
+   fChain->SetBranchAddress("Flag_METFilters_2022_2023_PromptReco", &Flag_METFilters_2022_2023_PromptReco, &b_Flag_METFilters_2022_2023_PromptReco);
+
    Notify();
 }
 
