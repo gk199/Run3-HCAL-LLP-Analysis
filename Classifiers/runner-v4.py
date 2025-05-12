@@ -54,7 +54,7 @@ class DataProcessor:
         # and returns the dataframe unchanged so filenames are the same
         print("Loading Data...")
         
-        filter_name = ["perJet_*", "Pass*", "jetIndex", "randomFloat"] 
+        filter_name = ["perJet_*", "Pass*", "jetIndex"] 
         filepath = '/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/'
     
         sig_fps = [filepath + filename for filename in sig_files] if sig_files is not None else []
@@ -99,18 +99,19 @@ class DataProcessor:
         # only consider events that pass the displaced jet HLT (Pass_HLTDisplacedJet) -- both the depth and inclusive tag canidates already require this
         # use "Pass_DepthTagCand" or "Pass_InclTagCand", but still require L1 trig matched for the background
         def depth(row):
-            return row['Pass_DepthTagCand'] # returns 1 if this jet is a depth tag candidate (leading L1 LLP hwQual matched jet + kinematic requirements)
-            # return row['Pass_DepthTagCand'] and row['perJet_DepthTowers'] >= 2
-            # returns 1 if this jet is a depth tag candidate (leading L1 LLP hwQual matched jet + kinematic requirements)
-            # TODO also need to add a requirement on the perJet_DepthTowers >= 2, but this is not in v3.13 minituples!! 
+            return (row['Pass_DepthTagCand'] and row['perJet_DepthTowers'] >= 2 and abs(row['perJet_Eta']) < 1.26 and row['perJet_Pt'] > 60)
+            # returns 1 if this jet is a depth tag candidate (leading L1 LLP hwQual matched jet + kinematic requirements), 2+ depth emulated towers, eta < 1.26, and pT > 60
+            # TODO need to add in that this must be a depth candidate in the CR -- sequential trainings
         def inclusive(row):
+            return row['Pass_DepthTagCand'] == 0
+        def inclusive_signal(row):
             return row['Pass_InclTagCand'] # returns 1 if this jet is a inclusive tag candidate (leading jet that is not a depth tag candidate + kinematic requirements)
 
         def WPlusJets(row):
             return row['Pass_WPlusJets']
 
         def select_safety(row):
-            return (row['perJet_Pt'] > 40 and abs(row['perJet_Eta']) < 1.26 and 
+            return (row['perJet_Pt'] > 40 and abs(row['perJet_Eta'] < 2.0) and
             0 <= row['perJet_EnergyFrac_Depth1'] <= 1 and 
             0 <= row['perJet_EnergyFrac_Depth2'] <= 1 and 
             0 <= row['perJet_EnergyFrac_Depth3'] <= 1 and 
@@ -120,11 +121,11 @@ class DataProcessor:
             0 <= row['perJet_Track0Pt'] < 900 and 
             0 <= row['perJet_Track0dR'] < 1 and 
             0 <= row['perJet_Track1Pt'] < 900 and 
-            0 <= row['perJet_Track1dR'] < 1 and
-            0 <= row['jetIndex'] <= 1)                           # only consider the leading or subleading jet
+            0 <= row['perJet_Track1dR'] < 1) # and
+            # 0 <= row['jetIndex'] <= 1)                           # only consider the leading or subleading jet
 
         def classify_background(row): 
-            if select_safety(row) and WPlusJets(row) and depth(row):
+            if select_safety(row) and WPlusJets(row) and depth(row): 
                 return bkg_value # 2 or 1 
             else:
                 return -1
@@ -144,7 +145,7 @@ class DataProcessor:
                 return -1
             
         def classify_sig_inclusive(row):
-            if select_safety(row) and select_LLPjet(row) and inclusive(row):
+            if select_safety(row) and select_LLPjet(row) and inclusive_signal(row):
                 return 0
             else:
                 return -1
@@ -187,7 +188,8 @@ class DataProcessor:
             self.cumulative_df = self.cumulative_df.sample(frac=1, random_state=42).reset_index(drop=True) # shuffling
             labels = self.cumulative_df["classID"].values
         
-        randFloat = self.cumulative_df[['randomFloat']]
+        perJet_Pt_series = self.cumulative_df['perJet_Pt']
+        randFloat = ((perJet_Pt_series * 1000).astype(int) % 10) # extract 1000th place 
         data = self.cumulative_df[FEATURES]
         normed_data = pd.DataFrame()
         for feature in data.columns:
