@@ -49,37 +49,49 @@ class DataProcessor:
         self.mode = mode
         self.sel = sel
     
-    def load_data(self, sig_files=None, bkg_files=None):
-        # need a mode that doesn't pre-classify them but just loads the data and then you can get it to predict
-        # and returns the dataframe unchanged so filenames are the same
-        print("Loading Data...")
+    def load_data(self, sig_files=None, bkg_files=None, step_size=100000):
+        # Load the signal and background data. Do this in batches, otherwise the large root files cause memory issues
+        print("Loading Data in Batches with uproot.iterate...")
         
-        filter_name = ["perJet_*", "Pass*", "jetIndex"] 
-        filepath = '/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/'
+        filter_name = ["perJet_*", "Pass*"] 
+        tree_name = "PerJet_NoSel"
+        filepath = '/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.14/'
     
         sig_fps = [filepath + filename for filename in sig_files] if sig_files is not None else []
         bkg_fps = [filepath + filename for filename in bkg_files] if bkg_files is not None else []
+
+        # Load signal data in chunks
         sig_df = [] #pd.DataFrame()
-        bkg_df = [] #pd.DataFrame()
-        
-        # aggregating all signal events
-        for file in sig_fps:
-            sig = uproot.open(file)['PerJet_NoSel'] 
-            print(f"Opened {file}")
-            sig = sig.arrays(filter_name=filter_name, library="pd")
-            sig_df.append(sig)
+        total_signal = 0
+        for chunk in uproot.iterate(
+            [f"{file}:{tree_name}" for file in sig_fps], filter_name=filter_name, library="pd", step_size=step_size,
+        ):
+            # Apply event-level filter here
+            chunk_filtered = chunk[chunk["Pass_HLTDisplacedJet"] == 1]
+            print(f"Loaded signal chunk of size: {len(chunk)} entries, and {len(chunk_filtered)} entries passed HLT displaced jet selection")
+            total_signal += len(chunk_filtered)
+            sig_df.append(chunk_filtered)
+
         self.sig_df = pd.concat(sig_df) if sig_df else pd.DataFrame()
-        
-        # aggregating all background events
-        for file in bkg_fps:
-            bkg = uproot.open(file)['PerJet_NoSel'] 
-            print(f"Opened {file}")
-            bkg = bkg.arrays(filter_name=filter_name, library="pd") 
-            bkg_df.append(bkg)
+        print(f"Concatenated all signal entries, total length {total_signal}")
+
+        # Load background data in chunks
+        bkg_df = [] #pd.DataFrame()
+        total_background = 0
+        for chunk in uproot.iterate(
+            [f"{file}:{tree_name}" for file in bkg_fps], filter_name=filter_name, library="pd", step_size=step_size,
+        ):
+            # Apply event-level filter here
+            chunk_filtered = chunk[chunk["Pass_WPlusJets"] == 1] # TODO remove this if switch to using CR for depth tagger
+            print(f"Loaded background chunk of size: {len(chunk)} entries, and {len(chunk_filtered)} entries passed W+jets selection")
+            total_background += len(chunk_filtered)
+            bkg_df.append(chunk_filtered)
+
         self.bkg_df = pd.concat(bkg_df) if bkg_df else pd.DataFrame()
-        
+        print(f"Concatenated all background entries, total length {total_background}")
+
         print("Loaded Data")
-        
+
     def apply_selections(self, inclusive=False):
         print("Applying Selections")
         bkg_value = self.return_value_bkg
@@ -99,11 +111,12 @@ class DataProcessor:
         # only consider events that pass the displaced jet HLT (Pass_HLTDisplacedJet) -- both the depth and inclusive tag canidates already require this
         # use "Pass_DepthTagCand" or "Pass_InclTagCand", but still require L1 trig matched for the background
         def depth(row):
-            return (row['Pass_DepthTagCand'] and row['perJet_DepthTowers'] >= 2 and abs(row['perJet_Eta']) < 1.26 and row['perJet_Pt'] > 60)
+            return (row['Pass_DepthTagCand'] and abs(row['perJet_Eta']) < 1.26 and row['perJet_Pt'] > 60)
             # returns 1 if this jet is a depth tag candidate (leading L1 LLP hwQual matched jet + kinematic requirements), 2+ depth emulated towers, eta < 1.26, and pT > 60
-            # TODO need to add in that this must be a depth candidate in the CR -- sequential trainings
+            # TODO need to add in that this must be a depth candidate in the CR -- sequential trainings. 
+            # If scores are added, need to check the score of the one that Pass_InclTagCand -- not how per jet tree is setup though...
         def inclusive(row):
-            return row['Pass_DepthTagCand'] == 0
+            return (row['Pass_DepthTagCand'] == 0 and row['Pass_HLTDisplacedJet']) # not depth tag canidate, but must pass HLT
         def inclusive_signal(row):
             return row['Pass_InclTagCand'] # returns 1 if this jet is a inclusive tag candidate (leading jet that is not a depth tag candidate + kinematic requirements)
 
@@ -125,7 +138,7 @@ class DataProcessor:
             # 0 <= row['jetIndex'] <= 1)                           # only consider the leading or subleading jet
 
         def classify_background(row): 
-            if select_safety(row) and WPlusJets(row) and depth(row): 
+            if select_safety(row) and WPlusJets(row) and depth(row): # remove WPlusJets because this will be in the CR instead
                 return bkg_value # 2 or 1 
             else:
                 return -1
@@ -189,7 +202,6 @@ class DataProcessor:
             labels = self.cumulative_df["classID"].values
         
         perJet_Pt_series = self.cumulative_df['perJet_Pt']
-        randFloat = ((perJet_Pt_series * 1000).astype(int) % 10) # extract 1000th place 
         data = self.cumulative_df[FEATURES]
         normed_data = pd.DataFrame()
         for feature in data.columns:
@@ -197,13 +209,16 @@ class DataProcessor:
             # if inclusive: normed_data[feature] = (data[feature] - CONSTANTS_INCLUSIVE[feature][0])/ CONSTANTS_INCLUSIVE[feature][1] 
         
         if debug_mode:
+            print("Normed data:")
             print(normed_data.describe())
-            print(randFloat.describe())
+            print("Jet pT, 1000th digit will be used for random float later:")
+            print(perJet_Pt_series.describe())
+            print("Labels:")
             print(labels) # labels is 1 if signal and 0 if background
 
         print("Processing Complete")
         self.data = normed_data
-        return normed_data, labels, randFloat
+        return normed_data, labels, perJet_Pt_series
     
     def write_to_root(self, scores, filename, labels=None):
         filename = f"{filename}_scores.root"
@@ -443,26 +458,25 @@ class Runner:
      
     def run_training(self):
         # modifying to do per-event splitting
-        # TODO cut based on randomFloat
         print("Training")
         if self.load:
             self.processor = DataProcessor(num_classes=self.num_classes - 1)
             self.processor.load_data(self.sig, self.bkg)
         self.processor.apply_selections(inclusive=self.inclusive)
 
-        X, y, randFloat = self.processor.process_data() # no longer processing train and test samples separately
-        randFloat_values = randFloat["randomFloat"].values # floats between 0 and 1
-        train_mask = randFloat_values < 0.6
-        test_mask = ~train_mask  # or randFloat_values >= 0.6
+        X, y, perJet_Pt_series = self.processor.process_data() # no longer processing train and test samples separately
+        randFloat = (perJet_Pt_series * 1000).astype(int) % 10 # extract 1000th place. Trained on "train_mask = randFloat_values < 4"
+        train_mask = randFloat < 4
+        test_mask = ~train_mask  # or randFloat >= 4
 
         X_train, y_train = X[train_mask], y[train_mask]
         X_test, y_test = X[test_mask], y[test_mask]
 
         if debug_mode:
             print("Test and train masks based on the random float")
-            print(type(X), type(y), type(randFloat)) # X is a Pandas DataFrame (features), y is a numpy array (labels), randFloat is a Pandas DataFrame
+            print(type(X), type(y), type(randFloat)) # X is a Pandas DataFrame (features), y is a numpy array (labels), perJet_Pt_series is a Pandas DataFrame and randFloat is numpy array
+            print(perJet_Pt_series)
             print(randFloat)
-            print(randFloat_values)
             print(train_mask)
             print(test_mask)
 
@@ -561,11 +575,32 @@ class Runner:
         
 def main():
     sig_files = [
-        "minituple_HToSSTo4B_MH250_MS120_CTau10000_partial15k.root"
+        "minituple_HToSSTo4b_125_15_CTau10000.root"
+        #"minituple_HToSSTo4b_125_15_CTau1000.root",
+        #"minituple_HToSSTo4b_125_15_CTau3000.root",
+        #"minituple_HToSSTo4b_125_50_CTau10000.root",
+        #"minituple_HToSSTo4b_125_50_CTau3000.root",
+        # "minituple_HToSSTo4b_250_120_CTau10000.root",
+        # "minituple_HToSSTo4b_350_160_CTau10000.root",
+        # "minituple_HToSSTo4b_350_80_CTau500.root"
     ]
+
+    # minituples_Zmu_2023Bv1.root
+    # minituples_Zmu_2023Cv1.root
+    # minituples_Zmu_2023Cv2.root
+    # minituples_Zmu_2023Cv3.root
+    # minituples_Zmu_2023Cv4.root
+    # minituples_Zmu_2023Dv1.root
+    # minituples_Zmu_2023Dv2.root
     
     bkg_files = [
-        "minituple_Run2023D-EXOLLPJetHCAL-PromptReco-v2_partial28k.root"
+        "minituple_LLPskim_2023Bv1.root",
+        # "minituple_LLPskim_2023Cv1.root",
+        # "minituple_LLPskim_2023Cv2.root",
+        # "minituple_LLPskim_2023Cv3.root",
+        # "minituple_LLPskim_2023Cv4.root",
+        # "minituple_LLPskim_2023Dv1.root",
+        # "minituple_LLPskim_2023Dv2.root"
     ]
     
     mode = "train" # "train", "eval", "filewrite", "constants"
