@@ -22,6 +22,20 @@ num_jets = 1 if perJet else 4 # in v3.13 only 4 jets are saved! In earlier versi
 
 CONSTANTS = pd.read_csv("norm_constants_v3.csv")
 
+FEATURES = ['perJet_Eta', 'perJet_Mass', 
+       'perJet_S_phiphi', 'perJet_S_etaeta', 'perJet_S_etaphi', 
+       'perJet_Tracks_dR', 
+       'perJet_Track0dR', 'perJet_Track0dEta', 'perJet_Track0dPhi', 
+       'perJet_Track1dR', 'perJet_Track1dEta', 'perJet_Track1dPhi',
+       'perJet_Track2dR', 'perJet_Track2dEta', 'perJet_Track2dPhi',
+       'perJet_Frac_Track0Pt', 'perJet_Frac_Track1Pt', 'perJet_Frac_Track2Pt',
+       'perJet_EnergyFrac_Depth1', 'perJet_EnergyFrac_Depth2', 'perJet_EnergyFrac_Depth3', 'perJet_EnergyFrac_Depth4', 
+       'perJet_LeadingRechitD', 
+       'perJet_Frac_LeadingRechitE', 'perJet_Frac_SubLeadingRechitE', 'perJet_Frac_SSubLeadingRechitE', 
+       'perJet_AllRechitE', 
+       'perJet_NeutralHadEFrac', 'perJet_ChargedHadEFrac', 'perJet_PhoEFrac', 'perJet_EleEFrac', 'perJet_MuonEFrac']
+
+
 class DataProcessor:
     def __init__(self, num_classes=2, mode=None, sel=True, tree="NoSel"): #counting from 0 
         self.return_value_bkg = num_classes
@@ -61,28 +75,16 @@ class DataProcessor:
     def process_data(self):
         
         print("Processing...")
-        features = ['perJet_Eta', 'perJet_Mass', 
-       'perJet_S_phiphi', 'perJet_S_etaeta', 'perJet_S_etaphi', 
-       'perJet_Tracks_dR', 
-       'perJet_Track0dR', 'perJet_Track0dEta', 'perJet_Track0dPhi', 
-       'perJet_Track1dR', 'perJet_Track1dEta', 'perJet_Track1dPhi',
-       'perJet_Track2dR', 'perJet_Track2dEta', 'perJet_Track2dPhi',
-       'perJet_Frac_Track0Pt', 'perJet_Frac_Track1Pt', 'perJet_Frac_Track2Pt',
-       'perJet_EnergyFrac_Depth1', 'perJet_EnergyFrac_Depth2', 'perJet_EnergyFrac_Depth3', 'perJet_EnergyFrac_Depth4', 
-       'perJet_LeadingRechitD', 
-       'perJet_Frac_LeadingRechitE', 'perJet_Frac_SubLeadingRechitE', 'perJet_Frac_SSubLeadingRechitE', 
-       'perJet_AllRechitE', 
-       'perJet_NeutralHadEFrac', 'perJet_ChargedHadEFrac', 'perJet_PhoEFrac', 'perJet_EleEFrac', 'perJet_MuonEFrac']
 
         all_normed_data = []
         all_labels = []
-        all_jet_valid = []
+        all_jet_pt = []
 
         for jet in range(num_jets): 
             if not perJet:
-                new_features = [i.replace('perJet','jet'+str(jet)) for i in features] # list comprehension 
-                feature_dictionary = dict(zip(new_features, features))
-            else: new_features = features
+                new_features = [i.replace('perJet','jet'+str(jet)) for i in FEATURES] # list comprehension 
+                feature_dictionary = dict(zip(new_features, FEATURES))
+            else: new_features = FEATURES
         
             labels = None 
             if not self.mode and self.sel:
@@ -91,7 +93,7 @@ class DataProcessor:
             
             data = self.cumulative_df[new_features]
             print(data.describe())
-            jet_valid = self.cumulative_df["jet"+str(jet)+"_E"].values
+            jet_pt = self.cumulative_df["jet"+str(jet)+"_Pt"].values
             jet_trained_on = self.cumulative_df
             # in data, would like to rename jetX to perJet to work with the input files
             if not perJet: data = data.rename(columns=feature_dictionary)
@@ -109,10 +111,10 @@ class DataProcessor:
 
             all_normed_data.append(normed_data)
             all_labels.append(labels)
-            all_jet_valid.append(jet_valid)
+            all_jet_pt.append(jet_pt)
         
         # return normed data, labels, and a list of rows are ok (energy is positive) and which are not (energy is -9999.9)
-        return all_normed_data, all_labels, all_jet_valid
+        return all_normed_data, all_labels, all_jet_pt
     
     def default_variables(self, jet_index = 0):
         # assumes that you have already loaded the files and applied safety selections
@@ -222,7 +224,7 @@ class Runner:
     
     def evaluate_scores(self): # this code used to be in run_file_evaluation -- still testing
         print("Determining Scores")
-        predicting_data, labels, jet_valid = self.processor.process_data()
+        predicting_data, labels, jet_pt = self.processor.process_data()
         # depth
         # handler = ModelHandler(num_classes=self.num_classes, model_name=self.model_name)
         handler = ModelHandler(num_classes=self.num_classes, model_name="depth_model_v4.keras")
@@ -234,15 +236,26 @@ class Runner:
         print("Loading the inclusive model")
         handler_inc.load()
         preds_inc = [ handler_inc.predict(predicting_data[i], labels[i]) for i in range(num_jets) ]
-        # data is predicting_data, jet valid is jet_valid, scores are preds, all indexed by jet (6 total)
+        # data is predicting_data, jet pT is jet_pt, scores are preds, all indexed by jet (6 total)
         # to print whole data table, predicting_data[0], to print just values in a list, predicting_data[0].values
 
         # check if predicting_data[i] has a valid jet. If so, keep DNN score. If not, set score = -9999
         for i in range(num_jets): # evaluate for all 6 jets
             for jet in range(len(predicting_data[i])): # evaluate for every jet, if valid
-                if (jet_valid[i][jet] < -9000): # if jet E is -9999.9, replace score with -9999.9
+                if (jet_pt[i][jet] < -9000): # if jet pT is -9999.9, replace score with -9999.9
                     preds[i][jet] = [-9999.9, -9999.9]
                     preds_inc[i][jet] = [-9999.9, -9999.9]
+                # do not score jets that were used in the training, based on split with jet_Pt
+                if ((jet_pt[i][jet] * 1000).astype(int) % 10 < 4): # extract 1000th place. Trained on "train_mask = randFloat_values < 4"
+                    preds[i][jet] = [-9999.9, -9999.9]
+                    preds_inc[i][jet] = [-9999.9, -9999.9]
+                    # TODO verify this works with printouts
+                print("jet pT = ")
+                print(jet_pt[i][jet])
+                print("inclusive scores = ")
+                print(preds_inc[i][jet])
+                print("depth scores = ")
+                print(preds[i][jet])
 
         self.processor.write_to_root(preds, preds_inc, self.fname, labels=None)
 
