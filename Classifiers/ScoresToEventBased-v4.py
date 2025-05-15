@@ -17,6 +17,9 @@ import csv
 import sys, os, argparse, time, errno
 import os.path
 
+testing_mode = True
+debug_mode = True
+
 perJet = False
 num_jets = 1 if perJet else 4 # in v3.13 only 4 jets are saved! In earlier versions, 6 jets are saved
 
@@ -143,7 +146,7 @@ class DataProcessor:
                 dataframe['jet'+str(i)+'_scoresbkg_inc'] = scores_inc[i][:, 2]
         elif self.num_classes == 1:
             for i in range(num_jets):
-                dataframe['jet'+str(i)+'_scores'] = scores[i][:, 0] # 0 is the signal class
+                # dataframe['jet'+str(i)+'_scores'] = scores[i][:, 0] # 0 is the signal class # don't write depth scores first time (TESTING)
                 dataframe['jet'+str(i)+'_scores_inc'] = scores_inc[i][:, 0] # 0 is the signal class
         if labels is not None:
             dataframe['classID'] = labels
@@ -247,15 +250,16 @@ class Runner:
                     preds_inc[i][jet] = [-9999.9, -9999.9]
                 # do not score jets that were used in the training, based on split with jet_Pt
                 if ((jet_pt[i][jet] * 1000).astype(int) % 10 < 4): # extract 1000th place. Trained on "train_mask = randFloat_values < 4"
-                    preds[i][jet] = [-9999.9, -9999.9]
+                    # preds[i][jet] = [-9999.9, -9999.9] # depth scores are ok, because they rely on CR
                     preds_inc[i][jet] = [-9999.9, -9999.9]
                     # TODO verify this works with printouts
-                print("jet pT = ")
-                print(jet_pt[i][jet])
-                print("inclusive scores = ")
-                print(preds_inc[i][jet])
-                print("depth scores = ")
-                print(preds[i][jet])
+                if debug_mode:
+                    print("jet pT = ")
+                    print(jet_pt[i][jet])
+                    print("inclusive scores = ")
+                    print(preds_inc[i][jet])
+                    print("depth scores = ")
+                    print(preds[i][jet])
 
         self.processor.write_to_root(preds, preds_inc, self.fname, labels=None)
 
@@ -294,6 +298,7 @@ class Runner:
 def main():
     input_files = "test.root"
     filepath = "./"
+    if testing_mode: filepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/" # TODO REMOVE THIS FOR RUNNING
     if len(sys.argv) > 1:
         input_files  = sys.argv[1]
     if len(sys.argv) > 2:

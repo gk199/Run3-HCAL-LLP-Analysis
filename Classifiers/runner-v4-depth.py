@@ -22,7 +22,8 @@ from tensorflow.keras import layers, models
 tf.random.set_seed(311)
 
 CONSTANTS = pd.read_csv("norm_constants_v3.csv") # large negative values removed from mean / std dev computation 
-      
+num_jets = 2 # leading and sub-leading jet will be considered
+
 FEATURES = ['perJet_Eta', 'perJet_Mass', 
        'perJet_S_phiphi', 'perJet_S_etaeta', 'perJet_S_etaphi', 
        'perJet_Tracks_dR', 
@@ -51,9 +52,10 @@ class DataProcessor:
         # Load the signal and background data. Do this in batches, otherwise the large root files cause memory issues
         print("Loading Data in Batches with uproot.iterate...")
         
-        filter_name = ["perJet_*", "Pass*"] 
-        tree_name = "PerJet_NoSel"
+        filter_name = ["jet0*", "jet1*", "Pass*"] 
+        tree_name = "NoSel"
         filepath = '/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.14/'
+        filepath = './'
     
         sig_fps = [filepath + filename for filename in sig_files] if sig_files is not None else []
         bkg_fps = [filepath + filename for filename in bkg_files] if bkg_files is not None else []
@@ -65,10 +67,39 @@ class DataProcessor:
             [f"{file}:{tree_name}" for file in sig_fps], filter_name=filter_name, library="pd", step_size=step_size,
         ):
             # Apply event-level filter here
-            chunk_filtered = chunk[chunk["Pass_HLTDisplacedJet"]]
-            print(f"Loaded signal chunk of size: {len(chunk)} entries, and {len(chunk_filtered)} entries passed HLT displaced jet selection")
-            total_signal += len(chunk_filtered)
-            sig_df.append(chunk_filtered)
+            if debug_mode:
+                print(chunk["Pass_HLTDisplacedJet"].head()) # boolean
+                print(chunk["Pass_HLTDisplacedJet"].dtype)
+                print(chunk["jet0_isTruthMatched"].head()) # float
+                print(chunk["jet0_isTruthMatched"].dtype)
+                print(chunk["jet0_DepthTagCand"].head()) # boolean
+                print(chunk["jet0_DepthTagCand"].dtype)
+            chunk_filtered_leading = chunk[ chunk["Pass_HLTDisplacedJet"] & (chunk["jet0_isTruthMatched"] == 1) ] # & chunk["jet0_DepthTagCand"]]
+            chunk_filtered_subleading = chunk[ chunk["Pass_HLTDisplacedJet"] & (chunk["jet1_isTruthMatched"] == 1) ] # & chunk["jet1_DepthTagCand"]]
+            # Rename columns here to perJet for rest of processing, now that we know we have a depth tag candidate jet matched to LLP decay
+            rename_dict_leading = {
+                col: col.replace("jet0_", "perJet_")
+                for col in chunk_filtered_leading.columns
+                if col.startswith("jet0_") 
+            }
+            rename_dict_subleading = {
+                col: col.replace("jet1_", "perJet_")
+                for col in chunk_filtered_subleading.columns
+                if col.startswith("jet1_") 
+            }
+            chunk_filtered_leading = chunk_filtered_leading.rename(columns=rename_dict_leading)
+            chunk_filtered_subleading = chunk_filtered_subleading.rename(columns=rename_dict_subleading)
+            # Now the jets we care about are labeled perJet in each of these, and have accounted for leading / subleading differences
+            # Drop all columns except those starting with 'perJet' or 'Pass'
+            keep_cols = lambda df: [col for col in df.columns if col.startswith("perJet") or col.startswith("Pass")]
+            chunk_filtered_leading = chunk_filtered_leading[keep_cols(chunk_filtered_leading)]
+            chunk_filtered_subleading = chunk_filtered_subleading[keep_cols(chunk_filtered_subleading)]
+
+            print(f"Loaded signal chunk of size: {len(chunk)} entries, and {len(chunk_filtered_leading)} (leading) and  {len(chunk_filtered_subleading)} (subleading) entries passed HLT displaced jet + LLP match + depth tag candidate selection")
+            total_signal += len(chunk_filtered_leading) + len(chunk_filtered_subleading)
+
+            if not chunk_filtered_leading.empty: sig_df.append(chunk_filtered_leading)
+            if not chunk_filtered_subleading.empty: sig_df.append(chunk_filtered_subleading)
 
         self.sig_df = pd.concat(sig_df) if sig_df else pd.DataFrame()
         print(f"Concatenated all signal entries, total length {total_signal}")
@@ -80,10 +111,32 @@ class DataProcessor:
             [f"{file}:{tree_name}" for file in bkg_fps], filter_name=filter_name, library="pd", step_size=step_size,
         ):
             # Apply event-level filter here
-            chunk_filtered = chunk[chunk["Pass_WPlusJets"]] # TODO remove this if switch to using CR for depth tagger
-            print(f"Loaded background chunk of size: {len(chunk)} entries, and {len(chunk_filtered)} entries passed W+jets selection")
-            total_background += len(chunk_filtered)
-            bkg_df.append(chunk_filtered)
+            # Use CR for depth tagger, and find portions where leading jet is depth candidate, or subleading jet is depth candidate
+            chunk_filtered_leading = chunk[ ((chunk["jet1_scores_inc"] < 0.5) & (chunk["jet1_scores_inc"] > -1))] # & (chunk["jet0_DepthTagCand"] == 1)) ]
+            chunk_filtered_subleading = chunk[ ((chunk["jet0_scores_inc"] < 0.5) & (chunk["jet0_scores_inc"] > -1))] # & (chunk["jet1_DepthTagCand"] == 1)) ]
+            # Rename columns here to perJet for rest of processing, now that we know we have a depth tag candidate jet in the CR
+            rename_dict_leading = {
+                col: col.replace("jet0_", "perJet_")
+                for col in chunk_filtered_leading.columns
+                if col.startswith("jet0_") 
+            }
+            rename_dict_subleading = {
+                col: col.replace("jet1_", "perJet_")
+                for col in chunk_filtered_subleading.columns
+                if col.startswith("jet1_") 
+            }
+            chunk_filtered_leading = chunk_filtered_leading.rename(columns=rename_dict_leading)
+            chunk_filtered_subleading = chunk_filtered_subleading.rename(columns=rename_dict_subleading)
+            # Now the jets we care about are labeled perJet in each of these, and have accounted for leading / subleading CR differences
+            # Drop all columns except those starting with 'perJet' or 'Pass'
+            keep_cols = lambda df: [col for col in df.columns if col.startswith("perJet") or col.startswith("Pass")]
+            chunk_filtered_leading = chunk_filtered_leading[keep_cols(chunk_filtered_leading)]
+            chunk_filtered_subleading = chunk_filtered_subleading[keep_cols(chunk_filtered_subleading)]
+            
+            print(f"Loaded background chunk of size: {len(chunk)} entries, and {len(chunk_filtered_leading)} (leading) and {len(chunk_filtered_subleading)} (subleading) entries passed CR selection")
+            total_background += len(chunk_filtered_leading) + len(chunk_filtered_subleading)
+            if not chunk_filtered_leading.empty: bkg_df.append(chunk_filtered_leading)
+            if not chunk_filtered_subleading.empty: bkg_df.append(chunk_filtered_subleading)
 
         self.bkg_df = pd.concat(bkg_df) if bkg_df else pd.DataFrame()
         print(f"Concatenated all background entries, total length {total_background}")
@@ -91,6 +144,7 @@ class DataProcessor:
         print("Loaded Data")
 
     def apply_selections(self, inclusive=False):
+        # jet0 and jet1 -> perJet has already been done in load data, depending which one was identified to be the depth tag candidate. So only depth tag candidate should be evaluated now
         print("Applying Selections")
         bkg_value = self.return_value_bkg
         sig_value = self.return_sig_value
@@ -109,17 +163,14 @@ class DataProcessor:
         # only consider events that pass the displaced jet HLT (Pass_HLTDisplacedJet) -- both the depth and inclusive tag canidates already require this
         # use "Pass_DepthTagCand" or "Pass_InclTagCand", but still require L1 trig matched for the background
         def depth(row):
-            return (row['Pass_DepthTagCand'] and abs(row['perJet_Eta']) < 1.26 and row['perJet_Pt'] > 60)
+            return (abs(row['perJet_Eta']) < 1.26 and row['perJet_Pt'] > 60) # and row['perJet_DepthTagCand']) # TODO uncomment when depthTagCand is fixed in per event tree!! 
             # returns 1 if this jet is a depth tag candidate (leading L1 LLP hwQual matched jet + kinematic requirements), 2+ depth emulated towers, eta < 1.26, and pT > 60
             # TODO need to add in that this must be a depth candidate in the CR -- sequential trainings. 
             # If scores are added, need to check the score of the one that Pass_InclTagCand -- not how per jet tree is setup though...
         def inclusive_bkg(row):
-            return (row['Pass_DepthTagCand'] == 0 and row['Pass_HLTDisplacedJet']) # not depth tag candidate, but must pass HLT
+            return (row['perJet_DepthTagCand'] == 0 and row['Pass_HLTDisplacedJet']) # not depth tag candidate, but must pass HLT
         def inclusive_signal(row):
-            return row['Pass_InclTagCand'] # returns 1 if this jet is a inclusive tag candidate (leading jet that is not a depth tag candidate + kinematic requirements)
-
-        def WPlusJets(row):
-            return row['Pass_WPlusJets']
+            return row['perJet_InclTagCand'] # returns 1 if this jet is a inclusive tag candidate (leading jet that is not a depth tag candidate + kinematic requirements)
 
         def select_safety(row):
             return (row['perJet_Pt'] > 40 and abs(row['perJet_Eta'] < 2.0) and
@@ -136,34 +187,22 @@ class DataProcessor:
             # 0 <= row['jetIndex'] <= 1)                           # only consider the leading or subleading jet
 
         def classify_background(row): 
-            if select_safety(row) and WPlusJets(row) and depth(row): # remove WPlusJets because this will be in the CR instead
+            if select_safety(row) and depth(row): # removes WPlusJets because this will be in the CR instead
                 return bkg_value # 2 or 1 
             else:
                 return -1
 
-        def classify_bkg_inclusive(row): 
-            if select_safety(row) and WPlusJets(row) and inclusive_bkg(row):
-                return bkg_value 
-            else:
-                return -1
-
-        def classify_signal(row):
+        def classify_signal(row): # TODO decide if require LLP to decay in HCAL or not
             if select_safety(row) and select_HCAL12(row) and depth(row):
                 return 0
             elif select_safety(row) and select_HCAL34(row) and depth(row):
                 return sig_value # 1 or 0
             else:
                 return -1
-            
-        def classify_sig_inclusive(row):
-            if select_safety(row) and select_LLPjet(row) and inclusive_signal(row):
-                return 0
-            else:
-                return -1
         
-        classify_sig = classify_sig_inclusive if inclusive else classify_signal
+        classify_sig = classify_signal
 
-        classify_bkg = classify_bkg_inclusive if inclusive else classify_background
+        classify_bkg = classify_background
 
         sig_df = pd.DataFrame()
         bkg_df = pd.DataFrame()
@@ -215,6 +254,7 @@ class DataProcessor:
 
         print("Processing Complete")
         self.data = normed_data
+        # return normed data, labels, and a list of rows are ok (energy is positive) and which are not (energy is -9999.9)
         return normed_data, labels, perJet_Pt_series
     
     def write_to_root(self, scores, filename, labels=None):
@@ -326,7 +366,7 @@ class ModelHandler:
         plt.ylabel('Loss')
         plt.xlabel('Epoch')
         plt.legend(['train', 'val'], loc='upper left')
-        plt.savefig("ModelLoss_v4.png")
+        plt.savefig("ModelLoss_v4_depth.png")
 
         # Print summary of model
         print("Model summary:")
@@ -401,7 +441,7 @@ class ModelHandler:
         ax.set_title('One-vs-One ROC Curves')
         ax.legend(loc="lower right")
         ax.grid(True)
-        fig.savefig("ROC1v1_v4.png")
+        fig.savefig("ROC1v1_v4_depth.png")
             
     def one_vs_all_roc(self):       
         fig, ax = plt.subplots()
@@ -422,7 +462,7 @@ class ModelHandler:
         ax.set_title('One-vs-All ROC Curves')
         ax.legend(loc="lower right")
         ax.grid(True)  
-        fig.savefig("ROC1vA_v4.png")
+        fig.savefig("ROC1vA_v4_depth.png")
         print("-------ROC data-------")
         print("fpr shape ", fpr.shape)
         print("First non-zero TPR", tpr[fpr !=0][0])
@@ -601,9 +641,9 @@ def main():
     ]
 
     # this is for the depth training, the per event tree with inclusive scores appended
-    sig_files_perEvent = sig_files
-    bkg_files_perEvent = bkg_files
-    
+    sig_files_perEvent = ["minituple_HToSSTo4B_MH250_MS120_CTau10000_partial15k_NoSel_scores.root"]
+    bkg_files_perEvent = ["minituple_Run2023D-EXOLLPJetHCAL-PromptReco-v2_partial28k_NoSel_scores.root"]
+
     mode = "train" # "train", "eval", "filewrite", "constants"
     
     # running the depth and inclusive tagger sequentially
@@ -612,10 +652,10 @@ def main():
     runner.set_model_name(model_name="depth_model_v4.keras")
     runner.run()
     
-    print("Running Inclusive Tagger")
-    runner = Runner(sig_files=sig_files[:], bkg_files=bkg_files[:], mode=mode, num_classes=2, inclusive=True)
-    runner.set_model_name(model_name="inclusive_model_v4.keras")
-    runner.run()
+    # print("Running Inclusive Tagger")
+    # runner = Runner(sig_files=sig_files[:], bkg_files=bkg_files[:], mode=mode, num_classes=2, inclusive=True)
+    # runner.set_model_name(model_name="inclusive_model_v4.keras")
+    # runner.run()
       
 if __name__ == "__main__":
     main()
