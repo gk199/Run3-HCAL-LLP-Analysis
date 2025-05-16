@@ -572,14 +572,14 @@ class Runner:
         
 def main():
     sig_files = [
-        "minituple_HToSSTo4b_125_15_CTau10000.root"
-        #"minituple_HToSSTo4b_125_15_CTau1000.root",
-        #"minituple_HToSSTo4b_125_15_CTau3000.root",
-        #"minituple_HToSSTo4b_125_50_CTau10000.root",
-        #"minituple_HToSSTo4b_125_50_CTau3000.root",
-        # "minituple_HToSSTo4b_250_120_CTau10000.root",
-        # "minituple_HToSSTo4b_350_160_CTau10000.root",
-        # "minituple_HToSSTo4b_350_80_CTau500.root"
+        "minituple_HToSSTo4b_125_15_CTau10000.root",
+        "minituple_HToSSTo4b_125_15_CTau1000.root",
+        "minituple_HToSSTo4b_125_15_CTau3000.root",
+        "minituple_HToSSTo4b_125_50_CTau10000.root",
+        "minituple_HToSSTo4b_125_50_CTau3000.root",
+        "minituple_HToSSTo4b_250_120_CTau10000.root",
+        "minituple_HToSSTo4b_350_160_CTau10000.root",
+        "minituple_HToSSTo4b_350_80_CTau500.root"
     ]
 
     # minituples_Zmu_2023Bv1.root
@@ -591,8 +591,8 @@ def main():
     # minituples_Zmu_2023Dv2.root
     
     bkg_files = [
-        "minituple_LLPskim_2023Bv1.root",
-        # "minituple_LLPskim_2023Cv1.root",
+        # "minituple_LLPskim_2023Bv1.root",
+        "minituple_LLPskim_2023Cv1.root",
         # "minituple_LLPskim_2023Cv2.root",
         # "minituple_LLPskim_2023Cv3.root",
         # "minituple_LLPskim_2023Cv4.root",
@@ -607,10 +607,10 @@ def main():
     mode = "train" # "train", "eval", "filewrite", "constants"
     
     # running the depth and inclusive tagger sequentially
-    print("Running Depth Tagger")
-    runner = Runner(sig_files=sig_files_perEvent[:], bkg_files=bkg_files_perEvent[:], mode=mode, num_classes=2, inclusive=False)
-    runner.set_model_name(model_name="depth_model_v4.keras")
-    runner.run()
+    # print("Running Depth Tagger")
+    # runner = Runner(sig_files=sig_files_perEvent[:], bkg_files=bkg_files_perEvent[:], mode=mode, num_classes=2, inclusive=False)
+    # runner.set_model_name(model_name="depth_model_v4.keras")
+    # runner.run()
     
     print("Running Inclusive Tagger")
     runner = Runner(sig_files=sig_files[:], bkg_files=bkg_files[:], mode=mode, num_classes=2, inclusive=True)
