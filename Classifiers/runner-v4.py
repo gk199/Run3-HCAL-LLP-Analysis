@@ -6,7 +6,12 @@ from tensorflow.keras.layers import Dense, Conv1D, Flatten, Dropout, MaxPooling1
 from tensorflow.keras.optimizers import Nadam, Adam
 import pandas as pd
 import matplotlib.pyplot as plt
+
 import uproot
+import awkward as ak
+import h5py
+import gc
+import fnmatch
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
@@ -50,44 +55,97 @@ class DataProcessor:
     def load_data(self, sig_files=None, bkg_files=None, step_size=100000):
         # Load the signal and background data. Do this in batches, otherwise the large root files cause memory issues
         print("Loading Data in Batches with uproot.iterate...")
+        print("Filtering and saving data to HDF5 for DNN training...")
         
-        filter_name = ["perJet_*", "Pass*"] 
         tree_name = "PerJet_NoSel"
         filepath = '/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.14/'
-    
         sig_fps = [filepath + filename for filename in sig_files] if sig_files is not None else []
         bkg_fps = [filepath + filename for filename in bkg_files] if bkg_files is not None else []
 
-        # Load signal data in chunks
-        sig_df = [] #pd.DataFrame()
-        total_signal = 0
-        for chunk in uproot.iterate(
-            [f"{file}:{tree_name}" for file in sig_fps], filter_name=filter_name, library="pd", step_size=step_size,
-        ):
-            # Apply event-level filter here
-            chunk_filtered = chunk[chunk["Pass_HLTDisplacedJet"]]
-            print(f"Loaded signal chunk of size: {len(chunk)} entries, and {len(chunk_filtered)} entries passed HLT displaced jet selection")
-            total_signal += len(chunk_filtered)
-            sig_df.append(chunk_filtered)
+        with uproot.open(f"{sig_fps[0]}:{tree_name}") as tree:
+            all_branches = tree.keys()
+        include_patterns = ["perJet_*", "Pass_WPlusJets", "Pass_HLTDisplacedJet", "Pass_InclTagCand", "Pass_DepthTagCand"]
+        exclude_patterns = ["perJet_rechit*"] # these have type "awkward" which doesn't work with h5 format
+        # Match includes
+        included = set()
+        for pattern in include_patterns:
+            included.update(fnmatch.filter(all_branches, pattern))
+        # Remove excluded matches
+        for pattern in exclude_patterns:
+            to_remove = fnmatch.filter(all_branches, pattern)
+            included.difference_update(to_remove)
+        # Convert to sorted list for consistency
+        filter_name = sorted(included)
 
-        self.sig_df = pd.concat(sig_df) if sig_df else pd.DataFrame()
-        print(f"Concatenated all signal entries, total length {total_signal}")
+        # Initialize output HDF5 files
+        with h5py.File("signal.h5", "w") as sig_h5f, h5py.File("background.h5", "w") as bkg_h5f:
+            # These datasets will be extendable
+            sig_data = None
+            bkg_data = None
 
-        # Load background data in chunks
-        bkg_df = [] #pd.DataFrame()
-        total_background = 0
-        for chunk in uproot.iterate(
-            [f"{file}:{tree_name}" for file in bkg_fps], filter_name=filter_name, library="pd", step_size=step_size,
-        ):
-            # Apply event-level filter here
-            chunk_filtered = chunk[chunk["Pass_WPlusJets"]] # TODO remove this if switch to using CR for depth tagger
-            print(f"Loaded background chunk of size: {len(chunk)} entries, and {len(chunk_filtered)} entries passed W+jets selection")
-            total_background += len(chunk_filtered)
-            bkg_df.append(chunk_filtered)
+            total_signal = 0
+            total_background = 0
 
-        self.bkg_df = pd.concat(bkg_df) if bkg_df else pd.DataFrame()
-        print(f"Concatenated all background entries, total length {total_background}")
+            # Signal
+            for chunk in uproot.iterate(
+                [f"{file}:{tree_name}" for file in sig_fps], 
+                filter_name=filter_name, 
+                library="pd", 
+                step_size=step_size,
+            ):
 
+                # Apply event-level filter here
+                chunk_filtered = chunk[chunk["Pass_HLTDisplacedJet"]]
+                print(f"Loaded signal chunk of size: {len(chunk)} entries, and {len(chunk_filtered)} entries passed HLT displaced jet selection")
+                total_signal += len(chunk_filtered)
+                if not chunk_filtered.empty:
+                    if debug_mode: 
+                        with pd.option_context('display.max_rows', None, 'display.max_columns', None): print(chunk_filtered.dtypes) # debugging which column is badly behaved
+                    data = chunk_filtered.to_records(index=False)
+
+                    if sig_data is None:
+                        sig_data = sig_h5f.create_dataset(
+                            "features", data=data, maxshape=(None,), chunks=True
+                        )
+                    else:
+                        sig_data.resize((sig_data.shape[0] + len(data),))
+                        sig_data[-len(data):] = data
+
+                    del chunk_filtered, data
+                    gc.collect()
+
+                # sig_df.append(chunk_filtered)
+
+        # self.sig_df = pd.concat(sig_df) if sig_df else pd.DataFrame()
+        # print(f"Concatenated all signal entries, total length {total_signal}")
+
+            # Background
+            for chunk in uproot.iterate(
+                [f"{file}:{tree_name}" for file in bkg_fps], 
+                filter_name=filter_name, 
+                library="pd", 
+                step_size=step_size,
+            ):
+                # Apply event-level filter here
+                chunk_filtered = chunk[chunk["Pass_WPlusJets"]] 
+                print(f"Loaded background chunk of size: {len(chunk)} entries, and {len(chunk_filtered)} entries passed W+jets selection")
+                total_background += len(chunk_filtered)
+                if not chunk_filtered.empty:
+                    data = chunk_filtered.to_records(index=False)
+
+                    if bkg_data is None:
+                        bkg_data = bkg_h5f.create_dataset(
+                            "features", data=data, maxshape=(None,), chunks=True
+                        )
+                    else:
+                        bkg_data.resize((bkg_data.shape[0] + len(data),))
+                        bkg_data[-len(data):] = data
+
+                    del chunk_filtered, data
+                    gc.collect()
+                # bkg_df.append(chunk_filtered)
+
+        print(f"Saved {total_signal} signal and {total_background} background entries to HDF5 (combined number of samples is {total_signal + total_background})")
         print("Loaded Data")
 
     def apply_selections(self, inclusive=False):
@@ -168,19 +226,33 @@ class DataProcessor:
         sig_df = pd.DataFrame()
         bkg_df = pd.DataFrame()
         
+        # Load signal HDF5 data
+        with h5py.File("signal.h5", "r") as sig_file:
+            sig_data = sig_file["features"][:]
+            self.sig_df = pd.DataFrame.from_records(sig_data)  # Convert structured array to DataFrame
+        # Load background HDF5 data
+        with h5py.File("background.h5", "r") as bkg_file:
+            bkg_data = bkg_file["features"][:]
+            self.bkg_df = pd.DataFrame.from_records(bkg_data)
+
         if not self.sig_df.empty and self.sel:
             sig_df = self.sig_df.copy(deep=True)
             # applying selections cut to signal
-            sig_df["classID"] = sig_df.apply(classify_sig, axis=1)
+            sig_df["classID"] = sig_df.apply(classify_sig, axis=1) # add a column saying if passed signal selections (-1 or 0)
             sig_df = sig_df[sig_df["classID"] != -1].reset_index(drop=True) # removing junk
         
         if not self.bkg_df.empty and self.sel:
             bkg_df = self.bkg_df.copy(deep=True)
             # applying selections cut to background
-            bkg_df["classID"] = bkg_df.apply(classify_bkg, axis=1)
+            bkg_df["classID"] = bkg_df.apply(classify_bkg, axis=1) # add a column saying if passed signal selections (-1 or 1)
             bkg_df = bkg_df[bkg_df["classID"] != -1].reset_index(drop=True) # removing junk
             
         self.cumulative_df = pd.concat((sig_df, bkg_df))
+
+        print("Length of signal after selections =", len(sig_df))
+        print("Length of background after selections =", len(bkg_df))
+        print("Length of signal + background after selections =", len(sig_df) + len(bkg_df))
+
         if debug_mode:
             print("-------------------Cumulative Data---------")
             print(self.cumulative_df.describe())
@@ -591,13 +663,13 @@ def main():
     # minituples_Zmu_2023Dv2.root
     
     bkg_files = [
-        # "minituple_LLPskim_2023Bv1.root",
+        "minituple_LLPskim_2023Bv1.root",
         "minituple_LLPskim_2023Cv1.root",
-        # "minituple_LLPskim_2023Cv2.root",
-        # "minituple_LLPskim_2023Cv3.root",
-        # "minituple_LLPskim_2023Cv4.root",
-        # "minituple_LLPskim_2023Dv1.root",
-        # "minituple_LLPskim_2023Dv2.root"
+        "minituple_LLPskim_2023Cv2.root",
+        "minituple_LLPskim_2023Cv3.root",
+        "minituple_LLPskim_2023Cv4.root",
+        "minituple_LLPskim_2023Dv1.root",
+        "minituple_LLPskim_2023Dv2.root"
     ]
 
     # this is for the depth training, the per event tree with inclusive scores appended

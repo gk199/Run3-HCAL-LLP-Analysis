@@ -3,7 +3,7 @@
 Two DNN classifiers are trained, one as a depth jet tagger, the other as an inclusive jet tagger. A virtual environment is used to do the training and score evaluations:
 
 ```
-source keras2pt13pt1/bin/activate
+source ../Run/Condor/VirtualEnvs/keras2pt13pt1/bin/activate
 
 python3 runner-v4.py
 python3 ScoresToEventBased-v4.py <option-filename.root>
