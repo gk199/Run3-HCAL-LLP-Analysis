@@ -358,6 +358,11 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 
 	myvars_int.push_back(Form("perJet_DepthTowers") );
 
+	myvars_float.push_back("perJet_TDCavg");
+	myvars_float.push_back("perJet_TDCavg_energyWeight");
+	myvars_float.push_back("perJet_TDCnDelayed");
+	myvars_float.push_back("perJet_Timeavg");
+
 	for (int t=0; t<3; t++) {
 		myvars_float.push_back( Form("perJet_Track%dPt", t) );
 		myvars_float.push_back( Form("perJet_Frac_Track%dPt", t) );
@@ -878,6 +883,12 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	jet_tree_output_vars_int["perJet_LeadingRechitD"] 			= energeticRechits[0].second;
 
 	jet_tree_output_vars_int["perJet_DepthTowers"]				= GetDepthTowers_Jet(jetIndex, 0.4);
+
+	vector<float> TDC_TDCenergy = GetTDCavg_Jet(jetIndex, 0.4); // TDC average, energy weighted TDC
+	jet_tree_output_vars_float["perJet_TDCavg"] 				= TDC_TDCenergy[0];
+	jet_tree_output_vars_float["perJet_TDCavg_energyWeight"] 	= TDC_TDCenergy[1];
+	jet_tree_output_vars_float["perJet_TDCnDelayed"] 			= TDC_TDCenergy[2];
+	jet_tree_output_vars_float["perJet_Timeavg"] 				= TDC_TDCenergy[3];
 
 	// find three highest pT tracks matched to a jet, and save the generalTrack index for use later (in dzToPV and dzyToBS)
 	vector<uint> jet_track_index = jet_TrackIndices->at(jetIndex);

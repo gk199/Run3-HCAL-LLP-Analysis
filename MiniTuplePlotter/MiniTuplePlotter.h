@@ -899,10 +899,14 @@ public :
 							pEff = new TEfficiency(*h_pass, *h_total);
 							string label_y = "Efficiency";
 							if (plot_type == "acceptance") label_y = "Acceptance";
-							if (multiple) label_y = "L1T Efficiency";
+							if (multiple) label_y = "L1T efficiency";
 							pEff->SetTitle(Form("; %s; %s", PlotParams_temp.label_x.c_str(), label_y.c_str())); // HCAL LLP Trigger Efficiencies
 							pEff->SetLineColor( colors[i] );
 							pEff->SetLineWidth(3.);
+
+							pEff->SetMarkerStyle(52 + i); // for a x as the marker to differentiate the overlayed plots (53 = circle, 55 = triangle)
+							pEff->SetMarkerSize(1.7);
+							pEff->SetMarkerColor(colors[i]);
 
 							if (i == 1) pEff->Draw();
 							if (i > 1) pEff->Draw("same");
