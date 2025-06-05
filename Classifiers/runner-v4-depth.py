@@ -6,7 +6,12 @@ from tensorflow.keras.layers import Dense, Conv1D, Flatten, Dropout, MaxPooling1
 from tensorflow.keras.optimizers import Nadam, Adam
 import pandas as pd
 import matplotlib.pyplot as plt
+
 import uproot
+import awkward as ak
+import h5py
+import gc
+import fnmatch
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
@@ -52,7 +57,6 @@ class DataProcessor:
         # Load the signal and background data. Do this in batches, otherwise the large root files cause memory issues
         print("Loading Data in Batches with uproot.iterate...")
         
-        filter_name = ["jet0*", "jet1*", "Pass*"] 
         tree_name = "NoSel"
         filepath = '/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.14/'
         filepath = './'
@@ -60,87 +64,134 @@ class DataProcessor:
         sig_fps = [filepath + filename for filename in sig_files] if sig_files is not None else []
         bkg_fps = [filepath + filename for filename in bkg_files] if bkg_files is not None else []
 
-        # Load signal data in chunks
-        sig_df = [] #pd.DataFrame()
-        total_signal = 0
-        for chunk in uproot.iterate(
-            [f"{file}:{tree_name}" for file in sig_fps], filter_name=filter_name, library="pd", step_size=step_size,
-        ):
-            # Apply event-level filter here
-            if debug_mode:
-                print(chunk["Pass_HLTDisplacedJet"].head()) # boolean
-                print(chunk["Pass_HLTDisplacedJet"].dtype)
-                print(chunk["jet0_isTruthMatched"].head()) # float
-                print(chunk["jet0_isTruthMatched"].dtype)
-                print(chunk["jet0_DepthTagCand"].head()) # boolean
-                print(chunk["jet0_DepthTagCand"].dtype)
-            chunk_filtered_leading = chunk[ chunk["Pass_HLTDisplacedJet"] & (chunk["jet0_isTruthMatched"] == 1) ] # & chunk["jet0_DepthTagCand"]]
-            chunk_filtered_subleading = chunk[ chunk["Pass_HLTDisplacedJet"] & (chunk["jet1_isTruthMatched"] == 1) ] # & chunk["jet1_DepthTagCand"]]
-            # Rename columns here to perJet for rest of processing, now that we know we have a depth tag candidate jet matched to LLP decay
-            rename_dict_leading = {
-                col: col.replace("jet0_", "perJet_")
-                for col in chunk_filtered_leading.columns
-                if col.startswith("jet0_") 
-            }
-            rename_dict_subleading = {
-                col: col.replace("jet1_", "perJet_")
-                for col in chunk_filtered_subleading.columns
-                if col.startswith("jet1_") 
-            }
-            chunk_filtered_leading = chunk_filtered_leading.rename(columns=rename_dict_leading)
-            chunk_filtered_subleading = chunk_filtered_subleading.rename(columns=rename_dict_subleading)
-            # Now the jets we care about are labeled perJet in each of these, and have accounted for leading / subleading differences
-            # Drop all columns except those starting with 'perJet' or 'Pass'
-            keep_cols = lambda df: [col for col in df.columns if col.startswith("perJet") or col.startswith("Pass")]
-            chunk_filtered_leading = chunk_filtered_leading[keep_cols(chunk_filtered_leading)]
-            chunk_filtered_subleading = chunk_filtered_subleading[keep_cols(chunk_filtered_subleading)]
+        with uproot.open(f"{sig_fps[0]}:{tree_name}") as tree: all_branches = tree.keys()
+        include_patterns = ["jet0*", "jet1*", "Pass*"]
+        exclude_patterns = ["*_rechit_*"] # these have type "awkward" which doesn't work with h5 format
+        # Match includes
+        included = set()
+        for pattern in include_patterns:
+            included.update(fnmatch.filter(all_branches, pattern))
+        # Remove excluded matches
+        for pattern in exclude_patterns:
+            to_remove = fnmatch.filter(all_branches, pattern)
+            included.difference_update(to_remove)
+        # Convert to sorted list for consistency
+        filter_name = sorted(included)
 
-            print(f"Loaded signal chunk of size: {len(chunk)} entries, and {len(chunk_filtered_leading)} (leading) and  {len(chunk_filtered_subleading)} (subleading) entries passed HLT displaced jet + LLP match + depth tag candidate selection")
-            total_signal += len(chunk_filtered_leading) + len(chunk_filtered_subleading)
+        with h5py.File("signal_depth.h5", "w") as sig_h5f, h5py.File("background_depth.h5", "w") as bkg_h5f:
+            # These datasets will be extendable
+            sig_data = None
+            bkg_data = None
 
-            if not chunk_filtered_leading.empty: sig_df.append(chunk_filtered_leading)
-            if not chunk_filtered_subleading.empty: sig_df.append(chunk_filtered_subleading)
+            total_signal = 0
+            total_background = 0
 
-        self.sig_df = pd.concat(sig_df) if sig_df else pd.DataFrame()
-        print(f"Concatenated all signal entries, total length {total_signal}")
+            # Load signal data in chunks
+            for chunk in uproot.iterate(
+                [f"{file}:{tree_name}" for file in sig_fps], filter_name=filter_name, library="pd", step_size=step_size,
+            ):
+                # Apply event-level filter here
+                if debug_mode:
+                    print(chunk["Pass_HLTDisplacedJet"].head()) # boolean
+                    print(chunk["Pass_HLTDisplacedJet"].dtype)
+                    print(chunk["jet0_isTruthMatched"].head()) # float
+                    print(chunk["jet0_isTruthMatched"].dtype)
+                    print(chunk["jet0_DepthTagCand"].head()) # boolean
+                    print(chunk["jet0_DepthTagCand"].dtype)
+                chunk_filtered_leading = chunk[ chunk["Pass_HLTDisplacedJet"] & (chunk["jet0_isTruthMatched"] == 1) ] # & chunk["jet0_DepthTagCand"]]
+                chunk_filtered_subleading = chunk[ chunk["Pass_HLTDisplacedJet"] & (chunk["jet1_isTruthMatched"] == 1) ] # & chunk["jet1_DepthTagCand"]]
+                # Rename columns here to perJet for rest of processing, now that we know we have a depth tag candidate jet matched to LLP decay
+                rename_dict_leading = {
+                    col: col.replace("jet0_", "perJet_")
+                    for col in chunk_filtered_leading.columns
+                    if col.startswith("jet0_") 
+                }
+                rename_dict_subleading = {
+                    col: col.replace("jet1_", "perJet_")
+                    for col in chunk_filtered_subleading.columns
+                    if col.startswith("jet1_") 
+                }
+                chunk_filtered_leading = chunk_filtered_leading.rename(columns=rename_dict_leading)
+                chunk_filtered_subleading = chunk_filtered_subleading.rename(columns=rename_dict_subleading)
+                # Now the jets we care about are labeled perJet in each of these, and have accounted for leading / subleading differences
+                # Drop all columns except those starting with 'perJet' or 'Pass'
+                keep_cols = lambda df: [col for col in df.columns if col.startswith("perJet") or col.startswith("Pass")]
+                chunk_filtered_leading = chunk_filtered_leading[keep_cols(chunk_filtered_leading)]
+                chunk_filtered_subleading = chunk_filtered_subleading[keep_cols(chunk_filtered_subleading)]
 
-        # Load background data in chunks
-        bkg_df = [] #pd.DataFrame()
-        total_background = 0
-        for chunk in uproot.iterate(
-            [f"{file}:{tree_name}" for file in bkg_fps], filter_name=filter_name, library="pd", step_size=step_size,
-        ):
-            # Apply event-level filter here
-            # Use CR for depth tagger, and find portions where leading jet is depth candidate, or subleading jet is depth candidate
-            chunk_filtered_leading = chunk[ ((chunk["jet1_scores_inc"] < 0.5) & (chunk["jet1_scores_inc"] > -1))] # & (chunk["jet0_DepthTagCand"] == 1)) ]
-            chunk_filtered_subleading = chunk[ ((chunk["jet0_scores_inc"] < 0.5) & (chunk["jet0_scores_inc"] > -1))] # & (chunk["jet1_DepthTagCand"] == 1)) ]
-            # Rename columns here to perJet for rest of processing, now that we know we have a depth tag candidate jet in the CR
-            rename_dict_leading = {
-                col: col.replace("jet0_", "perJet_")
-                for col in chunk_filtered_leading.columns
-                if col.startswith("jet0_") 
-            }
-            rename_dict_subleading = {
-                col: col.replace("jet1_", "perJet_")
-                for col in chunk_filtered_subleading.columns
-                if col.startswith("jet1_") 
-            }
-            chunk_filtered_leading = chunk_filtered_leading.rename(columns=rename_dict_leading)
-            chunk_filtered_subleading = chunk_filtered_subleading.rename(columns=rename_dict_subleading)
-            # Now the jets we care about are labeled perJet in each of these, and have accounted for leading / subleading CR differences
-            # Drop all columns except those starting with 'perJet' or 'Pass'
-            keep_cols = lambda df: [col for col in df.columns if col.startswith("perJet") or col.startswith("Pass")]
-            chunk_filtered_leading = chunk_filtered_leading[keep_cols(chunk_filtered_leading)]
-            chunk_filtered_subleading = chunk_filtered_subleading[keep_cols(chunk_filtered_subleading)]
-            
-            print(f"Loaded background chunk of size: {len(chunk)} entries, and {len(chunk_filtered_leading)} (leading) and {len(chunk_filtered_subleading)} (subleading) entries passed CR selection")
-            total_background += len(chunk_filtered_leading) + len(chunk_filtered_subleading)
-            if not chunk_filtered_leading.empty: bkg_df.append(chunk_filtered_leading)
-            if not chunk_filtered_subleading.empty: bkg_df.append(chunk_filtered_subleading)
+                print(f"Loaded signal chunk of size: {len(chunk)} entries, and {len(chunk_filtered_leading)} (leading) and  {len(chunk_filtered_subleading)} (subleading) entries passed HLT displaced jet + LLP match + depth tag candidate selection")
+                total_signal += len(chunk_filtered_leading) + len(chunk_filtered_subleading)
 
-        self.bkg_df = pd.concat(bkg_df) if bkg_df else pd.DataFrame()
-        print(f"Concatenated all background entries, total length {total_background}")
+                # Combine both datasets
+                combined_filtered = pd.concat(
+                    [chunk_filtered_leading, chunk_filtered_subleading],
+                    ignore_index=True
+                )
+                if not combined_filtered.empty:
+                    if debug_mode: 
+                        with pd.option_context('display.max_rows', None, 'display.max_columns', None): print(combined_filtered.dtypes) # debugging which column is badly behaved
+                    data = combined_filtered.to_records(index=False)
 
+                    if sig_data is None:
+                        sig_data = sig_h5f.create_dataset(
+                            "features", data=data, maxshape=(None,), chunks=True
+                        )
+                    else:
+                        sig_data.resize((sig_data.shape[0] + len(data),))
+                        sig_data[-len(data):] = data
+
+                    del chunk_filtered_leading, chunk_filtered_subleading, combined_filtered, data
+                    gc.collect()
+
+            # Load background data in chunks
+            for chunk in uproot.iterate(
+                [f"{file}:{tree_name}" for file in bkg_fps], filter_name=filter_name, library="pd", step_size=step_size,
+            ):
+                # Apply event-level filter here
+                # Use CR for depth tagger, and find portions where leading jet is depth candidate, or subleading jet is depth candidate
+                chunk_filtered_leading = chunk[ ((chunk["jet1_scores_inc"] < 0.5) & (chunk["jet1_scores_inc"] > -1))] # & (chunk["jet0_DepthTagCand"] == 1)) ]
+                chunk_filtered_subleading = chunk[ ((chunk["jet0_scores_inc"] < 0.5) & (chunk["jet0_scores_inc"] > -1))] # & (chunk["jet1_DepthTagCand"] == 1)) ]
+                # Rename columns here to perJet for rest of processing, now that we know we have a depth tag candidate jet in the CR
+                rename_dict_leading = {
+                    col: col.replace("jet0_", "perJet_")
+                    for col in chunk_filtered_leading.columns
+                    if col.startswith("jet0_") 
+                }
+                rename_dict_subleading = {
+                    col: col.replace("jet1_", "perJet_")
+                    for col in chunk_filtered_subleading.columns
+                    if col.startswith("jet1_") 
+                }
+                chunk_filtered_leading = chunk_filtered_leading.rename(columns=rename_dict_leading)
+                chunk_filtered_subleading = chunk_filtered_subleading.rename(columns=rename_dict_subleading)
+                # Now the jets we care about are labeled perJet in each of these, and have accounted for leading / subleading CR differences
+                # Drop all columns except those starting with 'perJet' or 'Pass'
+                keep_cols = lambda df: [col for col in df.columns if col.startswith("perJet") or col.startswith("Pass")]
+                chunk_filtered_leading = chunk_filtered_leading[keep_cols(chunk_filtered_leading)]
+                chunk_filtered_subleading = chunk_filtered_subleading[keep_cols(chunk_filtered_subleading)]
+                
+                print(f"Loaded background chunk of size: {len(chunk)} entries, and {len(chunk_filtered_leading)} (leading) and {len(chunk_filtered_subleading)} (subleading) entries passed CR selection")
+                total_background += len(chunk_filtered_leading) + len(chunk_filtered_subleading)
+                # Combine both datasets
+                combined_filtered = pd.concat(
+                    [chunk_filtered_leading, chunk_filtered_subleading],
+                    ignore_index=True
+                )
+                if not combined_filtered.empty:
+                    data = combined_filtered.to_records(index=False)
+
+                    if bkg_data is None:
+                        bkg_data = bkg_h5f.create_dataset(
+                            "features", data=data, maxshape=(None,), chunks=True
+                        )
+                    else:
+                        bkg_data.resize((bkg_data.shape[0] + len(data),))
+                        bkg_data[-len(data):] = data
+
+                    del chunk_filtered_leading, chunk_filtered_subleading, combined_filtered, data
+                    gc.collect()
+
+        print(f"Saved {total_signal} signal and {total_background} background entries to HDF5 (combined number of samples is {total_signal + total_background})")
         print("Loaded Data")
 
     def apply_selections(self, inclusive=False):
@@ -206,6 +257,15 @@ class DataProcessor:
 
         sig_df = pd.DataFrame()
         bkg_df = pd.DataFrame()
+
+        # Load signal HDF5 data
+        with h5py.File("signal_depth.h5", "r") as sig_file:
+            sig_data = sig_file["features"][:]
+            self.sig_df = pd.DataFrame.from_records(sig_data)  # Convert structured array to DataFrame
+        # Load background HDF5 data
+        with h5py.File("background_depth.h5", "r") as bkg_file:
+            bkg_data = bkg_file["features"][:]
+            self.bkg_df = pd.DataFrame.from_records(bkg_data)
         
         if not self.sig_df.empty and self.sel:
             sig_df = self.sig_df.copy(deep=True)
@@ -349,7 +409,7 @@ class ModelHandler:
         
         self.model.compile(optimizer=self.optimizer, loss="sparse_categorical_crossentropy")
                   
-    def train(self, X_train, y_train, epochs=200, batch_size=512, val=0.2):
+    def train(self, X_train, y_train, epochs=200, batch_size=512, val=0.25):
         self.build() # similar to runner-v2
         name="best_model_v4.keras"
         early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
@@ -503,7 +563,7 @@ class Runner:
 
         X, y, perJet_Pt_series = self.processor.process_data() # no longer processing train and test samples separately
         randFloat = (perJet_Pt_series * 1000).astype(int) % 10 # extract 1000th place. Trained on "train_mask = randFloat_values < 4"
-        train_mask = randFloat < 4
+        train_mask = randFloat < 8
         test_mask = ~train_mask  # or randFloat >= 4
 
         X_train, y_train = X[train_mask], y[train_mask]

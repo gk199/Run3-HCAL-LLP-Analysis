@@ -114,8 +114,6 @@ class DataProcessor:
                     del chunk_filtered, data
                     gc.collect()
 
-                # sig_df.append(chunk_filtered)
-
         # self.sig_df = pd.concat(sig_df) if sig_df else pd.DataFrame()
         # print(f"Concatenated all signal entries, total length {total_signal}")
 
@@ -381,7 +379,7 @@ class ModelHandler:
         
         self.model.compile(optimizer=self.optimizer, loss="sparse_categorical_crossentropy")
                   
-    def train(self, X_train, y_train, epochs=200, batch_size=512, val=0.2):
+    def train(self, X_train, y_train, epochs=200, batch_size=512, val=0.25):
         self.build() # similar to runner-v2
         name="best_model_v4.keras"
         early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
@@ -511,7 +509,7 @@ class ModelHandler:
         mutual_info = mutual_info_regression(features, scores)
         mi_results = pd.Series(mutual_info, index=FEATURES)
         mi_results_sorted = mi_results.sort_values(ascending=False)
-        mi_results_sorted.to_csv("mutual_info_v4.csv")
+        mi_results_sorted.to_csv("mutual_info_v4_inclusive.csv")
         print("Computed mutual information")
         
         
@@ -535,7 +533,7 @@ class Runner:
 
         X, y, perJet_Pt_series = self.processor.process_data() # no longer processing train and test samples separately
         randFloat = (perJet_Pt_series * 1000).astype(int) % 10 # extract 1000th place. Trained on "train_mask = randFloat_values < 4"
-        train_mask = randFloat < 4
+        train_mask = randFloat < 8
         test_mask = ~train_mask  # or randFloat >= 4
 
         X_train, y_train = X[train_mask], y[train_mask]
