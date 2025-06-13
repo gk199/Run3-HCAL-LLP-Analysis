@@ -6,8 +6,12 @@ Two DNN classifiers are trained, one as a depth jet tagger, the other as an incl
 source ../Run/Condor/VirtualEnvs/keras2pt13pt1/bin/activate
 
 python3 runner-v4.py
+python3 runner-v4-depth.py
+
 python3 ScoresToEventBased-v4.py <option-filename.root>
 ```
+
+Need to run the inclusive tagger before the depth tagger training can be run, since depth training is done in the CR! 
 
 List files to train over and to write scores to in these scripts. The output DNNs are `dense_model_v4.keras` and `inclusive_model_v4.keras`.
 

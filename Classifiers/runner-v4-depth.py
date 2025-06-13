@@ -58,8 +58,7 @@ class DataProcessor:
         print("Loading Data in Batches with uproot.iterate...")
         
         tree_name = "NoSel"
-        filepath = '/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.14/'
-        filepath = './'
+        filepath = '/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/'
     
         sig_fps = [filepath + filename for filename in sig_files] if sig_files is not None else []
         bkg_fps = [filepath + filename for filename in bkg_files] if bkg_files is not None else []
@@ -98,8 +97,8 @@ class DataProcessor:
                     print(chunk["jet0_isTruthMatched"].dtype)
                     print(chunk["jet0_DepthTagCand"].head()) # boolean
                     print(chunk["jet0_DepthTagCand"].dtype)
-                chunk_filtered_leading = chunk[ chunk["Pass_HLTDisplacedJet"] & (chunk["jet0_isTruthMatched"] == 1) ] # & chunk["jet0_DepthTagCand"]]
-                chunk_filtered_subleading = chunk[ chunk["Pass_HLTDisplacedJet"] & (chunk["jet1_isTruthMatched"] == 1) ] # & chunk["jet1_DepthTagCand"]]
+                chunk_filtered_leading = chunk[ chunk["Pass_HLTDisplacedJet"] & (chunk["jet0_isTruthMatched"] == 1) & chunk["jet0_DepthTagCand"]]
+                chunk_filtered_subleading = chunk[ chunk["Pass_HLTDisplacedJet"] & (chunk["jet1_isTruthMatched"] == 1) & chunk["jet1_DepthTagCand"]]
                 # Rename columns here to perJet for rest of processing, now that we know we have a depth tag candidate jet matched to LLP decay
                 rename_dict_leading = {
                     col: col.replace("jet0_", "perJet_")
@@ -149,8 +148,8 @@ class DataProcessor:
             ):
                 # Apply event-level filter here
                 # Use CR for depth tagger, and find portions where leading jet is depth candidate, or subleading jet is depth candidate
-                chunk_filtered_leading = chunk[ ((chunk["jet1_scores_inc"] < 0.5) & (chunk["jet1_scores_inc"] > -1))] # & (chunk["jet0_DepthTagCand"] == 1)) ]
-                chunk_filtered_subleading = chunk[ ((chunk["jet0_scores_inc"] < 0.5) & (chunk["jet0_scores_inc"] > -1))] # & (chunk["jet1_DepthTagCand"] == 1)) ]
+                chunk_filtered_leading = chunk[ (chunk["jet0_DepthTagCand"] & (chunk["jet1_scores_inc_train80"] < 0.5) & (chunk["jet1_scores_inc_train80"] > -1)) ]
+                chunk_filtered_subleading = chunk[ (chunk["jet1_DepthTagCand"] & (chunk["jet0_scores_inc_train80"] < 0.5) & (chunk["jet0_scores_inc_train80"] > -1)) ]
                 # Rename columns here to perJet for rest of processing, now that we know we have a depth tag candidate jet in the CR
                 rename_dict_leading = {
                     col: col.replace("jet0_", "perJet_")
@@ -206,6 +205,8 @@ class DataProcessor:
         def select_L1jet(row):
             return row['perJet_L1trig_Matched'] > 0 # returns 1 if jet matched to L1 hwQual-set jet, 0 if not (hwQual not set, or not matched to L1). Now included in depth(row) function instead
 
+        def select_HCAL(row):
+            return 177 <= row['perJet_MatchedLLP_DecayR'] < 295 and abs(row['perJet_MatchedLLP_Eta']) < 1.26
         def select_HCAL12(row):
             return 177 <= row['perJet_MatchedLLP_DecayR'] < 214.2 and abs(row['perJet_MatchedLLP_Eta']) < 1.26
         def select_HCAL34(row):
@@ -214,7 +215,7 @@ class DataProcessor:
         # only consider events that pass the displaced jet HLT (Pass_HLTDisplacedJet) -- both the depth and inclusive tag canidates already require this
         # use "Pass_DepthTagCand" or "Pass_InclTagCand", but still require L1 trig matched for the background
         def depth(row):
-            return (abs(row['perJet_Eta']) < 1.26 and row['perJet_Pt'] > 60) # and row['perJet_DepthTagCand']) # TODO uncomment when depthTagCand is fixed in per event tree!! 
+            return (abs(row['perJet_Eta']) < 1.26 and row['perJet_Pt'] > 60 and row['perJet_DepthTagCand']) # TODO uncomment when depthTagCand is fixed in per event tree!! 
             # returns 1 if this jet is a depth tag candidate (leading L1 LLP hwQual matched jet + kinematic requirements), 2+ depth emulated towers, eta < 1.26, and pT > 60
             # TODO need to add in that this must be a depth candidate in the CR -- sequential trainings. 
             # If scores are added, need to check the score of the one that Pass_InclTagCand -- not how per jet tree is setup though...
@@ -244,10 +245,12 @@ class DataProcessor:
                 return -1
 
         def classify_signal(row): # TODO decide if require LLP to decay in HCAL or not
-            if select_safety(row) and select_HCAL12(row) and depth(row):
-                return 0
-            elif select_safety(row) and select_HCAL34(row) and depth(row):
-                return sig_value # 1 or 0
+            # if select_safety(row) and select_HCAL12(row) and depth(row):
+            #     return 0
+            # elif select_safety(row) and select_HCAL34(row) and depth(row):
+            #     return sig_value # 1 or 0
+            if select_safety(row) and depth(row): # and select_HCAL(row): # requires LLP decays in HCAL
+                return sig_value
             else:
                 return -1
         
@@ -411,7 +414,7 @@ class ModelHandler:
                   
     def train(self, X_train, y_train, epochs=200, batch_size=512, val=0.25):
         self.build() # similar to runner-v2
-        name="best_model_v4.keras"
+        name="best_model_dense_v4.keras" # only saves weights at the checkpoint during training
         early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
         checkpoint = ModelCheckpoint(name, monitor='val_loss', save_best_only=True, save_weights_only=True)
         history = self.model.fit(X_train, y_train, epochs=epochs, batch_size=512, validation_split=val, verbose=1, callbacks = [early_stopping, checkpoint])
@@ -672,14 +675,14 @@ class Runner:
         
 def main():
     sig_files = [
-        "minituple_HToSSTo4b_125_15_CTau10000.root"
-        #"minituple_HToSSTo4b_125_15_CTau1000.root",
-        #"minituple_HToSSTo4b_125_15_CTau3000.root",
-        #"minituple_HToSSTo4b_125_50_CTau10000.root",
-        #"minituple_HToSSTo4b_125_50_CTau3000.root",
-        # "minituple_HToSSTo4b_250_120_CTau10000.root",
-        # "minituple_HToSSTo4b_350_160_CTau10000.root",
-        # "minituple_HToSSTo4b_350_80_CTau500.root"
+        "minituple_HToSSTo4b_125_15_CTau10000_partial.root",
+        # "minituple_HToSSTo4b_125_15_CTau1000.root",
+        "minituple_HToSSTo4b_125_15_CTau3000_partial.root",
+        "minituple_HToSSTo4b_125_50_CTau10000_partial.root",
+        "minituple_HToSSTo4b_125_50_CTau3000_partial.root",
+        "minituple_HToSSTo4b_250_120_CTau10000_partial.root",
+        "minituple_HToSSTo4b_350_160_CTau10000_partial.root",
+        "minituple_HToSSTo4b_350_80_CTau500_partial.root"
     ]
 
     # minituples_Zmu_2023Bv1.root
@@ -691,24 +694,24 @@ def main():
     # minituples_Zmu_2023Dv2.root
     
     bkg_files = [
-        "minituple_LLPskim_2023Bv1.root",
-        # "minituple_LLPskim_2023Cv1.root",
-        # "minituple_LLPskim_2023Cv2.root",
-        # "minituple_LLPskim_2023Cv3.root",
-        # "minituple_LLPskim_2023Cv4.root",
-        # "minituple_LLPskim_2023Dv1.root",
-        # "minituple_LLPskim_2023Dv2.root"
+        "minituple_LLPskim_2023Bv1_partial.root",
+        "minituple_LLPskim_2023Cv1_partial.root",
+        "minituple_LLPskim_2023Cv2_partial.root",
+        "minituple_LLPskim_2023Cv3_partial.root",
+        "minituple_LLPskim_2023Cv4_partial.root",
+        "minituple_LLPskim_2023Dv1_partial.root",
+        "minituple_LLPskim_2023Dv2_partial.root"
     ]
 
     # this is for the depth training, the per event tree with inclusive scores appended
-    sig_files_perEvent = ["minituple_HToSSTo4B_MH250_MS120_CTau10000_partial15k_NoSel_scores.root"]
-    bkg_files_perEvent = ["minituple_Run2023D-EXOLLPJetHCAL-PromptReco-v2_partial28k_NoSel_scores.root"]
+    # sig_files_perEvent = ["minituple_HToSSTo4B_MH250_MS120_CTau10000_partial15k_NoSel_scores.root"]
+    # bkg_files_perEvent = ["minituple_Run2023D-EXOLLPJetHCAL-PromptReco-v2_partial28k_NoSel_scores.root"]
 
     mode = "train" # "train", "eval", "filewrite", "constants"
     
     # running the depth and inclusive tagger sequentially
     print("Running Depth Tagger")
-    runner = Runner(sig_files=sig_files_perEvent[:], bkg_files=bkg_files_perEvent[:], mode=mode, num_classes=2, inclusive=False)
+    runner = Runner(sig_files=sig_files[:], bkg_files=bkg_files[:], mode=mode, num_classes=2, inclusive=False)
     runner.set_model_name(model_name="depth_model_v4.keras")
     runner.run()
     
