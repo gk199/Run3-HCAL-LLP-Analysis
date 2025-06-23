@@ -15,6 +15,19 @@ Need to run the inclusive tagger before the depth tagger training can be run, si
 
 List files to train over and to write scores to in these scripts. The output DNNs are `dense_model_v4.keras` and `inclusive_model_v4.keras`.
 
+## Plot DNN Scores
+```
+python3 PlotScoresDNN.py
+```
+
+## Custom ROC Curve Plots
+```
+root -b -q -l MakeDNNPerformancePlots_SigBkg.C
+```
+The input root files are listed in the script. 
+
+## Environment Details
+
 Note that the training and evaluation of the DNN model is done in a python virtual environment created from `requirements_minimal.txt`. The full instructions for creating this are in the [Condor README](https://github.com/gk199/Run3-HCAL-LLP-Analysis/tree/dev-gillian/Run/Condor#debugging-issues-with-dnn-score-addition). 
 
 Creation of python virtual environment for training and evaluation of the DNNs:

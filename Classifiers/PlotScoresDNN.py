@@ -4,7 +4,7 @@ import ROOT
 
 ROOT.gROOT.SetBatch(True)
 
-WPlusJets = True # is this W+jets from LLP skim or LLP MC?
+WPlusJets = False # is this W+jets from LLP skim or LLP MC?
 
 # list of filepaths
 if WPlusJets: 
@@ -36,7 +36,7 @@ variables = [
     "jet1_DepthTagCand",
     "jet0_Pt",
     "Pass_WPlusJets",
-    "jet0_isTruthMatched"    
+    "jet0_isTruthMatched"  
 ]
 
 # Initialize dictionary to store all arrays
@@ -59,11 +59,16 @@ for var in variables:
 mask_train80 = combined_data["jet0_scores_inc_train80"] > -1
 mask_train40 = combined_data["jet0_scores_inc_train40"] > -1
 
+# Extract third decimal digit to exclude jets used in training
+jet0_Pt = combined_data["jet0_Pt"]
+third_decimal_digit = np.floor(jet0_Pt * 1000).astype(int) % 10
+
 if WPlusJets:
-    mask_train80 = mask_train80 & combined_data["Pass_WPlusJets"]
-    mask_train40 = mask_train40 & combined_data["Pass_WPlusJets"]
+    mask_train80 = mask_train80 & (third_decimal_digit >= 8) & combined_data["Pass_WPlusJets"]
+    mask_train40 = mask_train40 & (third_decimal_digit >= 4) & combined_data["Pass_WPlusJets"]
 else:
-    mask_train80 = mask_train80 & (combined_data["jet0_isTruthMatched"] == 1)
+    mask_train80 = mask_train80 & (third_decimal_digit >= 8) & (combined_data["jet0_isTruthMatched"] == 1)
+    mask_train40 = mask_train40 & (third_decimal_digit >= 4) & (combined_data["jet0_isTruthMatched"] == 1)
 
 # Progressive selection masks
 sel0 = np.ones_like(combined_data["jet0_Pt"], dtype=bool)
