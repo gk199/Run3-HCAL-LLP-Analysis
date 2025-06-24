@@ -14,17 +14,17 @@ debug = False
 # Define the histogram bins
 pT_bins = np.linspace(0, 300, 20)  # pT axis from 0 to 500 GeV, 20 bins
 pT_bins = [0, 40, 50, 60, 70, 80, 100, 120, 160, 240, 400]  # Define pT bins
-#pT_bins = [0, 40, 60, 70, 100, 150, 240, 400]  # Define pT bins
+# pT_bins = [0, 40, 60, 70, 100, 150, 240, 400]  # Define pT bins
 pT_bins = np.array(pT_bins, dtype=float)
 eta_bins = np.linspace(-1.26, 1.26, 10)  # eta axis from -2 to 2, 10 bins
 phi_bins = np.linspace(-np.pi, np.pi, 10)  # phi axis from -pi to pi, 10 bins
 
-DNN_cut = 0.9
+DNN_cut = 0.95
 DNN_cut_inc = 0.9
 
 runs_to_exclude = [367230, 367772, 368331, 368440, 368764, 370436, 370579, 370790] # 2023 runs
 
-era = "2023 Dv2" # automatically switches which input minituples to use based on this name
+era = "2023 Cv4" # automatically switches which input minituples to use based on this name
 
 Zmu = False
 if Zmu: era = "2023 Bv1-Dv2 Zmu"
@@ -809,10 +809,10 @@ def main():
     if combined_tree_Zmu:
         print("Z+jets / W+jets tree successfully accessed, will be passed to MisTagParametrization")
         #MisTagParametrization(combined_tree_Zmu, "")
-        #MisTagParametrization(combined_tree_Zmu, "depth")
+        MisTagParametrization(combined_tree_Zmu, "depth")
         #MisTagParametrization(combined_tree_Zmu, "timing")
         #MisTagParametrization(combined_tree_Zmu, "depth, timing")
-        MisTagParametrization(combined_tree_Zmu, "depth, trackPt")
+        # MisTagParametrization(combined_tree_Zmu, "depth, trackPt")
         # MisTagParametrization(combined_tree_Zmu, "before alignment")
         # MisTagParametrization(combined_tree_Zmu, "after alignment")
         # MisTagParametrization(combined_tree_Zmu, "before alignment, depth")
