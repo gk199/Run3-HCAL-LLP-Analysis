@@ -675,14 +675,16 @@ class Runner:
         
 def main():
     sig_files = [
-        "minituple_HToSSTo4b_125_15_CTau10000_partial.root",
-        # "minituple_HToSSTo4b_125_15_CTau1000.root",
-        "minituple_HToSSTo4b_125_15_CTau3000_partial.root",
-        "minituple_HToSSTo4b_125_50_CTau10000_partial.root",
-        "minituple_HToSSTo4b_125_50_CTau3000_partial.root",
-        "minituple_HToSSTo4b_250_120_CTau10000_partial.root",
-        "minituple_HToSSTo4b_350_160_CTau10000_partial.root",
-        "minituple_HToSSTo4b_350_80_CTau500_partial.root"
+        "minituple_HToSSTo4b_125_15_CTau10000_scores.root",
+        "minituple_HToSSTo4b_125_15_CTau3000_scores.root",
+        "minituple_HToSSTo4b_125_50_CTau10000_scores.root",
+        "minituple_HToSSTo4b_125_50_CTau3000_batch1_scores.root",
+        "minituple_HToSSTo4b_125_50_CTau3000_batch2_scores.root",
+        "minituple_HToSSTo4b_250_120_CTau10000_batch1_scores.root",
+        "minituple_HToSSTo4b_250_120_CTau10000_batch2_scores.root",
+        "minituple_HToSSTo4b_350_160_CTau10000_batch1_scores.root",
+        "minituple_HToSSTo4b_350_160_CTau10000_batch2_scores.root",
+        "minituple_HToSSTo4b_350_80_CTau500_scores.root"
     ]
 
     # minituples_Zmu_2023Bv1.root
@@ -694,13 +696,13 @@ def main():
     # minituples_Zmu_2023Dv2.root
     
     bkg_files = [
-        "minituple_LLPskim_2023Bv1_partial.root",
-        "minituple_LLPskim_2023Cv1_partial.root",
-        "minituple_LLPskim_2023Cv2_partial.root",
-        "minituple_LLPskim_2023Cv3_partial.root",
-        "minituple_LLPskim_2023Cv4_partial.root",
-        "minituple_LLPskim_2023Dv1_partial.root",
-        "minituple_LLPskim_2023Dv2_partial.root"
+        "minituple_LLPskim_2023Bv1_scores.root",
+        "minituple_LLPskim_2023Cv1_scores.root",
+        "minituple_LLPskim_2023Cv2_scores.root",
+        "minituple_LLPskim_2023Cv3_scores.root",
+        "minituple_LLPskim_2023Cv4_scores.root",
+        "minituple_LLPskim_2023Dv1_scores.root",
+        "minituple_LLPskim_2023Dv2_scores.root"
     ]
 
     # this is for the depth training, the per event tree with inclusive scores appended
