@@ -1,2 +1,5 @@
+junk*
 *.png
 *.root
+Run/Condor/Job*
+Run/Condor/Archive*
