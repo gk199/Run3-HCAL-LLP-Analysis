@@ -54,6 +54,8 @@ void DisplacedHcalJetAnalyzer( string infiletag = "", vector<string> infilepaths
 	cout<<"\nAdding the following files to chain:"<<endl;
 
 	TChain *chain = new TChain("DisplacedHcalJets/Events");
+    chain->SetCacheSize(50 * 1024 * 1024); // 50 MB
+    chain->SetCacheLearnEntries(10);
 
 	int n_files = 0;
 	for( auto infilepath: infilepaths ){
@@ -128,14 +130,14 @@ int main(int argc, char** argv) { // For running in compiled mode
 
 	int Nargs = argc;
 
-	if( Nargs <= 2 ){
-		vector<string> infilepaths;
-		for( int i = 2; i < Nargs; i++ ) infilepaths.push_back( argv[i] ); 
+	if( Nargs > 2 ){
+	    vector<string> infilepaths;
+	    for( int i = 2; i < Nargs; i++ ) infilepaths.push_back( argv[i] ); 
 
-		DisplacedHcalJetAnalyzer( argv[1], infilepaths );
+	    DisplacedHcalJetAnalyzer( argv[1], infilepaths );
 
 	} else {
-		cout<<"ERROR: Too enough arguments!"<<endl;
+		cout<<"ERROR: Not enough arguments!"<<endl;
 	}
 
 }
