@@ -40,31 +40,31 @@ def get_masks_and_selections(data, mode):
     mask80 = (data["jet0_scores_inc_train80"] > -1) & (third_dec >= 8)
     mask40 = (data["jet0_scores_inc_train40"] > -1) & (third_dec >= 4)
 
-    if mode == "background":
+    if (mode == "background"):
         print("Applying W+jets requirements")
-        truth = (data["Pass_WPlusJets"] == 1)
+        truth = (data["Pass_WPlusJets"] == 1) & (data["jet0_Pt"] > 40)
     else:
         print("Applying LLP matching requirements")
-        truth = (data["jet0_isTruthMatched"] == 1)
+        truth = (data["jet0_isTruthMatched"] == 1) & (data["jet0_Pt"] > 40)
 
     # Selection masks
-    sel0 = data["jet0_InclTagCand"] 
+    sel0 = data["jet0_InclTagCand"]
     sel1 = sel0 & data["jet1_DepthTagCand"]
     sel2 = truth # apply mask80 or 40, with truth matching requirements too
-    if mode == "signal": sel2 &= sel0 & sel1 # for LLP MC, also require jet0 and jet 1 are tag candidatates
+    if (mode == "signal"): sel2 &= sel1 # for LLP MC, also require jet0 and jet 1 are tag candidatates
 
     selections = [sel0, sel1, sel2]
     if mode == "background":
         labels = [
-            "prompt jet (background)",
-            "jet0 !DepthTagCand (background)",
-            "jet0 !DepthTagCand && jet1 DepthTagCand (background)"
+            "jet0 InclTagCand (background)",
+            "jet0 InclTagCand && jet1 DepthTagCand (background)",
+            "prompt jet (background)"
         ]
     else:
         labels = [
-            "LLP matched jet (signal)",
             "jet0 InclTagCand (signal)",
-            "jet0 InclTagCand && jet1 DepthTagCand (signal)"
+            "jet0 InclTagCand && jet1 DepthTagCand (signal)",
+            "jet0 and jet1 candidates, jet 0 is LLP matched (signal)"
         ]
     return mask80, mask40, selections, labels
 
@@ -86,7 +86,7 @@ def print_mask_stats(data, mode):
     print(f"  train40 (>=4): {np.sum(mask_excl40)}")
 
     # After matching (either truth matching or W+jets)
-    if "background":
+    if (mode == "background"):
         match_mask = data["Pass_WPlusJets"] == 1
         print(f"\nBackground (W+jets) selected with Pass_WPlusJets: {np.sum(match_mask)}")
     else:
@@ -104,10 +104,13 @@ def print_mask_stats(data, mode):
     overlap = np.sum(mask_final80 & mask_final40)
     print(f"\n  Overlap between train80 and train40 (should be same as train80): {overlap}")
 
+    jet0_Pt = data["jet0_Pt"]
+    valid_pt_mask = jet0_Pt > 0
+    third_dec_valid = third_dec[valid_pt_mask]
     # Optional: print distribution of third decimal digit
-    print("\nDistribution of third decimal digit of jet0_Pt * 1000:")
+    print("\nDistribution of third decimal digit of jet0_Pt * 1000 (for jet pT > 0):")
     for i in range(10):
-        count = np.sum(third_dec == i)
+        count = np.sum(third_dec_valid == i)
         print(f"  Digit {i}: {count}")
 
 def plot_train_comparison(scores80, scores40, weights80, weights40, step_label, out_prefix, normalize = False):
@@ -246,23 +249,23 @@ def main(mode):
     assert mode in ("signal", "background", "overlay", "background_overlay")
 
     # define file lists
-    signal_files = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_125_15_CTau10000_scores_50percent.root",]
-                # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_125_15_CTau3000_scores_50percent.root",     
-                # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_125_50_CTau10000_scores_50percent.root",     
-                # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_125_50_CTau3000_batch1_scores_50percent.root",     
-                # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_125_50_CTau3000_batch2_scores_50percent.root",     
-                # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_250_120_CTau10000_batch1_scores_50percent.root",     
-                # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_250_120_CTau10000_batch2_scores_50percent.root",     
-                # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_350_160_CTau10000_batch1_scores_50percent.root",     
-                # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_350_160_CTau10000_batch2_scores_50percent.root",     
-                # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_350_80_CTau500_scores_50percent.root"]
-    background_files = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_LLPskim_2023Bv1_scores_50percent.root",]
-                # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_LLPskim_2023Cv1_scores_50percent.root",
-                # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_LLPskim_2023Cv2_scores_50percent.root",
-                # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_LLPskim_2023Cv3_scores_50percent.root",
-                # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_LLPskim_2023Cv4_scores_50percent.root",
-                # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_LLPskim_2023Dv1_partial.root",
-                # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_LLPskim_2023Dv2_partial.root"]
+    signal_files = [#"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_125_15_CTau10000_scores.root",
+                #"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_125_15_CTau3000_scores.root",     
+                #"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_125_50_CTau10000_scores.root",     
+                "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_125_50_CTau3000_batch1_scores.root",     
+                "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_125_50_CTau3000_batch2_scores.root",     
+                "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_250_120_CTau10000_batch1_scores.root",     
+                "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_250_120_CTau10000_batch2_scores.root",     
+                "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_350_160_CTau10000_batch1_scores.root",     
+                "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_350_160_CTau10000_batch2_scores.root",     
+                "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_350_80_CTau500_scores.root"]
+    background_files = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_LLPskim_2023Bv1_scores.root",
+                "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_LLPskim_2023Cv1_scores.root",
+                "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_LLPskim_2023Cv2_scores.root",
+                "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_LLPskim_2023Cv3_scores.root",
+                "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_LLPskim_2023Cv4_scores.root",
+                "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_LLPskim_2023Dv1_scores.root",
+                "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_LLPskim_2023Dv2_scores.root"]
 
     if mode in ("signal", "background"):
         files = background_files if mode == "background" else signal_files
@@ -287,10 +290,10 @@ def main(mode):
         m80_b, _, sels_b, _ = get_masks_and_selections(bkg, "background")
 
         for step in range(3): # choose which step (1/2/3)
-            ss = sig["jet0_scores_inc_train80"][m80_s & sels_s[step-1]]
-            bb = bkg["jet0_scores_inc_train80"][m80_b & sels_b[step-1]]
-            weights_sig = sig["weight"][m80_s & sels_s[step-1]]
-            plot_signal_vs_background(ss, bb, weights_sig, f"Step {step}", f"signal_vs_background_step{step}", normalize=args.normalize)
+            ss = sig["jet0_scores_inc_train80"][m80_s & sels_s[step]]
+            bb = bkg["jet0_scores_inc_train80"][m80_b & sels_b[step]]
+            weights_sig = sig["weight"][m80_s & sels_s[step]]
+            plot_signal_vs_background(ss, bb, weights_sig, f"Step {step+1}", f"signal_vs_background_step{step+1}", normalize=args.normalize)
 
     elif mode == "background_overlay":
         for step in range(3):  # step 0, 1, 2
