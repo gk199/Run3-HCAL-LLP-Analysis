@@ -548,9 +548,9 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 		if (deltaR_jet_l1jet < 0.4) tree_output_vars_int[Form("jet%d_L1trig_Matched", valid_jet)] = (int)JetPassL1Trigger;
 
 		if( i == jetIndex_DepthTagCand )
-			tree_output_vars_float[Form("jet%d_DepthTagCand", valid_jet)] = true;
+			tree_output_vars_bool[Form("jet%d_DepthTagCand", valid_jet)] = true;
 		if( i == jetIndex_InclTagCand )
-			tree_output_vars_float[Form("jet%d_InclTagCand", valid_jet)]  = true;
+			tree_output_vars_bool[Form("jet%d_InclTagCand", valid_jet)]  = true;
 
 		tree_output_vars_float[Form("jet%d_Pt", valid_jet)] 	= jet_Pt->at(i);
 		tree_output_vars_float[Form("jet%d_Eta", valid_jet)] 	= jet_Eta->at(i);
