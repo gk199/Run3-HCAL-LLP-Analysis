@@ -277,6 +277,11 @@ PlotParams P_jet5_scores_inc = {"jet5_scores_inc", "DNN Inclusive Score", "DNN I
 PlotParams P_jet1and2_scores = {"jet1_scores + jet2_scores", "DNN Depth Score", "DNN Depth Score, jet 1 + jet 2", 0, 2};
 PlotParams P_jet1and2_scores_inc = {"jet1_scores_inc + jet2_scores_inc", "DNN Inclusive Score", "DNN Inclusive Score, jet 1 + jet 2", 0, 2};
 
+PlotParams P_jet0_scores_inc_train80 = {"jet0_scores_inc_train80", "DNN Inclusive Score, train 80%", "DNN Inclusive 80%, jet0", 0, 1};
+PlotParams P_jet0_scores_inc_train40 = {"jet0_scores_inc_train40", "DNN Inclusive Score, train 40%", "DNN Inclusive 40%, jet0", 0, 1};
+PlotParams P_jet0_scores_depth_hcal = {"jet0_scores_depth_hcal", "DNN Depth Score (HCAL)", "DNN Depth HCAL, jet0", 0, 1};
+PlotParams P_jet0_scores_depth_anywhere = {"jet0_scores_depth_anywhere", "DNN Depth Score", "DNN Depth, jet0", 0, 1};
+
 // --------------------------------------------------------------------- //
 // -------------------------- per jet variables ------------------------ //
 // --------------------------------------------------------------------- //

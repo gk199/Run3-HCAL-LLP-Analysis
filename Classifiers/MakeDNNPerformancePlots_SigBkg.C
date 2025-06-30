@@ -491,10 +491,10 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   //--------------------------------------------------------------------------------------------------------------
   // Histograms
   //==============================================================================================================  
-  TH1F *Signal_DNN_depth = new TH1F(("Signal_DNN_depth"+label).c_str(), "LLP Signal ; DNN (trained on combination) score for LLP signal ; Number of Events ",  55000, -0.1 , 1.1);
-  TH1F *Signal_DNN_inclusive = new TH1F(("Signal_DNN_depth"+label).c_str(), "LLP Signal ; Inclusive DNN (trained on combination) score for LLP signal ; Number of Events ",  55000, -0.1 , 1.1);
+  TH1F *Signal_DNN_depth = new TH1F(("Signal_DNN_depth"+label).c_str(), "LLP Signal ; Depth DNN (trained on combination) score for LLP signal ; Number of Events ",  55000, -0.1 , 1.1);
+  TH1F *Signal_DNN_inclusive = new TH1F(("Signal_DNN_inclusive"+label).c_str(), "LLP Signal ; Inclusive DNN (trained on combination) score for LLP signal ; Number of Events ",  55000, -0.1 , 1.1);
 
-  TH1F *Background_DNN_depth = new TH1F(("Background_DNN_depth"+label).c_str(), "W+Jets Background ; DNN (trained on combination) score for W+jets background ; Number of Events ",  55000, -0.1 , 1.1);
+  TH1F *Background_DNN_depth = new TH1F(("Background_DNN_depth"+label).c_str(), "W+Jets Background ; Depth DNN (trained on combination) score for W+jets background ; Number of Events ",  55000, -0.1 , 1.1);
   TH1F *Background_DNN_inclusive = new TH1F(("Background_DNN_inclusive"+label).c_str(), "W+Jets Background ; Inclusive DNN (trained on combination) score for W+jets background ; Number of Events ",  55000, -0.1 , 1.1);
 
   Double_t RealElectrons = 0;
@@ -557,8 +557,8 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   TTree *tree_sig_reduced_inc = tree_sig->CopyTree(SignalSelection_inc, "", tree_sig->GetEntries(), 0);
 
   if (SigTree.find("PerJet") == std::string::npos) {
-    tree_sig_reduced->SetBranchAddress("jet0_scores_inc_train80", &score_depth_sig);  
-    tree_sig_reduced_inc->SetBranchAddress("jet0_scores_inc_train40", &score_inclusive_sig);  
+    tree_sig_reduced->SetBranchAddress("jet0_scores_depth_hcal", &score_depth_sig);  
+    tree_sig_reduced_inc->SetBranchAddress("jet0_scores_inc_train80", &score_inclusive_sig);  
   }
   if (SigTree.find("PerJet") != std::string::npos) {
     tree_sig_reduced->SetBranchAddress("scores", &score_depth_sig);  
@@ -601,8 +601,8 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   tree_bkg->SetBranchAddress("Pass_WPlusJets", &Pass_WPlusJets);  // Set branch address for the flag
 
   if (SigTree.find("PerJet") == std::string::npos) {
-    tree_bkg->SetBranchAddress("jet0_scores_inc_train80", &score_depth_bkg);  
-    tree_bkg->SetBranchAddress("jet0_scores_inc_train40", &score_inclusive_bkg);  
+    tree_bkg->SetBranchAddress("jet0_scores_depth_hcal", &score_depth_bkg);  
+    tree_bkg->SetBranchAddress("jet0_scores_inc_train80", &score_inclusive_bkg);  
     tree_bkg->SetBranchAddress("jet0_Pt", &jet0_Pt);
     // tree_bkg->SetBranchAddress("bdtscore_hadd", &scoreHadd_bkg);
   }
@@ -868,22 +868,22 @@ void MakeDNNPerformancePlots_SigBkg()
   // Signals
   string SignalTree = "NoSel";
 
-  string Signal = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_125_50_CTau3000_batch2_scores_50percent.root";
+  string Signal = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_HToSSTo4b_125_50_CTau3000_batch2_allscores.root";
   string SigLabel = "125_mS50";
 
-  string Signal2 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_250_120_CTau10000_batch2_scores_50percent.root";
+  string Signal2 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_HToSSTo4b_250_120_CTau10000_batch2_allscores.root";
   string SigLabel2 = "250_mS120";
 
-  string Signal3 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_350_160_CTau10000_batch2_scores_50percent.root";
+  string Signal3 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_HToSSTo4b_350_160_CTau10000_batch2_allscores.root";
   string SigLabel3 = "350_mS160";
 
-  string Signal4 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_HToSSTo4b_350_80_CTau500_scores_50percent.root";
+  string Signal4 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_HToSSTo4b_350_80_CTau500_allscores.root";
   string SigLabel4 = "350_mX80";
 
   // Backgrounds
-  string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.15/minituple_LLPskim_2023Cv4_scores_50percent.root";
-  string BkgLabel = "W+Jets";
   string BackgroundTree = "NoSel";
+  string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Cv4_allscores.root";
+  string BkgLabel = "W+Jets";
 
   int Color1 = 30;
   int Color2 = 38;
