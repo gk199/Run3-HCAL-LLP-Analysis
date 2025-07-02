@@ -4,7 +4,7 @@
 python3 numberStudies.py
 ```
 
-Evaluates the predicted number of events (both nominal and fractional) that are in SR based on the total number of events in the MR, by applying the calculated mistag rate from the CR (binned as a function of pt, eta, and phi).
+Code is based on MisTagParametrization.p. Evaluates the predicted number of events (both nominal and fractional) that are in SR based on the total number of events in the MR, by applying the calculated mistag rate from the CR (binned as a function of pt, eta, and phi).
 Modify the code to either plot a cross-section (vary one type of cut while keeping the other one constant) using plotPoints1D or vary both simultaneously and obtain a heatmap using plotHeatmap, or just debug without evaluating by choosing which metrics to plot/print using the debugging function in MisTagParametrization function. 
 The settings are to help simplify the amount of hard-coding needed. 
  - Triggered jet: the jet used for the depth tagger; default "jet0"
