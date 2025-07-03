@@ -331,6 +331,7 @@ TGraphAsymmErrors* MakeCurrentWPSigEffVsBkgEffAtCutValueGraph(TH1F* signalHist, 
       cutValueErr[0] = 0;
     }
   }
+  cout << "signal efficiency at fixed cut value: " << SigEff[0] << endl;
   TGraphAsymmErrors *tmpSigEffVsBkg = new TGraphAsymmErrors (1, BkgEff, SigEff, BkgEffErrLow, BkgEffErrHigh, SigEffErrLow, SigEffErrHigh  );
   tmpSigEffVsBkg->SetName(name.c_str());
   tmpSigEffVsBkg->SetTitle("");
@@ -507,8 +508,9 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   //*****************************************************************************************
   TTree *tree_sig = getTreeFromFile(InputFile.c_str(), SigTree.c_str());
 
-  float LLP0_DecayR, LLP1_DecayR, LLP0_Eta, LLP1_Eta, jet0_isMatchedTo, jet0_Eta, jet0_Pt;
+  float LLP0_DecayR, LLP1_DecayR, LLP0_Eta, LLP1_Eta, jet0_isMatchedTo, jet0_Eta, jet0_Pt, jet0_MatchedLLP_DecayR, jet0_isTruthMatched;
   float perJet_MatchedLLP_DecayR, perJet_MatchedLLP_Eta;
+  bool jet0_DepthTagCand, jet0_InclTagCand;
 
   float score_depth_sig, score_inclusive_sig;
 
@@ -523,18 +525,15 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   TCut SignalSelection = "";
   TCut SignalSelection_inc = "";
   if (SigTree.find("PerJet") == std::string::npos) { // per event tree
-    tree_sig->SetBranchAddress("LLP0_DecayR", &LLP0_DecayR);
-    tree_sig->SetBranchAddress("LLP1_DecayR", &LLP1_DecayR);
-    tree_sig->SetBranchAddress("LLP0_Eta", &LLP0_Eta);
-    tree_sig->SetBranchAddress("LLP1_Eta", &LLP1_Eta);
-    tree_sig->SetBranchAddress("jet0_isMatchedTo", &jet0_isMatchedTo);
     tree_sig->SetBranchAddress("jet0_Eta", &jet0_Eta);
     tree_sig->SetBranchAddress("jet0_Pt", &jet0_Pt);
-    SignalSelection = Form("((LLP0_DecayR >= %f && LLP0_DecayR < %f && abs(LLP0_Eta) <= %f && jet0_isMatchedTo == 0) || (LLP1_DecayR >= %f && LLP1_DecayR < %f && abs(LLP1_Eta) <= %f && jet0_isMatchedTo == 1)) && (abs(jet0_Eta) < 1.26 && jet0_Pt > 40)", radius_HB1, radius_HBend, HBeta, radius_HB1, radius_HBend, HBeta); // radius_HB3
-    SignalSelection_inc = Form("((LLP0_DecayR < %f && abs(LLP0_Eta) <= %f && jet1_isMatchedTo == 0) || (LLP1_DecayR < %f && abs(LLP1_Eta) <= %f && jet1_isMatchedTo == 1)) && (abs(jet1_Eta) < 1.26 && jet1_Pt > 40)", radius_HBend, HBeta, radius_HBend, HBeta);
+    tree_sig->SetBranchAddress("jet0_MatchedLLP_DecayR", &jet0_MatchedLLP_DecayR);
+    tree_sig->SetBranchAddress("jet0_isTruthMatched", &jet0_isTruthMatched);
+    tree_sig->SetBranchAddress("jet0_DepthTagCand", &jet0_DepthTagCand);
+    tree_sig->SetBranchAddress("jet0_InclTagCand", &jet0_InclTagCand);
+    SignalSelection = Form("jet0_DepthTagCand && jet0_isTruthMatched == 1 && (jet0_MatchedLLP_DecayR >= %f && jet0_MatchedLLP_DecayR < %f) && (abs(jet0_Eta) < 1.26 && jet0_Pt > 40)", radius_HB1, radius_HBend); 
+    SignalSelection_inc = Form("jet0_InclTagCand && jet0_isTruthMatched == 1 && (jet0_MatchedLLP_DecayR < %f) && (abs(jet0_Eta) < 1.26 && jet0_Pt > 40)", radius_HBend);
     cout << "per event tree, adding signal region cuts on LLP position and matching" << endl;
-    // hopefully there is a better way to implement these cuts, had TCut errors when imported RegionCuts.h on first try
-    // reduces by a factor of about 10 for mh=125
   }
   if (SigTree.find("PerJet") != std::string::npos) {
     tree_sig->SetBranchAddress("perJet_MatchedLLP_DecayR", &perJet_MatchedLLP_DecayR);
@@ -552,6 +551,7 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
     cout << "per jet tree, adding signal region cuts on LLP position" << endl; // this tree already requires jet pT > 40 and eta < 1.26
   }
 
+    // preselection cuts -- here is where we specify the signal region based on LLP truth information 
   TFile *myReducedFile = new TFile("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/Classifiers/temp.root", "RECREATE"); // preventing error "This error is symptomatic of a Tree created as a memory-resident Tree"
   TTree *tree_sig_reduced = tree_sig->CopyTree(SignalSelection, "", tree_sig->GetEntries(), 0); // no cuts needed for already jet matched tree
   TTree *tree_sig_reduced_inc = tree_sig->CopyTree(SignalSelection_inc, "", tree_sig->GetEntries(), 0);
@@ -570,14 +570,11 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   int nentries = tree_sig_reduced->GetEntries();
   for(int ientry=0; ientry < nentries; ientry++) {       	
     tree_sig_reduced->GetEntry(ientry);
-    
+
     if (ientry % 100000 == 0) cout << "Event " << ientry << endl;
-        
-    //don't evaluate performance using training events
     int third_decimal = static_cast<int>(std::floor(jet0_Pt * 1000)) % 10;
-    //classify by eta and pt bins
-    //Some Preselection cuts -- here is where we specify the signal region based on LLP truth information 
     // eventually need to fill with weights
+    // don't evaluate performance using training events
     if (third_decimal >= 8) Signal_DNN_depth->Fill(score_depth_sig);
   } 
   cout << "Total Inclusive Entries (signal): " << tree_sig_reduced_inc->GetEntries() << "\n";
@@ -587,15 +584,14 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
     if (ientry % 100000 == 0) cout << "Event " << ientry << endl;
 
     int third_decimal = static_cast<int>(std::floor(jet0_Pt * 1000)) % 10;
-
-    if (third_decimal >= 4) Signal_DNN_inclusive->Fill(score_inclusive_sig);
+    if (third_decimal >= 8) Signal_DNN_inclusive->Fill(score_inclusive_sig);
   } 
   //*****************************************************************************************
   // Get background distribution
   //*****************************************************************************************
   TTree *tree_bkg = getTreeFromFile(InputFile2.c_str(), BkgTree.c_str()); 
   
-  float score_depth_bkg, score_inclusive_bkg;
+  float score_depth_bkg, score_inclusive_bkg, jet1_scores_inc_train80;
   bool Pass_WPlusJets; 
 
   tree_bkg->SetBranchAddress("Pass_WPlusJets", &Pass_WPlusJets);  // Set branch address for the flag
@@ -603,8 +599,10 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   if (SigTree.find("PerJet") == std::string::npos) {
     tree_bkg->SetBranchAddress("jet0_scores_depth_hcal", &score_depth_bkg);  
     tree_bkg->SetBranchAddress("jet0_scores_inc_train80", &score_inclusive_bkg);  
+    tree_bkg->SetBranchAddress("jet1_scores_inc_train80", &jet1_scores_inc_train80);  
     tree_bkg->SetBranchAddress("jet0_Pt", &jet0_Pt);
-    // tree_bkg->SetBranchAddress("bdtscore_hadd", &scoreHadd_bkg);
+    tree_bkg->SetBranchAddress("jet0_DepthTagCand", &jet0_DepthTagCand);
+    tree_bkg->SetBranchAddress("jet0_InclTagCand", &jet0_InclTagCand);
   }
   if (SigTree.find("PerJet") != std::string::npos) {
     tree_bkg->SetBranchAddress("scores", &score_depth_bkg);  
@@ -612,19 +610,23 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
     // tree_bkg->SetBranchAddress(("bdtscore_hadd"+plotType+"_perJet").c_str(), &scoreHadd_bkg);
   }
 
-  cout << "Total Entries (background): " << tree_bkg->GetEntries() << "\n";
   int nentries_bkg = tree_bkg->GetEntries();
+  cout << "Total Entries (background): " << nentries_bkg << "\n";
+  cout << "Total Entries (background, depth selections): " << tree_bkg->GetEntries("jet0_DepthTagCand && jet1_scores_inc_train80 < 0.2") << "\n";
+  cout << "Total Entries (background, inclusive W+jets selections): " << tree_bkg->GetEntries("Pass_WPlusJets && jet0_Pt > 40 && (abs(jet0_Eta) < 1.26)") << "\n";
+  cout << "Total Entries (background, inclusive selections): " << tree_bkg->GetEntries("jet0_InclTagCand") << "\n";
   for(int ientry=0; ientry < nentries_bkg; ientry++) {       	
     tree_bkg->GetEntry(ientry);
     
     if (ientry % 100000 == 0) cout << "Event " << ientry << endl;
 
-    if (!Pass_WPlusJets) continue; // apply W+jets selection for the background
+    // if (!Pass_WPlusJets) continue; // apply W+jets selection for the background -- ONLY want to apply for inclusive plot though!! 
     int third_decimal = static_cast<int>(std::floor(jet0_Pt * 1000)) % 10;
 
     // eventually need to fill with weights
-    if (third_decimal >= 8) Background_DNN_depth->Fill(score_depth_bkg);
-    if (third_decimal >= 4) Background_DNN_inclusive->Fill(score_inclusive_bkg);
+    if (jet0_DepthTagCand && jet1_scores_inc_train80 < 0.2 && third_decimal >= 8) Background_DNN_depth->Fill(score_depth_bkg);
+    // if (Pass_WPlusJets && third_decimal >= 8 && jet0_Pt > 40 && (abs(jet0_Eta) < 1.26)) Background_DNN_inclusive->Fill(score_inclusive_bkg);
+    if (jet0_InclTagCand && third_decimal >= 8) Background_DNN_inclusive->Fill(score_inclusive_bkg);
   } 
 
   //*****************************************************************************************
@@ -681,7 +683,7 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
 
   ROCGraphs.push_back(ROChadd_sigEffBkgEff);
   ROCGraphs.push_back(ROChadd_sigEffBkgEff_inc);
-  GraphLabels.push_back("DNN trained on LLP combination");
+  GraphLabels.push_back("Depth DNN trained on LLP combination");
   GraphLabels.push_back("Inclusive DNN trained on LLP combination");
   // colors.push_back(Option);
   // colors.push_back(Option2);
@@ -747,19 +749,19 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
     signal_eff = 0.66;
     mass = "125";
   }
-  if (InputFile.find("MH-350_MS-80") != std::string::npos) { // mh 350 working point, for per jet approach
+  if (InputFile.find("350_80") != std::string::npos) { // mh 350 working point, for per jet approach
     signal_eff = 0.77;
     mass = "350";
   }
-  if (InputFile.find("MH-125_MS-50") != std::string::npos) { // mh 125 working point, for per jet approach
+  if (InputFile.find("125_50") != std::string::npos) { // mh 125 working point, for per jet approach
     signal_eff = 0.58;
     mass = "125";
   }
-  if (InputFile.find("MH-250_MS-120") != std::string::npos) { // mh 250 working point, for per jet approach
+  if (InputFile.find("250_120") != std::string::npos) { // mh 250 working point, for per jet approach
     signal_eff = 0.65;
     mass = "250";
   }
-  if (InputFile.find("MH-350_MS-160") != std::string::npos) { // mh 125 working point, for per jet approach
+  if (InputFile.find("350_160") != std::string::npos) { // mh 125 working point, for per jet approach
     signal_eff = 0.68;
     mass = "350";
   }
@@ -771,16 +773,16 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   WP_jet_cutflow->SetMarkerSize(1.5);
   WP_jet_cutflow->Draw("Psame");  
 
-  TGraphAsymmErrors* WP_BDTcut = MakeCurrentWPSigEffVsBkgEffAtCutValueGraph(Signal_DNN_depth, Background_DNN_depth, "Eff at fixed cut", 0.999);
-  legend->AddEntry(WP_BDTcut, Form("DNN depth = 0.999 point (mH = %s)", mass.c_str()), "P");
+  TGraphAsymmErrors* WP_BDTcut = MakeCurrentWPSigEffVsBkgEffAtCutValueGraph(Signal_DNN_depth, Background_DNN_depth, "Eff at fixed cut", 0.95);
+  legend->AddEntry(WP_BDTcut, Form("DNN depth = 0.95 point (mH = %s)", mass.c_str()), "P");
   WP_BDTcut->SetFillColor(TColor::GetPalette().At(0));
   WP_BDTcut->SetMarkerColor(TColor::GetPalette().At(0));
   WP_BDTcut->SetMarkerStyle(34);
   WP_BDTcut->SetMarkerSize(1.5);
   WP_BDTcut->Draw("Psame"); 
 
-  TGraphAsymmErrors* WP_BDTcut_inc = MakeCurrentWPSigEffVsBkgEffAtCutValueGraph(Signal_DNN_inclusive, Background_DNN_inclusive, "Eff at fixed cut", 0.999);
-  legend->AddEntry(WP_BDTcut_inc, Form("DNN inclusive = 0.999 (mH = %s)", mass.c_str()), "P");
+  TGraphAsymmErrors* WP_BDTcut_inc = MakeCurrentWPSigEffVsBkgEffAtCutValueGraph(Signal_DNN_inclusive, Background_DNN_inclusive, "Eff at fixed cut", 0.95);
+  legend->AddEntry(WP_BDTcut_inc, Form("DNN inclusive = 0.95 (mH = %s)", mass.c_str()), "P");
   WP_BDTcut_inc->SetFillColor(kBlue-5);
   WP_BDTcut_inc->SetMarkerColor(kBlue-5);
   WP_BDTcut_inc->SetMarkerStyle(34);
@@ -882,7 +884,7 @@ void MakeDNNPerformancePlots_SigBkg()
 
   // Backgrounds
   string BackgroundTree = "NoSel";
-  string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Cv4_allscores.root";
+  string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Dv2_allscores.root";
   string BkgLabel = "W+Jets";
 
   int Color1 = 30;
@@ -892,12 +894,12 @@ void MakeDNNPerformancePlots_SigBkg()
   vector<string> plotType = {""}; // "_HCAL12", "_HCAL34", "_calor", "_HCAL12_calor", "_HCAL34_calor", 
   for( auto type: plotType){
     if (type != "") fs::create_directory(type);
-    BDTPerformancePlots(Signal, SigLabel, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
-    SetupPlots();
-    BDTPerformancePlots(Signal2, SigLabel2, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
-    SetupPlots();
-    BDTPerformancePlots(Signal3, SigLabel3, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
-    SetupPlots();
+    // BDTPerformancePlots(Signal, SigLabel, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
+    // SetupPlots();
+    // BDTPerformancePlots(Signal2, SigLabel2, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
+    // SetupPlots();
+    // BDTPerformancePlots(Signal3, SigLabel3, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
+    // SetupPlots();
     BDTPerformancePlots(Signal4, SigLabel4, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
     SetupPlots();
   }
