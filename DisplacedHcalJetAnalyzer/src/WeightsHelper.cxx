@@ -48,8 +48,8 @@ void DisplacedHcalJetAnalyzer::SetWeight(string infiletag){
 	
     // Weight for each event
 	weight = BRxSigma*lumi/NEvents_produced; // weight = lumi * xsec (=# higgs) * BR (=# LLP)
-    // if NEvents_produced == 1, then the filetag was not found. Instead of setting a too high weight, set event weight to 0
-    if ( !data && infiletag.find("CTau") != string::npos && NEvents_produced == 1) weight = 0;
+    // if NEvents_produced == 1, then the filetag was not found. Instead of setting a too high weight, set event weight to 1
+    if ( !data && infiletag.find("CTau") != string::npos && NEvents_produced == 1) weight = 1;
 	lumi_samplefrac  = lumiNum/(lumi_2022+lumi_2023);
 	cout<<"  weight   --> "<<weight<<" (event-by-event weight components included later)"<<endl;
 
