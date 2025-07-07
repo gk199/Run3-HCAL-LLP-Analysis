@@ -479,6 +479,11 @@ void SetupPlots()
   cv = new TCanvas("cv", "cv", 800, 600);
 }
 
+bool fileExists(const std::string& filename) {
+    std::ifstream file(filename);
+    return file.good();
+}
+
 //*************************************************************************************************
 //*************************************************************************************************
 void BDTPerformancePlots(string InputFile, string Label, string SigTree, string InputFile2, string Label2, string BkgTree, Int_t Option, Int_t Option2, Int_t Option3, string plotType)
@@ -495,8 +500,8 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   TH1F *Signal_DNN_depth = new TH1F(("Signal_DNN_depth"+label).c_str(), "LLP Signal ; Depth DNN (trained on combination) score for LLP signal ; Number of Events ",  55000, -0.1 , 1.1);
   TH1F *Signal_DNN_inclusive = new TH1F(("Signal_DNN_inclusive"+label).c_str(), "LLP Signal ; Inclusive DNN (trained on combination) score for LLP signal ; Number of Events ",  55000, -0.1 , 1.1);
 
-  TH1F *Background_DNN_depth = new TH1F(("Background_DNN_depth"+label).c_str(), "W+Jets Background ; Depth DNN (trained on combination) score for W+jets background ; Number of Events ",  55000, -0.1 , 1.1);
-  TH1F *Background_DNN_inclusive = new TH1F(("Background_DNN_inclusive"+label).c_str(), "W+Jets Background ; Inclusive DNN (trained on combination) score for W+jets background ; Number of Events ",  55000, -0.1 , 1.1);
+  TH1F *Background_DNN_depth = new TH1F("Background_DNN_depth", "Background ; Depth DNN (trained on combination) score for background ; Number of Events ",  55000, -0.1 , 1.1);
+  TH1F *Background_DNN_inclusive = new TH1F("Background_DNN_inclusive", "Background ; Inclusive DNN (trained on combination) score for background ; Number of Events ",  55000, -0.1 , 1.1);
 
   Double_t RealElectrons = 0;
   Double_t FakeElectrons = 0;
@@ -615,19 +620,42 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   cout << "Total Entries (background, depth selections): " << tree_bkg->GetEntries("jet0_DepthTagCand && jet1_scores_inc_train80 < 0.2") << "\n";
   cout << "Total Entries (background, inclusive W+jets selections): " << tree_bkg->GetEntries("Pass_WPlusJets && jet0_Pt > 40 && (abs(jet0_Eta) < 1.26)") << "\n";
   cout << "Total Entries (background, inclusive selections): " << tree_bkg->GetEntries("jet0_InclTagCand") << "\n";
-  for(int ientry=0; ientry < nentries_bkg; ientry++) {       	
-    tree_bkg->GetEntry(ientry);
-    
-    if (ientry % 100000 == 0) cout << "Event " << ientry << endl;
+  if (fileExists("background_histograms.root")) {
+    cout << "Reading from existing root histogram file for background distributions!" << endl;
+    TFile *histFile = new TFile("background_histograms.root", "READ");
+    if (!histFile || histFile->IsZombie()) {
+      cerr << "Error: Could not open background_histograms.root!" << endl;
+      exit(1);
+    }
+    Background_DNN_depth = (TH1F*)histFile->Get("Background_DNN_depth");
+    Background_DNN_inclusive = (TH1F*)histFile->Get("Background_DNN_inclusive");
+    if (!Background_DNN_depth || !Background_DNN_inclusive) {
+      cerr << "Error: One or both histograms not found!" << endl;
+      exit(1);
+    }
+    cout << "Successfully accessed background histograms from file" << endl;
+    Background_DNN_inclusive->SetDirectory(0);
+    Background_DNN_depth->SetDirectory(0);
+    histFile->Close();
+  }
+  else {
+    cout << "Will load background distributions and save to a root file for future use" << endl;
+    for(int ientry=0; ientry < nentries_bkg; ientry++) {       	
+      tree_bkg->GetEntry(ientry);
+      
+      if (ientry % 100000 == 0) cout << "Event " << ientry << endl;
+      int third_decimal = static_cast<int>(std::floor(jet0_Pt * 1000)) % 10;
 
-    // if (!Pass_WPlusJets) continue; // apply W+jets selection for the background -- ONLY want to apply for inclusive plot though!! 
-    int third_decimal = static_cast<int>(std::floor(jet0_Pt * 1000)) % 10;
-
-    // eventually need to fill with weights
-    if (jet0_DepthTagCand && jet1_scores_inc_train80 < 0.2 && third_decimal >= 8) Background_DNN_depth->Fill(score_depth_bkg);
-    // if (Pass_WPlusJets && third_decimal >= 8 && jet0_Pt > 40 && (abs(jet0_Eta) < 1.26)) Background_DNN_inclusive->Fill(score_inclusive_bkg);
-    if (jet0_InclTagCand && third_decimal >= 8) Background_DNN_inclusive->Fill(score_inclusive_bkg);
-  } 
+      // eventually need to fill with weights
+      if (jet0_DepthTagCand && jet1_scores_inc_train80 < 0.2 && third_decimal >= 8) Background_DNN_depth->Fill(score_depth_bkg);
+      // if (Pass_WPlusJets && third_decimal >= 8 && jet0_Pt > 40 && (abs(jet0_Eta) < 1.26)) Background_DNN_inclusive->Fill(score_inclusive_bkg);
+      if (jet0_InclTagCand && third_decimal >= 8) Background_DNN_inclusive->Fill(score_inclusive_bkg);
+    } 
+    TFile *outFile = new TFile("background_histograms.root", "RECREATE"); // approach to save the background depth and inclusive hisograms to disk so runs quicker
+    Background_DNN_depth->Write();
+    Background_DNN_inclusive->Write();
+    outFile->Close();
+  }
 
   //*****************************************************************************************
   // Current Working Points
@@ -884,7 +912,7 @@ void MakeDNNPerformancePlots_SigBkg()
 
   // Backgrounds
   string BackgroundTree = "NoSel";
-  string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Dv2_allscores.root";
+  string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Cv1_allscores.root";
   string BkgLabel = "W+Jets";
 
   int Color1 = 30;
@@ -894,12 +922,12 @@ void MakeDNNPerformancePlots_SigBkg()
   vector<string> plotType = {""}; // "_HCAL12", "_HCAL34", "_calor", "_HCAL12_calor", "_HCAL34_calor", 
   for( auto type: plotType){
     if (type != "") fs::create_directory(type);
-    // BDTPerformancePlots(Signal, SigLabel, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
-    // SetupPlots();
-    // BDTPerformancePlots(Signal2, SigLabel2, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
-    // SetupPlots();
-    // BDTPerformancePlots(Signal3, SigLabel3, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
-    // SetupPlots();
+    BDTPerformancePlots(Signal, SigLabel, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
+    SetupPlots();
+    BDTPerformancePlots(Signal2, SigLabel2, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
+    SetupPlots();
+    BDTPerformancePlots(Signal3, SigLabel3, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
+    SetupPlots();
     BDTPerformancePlots(Signal4, SigLabel4, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
     SetupPlots();
   }

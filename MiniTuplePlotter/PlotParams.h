@@ -282,6 +282,10 @@ PlotParams P_jet0_scores_inc_train40 = {"jet0_scores_inc_train40", "DNN Inclusiv
 PlotParams P_jet0_scores_depth_hcal = {"jet0_scores_depth_hcal", "DNN Depth Score (HCAL)", "DNN Depth HCAL, jet0", 0, 1};
 PlotParams P_jet0_scores_depth_anywhere = {"jet0_scores_depth_anywhere", "DNN Depth Score", "DNN Depth, jet0", 0, 1};
 
+PlotParams P_jet1_scores_inc_train80 = {"jet1_scores_inc_train80", "DNN Inclusive Score (subleading), train 80%", "DNN Inclusive 80%, jet1", 0, 1};
+PlotParams P_jet1_scores_depth_hcal = {"jet1_scores_depth_hcal", "DNN Depth Score (HCAL, subleading)", "DNN Depth HCAL, jet1", 0, 1};
+PlotParams P_jet1_scores_depth_anywhere = {"jet1_scores_depth_anywhere", "DNN Depth Score (subleading)", "DNN Depth, jet1", 0, 1};
+
 // --------------------------------------------------------------------- //
 // -------------------------- per jet variables ------------------------ //
 // --------------------------------------------------------------------- //
