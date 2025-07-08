@@ -19,16 +19,16 @@ pT_bins = np.array(pT_bins, dtype=float)
 eta_bins = np.linspace(-1.26, 1.26, 10)  # eta axis from -2 to 2, 10 bins
 phi_bins = np.linspace(-np.pi, np.pi, 10)  # phi axis from -pi to pi, 10 bins
 
-DNN_cut = 0.95
+DNN_cut = 0.05
 DNN_cut_inc = 0.9
 
 runs_to_exclude = [367230, 367772, 368331, 368440, 368764, 370436, 370579, 370790] # 2023 runs
 
 era = "2023 Cv4" # automatically switches which input minituples to use based on this name
 
-Zmu = False
+Zmu = True
 if Zmu: era = "2023 Bv1-Dv2 Zmu"
-LLPskim = True
+LLPskim = False
 
 era_name = era.replace(" ", "") # for plot saving
 
@@ -88,14 +88,14 @@ def GetData_single(infilepath, label): # get tree from a single filepath (not a 
 # ------------------------------------------------------------------------------
 def MisTagParametrization(tree, option=""):
 
-    # Setup cuts for CR and VR. CR = jet1_scores_inc between 0-0.5. VR = jet1_scores_inc between 0.5-0.9. Mistag means jet0_scores over "DNN_cut"
+    # Setup cuts for CR and VR. CR = jet1_scores_inc between 0-0.2. VR = jet1_scores_inc between 0.2-0.9. Mistag means jet0_scores over "DNN_cut"
     run_exclusion = ExcludedCut("run", runs_to_exclude)
     print(run_exclusion)
 
-    CR = GetCut("jet1_scores_inc", [0,0.5])
-    VR = GetCut("jet1_scores_inc", [0.5,DNN_cut_inc])
-    SR = GetCut("jet1_scores_inc", [DNN_cut_inc,1.1])
-    mistag = GetCut("jet0_scores", [DNN_cut,1.1])
+    CR = GetCut("jet1_scores_inc_train80", [0,0.2])
+    VR = GetCut("jet1_scores_inc_train80", [0.2,DNN_cut_inc])
+    SR = GetCut("jet1_scores_inc_train80", [DNN_cut_inc,1.1])
+    mistag = GetCut("jet0_scores_depth_hcal", [DNN_cut,1.1])
     if CNN:
         mistag = GetCut("CNN3D_classifier3", [DNN_cut,1.1])
     # Need leading jet to be matched to a LLP, jet0_L1trig_Matched. Leading jet pT > 60, subleading > 40. Eta restrictions on both jets at 1.26
@@ -110,11 +110,11 @@ def MisTagParametrization(tree, option=""):
     track_pT = GetCut("jet0_Track0Pt / jet0_Pt",[0,1.1])
     track_pT_1 = GetCut("jet1_Track0Pt / jet1_Pt",[0,1.1])
 
-    # Setup cuts for CR and VR. CR = jet0_scores_inc between 0-0.5. VR = jet0_scores_inc between 0.5-0.9. Mistag means jet1_scores over "DNN_cut"
-    CR_0 = GetCut("jet0_scores_inc", [0,0.5])
-    VR_0 = GetCut("jet0_scores_inc", [0.5,DNN_cut_inc])
-    SR_0 = GetCut("jet0_scores_inc", [DNN_cut_inc,1.1]) 
-    mistag_1 = GetCut("jet1_scores", [DNN_cut,1.1])
+    # Setup cuts for CR and VR. CR = jet0_scores_inc between 0-0.2. VR = jet0_scores_inc between 0.2-0.9. Mistag means jet1_scores over "DNN_cut"
+    CR_0 = GetCut("jet0_scores_inc_train80", [0,0.2])
+    VR_0 = GetCut("jet0_scores_inc_train80", [0.2,DNN_cut_inc])
+    SR_0 = GetCut("jet0_scores_inc_train80", [DNN_cut_inc,1.1]) 
+    mistag_1 = GetCut("jet1_scores_depth_hcal", [DNN_cut,1.1])
     # Need sub-leading jet to be matched to a LLP, jet1_L1trig_Matched. Sub-leading jet pT > 60, leading > 40. Eta restrictions on both jets at 1.26
     triggered_1 = GetCut("jet1_L1trig_Matched", 1) + GetCut("jet0_L1trig_Matched", [-10000,0.5]) # veto on both jet 0 and jet 1 being triggered to remove overlap
     # triggered_1 += GetCut("jet1_Pt", [60,1000]) 
@@ -769,30 +769,30 @@ def main():
 
     print(era)
 
-    if era == "2023 Bv1":   infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Bv1.root"]
-    elif era == "2023 Cv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Cv1.root"]
-    elif era == "2023 Cv2": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Cv2.root"]
-    elif era == "2023 Cv3": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Cv3.root"]
-    elif era == "2023 Cv4": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Cv4.root"]
-    elif era == "2023 Dv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Dv1.root"]
-    elif era == "2023 Dv2" and not CNN: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Dv2.root"]
+    if era == "2023 Bv1":   infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Bv1_allscores.root"]
+    elif era == "2023 Cv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Cv1_allscores.root"]
+    elif era == "2023 Cv2": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Cv2_allscores.root"]
+    elif era == "2023 Cv3": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Cv3_allscores.root"]
+    elif era == "2023 Cv4": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Cv4_allscores.root"]
+    elif era == "2023 Dv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Dv1_allscores.root"]
+    elif era == "2023 Dv2" and not CNN: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Dv2_allscores.root"]
     elif era == "2023 Dv2" and CNN: infilepath_list = ["/afs/cern.ch/work/f/fsimpson/public/minituple_outputs/minituple_Run2023D-EXOLLPJetHCAL-PromptReco-v2_partial28k-v4-scores_added.root"]
-    else: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Bv1.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Cv1.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Cv2.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Cv3.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Cv4.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Dv1.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_LLPskim_Run2023Dv2.root"]
+    else: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Bv1_allscores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Cv1_allscores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Cv2_allscores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Cv3_allscores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Cv4_allscores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Dv1_allscores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Dv2_allscores.root"]
     if LLPskim: combined_tree = GetData(infilepath_list, label)
 
-    infilepath_list_Zmu = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_Zmu_Run2023Bv1.root",
-                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_Zmu_Run2023Cv1.root",
-                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_Zmu_Run2023Cv2.root",
-                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_Zmu_Run2023Cv3.root",
-                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_Zmu_Run2023Cv4.root",
-                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_Zmu_Run2023Dv1.root",
-                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/minituple_v3.13_Zmu_Run2023Dv2.root"]
+    infilepath_list_Zmu = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituples_Zmu_2023Bv1_allscores.root",
+                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituples_Zmu_2023Cv1_allscores.root",
+                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituples_Zmu_2023Cv2_allscores.root",
+                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituples_Zmu_2023Cv3_allscores.root",
+                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituples_Zmu_2023Cv4_allscores.root",
+                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituples_Zmu_2023Dv1_allscores.root",
+                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituples_Zmu_2023Dv2_allscores.root"]
 
     if Zmu: combined_tree_Zmu = GetData(infilepath_list_Zmu, label)
 
