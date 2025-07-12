@@ -186,26 +186,27 @@ void MiniTuplePlotter_CR_SR(){
 		decay_R.Plot();
 */
 		// pT spectrum of CR and VR
-		class MiniTuplePlotter CR_VR_kinematics( {"v3.11_LLPskim_Run2023Cv1_NoSel_scores_2025_02_03"}, {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.11/minituple_"} );
-		CR_VR_kinematics.SetPlots({P_jet1_Pt, P_jet1_Eta, P_jet1_Phi}); 
+		class MiniTuplePlotter CR_VR_kinematics( {"LLPskim_2023Cv4_allscores"}, {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_"} );
+		CR_VR_kinematics.SetPlots({P_jet0_Pt, P_jet0_Eta, P_jet0_Phi, P_jet0_dEta, P_jet0_dPhi}); 
 		CR_VR_kinematics.SetTreeNames( {"NoSel"} );	
-		CR_VR_kinematics.SetOutputFileTag("Overlay_InclusiveJet_v3.11_data");
+		CR_VR_kinematics.SetOutputFileTag("Overlay_InclusiveJet_v3.16_data");
 		CR_VR_kinematics.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
-		CR_VR_kinematics.SetCuts("jet0_Pt >= 60 && abs(jet0_Eta) <= 1.26 && jet0_dR_L1jet < 0.4 && jet0_L1trig_Matched == 1 && jet0_scores >= 0.9");
+		CR_VR_kinematics.SetCuts("jet0_DepthTagCand == 1 && jet0_scores_depth_hcal >= 0.5");
 		CR_VR_kinematics.SetComparisonCuts({Cut_CR, Cut_VR}),
 		CR_VR_kinematics.SetLegendNames({"CR", "VR"});
 		CR_VR_kinematics.colors = { kViolet+4, kMagenta-7 };
 		CR_VR_kinematics.SetOutputDirectory("CR_VR");
 		CR_VR_kinematics.Plot();
 		CR_VR_kinematics.ClearFileTrees();
-		CR_VR_kinematics.SetOutputFileTag("Overlay_InclusiveJet_v3.11_data");
+		CR_VR_kinematics.SetOutputFileTag("Overlay_InclusiveJet_v3.16_data");
 		CR_VR_kinematics.SetComparisonCuts({Cut_CR, Cut_VR}),
 		CR_VR_kinematics.SetLegendNames({"CR", "VR"});
 		CR_VR_kinematics.plot_log    = false; 
 		CR_VR_kinematics.Plot();
 		CR_VR_kinematics.ClearFileTrees();
-		CR_VR_kinematics.SetOutputFileTag("Overlay_InclusiveJetBins_v3.11_data");
-		CR_VR_kinematics.SetComparisonCuts({"jet1_scores_inc >= 0 && jet1_scores_inc <= 0.2", "jet1_scores_inc > 0.2 && jet1_scores_inc <= 0.4", "jet1_scores_inc > 0.4 && jet1_scores_inc <= 0.6", "jet1_scores_inc > 0.6 && jet1_scores_inc <= 0.8"}),
+		CR_VR_kinematics.SetOutputFileTag("Overlay_InclusiveJetBins_v3.16_data");
+		CR_VR_kinematics.SetCuts("jet1_InclTagCand == 1");
+		CR_VR_kinematics.SetComparisonCuts({"jet1_scores_inc_train80 >= 0 && jet1_scores_inc_train80 <= 0.2", "jet1_scores_inc_train80 > 0.2 && jet1_scores_inc_train80 <= 0.4", "jet1_scores_inc_train80 > 0.4 && jet1_scores_inc_train80 <= 0.6", "jet1_scores_inc_train80 > 0.6 && jet1_scores_inc_train80 <= 0.8"}),
 		CR_VR_kinematics.SetLegendNames({"Inclusive DNN 0-0.2", "Inclusive DNN 0.2-0.4", "Inclusive DNN 0.4-0.6", "Inclusive DNN 0.6-0.8"});
 		CR_VR_kinematics.Plot();
 	}

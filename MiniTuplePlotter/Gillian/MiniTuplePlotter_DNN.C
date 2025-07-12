@@ -24,10 +24,10 @@ void MiniTuplePlotter_DNN(){
 
 	// ----- Example 1 -----//
 	// - Basic Booleans
-	bool study1 = false;
+	bool study1 = true;
 	bool study2 = false;
 	bool study3 = false;
-	bool study4 = true;
+	bool study4 = false;
 	
 	cout<<endl;
 	cout<<" ---------- Study 1: Overlay LLP MC and data ---------- "<<endl;
@@ -70,13 +70,13 @@ void MiniTuplePlotter_DNN(){
 
 		// pt, eta, one jet inclusive tag one depth
 		DNNscores.ClearFileTrees();
-		DNNscores.SetPlots({P_jet0_scores_inc_train80});
+		DNNscores.SetPlots({P_jet0_scores_inc_train80, P_jet1_scores_depth_hcal, P_jet1_scores_depth_anywhere});
 		DNNscores.SetOutputFileTag("DNNscores_jet1Depth");
 		DNNscores.SetCuts("jet0_InclTagCand == 1 && jet1_DepthTagCand == 1"); 		
 		DNNscores.use_weight = true;
 		DNNscores.Plot();
 		DNNscores.ClearFileTrees();
-		DNNscores.SetPlots({P_jet0_scores_depth_hcal, P_jet0_scores_depth_anywhere});
+		DNNscores.SetPlots({P_jet1_scores_inc_train80, P_jet0_scores_depth_hcal, P_jet0_scores_depth_anywhere});
 		DNNscores.SetOutputFileTag("DNNscores_jet1Incl");
 		DNNscores.SetCuts("jet1_InclTagCand == 1 && jet0_DepthTagCand == 1"); 		
 		DNNscores.use_weight = true;

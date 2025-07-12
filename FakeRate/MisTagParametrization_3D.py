@@ -16,19 +16,19 @@ pT_bins = np.linspace(0, 300, 20)  # pT axis from 0 to 500 GeV, 20 bins
 pT_bins = [0, 40, 50, 60, 70, 80, 100, 120, 160, 240, 400]  # Define pT bins
 # pT_bins = [0, 40, 60, 70, 100, 150, 240, 400]  # Define pT bins
 pT_bins = np.array(pT_bins, dtype=float)
-eta_bins = np.linspace(-1.26, 1.26, 10)  # eta axis from -2 to 2, 10 bins
+eta_bins = np.linspace(-1.26, 1.26, 31)  # eta axis from -2 to 2, 10 bins
 phi_bins = np.linspace(-np.pi, np.pi, 10)  # phi axis from -pi to pi, 10 bins
 
-DNN_cut = 0.05
+DNN_cut = 0.9
 DNN_cut_inc = 0.9
 
 runs_to_exclude = [367230, 367772, 368331, 368440, 368764, 370436, 370579, 370790] # 2023 runs
 
-era = "2023 Cv4" # automatically switches which input minituples to use based on this name
+era = "2023 Bv1-Dv2" # automatically switches which input minituples to use based on this name
 
-Zmu = True
+Zmu = False
 if Zmu: era = "2023 Bv1-Dv2 Zmu"
-LLPskim = False
+LLPskim = True
 
 era_name = era.replace(" ", "") # for plot saving
 
@@ -95,7 +95,8 @@ def MisTagParametrization(tree, option=""):
     CR = GetCut("jet1_scores_inc_train80", [0,0.2])
     VR = GetCut("jet1_scores_inc_train80", [0.2,DNN_cut_inc])
     SR = GetCut("jet1_scores_inc_train80", [DNN_cut_inc,1.1])
-    mistag = GetCut("jet0_scores_depth_hcal", [DNN_cut,1.1])
+    # mistag = GetCut("jet0_scores_depth_hcal", [DNN_cut,1.1])
+    mistag = GetCut("jet0_scores_depth_anywhere", [DNN_cut,1.1])
     if CNN:
         mistag = GetCut("CNN3D_classifier3", [DNN_cut,1.1])
     # Need leading jet to be matched to a LLP, jet0_L1trig_Matched. Leading jet pT > 60, subleading > 40. Eta restrictions on both jets at 1.26
@@ -114,7 +115,8 @@ def MisTagParametrization(tree, option=""):
     CR_0 = GetCut("jet0_scores_inc_train80", [0,0.2])
     VR_0 = GetCut("jet0_scores_inc_train80", [0.2,DNN_cut_inc])
     SR_0 = GetCut("jet0_scores_inc_train80", [DNN_cut_inc,1.1]) 
-    mistag_1 = GetCut("jet1_scores_depth_hcal", [DNN_cut,1.1])
+    # mistag_1 = GetCut("jet1_scores_depth_hcal", [DNN_cut,1.1])
+    mistag_1 = GetCut("jet1_scores_depth_anywhere", [DNN_cut,1.1])
     # Need sub-leading jet to be matched to a LLP, jet1_L1trig_Matched. Sub-leading jet pT > 60, leading > 40. Eta restrictions on both jets at 1.26
     triggered_1 = GetCut("jet1_L1trig_Matched", 1) + GetCut("jet0_L1trig_Matched", [-10000,0.5]) # veto on both jet 0 and jet 1 being triggered to remove overlap
     # triggered_1 += GetCut("jet1_Pt", [60,1000]) 
@@ -266,7 +268,8 @@ def MisTagParametrization(tree, option=""):
             [proj_phi_CR_all, proj_phi_CR_mistag, proj_phi_VR_all, proj_phi_VR_mistag]],  # Wrap each plot in a list
             legend_labels,
             png_title,
-            ["Jet p_{T} Projection with various cuts, "+mistag_jet_list[i], "Jet #eta Projection with various cuts, "+mistag_jet_list[i], "Jet #phi Projection with various cuts, "+mistag_jet_list[i]], label
+            ["Jet p_{T} Projection with various cuts, "+mistag_jet_list[i], "Jet #eta Projection with various cuts, "+mistag_jet_list[i], "Jet #phi Projection with various cuts, "+mistag_jet_list[i]], label,
+            normalize=True
         )
 
         # Clone CR_mistag and divide it by CR_all to get the mistag rate in CR
@@ -399,20 +402,33 @@ def ProjectHistogram(hist3d, y_label = ""):
     return proj_pT, proj_eta, proj_phi
 
 # ------------------------------------------------------------------------------
-def DrawCanvasAndPlots(canvas_name, canvas_title, option, title, plots, legend_labels, save_name, plot_titles, label):
+def DrawCanvasAndPlots(canvas_name, canvas_title, option, title, plots, legend_labels, save_name, plot_titles, label, normalize=False):
     # Create canvas
     canvas = ROOT.TCanvas(f"{canvas_name}_{option}", f"{canvas_title} for {option}", 2400, 600)
     canvas.Divide(3, 1)
     
     # Loop over the plots and generate them
+    normalized_all = []
     for i, plot_group in enumerate(plots):
         canvas.cd(i + 1)  # Navigate to the correct pad
+        # Normalize histograms if requested
+        if normalize:
+            normalized_group = []
+            for hist in plot_group:
+                hist_copy = hist.Clone()  # Clone the histogram
+                integral = hist_copy.Integral()
+                if integral > 0:
+                    hist_copy.Scale(1.0 / integral)
+                normalized_group.append(hist_copy)
+            normalized_all.append(normalized_group)  # <- store them to keep alive
+            MakePlot(normalized_group, legend_labels)
+            normalized_group[0].SetTitle(plot_titles[i] + title)
         # MakePlot can take a list of histograms, so pass the group of histograms
-        MakePlot(plot_group, legend_labels)
-        
-        # Set the title for the plot group
-        plot_group[0].SetTitle(plot_titles[i] + title)  # Just set the title for the first plot in the group
-    
+        else:
+            MakePlot(plot_group, legend_labels)
+            # Set the title for the plot group
+            plot_group[0].SetTitle(plot_titles[i] + title) # Just set the title for the first plot in the group
+            
     canvas.Update()
     canvas.Draw()
 
