@@ -81,11 +81,11 @@ void MiniTuplePlotter_HLT_Effs(){
 	overlay_LLPdisplacement.SetOutputDirectory("HLT_Efficiencies_31Jan");
 	overlay_LLPdisplacement.plot_norm 			= false;
 	overlay_LLPdisplacement.plot_log_ratio   	= true;
-	overlay_LLPdisplacement.SetLegendPosition( 0.13, 0.8, 0.6, 0.98 );
+	overlay_LLPdisplacement.SetLegendPosition( 0.13, 0.75, 0.5, 1.05 );
 	overlay_LLPdisplacement.SetSelectiveCuts("MC", Form("eventHT > %s && perJet_Pt >= %s && perJet_MatchedLLP_DecayR < 300", event_HT[0].c_str(), jet_E[0].c_str() ) ); // cut on the jet pT
 	overlay_LLPdisplacement.SetComparisonCuts({Cut_None, Cut_HLTpassed1});
 	overlay_LLPdisplacement.colors = { kBlack, kAzure+7, kGray+1, kViolet+4 };
-	overlay_LLPdisplacement.SetLegendNames({"No cuts", "m_{H}=350 GeV, m_{S}=80 GeV, c#tau=0.5 m", "No cuts", "m_{H}=125 GeV, m_{S}=50 GeV, c#tau=3 m"});
+	overlay_LLPdisplacement.SetLegendNames({"No cuts", "#splitline{m_{H}=350 GeV,}{m_{S}=80 GeV, c#tau=0.5 m}", "No cuts", "#splitline{m_{H}=125 GeV,}{m_{S}=50 GeV, c#tau=3 m}"});
 	overlay_LLPdisplacement.SetVariableBins( {0,50,100,150,175,190,200,208,215,222,229,236,243,250,257,264,271,278,285,292,300} );
 	overlay_LLPdisplacement.Plot("efficiency", "", {"0","0","0"}, true);
 	overlay_LLPdisplacement.ClearFileTrees(); 
@@ -102,7 +102,7 @@ void MiniTuplePlotter_HLT_Effs(){
 	overlay_HT.SetOutputDirectory("HLT_Efficiencies_31Jan");
 	overlay_HT.plot_norm 			= false;
 	overlay_HT.plot_log_ratio   	= true;
-	overlay_HT.SetLegendPosition( 0.4, 0.65, 0.87, 0.83 );
+	overlay_HT.SetLegendPosition( 0.3, 0.55, 0.77, 0.73 ); // -0.1 to move legend left
 	overlay_HT.SetSelectiveCuts("MC", Cut_LLPinHCAL34_AnyJet); // jet is matched to LLP in HCAL 34 and jet pT > 100 GeV
 	overlay_HT.SetComparisonCuts({Cut_None, Cut_HLTpassed1});
 	overlay_HT.colors = { kBlack, kAzure+7, kGray+1, kViolet+4 };
@@ -124,7 +124,7 @@ void MiniTuplePlotter_HLT_Effs(){
 	overlay_jet.SetOutputDirectory("HLT_Efficiencies_31Jan");
 	overlay_jet.plot_norm 			= false;
 	overlay_jet.plot_log_ratio   	= true;
-	overlay_jet.SetLegendPosition( 0.4, 0.75, 0.87, 0.93 );
+	overlay_jet.SetLegendPosition( 0.3, 0.55, 0.77, 0.73 );
 	overlay_jet.SetVariableBins( {40, 46, 52, 58, 64, 70, 76, 82, 88, 94, 100, 110, 124, 140, 160, 185, 215, 250} );
 	overlay_jet.SetVariableBins( {0, 10, 26, 40, 54, 63, 72, 81, 90, 100, 110, 120, 140, 165, 200, 250, 300} );	
 	overlay_jet.SetSelectiveCuts("MC", Cut_matchedLLPinHCAL34_eventHT250);		// region for LLP decay, and require LLP is matched to jet 0, and event HT 250
