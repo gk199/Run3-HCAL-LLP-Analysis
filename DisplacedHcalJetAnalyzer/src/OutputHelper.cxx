@@ -128,6 +128,8 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("jet%d_TDCnDelayed", i) );
 		myvars_float.push_back( Form("jet%d_Timeavg", i) );
 
+		if (i==0) myvars_float.push_back( Form("jet%d_jet1_dPhi", i) );
+
 		for (int t=0; t<3; t++) {
 			myvars_float.push_back( Form("jet%d_Track%dPt", i, t) );
 			myvars_float.push_back( Form("jet%d_Frac_Track%dPt", i, t) );
@@ -541,6 +543,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 
 	// jets are already sorted in jet Pt (not jet E!). Loop over first three reco jets, and save quantities in the ntuples
 	int valid_jet = 0;
+	int first_valid_jet = -1;
 	for (int i = 0; i < n_jet; i++) {
 		if (jet_Pt->at(i) < 40 || abs(jet_Eta->at(i)) > 2.0 ) continue; //1.26) continue; // not interested if low energy (< 40) or in HE (eta > 1.26) 
 		if (valid_jet >= N_PFJets_ToSave) continue; // below output variables are only designed to be used for first 12 jets
@@ -652,6 +655,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 		vector<uint> jet_track_index = jet_TrackIndices->at(i);
 		vector<pair<float, float>> track_pt_index = TrackMatcher(i, jet_track_index);
 
+		if (valid_jet==1 && jet_Pt->at(first_valid_jet) > 0 && jet_Pt->at(i) > 0) tree_output_vars_float[Form("jet0_jet%d_dPhi", valid_jet)] 		= DeltaPhi(jet_Phi->at(first_valid_jet), jet_Phi->at(i));
 		for (int track = 0; track < 3; track++) {
 			tree_output_vars_float[Form("jet%d_Track%dPt", valid_jet, track)] = 0; // default value for track pT (in case no tracks are matched)
 			tree_output_vars_float[Form("jet%d_Frac_Track%dPt", valid_jet, track)] = 0; // default value for fractional track pT (in case no tracks are matched)
@@ -711,6 +715,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 		}
 
 		valid_jet += 1;
+		if (first_valid_jet == -1) first_valid_jet = i;
 	}
 
 	tree_output_vars_int["validJet"] = valid_jet;

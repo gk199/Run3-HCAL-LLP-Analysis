@@ -923,11 +923,13 @@ public :
 							// std::cout << "set axis range to " << PlotParams_temp.xmin << ", " << PlotParams_temp.xmax << std::endl;
 							pEff->GetPaintedGraph()->GetYaxis()->SetRangeUser(0, 1.);
 
-							leg->AddEntry(pEff, Form("%s", legend_names.at(i).c_str() ) );
+							leg->AddEntry(pEff, legend_names.at(i).c_str(), "ep" ); // points and vertical markers. Remove Form(%s) to have newline work! 
+							leg->SetTextSize(0.045); // larger legend text size
 
 							if (i == size(hist_tags)-1 ) {
 								leg->Draw();
-								StampCMS( "Simulation Preliminary", 140., 0.12, 0.92, 0.06, 2 ); // 0 means no energy, 1 means sqrt s, 2 means (13.6 TeV) (should we have this for simulation?)
+								// StampCMS( "Simulation Preliminary", 140., 0.12, 0.92, 0.06, 2 ); // 0 means no energy, 1 means sqrt s, 2 means (13.6 TeV) (should we have this for simulation?)
+								StampCMS( "Simulation", 140., 0.12, 0.92, 0.06, 2 ); // 0 means no energy, 1 means sqrt s, 2 means (13.6 TeV) (should we have this for simulation?)
 								if (multiple) StampLLP( 0.14, 0.84, 0.04, mass_lifetime ); // top left // trigger paper plots
 								// else if (multiple && PlotParams_temp.hist_name == "eventHT") StampLLP( 0.56, 0.15, 0.03, mass_lifetime ); // lower right, no mass / ctau written for multiple, works when hard cuts on jet pt and event HT
 								else if (PlotParams_temp.hist_name == "perJet_MatchedLLP_DecayR" ) StampLLP( 0.14, 0.86, 0.03, mass_lifetime ); // top left

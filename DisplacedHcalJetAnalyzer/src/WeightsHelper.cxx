@@ -48,6 +48,8 @@ void DisplacedHcalJetAnalyzer::SetWeight(string infiletag){
 	
     // Weight for each event
 	weight = BRxSigma*lumi/NEvents_produced; // weight = lumi * xsec (=# higgs) * BR (=# LLP)
+    // if NEvents_produced == 1, then the filetag was not found. Instead of setting a too high weight, set event weight to 1
+    if ( !data && infiletag.find("CTau") != string::npos && NEvents_produced == 1) weight = 1;
 	lumi_samplefrac  = lumiNum/(lumi_2022+lumi_2023);
 	cout<<"  weight   --> "<<weight<<" (event-by-event weight components included later)"<<endl;
 
@@ -70,7 +72,7 @@ double DisplacedHcalJetAnalyzer::GetSignalBRxSigma(string infiletag){
 	cout<<"  CrossSec --> "<<BRxSigma<<endl; // NB: BRxSigma before BR component
 
 	// Branching Ratios //
-	if( infiletag.find("LLP_MC_ggH_HToSSTobbbb_MH") != string::npos || infiletag.find("HToSSTo4B") != string::npos ) BRxSigma *= 0.01; // BR for H to LLP
+	if( infiletag.find("HToSSTobbbb") != string::npos || infiletag.find("HToSSTo4B") != string::npos ) BRxSigma *= 0.01; // BR for H to LLP
 	else { 
 		weight = 1.0;
 		cout<<"WARNING: Could not identify the proper weight value for this signal sample..."<<endl;
@@ -88,14 +90,19 @@ double DisplacedHcalJetAnalyzer::GetNEventsProduced(string infiletag){
 
     map<string, double> MCTag_to_NEvents;
 
-    MCTag_to_NEvents["LLP_MC_125_mX50_batch1"] = 998000;
-    MCTag_to_NEvents["LLP_MC_125_mX50_batch2"] = 2994000;
-    MCTag_to_NEvents["LLP_MC_250_mX120_batch1"] = 997090;
-    MCTag_to_NEvents["LLP_MC_250_mX120_batch2"] = 2994401;
-    MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau500"] = 497400; // HToSSTo4B_MH350_MS80_CTau500
-    MCTag_to_NEvents["LLP_MC_350_mX160__"] = 999100;
-    MCTag_to_NEvents["LLP_MC_350_mX160_batch2"] = 2993396;
-    MCTag_to_NEvents["ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV"] = 1966400;
+    MCTag_to_NEvents["HToSSTo4B_MH125_MS50_CTau3000"] = 3992000; // 998000 in batch 1, 2994000 in batch 2
+    MCTag_to_NEvents["HToSSTo4B_MH250_MS120_CTau10000"] = 3991491; // 997090 in batch 1, 2994401 in batch 2
+    MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau500"] = 497400; // 497400 events
+    MCTag_to_NEvents["HToSSTo4B_MH350_MS160_CTau10000"] = 3992496; // 999100 in batch 1, 2993396 in batch 2
+
+    // MCTag_to_NEvents["LLP_MC_125_mX50_batch1"] = 998000;
+    // MCTag_to_NEvents["LLP_MC_125_mX50_batch2"] = 2994000;
+    // MCTag_to_NEvents["LLP_MC_250_mX120_batch1"] = 997090;
+    // MCTag_to_NEvents["LLP_MC_250_mX120_batch2"] = 2994401;
+    // MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau500"] = 497400; 
+    // MCTag_to_NEvents["LLP_MC_350_mX160__"] = 999100;
+    // MCTag_to_NEvents["LLP_MC_350_mX160_batch2"] = 2993396;
+    // MCTag_to_NEvents["ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV"] = 1966400;
 
     /*
     N events from DAS, searching with "instance=prod/phys03"

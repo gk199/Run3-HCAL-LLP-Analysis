@@ -44,6 +44,9 @@ FEATURES = ['perJet_Eta', 'perJet_Mass',
 
 debug_mode = False
 
+read_from_h5 = True
+chunk_size = 100000
+
 class DataProcessor:
     def __init__(self, num_classes=2, mode=None, sel=True): # counting from 0
         # this function is passed num_classes - 1 = 1. value_bkg = 1, sig_value = 0
@@ -53,7 +56,7 @@ class DataProcessor:
         self.mode = mode
         self.sel = sel
     
-    def load_data(self, sig_files=None, bkg_files=None, step_size=100000):
+    def load_data(self, sig_files=None, bkg_files=None, step_size=chunk_size):
         # Load the signal and background data. Do this in batches, otherwise the large root files cause memory issues
         print("Loading Data in Batches with uproot.iterate...")
         
@@ -76,6 +79,10 @@ class DataProcessor:
             included.difference_update(to_remove)
         # Convert to sorted list for consistency
         filter_name = sorted(included)
+
+        if read_from_h5:
+            print("h5 files for signal and background already created, will read data directly from those! Speeds up training")
+            return # exit function early 
 
         with h5py.File("signal_depth.h5", "w") as sig_h5f, h5py.File("background_depth.h5", "w") as bkg_h5f:
             # These datasets will be extendable
@@ -148,8 +155,8 @@ class DataProcessor:
             ):
                 # Apply event-level filter here
                 # Use CR for depth tagger, and find portions where leading jet is depth candidate, or subleading jet is depth candidate
-                chunk_filtered_leading = chunk[ (chunk["jet0_DepthTagCand"] & (chunk["jet1_scores_inc_train80"] < 0.5) & (chunk["jet1_scores_inc_train80"] > -1)) ]
-                chunk_filtered_subleading = chunk[ (chunk["jet1_DepthTagCand"] & (chunk["jet0_scores_inc_train80"] < 0.5) & (chunk["jet0_scores_inc_train80"] > -1)) ]
+                chunk_filtered_leading = chunk[ (chunk["jet0_DepthTagCand"] & (chunk["jet1_scores_inc_train80"] < 0.2) & (chunk["jet1_scores_inc_train80"] > -1)) ]
+                chunk_filtered_subleading = chunk[ (chunk["jet1_DepthTagCand"] & (chunk["jet0_scores_inc_train80"] < 0.2) & (chunk["jet0_scores_inc_train80"] > -1)) ]
                 # Rename columns here to perJet for rest of processing, now that we know we have a depth tag candidate jet in the CR
                 rename_dict_leading = {
                     col: col.replace("jet0_", "perJet_")
@@ -217,7 +224,7 @@ class DataProcessor:
         def depth(row):
             return (abs(row['perJet_Eta']) < 1.26 and row['perJet_Pt'] > 60 and row['perJet_DepthTagCand']) # TODO uncomment when depthTagCand is fixed in per event tree!! 
             # returns 1 if this jet is a depth tag candidate (leading L1 LLP hwQual matched jet + kinematic requirements), 2+ depth emulated towers, eta < 1.26, and pT > 60
-            # TODO need to add in that this must be a depth candidate in the CR -- sequential trainings. 
+            # TODO need to add in that this must be a depth candidate in the CR -- sequential trainings. This is done in initial loading of background actually
             # If scores are added, need to check the score of the one that Pass_InclTagCand -- not how per jet tree is setup though...
         def inclusive_bkg(row):
             return (row['perJet_DepthTagCand'] == 0 and row['Pass_HLTDisplacedJet']) # not depth tag candidate, but must pass HLT
@@ -255,33 +262,66 @@ class DataProcessor:
                 return -1
         
         classify_sig = classify_signal
-
         classify_bkg = classify_background
 
         sig_df = pd.DataFrame()
         bkg_df = pd.DataFrame()
 
-        # Load signal HDF5 data
-        with h5py.File("signal_depth.h5", "r") as sig_file:
-            sig_data = sig_file["features"][:]
-            self.sig_df = pd.DataFrame.from_records(sig_data)  # Convert structured array to DataFrame
-        # Load background HDF5 data
-        with h5py.File("background_depth.h5", "r") as bkg_file:
-            bkg_data = bkg_file["features"][:]
-            self.bkg_df = pd.DataFrame.from_records(bkg_data)
-        
-        if not self.sig_df.empty and self.sel:
-            sig_df = self.sig_df.copy(deep=True)
-            # applying selections cut to signal
-            sig_df["classID"] = sig_df.apply(classify_sig, axis=1)
-            sig_df = sig_df[sig_df["classID"] != -1].reset_index(drop=True) # removing junk
-        
-        if not self.bkg_df.empty and self.sel:
-            bkg_df = self.bkg_df.copy(deep=True)
-            # applying selections cut to background
-            bkg_df["classID"] = bkg_df.apply(classify_bkg, axis=1)
-            bkg_df = bkg_df[bkg_df["classID"] != -1].reset_index(drop=True) # removing junk
-            
+        def load_h5_in_chunks(file_name, chunk_size):
+            with h5py.File(file_name, 'r') as f:
+                data = f["features"][:]
+                # Calculate number of chunks based on data size
+                total_records = data.shape[0]
+                for start in range(0, total_records, chunk_size):
+                    end = min(start + chunk_size, total_records)
+                    chunk = data[start:end]
+                    yield pd.DataFrame.from_records(chunk)
+        def process_chunk(chunk, classify_function):
+            chunk["classID"] = chunk.apply(classify_function, axis = 1)
+            return chunk[chunk["classID"] != -1].reset_index(drop=True)
+
+        # with h5py.File("signal_depth.h5", "r") as sig_file:
+        #     sig_data = sig_file["features"][:]
+        #     self.sig_df = pd.DataFrame.from_records(sig_data)  # Convert structured array to DataFrame
+        #     del sig_data
+        #     print("Loaded signal data")
+        # # Load background HDF5 data
+        # with h5py.File("background_depth.h5", "r") as bkg_file:
+        #     bkg_data = bkg_file["features"][:]
+        #     self.bkg_df = pd.DataFrame.from_records(bkg_data)
+        #     del bkg_data
+        #     print("Loaded background data")
+
+        # Initialize empty list to store processed chunks
+        sig_chunks = []
+        bkg_chunks = []
+        # Load HDF5 data (signal and background)
+        print("Applying selections to signal chunks:")
+        for sig_chunk in load_h5_in_chunks("signal_depth.h5", chunk_size):
+            sig_chunk = process_chunk(sig_chunk, classify_sig)
+            sig_chunks.append(sig_chunk)
+        print("Applying selections to background chunks:")
+        for bkg_chunk in load_h5_in_chunks("background_depth.h5", chunk_size):
+            bkg_chunk = process_chunk(bkg_chunk, classify_bkg)
+            bkg_chunks.append(bkg_chunk)
+
+        # Concatenate all processed chunks into a final DataFrame
+        print("Concatenating all processed signal and background into a data frame")
+        sig_df = pd.concat(sig_chunks, ignore_index=True)
+        bkg_df = pd.concat(bkg_chunks, ignore_index=True)
+        # if not self.sig_df.empty and self.sel:
+        #     sig_df = self.sig_df.copy(deep=True)
+        #     # applying selections cut to signal
+        #     sig_df["classID"] = sig_df.apply(classify_sig, axis=1)
+        #     sig_df = sig_df[sig_df["classID"] != -1].reset_index(drop=True) # removing junk
+        #     print("Applied selections to signal")
+        # if not self.bkg_df.empty and self.sel: # this was the part causing memory issues with all of 2023 CR data. Try loading h5 data in chunks
+        #     bkg_df = self.bkg_df.copy(deep=True)
+        #     # applying selections cut to background
+        #     bkg_df["classID"] = bkg_df.apply(classify_bkg, axis=1)
+        #     bkg_df = bkg_df[bkg_df["classID"] != -1].reset_index(drop=True) # removing junk
+        #     print("Applied selections to background")
+
         self.cumulative_df = pd.concat((sig_df, bkg_df))
         if debug_mode:
             print("-------------------Cumulative Data---------")
@@ -542,7 +582,7 @@ class ModelHandler:
         mutual_info = mutual_info_regression(features, scores)
         mi_results = pd.Series(mutual_info, index=FEATURES)
         mi_results_sorted = mi_results.sort_values(ascending=False)
-        mi_results_sorted.to_csv("mutual_info_v4.csv")
+        mi_results_sorted.to_csv("mutual_info_v4_depth.csv")
         print("Computed mutual information")
         
         

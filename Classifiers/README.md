@@ -16,8 +16,16 @@ Need to run the inclusive tagger before the depth tagger training can be run, si
 List files to train over and to write scores to in these scripts. The output DNNs are `dense_model_v4.keras` and `inclusive_model_v4.keras`.
 
 ## Plot DNN Scores
+DNN scores for the signal and background are plotted with a python script. 
 ```
 python3 PlotScoresDNN.py
+```
+Options are mode (signal, background, overlay, different eras), normalize, and train 40 vs train 80. The script is run:
+```
+python3 PlotScoresDNN_v2.py --mode signal --normalize
+python3 PlotScoresDNN_v2.py --mode background --normalize
+python3 PlotScoresDNN_v2.py --mode overlay --normalize
+python3 PlotScoresDNN_v2.py --mode background_overlay --normalize
 ```
 
 ## Custom ROC Curve Plots
