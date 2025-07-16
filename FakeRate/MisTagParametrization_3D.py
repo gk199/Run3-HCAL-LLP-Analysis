@@ -22,7 +22,8 @@ phi_bins = np.linspace(-np.pi, np.pi, 10)  # phi axis from -pi to pi, 10 bins
 DNN_cut = 0.9
 DNN_cut_inc = 0.9
 
-runs_to_exclude = [367230, 367772, 368331, 368440, 368764, 370436, 370579, 370790] # 2023 runs
+runs_to_exclude = [367230, 367772, 368331, 368440, 368764, 370436, 370579, 370790] # 2023 runs, based on earlier DNN
+runs_to_exclude = [367772, 368384, 368412, 370102, 370472, 370522, 370579, 370667] # 2023 runs, from depth DNN with LLP decaying anywhere
 
 era = "2023 Bv1-Dv2" # automatically switches which input minituples to use based on this name
 
@@ -92,11 +93,14 @@ def MisTagParametrization(tree, option=""):
     run_exclusion = ExcludedCut("run", runs_to_exclude)
     print(run_exclusion)
 
+    deltaPhi_exclusion = GetCut("abs(jet0_Phi - jet1_Phi)", [0.2,10])
+    print(deltaPhi_exclusion)
+
     CR = GetCut("jet1_scores_inc_train80", [0,0.2])
     VR = GetCut("jet1_scores_inc_train80", [0.2,DNN_cut_inc])
     SR = GetCut("jet1_scores_inc_train80", [DNN_cut_inc,1.1])
-    # mistag = GetCut("jet0_scores_depth_hcal", [DNN_cut,1.1])
-    mistag = GetCut("jet0_scores_depth_anywhere", [DNN_cut,1.1])
+    mistag = GetCut("jet0_scores_depth_hcal", [DNN_cut,1.1])
+    # mistag = GetCut("jet0_scores_depth_anywhere", [DNN_cut,1.1])
     if CNN:
         mistag = GetCut("CNN3D_classifier3", [DNN_cut,1.1])
     # Need leading jet to be matched to a LLP, jet0_L1trig_Matched. Leading jet pT > 60, subleading > 40. Eta restrictions on both jets at 1.26
@@ -115,8 +119,8 @@ def MisTagParametrization(tree, option=""):
     CR_0 = GetCut("jet0_scores_inc_train80", [0,0.2])
     VR_0 = GetCut("jet0_scores_inc_train80", [0.2,DNN_cut_inc])
     SR_0 = GetCut("jet0_scores_inc_train80", [DNN_cut_inc,1.1]) 
-    # mistag_1 = GetCut("jet1_scores_depth_hcal", [DNN_cut,1.1])
-    mistag_1 = GetCut("jet1_scores_depth_anywhere", [DNN_cut,1.1])
+    mistag_1 = GetCut("jet1_scores_depth_hcal", [DNN_cut,1.1])
+    # mistag_1 = GetCut("jet1_scores_depth_anywhere", [DNN_cut,1.1])
     # Need sub-leading jet to be matched to a LLP, jet1_L1trig_Matched. Sub-leading jet pT > 60, leading > 40. Eta restrictions on both jets at 1.26
     triggered_1 = GetCut("jet1_L1trig_Matched", 1) + GetCut("jet0_L1trig_Matched", [-10000,0.5]) # veto on both jet 0 and jet 1 being triggered to remove overlap
     # triggered_1 += GetCut("jet1_Pt", [60,1000]) 
@@ -162,7 +166,6 @@ def MisTagParametrization(tree, option=""):
     # hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi, hist1D_VR_all_run = CreateHistograms_1D(tree, VR + triggered + pt_eta, "hist1d_VR_all")
     # hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi, hist1D_VR_mistag_run = CreateHistograms_1D(tree, VR + triggered + pt_eta + mistag, "hist1d_VR_mistag")
     print("created histograms for 1D rate evaluation")
-
     # if LLPskim: MistagRate_1D([hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run], [hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run], "CR", option, title, label, "leading") # mistag_jet_list[i])
     # if Zmu: MistagRate_1D([hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run], [hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run], "Wjets", option, title, label, "leading")
     # if LLPskim: MistagRate_1D([hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi, hist1D_VR_mistag_run], [hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi, hist1D_VR_all_run], "VR", option, title, label, "leading")
@@ -171,18 +174,18 @@ def MisTagParametrization(tree, option=""):
 
     # Create the 3D histograms with different cuts. Arguments to CreateHistograms function are tree, cut, histogram name. Histograms are filled usnig tree.Draw() method
     # jet 0 is triggered, jet 1 defines CR / VR
-    hist3d_CR_all = CreateHistograms(tree, CR + triggered + pt_eta + run_exclusion, "hist3d_CR_all")
-    hist3d_CR_mistag = CreateHistograms(tree, CR + triggered + pt_eta + run_exclusion + mistag, "hist3d_CR_mistag")
-    hist3d_VR_all = CreateHistograms(tree, VR + triggered + pt_eta + run_exclusion, "hist3d_VR_all")
-    hist3d_VR_mistag = CreateHistograms(tree, VR + triggered + pt_eta + run_exclusion + mistag, "hist3d_VR_mistag")
-    hist3d_SR_all = CreateHistograms(tree, SR + triggered + pt_eta + run_exclusion, "hist3d_SR_all")
+    hist3d_CR_all = CreateHistograms(tree, CR + triggered + pt_eta + run_exclusion + deltaPhi_exclusion, "hist3d_CR_all")
+    hist3d_CR_mistag = CreateHistograms(tree, CR + triggered + pt_eta + run_exclusion + deltaPhi_exclusion + mistag, "hist3d_CR_mistag")
+    hist3d_VR_all = CreateHistograms(tree, VR + triggered + pt_eta + run_exclusion + deltaPhi_exclusion, "hist3d_VR_all")
+    hist3d_VR_mistag = CreateHistograms(tree, VR + triggered + pt_eta + run_exclusion + deltaPhi_exclusion + mistag, "hist3d_VR_mistag")
+    hist3d_SR_all = CreateHistograms(tree, SR + triggered + pt_eta + run_exclusion + deltaPhi_exclusion, "hist3d_SR_all")
 
     # jet 1 is triggered, jet 0 defines CR / VR
-    hist3d_CR_all_1 = CreateHistograms(tree, CR_0 + triggered_1 + pt_eta + run_exclusion, "hist3d_CR_all_1")
-    hist3d_CR_mistag_1 = CreateHistograms(tree, CR_0 + triggered_1 + pt_eta + run_exclusion + mistag_1, "hist3d_CR_mistag_1")
-    hist3d_VR_all_1 = CreateHistograms(tree, VR_0 + triggered_1 + pt_eta + run_exclusion, "hist3d_VR_all_1")
-    hist3d_VR_mistag_1 = CreateHistograms(tree, VR_0 + triggered_1 + pt_eta + run_exclusion + mistag_1, "hist3d_VR_mistag_1")
-    hist3d_SR_all_1 = CreateHistograms(tree, SR_0 + triggered_1 + pt_eta + run_exclusion, "hist3d_SR_all_1")
+    hist3d_CR_all_1 = CreateHistograms(tree, CR_0 + triggered_1 + pt_eta + run_exclusion + deltaPhi_exclusion, "hist3d_CR_all_1")
+    hist3d_CR_mistag_1 = CreateHistograms(tree, CR_0 + triggered_1 + pt_eta + run_exclusion + deltaPhi_exclusion + mistag_1, "hist3d_CR_mistag_1")
+    hist3d_VR_all_1 = CreateHistograms(tree, VR_0 + triggered_1 + pt_eta + run_exclusion + deltaPhi_exclusion, "hist3d_VR_all_1")
+    hist3d_VR_mistag_1 = CreateHistograms(tree, VR_0 + triggered_1 + pt_eta + run_exclusion + deltaPhi_exclusion + mistag_1, "hist3d_VR_mistag_1")
+    hist3d_SR_all_1 = CreateHistograms(tree, SR_0 + triggered_1 + pt_eta + run_exclusion + deltaPhi_exclusion, "hist3d_SR_all_1")
     # OR the above options by adding together the two histograms
     hist3d_CR_all_combined = hist3d_CR_all.Clone("hist3d_CR_all_combined")
     hist3d_CR_all_combined.Add(hist3d_CR_all_1)
@@ -207,11 +210,11 @@ def MisTagParametrization(tree, option=""):
         ZW_pt_eta = GetCut("jet0_Pt",[40,1000]) + GetCut("jet0_Eta",[-1.26,1.26])  # only need first jet in HB
         WPlusJets = GetCut("Pass_WPlusJets", 1)
         ZPlusJets = GetCut("Pass_ZPlusJets", 1)
-        CR_all_list = [CreateHistograms(tree, WPlusJets + triggered + ZW_pt_eta + run_exclusion, "hist3d_Wjet_all")]
-        CR_mistag_list = [CreateHistograms(tree, WPlusJets + triggered + ZW_pt_eta + run_exclusion + mistag, "hist3d_Wjet_mistag")]
-        VR_all_list = [CreateHistograms(tree, ZPlusJets + triggered + ZW_pt_eta + run_exclusion, "hist3d_Zjet_all")]
-        VR_mistag_list = [CreateHistograms(tree, ZPlusJets + triggered + ZW_pt_eta + run_exclusion + mistag, "hist3d_Zjet_mistag")]
-        SR_all_list = [CreateHistograms(tree, triggered + ZW_pt_eta + run_exclusion, "hist3d_Zjet_all_duplicate")] # placeholder
+        CR_all_list = [CreateHistograms(tree, WPlusJets + triggered + ZW_pt_eta + run_exclusion + deltaPhi_exclusion, "hist3d_Wjet_all")]
+        CR_mistag_list = [CreateHistograms(tree, WPlusJets + triggered + ZW_pt_eta + run_exclusion + deltaPhi_exclusion + mistag, "hist3d_Wjet_mistag")]
+        VR_all_list = [CreateHistograms(tree, ZPlusJets + triggered + ZW_pt_eta + run_exclusion + deltaPhi_exclusion, "hist3d_Zjet_all")]
+        VR_mistag_list = [CreateHistograms(tree, ZPlusJets + triggered + ZW_pt_eta + run_exclusion + deltaPhi_exclusion + mistag, "hist3d_Zjet_mistag")]
+        SR_all_list = [CreateHistograms(tree, triggered + ZW_pt_eta + run_exclusion + deltaPhi_exclusion, "hist3d_Zjet_all_duplicate")] # placeholder
         mistag_jet_list = ["leading"]
         comparison = "_Wjets_Zjets"  
 
@@ -533,7 +536,7 @@ def MistagRate_1D(mistag_hists, all_hists, plot_type, option, title, label, type
     print("cloned and divided input histograms")
 
     # For the run number histogram, determine what run numbers have high mistag rates
-    threshold = 0.04
+    threshold = 0.0004
     nBins = mistag_rate_run.GetNbinsX()
     # Loop through bins, check content
     for bin in range(1, nBins + 1): # since bin numbers start at 1

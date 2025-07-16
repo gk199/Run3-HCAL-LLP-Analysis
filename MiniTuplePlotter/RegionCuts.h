@@ -267,3 +267,6 @@ TCut Cut_2Towers = Form("jet0_TimingTowers + jet0_DepthTowers >= 2");
 
 TCut Cut_CR = Form("jet1_scores_inc_train80 >= 0 && jet1_scores_inc_train80 <= 0.2 && jet1_InclTagCand == 1");
 TCut Cut_VR = Form("jet1_scores_inc_train80 > 0.2 && jet1_scores_inc_train80 <= 0.9 && jet1_InclTagCand == 1");
+
+TCut Cut_CR_jet0 = Form("jet0_scores_inc_train80 >= 0 && jet0_scores_inc_train80 <= 0.2 && jet0_InclTagCand == 1");
+TCut Cut_VR_jet0 = Form("jet0_scores_inc_train80 > 0.2 && jet0_scores_inc_train80 <= 0.9 && jet0_InclTagCand == 1");
