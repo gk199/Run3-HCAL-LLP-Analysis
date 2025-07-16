@@ -401,7 +401,7 @@ def DNN_Passing(file_path):
 	file = ROOT.TFile.Open(file_path)
 
 	baseline_selection_string = "Pass_WPlusJets == 1"
-	if "LLP_MC" in file_path: baseline_selection_string = "Pass_HLTDisplacedJet == 1"
+	if "HToSSTo4b" in file_path: baseline_selection_string = "Pass_HLTDisplacedJet == 1"
 	
 	f_out = ROOT.TFile.Open("skimmed_file.root", "RECREATE")
 	tree = file.Get("NoSel")
@@ -442,6 +442,108 @@ def DNN_Passing(file_path):
 		# if i == 13: total_selection_string += " && jet0_scores_inc >= 0.9 && jet1_scores >= 0.9"
 		# if i == 14: total_selection_string = jet_string + " && " + jet1_string + "&& jet1_TimingTowers == 2 && jet1_DepthTowers == 1 && jet1_L1trig_Matched == 1"
 		# if i == 15: total_selection_string += " && jet0_scores_inc >= 0.9 && jet1_scores >= 0.9"
+
+		selval = tree_reduced.GetEntries(total_selection_string)
+
+		Nevents = tree_reduced.GetEntries()
+
+		if print_latex:
+			print(selname+" & ", round(selval, 4), " & ", round((selval)/init, 4), " \\\\ ") 
+			if i == 0 or i == 2 or i == 9: print("\\hline")
+			if i == 16: latex_end(file_path)
+
+		else:
+			print(selection_list_abbrev_noCut[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
+
+# ------------------------------------------------------------------------------
+def Depth_Inclusive_DNN(file_path):
+	# Cutflow table for fraction of events passing DNN for jet 0 and jet 1
+	score = "0.1"
+	print(" \n")
+	print("Depth and inclusive jet and DNN cutflow, done per event")
+	print()
+	print(" \n")
+	selection_list_noCut = [
+		"All", 
+		"Jet 0 $\\geq "+jet_energy+"$~GeV $p_T$ and $\\abs\\eta \\leq 1.26$", 
+		"Jet 1 $\\geq "+jet_energy+"$~GeV $p_T$ and $\\abs\\eta \\leq 1.26$", 
+		"Jet 0 or 1 is L1 triggered",
+		"Triggered jet, 2+ depth towers passed",
+		"Triggered jet, 2+ depth towers and both DNN $\\geq $ "+score,
+		"One of leading jets is inclusive tag candidate",		
+		"Other jet is depth tag candidate",
+		"Inclusive jet DNN score $\\geq $ "+score,
+		"Depth jet DNN score $\\geq $ "+score,
+		"Jet 0 is L1 triggered",
+		"Leading jet, 2+ depth towers passed",
+		"Leading jet, 2+ depth towers and both DNN $\\geq $ "+score,
+		"Leading jet is depth tag candidate",
+		"Other jet is inclusive tag candidate",		
+		"Inclusive jet DNN score $\\geq $ "+score,
+		"Depth jet DNN score $\\geq $ "+score,	]
+
+	selection_list_abbrev_noCut = [
+		"All       ",
+		"Jet 0 pT and eta",
+		"Jet 1 pT and eta",
+		"Jet 0 or 1 triggered",
+		"2+ depth passed",
+		"and DNNs passed",
+		"2+ timing passed",
+		"and DNNs passed",
+		"1 timing, 1 depth passed",
+		"and DNNs passed",
+		"Jet 0 triggered",
+		"2+ depth passed (jet0)",
+		"and DNNs passed",
+		"2+ timing passed (jet0)",
+		"and DNNs passed",
+		"1 timing, 1 depth passed (jet0)",
+		"and DNNs passed",
+	]
+	
+	if print_latex:
+		event_latex_setup(file_path)
+
+	init = -1
+	file = ROOT.TFile.Open(file_path)
+
+	baseline_selection_string = "Pass_WPlusJets == 1"
+	# baseline_selection_string = "Pass_HLTDisplacedJet == 1"
+	if "HToSSTo4b" in file_path: baseline_selection_string = "Pass_HLTDisplacedJet == 1"
+	
+	f_out = ROOT.TFile.Open("skimmed_file.root", "RECREATE")
+	tree = file.Get("NoSel")
+	tree_reduced = tree.CopyTree(baseline_selection_string)
+	tree_reduced.Write() # write to disk
+	
+	for i in range(len(selection_list_noCut)):
+		selname = selection_list_noCut[i]
+		selval  = -1
+		Nevents = -1
+
+		if i == 0: 
+			init = tree_reduced.GetEntries()
+			total_selection_string = ""
+		if i == 1: total_selection_string = jet_string
+		if i == 2: total_selection_string += " && " + jet1_string
+		# either jet 1 or jet 2 is triggered
+		if i == 3: total_selection_string += " && (jet0_L1trig_Matched == 1 || jet1_L1trig_Matched == 1)"
+		if i == 4: total_selection_string = "(" + one_jet_tagged_string_triggered + "||" + one_jet1_tagged_string_triggered + ") && ( " + jet_string + " && " + jet1_string + ")"
+		if i == 5: total_selection_string += " && ((jet0_L1trig_Matched == 1 && jet0_scores_depth_anywhere >= " + score + " && jet1_scores_inc_train80 >= " + score + ") || (jet0_scores_inc_train80 >= " + score + " && jet1_scores_depth_anywhere >= " + score + " && jet1_L1trig_Matched == 1))"
+		if i == 6: total_selection_string = "( jet0_InclTagCand || jet1_InclTagCand) "
+		if i == 7: total_selection_string = "( (jet0_DepthTagCand && jet1_InclTagCand) || (jet0_InclTagCand && jet1_DepthTagCand) ) "
+		if i == 8: total_selection_string = "( (jet0_DepthTagCand && jet1_InclTagCand && jet1_scores_inc_train80 >= " + score + ") || (jet0_InclTagCand && jet0_scores_inc_train80 >= " + score + " && jet1_DepthTagCand) ) "
+		if i == 9: total_selection_string = "( (jet0_DepthTagCand && jet0_scores_depth_anywhere >= " + score + " && jet1_InclTagCand && jet1_scores_inc_train80 >= " + score + ") || (jet0_InclTagCand && jet0_scores_inc_train80 >= " + score + " && jet1_DepthTagCand && jet1_scores_depth_anywhere >= " + score + ") ) "
+
+		# jet 1 is triggered
+		if i == 10: total_selection_string = jet_string_triggered + " && " + jet1_string
+		if i == 11: total_selection_string = one_jet_tagged_string_triggered + " && " + jet1_string
+		if i == 12: total_selection_string += " && jet0_scores_depth_anywhere >= " + score + " && jet1_scores_inc_train80 >= " + score
+		if i == 13: total_selection_string = "jet0_DepthTagCand"
+		if i == 14: total_selection_string += " && jet1_InclTagCand"
+		if i == 15: total_selection_string += " && jet1_scores_inc_train80 >= " + score
+		if i == 16: total_selection_string += " && jet0_scores_depth_anywhere >= " + score
 
 		selval = tree_reduced.GetEntries(total_selection_string)
 
@@ -916,7 +1018,7 @@ def main():
 	file_path = sys.argv[1]
 	
 	# Signal truth cuts, evalute acceptance and then 6, 2, 1 jets
-	if "LLP_MC" in file_path: LLP_Cutflow(file_path) 
+	# if "LLP_MC" in file_path: LLP_Cutflow(file_path) 
 
 	# Similar to the first table from LLP_Cutflow, but on data or LLP, using jet/analysis cuts
 	# if "Zmu" or "LLPskim" in file_path: SixJetCheck(file_path, "NoSel") # evaluate 6, 2, and 1 jets that are triggered and pass emulation
@@ -924,6 +1026,7 @@ def main():
 
 	# DNN check
 	# DNN_Passing(file_path) 
+	Depth_Inclusive_DNN(file_path)
 
 	# Emulated towers check
 	# if "LLPskim" or "LLP_MC" in file_path: Emulated_Towers(file_path)
