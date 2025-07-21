@@ -20,7 +20,7 @@ cwd = os.getcwd()
 # -------------------------------------------------------------------------------------------------
 # MODIFY ME! (Keep things global)
 
-max_jobs_per_submission = 24
+max_jobs_per_submission = 100
 
 header_cmd    = os.path.abspath("condor_header.cmd")
 executable_sh = os.path.abspath("condor_executable.sh")
@@ -31,143 +31,169 @@ Executable_DisplacedHcalJetAnalyzer = os.path.abspath("../../DisplacedHcalJetAna
 
 # ------------------------------------------------------------------------------
 def parseArgs():
-	""" Parse command-line arguments
-	"""
-	parser = argparse.ArgumentParser(
-		add_help=True,
-		description=''
-	)
+    """ Parse command-line arguments
+    """
+    parser = argparse.ArgumentParser(
+        add_help=True,
+        description=''
+    )
 
-	parser.add_argument("-i", "--input_file", action="store", help="Input text file containing ROOT inputs", required=True)
-	parser.add_argument("-o", "--output_dir", action="store", default="./", help="Output directory path")
-	# parser.add_argument("-b", "--bdt_zipfile",  action="store", default="./BDTWeightFiles.zip", help="Path to directory containing bdt files")
-	# zip -r BDTWeightFiles.zip BDTWeightFiles
-	parser.add_argument("-p", "--proxy",      action="store", help="Proxy path: generate via `voms-proxy-init -voms cms` and copy file from /tmp/ area", required=True) # TODO
-	parser.add_argument("-s", "--setup_only", action="store_true", help="Setup jobs only") 
-	parser.add_argument("-t", "--test",       action="store_true", help="Submit test job only") 
-	parser.add_argument("-d", "--debug",      action="store_true", help="Debug") 
-	parser.add_argument("-f", "--flag",		  action="store", default="", help="Flag to append to Job_ directory")
+    parser.add_argument("-i", "--input_file", action="store", help="Input text file containing ROOT inputs", required=True)
+    parser.add_argument("-o", "--output_dir", action="store", default="./", help="Output directory path")
+    # parser.add_argument("-b", "--bdt_zipfile",  action="store", default="./BDTWeightFiles.zip", help="Path to directory containing bdt files")
+    # zip -r BDTWeightFiles.zip BDTWeightFiles
+    parser.add_argument("-p", "--proxy",      action="store", help="Proxy path: generate via `voms-proxy-init -voms cms` and copy file from /tmp/ area", required=True) # TODO
+    parser.add_argument("-s", "--setup_only", action="store_true", help="Setup jobs only") 
+    parser.add_argument("-t", "--test",       action="store_true", help="Submit test job only") 
+    parser.add_argument("-d", "--debug",      action="store_true", help="Debug") 
+    parser.add_argument("-f", "--flag",       action="store", default="", help="Flag to append to Job_ directory")
+    parser.add_argument("-n", "--nperjob",     action="store", default=1, help="Number of files to run per job")
+    args = parser.parse_args()
 
-	args = parser.parse_args()
-
-	return args
+    return args
 
 # -------------------------------------------------------------------------------------------------
 def main():
  
-	print( "Gathering Submission Info..." )
+    print( "Gathering Submission Info..." )
 
-	# ----- Get Args ----- #
+    # ----- Get Args ----- #
 
-	args = parseArgs()
+    args = parseArgs()
 
-	input_file 	= args.input_file
-	output_dir 	= args.output_dir + "_" + datetime_now
-	# bdt_zipfile = os.path.abspath( args.bdt_zipfile )
-	proxy 		= os.path.abspath( args.proxy )
-	setup_only 	= args.setup_only
-	test 		= args.test
-	debug 		= args.debug
-	flag        = args.flag
+    input_file  = args.input_file
+    output_dir  = args.output_dir + "_" + datetime_now
+    # bdt_zipfile = os.path.abspath( args.bdt_zipfile )
+    proxy       = os.path.abspath( args.proxy )
+    setup_only  = args.setup_only
+    test        = args.test
+    debug       = args.debug
+    flag        = args.flag
+    files_per_job = int(args.nperjob)
 
-	# ----- Get Inputs ----- #
+    # ----- Get Inputs ----- #
 
-	if not os.path.isfile(input_file): 
-		print( "ERROR:", input_file, " does not exist. Exiting..." )
-		quit()
+    if not os.path.isfile(input_file): 
+        print( "ERROR:", input_file, " does not exist. Exiting..." )
+        quit()
 
-	input_list = []
-	with open(input_file) as f:
-		for line in f.readlines():
-			line_temp = line.replace(" ","").strip()
-			if line_temp[0] == "#": continue
+    infile_path_list = []
 
-			infile_path = line_temp
-			infile_tag  = line_temp.split("/")[-1].replace(".root","")
-			input_list.append( [infile_tag, infile_path] )	
+    i = 0
+    input_list = []
+    input_list_temp = []
+    with open(input_file) as f:
+        for line in f.readlines():
+            line_temp = line.replace(" ","").strip()
+            if line_temp[0] == "#": continue
 
-			if debug: print( "Reading in:", [infile_tag, infile_path] )
+            if i % files_per_job == 0:
+                if i != 0: input_list.append( input_list_temp ) 
+                input_list_temp = []
 
-	# ----- Make Output Dir ----- #
+            input_list_temp.append( line_temp )
+            i += 1
 
-	if os.path.exists(output_dir):
-		print( "WARNING:", output_dir, "already exists! Files might be overwritten" )
-	else: 
-		os.mkdir( output_dir )
+            if debug: print( "Reading in:", infile_path )
 
-	# ----- Make Submission Dir ----- #
+    input_list.append( input_list_temp )  
 
-	DirFlag = ""
-	if (str(flag) != ""): DirFlag = str(flag) + "_"
-	submission_dir = "Jobs_"+DirFlag+datetime_now
+    # ----- Make Output Dir ----- #
 
-	if os.path.exists(submission_dir):
-				print( "ERROR:", submission_dir, "already exists. Please use another name. Check if your output directory will be overwritten! Exiting..." )
-				quit()
+    if os.path.exists(output_dir):
+        print( "WARNING:", output_dir, "already exists! Files might be overwritten" )
+    else: 
+        os.mkdir( output_dir )
 
-	os.mkdir( submission_dir )
-	os.chdir( submission_dir )
+    # ----- Make Submission Dir ----- #
 
-	# ----- BDT Weight Files ----- #
+    DirFlag = ""
+    if (str(flag) != ""): DirFlag = str(flag) + "_"
+    submission_dir = "Jobs_"+DirFlag+datetime_now
 
-	#os.system( "ln -s " + bdt_zipfile + " BDTWeightFiles.zip" )
-	#bdt_zipfile_new = os.path.abspath( "BDTWeightFiles.zip" )
-	add_scores = os.path.abspath( "../../../Classifiers/ScoresToEventBased-v3.py" )
-	keras_depth = os.path.abspath( "../../../Classifiers/depth_model_v3_Oct15.keras" )
-	keras_inclusive = os.path.abspath( "../../../Classifiers/inclusive_model_v3_Oct15.keras" )
-	norm_constants = os.path.abspath( "../../../Classifiers/norm_constants_v3.csv" )
-	transfer_input_files = Executable_DisplacedHcalJetAnalyzer + "," + add_scores + "," + keras_depth + "," + keras_inclusive + "," + norm_constants
+    if os.path.exists(submission_dir):
+                print( "ERROR:", submission_dir, "already exists. Please use another name. Check if your output directory will be overwritten! Exiting..." )
+                quit()
 
-	# ----- Submit Jobs ----- #
+    os.mkdir( submission_dir )
+    os.chdir( submission_dir )
 
-	print( "Begin submitting", len(input_list), "jobs...")
+    # ----- BDT Weight Files ----- #
 
-	n_jobs_submitted = 0
-	ii = -1
-	while n_jobs_submitted < len(input_list):
+    #os.system( "ln -s " + bdt_zipfile + " BDTWeightFiles.zip" )
+    #bdt_zipfile_new = os.path.abspath( "BDTWeightFiles.zip" )
+    add_scores = os.path.abspath( "../../../Classifiers/ScoresToEventBased-v3.py" )
+    keras_depth = os.path.abspath( "../../../Classifiers/depth_model_v3_Oct15.keras" )
+    keras_inclusive = os.path.abspath( "../../../Classifiers/inclusive_model_v3_Oct15.keras" )
+    norm_constants = os.path.abspath( "../../../Classifiers/norm_constants_v3.csv" )
+    transfer_input_files = Executable_DisplacedHcalJetAnalyzer + "," + add_scores + "," + keras_depth + "," + keras_inclusive + "," + norm_constants
 
-		ii += 1
+    # ----- Submit Jobs ----- #
 
-		job_dir = "Job_"+str(ii)
-		os.mkdir(job_dir)
-		os.chdir(job_dir)
+    print( "Begin submitting", len(input_list), "jobs...")
 
-		os.system( "cp "+header_cmd+" ./condor_submit.cmd" )
-		os.system( "cp "+executable_sh+" ./condor_executable.sh" )
-		os.system( "echo 'output_destination = root://eosuser.cern.ch/"+output_dir+"/' >> condor_submit.cmd")
-		os.system( "echo 'transfer_input_files = "+transfer_input_files+" ' >> condor_submit.cmd" )
+    n_jobs_submitted = 0
+    ii = -1
+    while n_jobs_submitted < len(input_list):
 
-		n_jobs_submitted_temp = n_jobs_submitted
-		for i in range(max_jobs_per_submission):
+        ii += 1
 
-			if n_jobs_submitted >= len(input_list): break
+        job_dir = "Job_"+str(ii)
+        os.mkdir(job_dir)
+        os.chdir(job_dir)
 
-			j = n_jobs_submitted_temp + i
-			infile_tag = "job"+str(ii)+"_"+str(i)+"_"+input_list[j][0]
-			infile_path = input_list[j][1]
+        os.system( "cp "+header_cmd+" ./condor_submit.cmd" )
+        os.system( "cp "+executable_sh+" ./condor_executable.sh" )
 
-			os.system("echo 'arguments = "+proxy+"   "+infile_tag+"   "+infile_path+"   "+output_dir+"/' >> condor_submit.cmd ")
-			os.system("echo queue >> condor_submit.cmd")
-			os.system("echo >> condor_submit.cmd")
+        # Output
+        os.system( "echo ' '  >> condor_submit.cmd")
+        os.system( "echo '# Output'  >> condor_submit.cmd")
+        os.system( "echo 'log    = job"+str(ii)+"_$(Process).local.log' >> condor_submit.cmd")
+        os.system( "echo 'output = job"+str(ii)+"_$(Process).local.output' >> condor_submit.cmd")
+        os.system( "echo 'error  = job"+str(ii)+"_$(Process).local.error' >> condor_submit.cmd")
 
-			n_jobs_submitted += 1
+        os.system( "echo ' '  >> condor_submit.cmd")
+        os.system( "echo 'x509userproxy = "+proxy+"' >> condor_submit.cmd")
+        os.system( "echo 'use_x509userproxy = True' >> condor_submit.cmd")
+        os.system( "echo ' '  >> condor_submit.cmd")
 
-		print( "Submitting", n_jobs_submitted % max_jobs_per_submission, "jobs to output dir", job_dir )
+        os.system( "echo 'output_destination = root://eosuser.cern.ch/"+output_dir+"/' >> condor_submit.cmd")
+        os.system( "echo ' ' >> condor_submit.cmd") 
+        os.system( "echo 'transfer_input_files = "+transfer_input_files+" ' >> condor_submit.cmd" )
 
-		if setup_only: os.system("echo 'COMMAND: condor_submit condor_submit.cmd'")
-		else:          os.system("condor_submit condor_submit.cmd")
+        n_jobs_submitted_temp = n_jobs_submitted
+        for i in range(max_jobs_per_submission):
 
-		time.sleep(2.)
-		os.chdir("../")
+            if n_jobs_submitted >= len(input_list): break
 
-		if test:
-			break
+            j = n_jobs_submitted_temp + i
+            infile_tag = "job"+str(ii)+"_"+str(i)+"_"+input_list[j][0]
 
-	print( "Done submitting", n_jobs_submitted, "jobs")
+            infile_paths_str = ""
+            for path in input_list[j]: infile_paths_str += path + "   "
 
-	quit()
+            os.system("echo 'arguments = "+proxy+"   "+infile_tag+"   "+infile_paths_str+"/' >> condor_submit.cmd ")
+            os.system("echo queue >> condor_submit.cmd")
+            os.system("echo >> condor_submit.cmd")
+
+            n_jobs_submitted += 1
+
+        print( "Submitting", n_jobs_submitted % max_jobs_per_submission, "jobs to output dir", job_dir )
+
+        if setup_only: os.system("echo 'COMMAND: condor_submit condor_submit.cmd'")
+        else:          os.system("condor_submit condor_submit.cmd")
+
+        time.sleep(2.)
+        os.chdir("../")
+
+        if test:
+            break
+
+    print( "Done submitting", n_jobs_submitted, "jobs")
+
+    quit()
 
 # -------------------------------------------------------------------------------------------------
 if __name__ == "__main__":
-	main()
+    main()
 

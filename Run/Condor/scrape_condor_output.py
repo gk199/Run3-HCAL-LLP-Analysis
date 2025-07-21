@@ -49,7 +49,7 @@ def process_log_files( directory ):
 						run_times.append(time_diff)
 
 				except Exception as e:
-					print(f"Error reading {log_file}: {e}")
+					continue #print(f"Error reading {log_file}: {e}")
 
 	return run_times
 
@@ -76,7 +76,7 @@ def main():
 	plt.xlabel('Run time [min]')
 	plt.ylabel('Number of Jobs')
 	#plt.grid(axis='y', linestyle='--', alpha=0.7)
-	plt.show()
+	plt.savefig( "Timing_" + directory + ".png" ) #plt.show()
 
 
 

@@ -22,11 +22,13 @@ echo "./DisplacedHcalJetAnalyzer $filetag $ds_in"
 
 echo "Setting up environment for DNN"
 echo "source /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/Run/Condor/VirtualEnvs/keras2pt13pt1/bin/activate"
-source /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/Run/Condor/VirtualEnvs/keras2pt13pt1/bin/activate
+#source /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/Run/Condor/VirtualEnvs/keras2pt13pt1/bin/activate
+#conda activate kerasModelv4
+conda activate /afs/cern.ch/work/k/kikenned/Conda/LLP_kerasModelv4
 
 echo "Evaluating DNN..."
 echo "python3 ScoresToEventBased-v3.py minituple_$filetag.root"
 cd ../../Classifiers/
-python3 ScoresToEventBased-v3.py ../Run/Condor/minituple_$filetag.root # $filepath
+python3 ScoresToEventBased-v4.py ../Run/Condor/minituple_$filetag.root # $filepath
 
 sleep 5

@@ -165,7 +165,7 @@ class DataProcessor:
             
         
 class ModelHandler:
-    def __init__(self, num_classes=3, num_layers=3, optimizer="adam", lr=0.00027848106048644665, model_name="dense_model_v3.keras"):
+    def __init__(self, num_classes=3, num_layers=3, optimizer="adam", lr=0.00027848106048644665, model_name="recovered_model.keras"): #"dense_model_v3.keras"):
         
         self.num_classes = num_classes
         self.num_layers = num_layers
@@ -226,19 +226,19 @@ class Runner:
         self.sig = input_files
         self.path = filepath
         self.tree = tree
-        self.model_name = "dense_model_v3.keras"
+        self.model_name = "recovered_model.keras" # "dense_model_v3.keras"
     
     def evaluate_scores(self): # this code used to be in run_file_evaluation -- still testing
         print("Determining Scores")
         predicting_data, labels, jet_valid = self.processor.process_data()
         # depth
         # handler = ModelHandler(num_classes=self.num_classes, model_name=self.model_name)
-        handler = ModelHandler(num_classes=self.num_classes, model_name="depth_model_v3_Oct15.keras")
+        handler = ModelHandler(num_classes=self.num_classes, model_name="recovered_model.keras") #"depth_model_v3_Oct15.keras")
         print("Loading the depth model")
         handler.load()
         preds = [ handler.predict(predicting_data[i], labels[i]) for i in range(num_jets) ]
         # inclusive
-        handler_inc = ModelHandler(num_classes=self.num_classes, model_name="inclusive_model_v3_Oct15.keras")
+        handler_inc = ModelHandler(num_classes=self.num_classes, model_name="recovered_model.keras") #"inclusive_model_v3_Oct15.keras")
         print("Loading the inclusive model")
         handler_inc.load()
         preds_inc = [ handler_inc.predict(predicting_data[i], labels[i]) for i in range(num_jets) ]
@@ -282,7 +282,7 @@ class Runner:
     def set_load(self,load=True):
         self.load = load
     
-    def set_model_name(self, model_name="dense_model_v3.keras"):
+    def set_model_name(self, model_name="recovered_model.keras"): #"dense_model_v3.keras"):
         self.model_name = model_name
         
         
@@ -296,6 +296,7 @@ def main():
     if len(sys.argv) > 2:
         filepath    = sys.argv[2]
 
+    print( "Reading in", filepath + input_files ) 
     #input_files = [
         # "minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV_2024_10_14_TRAIN.root", # no passed HLT tree 
         #"minituple_v3.9_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_10_14_batch1.root",
