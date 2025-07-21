@@ -20,10 +20,12 @@ cwd = os.getcwd()
 # -------------------------------------------------------------------------------------------------
 # MODIFY ME! (Keep things global)
 
-max_jobs_per_submission = 100
+#max_jobs_per_submission = 500
 
 header_cmd    = os.path.abspath("condor_header.cmd")
 executable_sh = os.path.abspath("condor_executable.sh")
+
+file_disk_usage = os.path.abspath("../Ntuples_v4/NTuplesV4_DiskUsage.txt")
 
 # Global path to executable (& other files to transfer if applicable) -- comma-separated list without spaces
 #transfer_input_files 
@@ -47,7 +49,7 @@ def parseArgs():
     parser.add_argument("-t", "--test",       action="store_true", help="Submit test job only") 
     parser.add_argument("-d", "--debug",      action="store_true", help="Debug") 
     parser.add_argument("-f", "--flag",       action="store", default="", help="Flag to append to Job_ directory")
-    parser.add_argument("-n", "--nperjob",     action="store", default=1, help="Number of files to run per job")
+
     args = parser.parse_args()
 
     return args
@@ -69,34 +71,65 @@ def main():
     test        = args.test
     debug       = args.debug
     flag        = args.flag
-    files_per_job = int(args.nperjob)
 
+    flavor="longlunch" #workday" #microcentury"
+    #if "LLPskim_2023Cv4" in flag: flavor="workday"
+    #if "LLPskim_2023Cv1" in flag: flavor="longlunch"
+    #if "LLPskim_2023Vv1" in flag: flavor="longlunch"
+    if "HToSSTo4b" in flag: flavor="longlunch" #microcentury" #espresso"
     # ----- Get Inputs ----- #
 
     if not os.path.isfile(input_file): 
         print( "ERROR:", input_file, " does not exist. Exiting..." )
         quit()
 
-    infile_path_list = []
+    file_sizes = {}
+    with open(file_disk_usage) as f:
+        for line in f.readlines():
+            line_temp      = line.replace(" ","").strip()
+            file_size_temp = line_temp.split("\t")[0]
+            file_temp      = line_temp.split("store")[-1]
 
-    i = 0
+            if "K" in file_size_temp: 
+                file_size_temp = float(file_size_temp.replace("K", ""))*1e-3*1e-3
+            elif "M" in file_size_temp: 
+                file_size_temp = float(file_size_temp.replace("M", ""))*1e-3
+            elif "G" in file_size_temp: 
+                file_size_temp = float(file_size_temp.replace("G", ""))
+            elif "T" in file_size_temp:
+                file_size_temp = float(file_size_temp.replace("T", ""))*1e3
+            else: 
+                file_size_temp = 0
+
+            file_sizes[file_temp] = file_size_temp
+
     input_list = []
-    input_list_temp = []
+
+    infile_paths_temp = []
+    infile_paths_sizes = 0
+    j = 0
+
     with open(input_file) as f:
         for line in f.readlines():
             line_temp = line.replace(" ","").strip()
             if line_temp[0] == "#": continue
 
-            if i % files_per_job == 0:
-                if i != 0: input_list.append( input_list_temp ) 
-                input_list_temp = []
+            if debug: print( "Reading in:", line_temp )
 
-            input_list_temp.append( line_temp )
-            i += 1
+            #infile_tag  = line_temp.split("/")[-1].replace(".root","")
+            infile_paths_temp.append( line_temp )
 
-            if debug: print( "Reading in:", infile_path )
+            if line_temp.split("store")[-1] in file_sizes: 
+                infile_paths_sizes += file_sizes[line_temp.split("store")[-1]]
+            else: 
+                infile_paths_sizes += 5
 
-    input_list.append( input_list_temp )  
+            if infile_paths_sizes >= 5:
+                input_list.append( infile_paths_temp ) 
+
+                # Reset 
+                infile_paths_temp  = []
+                infile_paths_sizes = 0
 
     # ----- Make Output Dir ----- #
 
@@ -122,9 +155,9 @@ def main():
 
     #os.system( "ln -s " + bdt_zipfile + " BDTWeightFiles.zip" )
     #bdt_zipfile_new = os.path.abspath( "BDTWeightFiles.zip" )
-    add_scores = os.path.abspath( "../../../Classifiers/ScoresToEventBased-v3.py" )
-    keras_depth = os.path.abspath( "../../../Classifiers/depth_model_v3_Oct15.keras" )
-    keras_inclusive = os.path.abspath( "../../../Classifiers/inclusive_model_v3_Oct15.keras" )
+    add_scores = os.path.abspath( "../../../Classifiers/ScoresToEventBased-v4.py" )
+    keras_depth = os.path.abspath( "../../../Classifiers/inclusive_model_v4_train40.keras" )
+    keras_inclusive = os.path.abspath( "../../../Classifiers/inclusive_model_v4_train80.keras" )
     norm_constants = os.path.abspath( "../../../Classifiers/norm_constants_v3.csv" )
     transfer_input_files = Executable_DisplacedHcalJetAnalyzer + "," + add_scores + "," + keras_depth + "," + keras_inclusive + "," + norm_constants
 
@@ -132,64 +165,37 @@ def main():
 
     print( "Begin submitting", len(input_list), "jobs...")
 
-    n_jobs_submitted = 0
-    ii = -1
-    while n_jobs_submitted < len(input_list):
+    #job_dir = "Job_"+str(ii)
+    #os.mkdir(job_dir)
+    #os.chdir(job_dir)
 
-        ii += 1
+    os.system( "cp "+header_cmd+" ./condor_submit.cmd" )
+    os.system( "cp "+executable_sh+" ./condor_executable.sh" )
+    os.system( "echo '+JobFlavour = \""+flavor+"\"' >> condor_submit.cmd")
+    os.system( "echo 'output_destination = root://eosuser.cern.ch/"+output_dir+"/' >> condor_submit.cmd")
+    os.system( "echo 'transfer_input_files = "+transfer_input_files+" ' >> condor_submit.cmd" )
 
-        job_dir = "Job_"+str(ii)
-        os.mkdir(job_dir)
-        os.chdir(job_dir)
+    for i in range( len(input_list) ):
 
-        os.system( "cp "+header_cmd+" ./condor_submit.cmd" )
-        os.system( "cp "+executable_sh+" ./condor_executable.sh" )
+        infile_tag = "job"+str(j)
+        infile_paths = " ".join(input_list[i])
 
-        # Output
-        os.system( "echo ' '  >> condor_submit.cmd")
-        os.system( "echo '# Output'  >> condor_submit.cmd")
-        os.system( "echo 'log    = job"+str(ii)+"_$(Process).local.log' >> condor_submit.cmd")
-        os.system( "echo 'output = job"+str(ii)+"_$(Process).local.output' >> condor_submit.cmd")
-        os.system( "echo 'error  = job"+str(ii)+"_$(Process).local.error' >> condor_submit.cmd")
+        os.system("echo 'arguments = "+proxy+"   "+infile_tag+"   "+infile_paths+" ' >> condor_submit.cmd ")
+        os.system("echo queue >> condor_submit.cmd")
+        os.system("echo >> condor_submit.cmd")
 
-        os.system( "echo ' '  >> condor_submit.cmd")
-        os.system( "echo 'x509userproxy = "+proxy+"' >> condor_submit.cmd")
-        os.system( "echo 'use_x509userproxy = True' >> condor_submit.cmd")
-        os.system( "echo ' '  >> condor_submit.cmd")
-
-        os.system( "echo 'output_destination = root://eosuser.cern.ch/"+output_dir+"/' >> condor_submit.cmd")
-        os.system( "echo ' ' >> condor_submit.cmd") 
-        os.system( "echo 'transfer_input_files = "+transfer_input_files+" ' >> condor_submit.cmd" )
-
-        n_jobs_submitted_temp = n_jobs_submitted
-        for i in range(max_jobs_per_submission):
-
-            if n_jobs_submitted >= len(input_list): break
-
-            j = n_jobs_submitted_temp + i
-            infile_tag = "job"+str(ii)+"_"+str(i)+"_"+input_list[j][0]
-
-            infile_paths_str = ""
-            for path in input_list[j]: infile_paths_str += path + "   "
-
-            os.system("echo 'arguments = "+proxy+"   "+infile_tag+"   "+infile_paths_str+"/' >> condor_submit.cmd ")
-            os.system("echo queue >> condor_submit.cmd")
-            os.system("echo >> condor_submit.cmd")
-
-            n_jobs_submitted += 1
-
-        print( "Submitting", n_jobs_submitted % max_jobs_per_submission, "jobs to output dir", job_dir )
-
-        if setup_only: os.system("echo 'COMMAND: condor_submit condor_submit.cmd'")
-        else:          os.system("condor_submit condor_submit.cmd")
-
-        time.sleep(2.)
-        os.chdir("../")
-
+        #print( "Submitting", n_jobs_submitted % max_jobs_per_submission, "jobs to output dir", job_dir )
         if test:
             break
 
-    print( "Done submitting", n_jobs_submitted, "jobs")
+    if setup_only: os.system("echo 'COMMAND: condor_submit condor_submit.cmd'")
+    else:          os.system("condor_submit condor_submit.cmd")
+
+    #time.sleep(2.)
+    #os.chdir("../")
+
+    print( "Done submitting", len(input_list), "jobs")
+    time.sleep(2.)
 
     quit()
 
