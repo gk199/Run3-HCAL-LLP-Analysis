@@ -17,7 +17,7 @@ import csv
 import sys, os, argparse, time, errno
 import os.path
 
-testing_mode = False
+testing_mode = True
 debug_mode = True
 inclusive_only = True
 
@@ -250,9 +250,9 @@ class Runner:
                     preds[i][jet] = [-9999.9, -9999.9]
                     preds_inc[i][jet] = [-9999.9, -9999.9]
                 # do not score jets that were used in the training, based on split with jet_Pt
-                # if ((jet_pt[i][jet] * 1000).astype(int) % 10 < 4): # extract 1000th place. Trained on "train_mask = randFloat_values < 4"
-                #     # preds[i][jet] = [-9999.9, -9999.9] # depth scores are ok, because they rely on CR
-                #     preds_inc[i][jet] = [-9999.9, -9999.9]
+                if ((jet_pt[i][jet] * 1000).astype(int) % 10 < 4): # extract 1000th place. Trained on "train_mask = randFloat_values < 4"
+                    # preds[i][jet] = [-9999.9, -9999.9] # depth scores are ok, because they rely on CR
+                    preds_inc[i][jet] = [-9999.9, -9999.9]
                 if debug_mode:
                     print("jet pT = ")
                     print(jet_pt[i][jet])
