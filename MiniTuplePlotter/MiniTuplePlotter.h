@@ -873,7 +873,7 @@ public :
 				hs_ratio->Draw("nostack"); //, hist"); // bug, not using uncertainty propagation, seems to try to do a per event sqrt N, errors 0-2
 				//hs_ratio->SetMinimum(0.0001);
 				//hs_ratio->SetMaximum(0.1);
-				hs_ratio->SetMaximum(1.);
+				hs_ratio->SetMaximum(2.);
 				//gPad->Update();
 				myCanvas->cd(1);
 			}
