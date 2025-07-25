@@ -39,8 +39,16 @@ PlotParams P_jet0_Eta					= {"jet0_Eta", "Leading Jet #eta", "Jet #eta", -1.5, 1
 PlotParams P_jet0_Phi					= {"jet0_Phi", "Leading Jet #phi", "Jet #phi", -3.2, 3.2 };
 PlotParams P_jet0_Mass					= {"jet0_Mass", "Leading Jet Mass", "Jet Mass", 0, 40 };
 PlotParams P_jet0_JetArea				= {"jet0_JetArea", "Leading Jet Area", "Jet Area", 0, 1 };
-PlotParams P_jet0_dEta					= {"jet0_Eta - jet1_Eta", "Leading-subleading Jet #Delta#eta", "Jet #Delta#eta", -1.5, 1.5 };
-PlotParams P_jet0_dPhi					= {"jet0_Phi - jet1_Phi", "Leading-subleading Jet #Delta#phi", "Jet #Delta#phi", -3.2, 3.2 };
+PlotParams P_jet0_dEta					= {"jet0_Eta - jet1_Eta", "Leading-subleading Jet #Delta#eta", "Jet #Delta#eta", -3, 3 };
+PlotParams P_jet0_dPhi					= {"jet0_jet1_dPhi", "Leading-subleading Jet #Delta#phi", "Jet #Delta#phi", -3.2, 3.2 };
+PlotParams P_jet0met_dPhi				= {"jet0_Phi - met_Phi", "Leading Jet to MET #Delta#phi", "Jet to MET #Delta#phi", -6, 6 };
+PlotParams P_jet1met_dPhi				= {"jet1_Phi - met_Phi", "Sub-Leading Jet to MET #Delta#phi", "Jet to MET #Delta#phi", -6, 6 };
+
+// flavor tagging
+PlotParams P_jet0_DeepCSV_prob_b		= {"jet0_DeepCSV_prob_b", "b-tagging Probability", "b-tag probability", 0, 1};
+PlotParams P_jet0_DeepCSV_prob_c		= {"jet0_DeepCSV_prob_c", "c-tagging Probability", "c-tag probability", 0, 1};
+PlotParams P_jet0_DeepCSV_prob_bb		= {"jet0_DeepCSV_prob_bb", "bb-tagging Probability", "bb-tag probability", 0, 1};
+PlotParams P_jet0_DeepCSV_prob_udsg		= {"jet0_DeepCSV_prob_udsg", "Light flavor tagging Probability", "udsg-tag probability", 0, 1};
 
 // spread
 PlotParams P_jet0_EtaSpread				= {"jet0_EtaSpread", "Leading Jet #eta Spread", "#eta Spread", 0, 0.4 };
@@ -223,6 +231,12 @@ PlotParams P_met_Phi					= {"met_Phi", "MET #phi", "#phi", -3.2, 3.2 };
 PlotParams P_met_SumEt					= {"met_SumEt", "MET Sum E_{T}", "E_{T} [GeV]", 0, 5000 };
 PlotParams P_eventHT					= {"eventHT", "Event H_{T}", "H_{T} [GeV]", 0, 1200 };
 
+// event level quantities
+PlotParams P_jet							= {"jet", "Jet Multiplicity", "N jets", 0, 20};
+PlotParams P_validJet						= {"validJet", "Valid Jet Multiplicity", "N valid jets", 0, 10};
+PlotParams P_ele							= {"ele", "Electron Multiplicity", "N electrons", 0, 5};
+PlotParams P_muon							= {"muon", "Muon Multiplicity", "N muons", 0, 20};
+PlotParams P_pho							= {"pho", "Photon Multiplicity", "N photons", 0, 5};
 // --------------------------------------------------------------------- //
 // LLP variables 
 // Leading LLP
@@ -283,11 +297,11 @@ PlotParams P_jet1and2_scores_inc = {"jet1_scores_inc + jet2_scores_inc", "DNN In
 PlotParams P_jet0_scores_inc_train80 = {"jet0_scores_inc_train80", "DNN Inclusive Score, train 80%", "DNN Inclusive 80%, jet0", 0, 1};
 PlotParams P_jet0_scores_inc_train40 = {"jet0_scores_inc_train40", "DNN Inclusive Score, train 40%", "DNN Inclusive 40%, jet0", 0, 1};
 PlotParams P_jet0_scores_depth_hcal = {"jet0_scores_depth_hcal", "DNN Depth Score (HCAL)", "DNN Depth HCAL, jet0", 0, 1};
-PlotParams P_jet0_scores_depth_anywhere = {"jet0_scores_depth_anywhere", "DNN Depth Score", "DNN Depth, jet0", 0, 1};
+PlotParams P_jet0_scores_depth_LLPanywhere = {"jet0_scores_depth_LLPanywhere", "DNN Depth Score", "DNN Depth, jet0", 0, 1};
 
 PlotParams P_jet1_scores_inc_train80 = {"jet1_scores_inc_train80", "DNN Inclusive Score (subleading), train 80%", "DNN Inclusive 80%, jet1", 0, 1};
 PlotParams P_jet1_scores_depth_hcal = {"jet1_scores_depth_hcal", "DNN Depth Score (HCAL, subleading)", "DNN Depth HCAL, jet1", 0, 1};
-PlotParams P_jet1_scores_depth_anywhere = {"jet1_scores_depth_anywhere", "DNN Depth Score (subleading)", "DNN Depth, jet1", 0, 1};
+PlotParams P_jet1_scores_depth_LLPanywhere = {"jet1_scores_depth_LLPanywhere", "DNN Depth Score (subleading)", "DNN Depth, jet1", 0, 1};
 
 // --------------------------------------------------------------------- //
 // -------------------------- per jet variables ------------------------ //
