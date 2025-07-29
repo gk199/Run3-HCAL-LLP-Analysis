@@ -263,11 +263,11 @@ void MiniTuplePlotter_CR_SR(){
 
 		if (v316) {
 			class MiniTuplePlotter dPhi_plotter2( {"HToSSTo4b_125_50_CTau3000_batch2_allscores", "HToSSTo4b_250_120_CTau10000_batch2_allscores", "HToSSTo4b_350_160_CTau10000_batch2_allscores", "LLPskim_2023Cv4_allscores"}, {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_"} );
-			dPhi_plotter2.SetPlots({P_jet0_dPhi}); 
+			dPhi_plotter2.SetPlots({P_jet0_dPhi_v316}); 
 			dPhi_plotter2.SetTreeName( "NoSel" );	
 			dPhi_plotter2.SetOutputFileTag("Overlay_dPhi_v3.16");
 			dPhi_plotter2.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
-			dPhi_plotter2.SetCuts("jet0_DepthTagCand == 1 && jet0_scores_depth_LLPanywhere >= 0.8");
+			dPhi_plotter2.SetCuts("jet0_DepthTagCand == 1 && jet0_scores_depth_anywhere >= 0.8");
 			// dPhi_plotter2.SetSelectiveCuts("LLPskim", {Cut_CR, Cut_VR}),
 			dPhi_plotter2.SetComparisonCuts({Cut_CR, Cut_VR}, "LLPskim");
 			dPhi_plotter2.SetLegendNames({"mH=125", "mH=250", "mH=350", "LLP skim CR", "LLP skim VR"});
@@ -277,15 +277,17 @@ void MiniTuplePlotter_CR_SR(){
 			dPhi_plotter2.NBins = 30;
 			dPhi_plotter2.Plot();	
 
-			class MiniTuplePlotter dPhi_cuts( {"HToSSTo4b_125_50_CTau3000_batch2_allscores", "HToSSTo4b_250_120_CTau10000_batch2_allscores", "HToSSTo4b_350_160_CTau10000_batch2_allscores", "LLPskim_2023Cv4_allscores"}, {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_"} );
+			// class MiniTuplePlotter dPhi_cuts( {"HToSSTo4b_125_50_CTau3000_batch2_allscores", "HToSSTo4b_250_120_CTau10000_batch2_allscores", "HToSSTo4b_350_160_CTau10000_batch2_allscores", "LLPskim_2023Cv4_allscores"}, {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_"} );
+			class MiniTuplePlotter dPhi_cuts( {"LLPskim_2023Cv4_allscores"}, {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_"} );
 			// dPhi_cuts.SetPlots({P_jet, P_jet0_Pt, P_validJet, P_pho, P_ele, P_muon, P_eventHT, P_met_Pt, P_met_Phi, P_met_SumEt, P_jet0met_dPhi, P_jet1met_dPhi}); 
 			dPhi_cuts.SetPlots({P_jet0_Phi, P_jet1_Phi, P_jet0met_dPhi, P_jet1met_dPhi}); 
 			dPhi_cuts.SetTreeName( "NoSel" );	
 			dPhi_cuts.SetOutputFileTag("Overlay_dPhi_v3.16");
 			dPhi_cuts.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
-			dPhi_cuts.SetCuts("jet0_DepthTagCand == 1 && jet0_scores_depth_LLPanywhere >= 0.2 && abs(jet0_Phi - jet1_Phi) < 0.2");
+			dPhi_cuts.SetCuts("jet0_DepthTagCand == 1 && jet0_scores_depth_anywhere >= 0.2 && abs(jet0_Phi - jet1_Phi) < 0.2");
 			dPhi_cuts.SetComparisonCuts({Cut_CR, Cut_VR}, "LLPskim");
-			dPhi_cuts.SetLegendNames({"mH=125", "mH=250", "mH=350", "LLP skim CR", "LLP skim VR"});
+			// dPhi_cuts.SetLegendNames({"mH=125", "mH=250", "mH=350", "LLP skim CR", "LLP skim VR"});
+			dPhi_cuts.SetLegendNames({"LLP skim CR", "LLP skim VR"});
 			dPhi_cuts.colors = { 40, 45, 38, kGreen-8, kGreen-2 };
 			dPhi_cuts.SetOutputDirectory("dPhi");
 			dPhi_cuts.plot_log    = false; 
@@ -298,7 +300,7 @@ void MiniTuplePlotter_CR_SR(){
 			dPhi_plotter2.SetTreeName( "NoSel" );	
 			dPhi_plotter2.SetOutputFileTag("Overlay_dPhi_v4.1");
 			dPhi_plotter2.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
-			dPhi_plotter2.SetCuts("jet0_DepthTagCand == 1 && jet0_scores_depth_LLPanywhere >= 0.8");
+			dPhi_plotter2.SetCuts("jet0_DepthTagCand == 1 && jet0_scores_depth_LLPanywhere >= 0.2 && Flag_METFilters_2022_2023_PromptReco");
 			dPhi_plotter2.SetComparisonCuts({Cut_CR, Cut_VR}, "DisplacedJet");
 			dPhi_plotter2.SetLegendNames({"LLP skim CR", "LLP skim VR"});
 			dPhi_plotter2.colors = { 40, 45 };
@@ -313,7 +315,7 @@ void MiniTuplePlotter_CR_SR(){
 			dPhi_cuts.SetTreeName( "NoSel" );	
 			dPhi_cuts.SetOutputFileTag("Overlay_dPhi_v4.1");
 			dPhi_cuts.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
-			dPhi_cuts.SetCuts("jet0_DepthTagCand == 1 && jet0_scores_depth_LLPanywhere >= 0.2 && abs(jet0_jet1_dPhi) < 0.2");
+			dPhi_cuts.SetCuts("jet0_DepthTagCand == 1 && jet0_scores_depth_LLPanywhere >= 0 && abs(jet0_jet1_dPhi) < 0.2"); // && Flag_METFilters_2022_2023_PromptReco");
 			dPhi_cuts.SetComparisonCuts({Cut_CR, Cut_VR}, "DisplacedJet");
 			dPhi_cuts.SetLegendNames({"LLP skim CR", "LLP skim VR"});
 			dPhi_cuts.colors = { 40, 45 };
