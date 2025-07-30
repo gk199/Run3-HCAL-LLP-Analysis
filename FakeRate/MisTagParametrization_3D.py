@@ -16,11 +16,13 @@ pT_bins = np.linspace(0, 300, 20)  # pT axis from 0 to 500 GeV, 20 bins
 pT_bins = [0, 40, 50, 60, 70, 80, 100, 120, 160, 240, 400]  # Define pT bins
 # pT_bins = [0, 40, 60, 70, 100, 150, 240, 400]  # Define pT bins
 pT_bins = np.array(pT_bins, dtype=float)
-eta_bins = np.linspace(-1.26, 1.26, 31)  # eta axis from -2 to 2, 10 bins
-phi_bins = np.linspace(-np.pi, np.pi, 10)  # phi axis from -pi to pi, 10 bins
+eta_bins = np.linspace(-1.26, 1.26, 9)  # eta axis from -2 to 2, 10 bins
+phi_bins = np.linspace(-np.pi, np.pi, 9)  # phi axis from -pi to pi, 10 bins
 
-DNN_cut = 0.9
+DNN_cut = 0.05
 DNN_cut_inc = 0.9
+
+v4pt1 = True
 
 runs_to_exclude = [367230, 367772, 368331, 368440, 368764, 370436, 370579, 370790] # 2023 runs, based on earlier DNN
 runs_to_exclude = [367772, 368384, 368412, 370102, 370472, 370522, 370579, 370667] # 2023 runs, from depth DNN with LLP decaying anywhere
@@ -99,8 +101,9 @@ def MisTagParametrization(tree, option=""):
     CR = GetCut("jet1_scores_inc_train80", [0,0.2])
     VR = GetCut("jet1_scores_inc_train80", [0.2,DNN_cut_inc])
     SR = GetCut("jet1_scores_inc_train80", [DNN_cut_inc,1.1])
-    mistag = GetCut("jet0_scores_depth_hcal", [DNN_cut,1.1])
-    # mistag = GetCut("jet0_scores_depth_anywhere", [DNN_cut,1.1])
+    # mistag = GetCut("jet0_scores_depth_hcal", [DNN_cut,1.1])
+    mistag = GetCut("jet0_scores_depth_anywhere", [DNN_cut,1.1])
+    if v4pt1: mistag = GetCut("jet0_scores_depth_LLPanywhere", [DNN_cut,1.1])
     if CNN:
         mistag = GetCut("CNN3D_classifier3", [DNN_cut,1.1])
     # Need leading jet to be matched to a LLP, jet0_L1trig_Matched. Leading jet pT > 60, subleading > 40. Eta restrictions on both jets at 1.26
@@ -111,6 +114,20 @@ def MisTagParametrization(tree, option=""):
     depth_emu = GetCut("jet0_DepthTowers", [2,100]) # + GetCut("jet0_TimingTowers", 0)
     timing_emu = GetCut("jet0_TimingTowers", [2,100]) # + GetCut("jet0_DepthTowers", 0)
     depth_timing_emu = GetCut("jet0_DepthTowers", 1) + GetCut("jet0_TimingTowers", 1)
+    depth_tag_cand = GetCut("jet0_DepthTagCand", 1)
+
+    b_tag = GetCut("jet0_DeepCSV_prob_b", [0.8, 1.1]) 
+    c_tag = GetCut("jet0_DeepCSV_prob_c", [0.8, 1.1]) 
+    bb_tag = GetCut("jet0_DeepCSV_prob_bb", [0.8, 1.1]) 
+    light_tag = GetCut("jet0_DeepCSV_prob_udsg", [0.8, 1.1]) 
+    b_tag_1 = GetCut("jet1_DeepCSV_prob_b", [0.8, 1.1]) 
+    c_tag_1 = GetCut("jet1_DeepCSV_prob_c", [0.8, 1.1]) 
+    bb_tag_1 = GetCut("jet1_DeepCSV_prob_bb", [0.8, 1.1]) 
+    light_tag_1 = GetCut("jet1_DeepCSV_prob_udsg", [0.8, 1.1]) 
+    flavor_tag = ROOT.TCut(" || ".join([ f'({str(GetCut("jet0_DeepCSV_prob_b", [0.8,1.1]))})', f'({str(GetCut("jet0_DeepCSV_prob_c", [0.8,1.1]))})', f'({str(GetCut("jet0_DeepCSV_prob_bb", [0.8,1.1]))})', f'({str(GetCut("jet0_DeepCSV_prob_udsg", [0.8,1.1]))})' ]))
+    flavor_tag_1 = ROOT.TCut(" || ".join([ f'({str(GetCut("jet1_DeepCSV_prob_b", [0.8,1.1]))})', f'({str(GetCut("jet1_DeepCSV_prob_c", [0.8,1.1]))})', f'({str(GetCut("jet1_DeepCSV_prob_bb", [0.8,1.1]))})', f'({str(GetCut("jet1_DeepCSV_prob_udsg", [0.8,1.1]))})' ]))
+    not_flavor_tag = GetCut("jet0_DeepCSV_prob_b", [-0.01,0.8]) + GetCut("jet0_DeepCSV_prob_c", [-0.01,0.8]) + GetCut("jet0_DeepCSV_prob_bb", [-0.01,0.8]) + GetCut("jet0_DeepCSV_prob_udsg", [-0.01,0.8])
+    not_flavor_tag_1 = GetCut("jet1_DeepCSV_prob_b", [-0.01,0.8]) + GetCut("jet1_DeepCSV_prob_c", [-0.01,0.8]) + GetCut("jet1_DeepCSV_prob_bb", [-0.01,0.8]) + GetCut("jet1_DeepCSV_prob_udsg", [-0.01,0.8])
 
     track_pT = GetCut("jet0_Track0Pt / jet0_Pt",[0,1.1])
     track_pT_1 = GetCut("jet1_Track0Pt / jet1_Pt",[0,1.1])
@@ -119,8 +136,9 @@ def MisTagParametrization(tree, option=""):
     CR_0 = GetCut("jet0_scores_inc_train80", [0,0.2])
     VR_0 = GetCut("jet0_scores_inc_train80", [0.2,DNN_cut_inc])
     SR_0 = GetCut("jet0_scores_inc_train80", [DNN_cut_inc,1.1]) 
-    mistag_1 = GetCut("jet1_scores_depth_hcal", [DNN_cut,1.1])
-    # mistag_1 = GetCut("jet1_scores_depth_anywhere", [DNN_cut,1.1])
+    # mistag_1 = GetCut("jet1_scores_depth_hcal", [DNN_cut,1.1])
+    mistag_1 = GetCut("jet1_scores_depth_anywhere", [DNN_cut,1.1])
+    if v4pt1: mistag_1 = GetCut("jet1_scores_depth_LLPanywhere", [DNN_cut,1.1])
     # Need sub-leading jet to be matched to a LLP, jet1_L1trig_Matched. Sub-leading jet pT > 60, leading > 40. Eta restrictions on both jets at 1.26
     triggered_1 = GetCut("jet1_L1trig_Matched", 1) + GetCut("jet0_L1trig_Matched", [-10000,0.5]) # veto on both jet 0 and jet 1 being triggered to remove overlap
     # triggered_1 += GetCut("jet1_Pt", [60,1000]) 
@@ -128,6 +146,7 @@ def MisTagParametrization(tree, option=""):
     depth_emu_1 = GetCut("jet1_DepthTowers", [2,100]) 
     timing_emu_1 = GetCut("jet1_TimingTowers", [2,100])
     depth_timing_emu_1 = GetCut("jet1_DepthTowers", 1) + GetCut("jet1_TimingTowers", 1)
+    depth_tag_cand_1 = GetCut("jet1_DepthTagCand", 1)
 
     run_before = GetCut("run", [360000, 368770])
     run_after = GetCut("run", [368770, 375000])
@@ -142,7 +161,13 @@ def MisTagParametrization(tree, option=""):
         "after alignment": (run_after, run_after, ": after alignment", "_after_align"),
         "before alignment, depth": (run_before + depth_emu, run_before + depth_emu_1, ": 2+ depth, before alignment", "_depth_before_align"),
         "after alignment, depth": (run_after + depth_emu, run_after + depth_emu_1, ": 2+ depth, after alignment", "_depth_after_align"),
-        "after alignment, trackPt": (run_after + track_pT, run_after + track_pT_1, ": frac. track pT, after alignment", "_trackPt_after_align")
+        "after alignment, trackPt": (run_after + track_pT, run_after + track_pT_1, ": frac. track pT, after alignment", "_trackPt_after_align"),
+        "depth, b tagged": (depth_emu + b_tag, depth_emu_1 + b_tag_1, ": 2+ depth, b-tagged", "_depth_bTag"),
+        "depth, c tagged": (depth_emu + c_tag, depth_emu_1 + c_tag_1, ": 2+ depth, c-tagged", "_depth_cTag"),
+        "depth, bb tagged": (depth_emu + bb_tag, depth_emu_1 + bb_tag_1, ": 2+ depth, bb-tagged", "_depth_bbTag"),
+        "depth, light flavor tagged": (depth_emu + light_tag, depth_emu_1 + light_tag_1, ": 2+ depth, light flavor tagged", "_depth_lightFlavorTag"),
+        "depth, flavor tagged": (depth_emu + flavor_tag, depth_emu_1 + flavor_tag_1, ": 2+ depth, flavor tagged", "_depth_flavorTag"),
+        "depth, not flavor tagged": (depth_emu + not_flavor_tag, depth_emu_1 + not_flavor_tag_1, ": 2+ depth, not flavor tagged", "_depth_notFlavorTag")
     }
 
     # Default values for label and title
@@ -796,6 +821,11 @@ def main():
     elif era == "2023 Dv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Dv1_allscores.root"]
     elif era == "2023 Dv2" and not CNN: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Dv2_allscores.root"]
     elif era == "2023 Dv2" and CNN: infilepath_list = ["/afs/cern.ch/work/f/fsimpson/public/minituple_outputs/minituple_Run2023D-EXOLLPJetHCAL-PromptReco-v2_partial28k-v4-scores_added.root"]
+    elif era == "2023 Bv1-Dv2" and v4pt1: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/DisplacedJet_Run2023B-EXOLLPJetHCAL-PromptReco-v1_AOD_2025_07_21_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/DisplacedJet_Run2023C-EXOLLPJetHCAL-PromptReco-v1_AOD_2025_07_21_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/DisplacedJet_Run2023C-EXOLLPJetHCAL-PromptReco-v2_AOD_2025_07_21_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/DisplacedJet_Run2023C-EXOLLPJetHCAL-PromptReco-v4_AOD_2025_07_21_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/DisplacedJet_Run2023D-EXOLLPJetHCAL-PromptReco-v1_AOD_2025_07_21_scores.root"]
     else: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Bv1_allscores.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Cv1_allscores.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Cv2_allscores.root",
@@ -818,7 +848,16 @@ def main():
     if combined_tree:
         print("LLP skim tree successfully accessed, will be passed to MisTagParametrization")
         #MisTagParametrization(combined_tree)
-        MisTagParametrization(combined_tree, "depth")
+        if v4pt1: 
+            MisTagParametrization(combined_tree, "depth, b tagged")
+            MisTagParametrization(combined_tree, "depth, c tagged")
+            MisTagParametrization(combined_tree, "depth, bb tagged")
+            MisTagParametrization(combined_tree, "depth, light flavor tagged")
+            MisTagParametrization(combined_tree, "depth, flavor tagged")
+            MisTagParametrization(combined_tree, "depth, not flavor tagged")
+        else: MisTagParametrization(combined_tree, "depth")
+        # MisTagParametrization(combined_tree, "before alignment, depth")
+        # MisTagParametrization(combined_tree, "after alignment, depth")
         #MisTagParametrization(combined_tree, "after alignment")
         #MisTagParametrization(combined_tree, "timing")
         #MisTagParametrization(combined_tree, "depth, timing")
