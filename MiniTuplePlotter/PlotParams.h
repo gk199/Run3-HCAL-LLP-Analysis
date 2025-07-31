@@ -36,11 +36,12 @@ PlotParams P_jet0_RechitN				= {"jet0_RechitN", "Number of HCAL RecHits", "N^{HC
 PlotParams P_jet0_E						= {"jet0_E", "Leading Jet Energy", "Jet E [GeV]", 0, 300 };
 PlotParams P_jet0_Pt					= {"jet0_Pt", "Leading Jet p_{T}", "Jet p_{T} [GeV]", 0, 300 };
 PlotParams P_jet0_Eta					= {"jet0_Eta", "Leading Jet #eta", "Jet #eta", -1.5, 1.5 };
-PlotParams P_jet0_Phi					= {"jet0_Phi", "Leading Jet #phi", "Jet #phi", -3.2, 3.2 };
+PlotParams P_jet0_Phi					= {"jet0_Phi", "Leading Jet #phi", "Jet #phi", -3.14, 3.14 };
 PlotParams P_jet0_Mass					= {"jet0_Mass", "Leading Jet Mass", "Jet Mass", 0, 40 };
 PlotParams P_jet0_JetArea				= {"jet0_JetArea", "Leading Jet Area", "Jet Area", 0, 1 };
 PlotParams P_jet0_dEta					= {"jet0_Eta - jet1_Eta", "Leading-subleading Jet #Delta#eta", "Jet #Delta#eta", -3, 3 };
-PlotParams P_jet0_dPhi					= {"jet0_jet1_dPhi", "Leading-subleading Jet #Delta#phi", "Jet #Delta#phi", -3.2, 3.2 };
+PlotParams P_jet0_dPhi					= {"jet0_jet1_dPhi", "Leading-subleading Jet #Delta#phi", "Jet #Delta#phi", -3.14, 3.14 };
+PlotParams P_jet0_dPhi_v316				= {"jet0_Phi - jet1_Phi", "Leading-subleading Jet #Delta#phi", "Jet #Delta#phi", -6, 6 };
 PlotParams P_jet0met_dPhi				= {"jet0_Phi - met_Phi", "Leading Jet to MET #Delta#phi", "Jet to MET #Delta#phi", -6, 6 };
 PlotParams P_jet1met_dPhi				= {"jet1_Phi - met_Phi", "Sub-Leading Jet to MET #Delta#phi", "Jet to MET #Delta#phi", -6, 6 };
 
