@@ -977,9 +977,51 @@ public :
 	}
 
 	// -------------------------------------------------------------------------------------
-	void Draw2DPlot( PlotParams myPlotParams_x, PlotParams myPlotParams_y, string filetag_treename, TCut cut_compare, int i ) {
+	void Draw2DPlot( PlotParams myPlotParams_x, PlotParams myPlotParams_y, string filetag_treename, TCut cut_compare, int i , TCut cut_base = "") {
 		if( debug) cout<<"MiniTuplePlotter::Draw2DPlot()"<<endl;
 
+    	// --------------------------------------------------------
+    	// Ratio Mode
+    	// --------------------------------------------------------
+		if (cut_base != "") {
+			cout << "running ratio plots" << endl;
+			TH2F* h_base = (TH2F*)GetHist2D(myPlotParams_x, myPlotParams_y, filetag_treename, cut_base);
+			TH2F* h_comp = (TH2F*)GetHist2D(myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare);
+
+			if (!h_base || !h_comp) {
+				cerr << "Error: One of the input histograms is null!" << endl;
+				return;
+			}
+
+			TH2F* h_ratio = (TH2F*)h_comp->Clone("h_ratio");
+			h_ratio->SetTitle("Ratio: Mistag Rate");
+			h_ratio->Divide(h_base);  // Performs bin-by-bin division
+
+			TCanvas* c = new TCanvas("c_ratio", "Ratio Plot", 1300, 1200);
+			c->SetRightMargin(0.14);
+			c->SetLeftMargin(0.14);
+			c->SetTopMargin(0.12);
+			c->SetBottomMargin(0.12);
+			if (plot_log) gPad->SetLogz();
+
+			h_ratio->GetZaxis()->SetTitle("Ratio");
+			h_ratio->Draw("COLZ");
+
+			StampCuts(0.12, 0.91, 0.02);
+			StampText(0.7, 0.91, 0.04, WriteSelection);
+			StampText(0.55, 0.91, 0.03, (filetag_treename.substr(0, 27)).c_str());
+
+			TString output_file_name = FormatMyString(myPlotParams_y.hist_name + "_vs_" + myPlotParams_x.hist_name);
+			TString cut_title = Form("Ratio_%s_over_%s",
+									GetBetterCutTitle(cut_compare).Data(),
+									GetBetterCutTitle(cut_base).Data());
+
+			c->SaveAs(Form(output_directory + "/Plot2D_" + output_file_name + "_Cut" + cut_title(0, 24) +  "_%s.png", output_file_tag.c_str()));
+			delete c;
+			return;
+		}
+		
+		// regular 2D plot
 		TH2F* h2 = (TH2F*)GetHist2D( myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare );
 
 		TCanvas *myCanvas = new TCanvas("c", "c", 1300, 1200);
@@ -1047,7 +1089,7 @@ public :
 	}
 
 	// -------------------------------------------------------------------------------------
-	void Plot2D( PlotParams myPlotParams_x, PlotParams myPlotParams_y ){
+	void Plot2D( PlotParams myPlotParams_x, PlotParams myPlotParams_y, string plot_type = "" ){
 		if( debug) cout<<"MiniTuplePlotter::Plot2D()"<<endl;		
 
 		GetTrees();
@@ -1060,15 +1102,27 @@ public :
 				file_cuts_compare = {""};
 			else
 				file_cuts_compare = cuts_compare;
-			for( auto cut_compare: file_cuts_compare ){
-        		i++;
-				Draw2DPlot(myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare, i);
+			// --------------------------------------------------------
+			// Ratio Mode
+			// --------------------------------------------------------
+			if (plot_type == "ratio" && file_cuts_compare.size() >= 2) {
+				TCut cut_base = file_cuts_compare[0];
+				TCut cut_compare = file_cuts_compare[1];
+
+				i++; // You may increment once for ratio
+				Draw2DPlot(myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare, i, cut_base);
+			}
+			else {
+				for( auto cut_compare: file_cuts_compare ){
+					i++;
+					Draw2DPlot(myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare, i);
+				}
 			}
 		}
 	}
 
 	// -------------------------------------------------------------------------------------
-	void PlotMany2D( ){
+	void PlotMany2D( string plot_type = "" ){
 		if( debug) cout<<"MiniTuplePlotter::PlotMany2D()"<<endl;		
 
 		GetTrees();
@@ -1084,9 +1138,25 @@ public :
 					file_cuts_compare = {""};
 				else
 					file_cuts_compare = cuts_compare;
-				for( auto cut_compare: file_cuts_compare ){
-          			i++;
-					Draw2DPlot(myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare, i);
+				// --------------------------------------------------------
+				// Ratio Mode
+				// --------------------------------------------------------
+				if (plot_type == "ratio" && file_cuts_compare.size() >= 2) {
+					TCut cut_base    = file_cuts_compare[0]; // denominator
+					TCut cut_compare = file_cuts_compare[1]; // numerator
+
+					i++; // Optional: can be 0 if you only need one output
+					Draw2DPlot(myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare, i, cut_base);
+				}
+
+				// --------------------------------------------------------
+				// Standard Mode
+				// --------------------------------------------------------
+				else {
+					for( auto cut_compare: file_cuts_compare ){
+						i++;
+						Draw2DPlot(myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare, i);
+					}
 				}
 			}
 		}

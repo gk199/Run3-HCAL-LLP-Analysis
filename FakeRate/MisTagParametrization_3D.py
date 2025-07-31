@@ -19,10 +19,8 @@ pT_bins = np.array(pT_bins, dtype=float)
 eta_bins = np.linspace(-1.26, 1.26, 9)  # eta axis from -2 to 2, 10 bins
 phi_bins = np.linspace(-np.pi, np.pi, 9)  # phi axis from -pi to pi, 10 bins
 
-DNN_cut = 0.05
+DNN_cut = 0.9
 DNN_cut_inc = 0.9
-
-v4pt1 = True
 
 runs_to_exclude = [367230, 367772, 368331, 368440, 368764, 370436, 370579, 370790] # 2023 runs, based on earlier DNN
 runs_to_exclude = [367772, 368384, 368412, 370102, 370472, 370522, 370579, 370667] # 2023 runs, from depth DNN with LLP decaying anywhere
@@ -102,8 +100,7 @@ def MisTagParametrization(tree, option=""):
     VR = GetCut("jet1_scores_inc_train80", [0.2,DNN_cut_inc])
     SR = GetCut("jet1_scores_inc_train80", [DNN_cut_inc,1.1])
     # mistag = GetCut("jet0_scores_depth_hcal", [DNN_cut,1.1])
-    mistag = GetCut("jet0_scores_depth_anywhere", [DNN_cut,1.1])
-    if v4pt1: mistag = GetCut("jet0_scores_depth_LLPanywhere", [DNN_cut,1.1])
+    mistag = GetCut("jet0_scores_depth_LLPanywhere", [DNN_cut,1.1])
     if CNN:
         mistag = GetCut("CNN3D_classifier3", [DNN_cut,1.1])
     # Need leading jet to be matched to a LLP, jet0_L1trig_Matched. Leading jet pT > 60, subleading > 40. Eta restrictions on both jets at 1.26
@@ -137,8 +134,7 @@ def MisTagParametrization(tree, option=""):
     VR_0 = GetCut("jet0_scores_inc_train80", [0.2,DNN_cut_inc])
     SR_0 = GetCut("jet0_scores_inc_train80", [DNN_cut_inc,1.1]) 
     # mistag_1 = GetCut("jet1_scores_depth_hcal", [DNN_cut,1.1])
-    mistag_1 = GetCut("jet1_scores_depth_anywhere", [DNN_cut,1.1])
-    if v4pt1: mistag_1 = GetCut("jet1_scores_depth_LLPanywhere", [DNN_cut,1.1])
+    mistag_1 = GetCut("jet1_scores_depth_LLPanywhere", [DNN_cut,1.1])
     # Need sub-leading jet to be matched to a LLP, jet1_L1trig_Matched. Sub-leading jet pT > 60, leading > 40. Eta restrictions on both jets at 1.26
     triggered_1 = GetCut("jet1_L1trig_Matched", 1) + GetCut("jet0_L1trig_Matched", [-10000,0.5]) # veto on both jet 0 and jet 1 being triggered to remove overlap
     # triggered_1 += GetCut("jet1_Pt", [60,1000]) 
@@ -813,26 +809,21 @@ def main():
 
     print(era)
 
-    if era == "2023 Bv1":   infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Bv1_allscores.root"]
-    elif era == "2023 Cv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Cv1_allscores.root"]
-    elif era == "2023 Cv2": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Cv2_allscores.root"]
-    elif era == "2023 Cv3": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Cv3_allscores.root"]
-    elif era == "2023 Cv4": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Cv4_allscores.root"]
-    elif era == "2023 Dv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Dv1_allscores.root"]
-    elif era == "2023 Dv2" and not CNN: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Dv2_allscores.root"]
+    if era == "2023 Bv1":   infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Bv1_allscores.root"]
+    elif era == "2023 Cv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv1_allscores.root"]
+    elif era == "2023 Cv2": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv2_allscores.root"]
+    elif era == "2023 Cv3": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv3_allscores.root"]
+    elif era == "2023 Cv4": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv4_allscores.root"]
+    elif era == "2023 Dv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Dv1_allscores.root"]
+    elif era == "2023 Dv2" and not CNN: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Dv2_allscores.root"]
     elif era == "2023 Dv2" and CNN: infilepath_list = ["/afs/cern.ch/work/f/fsimpson/public/minituple_outputs/minituple_Run2023D-EXOLLPJetHCAL-PromptReco-v2_partial28k-v4-scores_added.root"]
-    elif era == "2023 Bv1-Dv2" and v4pt1: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/DisplacedJet_Run2023B-EXOLLPJetHCAL-PromptReco-v1_AOD_2025_07_21_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/DisplacedJet_Run2023C-EXOLLPJetHCAL-PromptReco-v1_AOD_2025_07_21_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/DisplacedJet_Run2023C-EXOLLPJetHCAL-PromptReco-v2_AOD_2025_07_21_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/DisplacedJet_Run2023C-EXOLLPJetHCAL-PromptReco-v4_AOD_2025_07_21_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/DisplacedJet_Run2023D-EXOLLPJetHCAL-PromptReco-v1_AOD_2025_07_21_scores.root"]
-    else: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Bv1_allscores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Cv1_allscores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Cv2_allscores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Cv3_allscores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Cv4_allscores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Dv1_allscores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_LLPskim_2023Dv2_allscores.root"]
+    else: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Bv1_allscores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv1_allscores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv2_allscores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv3_allscores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv4_allscores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Dv1_allscores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Dv2_allscores.root"]
     if LLPskim: combined_tree = GetData(infilepath_list, label)
 
     infilepath_list_Zmu = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituples_Zmu_2023Bv1_allscores.root",
@@ -848,14 +839,13 @@ def main():
     if combined_tree:
         print("LLP skim tree successfully accessed, will be passed to MisTagParametrization")
         #MisTagParametrization(combined_tree)
-        if v4pt1: 
-            MisTagParametrization(combined_tree, "depth, b tagged")
-            MisTagParametrization(combined_tree, "depth, c tagged")
-            MisTagParametrization(combined_tree, "depth, bb tagged")
-            MisTagParametrization(combined_tree, "depth, light flavor tagged")
-            MisTagParametrization(combined_tree, "depth, flavor tagged")
-            MisTagParametrization(combined_tree, "depth, not flavor tagged")
-        else: MisTagParametrization(combined_tree, "depth")
+        MisTagParametrization(combined_tree, "depth")
+        MisTagParametrization(combined_tree, "depth, b tagged")
+        MisTagParametrization(combined_tree, "depth, c tagged")
+        MisTagParametrization(combined_tree, "depth, bb tagged")
+        MisTagParametrization(combined_tree, "depth, light flavor tagged")
+        MisTagParametrization(combined_tree, "depth, flavor tagged")
+        MisTagParametrization(combined_tree, "depth, not flavor tagged")
         # MisTagParametrization(combined_tree, "before alignment, depth")
         # MisTagParametrization(combined_tree, "after alignment, depth")
         #MisTagParametrization(combined_tree, "after alignment")

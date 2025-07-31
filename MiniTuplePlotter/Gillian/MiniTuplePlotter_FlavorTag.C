@@ -5,9 +5,9 @@
 // -------------------------------------------------------------------------------------------------
 void MiniTuplePlotter_FlavorTag(){
 
-	string path = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/";
+	string path = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_";
 	
-	vector<string> filetags = { "DisplacedJet_Run2023C-EXOLLPJetHCAL-PromptReco-v1_AOD_2025_07_21_scores" }; 
+	vector<string> filetags = { "LLPskim_2023Cv1_allscores" }; 
 
 	// ----- Flavor tagging probabilities -----//
 
