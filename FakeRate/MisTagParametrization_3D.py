@@ -93,25 +93,23 @@ def MisTagParametrization(tree, option=""):
     run_exclusion = ExcludedCut("run", runs_to_exclude)
     print(run_exclusion)
 
-    deltaPhi_exclusion = GetCut("abs(jet0_Phi - jet1_Phi)", [0.2,10])
+    deltaPhi_exclusion = ROOT.TCut("(abs(jet0_Phi) > 0.2 && abs(jet0_Phi) < 2.95) || abs(jet0_jet1_dPhi) > 0.2")
     print(deltaPhi_exclusion)
 
     CR = GetCut("jet1_scores_inc_train80", [0,0.2])
     VR = GetCut("jet1_scores_inc_train80", [0.2,DNN_cut_inc])
     SR = GetCut("jet1_scores_inc_train80", [DNN_cut_inc,1.1])
-    # mistag = GetCut("jet0_scores_depth_hcal", [DNN_cut,1.1])
     mistag = GetCut("jet0_scores_depth_LLPanywhere", [DNN_cut,1.1])
     if CNN:
         mistag = GetCut("CNN3D_classifier3", [DNN_cut,1.1])
-    # Need leading jet to be matched to a LLP, jet0_L1trig_Matched. Leading jet pT > 60, subleading > 40. Eta restrictions on both jets at 1.26
-    triggered = GetCut("jet0_L1trig_Matched", 1) 
-    # triggered += GetCut("jet0_Pt", [60,1000])
-    pt_eta = GetCut("jet0_Pt",[40,1000]) + GetCut("jet0_Eta",[-1.26,1.26]) + GetCut("jet1_Pt",[40,1000]) + GetCut("jet1_Eta",[-1.26,1.26])
-    # Emulated towers are split with jet0_DepthTowers, TimingTowers
-    depth_emu = GetCut("jet0_DepthTowers", [2,100]) # + GetCut("jet0_TimingTowers", 0)
+    # Emulated towers are split with jet0_DepthTowers, TimingTowers. Depth tag cand incorporates trig matching, pT, eta
+    depth_emu = GetCut("jet0_DepthTagCand", 1) + GetCut("jet1_InclTagCand", 1) # GetCut("jet0_DepthTowers", [2,100]) # + GetCut("jet0_TimingTowers", 0)
     timing_emu = GetCut("jet0_TimingTowers", [2,100]) # + GetCut("jet0_DepthTowers", 0)
     depth_timing_emu = GetCut("jet0_DepthTowers", 1) + GetCut("jet0_TimingTowers", 1)
-    depth_tag_cand = GetCut("jet0_DepthTagCand", 1)
+    # Need leading jet to be matched to a LLP, jet0_L1trig_Matched. Leading jet pT > 60, subleading > 40. Eta restrictions on both jets at 1.26
+    # triggered = GetCut("jet0_L1trig_Matched", 1) 
+    # triggered += GetCut("jet0_Pt", [60,1000])
+    # pt_eta = GetCut("jet0_Pt",[40,1000]) + GetCut("jet0_Eta",[-1.26,1.26]) + GetCut("jet1_Pt",[40,1000]) + GetCut("jet1_Eta",[-1.26,1.26])
 
     b_tag = GetCut("jet0_DeepCSV_prob_b", [0.8, 1.1]) 
     c_tag = GetCut("jet0_DeepCSV_prob_c", [0.8, 1.1]) 
@@ -133,16 +131,11 @@ def MisTagParametrization(tree, option=""):
     CR_0 = GetCut("jet0_scores_inc_train80", [0,0.2])
     VR_0 = GetCut("jet0_scores_inc_train80", [0.2,DNN_cut_inc])
     SR_0 = GetCut("jet0_scores_inc_train80", [DNN_cut_inc,1.1]) 
-    # mistag_1 = GetCut("jet1_scores_depth_hcal", [DNN_cut,1.1])
     mistag_1 = GetCut("jet1_scores_depth_LLPanywhere", [DNN_cut,1.1])
-    # Need sub-leading jet to be matched to a LLP, jet1_L1trig_Matched. Sub-leading jet pT > 60, leading > 40. Eta restrictions on both jets at 1.26
-    triggered_1 = GetCut("jet1_L1trig_Matched", 1) + GetCut("jet0_L1trig_Matched", [-10000,0.5]) # veto on both jet 0 and jet 1 being triggered to remove overlap
-    # triggered_1 += GetCut("jet1_Pt", [60,1000]) 
     # Emulated towers are split with jet0_DepthTowers, TimingTowers
-    depth_emu_1 = GetCut("jet1_DepthTowers", [2,100]) 
+    depth_emu_1 = GetCut("jet1_DepthTagCand", 1) + GetCut("jet0_InclTagCand", 1) # GetCut("jet1_DepthTowers", [2,100]) 
     timing_emu_1 = GetCut("jet1_TimingTowers", [2,100])
     depth_timing_emu_1 = GetCut("jet1_DepthTowers", 1) + GetCut("jet1_TimingTowers", 1)
-    depth_tag_cand_1 = GetCut("jet1_DepthTagCand", 1)
 
     run_before = GetCut("run", [360000, 368770])
     run_after = GetCut("run", [368770, 375000])
@@ -170,12 +163,14 @@ def MisTagParametrization(tree, option=""):
     label = ""
     title = ": inclusive"
 
+    cut = ROOT.TCut("")
+    cut_1 = ROOT.TCut("")
     # Check if the option exists in the mapping
     if option in option_map:
-        triggered += option_map[option][0] # emulated option
+        cut = option_map[option][0] # emulated option
         print("Triggered requirements:")
-        print(triggered)
-        triggered_1 += option_map[option][1] # emulated option, to handle the case when jet 1 is triggered and also require depth/timing emulated! 
+        print(cut)
+        cut_1 += option_map[option][1] # emulated option, to handle the case when jet 1 is triggered and also require depth/timing emulated! 
         title = option_map[option][2]
         label = option_map[option][3]
 
@@ -195,18 +190,18 @@ def MisTagParametrization(tree, option=""):
 
     # Create the 3D histograms with different cuts. Arguments to CreateHistograms function are tree, cut, histogram name. Histograms are filled usnig tree.Draw() method
     # jet 0 is triggered, jet 1 defines CR / VR
-    hist3d_CR_all = CreateHistograms(tree, CR + triggered + pt_eta + run_exclusion + deltaPhi_exclusion, "hist3d_CR_all")
-    hist3d_CR_mistag = CreateHistograms(tree, CR + triggered + pt_eta + run_exclusion + deltaPhi_exclusion + mistag, "hist3d_CR_mistag")
-    hist3d_VR_all = CreateHistograms(tree, VR + triggered + pt_eta + run_exclusion + deltaPhi_exclusion, "hist3d_VR_all")
-    hist3d_VR_mistag = CreateHistograms(tree, VR + triggered + pt_eta + run_exclusion + deltaPhi_exclusion + mistag, "hist3d_VR_mistag")
-    hist3d_SR_all = CreateHistograms(tree, SR + triggered + pt_eta + run_exclusion + deltaPhi_exclusion, "hist3d_SR_all")
+    hist3d_CR_all = CreateHistograms(tree, CR + cut + run_exclusion + deltaPhi_exclusion, "hist3d_CR_all")
+    hist3d_CR_mistag = CreateHistograms(tree, CR + cut + run_exclusion + deltaPhi_exclusion + mistag, "hist3d_CR_mistag")
+    hist3d_VR_all = CreateHistograms(tree, VR + cut + run_exclusion + deltaPhi_exclusion, "hist3d_VR_all")
+    hist3d_VR_mistag = CreateHistograms(tree, VR + cut + run_exclusion + deltaPhi_exclusion + mistag, "hist3d_VR_mistag")
+    hist3d_SR_all = CreateHistograms(tree, SR + cut + run_exclusion + deltaPhi_exclusion, "hist3d_SR_all")
 
     # jet 1 is triggered, jet 0 defines CR / VR
-    hist3d_CR_all_1 = CreateHistograms(tree, CR_0 + triggered_1 + pt_eta + run_exclusion + deltaPhi_exclusion, "hist3d_CR_all_1")
-    hist3d_CR_mistag_1 = CreateHistograms(tree, CR_0 + triggered_1 + pt_eta + run_exclusion + deltaPhi_exclusion + mistag_1, "hist3d_CR_mistag_1")
-    hist3d_VR_all_1 = CreateHistograms(tree, VR_0 + triggered_1 + pt_eta + run_exclusion + deltaPhi_exclusion, "hist3d_VR_all_1")
-    hist3d_VR_mistag_1 = CreateHistograms(tree, VR_0 + triggered_1 + pt_eta + run_exclusion + deltaPhi_exclusion + mistag_1, "hist3d_VR_mistag_1")
-    hist3d_SR_all_1 = CreateHistograms(tree, SR_0 + triggered_1 + pt_eta + run_exclusion + deltaPhi_exclusion, "hist3d_SR_all_1")
+    hist3d_CR_all_1 = CreateHistograms(tree, CR_0 + cut_1 + run_exclusion + deltaPhi_exclusion, "hist3d_CR_all_1")
+    hist3d_CR_mistag_1 = CreateHistograms(tree, CR_0 + cut_1 + run_exclusion + deltaPhi_exclusion + mistag_1, "hist3d_CR_mistag_1")
+    hist3d_VR_all_1 = CreateHistograms(tree, VR_0 + cut_1 + run_exclusion + deltaPhi_exclusion, "hist3d_VR_all_1")
+    hist3d_VR_mistag_1 = CreateHistograms(tree, VR_0 + cut_1 + run_exclusion + deltaPhi_exclusion + mistag_1, "hist3d_VR_mistag_1")
+    hist3d_SR_all_1 = CreateHistograms(tree, SR_0 + cut_1 + run_exclusion + deltaPhi_exclusion, "hist3d_SR_all_1")
     # OR the above options by adding together the two histograms
     hist3d_CR_all_combined = hist3d_CR_all.Clone("hist3d_CR_all_combined")
     hist3d_CR_all_combined.Add(hist3d_CR_all_1)
@@ -840,12 +835,13 @@ def main():
         print("LLP skim tree successfully accessed, will be passed to MisTagParametrization")
         #MisTagParametrization(combined_tree)
         MisTagParametrization(combined_tree, "depth")
-        MisTagParametrization(combined_tree, "depth, b tagged")
-        MisTagParametrization(combined_tree, "depth, c tagged")
-        MisTagParametrization(combined_tree, "depth, bb tagged")
-        MisTagParametrization(combined_tree, "depth, light flavor tagged")
-        MisTagParametrization(combined_tree, "depth, flavor tagged")
-        MisTagParametrization(combined_tree, "depth, not flavor tagged")
+        # MisTagParametrization(combined_tree, "depth, b tagged") # run with lower DNN scores otherwise nothing predicted...
+        # MisTagParametrization(combined_tree, "depth, c tagged")
+        # MisTagParametrization(combined_tree, "depth, bb tagged")
+        # MisTagParametrization(combined_tree, "depth, light flavor tagged")
+        # MisTagParametrization(combined_tree, "depth, flavor tagged")
+        # MisTagParametrization(combined_tree, "depth, not flavor tagged")
+
         # MisTagParametrization(combined_tree, "before alignment, depth")
         # MisTagParametrization(combined_tree, "after alignment, depth")
         #MisTagParametrization(combined_tree, "after alignment")
