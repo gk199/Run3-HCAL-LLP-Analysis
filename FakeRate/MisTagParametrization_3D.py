@@ -19,7 +19,7 @@ pT_bins = np.array(pT_bins, dtype=float)
 eta_bins = np.linspace(-1.26, 1.26, 9)  # eta axis from -2 to 2, 10 bins
 phi_bins = np.linspace(-np.pi, np.pi, 9)  # phi axis from -pi to pi, 10 bins
 
-DNN_cut = 0.9
+DNN_cut = 0.5
 DNN_cut_inc = 0.9
 
 runs_to_exclude = [367230, 367772, 368331, 368440, 368764, 370436, 370579, 370790] # 2023 runs, based on earlier DNN
@@ -93,7 +93,7 @@ def MisTagParametrization(tree, option=""):
     run_exclusion = ExcludedCut("run", runs_to_exclude)
     print(run_exclusion)
 
-    deltaPhi_exclusion = ROOT.TCut("(abs(jet0_Phi) > 0.2 && abs(jet0_Phi) < 2.95) || abs(jet0_jet1_dPhi) > 0.2")
+    deltaPhi_exclusion = ROOT.TCut("(abs(jet0_Phi) > 0.2 && abs(jet0_Phi) < 2.95) || abs(jet0_jet1_dPhi) > 0.2") + GetCut("Flag_METFilters_2022_2023_PromptReco", 1)
     print(deltaPhi_exclusion)
 
     CR = GetCut("jet1_scores_inc_train80", [0,0.2])
@@ -111,18 +111,18 @@ def MisTagParametrization(tree, option=""):
     # triggered += GetCut("jet0_Pt", [60,1000])
     # pt_eta = GetCut("jet0_Pt",[40,1000]) + GetCut("jet0_Eta",[-1.26,1.26]) + GetCut("jet1_Pt",[40,1000]) + GetCut("jet1_Eta",[-1.26,1.26])
 
-    b_tag = GetCut("jet0_DeepCSV_prob_b", [0.8, 1.1]) 
-    c_tag = GetCut("jet0_DeepCSV_prob_c", [0.8, 1.1]) 
-    bb_tag = GetCut("jet0_DeepCSV_prob_bb", [0.8, 1.1]) 
+    b_tag = GetCut("jet0_DeepCSV_prob_b", [0.2435, 1.1]) 
+    c_tag = GetCut("jet0_DeepCSV_prob_c", [0.102, 1.1]) 
+    bb_tag = GetCut("jet0_DeepCSV_prob_bb", [0.2435, 1.1]) 
     light_tag = GetCut("jet0_DeepCSV_prob_udsg", [0.8, 1.1]) 
-    b_tag_1 = GetCut("jet1_DeepCSV_prob_b", [0.8, 1.1]) 
-    c_tag_1 = GetCut("jet1_DeepCSV_prob_c", [0.8, 1.1]) 
-    bb_tag_1 = GetCut("jet1_DeepCSV_prob_bb", [0.8, 1.1]) 
+    b_tag_1 = GetCut("jet1_DeepCSV_prob_b", [0.2435, 1.1]) 
+    c_tag_1 = GetCut("jet1_DeepCSV_prob_c", [0.102, 1.1]) 
+    bb_tag_1 = GetCut("jet1_DeepCSV_prob_bb", [0.2435, 1.1]) 
     light_tag_1 = GetCut("jet1_DeepCSV_prob_udsg", [0.8, 1.1]) 
-    flavor_tag = ROOT.TCut(" || ".join([ f'({str(GetCut("jet0_DeepCSV_prob_b", [0.8,1.1]))})', f'({str(GetCut("jet0_DeepCSV_prob_c", [0.8,1.1]))})', f'({str(GetCut("jet0_DeepCSV_prob_bb", [0.8,1.1]))})', f'({str(GetCut("jet0_DeepCSV_prob_udsg", [0.8,1.1]))})' ]))
-    flavor_tag_1 = ROOT.TCut(" || ".join([ f'({str(GetCut("jet1_DeepCSV_prob_b", [0.8,1.1]))})', f'({str(GetCut("jet1_DeepCSV_prob_c", [0.8,1.1]))})', f'({str(GetCut("jet1_DeepCSV_prob_bb", [0.8,1.1]))})', f'({str(GetCut("jet1_DeepCSV_prob_udsg", [0.8,1.1]))})' ]))
-    not_flavor_tag = GetCut("jet0_DeepCSV_prob_b", [-0.01,0.8]) + GetCut("jet0_DeepCSV_prob_c", [-0.01,0.8]) + GetCut("jet0_DeepCSV_prob_bb", [-0.01,0.8]) + GetCut("jet0_DeepCSV_prob_udsg", [-0.01,0.8])
-    not_flavor_tag_1 = GetCut("jet1_DeepCSV_prob_b", [-0.01,0.8]) + GetCut("jet1_DeepCSV_prob_c", [-0.01,0.8]) + GetCut("jet1_DeepCSV_prob_bb", [-0.01,0.8]) + GetCut("jet1_DeepCSV_prob_udsg", [-0.01,0.8])
+    flavor_tag = ROOT.TCut(" || ".join([ f'({str(GetCut("jet0_DeepCSV_prob_b", [0.2435,1.1]))})', f'({str(GetCut("jet0_DeepCSV_prob_c", [0.102,1.1]))})', f'({str(GetCut("jet0_DeepCSV_prob_bb", [0.2435,1.1]))})', f'({str(GetCut("jet0_DeepCSV_prob_udsg", [0.8,1.1]))})' ]))
+    flavor_tag_1 = ROOT.TCut(" || ".join([ f'({str(GetCut("jet1_DeepCSV_prob_b", [0.2435,1.1]))})', f'({str(GetCut("jet1_DeepCSV_prob_c", [0.102,1.1]))})', f'({str(GetCut("jet1_DeepCSV_prob_bb", [0.2435,1.1]))})', f'({str(GetCut("jet1_DeepCSV_prob_udsg", [0.8,1.1]))})' ]))
+    not_flavor_tag = GetCut("jet0_DeepCSV_prob_b", [-0.01,0.2435]) + GetCut("jet0_DeepCSV_prob_c", [-0.01,0.102]) + GetCut("jet0_DeepCSV_prob_bb", [-0.01,0.2435]) + GetCut("jet0_DeepCSV_prob_udsg", [-0.01,0.8])
+    not_flavor_tag_1 = GetCut("jet1_DeepCSV_prob_b", [-0.01,0.2435]) + GetCut("jet1_DeepCSV_prob_c", [-0.01,0.102]) + GetCut("jet1_DeepCSV_prob_bb", [-0.01,0.2435]) + GetCut("jet1_DeepCSV_prob_udsg", [-0.01,0.8])
 
     track_pT = GetCut("jet0_Track0Pt / jet0_Pt",[0,1.1])
     track_pT_1 = GetCut("jet1_Track0Pt / jet1_Pt",[0,1.1])
@@ -190,6 +190,7 @@ def MisTagParametrization(tree, option=""):
 
     # Create the 3D histograms with different cuts. Arguments to CreateHistograms function are tree, cut, histogram name. Histograms are filled usnig tree.Draw() method
     # jet 0 is triggered, jet 1 defines CR / VR
+    print(CR + cut + run_exclusion + deltaPhi_exclusion + mistag)
     hist3d_CR_all = CreateHistograms(tree, CR + cut + run_exclusion + deltaPhi_exclusion, "hist3d_CR_all")
     hist3d_CR_mistag = CreateHistograms(tree, CR + cut + run_exclusion + deltaPhi_exclusion + mistag, "hist3d_CR_mistag")
     hist3d_VR_all = CreateHistograms(tree, VR + cut + run_exclusion + deltaPhi_exclusion, "hist3d_VR_all")
@@ -835,12 +836,12 @@ def main():
         print("LLP skim tree successfully accessed, will be passed to MisTagParametrization")
         #MisTagParametrization(combined_tree)
         MisTagParametrization(combined_tree, "depth")
-        # MisTagParametrization(combined_tree, "depth, b tagged") # run with lower DNN scores otherwise nothing predicted...
-        # MisTagParametrization(combined_tree, "depth, c tagged")
-        # MisTagParametrization(combined_tree, "depth, bb tagged")
-        # MisTagParametrization(combined_tree, "depth, light flavor tagged")
-        # MisTagParametrization(combined_tree, "depth, flavor tagged")
-        # MisTagParametrization(combined_tree, "depth, not flavor tagged")
+        MisTagParametrization(combined_tree, "depth, b tagged") # run with lower DNN scores otherwise nothing predicted...
+        MisTagParametrization(combined_tree, "depth, c tagged")
+        MisTagParametrization(combined_tree, "depth, bb tagged")
+        MisTagParametrization(combined_tree, "depth, light flavor tagged")
+        MisTagParametrization(combined_tree, "depth, flavor tagged")
+        MisTagParametrization(combined_tree, "depth, not flavor tagged")
 
         # MisTagParametrization(combined_tree, "before alignment, depth")
         # MisTagParametrization(combined_tree, "after alignment, depth")
