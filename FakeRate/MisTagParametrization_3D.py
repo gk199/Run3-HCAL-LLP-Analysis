@@ -98,10 +98,13 @@ def MisTagParametrization(tree, option=""):
 
     # Setup cuts for CR and VR. CR = jet1_scores_inc between 0-0.2. VR = jet1_scores_inc between 0.2-0.9. Mistag means jet0_scores over "DNN_cut"
     run_exclusion = ExcludedCut("run", runs_to_exclude)
-    print(run_exclusion)
+    if debug: print(run_exclusion)
 
     deltaPhi_exclusion = ROOT.TCut("(abs(jet0_Phi) > 0.2 && abs(jet0_Phi) < 2.95) || abs(jet0_jet1_dPhi) > 0.2") + GetCut("Flag_METFilters_2022_2023_PromptReco", 1)
-    print(deltaPhi_exclusion)
+    if debug: print(deltaPhi_exclusion)
+
+    low_PV = GetCut("PV", [0,42])
+    high_PV = GetCut("PV", [42,100])
 
     CR = GetCut("jet1_scores_inc_train80", [0,0.2])
     VR = GetCut("jet1_scores_inc_train80", [0.2,DNN_cut_inc])
@@ -152,6 +155,12 @@ def MisTagParametrization(tree, option=""):
 
     # Define a mapping of options to their corresponding updates
     option_map = {
+        "depth, b tagged": (depth_emu + b_tag, depth_emu_1 + b_tag_1, ": 2+ depth, b-tagged", "_depth_bTag"),
+        "depth, not b tagged": (depth_emu + NOTb_tag, depth_emu_1 + NOTb_tag_1, ": 2+ depth, not b-tagged", "_depth_nobTag"),
+        "depth, b tagged, low PV": (depth_emu + b_tag, depth_emu_1 + b_tag_1, ": 2+ depth, b-tagged, low PV", "_depth_bTag_lowPV"),
+        "depth, not b tagged, low PV": (depth_emu + NOTb_tag, depth_emu_1 + NOTb_tag_1, ": 2+ depth, not b-tagged, low PV", "_depth_nobTag_lowPV"),
+        "depth, b tagged, high PV": (depth_emu + b_tag, depth_emu_1 + b_tag_1, ": 2+ depth, b-tagged, high PV", "_depth_bTag_highPV"),
+        "depth, not b tagged, high PV": (depth_emu + NOTb_tag, depth_emu_1 + NOTb_tag_1, ": 2+ depth, not b-tagged, high PV", "_depth_nobTag_highPV"),
         "depth": (depth_emu, depth_emu_1, ": 2+ depth", "_depth"),
         "depth, trackPt": (depth_emu + track_pT, depth_emu_1 + track_pT_1, ": 2+ depth, frac. track pT", "_depth_trackPt"),
         "timing": (timing_emu, timing_emu_1, ": 2+ timing", "_timing"),
@@ -161,8 +170,6 @@ def MisTagParametrization(tree, option=""):
         "before alignment, depth": (run_before + depth_emu, run_before + depth_emu_1, ": 2+ depth, before alignment", "_depth_before_align"),
         "after alignment, depth": (run_after + depth_emu, run_after + depth_emu_1, ": 2+ depth, after alignment", "_depth_after_align"),
         "after alignment, trackPt": (run_after + track_pT, run_after + track_pT_1, ": frac. track pT, after alignment", "_trackPt_after_align"),
-        "depth, b tagged": (depth_emu + b_tag, depth_emu_1 + b_tag_1, ": 2+ depth, b-tagged", "_depth_bTag"),
-        "depth, not b tagged": (depth_emu + NOTb_tag, depth_emu_1 + NOTb_tag_1, ": 2+ depth, not b-tagged", "_depth_nobTag"),
         "depth, c tagged": (depth_emu + c_tag, depth_emu_1 + c_tag_1, ": 2+ depth, c-tagged", "_depth_cTag"),
         "depth, bb tagged": (depth_emu + bb_tag, depth_emu_1 + bb_tag_1, ": 2+ depth, bb-tagged", "_depth_bbTag"),
         "depth, light flavor tagged": (depth_emu + light_tag, depth_emu_1 + light_tag_1, ": 2+ depth, light flavor tagged", "_depth_lightFlavorTag"),
@@ -179,8 +186,9 @@ def MisTagParametrization(tree, option=""):
     # Check if the option exists in the mapping
     if option in option_map:
         cut = option_map[option][0] # emulated option
-        print("Triggered requirements:")
-        print(cut)
+        if debug: 
+            print("Triggered requirements:")
+            print(cut)
         cut_1 += option_map[option][1] # emulated option, to handle the case when jet 1 is triggered and also require depth/timing emulated! 
         title = option_map[option][2]
         label = option_map[option][3]
@@ -201,16 +209,25 @@ def MisTagParametrization(tree, option=""):
 
     # Create the 3D histograms with different cuts. Arguments to CreateHistograms function are tree, cut, histogram name. Histograms are filled using tree.Draw() method
     # jet 0 is triggered, jet 1 defines CR / VR
-    print(CR + cut + run_exclusion + deltaPhi_exclusion + mistag)
-    hist3d_CR_all = CreateHistograms(tree, CR + cut + run_exclusion + deltaPhi_exclusion, "hist3d_CR_all")
-    hist3d_CR_mistag = CreateHistograms(tree, CR + cut + run_exclusion + deltaPhi_exclusion + mistag, "hist3d_CR_mistag")
+    mistag_rate_cut = ""
+    if "low PV" in option: # used just for the CR mistag rate, keep VR as full stats, but predict from a slightly different sampele to understand the systematic variation 
+        mistag_rate_cut = low_PV
+    if "high PV" in option:
+        mistag_rate_cut = high_PV
+    if debug: 
+        print("CR cuts = ")
+        print(CR + mistag_rate_cut + cut + run_exclusion + deltaPhi_exclusion + mistag)
+        print("VR cuts = ")
+        print(VR + cut + run_exclusion + deltaPhi_exclusion + mistag)
+    hist3d_CR_all = CreateHistograms(tree, CR + mistag_rate_cut + cut + run_exclusion + deltaPhi_exclusion, "hist3d_CR_all")
+    hist3d_CR_mistag = CreateHistograms(tree, CR + mistag_rate_cut + cut + run_exclusion + deltaPhi_exclusion + mistag, "hist3d_CR_mistag")
     hist3d_VR_all = CreateHistograms(tree, VR + cut + run_exclusion + deltaPhi_exclusion, "hist3d_VR_all")
     hist3d_VR_mistag = CreateHistograms(tree, VR + cut + run_exclusion + deltaPhi_exclusion + mistag, "hist3d_VR_mistag")
     hist3d_SR_all = CreateHistograms(tree, SR + cut + run_exclusion + deltaPhi_exclusion, "hist3d_SR_all")
 
     # jet 1 is triggered, jet 0 defines CR / VR
-    hist3d_CR_all_1 = CreateHistograms(tree, CR_0 + cut_1 + run_exclusion + deltaPhi_exclusion, "hist3d_CR_all_1")
-    hist3d_CR_mistag_1 = CreateHistograms(tree, CR_0 + cut_1 + run_exclusion + deltaPhi_exclusion + mistag_1, "hist3d_CR_mistag_1")
+    hist3d_CR_all_1 = CreateHistograms(tree, CR_0 + mistag_rate_cut + cut_1 + run_exclusion + deltaPhi_exclusion, "hist3d_CR_all_1")
+    hist3d_CR_mistag_1 = CreateHistograms(tree, CR_0 + mistag_rate_cut + cut_1 + run_exclusion + deltaPhi_exclusion + mistag_1, "hist3d_CR_mistag_1")
     hist3d_VR_all_1 = CreateHistograms(tree, VR_0 + cut_1 + run_exclusion + deltaPhi_exclusion, "hist3d_VR_all_1")
     hist3d_VR_mistag_1 = CreateHistograms(tree, VR_0 + cut_1 + run_exclusion + deltaPhi_exclusion + mistag_1, "hist3d_VR_mistag_1")
     hist3d_SR_all_1 = CreateHistograms(tree, SR_0 + cut_1 + run_exclusion + deltaPhi_exclusion, "hist3d_SR_all_1")
@@ -247,7 +264,7 @@ def MisTagParametrization(tree, option=""):
         comparison = "_Wjets_Zjets"  
 
     for i, (CR_all, CR_mistag, VR_all, VR_mistag, SR_all) in enumerate(zip(CR_all_list, CR_mistag_list, VR_all_list, VR_mistag_list, SR_all_list)):
-        print (mistag_jet_list[i])
+        print (" ************* \n " + mistag_jet_list[i] + " \n *************")
         
         if debug:
             print(f"Entries in the tree: {tree.GetEntries()}")
@@ -381,7 +398,7 @@ def MisTagParametrization(tree, option=""):
         MakePlotWithRatio([proj_eta_VR_mistag, proj_eta_VR_mistag_predict], legend_labels, label + "_eta", png_title)
         MakePlotWithRatio([proj_phi_VR_mistag, proj_phi_VR_mistag_predict], legend_labels, label + "_phi", png_title) 
 
-        print("\npredicted VR events (pT) = " + str(proj_pT_VR_mistag_predict.Integral()) + 
+        if debug: print("\npredicted VR events (pT) = " + str(proj_pT_VR_mistag_predict.Integral()) + 
                 "\npredicted VR events (eta) = " + str(proj_eta_VR_mistag_predict.Integral()) + 
                 "\npredicted VR events (phi) = " + str(proj_phi_VR_mistag_predict.Integral()) + "\n")
 
@@ -396,7 +413,7 @@ def MisTagParametrization(tree, option=""):
             png_title,
             ["Jet p_{T} Projected Mistags from CR, "+mistag_jet_list[i], "Jet #eta Projected Mistags from CR, "+mistag_jet_list[i], "Jet #phi Projected Mistags from CR, "+mistag_jet_list[i]], label
         )
-        print("\npredicted SR events (pT) = " + str(proj_pT_SR_mistag_predict.Integral()) +
+        if debug: print("\npredicted SR events (pT) = " + str(proj_pT_SR_mistag_predict.Integral()) +
             "\npredicted SR events (eta) = " + str(proj_eta_SR_mistag_predict.Integral()) + 
             "\npredicted SR events (phi) = " + str(proj_phi_SR_mistag_predict.Integral()) + "\n")
 
@@ -965,8 +982,19 @@ def main():
         print("LLP skim tree successfully accessed, will be passed to MisTagParametrization")
         #MisTagParametrization(combined_tree)
         # MisTagParametrization(combined_tree, "depth")
+        print("\n \n ********************* \n DNN score = " + str(DNN_cut) + " \n ********************* \n \n")
+        print("\n \n ********************* \n depth, b-tagged \n ********************* \n \n")
         MisTagParametrization(combined_tree, "depth, b tagged") # run with lower DNN scores otherwise nothing predicted...
+        print("\n \n ********************* \n depth, not b-tagged \n ********************* \n \n")
         MisTagParametrization(combined_tree, "depth, not b tagged")
+        print("\n \n ********************* \n depth, b-tagged, low PV \n ********************* \n \n")
+        MisTagParametrization(combined_tree, "depth, b tagged, low PV") # run with lower DNN scores otherwise nothing predicted...
+        print("\n \n ********************* \n depth, not b-tagged, low PV \n ********************* \n \n")
+        MisTagParametrization(combined_tree, "depth, not b tagged, low PV")
+        print("\n \n ********************* \n depth, b-tagged, high PV \n ********************* \n \n")
+        MisTagParametrization(combined_tree, "depth, b tagged, high PV") # run with lower DNN scores otherwise nothing predicted...
+        print("\n \n ********************* \n depth, not b-tagged, high PV \n ********************* \n \n")
+        MisTagParametrization(combined_tree, "depth, not b tagged, high PV")
         # MisTagParametrization(combined_tree, "depth, c tagged")
         # MisTagParametrization(combined_tree, "depth, bb tagged")
         # MisTagParametrization(combined_tree, "depth, light flavor tagged")
