@@ -100,7 +100,9 @@ def MisTagParametrization(tree, option=""):
     run_exclusion = ExcludedCut("run", runs_to_exclude)
     if debug: print(run_exclusion)
 
-    deltaPhi_exclusion = ROOT.TCut("(abs(jet0_Phi) > 0.2 && abs(jet0_Phi) < 2.95) || abs(jet0_jet1_dPhi) > 0.2") + GetCut("Flag_METFilters_2022_2023_PromptReco", 1)
+    # deltaPhi_exclusion = ROOT.TCut("(abs(jet0_Phi) > 0.2 && abs(jet0_Phi) < 2.95) || abs(jet0_jet1_dPhi) > 0.2") + GetCut("Flag_METFilters_2022_2023_PromptReco", 1)
+    deltaPhi_exclusion = ROOT.TCut("abs(jet0_jet1_dPhi) > 0.2") + GetCut("Flag_METFilters_2022_2023_PromptReco", 1) # stricter than just beam halo, also addressing colimated jets
+    deltaPhi_exclusion += GetCut("jet0_DeepCSV_prob_b", [-0.1,0.5]) + GetCut("jet1_DeepCSV_prob_b", [-0.1,0.5]) # require two jets are not highly b tagged
     if debug: print(deltaPhi_exclusion)
 
     low_PV = GetCut("PV", [0,42])
@@ -368,6 +370,7 @@ def MisTagParametrization(tree, option=""):
         total_actual, err_actual = get_total_and_error(VR_mistag)
         total_SR, err_SR = get_total_and_error(SR_all) # this is SR * mistag already
 
+        print(option + ", " + mistag_jet_list[i])
         print(f"Observed mistagged events in VR: {total_actual:.2f} ± {err_actual:.2f} (stat)")
         print(f"Predicted mistagged events in VR: {total_pred:.2f} ± {err_pred:.2f} (stat)")
         print(f"Predicted mistagged events in SR: {total_SR:.2f} ± {err_SR:.2f} (stat)")
