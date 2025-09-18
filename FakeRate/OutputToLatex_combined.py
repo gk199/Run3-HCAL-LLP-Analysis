@@ -1,7 +1,7 @@
 import re
 from collections import defaultdict
 
-score = "8"
+score = "9"
 
 def parse_file(filename):
     with open(filename, 'r') as f:
@@ -24,12 +24,6 @@ def parse_file(filename):
         elif "depth" in line_lower and "pv" not in line_lower:
             current_mode = 'central'
 
-        # --- Detect b-tagging category
-        if "depth, b-tagged" in line_lower or "depth, b tagged" in line_lower:
-            current_tag = "b tagged"
-        elif "depth, not b-tagged" in line_lower or "depth, not b tagged" in line_lower:
-            current_tag = "not b tagged"
-
         # --- Detect jet category
         if line_lower in {"leading", "sub-leading", "combined"}:
             current_jet = line_lower
@@ -39,21 +33,21 @@ def parse_file(filename):
             match = re.search(r"([\d.]+)\s*±\s*([\d.]+)", line)
             if match:
                 val, err = map(float, match.groups())
-                key = (current_jet, current_tag)
+                key = current_jet
                 data[key][current_mode]['Predicted VR'] = (val, err)
 
         elif "predicted mistagged events in sr" in line_lower:
             match = re.search(r"([\d.]+)\s*±\s*([\d.]+)", line)
             if match:
                 val, err = map(float, match.groups())
-                key = (current_jet, current_tag)
+                key = current_jet
                 data[key][current_mode]['Predicted SR'] = (val, err)
 
         elif "observed mistagged events in vr" in line_lower:
             match = re.search(r"([\d.]+)\s*±\s*([\d.]+)", line)
             if match:
                 val, err = map(float, match.groups())
-                key = (current_jet, current_tag)
+                key = current_jet
                 data[key]['central']['Observed VR'] = (val, err)
 
     return data
@@ -85,38 +79,39 @@ def format_observed(val, stat):
 
 
 def generate_latex_table(data):
-    def entry(jet, tag, key):
+    def entry(jet, key):
         if key == 'Observed VR':
-            val, stat = data[(jet, tag)]['central'][key]
+            val, stat = data[jet]['central'][key]
             return format_observed(val, stat)
         else:
-            val, stat = data[(jet, tag)]['central'][key]
-            low = data[(jet, tag)]['low'].get(key, (val, stat))
-            high = data[(jet, tag)]['high'].get(key, (val, stat))
+            val, stat = data[jet]['central'][key]
+            low = data[jet]['low'].get(key, (val, stat))
+            high = data[jet]['high'].get(key, (val, stat))
             syst_up, syst_down = compute_syst((val, stat), low, high)
             return format_predicted(val, stat, syst_up, syst_down)
 
     lines = []
     lines.append("\\begin{table}[h!]")
     lines.append("    \\centering")
-    lines.append("    \\begin{tabular}{c|c|c|c}")
-    lines.append("        \\multicolumn{2}{c|}{\\textbf{Categories}} & \\textbf{b-tagged} & \\textbf{not b-tagged} \\\\ \\hline")
+    lines.append("    \\begin{tabular}{c|c|c}")
+
+    lines.append("        \\multicolumn{2}{c|}{\\textbf{Categories}} & \\textbf{DNN Score = 0." + score + "} \\\\ \\hline")
 
     for jet in ['leading', 'sub-leading']:
-        lines.append(f"        \\multirow{{3}}{{*}}{{{jet.capitalize()} Jet}} & Observed VR  & {entry(jet, 'b tagged', 'Observed VR')} & {entry(jet, 'not b tagged', 'Observed VR')} \\\\")
-        lines.append(f"        & Predicted VR & {entry(jet, 'b tagged', 'Predicted VR')} & {entry(jet, 'not b tagged', 'Predicted VR')} \\\\")
-        lines.append(f"        & Predicted SR & {entry(jet, 'b tagged', 'Predicted SR')} & {entry(jet, 'not b tagged', 'Predicted SR')} \\\\ \\hline")
+        lines.append(f"        \\multirow{{3}}{{*}}{{{jet.capitalize()} Jet}} & Observed VR  & {entry(jet, 'Observed VR')} \\\\")
+        lines.append(f"        & Predicted VR & {entry(jet, 'Predicted VR')} \\\\")
+        lines.append(f"        & Predicted SR & {entry(jet, 'Predicted SR')} \\\\ \\hline")
 
     lines.append("    \\end{tabular}")
     lines.append("    \\caption{Depth DNN score = 0." + score + ".}")
-    lines.append("    \\label{Table:VRclosure_pt" + score + "}")
+    lines.append("    \\label{Table:VRclosure_pt" + score + "_combined}")
     lines.append("\\end{table}")
     return "\n".join(lines)
 
 
 # ---- USAGE ----
 if __name__ == "__main__":
-    filename = "DNN_pt" + score + "_forPython.txt"  # Change this to your input file
+    filename = "DNN_pt" + score + "_forPython_combined.txt"  # Change this to your input file
     data = parse_file(filename)
 
     for key, modes in data.items():
