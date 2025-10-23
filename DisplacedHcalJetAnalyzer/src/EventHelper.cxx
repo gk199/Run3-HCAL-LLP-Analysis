@@ -194,7 +194,7 @@ bool DisplacedHcalJetAnalyzer::PassWPlusJetsSelection() {
 		}
 	}
 
-	if (met_SumEt < 30) return false;										// should this be met pT or eT?
+	// if (met_SumEt < 30) return false;										// should this be met pT or eT?
 	if ( electron && muon ) return false;									// reject events with 2 leptons passing
 	if ( !electron && !muon ) return false;									// reject events with no leptons passing
 	if ( (n_ele_over20 + n_muon_over20) > 1 ) return false;					// reject events with additional leptons over 20 GeV
@@ -253,7 +253,7 @@ bool DisplacedHcalJetAnalyzer::PassLeptonVeto() {
 		if (muon_Pt->at(i) > 20 && abs(muon_Eta->at(i)) < 2.4 && transverseM_muon > 55 && muon == false) muon = true;
 	}
 
-	if (met_SumEt < 30) return false;										// should this be met pT or eT?
+	// if (met_SumEt < 30) return false;										// should this be met pT or eT?
 	// if ( electron || muon ) return false;								// require neither electron or muon is found
 	if ( (n_ele_over20 + n_muon_over20) > 0 ) return false;					// reject events with any leptons over 20 GeV
 
