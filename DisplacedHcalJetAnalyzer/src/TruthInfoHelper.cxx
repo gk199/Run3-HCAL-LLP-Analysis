@@ -61,16 +61,44 @@ void DisplacedHcalJetAnalyzer::SetLLPVariables(){
 }
 
 /* ====================================================================================================================== */
-bool DisplacedHcalJetAnalyzer::isRechitValid(float RechitEnergy, int RechitDepth) {
-	vector<float> energy_cuts_2022initial = {0.1, 0.2, 0.3, 0.3};
+bool DisplacedHcalJetAnalyzer::isRechitValid(float RechitEnergy, int RechitDepth, int RechitIEta, int RunNum) {
+	vector<float> energy_cuts_2022initial = {0.1, 0.2, 0.3, 0.3}; // anticipate this is the one to use for processing since it matches offline IOV tag
 	vector<float> energy_cuts_2022rereco = 	{0.25, 0.25, 0.3, 0.3}; // best agreement with MC
 	vector<float> energy_cuts_2023 = 		{0.4, 0.3, 0.3, 0.3};
+
+	// also need HE thresholds
+	vector<float> energy_cuts_2022initial_HE = 	{0.1, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2}; // anticipate this is the one to use for processing since it matches offline IOV tag
+	vector<float> energy_cuts_2023_HE = 		{0.1, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2};
 	// https://github.com/cms-sw/cmssw/blob/master/RecoParticleFlow/PFClusterProducer/python/particleFlowClusterHBHE_cfi.py#L6
 	// https://github.com/swagata87/cmssw/blob/51067fbc70af1ef57a0f6a0f2d7297deefbeba45/RecoParticleFlow/PFClusterProducer/python/particleFlowClusterHBHE_cfi.py#L13
 	// https://github.com/cms-sw/cmssw/blob/master/RecoParticleFlow/PFClusterProducer/python/particleFlowRecHitHBHE_cfi.py#L8
+	// https://twiki.cern.ch/twiki/bin/view/CMS/HcalPFCutsTagsRun3
+	// 2021-2022 https://twiki.cern.ch/twiki/pub/CMS/HcalPFCutsTagsRun3/PFCuts_IOV_342670.txt
+	// 2023-2024 https://twiki.cern.ch/twiki/pub/CMS/HcalPFCutsTagsRun3/PFCuts_IOV_362975.txt
+	// 2025 https://twiki.cern.ch/twiki/pub/CMS/HcalPFCutsTagsRun3/HcalPFCuts_2025_mc.txt 
 
-	if (RechitEnergy >= energy_cuts_2023[RechitDepth-1]) return true;
-	else return false;
+	// TO DO need to adjust this for other years of data processing
+	// do this based on run number
+	// 2022 started 342670
+	// 2023 started 362975
+	// use 2023 as defaults, default is used for MC
+	vector<float> energy_cuts = energy_cuts_2023;
+	vector<float> energy_cuts_HE = energy_cuts_2023_HE;
+	if (RunNum >= 342670 && RunNum < 362975) {
+		energy_cuts = energy_cuts_2022initial;
+		energy_cuts_HE = energy_cuts_2022initial_HE;
+	}
+	bool pass = false;
+	if ((abs(RechitIEta) > 16) || (abs(RechitIEta) == 16 && RechitDepth == 4)) {
+		pass = (RechitEnergy >= energy_cuts_HE[RechitDepth-1]);
+	}
+	else if ((abs(RechitIEta) < 16) || (abs(RechitIEta) == 16 && RechitDepth <= 3)) {
+		pass = (RechitEnergy >= energy_cuts[RechitDepth-1]);
+	}
+	return pass;
+	// if (RechitEnergy >= energy_cuts_2023[RechitDepth-1]) return true;
+	// else return false;
+
 }
 
 /* ====================================================================================================================== */
@@ -92,7 +120,8 @@ vector<float> DisplacedHcalJetAnalyzer::GetMatchedHcalRechits_LLPDecay( int idx_
 	vector<float> hbhe_matched_indices;
 
 	for( int i=0; i<hbheRechit_E->size(); i++ ){
-		if (!isRechitValid(hbheRechit_E->at(i), hbheRechit_depth->at(i))) continue;
+		if (!isRechitValid(hbheRechit_E->at(i), hbheRechit_depth->at(i), hbheRechit_iEta->at(i), runNum)) continue;
+
 
 		TVector3 vec_rechit;
 		vec_rechit.SetXYZ( hbheRechit_X->at(i), hbheRechit_Y->at(i), hbheRechit_Z->at(i) );
@@ -125,7 +154,7 @@ vector<float> DisplacedHcalJetAnalyzer::GetMatchedHcalRechits_LLP( int idx_llp, 
 	vector<float> hbhe_matched_indices;
 
 	for( int i=0; i<hbheRechit_E->size(); i++ ){
-		if (!isRechitValid(hbheRechit_E->at(i), hbheRechit_depth->at(i))) continue;
+		if (!isRechitValid(hbheRechit_E->at(i), hbheRechit_depth->at(i), hbheRechit_iEta->at(i), runNum)) continue;
 
 		TVector3 vec_rechit;
 		vec_rechit.SetXYZ( hbheRechit_X->at(i), hbheRechit_Y->at(i), hbheRechit_Z->at(i) );
