@@ -30,7 +30,7 @@ vector<float> DisplacedHcalJetAnalyzer::GetMatchedHcalRechits_Jet( int idx_jet, 
 
 	for( int j=0; j<hbheRechit_E->size(); j++ ){
 
-		if (!isRechitValid(hbheRechit_E->at(j), hbheRechit_depth->at(j))) continue;
+		if (!isRechitValid(hbheRechit_E->at(j), hbheRechit_depth->at(j), hbheRechit_iEta->at(j), runNum)) continue;
 
 		// q: for LLP matching, had to consider right depth, for jet should take all depths? 		
 			
