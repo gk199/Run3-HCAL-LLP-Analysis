@@ -357,6 +357,7 @@ def AnalysisSelections(file_path):
 	print(" \n")
 	selection_list_noCut = [
 		"All", 
+		"LLP decays in HCAL",
 		"L1 passed",
 		"HLT passed",
 		"Jet 0 and jet 1 $\\geq "+jet_energy+"$~GeV $p_T$ and $\\abs\\eta \\leq 2$", 
@@ -366,6 +367,7 @@ def AnalysisSelections(file_path):
 
 	selection_list_abbrev_noCut = [
 		"All       ",
+		"LLP in HCAL",
 		"L1 passed",
 		"HLT passed",
 		"2+ jets",
@@ -390,12 +392,13 @@ def AnalysisSelections(file_path):
 		if i == 0: 
 			init = tree.GetEntries()
 			total_selection_string = ""
-		if i == 1: total_selection_string = "Pass_L1SingleLLPJet == 1"
-		if i == 2: total_selection_string += " && " + "Pass_HLTDisplacedJet == 1"
+		if i == 1: total_selection_string = "((LLP0_DecayR >= 214.2 && LLP0_DecayR < 295 && abs(LLP0_Eta) < 1.26) || (LLP1_DecayR >= 214.2 && LLP1_DecayR < 295 && abs(LLP1_Eta) < 1.26))"
+		if i == 2: total_selection_string += " && Pass_L1SingleLLPJet == 1"
+		if i == 3: total_selection_string += " && Pass_HLTDisplacedJet == 1"
 		# either jet 1 or jet 2 is triggered
-		if i == 3: total_selection_string += " && ((abs(jet0_Eta) < 2 && jet0_Pt > " + jet_energy + ") || (abs(jet1_Eta) < 2 && jet1_Pt > " + jet_energy + "))"
-		if i == 4: total_selection_string += " && ( (abs(jet0_Eta) < 1.26 && jet0_Pt > 60) || (abs(jet1_Eta) < 1.26 && jet1_Pt > 60) )"
-		if i == 5: total_selection_string += " && ( (abs(jet0_Eta) < 1.26 && jet0_Pt > 60 && jet0_L1trig_Matched == 1) || (abs(jet1_Eta) < 1.26 && jet1_Pt > 60 && jet1_L1trig_Matched == 1) )"
+		if i == 4: total_selection_string += " && ((abs(jet0_Eta) < 2 && jet0_Pt > " + jet_energy + ") || (abs(jet1_Eta) < 2 && jet1_Pt > " + jet_energy + "))"
+		if i == 5: total_selection_string += " && ( (abs(jet0_Eta) < 1.26 && jet0_Pt > 60) || (abs(jet1_Eta) < 1.26 && jet1_Pt > 60) )"
+		if i == 6: total_selection_string += " && ( (abs(jet0_Eta) < 1.26 && jet0_Pt > 60 && jet0_L1trig_Matched == 1) || (abs(jet1_Eta) < 1.26 && jet1_Pt > 60 && jet1_L1trig_Matched == 1) )"
 
 		selval = tree.GetEntries(total_selection_string)
 
@@ -403,8 +406,8 @@ def AnalysisSelections(file_path):
 
 		if print_latex:
 			print(selname+" & ", round(selval, 4), " & ", round((selval)/init, 4), " \\\\ ") 
-			if i == 0 or i == 2: print("\\hline")
-			if i == 5: latex_end(file_path)
+			if i == 0 or i == 3: print("\\hline")
+			if i == 6: latex_end(file_path)
 
 		else:
 			print(selection_list_abbrev_noCut[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))

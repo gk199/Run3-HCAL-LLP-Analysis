@@ -272,3 +272,6 @@ Ongoing wish list:
 * Trigger prescales
 * Some duplication in coding between event and jet filled trees, can this be reduced or simplified?
 * Should be able to do BDT helper with automated read-in of files instead of MyTags class in .h file
+
+Updates:
+* updated isRechitValid to include HE rechits and PF cuts there
