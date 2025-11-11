@@ -112,8 +112,7 @@ def compute_tag_eff_rdf(filename, tree_name="NoSel"):
 
     # Preselection
     pre = (
-        "(jet0_Pt > 60 && abs(jet0_Eta) < 1.26 && jet0_L1trig_Matched == 1) || "
-        "(jet1_Pt > 60 && abs(jet1_Eta) < 1.26 && jet1_L1trig_Matched == 1)"
+        "(jet0_Pt > 60 && abs(jet0_Eta) < 1.26 && jet0_L1trig_Matched == 1) || (jet1_Pt > 60 && abs(jet1_Eta) < 1.26 && jet1_L1trig_Matched == 1)"
     )
 
     # Tag condition: opposite tags for lead/sublead
@@ -322,10 +321,15 @@ def plot_llp_match_fraction_ratio(puppi_hists, chs_hists, labels, name="Puppi/CH
 # Main execution
 # -------------------------------------------------
 if __name__ == "__main__":
-    file1 = "/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/Run/minituple_PUPPIjets_2023C_LLPskim.root"
-    file2 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv2_allscores.root"
-    file3 = "/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/Run/minituple_PUPPIjets_LLP_MC_eta2.root"
-    file4 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_HToSSTo4B_125_50_CTau3000_scores.root"
+    # file1 = "/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/Run/minituple_PUPPIjets_2023C_LLPskim.root"
+    # file2 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv2_allscores.root"
+    # file3 = "/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/Run/minituple_PUPPIjets_LLP_MC_eta2.root"
+    # file4 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_HToSSTo4B_125_50_CTau3000_scores.root"
+
+    file1 = "/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/Run/minituple_data_PUPPI.root"
+    file2 = "/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/Run/minituple_data_CHS.root"
+    file3 = "/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/Run/minituple_MC_PUPPI.root"
+    file4 = "/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/Run/minituple_MC_CHS.root"
 
     print("Running LLP–jet dR plot and efficiency:")
     eff_dR = plot_llp_jet_dR(file3, "NoSel", "PUPPI")
