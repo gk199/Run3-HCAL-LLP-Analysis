@@ -48,7 +48,7 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 	int max_jets = std::min((int)jet_Pt->size(), N_PFJets_ToSave);
 
 	for (int i = 0; i < max_jets; i++) {
-		if (jet_Pt->at(i) > 40 && abs(jet_Eta->at(i)) <= 2.0) { // this is the standard requirement
+		if (jet_Pt->at(i) > 20 && abs(jet_Eta->at(i)) <= 2.0) { // this is the standard requirement, and is the same with ntuples
 		// if (jet_Pt->at(i) >= 0 && abs(jet_Eta->at(i)) <= 1.26) { // edited requirement to make jet pT turn on plot without a 40 GeV cut
 
 			// Update/Modify Pass_EventSelections for Jets // 
