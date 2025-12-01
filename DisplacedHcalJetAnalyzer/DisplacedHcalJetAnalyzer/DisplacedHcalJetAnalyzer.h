@@ -242,6 +242,17 @@ public :
    vector<float>   *jet_E;
    vector<float>   *jet_Mass;
    vector<float>   *jet_JetArea;
+   vector<float>   *jetRaw_E;
+   vector<float>   *jetRaw_Pt;
+   vector<float>   *jet_E_noJER;
+   vector<float>   *jet_Pt_noJER;
+   vector<float>   *jet_Mass_noJER;
+   vector<float>   *jet_Pt_JER_up;
+   vector<float>   *jet_E_JER_up;
+   vector<float>   *jet_Mass_JER_up;
+   vector<float>   *jet_Pt_JER_down;
+   vector<float>   *jet_E_JER_down;
+   vector<float>   *jet_Mass_JER_down;
    vector<float>   *jet_ChargedHadEFrac;
    vector<float>   *jet_NeutralHadEFrac;
    vector<float>   *jet_PhoEFrac;
@@ -578,6 +589,17 @@ public :
    TBranch        *b_jet_Phi;   //!
    TBranch        *b_jet_E;   //!
    TBranch        *b_jet_Mass;   //!
+   TBranch        *b_jetRaw_E;
+   TBranch        *b_jetRaw_Pt;
+   TBranch        *b_jet_E_noJER;
+   TBranch        *b_jet_Pt_noJER;
+   TBranch        *b_jet_Mass_noJER;
+   TBranch        *b_jet_Pt_JER_up;
+   TBranch        *b_jet_E_JER_up;
+   TBranch        *b_jet_Mass_JER_up;
+   TBranch        *b_jet_Pt_JER_down;
+   TBranch        *b_jet_E_JER_down;
+   TBranch        *b_jet_Mass_JER_down;
    TBranch        *b_jet_JetArea;   //!
    TBranch        *b_jet_ChargedHadEFrac;   //!
    TBranch        *b_jet_NeutralHadEFrac;   //!
@@ -1035,6 +1057,17 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    jet_E = 0;
    jet_Mass = 0;
    jet_JetArea = 0;
+   jetRaw_E = 0;
+   jetRaw_Pt = 0;
+   jet_E_noJER = 0;
+   jet_Pt_noJER = 0;
+   jet_Mass_noJER = 0;
+   jet_Pt_JER_up = 0;
+   jet_E_JER_up = 0;
+   jet_Mass_JER_up = 0;
+   jet_Pt_JER_down = 0;
+   jet_E_JER_down = 0;
+   jet_Mass_JER_down = 0;
    jet_ChargedHadEFrac = 0;
    jet_NeutralHadEFrac = 0;
    jet_PhoEFrac = 0;
@@ -1366,6 +1399,17 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("jet_Phi", &jet_Phi, &b_jet_Phi);
    fChain->SetBranchAddress("jet_E", &jet_E, &b_jet_E);
    fChain->SetBranchAddress("jet_Mass", &jet_Mass, &b_jet_Mass);
+   fChain->SetBranchAddress("jetRaw_E", &jetRaw_E, &b_jetRaw_E);
+   fChain->SetBranchAddress("jetRaw_Pt", &jetRaw_Pt, &b_jetRaw_Pt);
+   fChain->SetBranchAddress("jet_E_noJER", &jet_E_noJER, &b_jet_E_noJER);
+   fChain->SetBranchAddress("jet_Pt_noJER", &jet_Pt_noJER, &b_jet_Pt_noJER);
+   fChain->SetBranchAddress("jet_Mass_noJER", &jet_Mass_noJER, &b_jet_Mass_noJER);
+   fChain->SetBranchAddress("jet_Pt_JER_up", &jet_Pt_JER_up, &b_jet_Pt_JER_up);
+   fChain->SetBranchAddress("jet_E_JER_up", &jet_E_JER_up, &b_jet_E_JER_up);
+   fChain->SetBranchAddress("jet_Mass_JER_up", &jet_Mass_JER_up, &b_jet_Mass_JER_up);
+   fChain->SetBranchAddress("jet_Pt_JER_down", &jet_Pt_JER_down, &b_jet_Pt_JER_down);
+   fChain->SetBranchAddress("jet_E_JER_down", &jet_E_JER_down, &b_jet_E_JER_down);
+   fChain->SetBranchAddress("jet_Mass_JER_down", &jet_Mass_JER_down, &b_jet_Mass_JER_down);
    fChain->SetBranchAddress("jet_JetArea", &jet_JetArea, &b_jet_JetArea);
    fChain->SetBranchAddress("jet_ChargedHadEFrac", &jet_ChargedHadEFrac, &b_jet_ChargedHadEFrac);
    fChain->SetBranchAddress("jet_NeutralHadEFrac", &jet_NeutralHadEFrac, &b_jet_NeutralHadEFrac);

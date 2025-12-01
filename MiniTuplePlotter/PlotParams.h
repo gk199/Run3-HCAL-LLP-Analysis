@@ -370,8 +370,8 @@ PlotParams P_perJet_Track1dzToPV			= {"perJet_Track1dzToPV", "Jet: Subleading Tr
 PlotParams P_perJet_Track0dxyToBS			= {"perJet_Track0dxyToBS", "Jet: Leading Track #DeltaXY", "#DeltaXY [cm]", 0, 40 };
 PlotParams P_perJet_Track1dxyToBS			= {"perJet_Track1dxyToBS", "Jet: Subleading Track #DeltaXY", "#DeltaXY [cm]", 0, 40 };
 
-PlotParams P_perJet_OtherLLP_DecayR			= {"perJet_OtherLLP_DecayR", "Jet: Decay R of the non-matched LLP", "Decay R [cm]", 0, 350};
-PlotParams P_perJet_MatchedLLP_DecayR		= {"perJet_MatchedLLP_DecayR", "Jet: Decay R of the matched LLP", "Decay R [cm]", 0, 350};
-PlotParams P_perJet_MatchedLLP_DecayZ		= {"perJet_MatchedLLP_DecayZ", "Jet: Decay Z of the matched LLP", "Decay Z [cm]", -1000, 1000};
-PlotParams P_perJet_MatchedLLP_TravelTime	= {"perJet_MatchedLLP_TravelTime", "Jet: Travel time of the matched LLP", "Travel time [ns]", 0, 25};
-PlotParams P_perJet_MatchedLLP_Eta			= {"perJet_MatchedLLP_Eta", "Jet: #eta of the matched LLP", "#eta", -1.5, 1.5};
+PlotParams P_perJet_OtherLLP_DecayR			= {"perJet_OtherLLP_DecayR", "Jet: Decay R of the non-matched LLP", "LLP decay R [cm]", 0, 350};
+PlotParams P_perJet_MatchedLLP_DecayR		= {"perJet_MatchedLLP_DecayR", "Jet: Decay R of the matched LLP", "LLP decay R [cm]", 0, 350};
+PlotParams P_perJet_MatchedLLP_DecayZ		= {"perJet_MatchedLLP_DecayZ", "Jet: Decay Z of the matched LLP", "LLP decay Z [cm]", -1000, 1000};
+PlotParams P_perJet_MatchedLLP_TravelTime	= {"perJet_MatchedLLP_TravelTime", "Jet: Travel time of the matched LLP", "LLP travel time [ns]", 0, 25};
+PlotParams P_perJet_MatchedLLP_Eta			= {"perJet_MatchedLLP_Eta", "Jet: #eta of the matched LLP", "LLP #eta", -1.5, 1.5};

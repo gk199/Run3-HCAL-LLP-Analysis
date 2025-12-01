@@ -863,7 +863,7 @@ public :
 			if (output_file_name == "Plotratio_-1 MULT jet0_S_etaeta MULT jet0_S_phiphi + sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2 MULT jet0_S_etaeta MULT jet0_S_phiphi - sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2_norm_log_Overlay_v3.0") output_file_name = "Plotratio_jet0_Smajor_Sminor_norm_log_Overlay_v3.0";
 			if (output_file_name == "Plotratio_-1 MULT jet0_S_etaeta MULT jet0_S_phiphi + sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2 MULT jet0_S_etaeta MULT jet0_S_phiphi - sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2_norm_log_JetpTBins_Jet40_v3.0_MC") output_file_name = "Plotratio_jet0_Smajor_Sminor_norm_log_JetpTBins_Jet40_v3.0_MC";
 			if (output_file_name == "Plotratio_-1 MULT jet0_S_etaeta MULT jet0_S_phiphi + sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2 MULT jet0_S_etaeta MULT jet0_S_phiphi - sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2_norm_log_JetpTBins_Jet40_v3.0") output_file_name = "Plotratio_jet0_Smajor_Sminor_norm_log_JetpTBins_Jet40_v3.0";
-			// fout = new TFile( "Figures/Figures_"+output_file_name+".root", "RECREATE"); // if want separate root file for each plot
+			fout = new TFile( "Figures/Figures_"+output_file_name+".root", "RECREATE"); // if want separate root file for each plot
 			
 			if( plot_type == "ratio" ){
 				myCanvas->cd(2);
@@ -880,6 +880,8 @@ public :
 
 			if( plot_type == "efficiency" || plot_type == "acceptance"){
 				myCanvas->cd(2);
+				gPad->SetTickx(1);
+				gPad->SetTicky(1);
 				// need to get the first hist, this will be the denominator for the efficiency plot when listed first in compare cuts (h_total)
 				int i = 0;
 				// TLegend* leg  = new TLegend(legx1-0.45,legy1,legx2-0.45,legy2);
