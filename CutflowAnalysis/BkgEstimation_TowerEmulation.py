@@ -363,7 +363,7 @@ def AnalysisSelections(file_path):
 		"Jet 0 and jet 1 $\\geq "+jet_energy+"$~GeV $p_T$ and $\\abs\\eta \\leq 2$", 
 		"1+ jet with $\\geq 60$~GeV $p_T$ and $\\abs\\eta \\leq 1.26$", 
 		"HB jet is matched to L1 LLP jet", 
-		"NHF $\\geq$ 80\%"		
+		"Triggered jet NHF $\\geq$ 70\%"		
 	]
 
 	selection_list_abbrev_noCut = [
@@ -394,14 +394,16 @@ def AnalysisSelections(file_path):
 		if i == 0: 
 			init = tree.GetEntries()
 			total_selection_string = ""
-		if i == 1: total_selection_string = " Pass_L1SingleLLPJet == 1" # "((LLP0_DecayR >= 214.2 && LLP0_DecayR < 295 && abs(LLP0_Eta) < 1.26) || (LLP1_DecayR >= 214.2 && LLP1_DecayR < 295 && abs(LLP1_Eta) < 1.26))" # total_selection_string += " Pass_L1SingleLLPJet == 1"
+		if i == 1: total_selection_string = "((LLP0_DecayR >= 214.2 && LLP0_DecayR < 295 && abs(LLP0_Eta) < 1.26) || (LLP1_DecayR >= 214.2 && LLP1_DecayR < 295 && abs(LLP1_Eta) < 1.26))" # total_selection_string += " Pass_L1SingleLLPJet == 1"
 		if i == 2: total_selection_string += " && Pass_L1SingleLLPJet == 1"
 		if i == 3: total_selection_string += " && Pass_HLTDisplacedJet == 1"
 		# either jet 1 or jet 2 is triggered
-		if i == 4: total_selection_string += " && ((abs(jet0_Eta) < 2 && jet0_Pt > " + jet_energy + ") || (abs(jet1_Eta) < 2 && jet1_Pt > " + jet_energy + "))"
+		if i == 4: 
+			init = tree.GetEntries(total_selection_string)
+			total_selection_string += " && ((abs(jet0_Eta) < 2 && jet0_Pt > " + jet_energy + ") || (abs(jet1_Eta) < 2 && jet1_Pt > " + jet_energy + "))"
 		if i == 5: total_selection_string += " && ( (abs(jet0_Eta) < 1.26 && jet0_Pt > 60) || (abs(jet1_Eta) < 1.26 && jet1_Pt > 60) )"
 		if i == 6: total_selection_string += " && ( (abs(jet0_Eta) < 1.26 && jet0_Pt > 60 && jet0_L1trig_Matched == 1) || (abs(jet1_Eta) < 1.26 && jet1_Pt > 60 && jet1_L1trig_Matched == 1) )"
-		if i == 7: total_selection_string += " && ( (jet0_NeutralHadEFrac >= 0.6 && jet0_L1trig_Matched == 1) || (jet1_NeutralHadEFrac >= 0.6 && jet1_L1trig_Matched == 1) )"
+		if i == 7: total_selection_string += " && ( (jet0_NeutralHadEFrac >= 0.7 && jet0_L1trig_Matched == 1) || (jet1_NeutralHadEFrac >= 0.7 && jet1_L1trig_Matched == 1) )"
 
 		selval = tree.GetEntries(total_selection_string)
 

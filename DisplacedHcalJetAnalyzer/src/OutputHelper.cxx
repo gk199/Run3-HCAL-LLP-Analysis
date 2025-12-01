@@ -69,6 +69,20 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("jet%d_Mass", i) );
 		myvars_float.push_back( Form("jet%d_JetArea", i) );
 
+		// uncorrected and no JER (MC) jets
+		myvars_float.push_back( Form("jet%dRaw_E", i) );
+		myvars_float.push_back( Form("jet%dRaw_Pt", i) );
+		myvars_float.push_back( Form("jet%d_E_noJER", i) );
+		myvars_float.push_back( Form("jet%d_Pt_noJER", i) );
+		myvars_float.push_back( Form("jet%d_Mass_noJER", i) );
+		// JER up / down variations
+		myvars_float.push_back( Form("jet%d_Pt_JER_up", i) );
+		myvars_float.push_back( Form("jet%d_E_JER_up", i) );
+		myvars_float.push_back( Form("jet%d_Mass_JER_up", i) );
+		myvars_float.push_back( Form("jet%d_Pt_JER_down", i) );
+		myvars_float.push_back( Form("jet%d_E_JER_down", i) );
+		myvars_float.push_back( Form("jet%d_Mass_JER_down", i) );
+
 		myvars_int.push_back( Form("jet%d_L1trig_Matched", i) );
 		// myvars_int.push_back( Form("jet%d_Index", i) );
 		myvars_float.push_back( Form("jet%d_dR_L1jet", i) );
@@ -567,6 +581,23 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 		tree_output_vars_float[Form("jet%d_Mass", valid_jet)] 	= jet_Mass->at(i);
 		tree_output_vars_float[Form("jet%d_JetArea", valid_jet)]= jet_JetArea->at(i);
 
+		// raw quantities
+		tree_output_vars_float[Form("jet%dRaw_E", valid_jet)] 		= jetRaw_E->at(i);
+		tree_output_vars_float[Form("jet%dRaw_Pt", valid_jet)] 		= jetRaw_Pt->at(i);
+		// without JER (for MC)
+		if (jet_E_noJER->size() > 0) { // not filled for data, since JER not applied for data
+			tree_output_vars_float[Form("jet%d_E_noJER", valid_jet)] 	= jet_E_noJER->at(i);
+			tree_output_vars_float[Form("jet%d_Pt_noJER", valid_jet)] 	= jet_Pt_noJER->at(i);
+			tree_output_vars_float[Form("jet%d_Mass_noJER", valid_jet)] = jet_Mass_noJER->at(i);
+			// JER up / down variations
+			tree_output_vars_float[Form("jet%d_Pt_JER_up", valid_jet)] 		= jet_Pt_JER_up->at(i);
+			tree_output_vars_float[Form("jet%d_E_JER_up", valid_jet)] 		= jet_E_JER_up->at(i);
+			tree_output_vars_float[Form("jet%d_Mass_JER_up", valid_jet)]	= jet_Mass_JER_up->at(i);
+			tree_output_vars_float[Form("jet%d_Pt_JER_down", valid_jet)] 	= jet_Pt_JER_down->at(i);
+			tree_output_vars_float[Form("jet%d_E_JER_down", valid_jet)] 	= jet_E_JER_down->at(i);
+			tree_output_vars_float[Form("jet%d_Mass_JER_down", valid_jet)]	= jet_Mass_JER_down->at(i);
+		}
+
 		tree_output_vars_float[Form("jet%d_ChargedHadEFrac", valid_jet)] 		= jet_ChargedHadEFrac->at(i);
 		tree_output_vars_float[Form("jet%d_NeutralHadEFrac", valid_jet)] 		= jet_NeutralHadEFrac->at(i);
 		tree_output_vars_float[Form("jet%d_PhoEFrac", valid_jet)] 				= jet_PhoEFrac->at(i);
@@ -705,7 +736,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 
 		for( auto bdt_tag: bdt_tags )
 			tree_output_vars_float[Form("jet%d_bdtscore_%s", valid_jet, bdt_tag.c_str())] = GetBDTScores( bdt_tag, valid_jet ); // Needs to be valid_jet and not i
-
+		
 		if( JetPassL1Trigger ){ // only fill if L1 triggered jet
 			vector<vector<float>> rechit_values = GetHcalRechitValues_Jet(i);
 			tree_output_vars_vec[Form("jet%d_rechit_E", valid_jet)]       = rechit_values.at(0);

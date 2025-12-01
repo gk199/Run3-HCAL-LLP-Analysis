@@ -246,26 +246,6 @@ void MiniTuplePlotter_CR_SR(){
 		CR_VR_kinematics_LLP.Plot();		
 	}
 	if (dPhi_CR_VR) { // July 2025 
-		class MiniTuplePlotter dPhi_plotter( {"LLPskim_2023Cv4_allscores"}, {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_"} );
-		dPhi_plotter.SetTreeName( "NoSel" );	
-		dPhi_plotter.SetOutputFileTag("Overlay_dPhi_v4.1"); 	
-		dPhi_plotter.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );			
-		dPhi_plotter.SetCuts("jet0_DepthTagCand == 1 && jet0_scores_depth_LLPanywhere >= 0.5");
-		dPhi_plotter.SetComparisonCuts({Cut_CR, Cut_VR});
-		dPhi_plotter.SetLegendNames({"LLP skim CR", "LLP skim VR"});
-		dPhi_plotter.SetPlots2D({Hist1_Hist2(P_jet0_dPhi, P_jet0_Phi), Hist1_Hist2(P_jet0_dEta, P_jet0_dPhi), Hist1_Hist2(P_jet0met_dPhi, P_jet0_dPhi) });
-		dPhi_plotter.SetOutputDirectory("2D_dPhi_dEta");
-		dPhi_plotter.PlotMany2D();
-		dPhi_plotter.ClearFileTrees();
-		dPhi_plotter.SetCuts("jet0_DepthTagCand == 1 " + Cut_CR);
-		dPhi_plotter.SetOutputFileTag("CRratio_Overlay_dPhi_v4.1"); 	
-		dPhi_plotter.SetComparisonCuts({"jet0_scores_depth_LLPanywhere >= 0", "jet0_scores_depth_LLPanywhere >= 0.2"});
-		dPhi_plotter.PlotMany2D("ratio");
-		dPhi_plotter.ClearFileTrees();
-		dPhi_plotter.SetCuts("jet0_DepthTagCand == 1 " + Cut_VR);
-		dPhi_plotter.SetOutputFileTag("VRratio_Overlay_dPhi_v4.1"); 	
-		dPhi_plotter.SetComparisonCuts({"jet0_scores_depth_LLPanywhere >= 0", "jet0_scores_depth_LLPanywhere >= 0.2"});
-		dPhi_plotter.PlotMany2D("ratio");
 
 		class MiniTuplePlotter dPhi_plotter2( {"minituple_LLPskim_2023Cv1_allscores"}, {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/"} );
 		// class MiniTuplePlotter dPhi_plotter2( {"HToSSTo4b_125_50_CTau3000_batch2_allscores", "HToSSTo4b_250_120_CTau10000_batch2_allscores", "HToSSTo4b_350_160_CTau10000_batch2_allscores", "LLPskim_2023Cv4_allscores"}, {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_"} );
@@ -290,7 +270,7 @@ void MiniTuplePlotter_CR_SR(){
 		dPhi_cuts.SetTreeName( "NoSel" );	
 		dPhi_cuts.SetOutputFileTag("Overlay_dPhi_v4.1");
 		dPhi_cuts.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
-		dPhi_cuts.SetCuts("jet0_DepthTagCand == 1 && jet0_scores_depth_LLPanywhere >= 0.05 && abs(jet0_jet1_dPhi) < 0.2"); // && Flag_METFilters_2022_2023_PromptReco");
+		dPhi_cuts.SetCuts("jet0_DepthTagCand == 1 && jet0_scores_depth_LLPanywhere >= 0.2 && abs(jet0_jet1_dPhi) < 0.2"); // && Flag_METFilters_2022_2023_PromptReco");
 		dPhi_cuts.SetComparisonCuts({Cut_CR, Cut_VR}, "LLPskim");
 		dPhi_cuts.SetLegendNames({"LLP skim CR", "LLP skim VR"});
 		dPhi_cuts.colors = { 40, 45 };
@@ -298,6 +278,48 @@ void MiniTuplePlotter_CR_SR(){
 		dPhi_cuts.plot_log    = false; 
 		dPhi_cuts.NBins = 20;
 		dPhi_cuts.Plot();	
+
+		bool v3 = true;
+		class MiniTuplePlotter dPhi_plotter( {"LLPskim_2023Cv4_allscores"}, {v3? "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_" 
+																				: "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_"} );
+		dPhi_plotter.SetTreeName( "NoSel" );	
+		dPhi_plotter.SetOutputFileTag("Overlay_dPhi_v4.1"); 	
+		dPhi_plotter.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );			
+		if (v3) {
+			dPhi_plotter.SetCuts("jet0_DepthTagCand == 1 && jet0_scores_depth_anywhere >= 0.5");
+			dPhi_plotter.SetOutputFileTag("Overlay_dPhi_v3.16"); 	
+		}
+		else {
+			dPhi_plotter.SetCuts("jet0_DepthTagCand == 1 && jet0_scores_depth_LLPanywhere >= 0.5");
+		}
+		dPhi_plotter.SetComparisonCuts({Cut_CR, Cut_VR});
+		dPhi_plotter.SetLegendNames({"LLP skim CR", "LLP skim VR"});
+		if (v3) dPhi_plotter.SetPlots2D({Hist1_Hist2(P_jet0_dPhi_v316, P_jet0_Phi), Hist1_Hist2(P_jet0_dEta, P_jet0_dPhi_v316), Hist1_Hist2(P_jet0met_dPhi, P_jet0_dPhi_v316) });
+		else dPhi_plotter.SetPlots2D({Hist1_Hist2(P_jet0_dPhi, P_jet0_Phi), Hist1_Hist2(P_jet0_dEta, P_jet0_dPhi), Hist1_Hist2(P_jet0met_dPhi, P_jet0_dPhi) });
+		dPhi_plotter.SetOutputDirectory("2D_dPhi_dEta");
+		dPhi_plotter.PlotMany2D();
+		dPhi_plotter.ClearFileTrees();
+		dPhi_plotter.SetCuts("jet0_DepthTagCand == 1 " + Cut_CR);
+		if (v3) {
+			dPhi_plotter.SetOutputFileTag("CRratio_Overlay_dPhi_v3.16"); 	
+			dPhi_plotter.SetComparisonCuts({"jet0_scores_depth_anywhere >= 0", "jet0_scores_depth_anywhere >= 0.2"});
+		}
+		else {
+			dPhi_plotter.SetOutputFileTag("CRratio_Overlay_dPhi_v4.1"); 	
+			dPhi_plotter.SetComparisonCuts({"jet0_scores_depth_LLPanywhere >= 0", "jet0_scores_depth_LLPanywhere >= 0.2"});
+		}
+		dPhi_plotter.PlotMany2D("ratio");
+		dPhi_plotter.ClearFileTrees();
+		dPhi_plotter.SetCuts("jet0_DepthTagCand == 1 " + Cut_VR);
+		if (v3) {
+			dPhi_plotter.SetOutputFileTag("VRratio_Overlay_dPhi_v3.16"); 	
+			dPhi_plotter.SetComparisonCuts({"jet0_scores_depth_anywhere >= 0", "jet0_scores_depth_anywhere >= 0.2"});
+		}
+		else {
+			dPhi_plotter.SetOutputFileTag("VRratio_Overlay_dPhi_v4.1"); 	
+			dPhi_plotter.SetComparisonCuts({"jet0_scores_depth_LLPanywhere >= 0", "jet0_scores_depth_LLPanywhere >= 0.2"});
+		}
+		dPhi_plotter.PlotMany2D("ratio");
 	}
 
 	// ----- Jet kinematics in control and signal regions -----//

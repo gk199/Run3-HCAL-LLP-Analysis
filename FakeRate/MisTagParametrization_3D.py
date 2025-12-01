@@ -26,7 +26,7 @@ c_tag_bins = [0, 0.102, 1.0]
 b_tag_bins = np.array(b_tag_bins, dtype=float)
 c_tag_bins = np.array(c_tag_bins, dtype=float)
 
-DNN_cut = 0.5
+DNN_cut = 0.8
 DNN_cut_inc = 0.9
 
 runs_to_exclude = [367230, 367772, 368331, 368440, 368764, 370436, 370579, 370790] # 2023 runs, based on earlier DNN
@@ -164,6 +164,8 @@ def MisTagParametrization(tree, option=""):
         "depth, b tagged, high PV": (depth_emu + b_tag, depth_emu_1 + b_tag_1, ": 2+ depth, b-tagged, high PV", "_depth_bTag_highPV"),
         "depth, not b tagged, high PV": (depth_emu + NOTb_tag, depth_emu_1 + NOTb_tag_1, ": 2+ depth, not b-tagged, high PV", "_depth_nobTag_highPV"),
         "depth": (depth_emu, depth_emu_1, ": 2+ depth", "_depth"),
+        "depth, low PV": (depth_emu, depth_emu_1, ": 2+ depth, low PV", "_depth_lowPV"),
+        "depth, high PV": (depth_emu, depth_emu_1, ": 2+ depth, high PV", "_depth_highPV"),
         "depth, trackPt": (depth_emu + track_pT, depth_emu_1 + track_pT_1, ": 2+ depth, frac. track pT", "_depth_trackPt"),
         "timing": (timing_emu, timing_emu_1, ": 2+ timing", "_timing"),
         "depth, timing": (depth_timing_emu, depth_timing_emu_1, ": 1 depth, 1 timing", "_depth_timing"),
@@ -984,20 +986,27 @@ def main():
     if combined_tree:
         print("LLP skim tree successfully accessed, will be passed to MisTagParametrization")
         #MisTagParametrization(combined_tree)
-        # MisTagParametrization(combined_tree, "depth")
+
         print("\n \n ********************* \n DNN score = " + str(DNN_cut) + " \n ********************* \n \n")
         print("\n \n ********************* \n depth, b-tagged \n ********************* \n \n")
-        MisTagParametrization(combined_tree, "depth, b tagged") # run with lower DNN scores otherwise nothing predicted...
-        print("\n \n ********************* \n depth, not b-tagged \n ********************* \n \n")
-        MisTagParametrization(combined_tree, "depth, not b tagged")
-        print("\n \n ********************* \n depth, b-tagged, low PV \n ********************* \n \n")
-        MisTagParametrization(combined_tree, "depth, b tagged, low PV") # run with lower DNN scores otherwise nothing predicted...
-        print("\n \n ********************* \n depth, not b-tagged, low PV \n ********************* \n \n")
-        MisTagParametrization(combined_tree, "depth, not b tagged, low PV")
-        print("\n \n ********************* \n depth, b-tagged, high PV \n ********************* \n \n")
-        MisTagParametrization(combined_tree, "depth, b tagged, high PV") # run with lower DNN scores otherwise nothing predicted...
-        print("\n \n ********************* \n depth, not b-tagged, high PV \n ********************* \n \n")
-        MisTagParametrization(combined_tree, "depth, not b tagged, high PV")
+        MisTagParametrization(combined_tree, "depth")
+        print("\n \n ********************* \n depth, low PV \n ********************* \n \n")
+        MisTagParametrization(combined_tree, "depth, low PV")
+        print("\n \n ********************* \n depth, high PV \n ********************* \n \n")
+        MisTagParametrization(combined_tree, "depth, high PV")
+        # print("\n \n ********************* \n depth, b-tagged \n ********************* \n \n")
+        # MisTagParametrization(combined_tree, "depth, b tagged") # run with lower DNN scores otherwise nothing predicted...
+        # print("\n \n ********************* \n depth, not b-tagged \n ********************* \n \n")
+        # MisTagParametrization(combined_tree, "depth, not b tagged")
+        # print("\n \n ********************* \n depth, b-tagged, low PV \n ********************* \n \n")
+        # MisTagParametrization(combined_tree, "depth, b tagged, low PV") # run with lower DNN scores otherwise nothing predicted...
+        # print("\n \n ********************* \n depth, not b-tagged, low PV \n ********************* \n \n")
+        # MisTagParametrization(combined_tree, "depth, not b tagged, low PV")
+        # print("\n \n ********************* \n depth, b-tagged, high PV \n ********************* \n \n")
+        # MisTagParametrization(combined_tree, "depth, b tagged, high PV") # run with lower DNN scores otherwise nothing predicted...
+        # print("\n \n ********************* \n depth, not b-tagged, high PV \n ********************* \n \n")
+        # MisTagParametrization(combined_tree, "depth, not b tagged, high PV")
+
         # MisTagParametrization(combined_tree, "depth, c tagged")
         # MisTagParametrization(combined_tree, "depth, bb tagged")
         # MisTagParametrization(combined_tree, "depth, light flavor tagged")
