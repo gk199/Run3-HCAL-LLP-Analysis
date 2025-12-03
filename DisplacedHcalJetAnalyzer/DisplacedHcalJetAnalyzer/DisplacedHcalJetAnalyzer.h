@@ -79,6 +79,11 @@ public :
    // Random number generator
    TRandom3 *randomGenerator = new TRandom3();
 
+   // jet veto mask
+   TH2F* maskMap_ = nullptr;
+   std::map<std::string, TH2F*> vetoMaps_; // this will load all maps, then look thme up by era
+   std::string currentEra_ = "UNKNOWN";
+
    // ----- My Hists ----- //
 
    vector<string> categories;
@@ -902,6 +907,12 @@ public :
    virtual bool   PassLeptonVeto();
    virtual bool   PassZmumuSelection();
    virtual float  EventHT();
+   // JetVetoMapHelper.cxx
+   virtual bool   PassJetVetoEvent();
+   virtual bool   PassJetVetoJet(int iJet);
+   virtual bool   IsJetInVetoRegion(int iJet);
+   virtual TH2F   LoadJetVetoMap(const std::string& filename);
+   virtual void   updateCurrentEraMap(int run);
    // BDTHelper.cxx
    virtual void   InitializeTMVA(); 
    virtual bool   BookTMVAReader( string filepath, string bdt_tag );
