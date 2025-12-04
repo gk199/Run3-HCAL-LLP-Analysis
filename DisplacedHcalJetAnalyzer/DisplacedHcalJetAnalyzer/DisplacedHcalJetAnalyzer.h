@@ -906,11 +906,11 @@ public :
    virtual bool   PassZmumuSelection();
    virtual float  EventHT();
    // JetVetoMapHelper.cxx
-   virtual bool   PassJetVetoEvent();
-   virtual bool   PassJetVetoJet(int iJet);
    virtual bool   IsJetInVetoRegion(int iJet);
-   virtual TH2F   LoadJetVetoMap(const std::string& filename);
-   virtual void   updateCurrentEraMap(int run);
+   virtual void   updateCurrentEraMap();
+   virtual bool   PassJetVetoEvent();
+   virtual TH2F*   LoadJetVetoMap(const std::string& filename);
+   virtual std::string eraToVetoMapKey(const std::string& era);
    // BDTHelper.cxx
    virtual void   InitializeTMVA(); 
    virtual bool   BookTMVAReader( string filepath, string bdt_tag );
