@@ -449,6 +449,7 @@ public :
    vector<float>   *gLLP_ProdVtx_X;
    vector<float>   *gLLP_ProdVtx_Y;
    vector<float>   *gLLP_ProdVtx_Z;
+   vector<float>   *HLT_SF_Tot;
    bool Flag_HBHENoiseFilter;
    bool Flag_HBHENoiseIsoFilter;
    bool Flag_CSCTightHaloFilter;
@@ -814,6 +815,7 @@ public :
    TBranch        *b_Flag_trkPOG_toomanystripclus53X;   //!
    TBranch        *b_Flag_trkPOG_logErrorTooManyClusters;   //!
    TBranch        *b_Flag_METFilters_2022_2023_PromptReco;   //!
+   TBranch        *b_HLT_SF_Tot;   //!
 
    DisplacedHcalJetAnalyzer(TTree *tree=0);
    virtual ~DisplacedHcalJetAnalyzer();
@@ -1259,6 +1261,7 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    Flag_trkPOG_toomanystripclus53X = 0;
    Flag_trkPOG_logErrorTooManyClusters = 0;
    Flag_METFilters_2022_2023_PromptReco = 0;
+   HLT_SF_Tot=0;
 
    // Set branch addresses and branch pointers
    if (!tree) return;
@@ -1602,6 +1605,7 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("Flag_trkPOG_toomanystripclus53X", &Flag_trkPOG_toomanystripclus53X, &b_Flag_trkPOG_toomanystripclus53X);
    fChain->SetBranchAddress("Flag_trkPOG_logErrorTooManyClusters", &Flag_trkPOG_logErrorTooManyClusters, &b_Flag_trkPOG_logErrorTooManyClusters);
    fChain->SetBranchAddress("Flag_METFilters_2022_2023_PromptReco", &Flag_METFilters_2022_2023_PromptReco, &b_Flag_METFilters_2022_2023_PromptReco);
+   fChain->SetBranchAddress("HLT_SF_Tot", &HLT_SF_Tot, &b_HLT_SF_Tot);
 
    Notify();
 }
