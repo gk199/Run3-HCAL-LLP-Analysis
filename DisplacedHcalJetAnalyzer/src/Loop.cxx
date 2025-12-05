@@ -17,6 +17,11 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 	count["All"]++;
 	
 	if (jet_Pt->size() == 0) return; // added to avoid vector out of range if there are no jets -- issue on signal file 
+	count["Pass_JetPtCut"]++;	
+
+	// check the jet veto map. If jet in veto region, skip event
+	if (PassJetVetoEvent() == false) return;
+	count["Pass_JetVeto"]++;
 
 	double base_weight = weight;   // from SetWeight
 	
@@ -46,6 +51,8 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 
 	// Event Counts // 
 
+	if( Pass_EventSelections["Pass_L1SingleLLPJet"] ) count["Pass_L1SingleLLPJet"]++;
+	if( Pass_EventSelections["Pass_HLTDisplacedJet"] ) count["Pass_HLTDisplacedJet"]++;
 	if( Pass_EventSelections["Pass_WPlusJets"] ) count["Pass_WPlusJets"]++;	
 	if( Pass_EventSelections["Pass_ZPlusJets"] ) count["Pass_ZPlusJets"]++;
 
@@ -103,6 +110,7 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 	Pass_EventSelections["Pass_WPlusJets"] = Pass_EventSelections["Pass_WPlusJets"] && abs(DeltaPhi(jet_Phi->at(0), WPlusJets_leptonPhi)) > 2;
 	Pass_EventSelections["Pass_ZPlusJets"] = Pass_EventSelections["Pass_ZPlusJets"] && abs(DeltaPhi(jet_Phi->at(0), Muon_PhiVectorSum)) > 2;
 
+	// if PassJetVetoEvent() then fill tree
 	FillOutputTrees("NoSel", Pass_EventSelections);
 
 	/*
@@ -141,6 +149,10 @@ void DisplacedHcalJetAnalyzer::Loop(){
 	}
 
 	count["All"] = 0;
+	count["Pass_JetVeto"] = 0;
+	count["Pass_JetPtCut"] = 0;
+	count["Pass_L1SingleLLPJet"] = 0;
+	count["Pass_HLTDisplacedJet"] = 0;
 	count["Pass_WPlusJets"] = 0;
 	count["Pass_ZPlusJets"] = 0;
 	count["Pass_WZPlusJets"] = 0;

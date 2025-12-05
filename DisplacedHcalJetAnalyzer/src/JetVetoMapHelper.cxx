@@ -18,15 +18,19 @@ bool DisplacedHcalJetAnalyzer::IsJetInVetoRegion(int iJet) {
     // https://cms-jerc.web.cern.ch/Recommendations/#2023_1 
 
     // Low-pt jets
+    if (debug) cout << "   Checking jet " << iJet << " with pt = " << pt << ", eta = " << eta << ", phi = " << phi << endl;
     if (pt < 15) return false;
     // tight lepton veto
     // JetID = (abs(eta)<=2.6 && CEMF<0.8 && CHM>0 && CHF>0.01 && NumConst>1 && NEMF<0.9 && MUF <0.8 && NHF < 0.99 )
     // note number of total constituents is NPFCands
-    if ( abs(eta) > 2.6 || eleEF > 0.8 || jet_ChargedHadMult->at(iJet) <= 0 || chHadEF < 0.01 || jet_NPFCands <= 1 || phoEF > 0.9 || muonEF > 0.8 || neuHadEF > 0.99 )
+    if ( abs(eta) > 2.6 || eleEF > 0.8 || jet_ChargedHadMult->at(iJet) <= 0 || chHadEF < 0.01 || jet_NPFCands->at(iJet) <= 1 || phoEF > 0.9 || muonEF > 0.8 || neuHadEF > 0.99 ) {
+        if (debug) cout << "Jet " << iJet << " did not pass minimal selection, jet not checked against veto map" << endl;
         return false;
+    }
 
     // (charged EM + neutral EM frac) < 0.9
     if ( (eleEF + phoEF) > 0.9 ) return false;
+    if (debug) cout << "   Jet " << iJet << " passed all preselections" << endl;
     // if made it to here, have met the minimal selections. Now check if jet is in veto region
 
     // Vetoed channels are from ROOT file from JEC
@@ -35,11 +39,10 @@ bool DisplacedHcalJetAnalyzer::IsJetInVetoRegion(int iJet) {
         int bin = maskMap_->FindBin(eta, phi);
         float val = maskMap_->GetBinContent(bin);
         if (val > 0) {
-            if (debug) cout << "Jet " << iJet << " vetoed by jet mask map bin = " << bin << " with value = " << val << endl;
+            if (debug) cout << "Jet " << iJet << " with eta, phi" << eta << ", " << phi << " vetoed by jet mask map bin = " << bin << " with value = " << val << endl;
+            return true; // jet is vetoed
         }
-        return true; // jet is vetoed
     }
-
     return false;  // jet is allowed
 }
 
@@ -48,7 +51,7 @@ bool DisplacedHcalJetAnalyzer::PassJetVetoEvent() {
 
     if (debug) cout << "DisplacedHcalJetAnalyzer::PassJetVetoEvent()" << endl;
 
-    for (int i = 0; i < nJets; i++) {
+    for (int i = 0; i < jet_Pt->size(); i++) {
         if (IsJetInVetoRegion(i)) {
             if (debug) cout << "Vetoing event due to jet " << i << endl;
             return false; // reject event
@@ -64,7 +67,8 @@ void DisplacedHcalJetAnalyzer::updateCurrentEraMap() {
     if (debug) cout << "DisplacedHcalJetAnalyzer::updateCurrentEraMap()" << endl;
 
     // era is instead read directly from the input root file 
-    currentEra_ = *Era;
+    // currentEra_ = *Era; // TO DO get this when era is in root file
+    currentEra_ = "Run2023D"; // temporary hardcode for testing
 
     // determine which veto map to use based on current era
     std::string vetoKey = eraToVetoMapKey(currentEra_);
@@ -80,24 +84,31 @@ void DisplacedHcalJetAnalyzer::updateCurrentEraMap() {
 }
 
 /* ====================================================================================================================== */
-TH2F* DisplacedHcalJetAnalyzer::LoadJetVetoMap(std::string filename) {
+TH2F* DisplacedHcalJetAnalyzer::LoadJetVetoMap(const std::string& filename) {
 
     if (debug) cout << "DisplacedHcalJetAnalyzer::LoadJetVetoMap()" << endl;
 
-    TFile* f = TFile::Open(filename.c_str());
-    if (!f || f->IsZombie())
+    TFile* f = TFile::Open(filename.c_str(), "READ"); // read only
+    if (!f || f->IsZombie()) {
         if( debug ) cout<< "DisplacedHcalJetAnalyzer::LoadJetVetoMap(): Cannot open veto map file: " << filename << endl;
+        return nullptr;
+    }
 
     TH2F* hMask = (TH2F*)f->Get("jetvetomap");
-    if (!hMask)
+    if (!hMask) {
         if( debug ) cout<<"DisplacedHcalJetAnalyzer::LoadJetVetoMap(): maskMap not found in file: " << filename << endl;
+        f->Close();
+        delete f;
+        return nullptr;
+    }
 
-    maskMap_ = (TH2F*)hMask->Clone("jetvetomap_local");
-    maskMap_->SetDirectory(0);
+    // Clone the histogram to avoid issues when closing the file
+    TH2F* h_localMask = (TH2F*)hMask->Clone();
+    h_localMask->SetDirectory(0);
     f->Close();
 
     if (debug) cout << "DisplacedHcalJetAnalyzer::LoadJetVetoMap(): Loaded jet veto map from " << filename << endl;
-    return maskMap_;
+    return h_localMask;
 }
 
 /* ====================================================================================================================== */
@@ -122,14 +133,4 @@ std::string DisplacedHcalJetAnalyzer::eraToVetoMapKey(const std::string& era) {
     // Default
     return "UNKNOWN";
 }
-
-
-
-// // still need to integrate...this should go in the constructor after loading the input file, not for every event...
-
-//     vetoMaps_["Summer22_23Sep2023"]     = LoadJetVetoMap("Summer22_23Sep2023_RunCD_v1.root");
-//     vetoMaps_["Summer22EE_23Sep2023"]   = LoadJetVetoMap("Summer22EE_23Sep2023_RunEFG_v1.root");
-//     vetoMaps_["Summer23Prompt23"]       = LoadJetVetoMap("Summer23Prompt23_RunC_v1.root");
-//     vetoMaps_["Summer23BPixPrompt23"]   = LoadJetVetoMap("Summer23BPixPrompt23_RunD_v1.root");
-
-
+/* ====================================================================================================================== */

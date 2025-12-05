@@ -12,6 +12,7 @@
 #include "../src/BDTHelper.cxx"
 #include "../src/TruthInfoHelper.cxx"
 #include "../src/WeightsHelper.cxx"
+#include "../src/JetVetoMapHelper.cxx"
 
 // gSystem->Load("/Users/kiley/Documents/CMS/WorkingDir/Run3-HCAL-LLP-Analysis/pugixml/pugixml_cpp.so");
 
@@ -90,6 +91,12 @@ void DisplacedHcalJetAnalyzer( string infiletag = "", vector<string> infilepaths
 	AnalysisReader.save_trees	= true;		// For minituples
 	AnalysisReader.NEvents 		= -1; 		// Run over specified number of events (set to -1 for ALL)
 	AnalysisReader.randomGenerator->SetSeed(0);
+
+	// ----- Load Jet Veto Maps ----- //
+	AnalysisReader.vetoMaps_["Summer22_23Sep2023"]     = AnalysisReader.LoadJetVetoMap("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/CMSSW_13_2_0/src/cms_lpc_llp/Run3-HCAL-LLP-NTupler/data/JEC_JER/JECDatabase/jet_veto_maps/Summer22_23Sep2023/Summer22_23Sep2023_RunCD_v1.root");
+    AnalysisReader.vetoMaps_["Summer22EE_23Sep2023"]   = AnalysisReader.LoadJetVetoMap("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/CMSSW_13_2_0/src/cms_lpc_llp/Run3-HCAL-LLP-NTupler/data/JEC_JER/JECDatabase/jet_veto_maps/Summer22EE_23Sep2023/Summer22EE_23Sep2023_RunEFG_v1.root");
+    AnalysisReader.vetoMaps_["Summer23Prompt23"]       = AnalysisReader.LoadJetVetoMap("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/CMSSW_13_2_0/src/cms_lpc_llp/Run3-HCAL-LLP-NTupler/data/JEC_JER/JECDatabase/jet_veto_maps/Summer23Prompt23/Summer23Prompt23_RunC_v1.root");
+    AnalysisReader.vetoMaps_["Summer23BPixPrompt23"]   = AnalysisReader.LoadJetVetoMap("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/CMSSW_13_2_0/src/cms_lpc_llp/Run3-HCAL-LLP-NTupler/data/JEC_JER/JECDatabase/jet_veto_maps/Summer23BPixPrompt23/Summer23BPixPrompt23_RunD_v1.root");
 
 	// ----- Initialize ----- // 
 
