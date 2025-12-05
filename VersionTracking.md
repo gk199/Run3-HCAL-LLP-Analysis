@@ -266,7 +266,26 @@ Updates:
 * Eta cut on inclusive tag canidate is set to 2.0
 * Changes needed for adding CNN scores to event trees
 
+### v3.15
+Updates:
+* Used to train v4 DNN model
+
+### v3.16
+Updates:
+* Has new v4 DNN model
+
 ## V4
+
+## V5 
+
+### v5.1
+Updates:
+* Jet veto maps applied
+* CHS jets with JER and JEC applied
+* Removed MET sum ET from W+jets selection
+* Updated PF cut thresholds for HB and HE, and done per year
+* Save jets with pT > 20, eta < 2
+
 Ongoing wish list:
 * MET filters
 * Trigger prescales
