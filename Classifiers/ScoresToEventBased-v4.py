@@ -13,13 +13,14 @@ from sklearn.utils import shuffle
 from itertools import combinations
 from sklearn.metrics import roc_curve, auc
 import csv
+import fnmatch
 
 import sys, os, argparse, time, errno
 import os.path
 
 testing_mode = False
-debug_mode = True
-inclusive_only = True
+debug_mode = False
+inclusive_only = False
 
 perJet = False
 num_jets = 1 if perJet else 4 # in v3.13 only 4 jets are saved! In earlier versions, 6 jets are saved
@@ -55,7 +56,7 @@ class DataProcessor:
         # and returns the dataframe unchanged so filenames are the same
         print("Loading Data...")
         
-        filter_name = "*"
+        # filter_name = "*"
 
         fps = [filepath + input_files] if input_files is not None else []
         df = [] #pd.DataFrame()
@@ -65,6 +66,22 @@ class DataProcessor:
             sig = uproot.open(file)[self.tree]
             print(f"Opened {file}")
             print(f"Evaluating on tree: {self.tree}")
+
+            # below block is copied from runner-v4 since got errors at runtime when running locally, likely from jagged arrays
+            include_patterns = ["jet0*", "jet1*", "jet2*", "jet3*", "Pass*"]
+            exclude_patterns = ["*_rechit_*"] # these have type "awkward" which doesn't work with h5 format
+            all_branches = sig.keys()
+            # Match includes
+            included = set()
+            for pattern in include_patterns:
+                included.update(fnmatch.filter(all_branches, pattern))
+            # Remove excluded matches
+            for pattern in exclude_patterns:
+                to_remove = fnmatch.filter(all_branches, pattern)
+                included.difference_update(to_remove)
+            # Convert to sorted list for consistency
+            filter_name = sorted(included)
+
             sig = sig.arrays(filter_name=filter_name, library="pd") 
             df.append(sig)
         self.df = pd.concat(df) if df else pd.DataFrame()
@@ -298,7 +315,7 @@ class Runner:
 def main():
     input_files = "test.root"
     filepath = "./"
-    if testing_mode: filepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/" # TODO REMOVE THIS FOR RUNNING
+    # if testing_mode: filepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/" # TODO REMOVE THIS FOR RUNNING
     if len(sys.argv) > 1:
         input_files  = sys.argv[1]
     if len(sys.argv) > 2:

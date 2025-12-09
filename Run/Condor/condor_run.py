@@ -112,11 +112,22 @@ def main():
 
 	#os.system( "ln -s " + bdt_zipfile + " BDTWeightFiles.zip" )
 	#bdt_zipfile_new = os.path.abspath( "BDTWeightFiles.zip" )
-	add_scores = os.path.abspath( "../../../Classifiers/ScoresToEventBased-v3.py" )
-	keras_depth = os.path.abspath( "../../../Classifiers/depth_model_v3_Oct15.keras" )
-	keras_inclusive = os.path.abspath( "../../../Classifiers/inclusive_model_v3_Oct15.keras" )
+
+	# ----- DNN input files ----- #
+	add_scores = os.path.abspath( "../../../Classifiers/ScoresToEventBased-v4.py" )
+	keras_depth = os.path.abspath( "../../../Classifiers/depth_model_v4.keras" )
+	keras_inclusive = os.path.abspath( "../../../Classifiers/inclusive_model_v4.keras" )
 	norm_constants = os.path.abspath( "../../../Classifiers/norm_constants_v3.csv" )
-	transfer_input_files = Executable_DisplacedHcalJetAnalyzer + "," + add_scores + "," + keras_depth + "," + keras_inclusive + "," + norm_constants
+
+	# ----- Jet veto map files ----- #
+	# these are now hardcoded in the DisplacedHcalJetAnalyzer.C util file
+	jetVeto_2022 = os.path.abspath( "../../../../CMSSW_13_2_0/src/cms_lpc_llp/Run3-HCAL-LLP-NTupler/data/JEC_JER/JECDatabase/jet_veto_maps/Summer22_23Sep2023/Summer22_23Sep2023_RunCD_v1.root" )	
+	jetVeto_2022EE = os.path.abspath( "../../../../CMSSW_13_2_0/src/cms_lpc_llp/Run3-HCAL-LLP-NTupler/data/JEC_JER/JECDatabase/jet_veto_maps/Summer22EE_23Sep2023/Summer22EE_23Sep2023_RunEFG_v1.root" )
+	jetVeto_2023 = os.path.abspath( "../../../../CMSSW_13_2_0/src/cms_lpc_llp/Run3-HCAL-LLP-NTupler/data/JEC_JER/JECDatabase/jet_veto_maps/Summer23Prompt23/Summer23Prompt23_RunC_v1.root" )	
+	jetVeto_2023BPix = os.path.abspath( "../../../../CMSSW_13_2_0/src/cms_lpc_llp/Run3-HCAL-LLP-NTupler/data/JEC_JER/JECDatabase/jet_veto_maps/Summer23BPixPrompt23/Summer23BPixPrompt23_RunD_v1.root" )	
+
+	# ----- Transfer Input Files ----- #
+	transfer_input_files = Executable_DisplacedHcalJetAnalyzer + "," + add_scores + "," + keras_depth + "," + keras_inclusive + "," + norm_constants + "," + jetVeto_2022 + "," + jetVeto_2022EE + "," + jetVeto_2023 + "," + jetVeto_2023BPix
 
 	# ----- Submit Jobs ----- #
 

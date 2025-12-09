@@ -37,7 +37,7 @@ echo "source /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/
 source /afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/Run/Condor/VirtualEnvs/keras2pt13pt1/bin/activate
 
 echo "Evaluating DNN..."
-echo "python3 ScoresToEventBased-v3.py minituple_$filetag.root"
-python3 ScoresToEventBased-v3.py minituple_$filetag.root # $filepath
+echo "python3 ScoresToEventBased-v4.py minituple_$filetag.root"
+python3 ScoresToEventBased-v4.py minituple_$filetag.root # $filepath
 
 sleep 5
