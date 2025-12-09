@@ -37,6 +37,9 @@ For running in compiled mode, remember to input the file path as `root://cmsxroo
 
 Text files of the ntuples can be made with `find "$PWD" -maxdepth 1 -type f` from the directories in `/hdfs/store/user/gkopp/`, or using the dedicated script in `ValidateFileProcessing`.
 
+### Jet Veto Maps
+Get the `.root` files for the jet veto maps from: https://cms-jerc.web.cern.ch/Recommendations/#jet-veto-maps. Copy these to the local directory, under `/Run` and transfer them with the condor job. 
+
 ### Condor Processing
 Follow the [instructions](https://github.com/gk199/Run3-HCAL-LLP-Analysis/tree/main/Run/Condor) in the `Run/Condor` subdirectory. 
 
