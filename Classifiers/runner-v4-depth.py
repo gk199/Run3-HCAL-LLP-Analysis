@@ -363,6 +363,18 @@ class DataProcessor:
     def write_to_root(self, scores, filename, labels=None):
         filename = f"{filename}_scores.root"
         dataframe = self.cumulative_df
+
+        #write tagger scale factors
+        sf_json = "../data/Depth_Score_SF.json"
+        if sf_json is not None:
+            with open(sf_json) as file:
+                sf_data = json.load(file)
+                sf = np.array(sf_data["sf"])
+            if self.num_classes == 1: score = scores[:, 0] 
+            elif self.num_classes == 2: score = scores[:, 1]
+            bin_idx = (score*15).astype(int)
+            dataframe["depthtaggerSF"] = sf[bin_idx]
+
         if self.num_classes == 2:
             dataframe['scores12'] = scores[:, 0]
             dataframe['scores34'] = scores[:, 1]
@@ -374,6 +386,12 @@ class DataProcessor:
         with uproot.recreate(filename) as f:
             f['Classification'] = {key: dataframe[key] for key in dataframe.columns}
         print(f"Wrote to ROOT file: {filename}")
+
+    def load_tagger_sf(json_file):
+        with open(json_file) as file:
+            sf_data = json.load(file)
+            sf = np.array(sf_data["sf"])
+            return sf
 
     def compute_norm_constants(self):
         # assumes that you have already loaded the files and applied safety selections

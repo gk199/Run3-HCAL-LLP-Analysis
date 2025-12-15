@@ -19,16 +19,17 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 	if (jet_Pt->size() == 0) return; // added to avoid vector out of range if there are no jets -- issue on signal file 
 
 	double base_weight = weight;   // from SetWeight
-	double trigSF      = 1.0;
 	
-        trigSF = HLT_SF_Tot->at(0);
+	double trigSF = 1.0;
+	
+	if(!HLT_SF_Tot->empty()) {trigSF = HLT_SF_Tot->at(0);}
 	
 	weight = base_weight * trigSF;
 	
-	std::cout << "base_weight=" << base_weight
+	if( debug ) std::cout << "base_weight=" << base_weight
                   << " HLT SF =" << trigSF
                   << " total weight=" << weight << std::endl;
-        }
+        
 
 	// Check Various Event Selections // 
 

@@ -449,7 +449,7 @@ public :
    vector<float>   *gLLP_ProdVtx_X;
    vector<float>   *gLLP_ProdVtx_Y;
    vector<float>   *gLLP_ProdVtx_Z;
-   vector<float>   *HLT_SF_Tot;
+   vector<double>   *HLT_SF_Tot;
    bool Flag_HBHENoiseFilter;
    bool Flag_HBHENoiseIsoFilter;
    bool Flag_CSCTightHaloFilter;
