@@ -72,24 +72,22 @@ void StampCMS( const std::string & approvaltext = "Internal", float lumi=140., f
   label_approvaltext.SetTextSize(textsize*0.88);
   label_approvaltext.DrawLatex( x+0.092, y, approvaltext.c_str() ); 
 
+  TLatex label_energylumi; 
+  label_energylumi.SetNDC();
+  label_energylumi.SetTextFont(42);
+  label_energylumi.SetTextColor(1);
+  label_energylumi.SetTextSize(textsize*0.77 );
   if (energy == 1) {
-	TLatex label_energylumi; 
-	label_energylumi.SetNDC();
-	label_energylumi.SetTextFont(42);
-	label_energylumi.SetTextColor(1);
-	label_energylumi.SetTextSize(textsize*0.77 );
 	label_energylumi.DrawLatex( x, y-.06, "#sqrt{s} = 13.6 TeV" ); // Just energy for now...
 	//label_energylumi.DrawLatex( x, y-.08, Form("L = %.1f fb^{-1}", lumi) );
 	//label_energylumi.DrawLatex( x+.01, y-.2, "SF = #frac{N_{SR}}{N_{CR}} = 0.88" );
   }
 
   if (energy == 2) {
-	TLatex label_energylumi; 
-	label_energylumi.SetNDC();
-	label_energylumi.SetTextFont(42);
-	label_energylumi.SetTextColor(1);
-	label_energylumi.SetTextSize(textsize*0.77 );
 	label_energylumi.DrawLatex( x+0.65, y, "(13.6 TeV)" );
+  }
+  if (energy == 3) {
+	label_energylumi.DrawLatex(x+0.65, y+0.09, "(13.6 TeV)" );
   }
 
 }

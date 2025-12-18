@@ -82,7 +82,7 @@ void MiniTuplePlotter_HLT_Effs(){
 	overlay_LLPdisplacement.plot_norm 			= false;
 	overlay_LLPdisplacement.plot_log_ratio   	= true;
 	overlay_LLPdisplacement.plot_grid			= false;
-	overlay_LLPdisplacement.SetLegendPosition( 0.12, 0.75, 0.55, 1.1 );
+	overlay_LLPdisplacement.SetLegendPosition( 0.12, 0.6, 0.55, 0.95 );
 	overlay_LLPdisplacement.SetSelectiveCuts("MC", Form("eventHT > %s && perJet_Pt >= %s && perJet_MatchedLLP_DecayR < 300", event_HT[0].c_str(), jet_E[0].c_str() ) ); // cut on the jet pT
 	overlay_LLPdisplacement.SetComparisonCuts({Cut_None, Cut_HLTpassed1});
 	overlay_LLPdisplacement.colors = { kBlack, kAzure+7, kGray+1, kViolet+4 };

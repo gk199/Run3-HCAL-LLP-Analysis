@@ -907,7 +907,7 @@ public :
 							pEff->SetLineWidth(3.);
 
 							pEff->SetMarkerStyle(52 + i); // for a x as the marker to differentiate the overlayed plots (53 = circle, 55 = triangle)
-							pEff->SetMarkerSize(1.7);
+							pEff->SetMarkerSize(2);
 							pEff->SetMarkerColor(colors[i]);
 
 							if (i == 1) pEff->Draw();
@@ -931,8 +931,12 @@ public :
 							if (i == size(hist_tags)-1 ) {
 								leg->Draw();
 								// StampCMS( "Simulation Preliminary", 140., 0.12, 0.92, 0.06, 2 ); // 0 means no energy, 1 means sqrt s, 2 means (13.6 TeV) (should we have this for simulation?)
-								StampCMS( "Simulation", 140., 0.12, 0.92, 0.06, 2 ); // 0 means no energy, 1 means sqrt s, 2 means (13.6 TeV) (should we have this for simulation?)
-								if (multiple) StampLLP( 0.14, 0.84, 0.04, mass_lifetime ); // top left // trigger paper plots
+								if (PlotParams_temp.hist_name == "perJet_MatchedLLP_DecayR") StampCMS( "Simulation", 140., 0.12, 0.83, 0.06, 3 ); // CMS inside frame, 13.6 outside
+								else StampCMS( "Simulation", 140., 0.12, 0.92, 0.06, 2 ); // 0 means no energy, 1 means sqrt s, 2 means (13.6 TeV) (should we have this for simulation?)
+								if (multiple) {
+									if (PlotParams_temp.hist_name == "perJet_MatchedLLP_DecayR") StampLLP( 0.14, 0.74, 0.04, mass_lifetime ); 
+									else StampLLP( 0.14, 0.84, 0.04, mass_lifetime ); // top left // trigger paper plots
+								}
 								// else if (multiple && PlotParams_temp.hist_name == "eventHT") StampLLP( 0.56, 0.15, 0.03, mass_lifetime ); // lower right, no mass / ctau written for multiple, works when hard cuts on jet pt and event HT
 								else if (PlotParams_temp.hist_name == "perJet_MatchedLLP_DecayR" ) StampLLP( 0.14, 0.86, 0.03, mass_lifetime ); // top left
 								else if (PlotParams_temp.hist_name == "eventHT" && mass_lifetime[0] == "125" ) StampLLP( 0.6, 0.45, 0.03, mass_lifetime ); // middle right
