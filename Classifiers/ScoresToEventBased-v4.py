@@ -16,10 +16,11 @@ import csv
 
 import sys, os, argparse, time, errno
 import os.path
+import json
 
 testing_mode = True
 debug_mode = True
-inclusive_only = True
+inclusive_only = False#True
 
 perJet = False
 num_jets = 1 if perJet else 4 # in v3.13 only 4 jets are saved! In earlier versions, 6 jets are saved
@@ -137,6 +138,25 @@ class DataProcessor:
         filename = f"{filename[:-5]}_{self.tree}_scores.root" # remove .root from initial filename
         # TODO: know the first time you open this file, call recreate before even starting (when loop over filenames, before loop over tree names), and then here call update
         dataframe = self.cumulative_df
+
+        #write tagger scale factors
+        sf_json_inc = "../data/Inclusive_Score_SF.json"
+        sf_json_depth = "../data/Depth_Score_SF.json"
+
+        if sf_json_inc is not None:
+            with open(sf_json_inc) as file_inc:
+                sf_data_inc = json.load(file_inc)
+                sf_inc = np.array(sf_data_inc["sf"])
+
+            nbins_inc = len(sf_inc)
+
+        if not inclusive_only and (sf_json_depth is not None):
+            with open(sf_json_depth) as file_depth:
+                sf_data_depth = json.load(file_depth)
+                sf_depth = np.array(sf_data_depth["sf"])
+
+            nbins_depth = len(sf_depth)
+
         if self.num_classes == 2:
             for i in range(num_jets):
                 dataframe['jet'+str(i)+'_scores12'] = scores[i][:, 0]
@@ -145,10 +165,69 @@ class DataProcessor:
                 dataframe['jet'+str(i)+'_scores12_inc'] = scores_inc[i][:, 0]
                 dataframe['jet'+str(i)+'_scores34_inc'] = scores_inc[i][:, 1]
                 dataframe['jet'+str(i)+'_scoresbkg_inc'] = scores_inc[i][:, 2]
+
+                score_inc = scores_inc[i][:, 0] 
+                score_inc_34 = scores_inc[i][:, 1]
+
+                bin_inc_idx = np.floor(score_inc*nbins_inc).astype(np.int64)
+                bin_inc_idx = np.clip(bin_inc_idx, 0, nbins_inc - 1)
+
+                bin_inc_idx_34 = np.floor(score_inc_34*nbins_inc).astype(np.int64)
+                bin_inc_idx_34 = np.clip(bin_inc_idx_34, 0, nbins_inc - 1)
+
+                sf_inc_corr = sf_inc[bin_inc_idx]
+                sf_inc_corr[score_inc < 0] = 1.0
+
+                sf_inc_corr_34 = sf_inc[bin_inc_idx_34]
+                sf_inc_corr_34[score_inc_34 < 0] = 1.0
+
+                dataframe['jet'+str(i)+'_inclusivetaggerSF'] = sf_inc_corr
+                dataframe['jet'+str(i)+'_inclusivetaggerSF34'] = sf_inc_corr_34
+
+                score_depth = scores[i][:, 0] 
+                score_depth_34 = scores[i][:, 1]
+
+                bin_depth_idx = np.floor(score_depth*nbins_depth).astype(np.int64)
+                bin_depth_idx = np.clip(bin_depth_idx, 0, nbins_depth - 1)
+
+                bin_depth_idx_34 = np.floor(score_depth_34*nbins_depth).astype(np.int64)
+                bin_depth_idx_34 = np.clip(bin_depth_idx_34, 0, nbins_depth - 1)
+
+                sf_depth_corr = sf_depth[bin_depth_idx]
+                sf_depth_corr[score_depth < 0] = 1.0
+
+                sf_depth_corr_34 = sf_depth[bin_depth_idx_34]
+                sf_depth_corr_34[score_depth_34 < 0] = 1.0
+
+                dataframe['jet'+str(i)+'_depthtaggerSF'] = sf_depth_corr
+                dataframe['jet'+str(i)+'_depthtaggerSF34'] = sf_depth_corr_34
+
+
         elif self.num_classes == 1:
             for i in range(num_jets):
                 if not inclusive_only: dataframe['jet'+str(i)+'_scores'] = scores[i][:, 0] # 0 is the signal class # don't write depth scores when only evaluating inclusive DNN
                 dataframe['jet'+str(i)+'_scores_inc'] = scores_inc[i][:, 0] # 0 is the signal class
+
+                score_inc = scores_inc[i][:, 0] 
+                bin_inc_idx = np.floor(score_inc*nbins_inc).astype(np.int64)
+                bin_inc_idx = np.clip(bin_inc_idx, 0, nbins_inc - 1)
+
+                sf_inc_corr = sf_inc[bin_inc_idx]
+                sf_inc_corr[score_inc < 0] = 1.0
+
+                dataframe['jet'+str(i)+'_inclusivetaggerSF'] = sf_inc_corr 
+
+                if not inclusive_only and (sf_json_depth is not None):
+                    dataframe['jet'+str(i)+'_scores'] = scores[i][:, 0]
+                    score_depth = scores[i][:, 0] 
+                    bin_depth_idx = np.floor(score_depth*nbins_depth).astype(np.int64)
+                    bin_depth_idx = np.clip(bin_depth_idx, 0, nbins_depth - 1)
+
+                    sf_depth_corr = sf_depth[bin_depth_idx]
+                    sf_depth_corr[score_depth < 0] = 1.0
+
+                    dataframe['jet'+str(i)+'_depthtaggerSF'] = sf_depth_corr
+                
         if labels is not None:
             dataframe['classID'] = labels
         if os.path.isfile(filename): 

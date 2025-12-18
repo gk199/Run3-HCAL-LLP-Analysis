@@ -288,18 +288,6 @@ class DataProcessor:
         return normed_data, labels, perJet_Pt_series
     
     def write_to_root(self, scores, filename, labels=None):
-        
-        #write tagger scale factors
-        sf_json = "../data/Inclusive_Score_SF.json"
-        if sf_json is not None:
-            with open(sf_json) as file:
-                sf_data = json.load(file)
-                sf = np.array(sf_data["sf"])
-            if self.num_classes == 1: score = scores[:, 0] 
-            elif self.num_classes == 2: score = scores[:, 1]
-            bin_idx = (score*10).astype(int)
-            dataframe["inclusivetaggerSF"] = sf[bin_idx]
-
         filename = f"{filename}_scores.root"
         dataframe = self.cumulative_df
         if self.num_classes == 2:
