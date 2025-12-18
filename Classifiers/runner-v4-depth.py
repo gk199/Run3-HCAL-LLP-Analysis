@@ -375,12 +375,6 @@ class DataProcessor:
             f['Classification'] = {key: dataframe[key] for key in dataframe.columns}
         print(f"Wrote to ROOT file: {filename}")
 
-    def load_tagger_sf(json_file):
-        with open(json_file) as file:
-            sf_data = json.load(file)
-            sf = np.array(sf_data["sf"])
-            return sf
-
     def compute_norm_constants(self):
         # assumes that you have already loaded the files and applied safety selections
         constants_df = pd.DataFrame({'Mean': self.cumulative_df.mean().to_dict(), 'Standard Deviation': self.cumulative_df.std().to_dict()})
@@ -770,3 +764,4 @@ def main():
       
 if __name__ == "__main__":
     main()
+
