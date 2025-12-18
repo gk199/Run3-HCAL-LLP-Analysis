@@ -166,42 +166,41 @@ class DataProcessor:
                 dataframe['jet'+str(i)+'_scores34_inc'] = scores_inc[i][:, 1]
                 dataframe['jet'+str(i)+'_scoresbkg_inc'] = scores_inc[i][:, 2]
 
-                score_inc = scores_inc[i][:, 0] 
-                score_inc_34 = scores_inc[i][:, 1]
+ #               score_inc = scores_inc[i][:, 0] 
+ #               score_inc_34 = scores_inc[i][:, 1]
 
-                bin_inc_idx = np.floor(score_inc*nbins_inc).astype(np.int64)
-                bin_inc_idx = np.clip(bin_inc_idx, 0, nbins_inc - 1)
+ #               bin_inc_idx = np.floor(score_inc*nbins_inc).astype(np.int64)
+ #               bin_inc_idx = np.clip(bin_inc_idx, 0, nbins_inc - 1)
 
-                bin_inc_idx_34 = np.floor(score_inc_34*nbins_inc).astype(np.int64)
-                bin_inc_idx_34 = np.clip(bin_inc_idx_34, 0, nbins_inc - 1)
+ #               bin_inc_idx_34 = np.floor(score_inc_34*nbins_inc).astype(np.int64)
+ #               bin_inc_idx_34 = np.clip(bin_inc_idx_34, 0, nbins_inc - 1)
 
-                sf_inc_corr = sf_inc[bin_inc_idx]
-                sf_inc_corr[score_inc < 0] = 1.0
+ #               sf_inc_corr = sf_inc[bin_inc_idx]
+ #               sf_inc_corr[score_inc < 0] = 1.0
 
-                sf_inc_corr_34 = sf_inc[bin_inc_idx_34]
-                sf_inc_corr_34[score_inc_34 < 0] = 1.0
+ #               sf_inc_corr_34 = sf_inc[bin_inc_idx_34]
+ #               sf_inc_corr_34[score_inc_34 < 0] = 1.0
 
-                dataframe['jet'+str(i)+'_inclusivetaggerSF'] = sf_inc_corr
-                dataframe['jet'+str(i)+'_inclusivetaggerSF34'] = sf_inc_corr_34
+ #               dataframe['jet'+str(i)+'_inclusivetaggerSF'] = sf_inc_corr
+ #               dataframe['jet'+str(i)+'_inclusivetaggerSF34'] = sf_inc_corr_34
 
-                score_depth = scores[i][:, 0] 
-                score_depth_34 = scores[i][:, 1]
+ #               score_depth = scores[i][:, 0] 
+ #               score_depth_34 = scores[i][:, 1]
 
-                bin_depth_idx = np.floor(score_depth*nbins_depth).astype(np.int64)
-                bin_depth_idx = np.clip(bin_depth_idx, 0, nbins_depth - 1)
+ #               bin_depth_idx = np.floor(score_depth*nbins_depth).astype(np.int64)
+ #               bin_depth_idx = np.clip(bin_depth_idx, 0, nbins_depth - 1)
 
-                bin_depth_idx_34 = np.floor(score_depth_34*nbins_depth).astype(np.int64)
-                bin_depth_idx_34 = np.clip(bin_depth_idx_34, 0, nbins_depth - 1)
+ #               bin_depth_idx_34 = np.floor(score_depth_34*nbins_depth).astype(np.int64)
+ #               bin_depth_idx_34 = np.clip(bin_depth_idx_34, 0, nbins_depth - 1)
 
-                sf_depth_corr = sf_depth[bin_depth_idx]
-                sf_depth_corr[score_depth < 0] = 1.0
+ #               sf_depth_corr = sf_depth[bin_depth_idx]
+ #               sf_depth_corr[score_depth < 0] = 1.0
 
-                sf_depth_corr_34 = sf_depth[bin_depth_idx_34]
-                sf_depth_corr_34[score_depth_34 < 0] = 1.0
+ #               sf_depth_corr_34 = sf_depth[bin_depth_idx_34]
+ #               sf_depth_corr_34[score_depth_34 < 0] = 1.0
 
-                dataframe['jet'+str(i)+'_depthtaggerSF'] = sf_depth_corr
-                dataframe['jet'+str(i)+'_depthtaggerSF34'] = sf_depth_corr_34
-
+ #               dataframe['jet'+str(i)+'_depthtaggerSF'] = sf_depth_corr
+ #               dataframe['jet'+str(i)+'_depthtaggerSF34'] = sf_depth_corr_34
 
         elif self.num_classes == 1:
             for i in range(num_jets):
