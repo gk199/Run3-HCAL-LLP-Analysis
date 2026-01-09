@@ -248,6 +248,9 @@ public :
    vector<float>   *jet_E;
    vector<float>   *jet_Mass;
    vector<float>   *jet_JetArea;
+   vector<int>     *jet_PileupE;
+   vector<int>     *jet_PileupIdFlag;
+   vector<int>     *jet_PileupId;
    vector<float>   *jetRaw_E;
    vector<float>   *jetRaw_Pt;
    vector<float>   *jet_E_noJER;
@@ -607,6 +610,9 @@ public :
    TBranch        *b_jet_E_JER_down;
    TBranch        *b_jet_Mass_JER_down;
    TBranch        *b_jet_JetArea;   //!
+   TBranch        *b_jet_PileupE;
+   TBranch        *b_jet_PileupIdFlag;
+   TBranch        *b_jet_PileupId;
    TBranch        *b_jet_ChargedHadEFrac;   //!
    TBranch        *b_jet_NeutralHadEFrac;   //!
    TBranch        *b_jet_PhoEFrac;   //!
@@ -1069,6 +1075,9 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    jet_E = 0;
    jet_Mass = 0;
    jet_JetArea = 0;
+   jet_PileupE = 0;
+   jet_PileupIdFlag = 0;
+   jet_PileupId = 0;
    jetRaw_E = 0;
    jetRaw_Pt = 0;
    jet_E_noJER = 0;
@@ -1423,6 +1432,9 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("jet_E_JER_down", &jet_E_JER_down, &b_jet_E_JER_down);
    fChain->SetBranchAddress("jet_Mass_JER_down", &jet_Mass_JER_down, &b_jet_Mass_JER_down);
    fChain->SetBranchAddress("jet_JetArea", &jet_JetArea, &b_jet_JetArea);
+   fChain->SetBranchAddress("jet_PileupE", &jet_PileupE, &b_jet_PileupE);
+   fChain->SetBranchAddress("jet_PileupIdFlag", &jet_PileupIdFlag, &b_jet_PileupIdFlag);
+   fChain->SetBranchAddress("jet_PileupId", &jet_PileupId, &b_jet_PileupId);
    fChain->SetBranchAddress("jet_ChargedHadEFrac", &jet_ChargedHadEFrac, &b_jet_ChargedHadEFrac);
    fChain->SetBranchAddress("jet_NeutralHadEFrac", &jet_NeutralHadEFrac, &b_jet_NeutralHadEFrac);
    fChain->SetBranchAddress("jet_PhoEFrac", &jet_PhoEFrac, &b_jet_PhoEFrac);
