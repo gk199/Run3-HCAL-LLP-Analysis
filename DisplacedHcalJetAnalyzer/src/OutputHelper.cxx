@@ -84,6 +84,9 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("jet%d_Mass_JER_down", i) );
 
 		myvars_int.push_back( Form("jet%d_L1trig_Matched", i) );
+		myvars_int.push_back( Form("jet%d_PileupE", i) );
+		myvars_int.push_back( Form("jet%d_PileupIdFlag", i) );
+		myvars_int.push_back( Form("jet%d_PileupId", i) );
 		// myvars_int.push_back( Form("jet%d_Index", i) );
 		myvars_float.push_back( Form("jet%d_dR_L1jet", i) );
 
@@ -346,6 +349,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 	myvars_float.push_back("perJet_Phi");
 	myvars_float.push_back("perJet_Mass");
 	myvars_float.push_back("perJet_Area");
+
 	myvars_float.push_back("perJet_ChargedHadEFrac");
 	myvars_float.push_back("perJet_NeutralHadEFrac");
 	myvars_float.push_back("perJet_PhoEFrac");
@@ -373,6 +377,9 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 	myvars_float.push_back("perJet_Tracks_dR");
 
 	myvars_int.push_back(Form("perJet_DepthTowers") );
+	myvars_int.push_back("perJet_PileupE");
+	myvars_int.push_back("perJet_PileupIdFlag");
+	myvars_int.push_back("perJet_PileupId");
 
 	myvars_float.push_back("perJet_TDCavg");
 	myvars_float.push_back("perJet_TDCavg_energyWeight");
@@ -580,6 +587,10 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 		tree_output_vars_float[Form("jet%d_E", valid_jet)] 		= jet_E->at(i);
 		tree_output_vars_float[Form("jet%d_Mass", valid_jet)] 	= jet_Mass->at(i);
 		tree_output_vars_float[Form("jet%d_JetArea", valid_jet)]= jet_JetArea->at(i);
+
+		tree_output_vars_int[Form("jet%d_PileupE", valid_jet)] 		= jet_PileupE->at(i);
+		tree_output_vars_int[Form("jet%d_PileupIdFlag", valid_jet)] = jet_PileupIdFlag->at(i);
+		tree_output_vars_int[Form("jet%d_PileupId", valid_jet)] 	= jet_PileupId->at(i);
 
 		// raw quantities
 		tree_output_vars_float[Form("jet%dRaw_E", valid_jet)] 		= jetRaw_E->at(i);
@@ -856,6 +867,10 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	jet_tree_output_vars_int["ele"]			= n_ele;
 	jet_tree_output_vars_int["muon"]		= n_muon;
 	jet_tree_output_vars_int["pho"]			= n_pho;
+	jet_tree_output_vars_int["perJet_PileupE"] 		= jet_PileupE->at(jetIndex);
+	jet_tree_output_vars_int["perJet_PileupIdFlag"] = jet_PileupIdFlag->at(jetIndex);
+	jet_tree_output_vars_int["perJet_PileupId"] 	= jet_PileupId->at(jetIndex);
+	
 	jet_tree_output_vars_float["eventHT"]   = EventHT();
 
 	for (int i = 0; i < HLT_Indices.size(); i++) { 
