@@ -12,7 +12,11 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 
 	ResetGlobalEventVars();
 
+	SetEventSystematic();
+
 	SetLLPVariables();
+
+	SetEra();
 
 	count["All"]++;
 	

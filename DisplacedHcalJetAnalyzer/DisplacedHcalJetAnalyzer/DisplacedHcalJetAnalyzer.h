@@ -121,6 +121,9 @@ public :
 
    // ----- Globals ----- //
 
+   bool run_systematic = false; 
+   string systematic_name = "";
+
    vector<string> HLT_Names;
    map<string, int> HLT_Indices;
 
@@ -149,6 +152,7 @@ public :
 
    // Declaration of leaf types
    Bool_t          isData;
+   std::string     *era;
    UInt_t          runNum;
    UInt_t          lumiNum;
    ULong64_t       eventNum;
@@ -276,6 +280,16 @@ public :
    vector<float>   *jet_DeepCSV_prob_c;
    vector<float>   *jet_DeepCSV_prob_bb;
    vector<float>   *jet_DeepCSV_prob_udsg;
+   vector<float>   *jet_DeepJet_b_Medium__SF;
+   vector<float>   *jet_DeepJet_b_Medium__up_uncorr;
+   vector<float>   *jet_DeepJet_b_Medium__down_uncorr;
+   vector<float>   *jet_DeepJet_b_Medium__up_corr;
+   vector<float>   *jet_DeepJet_b_Medium__down_corr;
+   vector<float>   *jet_DeepJet_b_Tight__SF;
+   vector<float>   *jet_DeepJet_b_Tight__up_uncorr;
+   vector<float>   *jet_DeepJet_b_Tight__down_uncorr;
+   vector<float>   *jet_DeepJet_b_Tight__up_corr;
+   vector<float>   *jet_DeepJet_b_Tight__down_corr;
    vector<float>   *jet_PtAllTracks;
    vector<float>   *jet_PtAllPVTracks;
    vector<int>     *jet_NVertexTracks;
@@ -501,6 +515,7 @@ public :
 
    // List of branches
    TBranch        *b_isData;   //!
+   TBranch        *b_era;   //!
    TBranch        *b_runNum;   //!
    TBranch        *b_lumiNum;   //!
    TBranch        *b_eventNum;   //!
@@ -628,6 +643,16 @@ public :
    TBranch        *b_jet_DeepCSV_prob_c;   //!
    TBranch        *b_jet_DeepCSV_prob_bb;   //!
    TBranch        *b_jet_DeepCSV_prob_udsg;   //!
+   TBranch        *b_jet_DeepJet_b_Medium__SF;   //!
+   TBranch        *b_jet_DeepJet_b_Medium__up_uncorr;   //!
+   TBranch        *b_jet_DeepJet_b_Medium__down_uncorr;   //!
+   TBranch        *b_jet_DeepJet_b_Medium__up_corr;   //!
+   TBranch        *b_jet_DeepJet_b_Medium__down_corr;   //!
+   TBranch        *b_jet_DeepJet_b_Tight__SF;   //!
+   TBranch        *b_jet_DeepJet_b_Tight__up_uncorr;   //!
+   TBranch        *b_jet_DeepJet_b_Tight__down_uncorr;   //!
+   TBranch        *b_jet_DeepJet_b_Tight__up_corr;   //!
+   TBranch        *b_jet_DeepJet_b_Tight__down_corr;   //!
    TBranch        *b_jet_PtAllTracks;   //!
    TBranch        *b_jet_PtAllPVTracks;   //!
    TBranch        *b_jet_NVertexTracks;   //!
@@ -861,7 +886,7 @@ public :
    virtual void     Show(Long64_t entry = -1);
 
    // DisplacedHcalJetAnalyzer.C
-   virtual void   Initialize( string infiletag, string infilepath );
+   virtual void   Initialize( string infiletag, string systematic, string infilepath );
    // Loop.cxx
    virtual void   Loop();
    virtual void   ProcessEvent( Long64_t jentry );
@@ -914,6 +939,9 @@ public :
    virtual bool   PassLeptonVeto();
    virtual bool   PassZmumuSelection();
    virtual float  EventHT();
+   virtual void   SetEra(); 
+   virtual void   InitializeSystematic( string systematic ); 
+   virtual void   SetEventSystematic();    
    // JetVetoMapHelper.cxx
    virtual bool   IsJetInVetoRegion(int iJet);
    virtual void   updateCurrentEraMap();
@@ -1105,6 +1133,16 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    jet_DeepCSV_prob_c = 0;
    jet_DeepCSV_prob_bb = 0;
    jet_DeepCSV_prob_udsg = 0;
+   jet_DeepJet_b_Medium__SF = 0;
+   jet_DeepJet_b_Medium__up_uncorr = 0;
+   jet_DeepJet_b_Medium__down_uncorr = 0;
+   jet_DeepJet_b_Medium__up_corr = 0;
+   jet_DeepJet_b_Medium__down_corr = 0;
+   jet_DeepJet_b_Tight__SF = 0;
+   jet_DeepJet_b_Tight__up_uncorr = 0;
+   jet_DeepJet_b_Tight__down_uncorr = 0;
+   jet_DeepJet_b_Tight__up_corr = 0;
+   jet_DeepJet_b_Tight__down_corr = 0;
    jet_PtAllTracks = 0;
    jet_PtAllPVTracks = 0;
    jet_NVertexTracks = 0;
@@ -1324,6 +1362,7 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    fChain->SetMakeClass(1);
 
    fChain->SetBranchAddress("isData", &isData, &b_isData);
+   fChain->SetBranchAddress("era", &era, &b_era);
    fChain->SetBranchAddress("runNum", &runNum, &b_runNum);
    fChain->SetBranchAddress("lumiNum", &lumiNum, &b_lumiNum);
    fChain->SetBranchAddress("eventNum", &eventNum, &b_eventNum);
@@ -1452,6 +1491,16 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("jet_DeepCSV_prob_c", &jet_DeepCSV_prob_c, &b_jet_DeepCSV_prob_c);
    fChain->SetBranchAddress("jet_DeepCSV_prob_bb", &jet_DeepCSV_prob_bb, &b_jet_DeepCSV_prob_bb);
    fChain->SetBranchAddress("jet_DeepCSV_prob_udsg", &jet_DeepCSV_prob_udsg, &b_jet_DeepCSV_prob_udsg);
+   fChain->SetBranchAddress("jet_DeepJet_b_Medium__SF", &jet_DeepJet_b_Medium__SF, &b_jet_DeepJet_b_Medium__SF );
+   fChain->SetBranchAddress("jet_DeepJet_b_Medium__up_uncorr", &jet_DeepJet_b_Medium__up_uncorr, &b_jet_DeepJet_b_Medium__up_uncorr );
+   fChain->SetBranchAddress("jet_DeepJet_b_Medium__down_uncorr", &jet_DeepJet_b_Medium__down_uncorr, &b_jet_DeepJet_b_Medium__down_uncorr );
+   fChain->SetBranchAddress("jet_DeepJet_b_Medium__up_corr", &jet_DeepJet_b_Medium__up_corr, &b_jet_DeepJet_b_Medium__up_corr );
+   fChain->SetBranchAddress("jet_DeepJet_b_Medium__down_corr", &jet_DeepJet_b_Medium__down_corr, &b_jet_DeepJet_b_Medium__down_corr );
+   fChain->SetBranchAddress("jet_DeepJet_b_Tight__SF", &jet_DeepJet_b_Tight__SF, &b_jet_DeepJet_b_Tight__SF );
+   fChain->SetBranchAddress("jet_DeepJet_b_Tight__up_uncorr", &jet_DeepJet_b_Tight__up_uncorr, &b_jet_DeepJet_b_Tight__up_uncorr );
+   fChain->SetBranchAddress("jet_DeepJet_b_Tight__down_uncorr", &jet_DeepJet_b_Tight__down_uncorr, &b_jet_DeepJet_b_Tight__down_uncorr );
+   fChain->SetBranchAddress("jet_DeepJet_b_Tight__up_corr", &jet_DeepJet_b_Tight__up_corr, &b_jet_DeepJet_b_Tight__up_corr );
+   fChain->SetBranchAddress("jet_DeepJet_b_Tight__down_corr", &jet_DeepJet_b_Tight__down_corr, &b_jet_DeepJet_b_Tight__down_corr );
    fChain->SetBranchAddress("jet_PtAllTracks", &jet_PtAllTracks, &b_jet_PtAllTracks);
    fChain->SetBranchAddress("jet_PtAllPVTracks", &jet_PtAllPVTracks, &b_jet_PtAllPVTracks);
    fChain->SetBranchAddress("jet_NVertexTracks", &jet_NVertexTracks, &b_jet_NVertexTracks);

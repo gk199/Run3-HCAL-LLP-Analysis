@@ -34,6 +34,14 @@ float DisplacedHcalJetAnalyzer::EventHT(){
 	return HT;
 }
 
+/* ====================================================================================================================== */
+void DisplacedHcalJetAnalyzer::SetEra(){
+
+	if ( debug ) cout<<"DisplacedHcalJetAnalyzer::SetEra()"<<endl;
+
+	currentEra_ = *era; 
+
+}
 
 /* ====================================================================================================================== */
 bool DisplacedHcalJetAnalyzer::PassL1SingleLLPJet(){
@@ -340,4 +348,46 @@ bool DisplacedHcalJetAnalyzer::PassZmumuSelection() {
 
 	if ( matched_jet )return true;
 	else return false;
+}
+
+/* ====================================================================================================================== */
+void DisplacedHcalJetAnalyzer::InitializeSystematic( string systematic ){
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::InitializeSystematic()"<<endl;
+
+	vector<string> valid_systematic_names = { "None", "Nominal", "JER_up", "JER_down" };
+
+	systematic_name = systematic;
+
+	if ( systematic == "None" or systematic == "Nominal" ){
+		run_systematic = false; 
+		cout<<"No systematics applied: systematic = "<<systematic<<endl;
+	} else if (std::find(valid_systematic_names.begin(), valid_systematic_names.end(), systematic) != valid_systematic_names.end()) {
+		run_systematic = true;
+		cout<<"Applying a systematic variation: systematic = "<<systematic<<endl;
+	} else {
+		run_systematic = false;
+		cout<<"WARNING: Systematic variation not recognized. Running with systematic variation: Nominal"<<endl;
+		cout<<"   --> Input: "<<systematic<<" will be ignored"<<endl;
+	}
+
+}
+
+/* ====================================================================================================================== */
+void DisplacedHcalJetAnalyzer::SetEventSystematic(){
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::SetEventSystematic()"<<endl;
+
+	if( isData || !run_systematic ) return; 
+
+	if ( systematic_name == "JER_up" ){
+		jet_Pt   = jet_Pt_JER_up;
+		jet_E    = jet_E_JER_up;
+		jet_Mass = jet_Mass_JER_up;
+	} else if ( systematic_name == "JER_down" ){
+		jet_Pt   = jet_Pt_JER_down;
+		jet_E    = jet_E_JER_down;
+		jet_Mass = jet_Mass_JER_down;
+	} 
+
 }

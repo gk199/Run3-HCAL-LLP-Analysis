@@ -68,7 +68,7 @@ void DisplacedHcalJetAnalyzer::updateCurrentEraMap() {
 
     // era is instead read directly from the input root file 
     // currentEra_ = *Era; // TO DO get this when era is in root file
-    currentEra_ = "Run2023D"; // temporary hardcode for testing
+    // currentEra_ = "Run2023D"; // temporary hardcode for testing
 
     // determine which veto map to use based on current era
     std::string vetoKey = eraToVetoMapKey(currentEra_);
