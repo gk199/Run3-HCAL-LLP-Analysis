@@ -93,10 +93,13 @@ void DisplacedHcalJetAnalyzer( string infiletag = "", vector<string> infilepaths
 	AnalysisReader.randomGenerator->SetSeed(0);
 
 	// ----- Load Jet Veto Maps ----- //
-	AnalysisReader.vetoMaps_["Summer22_23Sep2023"]     = AnalysisReader.LoadJetVetoMap("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/CMSSW_13_2_0/src/cms_lpc_llp/Run3-HCAL-LLP-NTupler/data/JEC_JER/JECDatabase/jet_veto_maps/Summer22_23Sep2023/Summer22_23Sep2023_RunCD_v1.root");
-    AnalysisReader.vetoMaps_["Summer22EE_23Sep2023"]   = AnalysisReader.LoadJetVetoMap("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/CMSSW_13_2_0/src/cms_lpc_llp/Run3-HCAL-LLP-NTupler/data/JEC_JER/JECDatabase/jet_veto_maps/Summer22EE_23Sep2023/Summer22EE_23Sep2023_RunEFG_v1.root");
-    AnalysisReader.vetoMaps_["Summer23Prompt23"]       = AnalysisReader.LoadJetVetoMap("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/CMSSW_13_2_0/src/cms_lpc_llp/Run3-HCAL-LLP-NTupler/data/JEC_JER/JECDatabase/jet_veto_maps/Summer23Prompt23/Summer23Prompt23_RunC_v1.root");
-    AnalysisReader.vetoMaps_["Summer23BPixPrompt23"]   = AnalysisReader.LoadJetVetoMap("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/CMSSW_13_2_0/src/cms_lpc_llp/Run3-HCAL-LLP-NTupler/data/JEC_JER/JECDatabase/jet_veto_maps/Summer23BPixPrompt23/Summer23BPixPrompt23_RunD_v1.root");
+	// these are from https://cms-jerc.web.cern.ch/Recommendations/#jet-veto-maps
+	// AnalysisReader.vetoMaps_["Summer22_23Sep2023"]     = AnalysisReader.LoadJetVetoMap("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/CMSSW_13_2_0/src/cms_lpc_llp/Run3-HCAL-LLP-NTupler/data/JEC_JER/JECDatabase/jet_veto_maps/Summer22_23Sep2023/Summer22_23Sep2023_RunCD_v1.root");
+	// copied to local directory, as these files are also transfered with condor. Currently in Run/ directory
+	AnalysisReader.vetoMaps_["Summer22_23Sep2023"]     = AnalysisReader.LoadJetVetoMap("Summer22_23Sep2023_RunCD_v1.root");
+    AnalysisReader.vetoMaps_["Summer22EE_23Sep2023"]   = AnalysisReader.LoadJetVetoMap("Summer22EE_23Sep2023_RunEFG_v1.root");
+    AnalysisReader.vetoMaps_["Summer23Prompt23"]       = AnalysisReader.LoadJetVetoMap("Summer23Prompt23_RunC_v1.root");
+    AnalysisReader.vetoMaps_["Summer23BPixPrompt23"]   = AnalysisReader.LoadJetVetoMap("Summer23BPixPrompt23_RunD_v1.root");
 
 	// ----- Initialize ----- // 
 

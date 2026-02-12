@@ -47,8 +47,10 @@ echo "./DisplacedHcalJetAnalyzer $filetag $ds_in"
 #source /afs/cern.ch/work/g/gkopp/public/forKiley/activate/afs/cern.ch/work/g/gkopp/public/forKiley/activate/afs/cern.ch/work/g/gkopp/public/forKiley/activate
 #source /afs/cern.ch/work/g/gkopp/public/forKiley/activate
 
-#echo "source /afs/cern.ch/work/k/kikenned/Run3-HCAL-LLP-Analysis-Gillian/Run/Condor/keras2pt13pt1/bin/activate"
-#source /afs/cern.ch/work/k/kikenned/Run3-HCAL-LLP-Analysis-Gillian/Run/Condor/keras2pt13pt1/bin/activate
+
+echo "Evaluating DNN..."
+echo "python3 ScoresToEventBased-v4.py minituple_$filetag.root"
+python3 ScoresToEventBased-v4.py minituple_$filetag.root # $filepath
 
 #echo "Timestamp: $(date '+%Y-%m-%d %H:%M:%S')"
 
