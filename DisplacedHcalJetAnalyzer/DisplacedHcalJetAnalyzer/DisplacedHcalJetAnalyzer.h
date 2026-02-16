@@ -152,7 +152,7 @@ public :
 
    // Declaration of leaf types
    Bool_t          isData;
-   std::string     *era;
+   std::string     *era = nullptr;
    UInt_t          runNum;
    UInt_t          lumiNum;
    ULong64_t       eventNum;
