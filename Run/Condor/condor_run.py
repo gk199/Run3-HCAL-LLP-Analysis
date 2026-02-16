@@ -10,6 +10,7 @@ For usage: `python3 condor_run.py --help`
 """
 
 import argparse, sys, os, time
+import zipfile
 from datetime import datetime
 
 datetime_now = datetime.today().strftime('%Y_%m_%d')
@@ -18,18 +19,20 @@ start_time = time.time()
 cwd = os.getcwd()
 
 # -------------------------------------------------------------------------------------------------
-# MODIFY ME! (Keep things global)
+# MODIFY ME! 
 
 #max_jobs_per_submission = 500
 
-header_cmd    = os.path.abspath("condor_header.cmd")
-executable_sh = os.path.abspath("condor_executable.sh")
+BASE_DIR = cwd.replace("/Run/Condor", "")
 
+header_cmd      = os.path.abspath("condor_header.cmd")
+executable_sh   = os.path.abspath("condor_executable.sh")
 file_disk_usage = os.path.abspath("../Ntuples_v4/NTuplesV4_DiskUsage.txt")
 
 # Global path to executable (& other files to transfer if applicable) -- comma-separated list without spaces
 #transfer_input_files 
-Executable_DisplacedHcalJetAnalyzer = os.path.abspath("../../DisplacedHcalJetAnalyzer/exe/DisplacedHcalJetAnalyzer") # this is made after compiling 
+Executable_DisplacedHcalJetAnalyzer = os.path.abspath("../../DisplacedHcalJetAnalyzer") #/exe/DisplacedHcalJetAnalyzer") # this is made after compiling 
+Executable_ClassifierInputs         = os.path.abspath("../../Classifiers/Evaluate")
 
 # ------------------------------------------------------------------------------
 def parseArgs():
@@ -44,6 +47,7 @@ def parseArgs():
     parser.add_argument("-o", "--output_dir", action="store", default="./", help="Output directory path")
     # parser.add_argument("-b", "--bdt_zipfile",  action="store", default="./BDTWeightFiles.zip", help="Path to directory containing bdt files")
     # zip -r BDTWeightFiles.zip BDTWeightFiles
+    parser.add_argument("-u", "--uncert",     action="store", default="Nominal", help="Systematic uncertainty (options: Nominal, None, JER_up, JER_down)")
     parser.add_argument("-p", "--proxy",      action="store", help="Proxy path: generate via `voms-proxy-init -voms cms` and copy file from /tmp/ area", required=True) # TODO
     parser.add_argument("-s", "--setup_only", action="store_true", help="Setup jobs only") 
     parser.add_argument("-t", "--test",       action="store_true", help="Submit test job only") 
@@ -55,6 +59,23 @@ def parseArgs():
     return args
 
 # -------------------------------------------------------------------------------------------------
+def zip_dir(src_path, zip_path):
+
+    if os.path.exists(zip_path): 
+        print("Zip file", zip_path, "already exists. Using this (not re-zipping!)" )
+        return
+
+    src_path = os.path.abspath(src_path)
+    base_name = os.path.basename(src_path)
+
+    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(src_path):
+            for file in files:
+                full_path = os.path.join(root, file)
+                arcname = os.path.join(base_name, os.path.relpath(full_path, src_path))
+                zipf.write(full_path, arcname)
+
+# -------------------------------------------------------------------------------------------------
 def main():
  
     print( "Gathering Submission Info..." )
@@ -64,19 +85,21 @@ def main():
     args = parseArgs()
 
     input_file  = args.input_file
-    output_dir  = args.output_dir + "_" + datetime_now
+    output_dir  = args.output_dir #+ "_" + datetime_now
     # bdt_zipfile = os.path.abspath( args.bdt_zipfile )
+    uncert     = args.uncert
     proxy       = os.path.abspath( args.proxy )
     setup_only  = args.setup_only
     test        = args.test
     debug       = args.debug
     flag        = args.flag
 
-    flavor="longlunch" #workday" #microcentury"
+    flavor="microcentury"
     #if "LLPskim_2023Cv4" in flag: flavor="workday"
     #if "LLPskim_2023Cv1" in flag: flavor="longlunch"
     #if "LLPskim_2023Vv1" in flag: flavor="longlunch"
-    if "HToSSTo4b" in flag: flavor="longlunch" #microcentury" #espresso"
+    #if "HToSSTo4b" in flag: flavor="longlunch" #microcentury" #espresso"
+
     # ----- Get Inputs ----- #
 
     if not os.path.isfile(input_file): 
@@ -122,29 +145,14 @@ def main():
             if line_temp.split("store")[-1] in file_sizes: 
                 infile_paths_sizes += file_sizes[line_temp.split("store")[-1]]
             else: 
-                infile_paths_sizes += 5
+                infile_paths_sizes += 1
 
-            if infile_paths_sizes >= 5:
+            if infile_paths_sizes >= 1:
                 input_list.append( infile_paths_temp ) 
 
-	#os.system( "ln -s " + bdt_zipfile + " BDTWeightFiles.zip" )
-	#bdt_zipfile_new = os.path.abspath( "BDTWeightFiles.zip" )
-
-	# ----- DNN input files ----- #
-	add_scores = os.path.abspath( "../../../Classifiers/ScoresToEventBased-v4.py" )
-	keras_depth = os.path.abspath( "../../../Classifiers/depth_model_v4.keras" )
-	keras_inclusive = os.path.abspath( "../../../Classifiers/inclusive_model_v4.keras" )
-	norm_constants = os.path.abspath( "../../../Classifiers/norm_constants_v3.csv" )
-
-	# ----- Jet veto map files ----- #
-	# these are now hardcoded in the DisplacedHcalJetAnalyzer.C util file
-	jetVeto_2022 = os.path.abspath( "../../../../CMSSW_13_2_0/src/cms_lpc_llp/Run3-HCAL-LLP-NTupler/data/JEC_JER/JECDatabase/jet_veto_maps/Summer22_23Sep2023/Summer22_23Sep2023_RunCD_v1.root" )	
-	jetVeto_2022EE = os.path.abspath( "../../../../CMSSW_13_2_0/src/cms_lpc_llp/Run3-HCAL-LLP-NTupler/data/JEC_JER/JECDatabase/jet_veto_maps/Summer22EE_23Sep2023/Summer22EE_23Sep2023_RunEFG_v1.root" )
-	jetVeto_2023 = os.path.abspath( "../../../../CMSSW_13_2_0/src/cms_lpc_llp/Run3-HCAL-LLP-NTupler/data/JEC_JER/JECDatabase/jet_veto_maps/Summer23Prompt23/Summer23Prompt23_RunC_v1.root" )	
-	jetVeto_2023BPix = os.path.abspath( "../../../../CMSSW_13_2_0/src/cms_lpc_llp/Run3-HCAL-LLP-NTupler/data/JEC_JER/JECDatabase/jet_veto_maps/Summer23BPixPrompt23/Summer23BPixPrompt23_RunD_v1.root" )	
-
-	# ----- Transfer Input Files ----- #
-	transfer_input_files = Executable_DisplacedHcalJetAnalyzer + "," + add_scores + "," + keras_depth + "," + keras_inclusive + "," + norm_constants + "," + jetVeto_2022 + "," + jetVeto_2022EE + "," + jetVeto_2023 + "," + jetVeto_2023BPix
+                # Reset 
+                infile_paths_temp  = []
+                infile_paths_sizes = 0
 
     # ----- Make Output Dir ----- #
 
@@ -153,28 +161,39 @@ def main():
     else: 
         os.mkdir( output_dir )
 
-    # ----- Make Submission Dir ----- #
+    # ----- Transfer Input Files ----- #
 
-    DirFlag = ""
-    if (str(flag) != ""): DirFlag = str(flag) + "_"
-    submission_dir = "Jobs_"+DirFlag+datetime_now
-
-    if os.path.exists(submission_dir):
-                print( "ERROR:", submission_dir, "already exists. Please use another name. Check if your output directory will be overwritten! Exiting..." )
-                quit()
-
-    os.mkdir( submission_dir )
-    os.chdir( submission_dir )
-
-    # ----- BDT Weight Files ----- #
+    Jobs_macro_dir = "Jobs_"+datetime_now
+    if not os.path.exists( Jobs_macro_dir ): 
+        os.mkdir(Jobs_macro_dir )
+    os.chdir( Jobs_macro_dir )
 
     #os.system( "ln -s " + bdt_zipfile + " BDTWeightFiles.zip" )
     #bdt_zipfile_new = os.path.abspath( "BDTWeightFiles.zip" )
-    add_scores = os.path.abspath( "../../../Classifiers/ScoresToEventBased-v4.py" )
-    keras_depth = os.path.abspath( "../../../Classifiers/inclusive_model_v4_train40.keras" )
-    keras_inclusive = os.path.abspath( "../../../Classifiers/inclusive_model_v4_train80.keras" )
-    norm_constants = os.path.abspath( "../../../Classifiers/norm_constants_v3.csv" )
-    transfer_input_files = Executable_DisplacedHcalJetAnalyzer + "," + add_scores + "," + keras_depth + "," + keras_inclusive + "," + norm_constants
+
+    print("Zipping DisplacedHcalJetAnalyzer input...")
+    ZIP_DisplacedHcalJetAnalyzer = os.path.join( cwd, "DisplacedHcalJetAnalyzer.zip")
+    zip_dir(Executable_DisplacedHcalJetAnalyzer, ZIP_DisplacedHcalJetAnalyzer )
+
+    print("Zipping Classifiers input...")
+    ZIP_Classifier = os.path.join( cwd, "Classifiers.zip")
+    zip_dir(Executable_ClassifierInputs, ZIP_Classifier )    
+
+    #transfer_input_files = Executable_DisplacedHcalJetAnalyzer + "," + add_scores + "," + keras_depth + "," + keras_inclusive + "," + norm_constants
+    transfer_input_files = ZIP_DisplacedHcalJetAnalyzer  + "," + ZIP_Classifier
+
+    # ----- Make Submission Dir ----- #
+
+    #DirFlag = ""
+    #if (str(flag) != ""): DirFlag = str(flag) + "_"
+    submission_dir = "Job_" + str(flag)
+
+    if os.path.exists(submission_dir):
+        print( "ERROR:", submission_dir, "already exists. Please use another name. Check if your output directory will be overwritten! Exiting..." )
+        quit()
+
+    os.mkdir( submission_dir )
+    os.chdir( submission_dir )
 
     # ----- Submit Jobs ----- #
 
@@ -192,10 +211,10 @@ def main():
 
     for i in range( len(input_list) ):
 
-        infile_tag = "job"+str(j)
+        infile_tag = "job"+str(i)
         infile_paths = " ".join(input_list[i])
 
-        os.system("echo 'arguments = "+proxy+"   "+infile_tag+"   "+infile_paths+" ' >> condor_submit.cmd ")
+        os.system("echo 'arguments = "+BASE_DIR+"   "+proxy+"    "+infile_tag+"   "+uncert+"   "+infile_paths+" ' >> condor_submit.cmd ")
         os.system("echo queue >> condor_submit.cmd")
         os.system("echo >> condor_submit.cmd")
 
@@ -209,6 +228,7 @@ def main():
     #time.sleep(2.)
     #os.chdir("../")
 
+    os.chdir( cwd )
     print( "Done submitting", len(input_list), "jobs")
     time.sleep(2.)
 
