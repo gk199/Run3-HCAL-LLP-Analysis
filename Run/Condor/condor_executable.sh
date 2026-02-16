@@ -23,6 +23,9 @@ echo "Timestamp: $(date '+%Y-%m-%d %H:%M:%S')\n"
 
 # ----- Create Minituple ----- #
 
+echo "Unzipping Jet Veto Maps..."
+unzip JetVetoMaps_Run3.zip > /dev/null
+
 echo "Unpacking and compiling executable..."
 unzip DisplacedHcalJetAnalyzer.zip > /dev/null
 
@@ -39,6 +42,7 @@ echo "  -Filetag: $filetag"
 echo "Timestamp: $(date '+%Y-%m-%d %H:%M:%S')\n"
 
 echo "Running executable..."
+echo "DisplacedHcalJetAnalyzer/exe/DisplacedHcalJetAnalyzer $filetag $uncert $ds_in"
 DisplacedHcalJetAnalyzer/exe/DisplacedHcalJetAnalyzer $filetag $uncert $ds_in
 
 echo "Timestamp: $(date '+%Y-%m-%d %H:%M:%S')\n"

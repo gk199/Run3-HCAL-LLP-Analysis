@@ -27,7 +27,7 @@ BASE_DIR = cwd.replace("/Run/Condor", "")
 
 header_cmd      = os.path.abspath("condor_header.cmd")
 executable_sh   = os.path.abspath("condor_executable.sh")
-file_disk_usage = os.path.abspath("../Ntuples_v4/NTuplesV4_DiskUsage.txt")
+file_disk_usage = os.path.abspath("../Ntuples_v5/NTuplesV5_DiskUsage.txt")
 
 # Global path to executable (& other files to transfer if applicable) -- comma-separated list without spaces
 #transfer_input_files 
@@ -94,11 +94,11 @@ def main():
     debug       = args.debug
     flag        = args.flag
 
-    flavor="microcentury"
+    flavor="microcentury" #"workday"
     #if "LLPskim_2023Cv4" in flag: flavor="workday"
     #if "LLPskim_2023Cv1" in flag: flavor="longlunch"
     #if "LLPskim_2023Vv1" in flag: flavor="longlunch"
-    #if "HToSSTo4b" in flag: flavor="longlunch" #microcentury" #espresso"
+    #if "HToSSTo4b" in flag: flavor="workday" #longlunch" #microcentury" #espresso"
 
     # ----- Get Inputs ----- #
 
@@ -145,9 +145,9 @@ def main():
             if line_temp.split("store")[-1] in file_sizes: 
                 infile_paths_sizes += file_sizes[line_temp.split("store")[-1]]
             else: 
-                infile_paths_sizes += 1
+                infile_paths_sizes += 8
 
-            if infile_paths_sizes >= 1:
+            if infile_paths_sizes >= 8:
                 input_list.append( infile_paths_temp ) 
 
                 # Reset 
@@ -179,8 +179,12 @@ def main():
     ZIP_Classifier = os.path.join( cwd, "Classifiers.zip")
     zip_dir(Executable_ClassifierInputs, ZIP_Classifier )    
 
+    print("Zipping Jet Veto Maps input...")
+    ZIP_JetVeto = os.path.join(cwd, "JetVetoMaps_Run3.zip")
+    zip_dir(os.path.join(cwd, "../JetVetoMaps"), ZIP_JetVeto)
+
     #transfer_input_files = Executable_DisplacedHcalJetAnalyzer + "," + add_scores + "," + keras_depth + "," + keras_inclusive + "," + norm_constants
-    transfer_input_files = ZIP_DisplacedHcalJetAnalyzer  + "," + ZIP_Classifier
+    transfer_input_files = ZIP_DisplacedHcalJetAnalyzer  + "," + ZIP_Classifier + "," + ZIP_JetVeto
 
     # ----- Make Submission Dir ----- #
 
