@@ -9,17 +9,11 @@ In `condor_run.py`: Modify file paths in "MODIFY ME" section, if necessary.
 ```
 voms-proxy-init --voms cms 
 ```
-Copy over output file from `/tmp/` area into local or home area.
+Copy over output file from `/tmp/` area into local, private, or home area.
 
 **3. Run:**
 
-Remember to recompile the DisplacedHcalJetAnalyzer executable! Important: If no CMSSW is setup in the Condor submission, then do not compile DisplacedHcalJetAnalyzer within a CMSSW release. If CMSSW is used, make sure that the environment `DisplacedHcalJetAnalyzer` was compiled in is the same as the CMSSW release `condor_executable.sh` sets up! This is currently `CMSSW_14_0_0`. Do `cmsenv` in this release, logout, and login to submit the Condor jobs. 
-
-Check the trees that are run over in `ScoresToEventBased-v3.py` with `trees_to_iterate`. After 3.13 only `NoSel` can be run over.
-
-(Outdated: Zip the BDT weights files, `zip -r <zip file name> <directory name>`.)
-
-Submit a condor job for each file in input text file:
+Submit a condor job for each file in input text file. This zips up executables and inputs in DisplacedHcalJetAnalyzer, Classifiers, and JetVetoMaps.
 ```
 python3 condor_run.py -i <input_file_path> -o <output_directory_tag> -p <path_to_proxy_file> <other optional arguments, -d -t -f>
 ```
@@ -28,10 +22,12 @@ For full usage:
 ```
 python3 condor_run.py --help
 ```
+Submit all (modify first): 
+```
+source submit_all.sh
+```
 
-A bash script is set up to submit all the 2023 displaced jet skim and the LLP MC: `./submit_MC.sh`. It is helpful to check the number of files produced in each script to make sure that all the files are processed (may be due to job flavor not allowing for a long enough run time!). Use `ls -1 <directory> | wc -l` to check the number of files in a directory.
-
-## Examples of submissions
+## Examples of submissions (mostly deprecated)
 ```
 voms-proxy-init --voms cms 
 cp /tmp/x509up_u101898 ./
