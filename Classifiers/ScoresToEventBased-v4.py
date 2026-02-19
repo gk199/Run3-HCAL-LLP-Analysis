@@ -19,12 +19,12 @@ import os.path
 import json
 import fnmatch
 
-testing_mode = False#True
+testing_mode = True
 debug_mode = True
 inclusive_only = False#True
 
 perJet = False
-num_jets = 1 if perJet else 1 # in v3.13 only 4 jets are saved! In earlier versions, 6 jets are saved
+num_jets = 1 if perJet else 4 # in v3.13 only 4 jets are saved! In earlier versions, 6 jets are saved
 
 CONSTANTS = pd.read_csv("norm_constants_v3.csv")
 
@@ -393,7 +393,7 @@ class Runner:
 def main():
     input_files = "test.root"
     filepath = "./"
-    if testing_mode: filepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.0/" # TODO REMOVE THIS FOR RUNNING
+    if testing_mode: filepath = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.13/" # TODO REMOVE THIS FOR RUNNING
     if len(sys.argv) > 1:
         input_files  = sys.argv[1]
     if len(sys.argv) > 2:
