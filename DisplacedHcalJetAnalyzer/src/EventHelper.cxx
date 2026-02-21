@@ -92,9 +92,9 @@ bool DisplacedHcalJetAnalyzer::PassEventPreselection( bool PassedHLT, bool Passe
 
 	// Pass HLT // 
 
-	if( !PassedHLT ){  // check again if already false
-		if( !PassHLTDisplacedJet() ) return false;
-	}
+	//if( !PassedHLT ){  // check again if already false
+	//	if( !PassHLTDisplacedJet() ) return false;
+	//}
 
 	// Veto on W Plus Jets //
 

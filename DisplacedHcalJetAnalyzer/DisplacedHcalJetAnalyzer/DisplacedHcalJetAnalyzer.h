@@ -891,7 +891,7 @@ public :
    virtual void   Loop();
    virtual void   ProcessEvent( Long64_t jentry );
    // TriggerHelper.cxx
-   virtual void   SetTriggerNames( string infilepath, string hist_name );
+   virtual void   SetTriggerNames();
    // ObjectHelper.cxx
    virtual float  DeltaR( float eta1, float eta2, float phi1, float phi2);
    virtual double DeltaPhi( double phi1, double phi2);

@@ -23,6 +23,9 @@ void DisplacedHcalJetAnalyzer::Initialize( string infiletag, string systematic, 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::Initialize()"<<endl;
 
 	// Initialize trigger names from NEvents_HLT histogram
+	SetTriggerNames();
+
+    // Initialize systematic uncertainty
 	InitializeSystematic( systematic );
 
 	// Set Categories
