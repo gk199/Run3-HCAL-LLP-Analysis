@@ -46,8 +46,25 @@ class DataProcessor:
             sig = uproot.open(file)[self.tree]
             print(f"Opened {file}")
             print(f"Evaluating on tree: {self.tree}")
+
+            # below block is copied from runner-v4 since got errors at runtime when running locally, likely from jagged arrays
+            include_patterns = ["jet0*", "jet1*", "jet2*", "jet3*", "Pass*"]
+            exclude_patterns = ["*_rechit_*"] # these have type "awkward" which doesn't work with h5 format
+            all_branches = sig.keys()
+            # Match includes
+            included = set()
+            for pattern in include_patterns:
+                included.update(fnmatch.filter(all_branches, pattern))
+            # Remove excluded matches
+            for pattern in exclude_patterns:
+                to_remove = fnmatch.filter(all_branches, pattern)
+                included.difference_update(to_remove)
+            # Convert to sorted list for consistency
+            filter_name = sorted(included)
+
             sig = sig.arrays(filter_name=filter_name, library="pd") 
             df.append(sig)
+
         self.df = pd.concat(df) if df else pd.DataFrame()
         
         print("Loaded Data")
@@ -60,6 +77,7 @@ class DataProcessor:
     def process_data(self):
         
         print("Processing...")
+
         features = ['perJet_Eta', 'perJet_Mass', 
        'perJet_S_phiphi', 'perJet_S_etaeta', 'perJet_S_etaphi', 
        'perJet_Tracks_dR', 
