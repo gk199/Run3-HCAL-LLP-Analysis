@@ -94,11 +94,11 @@ def main():
     debug       = args.debug
     flag        = args.flag
 
-    flavor="microcentury" #"workday"
+    flavor="workday" #"workday"
     #if "LLPskim_2023Cv4" in flag: flavor="workday"
     #if "LLPskim_2023Cv1" in flag: flavor="longlunch"
     #if "LLPskim_2023Vv1" in flag: flavor="longlunch"
-    #if "HToSSTo4b" in flag: flavor="workday" #longlunch" #microcentury" #espresso"
+    #if "HToSSTo4b" in flag: flavor="tomorrow" #longlunch" #microcentury" #espresso"
 
     # ----- Get Inputs ----- #
 
@@ -145,14 +145,17 @@ def main():
             if line_temp.split("store")[-1] in file_sizes: 
                 infile_paths_sizes += file_sizes[line_temp.split("store")[-1]]
             else: 
-                infile_paths_sizes += 8
+                infile_paths_sizes += 15
 
-            if infile_paths_sizes >= 8:
+            if infile_paths_sizes >= 15:
                 input_list.append( infile_paths_temp ) 
 
                 # Reset 
                 infile_paths_temp  = []
                 infile_paths_sizes = 0
+
+    # The remainder
+    if len(infile_paths_temp) > 0: input_list.append(  infile_paths_temp )
 
     # ----- Make Output Dir ----- #
 
