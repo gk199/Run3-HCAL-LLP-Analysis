@@ -350,6 +350,74 @@ def SixJetCheck(file_path, tree_name):
 			print(selection_list_abbrev[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
 
 # ------------------------------------------------------------------------------
+def AnalysisSelections(file_path):
+	# Cutflow table for fraction of events passing DNN for jet 0 and jet 1
+	print(" \n")
+	print("Analysis selections cutflow, done per event")
+	print(" \n")
+	selection_list_noCut = [
+		"All", 
+		"LLP decays in HCAL",
+		"L1 passed",
+		"HLT passed",
+		"Jet 0 and jet 1 $\\geq "+jet_energy+"$~GeV $p_T$ and $\\abs\\eta \\leq 2$", 
+		"1+ jet with $\\geq 60$~GeV $p_T$ and $\\abs\\eta \\leq 1.26$", 
+		"HB jet is matched to L1 LLP jet", 
+		"Triggered jet NHF $\\geq$ 70\%"		
+	]
+
+	selection_list_abbrev_noCut = [
+		"All       ",
+		"LLP in HCAL",
+		"L1 passed",
+		"HLT passed",
+		"2+ jets",
+		"1+ jet high pT",
+		"L1 match", 
+		"NHF high"
+	]
+	
+	if print_latex:
+		event_latex_setup(file_path)
+
+	init = -1
+	file = ROOT.TFile.Open(file_path)
+	
+	f_out = ROOT.TFile.Open("skimmed_file.root", "RECREATE")
+	tree = file.Get("NoSel")
+	
+	for i in range(len(selection_list_noCut)):
+		selname = selection_list_noCut[i]
+		selval  = -1
+		Nevents = -1
+
+		if i == 0: 
+			init = tree.GetEntries()
+			total_selection_string = ""
+		if i == 1: total_selection_string = "((LLP0_DecayR >= 214.2 && LLP0_DecayR < 295 && abs(LLP0_Eta) < 1.26) || (LLP1_DecayR >= 214.2 && LLP1_DecayR < 295 && abs(LLP1_Eta) < 1.26))" # total_selection_string += " Pass_L1SingleLLPJet == 1"
+		if i == 2: total_selection_string += " && Pass_L1SingleLLPJet == 1"
+		if i == 3: total_selection_string += " && Pass_HLTDisplacedJet == 1"
+		# either jet 1 or jet 2 is triggered
+		if i == 4: 
+			init = tree.GetEntries(total_selection_string)
+			total_selection_string += " && ((abs(jet0_Eta) < 2 && jet0_Pt > " + jet_energy + ") || (abs(jet1_Eta) < 2 && jet1_Pt > " + jet_energy + "))"
+		if i == 5: total_selection_string += " && ( (abs(jet0_Eta) < 1.26 && jet0_Pt > 60) || (abs(jet1_Eta) < 1.26 && jet1_Pt > 60) )"
+		if i == 6: total_selection_string += " && ( (abs(jet0_Eta) < 1.26 && jet0_Pt > 60 && jet0_L1trig_Matched == 1) || (abs(jet1_Eta) < 1.26 && jet1_Pt > 60 && jet1_L1trig_Matched == 1) )"
+		if i == 7: total_selection_string += " && ( (jet0_NeutralHadEFrac >= 0.7 && jet0_L1trig_Matched == 1) || (jet1_NeutralHadEFrac >= 0.7 && jet1_L1trig_Matched == 1) )"
+
+		selval = tree.GetEntries(total_selection_string)
+
+		Nevents = tree.GetEntries()
+
+		if print_latex:
+			print(selname+" & ", round(selval, 4), " & ", round((selval)/init, 4), " \\\\ ") 
+			if i == 0 or i == 3: print("\\hline")
+			if i == 7: latex_end(file_path)
+
+		else:
+			print(selection_list_abbrev_noCut[i], "\t", Nevents, "\t", round(selval, 4), "\t", round(selval/init, 4))
+
+# ------------------------------------------------------------------------------
 def DNN_Passing(file_path):
 	# Cutflow table for fraction of events passing DNN for jet 0 and jet 1
 	print(" \n")
@@ -1026,13 +1094,16 @@ def main():
 
 	# DNN check
 	# DNN_Passing(file_path) 
-	Depth_Inclusive_DNN(file_path)
+	# Depth_Inclusive_DNN(file_path) # this was most recently used
 
 	# Emulated towers check
 	# if "LLPskim" or "LLP_MC" in file_path: Emulated_Towers(file_path)
 
 	# Set up for background estimation now (needs update)
 	# if "Run2023" in file_path: Bkg_Estimation(file_path)
+
+	# Analysis pre-selections
+	AnalysisSelections(file_path)
 
 if __name__ == '__main__':
 	main()

@@ -9,38 +9,60 @@ git checkout -b <your-branch>
 ```
 
 ## Ntuples to Minituples
-`DisplacedHcalJetAnalyzer/util/DisplacedHcalJetAnalyzer.C` is the main file that produces minituples. To run in compiler mode:
+
+### Overview + Inputs
+`DisplacedHcalJetAnalyzer/util/DisplacedHcalJetAnalyzer.C` is the main file that produces minituples. Its arguments are: 
+- Filetag -- included in name of output file
+- Systematic uncertainty -- default is "Nominal"; other options are JER_up and JER_down
+- Input files -- can either be single or multiple files
+
+### Compilation Options:
+
+You can run in ROOT interpreter mode (no compilation necessary) or in compiled mode (preferred method). To compile:
 ```
-cd Run/
-proxy
-crab_setup
-root -q -b -l '../DisplacedHcalJetAnalyzer/util/DisplacedHcalJetAnalyzer.C("<tag>", "<path/to/ntuple.root>")'
-```
-Note that paths to ntuples must be local for running in compiler mode. To run in compiled mode (preferred method):
-```
-py_setup # setup if needed for python environment 
 cd DisplacedHcalJetAnalyzer/
 mkdir exe
-source compile.sh 
-cd ../Run
-./../DisplacedHcalJetAnalyzer/exe/DisplacedHcalJetAnalyzer <file_output_tag> root://cmsxrootd.fnal.gov///store/user/gkopp/<path_to_file>
-
-./run_signal_data.sh
-# change number of events in DisplacedHcalJetAnalyzer.C -- particularly helpful for testing changes before processing all data. 
-
-# multiprocessing, took 30 minutes for 100k events (MC); 1 hour for 500k events (data)
-./mp_local.py InputFiles_2023_*_*_Run2023C-EXOLLPJetHCAL-PromptReco-v4_ntuplesv*.txt
-./mp_local.py InputFiles_2023_*_*_ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_ntuplesv*.txt
-# files will be saved to /eos/user/g/gkopp/LLP_Analysis/
+source compile.sh
 ```
+
+### Run Locally:
+
+```
+# Go into run directory, since there are some local filepath dependencies
+cd Run/
+
+# Set up CMS proxy to access grid NTuples
+voms-proxy-init -voms cms
+```
+
+Run in ROOT interpreter mode (no compilation necessary):
+```
+# Run over single input file (single output file produced)
+root -q -b -l '../DisplacedHcalJetAnalyzer/util/DisplacedHcalJetAnalyzer.C("<tag>", "<systematic-uncert>", "<path/to/ntuple.root>")'
+
+# Run over multiple input files (single output file produced):
+root -q -b -l '../DisplacedHcalJetAnalyzer/util/DisplacedHcalJetAnalyzer.C("<tag>", "<systematic-uncert>", {"<path/to/ntuple1.root>", ..., "<path/to/ntupleN.root>"})'
+```
+
+Run in compiled mode (preferred):
+```
+# Run over single input file (single output file produced)
+../DisplacedHcalJetAnalyzer/exe/DisplacedHcalJetAnalyzer <tag> <systematic-uncert> <path/to/ntuple1.root>
+
+# Run over multiple input files (single output file produced):
+../DisplacedHcalJetAnalyzer/exe/DisplacedHcalJetAnalyzer <tag> <systematic-uncert> <path/to/ntuple1.root> ... <path/to/ntupleN.root>
+```
+
+See examples in: `run_example.sh`
+
 For running in compiled mode, remember to input the file path as `root://cmsxrootd.fnal.gov///store/user...`.
 
 Text files of the ntuples can be made with `find "$PWD" -maxdepth 1 -type f` from the directories in `/hdfs/store/user/gkopp/`, or using the dedicated script in `ValidateFileProcessing`.
 
-### Condor Processing
+### Run via Condor:
 Follow the [instructions](https://github.com/gk199/Run3-HCAL-LLP-Analysis/tree/main/Run/Condor) in the `Run/Condor` subdirectory. 
 
-### Analyzer Setttings
+### Analyzer Settings
 In `DisplacedHcalJetAnalyzer/DisplacedHcalJetAnalyzer/DisplacedHcalJetAnalyzer.h` can set the variables: `debug, print_counts, save_hists, save_trees, blind_data`. Setting `AnalysisReader.debug = true` in `DisplacedHcalJetAnalyzer.C` is very helpful for debugging. 
 
 Main files to edit are in `DisplacedHcalJetAnalyzer/src`. Specific details: In `HistHelper.cxx` set what histograms are filled and select categories. Requirements for when each category is filled are listed in `Loop.cxx`. Careful to submit only Condor jobs for the correct configuration though! 

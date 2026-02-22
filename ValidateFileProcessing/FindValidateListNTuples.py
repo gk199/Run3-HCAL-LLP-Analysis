@@ -77,8 +77,8 @@ def checkArgs( args ):
 # ------------------------------------------------------------------------------
 def getDatasets():
 
-	# datasets = ["DisplacedJet", "HToSSTo4B_MH125_MS15_CTau10000"]
-	datasets = ["HToSSTo4B_MH125_MS50_CTau3000", "HToSSTo4B_MH250_MS120_CTau10000", "HToSSTo4B_MH350_MS160_CTau10000", "HToSSTo4B_MH350_MS80_CTau500"]
+	datasets = ["DisplacedJet"]
+	# datasets = ["HToSSTo4B_MH125_MS50_CTau3000", "HToSSTo4B_MH250_MS120_CTau10000", "HToSSTo4B_MH350_MS160_CTau10000", "HToSSTo4B_MH350_MS80_CTau500"]
 	return datasets
 
 
@@ -116,7 +116,7 @@ def getNTupleFileLists( dataset, tag_version ):
 # ------------------------------------------------------------------------------
 def writeNTupleFileLists( dataset, filelists ):
 
-	textfilepath = "NTuplesV4_"+dataset+".txt"
+	textfilepath = "NTuplesV5_"+dataset+".txt"
 
 	with open(textfilepath, 'w') as output:
 		for filepath in filelists["ntuples"]:
@@ -239,7 +239,7 @@ def processDataset( dataset, tag_version ):
 	if eventcountreport.find("ERROR"):
 		#print( "ERROR ", dataset )
 
-		errorfilepath = "NTuplesV4_"+dataset+".err"
+		errorfilepath = "NTuplesV5_"+dataset+".err"
 
 		with open(errorfilepath, 'w') as output:
 			output.write(eventcountreport)

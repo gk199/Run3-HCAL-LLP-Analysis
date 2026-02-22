@@ -1,8 +1,9 @@
 #include "../MiniTuplePlotter.h"
 #include "TString.h"
+#include "../RegionCuts.h"
 
 // Goals of this study: use the LLP MC sample, split into different regions to understand how variables change by region. Also started overlaying LLP skim data variables.
-// Mostly worked on during October - November 2023, early spring 2024.
+// Mostly worked on during October - November 2023, early spring, summer 2024.
 // -------------------------------------------------------------------------------------------------
 void MiniTuplePlotter_CR_SR(){
 
@@ -92,10 +93,10 @@ void MiniTuplePlotter_CR_SR(){
 
 	MC_allPlots.insert(MC_allPlots.begin(), allPlots.begin(), allPlots.end());
 
-	#include "../RegionCuts.h"
-
-	bool DepthFlag = true;
-	bool Skim_WJets = false;				// BDT input variables, plot LLP skim vs W+Jets selection
+	bool DepthFlag = false;
+	bool Depth_CR_VR = false;
+	bool dPhi_CR_VR = true;
+	bool Skim_WJets = false;			// BDT input variables, plot LLP skim vs W+Jets selection
 	bool LLP_WJets = false;				// analysis variables for LLP and W+Jets overlayed
 	bool track_dR_study = false;		// track vars with diff dR cuts, dR with diff track cuts
 	bool overlay_LLP = false;			// overlay analysis variables for each LLP mass point
@@ -115,7 +116,7 @@ void MiniTuplePlotter_CR_SR(){
 		cout<<endl;
 		cout<<" ---------- CR / SR Study: Depth flag in PF jets ---------- "<<endl;
 		cout<<endl;
-/*
+
 		class MiniTuplePlotter plotter_depth( filetags_test, path_test );
 		plotter_depth.SetPlots({P_jet0_dR_L1jet, P_jet0_DepthTowers, P_jet0_TimingTowers, P_jet0_FlaggedTowers}); 
 		plotter_depth.SetTreeNames( {"NoSel"} );	
@@ -184,50 +185,51 @@ void MiniTuplePlotter_CR_SR(){
 		decay_R.SetComparisonCuts({Cut_0TimingTowers, Cut_1TimingTowers, Cut_2TimingTowers});
 		decay_R.SetLegendNames({"No flagged timing towers", "1 flagged tower", "2+ flagged towers"});		
 		decay_R.Plot();
-*/
+	}
+	if (Depth_CR_VR) { // July 2025
 		// pT spectrum of CR and VR
-		// class MiniTuplePlotter CR_VR_kinematics( {"LLPskim_2023Cv4_allscores"}, {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_"} );
-		// CR_VR_kinematics.SetPlots({P_jet0_Pt, P_jet0_Eta, P_jet0_Phi, P_jet0_dEta, P_jet0_dPhi}); 
-		// CR_VR_kinematics.SetTreeNames( {"NoSel"} );	
-		// CR_VR_kinematics.SetOutputFileTag("Overlay_DepthJet0_v3.16_data");
-		// CR_VR_kinematics.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
-		// CR_VR_kinematics.SetCuts("jet0_DepthTagCand == 1 && jet0_scores_depth_hcal >= 0.95");
-		// CR_VR_kinematics.SetComparisonCuts({Cut_CR, Cut_VR}),
-		// CR_VR_kinematics.SetLegendNames({"CR", "VR"});
-		// CR_VR_kinematics.colors = { kViolet+4, kMagenta-7 };
-		// CR_VR_kinematics.SetOutputDirectory("CR_VR");
-		// CR_VR_kinematics.plot_log    = false; 
-		// CR_VR_kinematics.NBins = 30;
-		// CR_VR_kinematics.Plot();
-		// CR_VR_kinematics.ClearFileTrees();
-		// CR_VR_kinematics.SetOutputFileTag("Overlay_DepthJet0_anyDecay_v3.16_data");
-		// CR_VR_kinematics.SetCuts("jet0_DepthTagCand == 1 && jet0_scores_depth_anywhere >= 0.95");
-		// CR_VR_kinematics.Plot();
-		// CR_VR_kinematics.ClearFileTrees();
-		// CR_VR_kinematics.SetOutputFileTag("Overlay_InclusiveJet1Bins_v3.16_data");
-		// CR_VR_kinematics.SetCuts("jet1_InclTagCand == 1");
-		// CR_VR_kinematics.SetComparisonCuts({"jet1_scores_inc_train80 >= 0 && jet1_scores_inc_train80 <= 0.2", "jet1_scores_inc_train80 > 0.2 && jet1_scores_inc_train80 <= 0.4", "jet1_scores_inc_train80 > 0.4 && jet1_scores_inc_train80 <= 0.6", "jet1_scores_inc_train80 > 0.6 && jet1_scores_inc_train80 <= 0.8"}),
-		// CR_VR_kinematics.SetLegendNames({"Inclusive DNN 0-0.2", "Inclusive DNN 0.2-0.4", "Inclusive DNN 0.4-0.6", "Inclusive DNN 0.6-0.8"});
-		// CR_VR_kinematics.Plot();
+		class MiniTuplePlotter CR_VR_kinematics( {"LLPskiDisplacedJet_Run2023C-EXOLLPJetHCAL-PromptReco-v4_AOD_2025_07_21_scores"}, {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/"} );
+		CR_VR_kinematics.SetPlots({P_jet0_Pt, P_jet0_Eta, P_jet0_Phi, P_jet0_dEta, P_jet0_dPhi}); 
+		CR_VR_kinematics.SetTreeNames( {"NoSel"} );	
+		CR_VR_kinematics.SetOutputFileTag("Overlay_DepthJet0_v4.1_data");
+		CR_VR_kinematics.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+		CR_VR_kinematics.SetCuts("jet0_DepthTagCand == 1 && jet0_scores_depth_LLPanywhere >= 0.95");
+		CR_VR_kinematics.SetComparisonCuts({Cut_CR, Cut_VR}),
+		CR_VR_kinematics.SetLegendNames({"CR", "VR"});
+		CR_VR_kinematics.colors = { kViolet+4, kMagenta-7 };
+		CR_VR_kinematics.SetOutputDirectory("CR_VR");
+		CR_VR_kinematics.plot_log    = false; 
+		CR_VR_kinematics.NBins = 30;
+		CR_VR_kinematics.Plot();
+		CR_VR_kinematics.ClearFileTrees();
+		CR_VR_kinematics.SetOutputFileTag("Overlay_DepthJet0_anyDecay_v4.1_data");
+		CR_VR_kinematics.SetCuts("jet0_DepthTagCand == 1 && jet0_scores_depth_LLPanywhere >= 0.95");
+		CR_VR_kinematics.Plot();
+		CR_VR_kinematics.ClearFileTrees();
+		CR_VR_kinematics.SetOutputFileTag("Overlay_InclusiveJet1Bins_v4.1_data");
+		CR_VR_kinematics.SetCuts("jet1_InclTagCand == 1");
+		CR_VR_kinematics.SetComparisonCuts({"jet1_scores_inc_train80 >= 0 && jet1_scores_inc_train80 <= 0.2", "jet1_scores_inc_train80 > 0.2 && jet1_scores_inc_train80 <= 0.4", "jet1_scores_inc_train80 > 0.4 && jet1_scores_inc_train80 <= 0.6", "jet1_scores_inc_train80 > 0.6 && jet1_scores_inc_train80 <= 0.8"}),
+		CR_VR_kinematics.SetLegendNames({"Inclusive DNN 0-0.2", "Inclusive DNN 0.2-0.4", "Inclusive DNN 0.4-0.6", "Inclusive DNN 0.6-0.8"});
+		CR_VR_kinematics.Plot();
 
-		// // evaluate distributions when leading jet is inclusive and sub-leading is depth
-		// CR_VR_kinematics.ClearFileTrees();
-		// CR_VR_kinematics.SetPlots({P_jet1_Pt, P_jet1_Eta, P_jet1_Phi, P_jet0_dEta, P_jet0_dPhi}); 
-		// CR_VR_kinematics.SetOutputFileTag("Overlay_DepthJet1_v3.16_data");
-		// CR_VR_kinematics.SetCuts("jet1_DepthTagCand == 1 && jet1_scores_depth_hcal >= 0.95");
-		// CR_VR_kinematics.SetComparisonCuts({Cut_CR_jet0, Cut_VR_jet0}),
-		// CR_VR_kinematics.NBins = 30;
-		// CR_VR_kinematics.Plot();
-		// CR_VR_kinematics.ClearFileTrees();
-		// CR_VR_kinematics.SetOutputFileTag("Overlay_DepthJet1_anyDecay_v3.16_data");
-		// CR_VR_kinematics.SetCuts("jet1_DepthTagCand == 1 && jet1_scores_depth_anywhere >= 0.95");
-		// CR_VR_kinematics.Plot();		
-		// CR_VR_kinematics.ClearFileTrees();
-		// CR_VR_kinematics.SetOutputFileTag("Overlay_InclusiveJet0Bins_v3.16_data");
-		// CR_VR_kinematics.SetCuts("jet0_InclTagCand == 1");
-		// CR_VR_kinematics.SetComparisonCuts({"jet0_scores_inc_train80 >= 0 && jet0_scores_inc_train80 <= 0.2", "jet0_scores_inc_train80 > 0.2 && jet0_scores_inc_train80 <= 0.4", "jet0_scores_inc_train80 > 0.4 && jet0_scores_inc_train80 <= 0.6", "jet0_scores_inc_train80 > 0.6 && jet0_scores_inc_train80 <= 0.8"}),
-		// CR_VR_kinematics.SetLegendNames({"Inclusive DNN 0-0.2", "Inclusive DNN 0.2-0.4", "Inclusive DNN 0.4-0.6", "Inclusive DNN 0.6-0.8"});
-		// CR_VR_kinematics.Plot();
+		// evaluate distributions when leading jet is inclusive and sub-leading is depth
+		CR_VR_kinematics.ClearFileTrees();
+		CR_VR_kinematics.SetPlots({P_jet1_Pt, P_jet1_Eta, P_jet1_Phi, P_jet0_dEta, P_jet0_dPhi}); 
+		CR_VR_kinematics.SetOutputFileTag("Overlay_DepthJet1_v4.1_data");
+		CR_VR_kinematics.SetCuts("jet1_DepthTagCand == 1 && jet1_scores_depth_hcal >= 0.95");
+		CR_VR_kinematics.SetComparisonCuts({Cut_CR_jet0, Cut_VR_jet0}),
+		CR_VR_kinematics.NBins = 30;
+		CR_VR_kinematics.Plot();
+		CR_VR_kinematics.ClearFileTrees();
+		CR_VR_kinematics.SetOutputFileTag("Overlay_DepthJet1_anyDecay_v4.1_data");
+		CR_VR_kinematics.SetCuts("jet1_DepthTagCand == 1 && jet1_scores_depth_LLPanywhere >= 0.95");
+		CR_VR_kinematics.Plot();		
+		CR_VR_kinematics.ClearFileTrees();
+		CR_VR_kinematics.SetOutputFileTag("Overlay_InclusiveJet0Bins_v4.1_data");
+		CR_VR_kinematics.SetCuts("jet0_InclTagCand == 1");
+		CR_VR_kinematics.SetComparisonCuts({"jet0_scores_inc_train80 >= 0 && jet0_scores_inc_train80 <= 0.2", "jet0_scores_inc_train80 > 0.2 && jet0_scores_inc_train80 <= 0.4", "jet0_scores_inc_train80 > 0.4 && jet0_scores_inc_train80 <= 0.6", "jet0_scores_inc_train80 > 0.6 && jet0_scores_inc_train80 <= 0.8"}),
+		CR_VR_kinematics.SetLegendNames({"Inclusive DNN 0-0.2", "Inclusive DNN 0.2-0.4", "Inclusive DNN 0.4-0.6", "Inclusive DNN 0.6-0.8"});
+		CR_VR_kinematics.Plot();
 
 		class MiniTuplePlotter CR_VR_kinematics_LLP( {"HToSSTo4b_125_50_CTau3000_batch2_allscores", "HToSSTo4b_250_120_CTau10000_batch2_allscores", "HToSSTo4b_350_160_CTau10000_batch2_allscores"}, {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_"} );
 		CR_VR_kinematics_LLP.SetPlots({P_jet0_Pt, P_jet0_Eta, P_jet0_Phi, P_jet0_dEta, P_jet0_dPhi}); 
@@ -242,6 +244,82 @@ void MiniTuplePlotter_CR_SR(){
 		CR_VR_kinematics_LLP.plot_log    = false; 
 		CR_VR_kinematics_LLP.NBins = 30;
 		CR_VR_kinematics_LLP.Plot();		
+	}
+	if (dPhi_CR_VR) { // July 2025 
+
+		class MiniTuplePlotter dPhi_plotter2( {"minituple_LLPskim_2023Cv1_allscores"}, {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/"} );
+		// class MiniTuplePlotter dPhi_plotter2( {"HToSSTo4b_125_50_CTau3000_batch2_allscores", "HToSSTo4b_250_120_CTau10000_batch2_allscores", "HToSSTo4b_350_160_CTau10000_batch2_allscores", "LLPskim_2023Cv4_allscores"}, {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_"} );
+		dPhi_plotter2.SetPlots({P_jet0_dPhi}); 
+		dPhi_plotter2.SetTreeName( "NoSel" );	
+		dPhi_plotter2.SetOutputFileTag("Overlay_dPhi_v4.1");
+		dPhi_plotter2.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+		dPhi_plotter2.SetCuts("jet0_DepthTagCand == 1 && jet0_scores_depth_LLPanywhere >= 0.2"); // && Flag_METFilters_2022_2023_PromptReco");
+		dPhi_plotter2.SetComparisonCuts({Cut_CR, Cut_VR}, "LLPskim");
+		// dPhi_plotter2.SetLegendNames({"mH=125", "mH=250", "mH=350", "LLP skim CR", "LLP skim VR"});
+		dPhi_plotter2.SetLegendNames({"LLP skim CR", "LLP skim VR"});
+		// dPhi_plotter2.colors = { 40, 45, 38, kGreen-8, kGreen-2 };
+		dPhi_plotter2.colors = { 40, 45 };
+		dPhi_plotter2.SetOutputDirectory("dPhi");
+		dPhi_plotter2.plot_log    = false; 
+		dPhi_plotter2.NBins = 30;
+		dPhi_plotter2.Plot();	
+
+		class MiniTuplePlotter dPhi_cuts( {"minituple_LLPskim_2023Cv1_allscores"}, {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/"} );
+		// dPhi_cuts.SetPlots({P_jet, P_jet0_Pt, P_validJet, P_pho, P_ele, P_muon, P_eventHT, P_met_Pt, P_met_Phi, P_met_SumEt, P_jet0met_dPhi, P_jet1met_dPhi}); 
+		dPhi_cuts.SetPlots({P_jet0_Phi, P_jet1_Phi, P_jet0met_dPhi, P_jet1met_dPhi}); 
+		dPhi_cuts.SetTreeName( "NoSel" );	
+		dPhi_cuts.SetOutputFileTag("Overlay_dPhi_v4.1");
+		dPhi_cuts.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+		dPhi_cuts.SetCuts("jet0_DepthTagCand == 1 && jet0_scores_depth_LLPanywhere >= 0.2 && abs(jet0_jet1_dPhi) < 0.2"); // && Flag_METFilters_2022_2023_PromptReco");
+		dPhi_cuts.SetComparisonCuts({Cut_CR, Cut_VR}, "LLPskim");
+		dPhi_cuts.SetLegendNames({"LLP skim CR", "LLP skim VR"});
+		dPhi_cuts.colors = { 40, 45 };
+		dPhi_cuts.SetOutputDirectory("dPhi");
+		dPhi_cuts.plot_log    = false; 
+		dPhi_cuts.NBins = 20;
+		dPhi_cuts.Plot();	
+
+		bool v3 = true;
+		class MiniTuplePlotter dPhi_plotter( {"LLPskim_2023Cv4_allscores"}, {v3? "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_" 
+																				: "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_"} );
+		dPhi_plotter.SetTreeName( "NoSel" );	
+		dPhi_plotter.SetOutputFileTag("Overlay_dPhi_v4.1"); 	
+		dPhi_plotter.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );			
+		if (v3) {
+			dPhi_plotter.SetCuts("jet0_DepthTagCand == 1 && jet0_scores_depth_anywhere >= 0.5");
+			dPhi_plotter.SetOutputFileTag("Overlay_dPhi_v3.16"); 	
+		}
+		else {
+			dPhi_plotter.SetCuts("jet0_DepthTagCand == 1 && jet0_scores_depth_LLPanywhere >= 0.5");
+		}
+		dPhi_plotter.SetComparisonCuts({Cut_CR, Cut_VR});
+		dPhi_plotter.SetLegendNames({"LLP skim CR", "LLP skim VR"});
+		if (v3) dPhi_plotter.SetPlots2D({Hist1_Hist2(P_jet0_dPhi_v316, P_jet0_Phi), Hist1_Hist2(P_jet0_dEta, P_jet0_dPhi_v316), Hist1_Hist2(P_jet0met_dPhi, P_jet0_dPhi_v316) });
+		else dPhi_plotter.SetPlots2D({Hist1_Hist2(P_jet0_dPhi, P_jet0_Phi), Hist1_Hist2(P_jet0_dEta, P_jet0_dPhi), Hist1_Hist2(P_jet0met_dPhi, P_jet0_dPhi) });
+		dPhi_plotter.SetOutputDirectory("2D_dPhi_dEta");
+		dPhi_plotter.PlotMany2D();
+		dPhi_plotter.ClearFileTrees();
+		dPhi_plotter.SetCuts("jet0_DepthTagCand == 1 " + Cut_CR);
+		if (v3) {
+			dPhi_plotter.SetOutputFileTag("CRratio_Overlay_dPhi_v3.16"); 	
+			dPhi_plotter.SetComparisonCuts({"jet0_scores_depth_anywhere >= 0", "jet0_scores_depth_anywhere >= 0.2"});
+		}
+		else {
+			dPhi_plotter.SetOutputFileTag("CRratio_Overlay_dPhi_v4.1"); 	
+			dPhi_plotter.SetComparisonCuts({"jet0_scores_depth_LLPanywhere >= 0", "jet0_scores_depth_LLPanywhere >= 0.2"});
+		}
+		dPhi_plotter.PlotMany2D("ratio");
+		dPhi_plotter.ClearFileTrees();
+		dPhi_plotter.SetCuts("jet0_DepthTagCand == 1 " + Cut_VR);
+		if (v3) {
+			dPhi_plotter.SetOutputFileTag("VRratio_Overlay_dPhi_v3.16"); 	
+			dPhi_plotter.SetComparisonCuts({"jet0_scores_depth_anywhere >= 0", "jet0_scores_depth_anywhere >= 0.2"});
+		}
+		else {
+			dPhi_plotter.SetOutputFileTag("VRratio_Overlay_dPhi_v4.1"); 	
+			dPhi_plotter.SetComparisonCuts({"jet0_scores_depth_LLPanywhere >= 0", "jet0_scores_depth_LLPanywhere >= 0.2"});
+		}
+		dPhi_plotter.PlotMany2D("ratio");
 	}
 
 	// ----- Jet kinematics in control and signal regions -----//

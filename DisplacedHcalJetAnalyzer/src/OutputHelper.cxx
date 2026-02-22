@@ -48,6 +48,8 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 
 	vector<string> myvars_vec = {};
 
+	vector<string> myvars_string = { "era" };
+
 	// Add Physics Variables //
 
 	for( int i=0; i<N_PFJets_ToSave; i++ ) {
@@ -69,7 +71,24 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("jet%d_Mass", i) );
 		myvars_float.push_back( Form("jet%d_JetArea", i) );
 
+		// uncorrected and no JER (MC) jets
+		myvars_float.push_back( Form("jet%dRaw_E", i) );
+		myvars_float.push_back( Form("jet%dRaw_Pt", i) );
+		myvars_float.push_back( Form("jet%d_E_noJER", i) );
+		myvars_float.push_back( Form("jet%d_Pt_noJER", i) );
+		myvars_float.push_back( Form("jet%d_Mass_noJER", i) );
+		// JER up / down variations
+		myvars_float.push_back( Form("jet%d_Pt_JER_up", i) );
+		myvars_float.push_back( Form("jet%d_E_JER_up", i) );
+		myvars_float.push_back( Form("jet%d_Mass_JER_up", i) );
+		myvars_float.push_back( Form("jet%d_Pt_JER_down", i) );
+		myvars_float.push_back( Form("jet%d_E_JER_down", i) );
+		myvars_float.push_back( Form("jet%d_Mass_JER_down", i) );
+
 		myvars_int.push_back( Form("jet%d_L1trig_Matched", i) );
+		myvars_int.push_back( Form("jet%d_PileupE", i) );
+		myvars_int.push_back( Form("jet%d_PileupIdFlag", i) );
+		myvars_int.push_back( Form("jet%d_PileupId", i) );
 		// myvars_int.push_back( Form("jet%d_Index", i) );
 		myvars_float.push_back( Form("jet%d_dR_L1jet", i) );
 
@@ -90,6 +109,17 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("jet%d_DeepCSV_prob_c", i) );
 		myvars_float.push_back( Form("jet%d_DeepCSV_prob_bb", i) );
 		myvars_float.push_back( Form("jet%d_DeepCSV_prob_udsg", i) );
+
+		myvars_float.push_back( Form("jet%d_DeepJet_b_Medium__SF", i) );
+		myvars_float.push_back( Form("jet%d_DeepJet_b_Medium__up_uncorr", i) );
+		myvars_float.push_back( Form("jet%d_DeepJet_b_Medium__down_uncorr", i) );
+		myvars_float.push_back( Form("jet%d_DeepJet_b_Medium__up_corr", i) );
+		myvars_float.push_back( Form("jet%d_DeepJet_b_Medium__down_corr", i) );
+		myvars_float.push_back( Form("jet%d_DeepJet_b_Tight__SF", i) );
+		myvars_float.push_back( Form("jet%d_DeepJet_b_Tight__up_uncorr", i) );
+		myvars_float.push_back( Form("jet%d_DeepJet_b_Tight__down_uncorr", i) );
+		myvars_float.push_back( Form("jet%d_DeepJet_b_Tight__up_corr", i) );
+		myvars_float.push_back( Form("jet%d_DeepJet_b_Tight__down_corr", i) );
 
 		myvars_float.push_back( Form("jet%d_PtAllTracks", i) );
 		myvars_float.push_back( Form("jet%d_PtAllPVTracks", i) );
@@ -281,6 +311,9 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		for( auto var: myvars_vec )
 			tree_output[treename]->Branch( Form("%s",var.c_str()), &tree_output_vars_vec[var] );		
 
+		for( auto var: myvars_string )
+			tree_output[treename]->Branch( Form("%s",var.c_str()), &tree_output_vars_string[var] );		
+
 	}
 }
 
@@ -323,6 +356,8 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 
 	vector<string> myvars_float = {"eventHT", "randomFloat"};
 
+	vector<string> myvars_string = {"era"};
+
 	// Add Physics Variables //
 
 	// consider adding L1 jet information
@@ -332,6 +367,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 	myvars_float.push_back("perJet_Phi");
 	myvars_float.push_back("perJet_Mass");
 	myvars_float.push_back("perJet_Area");
+
 	myvars_float.push_back("perJet_ChargedHadEFrac");
 	myvars_float.push_back("perJet_NeutralHadEFrac");
 	myvars_float.push_back("perJet_PhoEFrac");
@@ -359,6 +395,9 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 	myvars_float.push_back("perJet_Tracks_dR");
 
 	myvars_int.push_back(Form("perJet_DepthTowers") );
+	myvars_int.push_back("perJet_PileupE");
+	myvars_int.push_back("perJet_PileupIdFlag");
+	myvars_int.push_back("perJet_PileupId");
 
 	myvars_float.push_back("perJet_TDCavg");
 	myvars_float.push_back("perJet_TDCavg_energyWeight");
@@ -412,6 +451,9 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 
 		for( auto var: myvars_vec )
 			jet_tree_output[treename]->Branch( Form("%s",var.c_str()), &jet_tree_output_vars_vec[var] );
+
+		for( auto var: myvars_string )
+			jet_tree_output[treename]->Branch( Form("%s",var.c_str()), &jet_tree_output_vars_string[var] );
 	}
 }
 
@@ -451,7 +493,7 @@ void DisplacedHcalJetAnalyzer::ResetOutputBranches( string treename ){
 	for( const auto &pair : jet_tree_output_vars_string )
 		jet_tree_output_vars_string[pair.first] = "";
 
-	for( const auto &pair : jet_tree_output_vars_string )
+	for( const auto &pair : jet_tree_output_vars_vec )
 		jet_tree_output_vars_vec[pair.first].clear();
 
 }
@@ -471,6 +513,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 		tree_output_vars_bool[pair.first] = pair.second;
 
 	tree_output_vars_int["run"] 	= runNum;
+	tree_output_vars_string["era"] 	= currentEra_;
 	tree_output_vars_int["lumi"] 	= lumiNum;
 	tree_output_vars_int["event"] 	= eventNum;
 	tree_output_vars_int["PV"] 		= n_PV;
@@ -567,6 +610,27 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 		tree_output_vars_float[Form("jet%d_Mass", valid_jet)] 	= jet_Mass->at(i);
 		tree_output_vars_float[Form("jet%d_JetArea", valid_jet)]= jet_JetArea->at(i);
 
+		tree_output_vars_int[Form("jet%d_PileupE", valid_jet)] 		= jet_PileupE->at(i);
+		tree_output_vars_int[Form("jet%d_PileupIdFlag", valid_jet)] = jet_PileupIdFlag->at(i);
+		tree_output_vars_int[Form("jet%d_PileupId", valid_jet)] 	= jet_PileupId->at(i);
+
+		// raw quantities
+		tree_output_vars_float[Form("jet%dRaw_E", valid_jet)] 		= jetRaw_E->at(i);
+		tree_output_vars_float[Form("jet%dRaw_Pt", valid_jet)] 		= jetRaw_Pt->at(i);
+		// without JER (for MC)
+		if (jet_E_noJER->size() > 0) { // not filled for data, since JER not applied for data
+			tree_output_vars_float[Form("jet%d_E_noJER", valid_jet)] 	= jet_E_noJER->at(i);
+			tree_output_vars_float[Form("jet%d_Pt_noJER", valid_jet)] 	= jet_Pt_noJER->at(i);
+			tree_output_vars_float[Form("jet%d_Mass_noJER", valid_jet)] = jet_Mass_noJER->at(i);
+			// JER up / down variations
+			tree_output_vars_float[Form("jet%d_Pt_JER_up", valid_jet)] 		= jet_Pt_JER_up->at(i);
+			tree_output_vars_float[Form("jet%d_E_JER_up", valid_jet)] 		= jet_E_JER_up->at(i);
+			tree_output_vars_float[Form("jet%d_Mass_JER_up", valid_jet)]	= jet_Mass_JER_up->at(i);
+			tree_output_vars_float[Form("jet%d_Pt_JER_down", valid_jet)] 	= jet_Pt_JER_down->at(i);
+			tree_output_vars_float[Form("jet%d_E_JER_down", valid_jet)] 	= jet_E_JER_down->at(i);
+			tree_output_vars_float[Form("jet%d_Mass_JER_down", valid_jet)]	= jet_Mass_JER_down->at(i);
+		}
+
 		tree_output_vars_float[Form("jet%d_ChargedHadEFrac", valid_jet)] 		= jet_ChargedHadEFrac->at(i);
 		tree_output_vars_float[Form("jet%d_NeutralHadEFrac", valid_jet)] 		= jet_NeutralHadEFrac->at(i);
 		tree_output_vars_float[Form("jet%d_PhoEFrac", valid_jet)] 				= jet_PhoEFrac->at(i);
@@ -584,6 +648,17 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 		tree_output_vars_float[Form("jet%d_DeepCSV_prob_c", valid_jet)] 		= jet_DeepCSV_prob_c->at(i);
 		tree_output_vars_float[Form("jet%d_DeepCSV_prob_bb", valid_jet)] 		= jet_DeepCSV_prob_bb->at(i);
 		tree_output_vars_float[Form("jet%d_DeepCSV_prob_udsg", valid_jet)] 		= jet_DeepCSV_prob_udsg->at(i);
+
+		tree_output_vars_float[ Form("jet%d_DeepJet_b_Medium__SF", valid_jet)]			= jet_DeepJet_b_Medium__SF->at(i);
+		tree_output_vars_float[ Form("jet%d_DeepJet_b_Medium__up_uncorr", valid_jet)]	= jet_DeepJet_b_Medium__up_uncorr->at(i);
+		tree_output_vars_float[ Form("jet%d_DeepJet_b_Medium__down_uncorr", valid_jet)]	= jet_DeepJet_b_Medium__down_uncorr->at(i);
+		tree_output_vars_float[ Form("jet%d_DeepJet_b_Medium__up_corr", valid_jet)]		= jet_DeepJet_b_Medium__up_corr->at(i);
+		tree_output_vars_float[ Form("jet%d_DeepJet_b_Medium__down_corr", valid_jet)]	= jet_DeepJet_b_Medium__down_corr->at(i);
+		tree_output_vars_float[ Form("jet%d_DeepJet_b_Tight__SF", valid_jet)] 			= jet_DeepJet_b_Tight__SF->at(i);
+		tree_output_vars_float[ Form("jet%d_DeepJet_b_Tight__up_uncorr", valid_jet)]	= jet_DeepJet_b_Tight__up_uncorr->at(i);
+		tree_output_vars_float[ Form("jet%d_DeepJet_b_Tight__down_uncorr", valid_jet)]	= jet_DeepJet_b_Tight__down_uncorr->at(i);
+		tree_output_vars_float[ Form("jet%d_DeepJet_b_Tight__up_corr", valid_jet)] 		= jet_DeepJet_b_Tight__up_corr->at(i);
+		tree_output_vars_float[ Form("jet%d_DeepJet_b_Tight__down_corr", valid_jet)]	= jet_DeepJet_b_Tight__down_corr->at(i);
 
 		tree_output_vars_float[Form("jet%d_PtAllTracks", valid_jet)] 			= jet_PtAllTracks->at(i);
 		tree_output_vars_float[Form("jet%d_PtAllPVTracks", valid_jet)] 			= jet_PtAllPVTracks->at(i);
@@ -705,7 +780,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 
 		for( auto bdt_tag: bdt_tags )
 			tree_output_vars_float[Form("jet%d_bdtscore_%s", valid_jet, bdt_tag.c_str())] = GetBDTScores( bdt_tag, valid_jet ); // Needs to be valid_jet and not i
-
+		
 		if( JetPassL1Trigger ){ // only fill if L1 triggered jet
 			vector<vector<float>> rechit_values = GetHcalRechitValues_Jet(i);
 			tree_output_vars_vec[Form("jet%d_rechit_E", valid_jet)]       = rechit_values.at(0);
@@ -817,6 +892,7 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 		jet_tree_output_vars_bool[pair.first] = pair.second;
 	
 	jet_tree_output_vars_int["run"] 		= runNum;
+	jet_tree_output_vars_string["era"] 	    = currentEra_;
 	jet_tree_output_vars_int["lumi"] 		= lumiNum;
 	jet_tree_output_vars_int["event"] 		= eventNum;
 	jet_tree_output_vars_int["jetIndex"] 	= jetIndex;
@@ -825,6 +901,10 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	jet_tree_output_vars_int["ele"]			= n_ele;
 	jet_tree_output_vars_int["muon"]		= n_muon;
 	jet_tree_output_vars_int["pho"]			= n_pho;
+	jet_tree_output_vars_int["perJet_PileupE"] 		= jet_PileupE->at(jetIndex);
+	jet_tree_output_vars_int["perJet_PileupIdFlag"] = jet_PileupIdFlag->at(jetIndex);
+	jet_tree_output_vars_int["perJet_PileupId"] 	= jet_PileupId->at(jetIndex);
+	
 	jet_tree_output_vars_float["eventHT"]   = EventHT();
 
 	for (int i = 0; i < HLT_Indices.size(); i++) { 

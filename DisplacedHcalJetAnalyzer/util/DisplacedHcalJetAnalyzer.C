@@ -12,17 +12,21 @@
 #include "../src/BDTHelper.cxx"
 #include "../src/TruthInfoHelper.cxx"
 #include "../src/WeightsHelper.cxx"
+#include "../src/JetVetoMapHelper.cxx"
 
 // gSystem->Load("/Users/kiley/Documents/CMS/WorkingDir/Run3-HCAL-LLP-Analysis/pugixml/pugixml_cpp.so");
 
 
 /* ====================================================================================================================== */
-void DisplacedHcalJetAnalyzer::Initialize( string infiletag, string infilepath ){
+void DisplacedHcalJetAnalyzer::Initialize( string infiletag, string systematic, string infilepath ){
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::Initialize()"<<endl;
 
 	// Initialize trigger names from NEvents_HLT histogram
-	SetTriggerNames( infilepath, "DisplacedHcalJets/NEvents_HLT");
+	SetTriggerNames();
+
+    // Initialize systematic uncertainty
+	InitializeSystematic( systematic );
 
 	// Set Categories
 	SetHistCategories();
@@ -40,12 +44,11 @@ void DisplacedHcalJetAnalyzer::Initialize( string infiletag, string infilepath )
 }
 
 /* ====================================================================================================================== */
-void DisplacedHcalJetAnalyzer( string infiletag = "", vector<string> infilepaths = {} ){
+void DisplacedHcalJetAnalyzer( string infiletag = "", string systematic = "Nominal", vector<string> infilepaths = {} ){
 
 	clock_t start_clock = clock();
 
 	cout<<"\n ----- INITIALIZING ----- \n"<<endl;
-
 
 	//gSystem->Load("/Users/kiley/Documents/CMS/WorkingDir/Run3-HCAL-LLP-Analysis/pugixml/pugixml_cpp.so");
 	
@@ -84,17 +87,26 @@ void DisplacedHcalJetAnalyzer( string infiletag = "", vector<string> infilepaths
 
 	// ----- Modify Properties ----- // 
 
-	AnalysisReader.debug		= true; 
+	AnalysisReader.debug		= false; 
 	AnalysisReader.print_counts	= true;
 	AnalysisReader.save_hists	= false;	// For output histograms
 	AnalysisReader.save_trees	= true;		// For minituples
 	AnalysisReader.NEvents 		= -1; 		// Run over specified number of events (set to -1 for ALL)
 	AnalysisReader.randomGenerator->SetSeed(0);
 
+	// ----- Load Jet Veto Maps ----- //
+	// these are from https://cms-jerc.web.cern.ch/Recommendations/#jet-veto-maps
+	// AnalysisReader.vetoMaps_["Summer22_23Sep2023"]     = AnalysisReader.LoadJetVetoMap("/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/CMSSW_13_2_0/src/cms_lpc_llp/Run3-HCAL-LLP-NTupler/data/JEC_JER/JECDatabase/jet_veto_maps/Summer22_23Sep2023/Summer22_23Sep2023_RunCD_v1.root");
+	// copied to local directory, as these files are also transfered with condor. Currently in Run/ directory
+	AnalysisReader.vetoMaps_["Summer22_23Sep2023"]     = AnalysisReader.LoadJetVetoMap("JetVetoMaps/Summer22_23Sep2023_RunCD_v1.root");
+    AnalysisReader.vetoMaps_["Summer22EE_23Sep2023"]   = AnalysisReader.LoadJetVetoMap("JetVetoMaps/Summer22EE_23Sep2023_RunEFG_v1.root");
+    AnalysisReader.vetoMaps_["Summer23Prompt23"]       = AnalysisReader.LoadJetVetoMap("JetVetoMaps/Summer23Prompt23_RunC_v1.root");
+    AnalysisReader.vetoMaps_["Summer23BPixPrompt23"]   = AnalysisReader.LoadJetVetoMap("JetVetoMaps/Summer23BPixPrompt23_RunD_v1.root");
+
 	// ----- Initialize ----- // 
 
 
-	AnalysisReader.Initialize( infiletag, infilepaths.at(0) ); 
+	AnalysisReader.Initialize( infiletag, systematic, infilepaths.at(0) ); 
 	
 	//TString outfilename = Form( "minituple_%s.root", infiletag.c_str() ); // Not yet
 	TString outfilename = Form( "minituple_%s.root", infiletag.c_str() );
@@ -118,10 +130,10 @@ void DisplacedHcalJetAnalyzer( string infiletag = "", vector<string> infilepaths
 }
 
 /* ====================================================================================================================== */
-void DisplacedHcalJetAnalyzer( string infiletag = "", string infilepath = "" ){
+void DisplacedHcalJetAnalyzer( string infiletag = "", string systematic = "", string infilepath = "" ){
 
 	vector<string> infilepaths = { infilepath };
-	DisplacedHcalJetAnalyzer( infiletag, infilepaths );
+	DisplacedHcalJetAnalyzer( infiletag, systematic, infilepaths );
 
 }
 
@@ -130,11 +142,15 @@ int main(int argc, char** argv) { // For running in compiled mode
 
 	int Nargs = argc;
 
-	if( Nargs > 2 ){
-	    vector<string> infilepaths;
-	    for( int i = 2; i < Nargs; i++ ) infilepaths.push_back( argv[i] ); 
+	if( Nargs > 3 ){
 
-	    DisplacedHcalJetAnalyzer( argv[1], infilepaths );
+		string infiletag  = argv[1];
+		string systematic = argv[2];
+
+	    vector<string> infilepaths;
+	    for( int i = 3; i < Nargs; i++ ) infilepaths.push_back( argv[i] ); 
+
+	    DisplacedHcalJetAnalyzer( infiletag, systematic, infilepaths );
 
 	} else {
 		cout<<"ERROR: Not enough arguments!"<<endl;

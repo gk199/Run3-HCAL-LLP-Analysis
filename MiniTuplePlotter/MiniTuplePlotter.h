@@ -863,7 +863,7 @@ public :
 			if (output_file_name == "Plotratio_-1 MULT jet0_S_etaeta MULT jet0_S_phiphi + sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2 MULT jet0_S_etaeta MULT jet0_S_phiphi - sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2_norm_log_Overlay_v3.0") output_file_name = "Plotratio_jet0_Smajor_Sminor_norm_log_Overlay_v3.0";
 			if (output_file_name == "Plotratio_-1 MULT jet0_S_etaeta MULT jet0_S_phiphi + sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2 MULT jet0_S_etaeta MULT jet0_S_phiphi - sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2_norm_log_JetpTBins_Jet40_v3.0_MC") output_file_name = "Plotratio_jet0_Smajor_Sminor_norm_log_JetpTBins_Jet40_v3.0_MC";
 			if (output_file_name == "Plotratio_-1 MULT jet0_S_etaeta MULT jet0_S_phiphi + sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2 MULT jet0_S_etaeta MULT jet0_S_phiphi - sqrt jet0_S_etaeta - jet0_S_phiphiMULTjet0_S_etaeta - jet0_S_phiphi + 4MULTjet0_S_etaphi  DIV 2_norm_log_JetpTBins_Jet40_v3.0") output_file_name = "Plotratio_jet0_Smajor_Sminor_norm_log_JetpTBins_Jet40_v3.0";
-			// fout = new TFile( "Figures/Figures_"+output_file_name+".root", "RECREATE"); // if want separate root file for each plot
+			fout = new TFile( "Figures/Figures_"+output_file_name+".root", "RECREATE"); // if want separate root file for each plot
 			
 			if( plot_type == "ratio" ){
 				myCanvas->cd(2);
@@ -873,13 +873,15 @@ public :
 				hs_ratio->Draw("nostack"); //, hist"); // bug, not using uncertainty propagation, seems to try to do a per event sqrt N, errors 0-2
 				//hs_ratio->SetMinimum(0.0001);
 				//hs_ratio->SetMaximum(0.1);
-				hs_ratio->SetMaximum(1.);
+				hs_ratio->SetMaximum(2.);
 				//gPad->Update();
 				myCanvas->cd(1);
 			}
 
 			if( plot_type == "efficiency" || plot_type == "acceptance"){
 				myCanvas->cd(2);
+				gPad->SetTickx(1);
+				gPad->SetTicky(1);
 				// need to get the first hist, this will be the denominator for the efficiency plot when listed first in compare cuts (h_total)
 				int i = 0;
 				// TLegend* leg  = new TLegend(legx1-0.45,legy1,legx2-0.45,legy2);
@@ -905,7 +907,7 @@ public :
 							pEff->SetLineWidth(3.);
 
 							pEff->SetMarkerStyle(52 + i); // for a x as the marker to differentiate the overlayed plots (53 = circle, 55 = triangle)
-							pEff->SetMarkerSize(1.7);
+							pEff->SetMarkerSize(2);
 							pEff->SetMarkerColor(colors[i]);
 
 							if (i == 1) pEff->Draw();
@@ -929,8 +931,12 @@ public :
 							if (i == size(hist_tags)-1 ) {
 								leg->Draw();
 								// StampCMS( "Simulation Preliminary", 140., 0.12, 0.92, 0.06, 2 ); // 0 means no energy, 1 means sqrt s, 2 means (13.6 TeV) (should we have this for simulation?)
-								StampCMS( "Simulation", 140., 0.12, 0.92, 0.06, 2 ); // 0 means no energy, 1 means sqrt s, 2 means (13.6 TeV) (should we have this for simulation?)
-								if (multiple) StampLLP( 0.14, 0.84, 0.04, mass_lifetime ); // top left // trigger paper plots
+								if (PlotParams_temp.hist_name == "perJet_MatchedLLP_DecayR") StampCMS( "Simulation", 140., 0.12, 0.83, 0.06, 3 ); // CMS inside frame, 13.6 outside
+								else StampCMS( "Simulation", 140., 0.12, 0.92, 0.06, 2 ); // 0 means no energy, 1 means sqrt s, 2 means (13.6 TeV) (should we have this for simulation?)
+								if (multiple) {
+									if (PlotParams_temp.hist_name == "perJet_MatchedLLP_DecayR") StampLLP( 0.14, 0.74, 0.04, mass_lifetime ); 
+									else StampLLP( 0.14, 0.84, 0.04, mass_lifetime ); // top left // trigger paper plots
+								}
 								// else if (multiple && PlotParams_temp.hist_name == "eventHT") StampLLP( 0.56, 0.15, 0.03, mass_lifetime ); // lower right, no mass / ctau written for multiple, works when hard cuts on jet pt and event HT
 								else if (PlotParams_temp.hist_name == "perJet_MatchedLLP_DecayR" ) StampLLP( 0.14, 0.86, 0.03, mass_lifetime ); // top left
 								else if (PlotParams_temp.hist_name == "eventHT" && mass_lifetime[0] == "125" ) StampLLP( 0.6, 0.45, 0.03, mass_lifetime ); // middle right
@@ -977,9 +983,51 @@ public :
 	}
 
 	// -------------------------------------------------------------------------------------
-	void Draw2DPlot( PlotParams myPlotParams_x, PlotParams myPlotParams_y, string filetag_treename, TCut cut_compare, int i ) {
+	void Draw2DPlot( PlotParams myPlotParams_x, PlotParams myPlotParams_y, string filetag_treename, TCut cut_compare, int i , TCut cut_base = "") {
 		if( debug) cout<<"MiniTuplePlotter::Draw2DPlot()"<<endl;
 
+    	// --------------------------------------------------------
+    	// Ratio Mode
+    	// --------------------------------------------------------
+		if (cut_base != "") {
+			cout << "running ratio plots" << endl;
+			TH2F* h_base = (TH2F*)GetHist2D(myPlotParams_x, myPlotParams_y, filetag_treename, cut_base);
+			TH2F* h_comp = (TH2F*)GetHist2D(myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare);
+
+			if (!h_base || !h_comp) {
+				cerr << "Error: One of the input histograms is null!" << endl;
+				return;
+			}
+
+			TH2F* h_ratio = (TH2F*)h_comp->Clone("h_ratio");
+			h_ratio->SetTitle("Ratio: Mistag Rate");
+			h_ratio->Divide(h_base);  // Performs bin-by-bin division
+
+			TCanvas* c = new TCanvas("c_ratio", "Ratio Plot", 1300, 1200);
+			c->SetRightMargin(0.14);
+			c->SetLeftMargin(0.14);
+			c->SetTopMargin(0.12);
+			c->SetBottomMargin(0.12);
+			if (plot_log) gPad->SetLogz();
+
+			h_ratio->GetZaxis()->SetTitle("Ratio");
+			h_ratio->Draw("COLZ");
+
+			StampCuts(0.12, 0.91, 0.02);
+			StampText(0.7, 0.91, 0.04, WriteSelection);
+			StampText(0.55, 0.91, 0.03, (filetag_treename.substr(0, 27)).c_str());
+
+			TString output_file_name = FormatMyString(myPlotParams_y.hist_name + "_vs_" + myPlotParams_x.hist_name);
+			TString cut_title = Form("Ratio_%s_over_%s",
+									GetBetterCutTitle(cut_compare).Data(),
+									GetBetterCutTitle(cut_base).Data());
+
+			c->SaveAs(Form(output_directory + "/Plot2D_" + output_file_name + "_Cut" + cut_title(0, 24) +  "_%s.png", output_file_tag.c_str()));
+			delete c;
+			return;
+		}
+		
+		// regular 2D plot
 		TH2F* h2 = (TH2F*)GetHist2D( myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare );
 
 		TCanvas *myCanvas = new TCanvas("c", "c", 1300, 1200);
@@ -1047,7 +1095,7 @@ public :
 	}
 
 	// -------------------------------------------------------------------------------------
-	void Plot2D( PlotParams myPlotParams_x, PlotParams myPlotParams_y ){
+	void Plot2D( PlotParams myPlotParams_x, PlotParams myPlotParams_y, string plot_type = "" ){
 		if( debug) cout<<"MiniTuplePlotter::Plot2D()"<<endl;		
 
 		GetTrees();
@@ -1060,15 +1108,27 @@ public :
 				file_cuts_compare = {""};
 			else
 				file_cuts_compare = cuts_compare;
-			for( auto cut_compare: file_cuts_compare ){
-        		i++;
-				Draw2DPlot(myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare, i);
+			// --------------------------------------------------------
+			// Ratio Mode
+			// --------------------------------------------------------
+			if (plot_type == "ratio" && file_cuts_compare.size() >= 2) {
+				TCut cut_base = file_cuts_compare[0];
+				TCut cut_compare = file_cuts_compare[1];
+
+				i++; // You may increment once for ratio
+				Draw2DPlot(myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare, i, cut_base);
+			}
+			else {
+				for( auto cut_compare: file_cuts_compare ){
+					i++;
+					Draw2DPlot(myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare, i);
+				}
 			}
 		}
 	}
 
 	// -------------------------------------------------------------------------------------
-	void PlotMany2D( ){
+	void PlotMany2D( string plot_type = "" ){
 		if( debug) cout<<"MiniTuplePlotter::PlotMany2D()"<<endl;		
 
 		GetTrees();
@@ -1084,9 +1144,25 @@ public :
 					file_cuts_compare = {""};
 				else
 					file_cuts_compare = cuts_compare;
-				for( auto cut_compare: file_cuts_compare ){
-          			i++;
-					Draw2DPlot(myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare, i);
+				// --------------------------------------------------------
+				// Ratio Mode
+				// --------------------------------------------------------
+				if (plot_type == "ratio" && file_cuts_compare.size() >= 2) {
+					TCut cut_base    = file_cuts_compare[0]; // denominator
+					TCut cut_compare = file_cuts_compare[1]; // numerator
+
+					i++; // Optional: can be 0 if you only need one output
+					Draw2DPlot(myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare, i, cut_base);
+				}
+
+				// --------------------------------------------------------
+				// Standard Mode
+				// --------------------------------------------------------
+				else {
+					for( auto cut_compare: file_cuts_compare ){
+						i++;
+						Draw2DPlot(myPlotParams_x, myPlotParams_y, filetag_treename, cut_compare, i);
+					}
 				}
 			}
 		}

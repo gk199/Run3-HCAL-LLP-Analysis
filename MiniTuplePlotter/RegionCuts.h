@@ -270,3 +270,5 @@ TCut Cut_VR = Form("jet1_scores_inc_train80 > 0.2 && jet1_scores_inc_train80 <= 
 
 TCut Cut_CR_jet0 = Form("jet0_scores_inc_train80 >= 0 && jet0_scores_inc_train80 <= 0.2 && jet0_InclTagCand == 1");
 TCut Cut_VR_jet0 = Form("jet0_scores_inc_train80 > 0.2 && jet0_scores_inc_train80 <= 0.9 && jet0_InclTagCand == 1");
+
+TCut Cut_RunExclusion = Form("run != 367772 && run != 368384 && run != 368412 && run != 370102 && run != 370472 && run != 370522 && run != 370579 && run != 370667");

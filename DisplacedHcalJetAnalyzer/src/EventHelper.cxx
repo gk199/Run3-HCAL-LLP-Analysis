@@ -34,6 +34,14 @@ float DisplacedHcalJetAnalyzer::EventHT(){
 	return HT;
 }
 
+/* ====================================================================================================================== */
+void DisplacedHcalJetAnalyzer::SetEra(){
+
+	if ( debug ) cout<<"DisplacedHcalJetAnalyzer::SetEra()"<<endl;
+
+	currentEra_ = *era; 
+
+}
 
 /* ====================================================================================================================== */
 bool DisplacedHcalJetAnalyzer::PassL1SingleLLPJet(){
@@ -84,9 +92,9 @@ bool DisplacedHcalJetAnalyzer::PassEventPreselection( bool PassedHLT, bool Passe
 
 	// Pass HLT // 
 
-	if( !PassedHLT ){  // check again if already false
-		if( !PassHLTDisplacedJet() ) return false;
-	}
+	//if( !PassedHLT ){  // check again if already false
+	//	if( !PassHLTDisplacedJet() ) return false;
+	//}
 
 	// Veto on W Plus Jets //
 
@@ -194,7 +202,7 @@ bool DisplacedHcalJetAnalyzer::PassWPlusJetsSelection() {
 		}
 	}
 
-	if (met_SumEt < 30) return false;										// should this be met pT or eT?
+	// if (met_SumEt < 30) return false;										// should this be met pT or eT?
 	if ( electron && muon ) return false;									// reject events with 2 leptons passing
 	if ( !electron && !muon ) return false;									// reject events with no leptons passing
 	if ( (n_ele_over20 + n_muon_over20) > 1 ) return false;					// reject events with additional leptons over 20 GeV
@@ -253,7 +261,7 @@ bool DisplacedHcalJetAnalyzer::PassLeptonVeto() {
 		if (muon_Pt->at(i) > 20 && abs(muon_Eta->at(i)) < 2.4 && transverseM_muon > 55 && muon == false) muon = true;
 	}
 
-	if (met_SumEt < 30) return false;										// should this be met pT or eT?
+	// if (met_SumEt < 30) return false;										// should this be met pT or eT?
 	// if ( electron || muon ) return false;								// require neither electron or muon is found
 	if ( (n_ele_over20 + n_muon_over20) > 0 ) return false;					// reject events with any leptons over 20 GeV
 
@@ -340,4 +348,46 @@ bool DisplacedHcalJetAnalyzer::PassZmumuSelection() {
 
 	if ( matched_jet )return true;
 	else return false;
+}
+
+/* ====================================================================================================================== */
+void DisplacedHcalJetAnalyzer::InitializeSystematic( string systematic ){
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::InitializeSystematic()"<<endl;
+
+	vector<string> valid_systematic_names = { "None", "Nominal", "JER_up", "JER_down" };
+
+	systematic_name = systematic;
+
+	if ( systematic == "None" or systematic == "Nominal" ){
+		run_systematic = false; 
+		cout<<"No systematics applied: systematic = "<<systematic<<endl;
+	} else if (std::find(valid_systematic_names.begin(), valid_systematic_names.end(), systematic) != valid_systematic_names.end()) {
+		run_systematic = true;
+		cout<<"Applying a systematic variation: systematic = "<<systematic<<endl;
+	} else {
+		run_systematic = false;
+		cout<<"WARNING: Systematic variation not recognized. Running with systematic variation: Nominal"<<endl;
+		cout<<"   --> Input: "<<systematic<<" will be ignored"<<endl;
+	}
+
+}
+
+/* ====================================================================================================================== */
+void DisplacedHcalJetAnalyzer::SetEventSystematic(){
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::SetEventSystematic()"<<endl;
+
+	if( isData || !run_systematic ) return; 
+
+	if ( systematic_name == "JER_up" ){
+		jet_Pt   = jet_Pt_JER_up;
+		jet_E    = jet_E_JER_up;
+		jet_Mass = jet_Mass_JER_up;
+	} else if ( systematic_name == "JER_down" ){
+		jet_Pt   = jet_Pt_JER_down;
+		jet_E    = jet_E_JER_down;
+		jet_Mass = jet_Mass_JER_down;
+	} 
+
 }

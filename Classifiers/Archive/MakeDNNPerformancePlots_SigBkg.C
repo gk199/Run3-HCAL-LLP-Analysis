@@ -161,7 +161,7 @@ TGraphAsymmErrors* MakeSigEffVsBkgEffGraph(TH1F* signalHist, TH1F* bkgHist, stri
 
   TGraphAsymmErrors *tmpSigEffVsBkgEff = new TGraphAsymmErrors (nPoints, BkgEff, SigEff, BkgEffErrLow, BkgEffErrHigh, SigEffErrLow, SigEffErrHigh );
   tmpSigEffVsBkgEff->SetName(name.c_str());
-  tmpSigEffVsBkgEff->SetTitle(Form("ROC Curve for LLP (mh=%s) vs. W+jets %s", Label.c_str(), plotType.c_str()));
+  tmpSigEffVsBkgEff->SetTitle(Form("ROC Curve for LLP (mh=%s) vs. background %s", Label.c_str(), plotType.c_str()));
   tmpSigEffVsBkgEff->GetXaxis()->SetTitle("Bkg Eff");
   tmpSigEffVsBkgEff->GetYaxis()->SetTitle("Signal Eff");
   tmpSigEffVsBkgEff->GetXaxis()->SetRangeUser(0,1);
