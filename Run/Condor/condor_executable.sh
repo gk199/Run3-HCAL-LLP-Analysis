@@ -31,6 +31,7 @@ unzip DisplacedHcalJetAnalyzer.zip > /dev/null
 
 cd DisplacedHcalJetAnalyzer/
 source compile.sh
+mkdir exe
 cd ../
 
 echo "Exporting LD_LIBRARY_PATH..."
