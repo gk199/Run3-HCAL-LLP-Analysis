@@ -77,7 +77,7 @@ PlotParams P_jet0_TimingTowers_pt1	 	={"jet0_TimingTowers_pt1", "Number of Timin
 PlotParams P_jet0_TimingTowers	 		={"jet0_TimingTowers", "Number of Timing Flagged Towers with dR<0.4", "Number of Timing Flagged Towers", -0.5, 8.5};
 PlotParams P_jet0_FlaggedTowers_pt1	 	={"jet0_TimingTowers_pt1 + jet0_DepthTowers_pt1", "Number of Timing OR Depth Flagged Towers with dR<0.1", "Number of Timing or Depth Flagged Towers", -0.5, 8.5};
 PlotParams P_jet0_FlaggedTowers	 		={"jet0_TimingTowers + jet0_DepthTowers", "Number of Timing OR Depth Flagged Towers with dR<0.4", "Number of Timing or Depth Flagged Towers", -0.5, 8.5};
-PlotParams P_jet0_dR_L1jet	 			={"jet0_dR_L1jet", "dR between PF and L1 jet", "dR", 0, 0.5};
+PlotParams P_jet0_dR_L1jet	 			={"jet0_dR_L1jet", "dR between reco and L1 jet", "dR", 0, 0.5};
 
 // tracks
 PlotParams P_jet0_Track0PtFrac			= {"jet0_Track0Pt / jet0_Pt", "Leading Jet: Leading Track p_{T} / Jet p_{T}", "Track Energy Fraction", 0, 1 };
