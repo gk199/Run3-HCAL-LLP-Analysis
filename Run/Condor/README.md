@@ -67,7 +67,7 @@ cd Run/Condor/VirtualEnvs
 
 python3.9 -m venv keras2pt13pt1
 source keras2pt13pt1/bin/activate
-pip install -r ../../../Classifiers/requirements_minimal.txt
+pip install -r ../../../Classifiers/Archive/requirements_minimal.txt
 
 # the python virtual environment was used for v4 and v5. A conda virtual env was also tested: 
 conda create --name CondaDNNenv_py3pt9 python=3.9

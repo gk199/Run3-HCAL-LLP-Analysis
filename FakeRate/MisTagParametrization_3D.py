@@ -26,13 +26,13 @@ c_tag_bins = [0, 0.102, 1.0]
 b_tag_bins = np.array(b_tag_bins, dtype=float)
 c_tag_bins = np.array(c_tag_bins, dtype=float)
 
-DNN_cut = 0.8
+DNN_cut = 0.8 # depth DNN score, the one to vary 
 DNN_cut_inc = 0.9
 
 runs_to_exclude = [367230, 367772, 368331, 368440, 368764, 370436, 370579, 370790] # 2023 runs, based on earlier DNN
 runs_to_exclude = [367772, 368384, 368412, 370102, 370472, 370522, 370579, 370667] # 2023 runs, from depth DNN with LLP decaying anywhere
 
-era = "2023 Bv1-Dv2" # automatically switches which input minituples to use based on this name
+era = "2023 Cv1-Dv2" # automatically switches which input minituples to use based on this name
 
 Zmu = False
 if Zmu: era = "2023 Bv1-Dv2 Zmu"
@@ -98,10 +98,12 @@ def MisTagParametrization(tree, option=""):
 
     # Setup cuts for CR and VR. CR = jet1_scores_inc between 0-0.2. VR = jet1_scores_inc between 0.2-0.9. Mistag means jet0_scores over "DNN_cut"
     run_exclusion = ExcludedCut("run", runs_to_exclude)
+    run_exclusion = "" # just for 5.1 testing, TODO remove this for final version
     if debug: print(run_exclusion)
 
     # deltaPhi_exclusion = ROOT.TCut("(abs(jet0_Phi) > 0.2 && abs(jet0_Phi) < 2.95) || abs(jet0_jet1_dPhi) > 0.2") + GetCut("Flag_METFilters_2022_2023_PromptReco", 1)
     deltaPhi_exclusion = ROOT.TCut("abs(jet0_jet1_dPhi) > 0.2") + GetCut("Flag_METFilters_2022_2023_PromptReco", 1) # stricter than just beam halo, also addressing colimated jets
+    deltaPhi_exclusion = ROOT.TCut("abs(jet0_jet1_dPhi) > 0.2") # just for 5.1 testing, TODO remove this for final version # stricter than just beam halo, also addressing colimated jets
     deltaPhi_exclusion += GetCut("jet0_DeepCSV_prob_b", [-0.1,0.5]) + GetCut("jet1_DeepCSV_prob_b", [-0.1,0.5]) # require two jets are not highly b tagged
     if debug: print(deltaPhi_exclusion)
 
@@ -956,21 +958,21 @@ def main():
 
     print(era)
 
-    if era == "2023 Bv1":   infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Bv1_allscores.root"]
-    elif era == "2023 Cv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv1_allscores.root"]
-    elif era == "2023 Cv2": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv2_allscores.root"]
-    elif era == "2023 Cv3": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv3_allscores.root"]
-    elif era == "2023 Cv4": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv4_allscores.root"]
-    elif era == "2023 Dv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Dv1_allscores.root"]
-    elif era == "2023 Dv2" and not CNN: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Dv2_allscores.root"]
+    if era == "2023 Bv1":   infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Bv1_scores.root"]
+    elif era == "2023 Cv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv1_scores.root"]
+    elif era == "2023 Cv2": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv2_scores.root"]
+    elif era == "2023 Cv3": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv3_scores.root"]
+    elif era == "2023 Cv4": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv4_scores.root"]
+    elif era == "2023 Dv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv1_scores.root"]
+    elif era == "2023 Dv2" and not CNN: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv2_scores.root"]
     elif era == "2023 Dv2" and CNN: infilepath_list = ["/afs/cern.ch/work/f/fsimpson/public/minituple_outputs/minituple_Run2023D-EXOLLPJetHCAL-PromptReco-v2_partial28k-v4-scores_added.root"]
-    else: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Bv1_allscores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv1_allscores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv2_allscores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv3_allscores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv4_allscores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Dv1_allscores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Dv2_allscores.root"]
+    else: infilepath_list = [# "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Bv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv2_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv3_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv4_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv2_scores.root"]
     if LLPskim: combined_tree = GetData(infilepath_list, label)
 
     infilepath_list_Zmu = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituples_Zmu_2023Bv1_allscores.root",
@@ -987,13 +989,16 @@ def main():
         print("LLP skim tree successfully accessed, will be passed to MisTagParametrization")
         #MisTagParametrization(combined_tree)
 
+        # for OutputToLatex_combined.py:
         print("\n \n ********************* \n DNN score = " + str(DNN_cut) + " \n ********************* \n \n")
-        print("\n \n ********************* \n depth, b-tagged \n ********************* \n \n")
+        print("\n \n ********************* \n depth \n ********************* \n \n")
         MisTagParametrization(combined_tree, "depth")
         print("\n \n ********************* \n depth, low PV \n ********************* \n \n")
         MisTagParametrization(combined_tree, "depth, low PV")
         print("\n \n ********************* \n depth, high PV \n ********************* \n \n")
         MisTagParametrization(combined_tree, "depth, high PV")
+
+        # for OutputToLatex.py:
         # print("\n \n ********************* \n depth, b-tagged \n ********************* \n \n")
         # MisTagParametrization(combined_tree, "depth, b tagged") # run with lower DNN scores otherwise nothing predicted...
         # print("\n \n ********************* \n depth, not b-tagged \n ********************* \n \n")
