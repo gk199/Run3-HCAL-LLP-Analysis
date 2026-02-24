@@ -27,6 +27,14 @@ Submit all (modify first):
 source submit_all.sh
 ```
 
+## Score Addition Options
+In the case where the minituples ran but the score addition needs to be re-run, this is generally quite fast and a bash script is set up to do so:
+```
+cd ../../Classifiers/
+source VirtualEnvs/keras2pt13pt1/bin/activate  
+./AddScores.sh
+```
+
 ## Examples of submissions (mostly deprecated)
 ```
 voms-proxy-init --voms cms 

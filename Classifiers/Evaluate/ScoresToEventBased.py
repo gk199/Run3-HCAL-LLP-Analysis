@@ -49,8 +49,8 @@ class DataProcessor:
             print(f"Evaluating on tree: {self.tree}")
 
             # below block is copied from runner-v4 since got errors at runtime when running locally, likely from jagged arrays
-            include_patterns = ["jet0*", "jet1*", "jet2*", "jet3*", "Pass*"]
-            exclude_patterns = ["*_rechit_*"] # these have type "awkward" which doesn't work with h5 format
+            include_patterns = ["*"]
+            exclude_patterns = ["*_rechit_*", "HLT*"] # these have type "awkward" which doesn't work with h5 format
             all_branches = sig.keys()
             # Match includes
             included = set()
@@ -161,7 +161,6 @@ class DataProcessor:
             for i in range(num_jets):
                 dataframe['jet'+str(i)+'_scores_depth_LLPanywhere'] = scores[i][:, 0] # 0 is the signal class
                 dataframe['jet'+str(i)+'_scores_inc_train80'] = scores_inc[i][:, 0] # 0 is the signal class
-                print("here")
         if labels is not None:
             dataframe['classID'] = labels
         if os.path.isfile(filename): 

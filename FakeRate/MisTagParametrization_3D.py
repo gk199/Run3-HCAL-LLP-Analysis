@@ -33,6 +33,7 @@ runs_to_exclude = [367230, 367772, 368331, 368440, 368764, 370436, 370579, 37079
 runs_to_exclude = [367772, 368384, 368412, 370102, 370472, 370522, 370579, 370667] # 2023 runs, from depth DNN with LLP decaying anywhere
 
 era = "2023 Cv1-Dv2" # automatically switches which input minituples to use based on this name
+# era = "2022-2023" # automatically switches which input minituples to use based on this name
 
 Zmu = False
 if Zmu: era = "2023 Bv1-Dv2 Zmu"
@@ -966,13 +967,18 @@ def main():
     elif era == "2023 Dv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv1_scores.root"]
     elif era == "2023 Dv2" and not CNN: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv2_scores.root"]
     elif era == "2023 Dv2" and CNN: infilepath_list = ["/afs/cern.ch/work/f/fsimpson/public/minituple_outputs/minituple_Run2023D-EXOLLPJetHCAL-PromptReco-v2_partial28k-v4-scores_added.root"]
-    else: infilepath_list = [# "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Bv1_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv1_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv2_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv3_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv4_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv1_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv2_scores.root"]
+    else: infilepath_list = [
+                        # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/Scores_ReducedBranches/minituple_data_2022Dv1_scores.root",
+                        # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/Scores_ReducedBranches/minituple_data_2022Ev1_scores.root",
+                        # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/Scores_ReducedBranches/minituple_data_2022Fv1_scores.root",
+                        # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/Scores_ReducedBranches/minituple_data_2022Gv1_scores.root",
+                        # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Bv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/Scores_ReducedBranches/minituple_data_2023Cv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/Scores_ReducedBranches/minituple_data_2023Cv2_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/Scores_ReducedBranches/minituple_data_2023Cv3_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/Scores_ReducedBranches/minituple_data_2023Cv4_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/Scores_ReducedBranches/minituple_data_2023Dv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/Scores_ReducedBranches/minituple_data_2023Dv2_scores.root"]
     if LLPskim: combined_tree = GetData(infilepath_list, label)
 
     infilepath_list_Zmu = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituples_Zmu_2023Bv1_allscores.root",
@@ -990,27 +996,27 @@ def main():
         #MisTagParametrization(combined_tree)
 
         # for OutputToLatex_combined.py:
-        print("\n \n ********************* \n DNN score = " + str(DNN_cut) + " \n ********************* \n \n")
-        print("\n \n ********************* \n depth \n ********************* \n \n")
-        MisTagParametrization(combined_tree, "depth")
-        print("\n \n ********************* \n depth, low PV \n ********************* \n \n")
-        MisTagParametrization(combined_tree, "depth, low PV")
-        print("\n \n ********************* \n depth, high PV \n ********************* \n \n")
-        MisTagParametrization(combined_tree, "depth, high PV")
+        # print("\n \n ********************* \n DNN score = " + str(DNN_cut) + " \n ********************* \n \n")
+        # print("\n \n ********************* \n depth \n ********************* \n \n")
+        # MisTagParametrization(combined_tree, "depth")
+        # print("\n \n ********************* \n depth, low PV \n ********************* \n \n")
+        # MisTagParametrization(combined_tree, "depth, low PV")
+        # print("\n \n ********************* \n depth, high PV \n ********************* \n \n")
+        # MisTagParametrization(combined_tree, "depth, high PV")
 
         # for OutputToLatex.py:
-        # print("\n \n ********************* \n depth, b-tagged \n ********************* \n \n")
-        # MisTagParametrization(combined_tree, "depth, b tagged") # run with lower DNN scores otherwise nothing predicted...
-        # print("\n \n ********************* \n depth, not b-tagged \n ********************* \n \n")
-        # MisTagParametrization(combined_tree, "depth, not b tagged")
-        # print("\n \n ********************* \n depth, b-tagged, low PV \n ********************* \n \n")
-        # MisTagParametrization(combined_tree, "depth, b tagged, low PV") # run with lower DNN scores otherwise nothing predicted...
-        # print("\n \n ********************* \n depth, not b-tagged, low PV \n ********************* \n \n")
-        # MisTagParametrization(combined_tree, "depth, not b tagged, low PV")
-        # print("\n \n ********************* \n depth, b-tagged, high PV \n ********************* \n \n")
-        # MisTagParametrization(combined_tree, "depth, b tagged, high PV") # run with lower DNN scores otherwise nothing predicted...
-        # print("\n \n ********************* \n depth, not b-tagged, high PV \n ********************* \n \n")
-        # MisTagParametrization(combined_tree, "depth, not b tagged, high PV")
+        print("\n \n ********************* \n depth, b-tagged \n ********************* \n \n")
+        MisTagParametrization(combined_tree, "depth, b tagged") # run with lower DNN scores otherwise nothing predicted...
+        print("\n \n ********************* \n depth, not b-tagged \n ********************* \n \n")
+        MisTagParametrization(combined_tree, "depth, not b tagged")
+        print("\n \n ********************* \n depth, b-tagged, low PV \n ********************* \n \n")
+        MisTagParametrization(combined_tree, "depth, b tagged, low PV") # run with lower DNN scores otherwise nothing predicted...
+        print("\n \n ********************* \n depth, not b-tagged, low PV \n ********************* \n \n")
+        MisTagParametrization(combined_tree, "depth, not b tagged, low PV")
+        print("\n \n ********************* \n depth, b-tagged, high PV \n ********************* \n \n")
+        MisTagParametrization(combined_tree, "depth, b tagged, high PV") # run with lower DNN scores otherwise nothing predicted...
+        print("\n \n ********************* \n depth, not b-tagged, high PV \n ********************* \n \n")
+        MisTagParametrization(combined_tree, "depth, not b tagged, high PV")
 
         # MisTagParametrization(combined_tree, "depth, c tagged")
         # MisTagParametrization(combined_tree, "depth, bb tagged")
