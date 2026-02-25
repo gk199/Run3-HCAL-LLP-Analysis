@@ -2,6 +2,7 @@ import re
 from collections import defaultdict
 
 score = "8"
+year = "2022"
 
 def parse_file(filename):
     with open(filename, 'r') as f:
@@ -108,15 +109,15 @@ def generate_latex_table(data):
         lines.append(f"        & Predicted SR & {entry(jet, 'b tagged', 'Predicted SR')} & {entry(jet, 'not b tagged', 'Predicted SR')} \\\\ \\hline")
 
     lines.append("    \\end{tabular}")
-    lines.append("    \\caption{Depth DNN score = 0." + score + ".}")
-    lines.append("    \\label{Table:VRclosure_pt" + score + "}")
+    lines.append("    \\caption{Depth DNN score = 0." + score + " for " + year + ".}")
+    lines.append("    \\label{Table:VRclosure_pt" + score + "_" + year + "}")
     lines.append("\\end{table}")
     return "\n".join(lines)
 
 
 # ---- USAGE ----
 if __name__ == "__main__":
-    filename = "DNN_pt" + score + "_forPython.txt"  # Change this to your input file
+    filename = "DNN_pt" + score + "_" + year + "_forPython.txt"  # Change this to your input file
     data = parse_file(filename)
 
     for key, modes in data.items():
