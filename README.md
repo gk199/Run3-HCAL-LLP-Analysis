@@ -81,6 +81,11 @@ Created from minituples, in the `Classifiers` directory. The Inclusive DNN is ru
 
 Plotters for the ROC curves and DNN scores are also included in this directory. 
 
+## Steps after Minituples are Produced
+`CutflowAnalysis` has scripts to evaluate signal and data with various analysis cuts, and the output is written to LaTeX format. 
+
+The background estimation is done with the Mistag Parameterization analysis in `FakeRate`, producing numerous VR and CR mistag rate plots and LaTeX tables of the expected and observed number of mistagged events in data (SR is blinded). 
+
 ## Locations on lxplus
 This directory: `/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/LLP_NtuplerAnalyzer`.
 
