@@ -1,8 +1,6 @@
 import re
 from collections import defaultdict
-
-score = "8"
-year = "2022"
+import argparse
 
 def parse_file(filename):
     with open(filename, 'r') as f:
@@ -85,7 +83,7 @@ def format_observed(val, stat):
     return f"{val:.2f} $\\pm$ {stat:.2f} (stat)"
 
 
-def generate_latex_table(data):
+def generate_latex_table(data, year, score):
     def entry(jet, tag, key):
         if key == 'Observed VR':
             val, stat = data[(jet, tag)]['central'][key]
@@ -109,23 +107,49 @@ def generate_latex_table(data):
         lines.append(f"        & Predicted SR & {entry(jet, 'b tagged', 'Predicted SR')} & {entry(jet, 'not b tagged', 'Predicted SR')} \\\\ \\hline")
 
     lines.append("    \\end{tabular}")
-    lines.append("    \\caption{Depth DNN score = 0." + score + " for " + year + ".}")
-    lines.append("    \\label{Table:VRclosure_pt" + score + "_" + year + "}")
+    lines.append("    \\caption{Depth DNN score = " + score + " for " + year + ".}")
+    lines.append("    \\label{Table:VRclosure_pt" + score[-1] + "_" + year + "}")
     lines.append("\\end{table}")
     return "\n".join(lines)
 
+def parseArgs():
+    """ Parse command-line arguments
+    """
+    parser = argparse.ArgumentParser(
+        add_help=True,
+        description=''
+    )
+
+    parser.add_argument("-e", "--era",              action="store", help="era (2022, 2023, or specify year and era)", required=True) 
+    parser.add_argument("-s", "--DNN_cut",          action="store", default=0.8, help="Depth DNN score cut (default: 0.8)")
+    parser.add_argument("-b", "--b_tag_combined",   action="store_true", help="combined b-tag categories (True if -b passed) or not (False no -b)")
+    
+    args = parser.parse_args()
+
+    return args 
 
 # ---- USAGE ----
 if __name__ == "__main__":
-    filename = "DNN_pt" + score + "_" + year + "_forPython.txt"  # Change this to your input file
+
+    print("Parsing arguments...")
+
+    args = parseArgs()
+    year = args.era   
+    score = args.DNN_cut
+    b_tag_combined = args.b_tag_combined
+    btag_str = "_combined" if b_tag_combined else ""
+
+    filename = "DNN_pt" + score[-1] + "_" + year + "_forPython" + btag_str + ".txt"  # Change this to your input file
     data = parse_file(filename)
 
-    for key, modes in data.items():
-        print(f"\n{key}:")
-        for mode, values in modes.items():
-            print(f"  {mode}:")
-            for name, val in values.items():
-                print(f"    {name}: {val}")
+    debug = False
+    if debug:
+        for key, modes in data.items():
+            print(f"\n{key}:")
+            for mode, values in modes.items():
+                print(f"  {mode}:")
+                for name, val in values.items():
+                    print(f"    {name}: {val}")
 
-    latex = generate_latex_table(data)
+    latex = generate_latex_table(data, year, score)
     print(latex)

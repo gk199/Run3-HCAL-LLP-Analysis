@@ -21,10 +21,10 @@ This takes the output root files from `MisTagParameterization_3D` and overlays t
 
 ## Convert Fake Rate Results to Latex Tables
 ```
-python3 OutputToLatex.py # uses DNN_pt*_forPython.txt
-python3 OutputToLatex_combined.py # uses DNN_pt*_forPython_combined.txt
+python3 OutputToLatex.py -e 2022 -s 0.7 # uses DNN_pt*_forPython.txt
+python3 OutputToLatex_combined.py -e 2022 -s 0.7 -b# uses DNN_pt*_forPython_combined.txt
 ```
-Make sure to change the "score" variable in the python script to correspond with the txt file. 
+Score, year, and combined b-tag categories are now passed via arguments to the python script. 
 
 `OutputToLatex.py` is for the results of running `MisTagParameterization_3D.py` with depth, b-tagged (leading, subleading, combined); depth, not b-tagged; depth, b-tagged, low PV; depth, not b-tagged, low PV; depth, b-tagged, high PV; depth, not b-tagged, high PV (used for Tables 8-11 in v2 of the AN). `OutputToLatex_combined.py` is for depth (leading, subleading, combined); depth, low PV; depth, high PV (used for Table 12 in v2 of the AN). 
 
