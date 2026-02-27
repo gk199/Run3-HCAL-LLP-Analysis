@@ -3,9 +3,14 @@
 ## Mistag Rate Evaluation
 The newer approach uses 3D histograms to evaluate the mistag rates, so information from each dimension can be used in the prediction.
 ```
-python3 MisTagParameterization_3D.py > DNN_pt*_forPython_combined.txt
+python3 MisTagParameterization_3D.py -e <era or year> -s <depth DNN score> -b
 ```
-Check the settings in 
+This will write to `DNN_pt*_202*_forPython_combined.txt`. For the case with b-tagged categories separated and written to `DNN_pt*_202*_forPython.txt`, do
+```
+python3 MisTagParameterization_3D.py -e <era or year> -s <depth DNN score> 
+```
+Now the arguments passed determine which year, DNN score, and b-tag option is run. Combined `-b` does not split by b-tagging. The bash script `./ScanScore.sh` scans over year and DNN score. 
+
 Change the booleans `Zmu` and `LLPskim` and the era name at the beginning of the file to control which files are run over.
 
 ## Overlay Mistag Rates
