@@ -36,6 +36,8 @@ DNN_cut_inc = 0.9
 
 runs_to_exclude = [367230, 367772, 368331, 368440, 368764, 370436, 370579, 370790] # 2023 runs, based on earlier DNN
 runs_to_exclude = [367772, 368384, 368412, 370102, 370472, 370522, 370579, 370667] # 2023 runs, from depth DNN with LLP decaying anywhere
+runs_to_exclude_2023 = [368389] # 2023 runs, from depth DNN with LLP decaying anywhere, with delta phi exclusion and depth / inclusive candidates
+runs_to_exclude_2022 = [357805, 360890, 360941, 362437, 360949, 361053] # 2022 runs, from depth DNN with LLP decaying anywhere
 
 Zmu = False
 if Zmu: era = "2023 Bv1-Dv2 Zmu"
@@ -98,7 +100,11 @@ def GetData_single(infilepath, label): # get tree from a single filepath (not a 
 def MisTagParametrization(tree, option=""):
 
     # Setup cuts for CR and VR. CR = jet1_scores_inc between 0-0.2. VR = jet1_scores_inc between 0.2-0.9. Mistag means jet0_scores over "DNN_cut"
-    run_exclusion = ExcludedCut("run", runs_to_exclude)
+    run_exclusion = ExcludedCut("run", []) # placeholder, will be updated based on era. Exclude runs with anomalous DNN scores, likely due to detector effects not well modeled by the mistag rate.
+    if era == "2023":
+        run_exclusion = ExcludedCut("run", runs_to_exclude_2023)
+    elif era == "2022": 
+        run_exclusion = ExcludedCut("run", runs_to_exclude_2022)
     if debug: print(run_exclusion)
 
     # deltaPhi_exclusion = ROOT.TCut("(abs(jet0_Phi) > 0.2 && abs(jet0_Phi) < 2.95) || abs(jet0_jet1_dPhi) > 0.2") + GetCut("Flag_METFilters_2022_2023_PromptReco", 1)
@@ -201,12 +207,20 @@ def MisTagParametrization(tree, option=""):
     # First create 1D histograms for determining the mistag rate. 3D projections can be used, but the errors aren't propagated correctly by default so cross check with this method
     # currently crashing on all datasets -- makes plot and then immediately crashes, so works to see one plot but not good -- need to debug still TODO 
     # still producing rates plots with high errors, making this lower priority
-    # hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run = CreateHistograms_1D(tree, CR + triggered + pt_eta, "hist1d_CR_all")
-    # hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run = CreateHistograms_1D(tree, CR + triggered + pt_eta + mistag, "hist1d_CR_mistag")
-    # hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi, hist1D_VR_all_run = CreateHistograms_1D(tree, VR + triggered + pt_eta, "hist1d_VR_all")
-    # hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi, hist1D_VR_mistag_run = CreateHistograms_1D(tree, VR + triggered + pt_eta + mistag, "hist1d_VR_mistag")
+    # replace "triggered + pt_eta" with depth_emu. This is for the leading jet mistag rate. 
+    # Also add  + deltaPhi_exclusion to avoid collimated jets which are likely to be beam halo and not well modeled by the mistag rate.
+    # For the subleading jet mistag rate, use the same cuts but with jet1 emulated instead of jet0, and also require jet0 to pass the emulated cut to ensure we're in the same sample (just swapping which jet is tagged vs mistagged)
+    # TODO comment this out if want to do 1D rate evaluation 
+    # hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run = CreateHistograms_1D(tree, CR + depth_emu + deltaPhi_exclusion, "hist1d_CR_all")
+    # hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run = CreateHistograms_1D(tree, CR + depth_emu + deltaPhi_exclusion + mistag, "hist1d_CR_mistag")
+    # hist1D_CR_all_pt_1, hist1D_CR_all_eta_1, hist1D_CR_all_phi_1, hist1D_CR_all_run_1 = CreateHistograms_1D(tree, CR_0 + depth_emu_1 + deltaPhi_exclusion, "hist1d_CR_all_1")
+    # hist1D_CR_mistag_pt_1, hist1D_CR_mistag_eta_1, hist1D_CR_mistag_phi_1, hist1D_CR_mistag_run_1 = CreateHistograms_1D(tree, CR_0 + depth_emu_1 + deltaPhi_exclusion + mistag_1, "hist1d_CR_mistag_1")
+    # hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi, hist1D_VR_all_run = CreateHistograms_1D(tree, VR + depth_emu + deltaPhi_exclusion, "hist1d_VR_all")
+    # hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi, hist1D_VR_mistag_run = CreateHistograms_1D(tree, VR + depth_emu + deltaPhi_exclusion + mistag, "hist1d_VR_mistag")
     print("created histograms for 1D rate evaluation")
+    # TODO comment this out if want to do 1D bkg prediction
     # if LLPskim: MistagRate_1D([hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run], [hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run], "CR", option, title, label, "leading") # mistag_jet_list[i])
+    # if LLPskim: MistagRate_1D([hist1D_CR_mistag_pt_1, hist1D_CR_mistag_eta_1, hist1D_CR_mistag_phi_1, hist1D_CR_mistag_run_1], [hist1D_CR_all_pt_1, hist1D_CR_all_eta_1, hist1D_CR_all_phi_1, hist1D_CR_all_run_1], "CR", option, title, label, "subleading") # mistag_jet_list[i])
     # if Zmu: MistagRate_1D([hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run], [hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run], "Wjets", option, title, label, "leading")
     # if LLPskim: MistagRate_1D([hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi, hist1D_VR_mistag_run], [hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi, hist1D_VR_all_run], "VR", option, title, label, "leading")
     # if Zmu: MistagRate_1D([hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi, hist1D_VR_mistag_run], [hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi, hist1D_VR_all_run], "Zjets", option, title, label, "leading")
@@ -551,6 +565,9 @@ def ProjectHistogram(hist, y_label = ""):
 def DrawCanvasAndPlots(canvas_name, canvas_title, option, title, plots, legend_labels, save_name, plot_titles, label, normalize=False):
     # Create canvas
     canvas = ROOT.TCanvas(f"{canvas_name}_{option}", f"{canvas_title} for {option}", 2400, 600)
+    old_canvas = ROOT.gDirectory.Get(f"{canvas_name}_{option}") # trying to not make crash on multiple runs in the same session, but not sure if this is working
+    if old_canvas:
+        old_canvas.Delete()
     canvas.Divide(3, 1)
     
     # Loop over the plots and generate them
@@ -579,6 +596,7 @@ def DrawCanvasAndPlots(canvas_name, canvas_title, option, title, plots, legend_l
     canvas.Draw()
 
     canvas.SaveAs(f"{output_dir}/{save_name}{label}_{era_name}.png")
+    print("saved canvas as " + output_dir + "/" + save_name + label + "_" + era_name + ".png")
     canvas.Clear()
 
 # ------------------------------------------------------------------------------
@@ -654,7 +672,9 @@ def CreateHistograms_1D(tree, cut, hist_name):
     hist1d_pt = ROOT.TH1F(hist_name + "_pt", "1D histogram; p_{T}", len(pT_bins)-1, pT_bins)
     hist1d_eta = ROOT.TH1F(hist_name + "_eta", "1D histogram; #eta", len(eta_bins)-1, eta_bins)
     hist1d_phi = ROOT.TH1F(hist_name + "_phi", "1D histogram; #phi", len(phi_bins)-1, phi_bins)
-    hist1d_run = ROOT.TH1F(hist_name + "_run", "1D histogram; Run Number", 5000, 366000, 371000) # run range specified
+    hist1d_run = ROOT.TH1F(hist_name + "_run", "1D histogram; Run Number", 5000, 356000, 364000) # run range specified
+    if (era == "2023"):
+        hist1d_run = ROOT.TH1F(hist_name + "_run", "1D histogram; Run Number", 5000, 366000, 371000) # run range specified
     tree.Draw("jet0_Pt >> " + hist_name + "_pt", cut, "")
     tree.Draw("jet0_Eta >> " + hist_name + "_eta", cut, "")
     tree.Draw("jet0_Phi >> " + hist_name + "_phi", cut, "")
@@ -680,6 +700,7 @@ def MistagRate_1D(mistag_hists, all_hists, plot_type, option, title, label, type
 
     # For the run number histogram, determine what run numbers have high mistag rates
     threshold = 0.0004
+    print("threshold for mistag rate by run number is " + str(threshold))
     nBins = mistag_rate_run.GetNbinsX()
     # Loop through bins, check content
     for bin in range(1, nBins + 1): # since bin numbers start at 1
@@ -703,10 +724,10 @@ def MistagRate_1D(mistag_hists, all_hists, plot_type, option, title, label, type
         ["Jet p_{T} Mistag Rate from " + plot_type + ", "+type_of_jet, "Jet #eta Mistag Rate from " + plot_type + ", "+type_of_jet, "Jet Mistag Rate by Run Number from " + plot_type + ", "+type_of_jet], label
     )
     # clear histograms to prevent axis ranges being set strangly on the second run through 
-    mistag_rate_pt.Clear()
-    mistag_rate_eta.Clear()
-    mistag_rate_phi.Clear()
-    mistag_rate_run.Clear()
+    # mistag_rate_pt.Clear()
+    # mistag_rate_eta.Clear()
+    # mistag_rate_phi.Clear()
+    # mistag_rate_run.Clear()
     for i in range(len(mistag_hists)): mistag_hists[i].Clear()
     print("histograms cleared")
 
@@ -1022,7 +1043,7 @@ def main():
     print(f"Writing output to: {output_filename}")
 
     with open(output_filename, "w") as f:
-        with redirect_stdout(f):
+        with redirect_stdout(f): # TODO remove for table running full bkg prediction
     
             if combined_tree:
                 print("LLP skim tree successfully accessed, will be passed to MisTagParametrization")
