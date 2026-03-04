@@ -100,7 +100,7 @@ def GetData_single(infilepath, label): # get tree from a single filepath (not a 
 def MisTagParametrization(tree, option=""):
 
     # Setup cuts for CR and VR. CR = jet1_scores_inc between 0-0.2. VR = jet1_scores_inc between 0.2-0.9. Mistag means jet0_scores over "DNN_cut"
-    run_exclusion = ExcludedCut("run", []) # placeholder, will be updated based on era. Exclude runs with anomalous DNN scores, likely due to detector effects not well modeled by the mistag rate.
+    # run_exclusion = ExcludedCut("run", []) # placeholder, will be updated based on era. Exclude runs with anomalous DNN scores, likely due to detector effects not well modeled by the mistag rate.
     if era == "2023":
         run_exclusion = ExcludedCut("run", runs_to_exclude_2023)
     elif era == "2022": 
@@ -1012,7 +1012,8 @@ def main():
     elif era == "2023 Dv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv1_scores.root"]
     elif era == "2023 Dv2" and not CNN: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv2_scores.root"]
     elif era == "2023 Dv2" and CNN: infilepath_list = ["/afs/cern.ch/work/f/fsimpson/public/minituple_outputs/minituple_Run2023D-EXOLLPJetHCAL-PromptReco-v2_partial28k-v4-scores_added.root"]
-    elif era == "2022": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Dv1_scores.root",
+    elif era == "2022": infilepath_list = [
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Dv1_scores.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Ev1_scores.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Fv1_scores.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Gv1_scores.root"]

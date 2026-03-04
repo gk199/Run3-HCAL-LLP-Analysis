@@ -47,6 +47,7 @@ PlotParams P_jet1met_dPhi				= {"jet1_Phi - met_Phi", "Sub-Leading Jet to MET #D
 
 // flavor tagging
 PlotParams P_jet0_DeepCSV_prob_b		= {"jet0_DeepCSV_prob_b", "b-tagging Probability", "b-tag probability", 0, 1};
+PlotParams P_jet1_DeepCSV_prob_b		= {"jet1_DeepCSV_prob_b", "b-tagging Probability", "b-tag probability", 0, 1};
 PlotParams P_jet0_DeepCSV_prob_c		= {"jet0_DeepCSV_prob_c", "c-tagging Probability", "c-tag probability", 0, 1};
 PlotParams P_jet0_DeepCSV_prob_bb		= {"jet0_DeepCSV_prob_bb", "bb-tagging Probability", "bb-tag probability", 0, 1};
 PlotParams P_jet0_DeepCSV_prob_udsg		= {"jet0_DeepCSV_prob_udsg", "Light flavor tagging Probability", "udsg-tag probability", 0, 1};
