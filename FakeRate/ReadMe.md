@@ -28,6 +28,12 @@ Score, year, and combined b-tag categories are now passed via arguments to the p
 
 `OutputToLatex.py` is for the results of running `MisTagParameterization_3D.py` with depth, b-tagged (leading, subleading, combined); depth, not b-tagged; depth, b-tagged, low PV; depth, not b-tagged, low PV; depth, b-tagged, high PV; depth, not b-tagged, high PV (used for Tables 8-11 in v2 of the AN). `OutputToLatex_combined.py` is for depth (leading, subleading, combined); depth, low PV; depth, high PV (used for Table 12 in v2 of the AN). 
 
+To run everything:
+```
+./ScanScore.sh
+./ProduceTables.sh
+```
+
 # Archive
 
 ## Mistag Rate: Initial Version
