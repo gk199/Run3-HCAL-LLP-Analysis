@@ -18,6 +18,8 @@ import fnmatch
 import sys, os, argparse, time, errno
 import os.path
 
+import gc
+
 perJet = False
 num_jets = 1 if perJet else 4 # in v3.13 only 4 jets are saved! In earlier versions, 6 jets are saved
 
@@ -32,44 +34,44 @@ class DataProcessor:
         self.constants = constants
     
     def load_data(self, input_file=None):
-        
-        # need a mode that doesn't pre-classify them but just loads the data and then you can get it to predict
-        # and returns the dataframe unchanged so filenames are the same
-        print("Loading Data...")
-        
+
+        print("Loading Data (chunked)...")
+
         filter_name = "*"
 
-        fps = [input_file] if input_file is not None else []
-        df = [] #pd.DataFrame()
-        
-        # aggregating all signal events
-        for file in fps:
-            sig = uproot.open(file)[self.tree]
-            print(f"Opened {file}")
-            print(f"Evaluating on tree: {self.tree}")
+        sig_tree = uproot.open(input_file)[self.tree]
 
-            # below block is copied from runner-v4 since got errors at runtime when running locally, likely from jagged arrays
-            include_patterns = ["*"]
-            exclude_patterns = ["*_rechit_*", "HLT*"] # these have type "awkward" which doesn't work with h5 format
-            all_branches = sig.keys()
-            # Match includes
-            included = set()
-            for pattern in include_patterns:
-                included.update(fnmatch.filter(all_branches, pattern))
-            # Remove excluded matches
-            for pattern in exclude_patterns:
-                to_remove = fnmatch.filter(all_branches, pattern)
-                included.difference_update(to_remove)
-            # Convert to sorted list for consistency
-            filter_name = sorted(included)
+        # Branch filtering (same as original code)
+        include_patterns = ["*"]
+        exclude_patterns = ["*_rechit_*", "HLT*"]
 
-            sig = sig.arrays(filter_name=filter_name, library="pd") 
-            df.append(sig)
+        all_branches = sig_tree.keys()
 
-        self.df = pd.concat(df) if df else pd.DataFrame()
-        
+        included = set()
+        for pattern in include_patterns:
+            included.update(fnmatch.filter(all_branches, pattern))
+
+        for pattern in exclude_patterns:
+            included.difference_update(fnmatch.filter(all_branches, pattern))
+
+        filter_name = sorted(included)
+
+        df_chunks = []
+
+        # Instead of loading full file, stream in chunks
+        for chunk in uproot.iterate(
+            f"{input_file}:{self.tree}",
+            filter_name,
+            library="pd",
+            step_size=100000
+        ):
+            df_chunks.append(chunk)
+
+        self.df = pd.concat(df_chunks)
+        del df_chunks
+        gc.collect()
         print("Loaded Data")
-        
+
     def no_selections_concatenate(self):
         self.cumulative_df = self.df
         print("-------------------All Data // No Cuts applied---------")
@@ -143,36 +145,7 @@ class DataProcessor:
         for useful_variable in useful_variables:
             data = self.cumulative_df[[useful_variable]].copy()
             mask_condition = (data[useful_variable] <= -900) | (data[useful_variable] >= 900)
-            data.loc[mask_condition, useful_variable] = 0  # Default to 0 for matching entries
-    
-    def write_to_root(self, scores, scores_inc, filename, labels=None):
-        filename = f"{filename[:-5]}_{self.tree}_scores.root" # remove .root from initial filename
-        # TODO: know the first time you open this file, call recreate before even starting (when loop over filenames, before loop over tree names), and then here call update
-        dataframe = self.cumulative_df
-        if self.num_classes == 2:
-            for i in range(num_jets):
-                dataframe['jet'+str(i)+'_scores12'] = scores[i][:, 0]
-                dataframe['jet'+str(i)+'_scores34'] = scores[i][:, 1]
-                dataframe['jet'+str(i)+'_scoresbkg'] = scores[i][:, 2]
-                dataframe['jet'+str(i)+'_scores12_inc'] = scores_inc[i][:, 0]
-                dataframe['jet'+str(i)+'_scores34_inc'] = scores_inc[i][:, 1]
-                dataframe['jet'+str(i)+'_scoresbkg_inc'] = scores_inc[i][:, 2]
-        elif self.num_classes == 1:
-            for i in range(num_jets):
-                dataframe['jet'+str(i)+'_scores_depth_LLPanywhere'] = scores[i][:, 0] # 0 is the signal class
-                dataframe['jet'+str(i)+'_scores_inc_train80'] = scores_inc[i][:, 0] # 0 is the signal class
-        if labels is not None:
-            dataframe['classID'] = labels
-        if os.path.isfile(filename): 
-            with uproot.update(filename) as f:
-                # TODO: propagate correct treename through to this point
-                f[self.tree] = {key: dataframe[key] for key in dataframe.columns}
-        else:  
-            with uproot.recreate(filename) as f:
-                f[self.tree] = {key: dataframe[key] for key in dataframe.columns}
-                
-        print(f"Wrote to ROOT file: {filename}")
-        f.close()            
+            data.loc[mask_condition, useful_variable] = 0  # Default to 0 for matching entries         
         
 class ModelHandler:
     def __init__(self, num_classes=3, num_layers=3, optimizer="adam", lr=0.00027848106048644665, model_name="model.keras"):
@@ -210,7 +183,7 @@ class ModelHandler:
         return self.roc_data
     
     def predict(self, predicting_data, labels=None):
-        preds = self.model.predict(predicting_data)
+        preds = self.model.predict(predicting_data, batch_size=4096, verbose=0)
         if labels is not None:
             print("Accuracy: ", np.sum(np.argmax(preds, axis=1) == labels) / len(labels) )
         return preds
@@ -240,44 +213,131 @@ class Runner:
         self.depth_model_keras = depth_model_keras
         self.incl_model_keras  = incl_model_keras
         self.constants         = constants
-
-        #self.model_name = "inclusive_model_v4_train40.keras"
     
-    def evaluate_scores(self): # this code used to be in run_file_evaluation -- still testing
-        print("Determining Scores")
-        predicting_data, labels, jet_valid = self.processor.process_data()
-        # depth
-        handler = ModelHandler(num_classes=self.num_classes, model_name=self.depth_model_keras)
-        print("Loading the depth model:", self.depth_model_keras)
-        handler.load()
-        preds = [ handler.predict(predicting_data[i], labels[i]) for i in range(num_jets) ]
-        # inclusive
-        handler_inc = ModelHandler(num_classes=self.num_classes, model_name=self.incl_model_keras)
-        print("Loading the inclusive model: ", self.incl_model_keras)
-        handler_inc.load()
-        preds_inc = [ handler_inc.predict(predicting_data[i], labels[i]) for i in range(num_jets) ]
-        # data is predicting_data, jet valid is jet_valid, scores are preds, all indexed by jet (6 total)
-        # to print whole data table, predicting_data[0], to print just values in a list, predicting_data[0].values
-
-        # check if predicting_data[i] has a valid jet. If so, keep DNN score. If not, set score = -9999
-        for i in range(num_jets): # evaluate for all 6 jets
-            for jet in range(len(predicting_data[i])): # evaluate for every jet, if valid
-                if (jet_valid[i][jet] < -9000): # if jet E is -9999.9, replace score with -9999.9
-                    preds[i][jet] = [-9999.9, -9999.9]
-                    preds_inc[i][jet] = [-9999.9, -9999.9]
-
-        self.processor.write_to_root(preds, preds_inc, self.fname, labels=None)
-
     def run_file_evaluation(self):
-        print("Evaluating Single File")
-        # processes one file per run for now
-        print("Loaded files")
-        if self.load:
-            self.processor = DataProcessor(num_classes=self.num_classes - 1, mode="filewrite", sel=False, tree=self.tree, constants=self.constants)
-            self.processor.load_data(input_file=self.sig)
-        self.processor.no_selections_concatenate() # automatically inclusive
-        self.fname = self.sig
-        self.evaluate_scores()
+
+        print("Evaluating Single File (streaming)...")
+
+        self.processor = DataProcessor(
+            num_classes=self.num_classes - 1,
+            mode="filewrite",
+            sel=False,
+            tree=self.tree,
+            constants=self.constants
+        )
+
+        # Load models once
+        depth_handler = ModelHandler(
+            num_classes=self.num_classes,
+            model_name=self.depth_model_keras
+        )
+        depth_handler.load()
+
+        incl_handler = ModelHandler(
+            num_classes=self.num_classes,
+            model_name=self.incl_model_keras
+        )
+        incl_handler.load()
+
+        output_filename = f"{self.sig[:-5]}_{self.tree}_scores.root"
+
+        first_write = True
+        outfile = None
+        outtree = None
+
+        # Branch filtering
+        with uproot.open(self.sig) as f:
+            branches = f[self.tree].keys()
+
+        include_patterns = ["*"]
+        exclude_patterns = ["*_rechit_*", "HLT*"]
+
+        included = set()
+        for p in include_patterns:
+            included.update(fnmatch.filter(branches, p))
+
+        for p in exclude_patterns:
+            included.difference_update(fnmatch.filter(branches, p))
+
+        filter_name = sorted(included)
+
+        # streaming looping over file in chunks, processing each chunk, and writing out scores immediately to avoid memory issues. Note that the model is loaded once at the beginning and then used for all chunks. Also note that the output file is created and schema is written on the first chunk, and then subsequent chunks just update the tree with new data. This way we never have to hold more than one chunk of data in memory at a time, along with the model itself.
+        for batch in uproot.iterate(
+            f"{self.sig}:{self.tree}",
+            expressions=filter_name,
+            library="pd",
+            step_size=100000
+        ):
+
+            # Process + normalize
+            self.processor.cumulative_df = batch
+            predicting_data, labels, jet_valid = self.processor.process_data()
+
+            preds = []
+            preds_inc = []
+
+            for i in range(num_jets):
+                preds.append(
+                    depth_handler.model.predict(predicting_data[i].values, batch_size=4096, verbose=0)
+                )
+                preds_inc.append(
+                    incl_handler.model.predict(predicting_data[i].values, batch_size=4096, verbose=0)
+                )
+
+            dataframe = batch.copy()
+            dataframe = dataframe.reset_index(drop=True)
+
+            # Add scores
+            for i in range(num_jets):
+                dataframe[f'jet{i}_scores_depth_LLPanywhere'] = preds[i][:,0]
+                dataframe[f'jet{i}_scores_inc_train80'] = preds_inc[i][:,0]
+
+            # Convert to ROOT-safe numpy arrays
+            output_dict = {}
+
+            for col in dataframe.columns:
+
+                arr = dataframe[col].to_numpy()
+
+                # # # Convert to safe numeric types 
+                if arr.dtype == object:
+                    # check if this is a string like "era"
+                    if len(arr) > 0 and isinstance(arr[0], str):
+                        arr = arr.astype("U") # preserve root string branch
+                    else:
+                        arr = pd.to_numeric(arr, errors="coerce").astype("float32")
+
+                output_dict[col] = arr
+
+            # Write schema once
+            if first_write:
+
+                outfile = uproot.recreate(output_filename)
+
+                branch_types = {}
+                for k, v in output_dict.items():
+                    if isinstance(v[0], str):
+                        branch_types[k] = "string"
+                    else:
+                        branch_types[k] = np.asarray(v).dtype
+
+                outtree = outfile.mktree(self.tree, branch_types)
+
+                first_write = False
+
+            outtree.extend(output_dict)
+
+            # VERY IMPORTANT — force memory release
+            del batch
+            del dataframe
+            del predicting_data
+            del preds
+            del preds_inc
+
+        if outfile is not None:
+            outfile.close()
+
+        print("Wrote:", output_filename)
         
     def run(self):
         if self.mode == "train":
@@ -298,7 +358,7 @@ class Runner:
     
     #def set_model_name(self, model_name="dense_model_v4.keras"):
     #    self.model_name = model_name
-      
+        
 def parseArgs():
     """ Parse command-line arguments
     """

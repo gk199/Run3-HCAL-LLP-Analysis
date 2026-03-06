@@ -37,7 +37,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV=/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/Run3-HCAL-LLP-Analysis/Run/Condor/VirtualEnvs/keras2pt13pt1
+VIRTUAL_ENV=/afs/cern.ch/work/g/gkopp/2022_LLP_analysis/VirtualEnvs/keras2pt13pt1
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

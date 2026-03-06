@@ -63,7 +63,7 @@ void DisplacedHcalJetAnalyzer::SetLLPVariables(){
 /* ====================================================================================================================== */
 bool DisplacedHcalJetAnalyzer::isRechitValid(float RechitEnergy, int RechitDepth, int RechitIEta, int RunNum) {
 	vector<float> energy_cuts_2022initial = {0.1, 0.2, 0.3, 0.3}; // anticipate this is the one to use for processing since it matches offline IOV tag
-	vector<float> energy_cuts_2022rereco = 	{0.25, 0.25, 0.3, 0.3}; // best agreement with MC
+	vector<float> energy_cuts_2022rereco = 	{0.3, 0.2, 0.3, 0.3}; // best agreement with MC, from new PU profile
 	vector<float> energy_cuts_2023 = 		{0.4, 0.3, 0.3, 0.3};
 
 	// also need HE thresholds

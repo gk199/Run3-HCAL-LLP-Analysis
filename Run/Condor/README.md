@@ -27,6 +27,14 @@ Submit all (modify first):
 source submit_all.sh
 ```
 
+## Score Addition Options
+In the case where the minituples ran but the score addition needs to be re-run, this is generally quite fast and a bash script is set up to do so:
+```
+cd ../../Classifiers/
+source VirtualEnvs/keras2pt13pt1/bin/activate  
+./AddScores.sh
+```
+
 ## Examples of submissions (mostly deprecated)
 ```
 voms-proxy-init --voms cms 
@@ -63,13 +71,16 @@ The virtual environment is set up based on the requirements file from the SWAN a
 ```
 pip freeze > requirements.txt # in SWAN area
 
-conda create --name CondaDNNenv_py3pt9 python=3.9
-conda activate CondaDNNenv_py3pt9
-pip install -r requirements_minimal.txt 
+cd Run/Condor/VirtualEnvs
 
 python3.9 -m venv keras2pt13pt1
 source keras2pt13pt1/bin/activate
-pip install -r ../../../Classifiers/requirements_minimal.txt
+pip install -r ../../../Classifiers/Archive/requirements_minimal.txt
+
+# the python virtual environment was used for v4 and v5. A conda virtual env was also tested: 
+conda create --name CondaDNNenv_py3pt9 python=3.9
+conda activate CondaDNNenv_py3pt9
+pip install -r requirements_minimal.txt 
 ```
 In November, used an approach of sourcing the LCG environment. This was added based on the recommendation to source a LCG file with an up to date tensorflow: https://root-forum.cern.ch/t/incompatibility-among-tensorflow-of-lxplus-with-tensorflow-macbook-pro-colab-notebook-and-swan/56336. Without this, the DNN model would not work on lxplus / Condor area. Then the scores are added with:
 ```

@@ -2,6 +2,9 @@ import ROOT
 import numpy as np
 import os
 import math
+import argparse
+import sys
+from contextlib import redirect_stdout
 
 # Initialize ROOT
 ROOT.gROOT.SetBatch(True)
@@ -26,19 +29,19 @@ c_tag_bins = [0, 0.102, 1.0]
 b_tag_bins = np.array(b_tag_bins, dtype=float)
 c_tag_bins = np.array(c_tag_bins, dtype=float)
 
-DNN_cut = 0.8
+# era = "2023" # automatically switches which input minituples to use based on this name
+# b_tag_combined = True
+# DNN_cut = 0.8 # depth DNN score, the one to vary 
 DNN_cut_inc = 0.9
 
 runs_to_exclude = [367230, 367772, 368331, 368440, 368764, 370436, 370579, 370790] # 2023 runs, based on earlier DNN
 runs_to_exclude = [367772, 368384, 368412, 370102, 370472, 370522, 370579, 370667] # 2023 runs, from depth DNN with LLP decaying anywhere
-
-era = "2023 Bv1-Dv2" # automatically switches which input minituples to use based on this name
+runs_to_exclude_2023 = [368389] # 2023 runs, from depth DNN with LLP decaying anywhere, with delta phi exclusion and depth / inclusive candidates
+runs_to_exclude_2022 = [357805, 360890, 360941, 362437, 360949, 361053] # 2022 runs, from depth DNN with LLP decaying anywhere
 
 Zmu = False
 if Zmu: era = "2023 Bv1-Dv2 Zmu"
 LLPskim = True
-
-era_name = era.replace(" ", "") # for plot saving
 
 CNN = False
 
@@ -97,7 +100,11 @@ def GetData_single(infilepath, label): # get tree from a single filepath (not a 
 def MisTagParametrization(tree, option=""):
 
     # Setup cuts for CR and VR. CR = jet1_scores_inc between 0-0.2. VR = jet1_scores_inc between 0.2-0.9. Mistag means jet0_scores over "DNN_cut"
-    run_exclusion = ExcludedCut("run", runs_to_exclude)
+    # run_exclusion = ExcludedCut("run", []) # placeholder, will be updated based on era. Exclude runs with anomalous DNN scores, likely due to detector effects not well modeled by the mistag rate.
+    if era == "2023":
+        run_exclusion = ExcludedCut("run", runs_to_exclude_2023)
+    elif era == "2022": 
+        run_exclusion = ExcludedCut("run", runs_to_exclude_2022)
     if debug: print(run_exclusion)
 
     # deltaPhi_exclusion = ROOT.TCut("(abs(jet0_Phi) > 0.2 && abs(jet0_Phi) < 2.95) || abs(jet0_jet1_dPhi) > 0.2") + GetCut("Flag_METFilters_2022_2023_PromptReco", 1)
@@ -200,12 +207,20 @@ def MisTagParametrization(tree, option=""):
     # First create 1D histograms for determining the mistag rate. 3D projections can be used, but the errors aren't propagated correctly by default so cross check with this method
     # currently crashing on all datasets -- makes plot and then immediately crashes, so works to see one plot but not good -- need to debug still TODO 
     # still producing rates plots with high errors, making this lower priority
-    # hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run = CreateHistograms_1D(tree, CR + triggered + pt_eta, "hist1d_CR_all")
-    # hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run = CreateHistograms_1D(tree, CR + triggered + pt_eta + mistag, "hist1d_CR_mistag")
-    # hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi, hist1D_VR_all_run = CreateHistograms_1D(tree, VR + triggered + pt_eta, "hist1d_VR_all")
-    # hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi, hist1D_VR_mistag_run = CreateHistograms_1D(tree, VR + triggered + pt_eta + mistag, "hist1d_VR_mistag")
+    # replace "triggered + pt_eta" with depth_emu. This is for the leading jet mistag rate. 
+    # Also add  + deltaPhi_exclusion to avoid collimated jets which are likely to be beam halo and not well modeled by the mistag rate.
+    # For the subleading jet mistag rate, use the same cuts but with jet1 emulated instead of jet0, and also require jet0 to pass the emulated cut to ensure we're in the same sample (just swapping which jet is tagged vs mistagged)
+    # TODO comment this out if want to do 1D rate evaluation 
+    # hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run = CreateHistograms_1D(tree, CR + depth_emu + deltaPhi_exclusion, "hist1d_CR_all")
+    # hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run = CreateHistograms_1D(tree, CR + depth_emu + deltaPhi_exclusion + mistag, "hist1d_CR_mistag")
+    # hist1D_CR_all_pt_1, hist1D_CR_all_eta_1, hist1D_CR_all_phi_1, hist1D_CR_all_run_1 = CreateHistograms_1D(tree, CR_0 + depth_emu_1 + deltaPhi_exclusion, "hist1d_CR_all_1")
+    # hist1D_CR_mistag_pt_1, hist1D_CR_mistag_eta_1, hist1D_CR_mistag_phi_1, hist1D_CR_mistag_run_1 = CreateHistograms_1D(tree, CR_0 + depth_emu_1 + deltaPhi_exclusion + mistag_1, "hist1d_CR_mistag_1")
+    # hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi, hist1D_VR_all_run = CreateHistograms_1D(tree, VR + depth_emu + deltaPhi_exclusion, "hist1d_VR_all")
+    # hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi, hist1D_VR_mistag_run = CreateHistograms_1D(tree, VR + depth_emu + deltaPhi_exclusion + mistag, "hist1d_VR_mistag")
     print("created histograms for 1D rate evaluation")
+    # TODO comment this out if want to do 1D bkg prediction
     # if LLPskim: MistagRate_1D([hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run], [hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run], "CR", option, title, label, "leading") # mistag_jet_list[i])
+    # if LLPskim: MistagRate_1D([hist1D_CR_mistag_pt_1, hist1D_CR_mistag_eta_1, hist1D_CR_mistag_phi_1, hist1D_CR_mistag_run_1], [hist1D_CR_all_pt_1, hist1D_CR_all_eta_1, hist1D_CR_all_phi_1, hist1D_CR_all_run_1], "CR", option, title, label, "subleading") # mistag_jet_list[i])
     # if Zmu: MistagRate_1D([hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run], [hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run], "Wjets", option, title, label, "leading")
     # if LLPskim: MistagRate_1D([hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi, hist1D_VR_mistag_run], [hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi, hist1D_VR_all_run], "VR", option, title, label, "leading")
     # if Zmu: MistagRate_1D([hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi, hist1D_VR_mistag_run], [hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi, hist1D_VR_all_run], "Zjets", option, title, label, "leading")
@@ -550,6 +565,9 @@ def ProjectHistogram(hist, y_label = ""):
 def DrawCanvasAndPlots(canvas_name, canvas_title, option, title, plots, legend_labels, save_name, plot_titles, label, normalize=False):
     # Create canvas
     canvas = ROOT.TCanvas(f"{canvas_name}_{option}", f"{canvas_title} for {option}", 2400, 600)
+    old_canvas = ROOT.gDirectory.Get(f"{canvas_name}_{option}") # trying to not make crash on multiple runs in the same session, but not sure if this is working
+    if old_canvas:
+        old_canvas.Delete()
     canvas.Divide(3, 1)
     
     # Loop over the plots and generate them
@@ -578,6 +596,7 @@ def DrawCanvasAndPlots(canvas_name, canvas_title, option, title, plots, legend_l
     canvas.Draw()
 
     canvas.SaveAs(f"{output_dir}/{save_name}{label}_{era_name}.png")
+    print("saved canvas as " + output_dir + "/" + save_name + label + "_" + era_name + ".png")
     canvas.Clear()
 
 # ------------------------------------------------------------------------------
@@ -653,7 +672,9 @@ def CreateHistograms_1D(tree, cut, hist_name):
     hist1d_pt = ROOT.TH1F(hist_name + "_pt", "1D histogram; p_{T}", len(pT_bins)-1, pT_bins)
     hist1d_eta = ROOT.TH1F(hist_name + "_eta", "1D histogram; #eta", len(eta_bins)-1, eta_bins)
     hist1d_phi = ROOT.TH1F(hist_name + "_phi", "1D histogram; #phi", len(phi_bins)-1, phi_bins)
-    hist1d_run = ROOT.TH1F(hist_name + "_run", "1D histogram; Run Number", 5000, 366000, 371000) # run range specified
+    hist1d_run = ROOT.TH1F(hist_name + "_run", "1D histogram; Run Number", 5000, 356000, 364000) # run range specified
+    if (era == "2023"):
+        hist1d_run = ROOT.TH1F(hist_name + "_run", "1D histogram; Run Number", 5000, 366000, 371000) # run range specified
     tree.Draw("jet0_Pt >> " + hist_name + "_pt", cut, "")
     tree.Draw("jet0_Eta >> " + hist_name + "_eta", cut, "")
     tree.Draw("jet0_Phi >> " + hist_name + "_phi", cut, "")
@@ -679,6 +700,7 @@ def MistagRate_1D(mistag_hists, all_hists, plot_type, option, title, label, type
 
     # For the run number histogram, determine what run numbers have high mistag rates
     threshold = 0.0004
+    print("threshold for mistag rate by run number is " + str(threshold))
     nBins = mistag_rate_run.GetNbinsX()
     # Loop through bins, check content
     for bin in range(1, nBins + 1): # since bin numbers start at 1
@@ -702,10 +724,10 @@ def MistagRate_1D(mistag_hists, all_hists, plot_type, option, title, label, type
         ["Jet p_{T} Mistag Rate from " + plot_type + ", "+type_of_jet, "Jet #eta Mistag Rate from " + plot_type + ", "+type_of_jet, "Jet Mistag Rate by Run Number from " + plot_type + ", "+type_of_jet], label
     )
     # clear histograms to prevent axis ranges being set strangly on the second run through 
-    mistag_rate_pt.Clear()
-    mistag_rate_eta.Clear()
-    mistag_rate_phi.Clear()
-    mistag_rate_run.Clear()
+    # mistag_rate_pt.Clear()
+    # mistag_rate_eta.Clear()
+    # mistag_rate_phi.Clear()
+    # mistag_rate_run.Clear()
     for i in range(len(mistag_hists)): mistag_hists[i].Clear()
     print("histograms cleared")
 
@@ -946,7 +968,33 @@ def get_total_and_error(hist):
     return total, math.sqrt(error2)
 
 # ------------------------------------------------------------------------------
+def parseArgs():
+    """ Parse command-line arguments
+    """
+    parser = argparse.ArgumentParser(
+        add_help=True,
+        description=''
+    )
+
+    parser.add_argument("-e", "--era",              action="store", help="era (2022, 2023, or specify year and era)", required=True) 
+    parser.add_argument("-s", "--DNN_cut",          action="store", default=0.8, help="Depth DNN score cut (default: 0.8)")
+    parser.add_argument("-b", "--b_tag_combined",   action="store_true", help="combined b-tag categories (True if -b passed) or not (False no -b)")
+    
+    args = parser.parse_args()
+
+    return args  
+# ------------------------------------------------------------------------------
 def main():
+
+    print("Parsing arguments...")
+
+    args = parseArgs()
+    global era, DNN_cut, b_tag_combined, era_name
+    era = args.era   
+    DNN_cut = args.DNN_cut
+    b_tag_combined = args.b_tag_combined
+
+    era_name = era.replace(" ", "") # for plot saving
 
     combined_tree = False
     combined_tree_Zmu = False
@@ -956,21 +1004,26 @@ def main():
 
     print(era)
 
-    if era == "2023 Bv1":   infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Bv1_allscores.root"]
-    elif era == "2023 Cv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv1_allscores.root"]
-    elif era == "2023 Cv2": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv2_allscores.root"]
-    elif era == "2023 Cv3": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv3_allscores.root"]
-    elif era == "2023 Cv4": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv4_allscores.root"]
-    elif era == "2023 Dv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Dv1_allscores.root"]
-    elif era == "2023 Dv2" and not CNN: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Dv2_allscores.root"]
+    if era == "2023 Bv1":   infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Bv1_scores.root"]
+    elif era == "2023 Cv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv1_scores.root"]
+    elif era == "2023 Cv2": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv2_scores.root"]
+    elif era == "2023 Cv3": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv3_scores.root"]
+    elif era == "2023 Cv4": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv4_scores.root"]
+    elif era == "2023 Dv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv1_scores.root"]
+    elif era == "2023 Dv2" and not CNN: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv2_scores.root"]
     elif era == "2023 Dv2" and CNN: infilepath_list = ["/afs/cern.ch/work/f/fsimpson/public/minituple_outputs/minituple_Run2023D-EXOLLPJetHCAL-PromptReco-v2_partial28k-v4-scores_added.root"]
-    else: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Bv1_allscores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv1_allscores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv2_allscores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv3_allscores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Cv4_allscores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Dv1_allscores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_LLPskim_2023Dv2_allscores.root"]
+    elif era == "2022": infilepath_list = [
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Dv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Ev1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Fv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Gv1_scores.root"]
+    elif era == "2023": infilepath_list = [
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv2_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv3_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv4_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv2_scores.root"]
     if LLPskim: combined_tree = GetData(infilepath_list, label)
 
     infilepath_list_Zmu = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituples_Zmu_2023Bv1_allscores.root",
@@ -983,61 +1036,76 @@ def main():
 
     if Zmu: combined_tree_Zmu = GetData(infilepath_list_Zmu, label)
 
-    if combined_tree:
-        print("LLP skim tree successfully accessed, will be passed to MisTagParametrization")
-        #MisTagParametrization(combined_tree)
+    # Format DNN value like pt8 instead of 0.8
+    dnn_str = str(DNN_cut).replace("0.", "pt")
+    # Optional suffix
+    btag_str = "_combined" if b_tag_combined else ""
+    output_filename = f"DNN_{dnn_str}_{era}_forPython{btag_str}.txt"
+    print(f"Writing output to: {output_filename}")
 
-        print("\n \n ********************* \n DNN score = " + str(DNN_cut) + " \n ********************* \n \n")
-        print("\n \n ********************* \n depth, b-tagged \n ********************* \n \n")
-        MisTagParametrization(combined_tree, "depth")
-        print("\n \n ********************* \n depth, low PV \n ********************* \n \n")
-        MisTagParametrization(combined_tree, "depth, low PV")
-        print("\n \n ********************* \n depth, high PV \n ********************* \n \n")
-        MisTagParametrization(combined_tree, "depth, high PV")
-        # print("\n \n ********************* \n depth, b-tagged \n ********************* \n \n")
-        # MisTagParametrization(combined_tree, "depth, b tagged") # run with lower DNN scores otherwise nothing predicted...
-        # print("\n \n ********************* \n depth, not b-tagged \n ********************* \n \n")
-        # MisTagParametrization(combined_tree, "depth, not b tagged")
-        # print("\n \n ********************* \n depth, b-tagged, low PV \n ********************* \n \n")
-        # MisTagParametrization(combined_tree, "depth, b tagged, low PV") # run with lower DNN scores otherwise nothing predicted...
-        # print("\n \n ********************* \n depth, not b-tagged, low PV \n ********************* \n \n")
-        # MisTagParametrization(combined_tree, "depth, not b tagged, low PV")
-        # print("\n \n ********************* \n depth, b-tagged, high PV \n ********************* \n \n")
-        # MisTagParametrization(combined_tree, "depth, b tagged, high PV") # run with lower DNN scores otherwise nothing predicted...
-        # print("\n \n ********************* \n depth, not b-tagged, high PV \n ********************* \n \n")
-        # MisTagParametrization(combined_tree, "depth, not b tagged, high PV")
+    with open(output_filename, "w") as f:
+        with redirect_stdout(f): # TODO remove for table running full bkg prediction
+    
+            if combined_tree:
+                print("LLP skim tree successfully accessed, will be passed to MisTagParametrization")
+                #MisTagParametrization(combined_tree)
 
-        # MisTagParametrization(combined_tree, "depth, c tagged")
-        # MisTagParametrization(combined_tree, "depth, bb tagged")
-        # MisTagParametrization(combined_tree, "depth, light flavor tagged")
-        # MisTagParametrization(combined_tree, "depth, flavor tagged")
-        # MisTagParametrization(combined_tree, "depth, not flavor tagged")
+                if b_tag_combined:
+                    # for OutputToLatex_combined.py:
+                    print("\n \n ********************* \n DNN score = " + str(DNN_cut) + " \n ********************* \n \n")
+                    print("\n \n ********************* \n depth \n ********************* \n \n")
+                    MisTagParametrization(combined_tree, "depth")
+                    print("\n \n ********************* \n depth, low PV \n ********************* \n \n")
+                    MisTagParametrization(combined_tree, "depth, low PV")
+                    print("\n \n ********************* \n depth, high PV \n ********************* \n \n")
+                    MisTagParametrization(combined_tree, "depth, high PV")
 
-        # MisTagParametrization(combined_tree, "before alignment, depth")
-        # MisTagParametrization(combined_tree, "after alignment, depth")
-        #MisTagParametrization(combined_tree, "after alignment")
-        #MisTagParametrization(combined_tree, "timing")
-        #MisTagParametrization(combined_tree, "depth, timing")
-    else:
-        print("LLP skim tree is invalid!")
+                if not b_tag_combined:
+                    # for OutputToLatex.py:
+                    print("\n \n ********************* \n depth, b-tagged \n ********************* \n \n")
+                    MisTagParametrization(combined_tree, "depth, b tagged") # run with lower DNN scores otherwise nothing predicted...
+                    print("\n \n ********************* \n depth, not b-tagged \n ********************* \n \n")
+                    MisTagParametrization(combined_tree, "depth, not b tagged")
+                    print("\n \n ********************* \n depth, b-tagged, low PV \n ********************* \n \n")
+                    MisTagParametrization(combined_tree, "depth, b tagged, low PV") # run with lower DNN scores otherwise nothing predicted...
+                    print("\n \n ********************* \n depth, not b-tagged, low PV \n ********************* \n \n")
+                    MisTagParametrization(combined_tree, "depth, not b tagged, low PV")
+                    print("\n \n ********************* \n depth, b-tagged, high PV \n ********************* \n \n")
+                    MisTagParametrization(combined_tree, "depth, b tagged, high PV") # run with lower DNN scores otherwise nothing predicted...
+                    print("\n \n ********************* \n depth, not b-tagged, high PV \n ********************* \n \n")
+                    MisTagParametrization(combined_tree, "depth, not b tagged, high PV")
 
-    if combined_tree_Zmu:
-        print("Z+jets / W+jets tree successfully accessed, will be passed to MisTagParametrization")
-        #MisTagParametrization(combined_tree_Zmu, "")
-        MisTagParametrization(combined_tree_Zmu, "depth")
-        #MisTagParametrization(combined_tree_Zmu, "timing")
-        #MisTagParametrization(combined_tree_Zmu, "depth, timing")
-        # MisTagParametrization(combined_tree_Zmu, "depth, trackPt")
-        # MisTagParametrization(combined_tree_Zmu, "before alignment")
-        # MisTagParametrization(combined_tree_Zmu, "after alignment")
-        # MisTagParametrization(combined_tree_Zmu, "before alignment, depth")
-        # MisTagParametrization(combined_tree_Zmu, "after alignment, depth")
-        # MisTagParametrization(combined_tree_Zmu, "after alignment, trackPt")
-    else:
-        print("Z+jets / W+jets tree is invalid!")
+                # MisTagParametrization(combined_tree, "depth, c tagged")
+                # MisTagParametrization(combined_tree, "depth, bb tagged")
+                # MisTagParametrization(combined_tree, "depth, light flavor tagged")
+                # MisTagParametrization(combined_tree, "depth, flavor tagged")
+                # MisTagParametrization(combined_tree, "depth, not flavor tagged")
 
-    filelist = ["output_3D_hists_depth_combined_2023Cv1.root", "output_3D_hists_depth_combined_2023Cv2.root"]
-    # PlotFromFile(filelist)
+                # MisTagParametrization(combined_tree, "before alignment, depth")
+                # MisTagParametrization(combined_tree, "after alignment, depth")
+                #MisTagParametrization(combined_tree, "after alignment")
+                #MisTagParametrization(combined_tree, "timing")
+                #MisTagParametrization(combined_tree, "depth, timing")
+            else:
+                print("LLP skim tree is invalid!")
+
+            if combined_tree_Zmu:
+                print("Z+jets / W+jets tree successfully accessed, will be passed to MisTagParametrization")
+                #MisTagParametrization(combined_tree_Zmu, "")
+                MisTagParametrization(combined_tree_Zmu, "depth")
+                #MisTagParametrization(combined_tree_Zmu, "timing")
+                #MisTagParametrization(combined_tree_Zmu, "depth, timing")
+                # MisTagParametrization(combined_tree_Zmu, "depth, trackPt")
+                # MisTagParametrization(combined_tree_Zmu, "before alignment")
+                # MisTagParametrization(combined_tree_Zmu, "after alignment")
+                # MisTagParametrization(combined_tree_Zmu, "before alignment, depth")
+                # MisTagParametrization(combined_tree_Zmu, "after alignment, depth")
+                # MisTagParametrization(combined_tree_Zmu, "after alignment, trackPt")
+            else:
+                print("Z+jets / W+jets tree is invalid!")
+
+            filelist = ["output_3D_hists_depth_combined_2023Cv1.root", "output_3D_hists_depth_combined_2023Cv2.root"]
+            # PlotFromFile(filelist)
 
 if __name__ == '__main__':
 	main()
