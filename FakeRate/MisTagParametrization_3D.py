@@ -38,6 +38,12 @@ runs_to_exclude = [367230, 367772, 368331, 368440, 368764, 370436, 370579, 37079
 runs_to_exclude = [367772, 368384, 368412, 370102, 370472, 370522, 370579, 370667] # 2023 runs, from depth DNN with LLP decaying anywhere
 runs_to_exclude_2023 = [368389] # 2023 runs, from depth DNN with LLP decaying anywhere, with delta phi exclusion and depth / inclusive candidates
 runs_to_exclude_2022 = [357805, 360890, 360941, 362437, 360949, 361053] # 2022 runs, from depth DNN with LLP decaying anywhere
+# 362596 has triggers sent from HE as well, since Calo L1 was not masking these! Pretty serious operational issue that caused trigger rates to blow up 
+runs_to_exclude_2022.append(362596) 
+# runs_to_exclude_2022.extend(range(362597, 362697)) # runs with L1 6:1 LUT issue (when the actually correct LUT was used! passed both timing and depth), from Nov 23-26
+# This is a large range of runs but want to be conservative in excluding all runs that could be affected by the LUT issue, which caused anomalous DNN scores likely due to detector effects not well modeled by the mistag rate.
+# Era F ended at 362167
+# Era G was 362350-362760, so this issue only affected a subset of era G, but to be conservative exclude the full era G.
 
 Zmu = False
 if Zmu: era = "2023 Bv1-Dv2 Zmu"
@@ -103,7 +109,7 @@ def MisTagParametrization(tree, option=""):
     # run_exclusion = ExcludedCut("run", []) # placeholder, will be updated based on era. Exclude runs with anomalous DNN scores, likely due to detector effects not well modeled by the mistag rate.
     if era == "2023":
         run_exclusion = ExcludedCut("run", runs_to_exclude_2023)
-    elif era == "2022": 
+    elif era == "2022" or era == "2022_DE" or era == "2022_DEF" or era == "2022_F" or era == "2022_G": 
         run_exclusion = ExcludedCut("run", runs_to_exclude_2022)
     if debug: print(run_exclusion)
 
@@ -1016,6 +1022,17 @@ def main():
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Dv1_scores.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Ev1_scores.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Fv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Gv1_scores.root"]
+    elif era == "2022_DE": infilepath_list = [
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Dv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Ev1_scores.root"]
+    elif era == "2022_DEF": infilepath_list = [
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Dv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Ev1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Fv1_scores.root"]
+    elif era == "2022_F": infilepath_list = [
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Fv1_scores.root"]
+    elif era == "2022_G": infilepath_list = [
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Gv1_scores.root"]
     elif era == "2023": infilepath_list = [
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv1_scores.root",

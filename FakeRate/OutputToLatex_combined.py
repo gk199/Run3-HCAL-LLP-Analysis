@@ -101,8 +101,9 @@ def generate_latex_table(data, year, score):
         lines.append(f"        & Predicted VR & {entry(jet, 'Predicted VR')} \\\\")
         lines.append(f"        & Predicted SR & {entry(jet, 'Predicted SR')} \\\\ \\hline")
 
+    year_text = year.replace("_", " ")
     lines.append("    \\end{tabular}")
-    lines.append("    \\caption{Depth DNN score = " + score + " for " + year + ".}")
+    lines.append("    \\caption{Depth DNN score = " + score + " for " + year_text + ".}")
     lines.append("    \\label{Table:VRclosure_pt" + score[-1] + "_" + year + "_combined}")
     lines.append("\\end{table}")
     return "\n".join(lines)
