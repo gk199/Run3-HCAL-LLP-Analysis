@@ -40,10 +40,11 @@ runs_to_exclude_2023 = [368389] # 2023 runs, from depth DNN with LLP decaying an
 runs_to_exclude_2022 = [357805, 360890, 360941, 362437, 360949, 361053] # 2022 runs, from depth DNN with LLP decaying anywhere
 # 362596 has triggers sent from HE as well, since Calo L1 was not masking these! Pretty serious operational issue that caused trigger rates to blow up 
 runs_to_exclude_2022.append(362596) 
-# runs_to_exclude_2022.extend(range(362597, 362697)) # runs with L1 6:1 LUT issue (when the actually correct LUT was used! passed both timing and depth), from Nov 23-26
+runs_to_exclude_2022.extend(range(362597, 362697)) # runs with L1 6:1 LUT issue (when the actually correct LUT was used! passed both timing and depth), from Nov 23-26
 # This is a large range of runs but want to be conservative in excluding all runs that could be affected by the LUT issue, which caused anomalous DNN scores likely due to detector effects not well modeled by the mistag rate.
 # Era F ended at 362167
 # Era G was 362350-362760, so this issue only affected a subset of era G, but to be conservative exclude the full era G.
+print(f"Runs to exclude in 2022: {runs_to_exclude_2022}")
 
 Zmu = False
 if Zmu: era = "2023 Bv1-Dv2 Zmu"
@@ -107,9 +108,9 @@ def MisTagParametrization(tree, option=""):
 
     # Setup cuts for CR and VR. CR = jet1_scores_inc between 0-0.2. VR = jet1_scores_inc between 0.2-0.9. Mistag means jet0_scores over "DNN_cut"
     # run_exclusion = ExcludedCut("run", []) # placeholder, will be updated based on era. Exclude runs with anomalous DNN scores, likely due to detector effects not well modeled by the mistag rate.
-    if era == "2023":
+    if "2023" in era:
         run_exclusion = ExcludedCut("run", runs_to_exclude_2023)
-    elif era == "2022" or era == "2022_DE" or era == "2022_DEF" or era == "2022_F" or era == "2022_G": 
+    elif "2022" in era: 
         run_exclusion = ExcludedCut("run", runs_to_exclude_2022)
     if debug: print(run_exclusion)
 
@@ -679,7 +680,7 @@ def CreateHistograms_1D(tree, cut, hist_name):
     hist1d_eta = ROOT.TH1F(hist_name + "_eta", "1D histogram; #eta", len(eta_bins)-1, eta_bins)
     hist1d_phi = ROOT.TH1F(hist_name + "_phi", "1D histogram; #phi", len(phi_bins)-1, phi_bins)
     hist1d_run = ROOT.TH1F(hist_name + "_run", "1D histogram; Run Number", 5000, 356000, 364000) # run range specified
-    if (era == "2023"):
+    if ("2023" in era):
         hist1d_run = ROOT.TH1F(hist_name + "_run", "1D histogram; Run Number", 5000, 366000, 371000) # run range specified
     tree.Draw("jet0_Pt >> " + hist_name + "_pt", cut, "")
     tree.Draw("jet0_Eta >> " + hist_name + "_eta", cut, "")
@@ -1038,6 +1039,14 @@ def main():
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv1_scores.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv2_scores.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv3_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv4_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv2_scores.root"]
+    elif era == "2023_C123": infilepath_list = [
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv2_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv3_scores.root"]
+    elif era == "2023_C4D": infilepath_list = [
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv4_scores.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv1_scores.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv2_scores.root"]
