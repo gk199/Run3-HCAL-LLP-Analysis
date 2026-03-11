@@ -38,9 +38,6 @@ runs_to_exclude = [367230, 367772, 368331, 368440, 368764, 370436, 370579, 37079
 runs_to_exclude = [367772, 368384, 368412, 370102, 370472, 370522, 370579, 370667] # 2023 runs, from depth DNN with LLP decaying anywhere
 runs_to_exclude_2023 = [368389] # 2023 runs, from depth DNN with LLP decaying anywhere, with delta phi exclusion and depth / inclusive candidates
 runs_to_exclude_2022 = [357805, 360890, 360941, 362437, 360949, 361053] # 2022 runs, from depth DNN with LLP decaying anywhere
-# below two are evaluated without b-tagging requirement in beam halo rejection
-# runs_to_exclude_2022 = [357776, 359661, 359690, 359869, 360890, 361044, 362087, 362437, 362615, 362616, 362653, 360128, 360887, 360949, 361053, 361994, 362063, 362698]
-# runs_to_exclude_2023 = [367228, 368684, 370460, 368684, 370460]
 # 362596 has triggers sent from HE as well, since Calo L1 was not masking these! Pretty serious operational issue that caused trigger rates to blow up 
 runs_to_exclude_2022.append(362596) 
 runs_to_exclude_2022.extend(range(362597, 362697)) # runs with L1 6:1 LUT issue (when the actually correct LUT was used! passed both timing and depth), from Nov 23-26
@@ -119,7 +116,7 @@ def MisTagParametrization(tree, option=""):
 
     # deltaPhi_exclusion = ROOT.TCut("(abs(jet0_Phi) > 0.2 && abs(jet0_Phi) < 2.95) || abs(jet0_jet1_dPhi) > 0.2") + GetCut("Flag_METFilters_2022_2023_PromptReco", 1)
     deltaPhi_exclusion = ROOT.TCut("abs(jet0_jet1_dPhi) > 0.2") + GetCut("Flag_METFilters_2022_2023_PromptReco", 1) # stricter than just beam halo, also addressing colimated jets
-    # deltaPhi_exclusion += GetCut("jet0_DeepCSV_prob_b", [-0.1,0.5]) + GetCut("jet1_DeepCSV_prob_b", [-0.1,0.5]) # require two jets are not highly b tagged
+    deltaPhi_exclusion += GetCut("jet0_DeepCSV_prob_b", [-0.1,0.5]) + GetCut("jet1_DeepCSV_prob_b", [-0.1,0.5]) # require two jets are not highly b tagged
     if debug: print(deltaPhi_exclusion)
 
     low_PV = GetCut("PV", [0,42])
@@ -221,19 +218,19 @@ def MisTagParametrization(tree, option=""):
     # Also add  + deltaPhi_exclusion to avoid collimated jets which are likely to be beam halo and not well modeled by the mistag rate.
     # For the subleading jet mistag rate, use the same cuts but with jet1 emulated instead of jet0, and also require jet0 to pass the emulated cut to ensure we're in the same sample (just swapping which jet is tagged vs mistagged)
     # TODO comment this out if want to do 1D rate evaluation 
-    # hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run = CreateHistograms_1D(tree, CR + depth_emu + deltaPhi_exclusion, "hist1d_CR_all")
-    # hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run = CreateHistograms_1D(tree, CR + depth_emu + deltaPhi_exclusion + mistag, "hist1d_CR_mistag")
-    # hist1D_CR_all_pt_1, hist1D_CR_all_eta_1, hist1D_CR_all_phi_1, hist1D_CR_all_run_1 = CreateHistograms_1D(tree, CR_0 + depth_emu_1 + deltaPhi_exclusion, "hist1d_CR_all_1")
-    # hist1D_CR_mistag_pt_1, hist1D_CR_mistag_eta_1, hist1D_CR_mistag_phi_1, hist1D_CR_mistag_run_1 = CreateHistograms_1D(tree, CR_0 + depth_emu_1 + deltaPhi_exclusion + mistag_1, "hist1d_CR_mistag_1")
-    # hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi, hist1D_VR_all_run = CreateHistograms_1D(tree, VR + depth_emu + deltaPhi_exclusion, "hist1d_VR_all")
-    # hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi, hist1D_VR_mistag_run = CreateHistograms_1D(tree, VR + depth_emu + deltaPhi_exclusion + mistag, "hist1d_VR_mistag")
+    hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run = CreateHistograms_1D(tree, CR + depth_emu + deltaPhi_exclusion, "hist1d_CR_all")
+    hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run = CreateHistograms_1D(tree, CR + depth_emu + deltaPhi_exclusion + mistag, "hist1d_CR_mistag")
+    hist1D_CR_all_pt_1, hist1D_CR_all_eta_1, hist1D_CR_all_phi_1, hist1D_CR_all_run_1 = CreateHistograms_1D(tree, CR_0 + depth_emu_1 + deltaPhi_exclusion, "hist1d_CR_all_1")
+    hist1D_CR_mistag_pt_1, hist1D_CR_mistag_eta_1, hist1D_CR_mistag_phi_1, hist1D_CR_mistag_run_1 = CreateHistograms_1D(tree, CR_0 + depth_emu_1 + deltaPhi_exclusion + mistag_1, "hist1d_CR_mistag_1")
+    hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi, hist1D_VR_all_run = CreateHistograms_1D(tree, VR + depth_emu + deltaPhi_exclusion, "hist1d_VR_all")
+    hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi, hist1D_VR_mistag_run = CreateHistograms_1D(tree, VR + depth_emu + deltaPhi_exclusion + mistag, "hist1d_VR_mistag")
     print("created histograms for 1D rate evaluation")
     # TODO comment this out if want to do 1D bkg prediction
-    # if LLPskim: MistagRate_1D([hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run], [hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run], "CR", option, title, label, "leading") # mistag_jet_list[i])
-    # if LLPskim: MistagRate_1D([hist1D_CR_mistag_pt_1, hist1D_CR_mistag_eta_1, hist1D_CR_mistag_phi_1, hist1D_CR_mistag_run_1], [hist1D_CR_all_pt_1, hist1D_CR_all_eta_1, hist1D_CR_all_phi_1, hist1D_CR_all_run_1], "CR", option, title, label, "subleading") # mistag_jet_list[i])
-    # if Zmu: MistagRate_1D([hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run], [hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run], "Wjets", option, title, label, "leading")
-    # if LLPskim: MistagRate_1D([hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi, hist1D_VR_mistag_run], [hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi, hist1D_VR_all_run], "VR", option, title, label, "leading")
-    # if Zmu: MistagRate_1D([hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi, hist1D_VR_mistag_run], [hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi, hist1D_VR_all_run], "Zjets", option, title, label, "leading")
+    if LLPskim: MistagRate_1D([hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run], [hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run], "CR", option, title, label, "leading") # mistag_jet_list[i])
+    if LLPskim: MistagRate_1D([hist1D_CR_mistag_pt_1, hist1D_CR_mistag_eta_1, hist1D_CR_mistag_phi_1, hist1D_CR_mistag_run_1], [hist1D_CR_all_pt_1, hist1D_CR_all_eta_1, hist1D_CR_all_phi_1, hist1D_CR_all_run_1], "CR", option, title, label, "subleading") # mistag_jet_list[i])
+    if Zmu: MistagRate_1D([hist1D_CR_mistag_pt, hist1D_CR_mistag_eta, hist1D_CR_mistag_phi, hist1D_CR_mistag_run], [hist1D_CR_all_pt, hist1D_CR_all_eta, hist1D_CR_all_phi, hist1D_CR_all_run], "Wjets", option, title, label, "leading")
+    if LLPskim: MistagRate_1D([hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi, hist1D_VR_mistag_run], [hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi, hist1D_VR_all_run], "VR", option, title, label, "leading")
+    if Zmu: MistagRate_1D([hist1D_VR_mistag_pt, hist1D_VR_mistag_eta, hist1D_VR_mistag_phi, hist1D_VR_mistag_run], [hist1D_VR_all_pt, hist1D_VR_all_eta, hist1D_VR_all_phi, hist1D_VR_all_run], "Zjets", option, title, label, "leading")
     print("completed 1D rate evaluation")
 
     # Create the 3D histograms with different cuts. Arguments to CreateHistograms function are tree, cut, histogram name. Histograms are filled using tree.Draw() method
@@ -1030,9 +1027,10 @@ def main():
     elif era == "2022_DE": infilepath_list = [
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Dv1_scores.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Ev1_scores.root"]
-    elif era == "2022_FG": infilepath_list = [
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Fv1_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Gv1_scores.root"]
+    elif era == "2022_DEF": infilepath_list = [
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Dv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Ev1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Fv1_scores.root"]
     elif era == "2022_F": infilepath_list = [
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Fv1_scores.root"]
     elif era == "2022_G": infilepath_list = [
@@ -1068,11 +1066,11 @@ def main():
     dnn_str = str(DNN_cut).replace("0.", "pt")
     # Optional suffix
     btag_str = "_combined" if b_tag_combined else ""
-    output_filename = f"DNN_{dnn_str}_{era}_forPython{btag_str}.txt"
+    output_filename = f"DNN_{dnn_str}_{era}_forPython{btag_str}_RunNumText.txt"
     print(f"Writing output to: {output_filename}")
 
     with open(output_filename, "w") as f:
-        with redirect_stdout(f): # TODO remove for table running full bkg prediction
+        # with redirect_stdout(f): # TODO remove for table running full bkg prediction
     
             if combined_tree:
                 print("LLP skim tree successfully accessed, will be passed to MisTagParametrization")

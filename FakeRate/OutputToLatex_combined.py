@@ -104,7 +104,7 @@ def generate_latex_table(data, year, score):
     year_text = year.replace("_", " ")
     lines.append("    \\end{tabular}")
     lines.append("    \\caption{Depth DNN score = " + score + " for " + year_text + ".}")
-    lines.append("    \\label{Table:VRclosure_pt" + score[-1] + "_" + year + "_combined}")
+    lines.append("    \\label{Table:VRclosure_pt" + score.replace("0.", "") + "_" + year + "_combined}")
     lines.append("\\end{table}")
     return "\n".join(lines)
 
@@ -127,7 +127,8 @@ def parseArgs():
 # ---- USAGE ----
 if __name__ == "__main__":
 
-    print("Parsing arguments...")
+    #print("Parsing arguments...")
+    print (" ")
 
     args = parseArgs()
     year = args.era   
@@ -135,7 +136,7 @@ if __name__ == "__main__":
     b_tag_combined = args.b_tag_combined
     btag_str = "_combined" if b_tag_combined else ""
 
-    filename = "DNN_pt" + score[-1] + "_" + year + "_forPython" + btag_str + ".txt"  # Change this to your input file
+    filename = "DNN_pt" + score.replace("0.", "") + "_" + year + "_forPython" + btag_str + ".txt"  # Change this to your input file
     data = parse_file(filename)
 
     debug = False
