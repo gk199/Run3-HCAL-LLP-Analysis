@@ -32,15 +32,15 @@ c_tag_bins = np.array(c_tag_bins, dtype=float)
 # era = "2023" # automatically switches which input minituples to use based on this name
 # b_tag_combined = True
 # DNN_cut = 0.8 # depth DNN score, the one to vary 
-DNN_cut_inc = 0.9
+DNN_cut_inc = 0.97
 
 runs_to_exclude = [367230, 367772, 368331, 368440, 368764, 370436, 370579, 370790] # 2023 runs, based on earlier DNN
 runs_to_exclude = [367772, 368384, 368412, 370102, 370472, 370522, 370579, 370667] # 2023 runs, from depth DNN with LLP decaying anywhere
-runs_to_exclude_2023 = [368389] # 2023 runs, from depth DNN with LLP decaying anywhere, with delta phi exclusion and depth / inclusive candidates
-runs_to_exclude_2022 = [357805, 360890, 360941, 362437, 360949, 361053] # 2022 runs, from depth DNN with LLP decaying anywhere
+# runs_to_exclude_2023 = [368389] # 2023 runs, from depth DNN with LLP decaying anywhere, with delta phi exclusion and depth / inclusive candidates
+# runs_to_exclude_2022 = [357805, 360890, 360941, 362437, 360949, 361053] # 2022 runs, from depth DNN with LLP decaying anywhere
 # below two are evaluated without b-tagging requirement in beam halo rejection
-# runs_to_exclude_2022 = [357776, 359661, 359690, 359869, 360890, 361044, 362087, 362437, 362615, 362616, 362653, 360128, 360887, 360949, 361053, 361994, 362063, 362698]
-# runs_to_exclude_2023 = [367228, 368684, 370460, 368684, 370460]
+runs_to_exclude_2022 = [357776, 359661, 359690, 359869, 360890, 361044, 362087, 362437, 362615, 362616, 362653, 360128, 360887, 360949, 361053, 361994, 362063, 362698]
+runs_to_exclude_2023 = [367228, 368684, 370460, 368684, 370460]
 # 362596 has triggers sent from HE as well, since Calo L1 was not masking these! Pretty serious operational issue that caused trigger rates to blow up 
 runs_to_exclude_2022.append(362596) 
 runs_to_exclude_2022.extend(range(362597, 362697)) # runs with L1 6:1 LUT issue (when the actually correct LUT was used! passed both timing and depth), from Nov 23-26
@@ -119,7 +119,7 @@ def MisTagParametrization(tree, option=""):
 
     # deltaPhi_exclusion = ROOT.TCut("(abs(jet0_Phi) > 0.2 && abs(jet0_Phi) < 2.95) || abs(jet0_jet1_dPhi) > 0.2") + GetCut("Flag_METFilters_2022_2023_PromptReco", 1)
     deltaPhi_exclusion = ROOT.TCut("abs(jet0_jet1_dPhi) > 0.2") + GetCut("Flag_METFilters_2022_2023_PromptReco", 1) # stricter than just beam halo, also addressing colimated jets
-    # deltaPhi_exclusion += GetCut("jet0_DeepCSV_prob_b", [-0.1,0.5]) + GetCut("jet1_DeepCSV_prob_b", [-0.1,0.5]) # require two jets are not highly b tagged
+    # deltaPhi_exclusion += GetCut("jet0_DeepCSV_prob_b", [-0.1,2]) + GetCut("jet1_DeepCSV_prob_b", [-0.1,2]) # require two jets are not highly b tagged
     if debug: print(deltaPhi_exclusion)
 
     low_PV = GetCut("PV", [0,42])
@@ -1013,6 +1013,8 @@ def main():
     label = "NoSel"
 
     print(era)
+    print("Depth DNN cut is " + str(DNN_cut))
+    print("Inclusive DNN cut is " + str(DNN_cut_inc))
 
     if era == "2023 Bv1":   infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Bv1_scores.root"]
     elif era == "2023 Cv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv1_scores.root"]

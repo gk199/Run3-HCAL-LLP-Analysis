@@ -116,7 +116,7 @@ def MisTagParametrization(tree, option=""):
 
     # deltaPhi_exclusion = ROOT.TCut("(abs(jet0_Phi) > 0.2 && abs(jet0_Phi) < 2.95) || abs(jet0_jet1_dPhi) > 0.2") + GetCut("Flag_METFilters_2022_2023_PromptReco", 1)
     deltaPhi_exclusion = ROOT.TCut("abs(jet0_jet1_dPhi) > 0.2") + GetCut("Flag_METFilters_2022_2023_PromptReco", 1) # stricter than just beam halo, also addressing colimated jets
-    deltaPhi_exclusion += GetCut("jet0_DeepCSV_prob_b", [-0.1,0.5]) + GetCut("jet1_DeepCSV_prob_b", [-0.1,0.5]) # require two jets are not highly b tagged
+    # deltaPhi_exclusion += GetCut("jet0_DeepCSV_prob_b", [-0.1,0.5]) + GetCut("jet1_DeepCSV_prob_b", [-0.1,0.5]) # require two jets are not highly b tagged
     if debug: print(deltaPhi_exclusion)
 
     low_PV = GetCut("PV", [0,42])
