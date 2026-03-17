@@ -91,10 +91,10 @@ void MiniTuplePlotter_HLT_Effs(){
 	overlay_LLPdisplacement.Plot("efficiency", "", {"0","0","0"}, true);
 	overlay_LLPdisplacement.ClearFileTrees(); 
 	overlay_LLPdisplacement.SetOutputFileTag("HLT_v3_MC_jetE"+jet_E[0]+"_HLTeffs");
-	overlay_LLPdisplacement.SetLegendPosition( 0.15, 0.5, 0.53, 0.68 );
-	overlay_LLPdisplacement.SetComparisonCuts({Cut_HLTpassed1, Cut_AnyLLP_HLT_noECAL});
-	overlay_LLPdisplacement.SetLegendNames({"L1", "m_{H}=350 GeV, HLT efficiency", "L1", "m_{H}=125 GeV, HLT efficiency"});
-	overlay_LLPdisplacement.Plot("efficiency", "", {"0","0","0"}, true);
+	overlay_LLPdisplacement.SetLegendPosition( 0.15, 0.5, 0.53, 0.85 );
+	overlay_LLPdisplacement.SetComparisonCuts({Cut_HLTpassed1, Cut_AnyLLP_HLT});
+	overlay_LLPdisplacement.SetLegendNames({"L1", "#splitline{m_{H} = 350 GeV,}{m_{S} = 80 GeV, c#tau = 0.5 m}", "L1", "#splitline{m_{H} = 125 GeV,}{m_{S} = 50 GeV, c#tau = 3 m}"});
+	overlay_LLPdisplacement.Plot("efficiencyHLT", "", {"0","0","0"}, true);
 
 	class MiniTuplePlotter overlay_HT( { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_2024_06_03_rerun", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_2024_06_03_combined"}, path );
 	overlay_HT.SetPlots({P_eventHT});
@@ -115,9 +115,9 @@ void MiniTuplePlotter_HLT_Effs(){
 	overlay_HT.ClearFileTrees(); 
 	overlay_HT.SetOutputFileTag("HLT_v3_MC_eventHT_HLTeffs");
 	overlay_HT.SetLegendPosition( 0.15, 0.9, 0.53, 1.08 );
-	overlay_HT.SetComparisonCuts({Cut_HLTpassed1, Cut_AnyLLP_HLT_noECAL});
-	overlay_HT.SetLegendNames({"L1", "m_{H}=350 GeV, HLT efficiency", "L1", "m_{H}=125 GeV, HLT efficiency"});
-	overlay_HT.Plot("efficiency", "", {"0","0","0"}, true);
+	overlay_HT.SetComparisonCuts({Cut_HLTpassed1, Cut_AnyLLP_HLT});
+	overlay_HT.SetLegendNames({"L1", "m_{H} = 350 GeV, m_{S} = 80 GeV, c#tau = 0.5 m", "L1", "m_{H} = 125 GeV, m_{S} = 50 GeV, c#tau = 3 m"});
+	overlay_HT.Plot("efficiencyHLT", "", {"0","0","0"}, true);
 
 	class MiniTuplePlotter overlay_jet( { "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-350_MS-80_CTau500_13p6TeV_noPerJetPt_2024_06_30", "v3.8_LLP_MC_ggH_HToSSTobbbb_MH-125_MS-50_CTau3000_13p6TeV_noPerJetPt_2024_06_30"}, path );
 	overlay_jet.SetPlots({P_perJet_Pt});
@@ -137,10 +137,10 @@ void MiniTuplePlotter_HLT_Effs(){
 	overlay_jet.Plot("efficiency", "", {"0","0","0"}, true);
 	overlay_jet.ClearFileTrees(); 
 	overlay_jet.SetOutputFileTag("HLT_v3_MC_HLTeffs");
-	overlay_jet.SetComparisonCuts({Cut_HLTpassed1, Cut_AnyLLP_HLT_noECAL});
-	overlay_jet.SetLegendPosition( 0.5, 0.9, 0.88, 1.08 ); 
-	overlay_jet.SetLegendNames({"L1", "m_{H}=350 GeV, HLT efficiency", "L1", "m_{H}=125 GeV, HLT efficiency"});
-	overlay_jet.Plot("efficiency", "", {"0","0","0"}, true);
+	overlay_jet.SetComparisonCuts({Cut_HLTpassed1, Cut_AnyLLP_HLT});
+	overlay_jet.SetLegendPosition( 0.32, 0.9, 0.65, 1.08 ); 
+	overlay_jet.SetLegendNames({"L1", "m_{H} = 350 GeV, m_{S} = 80 GeV, c#tau = 0.5 m", "L1", "m_{H} = 125 GeV, m_{S} = 50 GeV, c#tau = 3 m"});
+	overlay_jet.Plot("efficiencyHLT", "", {"0","0","0"}, true);
 
 	// overlay L1 and HLT results
 	for( auto key: filetag_keys_to_loop){

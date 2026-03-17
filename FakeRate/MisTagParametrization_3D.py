@@ -1017,18 +1017,22 @@ def main():
     print("Inclusive DNN cut is " + str(DNN_cut_inc))
 
     if era == "2023 Bv1":   infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Bv1_scores.root"]
-    elif era == "2023 Cv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv1_scores.root"]
-    elif era == "2023 Cv2": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv2_scores.root"]
-    elif era == "2023 Cv3": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv3_scores.root"]
-    elif era == "2023 Cv4": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv4_scores.root"]
-    elif era == "2023 Dv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv1_scores.root"]
-    elif era == "2023 Dv2" and not CNN: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv2_scores.root"]
-    elif era == "2023 Dv2" and CNN: infilepath_list = ["/afs/cern.ch/work/f/fsimpson/public/minituple_outputs/minituple_Run2023D-EXOLLPJetHCAL-PromptReco-v2_partial28k-v4-scores_added.root"]
+    elif era == "2023_Cv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv1_scores.root"]
+    elif era == "2023_Cv2": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv2_scores.root"]
+    elif era == "2023_Cv3": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv3_scores.root"]
+    elif era == "2023_Cv4": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv4_scores.root"]
+    elif era == "2023_Dv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv1_scores.root"]
+    elif era == "2023_Dv2" and not CNN: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv2_scores.root"]
+    elif era == "2023_Dv2" and CNN: infilepath_list = ["/afs/cern.ch/work/f/fsimpson/public/minituple_outputs/minituple_Run2023D-EXOLLPJetHCAL-PromptReco-v2_partial28k-v4-scores_added.root"]
     elif era == "2022": infilepath_list = [
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Dv1_scores.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Ev1_scores.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Fv1_scores.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Gv1_scores.root"]
+    elif era == "2022_D": infilepath_list = [
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Dv1_scores.root"]
+    elif era == "2022_E": infilepath_list = [
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Ev1_scores.root"]
     elif era == "2022_DE": infilepath_list = [
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Dv1_scores.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Ev1_scores.root"]
@@ -1046,12 +1050,12 @@ def main():
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv4_scores.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv1_scores.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv2_scores.root"]
-    elif era == "2023_C123": infilepath_list = [
+    elif era == "2023_C1234": infilepath_list = [
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv1_scores.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv2_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv3_scores.root"]
-    elif era == "2023_C4D": infilepath_list = [
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv4_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv3_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv4_scores.root"]
+    elif era == "2023_D": infilepath_list = [
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv1_scores.root",
                         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv2_scores.root"]
     if LLPskim: combined_tree = GetData(infilepath_list, label)
