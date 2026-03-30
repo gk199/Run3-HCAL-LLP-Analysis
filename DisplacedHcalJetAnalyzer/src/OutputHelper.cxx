@@ -26,6 +26,10 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_bool.push_back(HLT_Names[i]);
 	}
 
+	for (int i = 0; i < (int)L1_Indices.size(); i++) {
+		myvars_bool.push_back(L1_Names[i]);
+	}
+
 	// Add Event Variables //
 
 	vector<string> myvars_int = {
@@ -43,8 +47,19 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 	}
 
 	vector<string> myvars_float = {
-		"met_Pt", "met_Phi", "met_SumEt", "eventHT", "weight", "randomFloat"
+		"met_Pt", "met_Phi", "met_SumEt", "eventHT", "weight", "randomFloat",
+		// Per-trigger L1 prescale values. Stored as float because the ntupler
+		// stores them as double. Value is -1 when L1 branches are absent.
+		// For MC, the ntupler fills luminosity-weighted effective prescales
+		// (e.g. 100, 50, 1, 1, 1 for the 5 LLP triggers) so no external
+		// correction is needed -- just apply L1_prescale_weight to MC events.
+		// L1_prescale_weight = 1/prescale of lowest-prescaled fired L1 trigger.
+		"L1_prescale_weight"
 	};
+
+	for (int i = 0; i < (int)L1_Indices.size(); i++) {
+		myvars_float.push_back(L1_Names[i] + "_Prescale");
+	}
 
 	vector<string> myvars_vec = {};
 
@@ -348,13 +363,22 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 		myvars_bool.push_back(HLT_Names[i]);
 	}
 
+	for (int i = 0; i < (int)L1_Indices.size(); i++) {
+		myvars_bool.push_back(L1_Names[i]);
+	}
+
 	// Add Event Variables //
 	vector<string> myvars_int = {
 		"run","lumi","event","jetIndex",
 		"PV","jet","muon","ele","pho",
-	};	
+	};
 
-	vector<string> myvars_float = {"eventHT", "randomFloat"};
+	vector<string> myvars_float = {"eventHT", "randomFloat", "L1_prescale_weight"};
+
+	// Per-trigger L1 prescale values (float; -1 = branch absent)
+	for (int i = 0; i < (int)L1_Indices.size(); i++) {
+		myvars_float.push_back(L1_Names[i] + "_Prescale");
+	}
 
 	vector<string> myvars_string = {"era"};
 
@@ -532,9 +556,32 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 	tree_output_vars_float["eventHT"]   = EventHT();
 	tree_output_vars_float["weight"]	= weight; // from SetWeight() in WeightsHelper.cxx
 
-	for (int i = 0; i < HLT_Indices.size(); i++) { 
+	for (int i = 0; i < HLT_Indices.size(); i++) {
 		tree_output_vars_bool[HLT_Names[i]] = HLT_Decision->at(i);
 	}
+
+	// L1 decisions and prescales.
+	// L1_Prescale is vector<double> in the ntupler. For data it holds the actual
+	// run-by-run prescale; for MC the ntupler fills prescales (100/50/1/1/1 for 
+	// the 5 LLP triggers). Stored as -1 when branches absent.
+	// L1_prescale_weight = 1/min_prescale over fired triggers; apply to MC event weights.
+	float  l1_prescale_weight = 1.0f;
+	double l1_min_prescale    = -1.0; // -1 = no fired trigger found yet
+	for (int i = 0; i < (int)L1_Indices.size(); i++) {
+		bool   decision = false;
+		double prescale = -1.0; // -1 = branch absent
+		if (has_L1_branches && i < (int)L1_Decision->size()) {
+			decision = L1_Decision->at(i);
+			prescale = (i < (int)L1_Prescale->size()) ? L1_Prescale->at(i) : -1.0;
+			if (decision && prescale > 0.0 && (l1_min_prescale < 0.0 || prescale < l1_min_prescale))
+				l1_min_prescale = prescale;
+		}
+		tree_output_vars_bool[L1_Names[i]]                  = decision;
+		tree_output_vars_float[L1_Names[i] + "_Prescale"]   = (float)prescale;
+	}
+	if (l1_min_prescale > 0.0)
+		l1_prescale_weight = (float)(1.0 / l1_min_prescale);
+	tree_output_vars_float["L1_prescale_weight"] = l1_prescale_weight;
 
 	tree_output_vars_bool["Flag_HBHENoiseFilter"] = Flag_HBHENoiseFilter;
 	tree_output_vars_bool["Flag_HBHENoiseIsoFilter"] = Flag_HBHENoiseIsoFilter;
@@ -907,9 +954,28 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	
 	jet_tree_output_vars_float["eventHT"]   = EventHT();
 
-	for (int i = 0; i < HLT_Indices.size(); i++) { 
+	for (int i = 0; i < HLT_Indices.size(); i++) {
 		jet_tree_output_vars_bool[HLT_Names[i]] = HLT_Decision->at(i);
 	}
+
+	// L1 decisions and prescales (same logic as event tree)
+	float  l1_prescale_weight_jet = 1.0f;
+	double l1_min_prescale_jet    = -1.0;
+	for (int i = 0; i < (int)L1_Indices.size(); i++) {
+		bool   decision = false;
+		double prescale = -1.0;
+		if (has_L1_branches && i < (int)L1_Decision->size()) {
+			decision = L1_Decision->at(i);
+			prescale = (i < (int)L1_Prescale->size()) ? L1_Prescale->at(i) : -1.0;
+			if (decision && prescale > 0.0 && (l1_min_prescale_jet < 0.0 || prescale < l1_min_prescale_jet))
+				l1_min_prescale_jet = prescale;
+		}
+		jet_tree_output_vars_bool[L1_Names[i]]                = decision;
+		jet_tree_output_vars_float[L1_Names[i] + "_Prescale"] = (float)prescale;
+	}
+	if (l1_min_prescale_jet > 0.0)
+		l1_prescale_weight_jet = (float)(1.0 / l1_min_prescale_jet);
+	jet_tree_output_vars_float["L1_prescale_weight"] = l1_prescale_weight_jet;
 
 	float deltaR_jet_l1jet; 
 	bool JetPassL1Trigger = JetPassesHWQual( jetIndex, deltaR_jet_l1jet );

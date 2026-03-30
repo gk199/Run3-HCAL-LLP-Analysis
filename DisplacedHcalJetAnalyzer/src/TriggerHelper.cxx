@@ -90,7 +90,33 @@ void DisplacedHcalJetAnalyzer::SetTriggerNames(){ //} string infilepath, string 
 		}
 
 		HLT_Indices[hlt_name_temp] = i;
-		
+
+	}
+
+}
+
+/* ====================================================================================================================== */
+void DisplacedHcalJetAnalyzer::SetL1TriggerNames(){
+
+	if( debug ) cout<<"DisplacedHcalJetAnalyzer::SetL1TriggerNames()"<<endl;
+
+	vector<string> l1TriggerPathNames;
+
+	// L1 LLP trigger seeds stored in ntupler
+	l1TriggerPathNames.push_back("L1_HTT120_SingleLLPJet40");
+	l1TriggerPathNames.push_back("L1_HTT160_SingleLLPJet50");
+	l1TriggerPathNames.push_back("L1_HTT200_SingleLLPJet60");
+	l1TriggerPathNames.push_back("L1_HTT240_SingleLLPJet70");
+	l1TriggerPathNames.push_back("L1_DoubleLLPJet40");
+
+	// Set Global Variables
+	L1_Names = l1TriggerPathNames;
+
+	cout<<"Reading in "<<l1TriggerPathNames.size()<<" L1 paths:"<<endl;
+
+	for( int i=0; i<(int)l1TriggerPathNames.size(); i++ ){
+		cout<<" --> "<<l1TriggerPathNames[i]<<endl;
+		L1_Indices[l1TriggerPathNames[i]] = i;
 	}
 
 }
