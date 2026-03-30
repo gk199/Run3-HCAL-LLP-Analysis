@@ -22,13 +22,20 @@ void MiniTuplePlotter_DNN(){
 										"HToSSTo4b_350_160_CTau10000_batch2_allscores",
 										"HToSSTo4b_350_80_CTau500_allscores"};
 
+
+	string path_v5 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_"; 
+	vector<string> filetags_all_signal_v5 = { "HToSSTo4B_125_50_CTau3000_scores", "HToSSTo4B_250_120_CTau10000_scores", "HToSSTo4B_350_160_CTau10000_scores", "HToSSTo4B_350_80_CTau500_scores"};
+	vector<string> filetags_all_data_v5 = { // "data_2022Dv1_scores", "data_2022Ev1_scores", "data_2022Fv1_scores", "data_2022Gv1_scores", 
+								"data_2023Cv1_scores", "data_2023Cv2_scores", "data_2023Cv3_scores", "data_2023Cv4_scores", "data_2023Dv1_scores", "data_2023Dv2_scores"};
+
 	// ----- Example 1 -----//
 	// - Basic Booleans
-	bool study1 = true;
+	bool study1 = false;
 	bool study2 = false;
 	bool study3 = false;
 	bool study4 = false;
-	
+	bool study5 = true; // for v3 AN plots
+ 	
 	cout<<endl;
 	cout<<" ---------- Study 1: Overlay LLP MC and data ---------- "<<endl;
 	cout<<endl;
@@ -54,13 +61,13 @@ void MiniTuplePlotter_DNN(){
 		DNNscores.use_weight = true;
 		DNNscores.Plot();
 		DNNscores.ClearFileTrees();
-		DNNscores.SetPlots({P_jet0_scores_depth_hcal, P_jet0_scores_depth_anywhere});
+		DNNscores.SetPlots({P_jet0_scores_depth_hcal, P_jet0_scores_depth_LLPanywhere});
 		DNNscores.SetCuts("jet0_DepthTagCand == 1"); 		
 		DNNscores.Plot();									 								
 
 		// pt, eta, W+jets
 		DNNscores.ClearFileTrees();
-		DNNscores.SetPlots({P_jet0_scores_inc_train80, P_jet0_scores_depth_hcal, P_jet0_scores_depth_anywhere});
+		DNNscores.SetPlots({P_jet0_scores_inc_train80, P_jet0_scores_depth_hcal, P_jet0_scores_depth_LLPanywhere});
 		DNNscores.SetOutputFileTag("DNNscores_truthMatch");
 		DNNscores.SetCuts("jet0_Pt > 40 && abs(jet0_Eta) < 1.5"); 		
 		DNNscores.SetSelectiveCuts("CTau", "jet0_isTruthMatched == 1");
@@ -70,13 +77,13 @@ void MiniTuplePlotter_DNN(){
 
 		// pt, eta, one jet inclusive tag one depth
 		DNNscores.ClearFileTrees();
-		DNNscores.SetPlots({P_jet0_scores_inc_train80, P_jet1_scores_depth_hcal, P_jet1_scores_depth_anywhere});
+		DNNscores.SetPlots({P_jet0_scores_inc_train80, P_jet1_scores_depth_hcal, P_jet1_scores_depth_LLPanywhere});
 		DNNscores.SetOutputFileTag("DNNscores_jet1Depth");
 		DNNscores.SetCuts("jet0_InclTagCand == 1 && jet1_DepthTagCand == 1"); 		
 		DNNscores.use_weight = true;
 		DNNscores.Plot();
 		DNNscores.ClearFileTrees();
-		DNNscores.SetPlots({P_jet1_scores_inc_train80, P_jet0_scores_depth_hcal, P_jet0_scores_depth_anywhere});
+		DNNscores.SetPlots({P_jet1_scores_inc_train80, P_jet0_scores_depth_hcal, P_jet0_scores_depth_LLPanywhere});
 		DNNscores.SetOutputFileTag("DNNscores_jet1Incl");
 		DNNscores.SetCuts("jet1_InclTagCand == 1 && jet0_DepthTagCand == 1"); 		
 		DNNscores.use_weight = true;
@@ -91,7 +98,7 @@ void MiniTuplePlotter_DNN(){
 		class MiniTuplePlotter DNNscores_allMC( filetags_all_signal, path );
 		// pt, eta, tag cand
 		DNNscores_allMC.SetTreeName( "NoSel" );	// TreeName
-		DNNscores_allMC.SetPlots({P_jet0_scores_inc_train40, P_jet0_scores_inc_train80, P_jet0_scores_depth_hcal, P_jet0_scores_depth_anywhere}); // These "P_" variables are PlotParams structs defined in PlotParams.h
+		DNNscores_allMC.SetPlots({P_jet0_scores_inc_train40, P_jet0_scores_inc_train80, P_jet0_scores_depth_hcal, P_jet0_scores_depth_LLPanywhere}); // These "P_" variables are PlotParams structs defined in PlotParams.h
 		DNNscores_allMC.SetOutputFileTag("DNNscores_allMC"); 						
 		DNNscores_allMC.plot_norm 		  = true; 	// Default = true
 		DNNscores_allMC.plot_log  		  = true; 	// Default = true
@@ -102,13 +109,13 @@ void MiniTuplePlotter_DNN(){
 		DNNscores_allMC.use_weight = true;
 		DNNscores_allMC.Plot();		
 		DNNscores_allMC.ClearFileTrees();
-		DNNscores_allMC.SetPlots({P_jet0_scores_depth_hcal, P_jet0_scores_depth_anywhere});
+		DNNscores_allMC.SetPlots({P_jet0_scores_depth_hcal, P_jet0_scores_depth_LLPanywhere});
 		DNNscores_allMC.SetCuts("jet0_DepthTagCand == 1");
 		DNNscores_allMC.Plot();	
 
 		// pt, eta, truth match
 		DNNscores_allMC.ClearFileTrees();
-		DNNscores_allMC.SetPlots({P_jet0_scores_inc_train80, P_jet0_scores_depth_hcal, P_jet0_scores_depth_anywhere});
+		DNNscores_allMC.SetPlots({P_jet0_scores_inc_train80, P_jet0_scores_depth_hcal, P_jet0_scores_depth_LLPanywhere});
 		DNNscores_allMC.SetOutputFileTag("DNNscores_allMC_truthMatch");
 		DNNscores_allMC.SetCuts("jet0_Pt > 40 && abs(jet0_Eta) < 1.5 && jet0_isTruthMatched == 1"); 		
 		DNNscores_allMC.use_weight = true;
@@ -122,7 +129,7 @@ void MiniTuplePlotter_DNN(){
 		DNNscores_allMC.use_weight = true;
 		DNNscores_allMC.Plot();
 		DNNscores_allMC.ClearFileTrees();
-		DNNscores_allMC.SetPlots({P_jet0_scores_depth_hcal, P_jet0_scores_depth_anywhere});
+		DNNscores_allMC.SetPlots({P_jet0_scores_depth_hcal, P_jet0_scores_depth_LLPanywhere});
 		DNNscores_allMC.SetOutputFileTag("DNNscores_allMC_truthMatch_DepthCand");
 		DNNscores_allMC.SetCuts("jet0_DepthTagCand == 1 && jet0_isTruthMatched == 1"); 		
 		DNNscores_allMC.use_weight = true;
@@ -136,7 +143,7 @@ void MiniTuplePlotter_DNN(){
 		DNNscores_allMC.use_weight = true;
 		DNNscores_allMC.Plot();
 		DNNscores_allMC.ClearFileTrees();
-		DNNscores_allMC.SetPlots({P_jet0_scores_depth_hcal, P_jet0_scores_depth_anywhere});
+		DNNscores_allMC.SetPlots({P_jet0_scores_depth_hcal, P_jet0_scores_depth_LLPanywhere});
 		DNNscores_allMC.SetOutputFileTag("DNNscores_allMC_DepthCand_HLT");
 		DNNscores_allMC.SetCuts("jet0_DepthTagCand == 1 && Pass_HLTDisplacedJet"); 		
 		DNNscores_allMC.use_weight = true;
@@ -144,7 +151,7 @@ void MiniTuplePlotter_DNN(){
 
 		// pt, eta, truth match LLP, HLT
 		DNNscores_allMC.ClearFileTrees();
-		DNNscores_allMC.SetPlots({P_jet0_scores_inc_train80, P_jet0_scores_depth_hcal, P_jet0_scores_depth_anywhere});
+		DNNscores_allMC.SetPlots({P_jet0_scores_inc_train80, P_jet0_scores_depth_hcal, P_jet0_scores_depth_LLPanywhere});
 		DNNscores_allMC.SetOutputFileTag("DNNscores_allMC_truthMatch_HLT");
 		DNNscores_allMC.SetCuts("jet0_Pt > 40 && abs(jet0_Eta) < 1.5 && jet0_isTruthMatched == 1 && Pass_HLTDisplacedJet"); 		
 		DNNscores_allMC.use_weight = true;
@@ -170,14 +177,14 @@ void MiniTuplePlotter_DNN(){
 		DNNscores_allData.Plot();		
 
 		DNNscores_allData.ClearFileTrees();
-		DNNscores_allData.SetPlots({P_jet0_scores_depth_hcal, P_jet0_scores_depth_anywhere});
+		DNNscores_allData.SetPlots({P_jet0_scores_depth_hcal, P_jet0_scores_depth_LLPanywhere});
 		DNNscores_allData.SetOutputFileTag("DNNscores_allData");
 		DNNscores_allData.SetCuts("jet0_DepthTagCand == 1"); 		
 		DNNscores_allData.use_weight = true;
 		DNNscores_allData.Plot();
 
 		DNNscores_allData.ClearFileTrees();
-		DNNscores_allData.SetPlots({P_jet0_scores_inc_train80, P_jet0_scores_depth_hcal, P_jet0_scores_depth_anywhere});
+		DNNscores_allData.SetPlots({P_jet0_scores_inc_train80, P_jet0_scores_depth_hcal, P_jet0_scores_depth_LLPanywhere});
 		DNNscores_allData.SetOutputFileTag("DNNscores_allData_WPlusJets");
 		DNNscores_allData.SetCuts("jet0_Pt > 40 && abs(jet0_Eta) < 1.5 && Pass_WPlusJets"); 		
 		DNNscores_allData.use_weight = true;
@@ -208,16 +215,79 @@ void MiniTuplePlotter_DNN(){
 		DNNscores_CR_SR.Plot();
 
 		DNNscores_CR_SR.ClearFileTrees();
-		DNNscores_CR_SR.SetPlots({P_jet0_scores_depth_hcal, P_jet0_scores_depth_anywhere});
+		DNNscores_CR_SR.SetPlots({P_jet0_scores_depth_hcal, P_jet0_scores_depth_LLPanywhere});
 		DNNscores_CR_SR.SetCuts("jet0_DepthTagCand == 1 && Pass_HLTDisplacedJet"); 		
 		DNNscores_CR_SR.SetSelectiveCuts("LLPskim", "jet1_scores_inc_train80 < 0.2");	// CR
 		DNNscores_CR_SR.SetSelectiveCuts("CTau", "jet1_scores_inc_train80 > 0.9");	// SR
 		DNNscores_CR_SR.Plot();
 		DNNscores_CR_SR.ClearFileTrees();
-		DNNscores_CR_SR.SetPlots({P_jet1_scores_depth_hcal, P_jet1_scores_depth_anywhere});
+		DNNscores_CR_SR.SetPlots({P_jet1_scores_depth_hcal, P_jet1_scores_depth_LLPanywhere});
 		DNNscores_CR_SR.SetCuts("jet1_DepthTagCand == 1 && Pass_HLTDisplacedJet"); 		
 		DNNscores_CR_SR.SetSelectiveCuts("LLPskim", "jet0_scores_inc_train80 < 0.2");	// CR
 		DNNscores_CR_SR.SetSelectiveCuts("CTau", "jet0_scores_inc_train80 > 0.9");	// SR
 		DNNscores_CR_SR.Plot();
+	}
+
+	cout << endl;
+	cout<<" ---------- Study 5: v3 AN plots ---------- "<<endl;
+	cout << endl;
+
+	if (study5) {
+
+		// same for signal inclusive and depth tagger now
+		class MiniTuplePlotter DNNscores_signal( filetags_all_signal_v5, path_v5 );
+		DNNscores_signal.SetTreeName( "NoSel" );	// TreeName
+		DNNscores_signal.SetPlots({P_jet0_scores_inc_train80}); // These "P_" variables are PlotParams structs defined in PlotParams.h
+		DNNscores_signal.SetOutputFileTag("DNNscores_signal");
+		DNNscores_signal.SetOutputDirectory("DNNscores");				
+		DNNscores_signal.plot_norm 		  = true; 	// Default = true
+		DNNscores_signal.plot_log  		  = true; 	// Default = true
+		DNNscores_signal.SetCuts("jet0_InclTagCand == 1"); 		// Apply cuts to all events
+		DNNscores_signal.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );										// Manual Legend location
+		DNNscores_signal.SetLegendNames({"m_{H} = 125, m_{S} = 50 GeV", "m_{H} = 250, m_{S} = 120 GeV", "m_{H} = 350, m_{S} = 160 GeV", "m_{H} = 350, m_{S} = 80 GeV"});
+		DNNscores_signal.use_weight = false; // otherwise plots are 0! 
+		DNNscores_signal.NBins = 30; 									 								// Default = 100
+		DNNscores_signal.Plot();
+
+		DNNscores_signal.ClearFileTrees();
+		DNNscores_signal.SetPlots({P_jet0_scores_depth_LLPanywhere});
+		DNNscores_signal.SetCuts("jet0_DepthTagCand == 1 && jet0_isTruthMatched == 1");
+		DNNscores_signal.Plot();	
+
+		// pt, eta, truth match
+		DNNscores_signal.ClearFileTrees();
+		DNNscores_signal.SetPlots({P_jet0_scores_inc_train80, P_jet0_scores_depth_LLPanywhere});
+		DNNscores_signal.SetOutputFileTag("DNNscores_signal_truthMatch");
+		DNNscores_signal.SetCuts("jet0_Pt > 40 && abs(jet0_Eta) < 1.5 && jet0_isTruthMatched == 1"); 		
+		DNNscores_signal.Plot();
+	
+		// -------------------------------------------------------------- //
+		// data inclusive and depth tagger now
+		class MiniTuplePlotter DNNscores_data( filetags_all_data_v5, path_v5 );
+		DNNscores_data.SetTreeName( "NoSel" );	// TreeName
+		DNNscores_data.SetPlots({P_jet0_scores_inc_train80}); // These "P_" variables are PlotParams structs defined in PlotParams.h
+		DNNscores_data.SetOutputFileTag("DNNscores_data"); 						
+		DNNscores_data.SetOutputDirectory("DNNscores");				
+		DNNscores_data.plot_norm 		  = true; 	// Default = true
+		DNNscores_data.plot_log  		  = true; 	// Default = true
+		DNNscores_data.SetCuts("jet0_InclTagCand == 1"); 		// Apply cuts to all events
+		DNNscores_data.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );										// Manual Legend location
+		DNNscores_data.SetLegendNames({"Cv1", "Cv2", "Cv3", "Cv4", "Dv1", "Dv2"});
+		DNNscores_data.NBins = 30; 									 								// Default = 100
+		DNNscores_data.use_weight = true;
+		DNNscores_data.Plot();		
+
+		DNNscores_data.ClearFileTrees();
+		DNNscores_data.SetPlots({P_jet0_scores_depth_LLPanywhere});
+		DNNscores_data.SetCuts("jet0_DepthTagCand == 1 && jet1_InclTagCand == 1 && jet1_scores_inc_train80 < 0.9"); // only look at depth scores outside of MR		
+		DNNscores_data.use_weight = true;
+		DNNscores_data.Plot();
+
+		DNNscores_data.ClearFileTrees();
+		DNNscores_data.SetPlots({P_jet0_scores_inc_train80, P_jet0_scores_depth_LLPanywhere});
+		DNNscores_data.SetOutputFileTag("DNNscores_data_WPlusJets");
+		DNNscores_data.SetCuts("jet0_Pt > 40 && abs(jet0_Eta) < 1.5 && Pass_WPlusJets"); 		
+		DNNscores_data.use_weight = true;
+		DNNscores_data.Plot();
 	}
 }

@@ -18,19 +18,21 @@ void MiniTuplePlotter_22vs23(){
 	cout<<" ---------- Flavor tagging probabilities by DNN scores ---------- "<<endl;
 	cout<<endl;
 
-	bool plot_all = false; // Set to true to plot all variables, false to just plot DNN scores in CR/VR.
+	bool plot_all = true; // Set to true to plot all variables, false to just plot DNN scores in CR/VR.
 	if (plot_all) {
 		class MiniTuplePlotter kinematics( filetags, path );
 
 		kinematics.SetTreeName( "NoSel" );	
-		kinematics.SetPlots({P_jet0_Pt, P_jet0_Eta, P_jet0_Phi, P_jet0_DeepCSV_prob_b, 
-							P_jet0_DepthTowers, P_jet0_TimingTowers, P_jet0_FlaggedTowers, P_jet0_dR_L1jet, 
+		kinematics.SetPlots({P_jet0_Pt, P_jet0_Eta, P_jet0_Phi, P_jet0_RechitN, P_jet0_dEta, P_jet0_dPhi, P_jet0_DeepCSV_prob_b, 
+							P_jet0_DepthTowers, P_jet0_TimingTowers, P_jet0_FlaggedTowers, 
+							P_jet0_dR_L1jet, 
 							P_jet0_Setaeta, P_jet0_Sphiphi, P_jet0_Setaphi,
-							P_jet0_Track0PtFrac, 
+							P_jet0_Track0PtFrac, P_jet0_Track1PtFrac, P_jet0_Track2PtFrac, 
+							P_jet0_Track0dR, P_jet0_Track1dR, P_jet0_Track2dR,
 							P_jet0_EnergyFrac_Depth1, P_jet0_EnergyFrac_Depth2, P_jet0_EnergyFrac_Depth3, P_jet0_EnergyFrac_Depth4,
 							P_jet0_TDCaverage, P_jet0_TDCaverage_Eweight, P_jet0_TDCnDelayed, 
 							P_jet0_NeutralHadEFrac, P_jet0_ChargedHadEFrac, P_jet0_PhoEFrac, P_jet0_EleEFrac, P_jet0_MuonEFrac,
-							P_jet0_LeadingRechitEFracJet, P_jet0_AllRechitE,
+							P_jet0_LeadingRechitEFracJet, P_jet0_LeadingRechitEFrac, P_jet0_AllRechitE,
 							P_jet0_scores_inc_train80, P_jet1_scores_inc_train80, // P_jet0_scores_depth_LLPanywhere, P_jet1_scores_depth_LLPanywhere,
 						}); 
 		kinematics.SetOutputFileTag("22vs23"); 	

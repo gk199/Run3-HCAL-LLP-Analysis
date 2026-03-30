@@ -1,0 +1,298 @@
+import re
+import os
+import ROOT
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Filename parser
+# ──────────────────────────────────────────────────────────────────────────────
+# Recognised patterns
+#   Signal : minituple_HToSSTo4B_<mH>_<mS>_CTau<ctau>_scores.root
+#   Data   : minituple_data_<era>_scores.root
+
+def parse_filename(file_path):
+    """
+    Return a dict with keys:
+        kind        – 'signal' | 'data' | 'unknown'
+        plain       – human-readable one-line description
+        latex       – LaTeX one-line description
+        short       – very short tag for plain-text table headers
+    """
+    stem = os.path.basename(file_path)          # e.g. minituple_HToSSTo4B_125_50_CTau3000_scores.root
+    stem = stem.replace(".root", "")
+
+    # ── signal ────────────────────────────────────────────────────────────────
+    m = re.search(
+        r"HToSSTo4B_(?P<mH>\d+)_(?P<mS>\d+)_CTau(?P<ctau>\d+)",
+        stem, re.IGNORECASE
+    )
+    if m:
+        mH, mS, ctau = m.group("mH"), m.group("mS"), m.group("ctau")
+        return dict(
+            kind  = "signal",
+            plain = f"H→SS→4b  mH={mH} GeV  mS={mS} GeV  cτ={ctau} mm",
+            latex = (
+                r"$H \to SS \to 4b$, "
+                rf"$m_{{H}}={mH}$~GeV, $m_{{S}}={mS}$~GeV, "
+                rf"$c\tau={ctau}$~mm"
+            ),
+            short = f"HToSS_mH{mH}_mS{mS}_CTau{ctau}",
+        )
+
+    # ── data ──────────────────────────────────────────────────────────────────
+    m = re.search(r"data_(?P<era>[A-Za-z0-9]+)", stem)
+    if m:
+        era = m.group("era")
+        return dict(
+            kind  = "data",
+            plain = f"Data  era={era}",
+            latex = rf"Data, era {era}",
+            short = f"data_{era}",
+        )
+
+    # ── fallback ──────────────────────────────────────────────────────────────
+    return dict(
+        kind  = "unknown",
+        plain = stem,
+        latex = stem.replace("_", r"\_"),
+        short = stem[:30],
+    )
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Helpers for LaTeX output
+# ──────────────────────────────────────────────────────────────────────────────
+
+def latex_setup(sample_latex, apply_llp_truth, use_weights=False):
+    truth_note = (
+        r", with LLP truth matching ($177 \leq R_{\text{decay}} < 295$~cm, $\abs{\eta_{LLP}} < 1.26$)"
+        if apply_llp_truth else ""
+    )
+    weight_note = r", weighted" if use_weights else ""
+    caption = rf"Cutflow for {sample_latex}{truth_note}{weight_note}."
+    print(r"\begin{table}[h!]")
+    print(r"\centering")
+    print(r"\begin{tabular}{lrrr}")
+    print(r"\hline")
+    print(r"\textbf{Selection} & \textbf{Events} & \textbf{\% of All} & \textbf{\% of HLT} \\")
+    print(r"\hline")
+    # store caption for latex_end
+    return caption
+
+def latex_end(caption):
+    print(r"\hline")
+    print(r"\end{tabular}")
+    print(rf"\caption{{{caption}}}")
+    print(r"\end{table}")
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Core cutflow function
+# ──────────────────────────────────────────────────────────────────────────────
+
+def run_cutflow(
+    file_path,
+    tree_name       = "Events",
+    apply_llp_truth = False,
+    print_latex     = False,
+    use_weights     = None,
+):
+    """
+    Print a cutflow table for the displaced-jet search.
+
+    Parameters
+    ----------
+    file_path       : str        – path to the input ROOT file
+    tree_name       : str        – name of the TTree inside the file
+    apply_llp_truth : bool       – if True, prepend the LLP-HCAL truth requirement
+                                   (one of jet0 / jet1 matched to an LLP with
+                                    177 cm ≤ DecayR < 295 cm) to every cut level
+    print_latex     : bool       – emit LaTeX table rows instead of plain text
+    use_weights     : bool|None  – True  → always use the "weight" branch
+                                   False → always use raw event counts
+                                   None  → auto: weighted for signal, counts for data
+    """
+
+    # ── open file / tree ──────────────────────────────────────────────────────
+    f    = ROOT.TFile.Open(file_path)
+    tree = f.Get(tree_name)
+    if not tree:
+        raise RuntimeError(f"Tree '{tree_name}' not found in {file_path}")
+
+    # ── category strings ─────────────────────────────────────────────────────
+    # LJDC: jet0 is the depth-tagged candidate, jet1 is the inclusive candidate
+    # SJDC: jet1 is the depth-tagged candidate, jet0 is the inclusive candidate
+    LJDC = "(jet0_DepthTagCand == 1 && jet1_InclTagCand == 1)"
+    SJDC = "(jet1_DepthTagCand == 1 && jet0_InclTagCand == 1)"
+    JDC_OR = f"({LJDC} || {SJDC})"
+
+    # DNN cuts applied per-category so the correct jet role is used
+    # "inc" cut (> 0.97): applied to the inclusive-tagged jet
+    dnn_inc = (
+        f"(({SJDC} && jet0_scores_inc_train80 > 0.97) || "
+        f" ({LJDC} && jet1_scores_inc_train80 > 0.97))"
+    )
+    # "depth" cut (> 0.95): applied to the depth-tagged jet
+    dnn_depth = (
+        f"(({SJDC} && jet1_scores_depth_LLPanywhere > 0.95) || "
+        f" ({LJDC} && jet0_scores_depth_LLPanywhere > 0.95))"
+    )
+
+    # ── LLP truth cut ─────────────────────────────────────────────────────────
+    # At least one of the two leading jets must be matched to an LLP that
+    # decays inside the HCAL barrel depth (177 cm ≤ R < 295 cm).
+    LLP_truth = (
+        "((jet0_MatchedLLP_DecayR >= 177 && jet0_MatchedLLP_DecayR < 295) || "
+        " (jet1_MatchedLLP_DecayR >= 177 && jet1_MatchedLLP_DecayR < 295))"
+    )
+
+    # ── parse filename for human/LaTeX labels ────────────────────────────────
+    sample = parse_filename(file_path)
+    truth_note = (
+        "  |  LLP truth: jet matched to LLP with 177 ≤ R < 295 cm, |eta| < 1.26"
+        if apply_llp_truth else ""
+    )
+
+    # ── ordered list of (label, incremental cut string) ──────────────────────
+    # Each entry appends its cut to all previous ones.
+    # MET filters are only applied to data, not LLP MC signal.
+    steps = [
+        ("All",                                 ""),
+        ("Trigger (L1)",                        "Pass_L1SingleLLPJet == 1"),
+        ("Trigger (HLT)",                       "Pass_HLTDisplacedJet == 1"),
+        ("LJDC or SJDC",                        JDC_OR),
+        ("$\Delta\phi$ (beam halo) veto",       "abs(jet0_jet1_dPhi) > 0.2"),
+        ("DNN $>0.97$ (inc)",                   dnn_inc),
+        ("DNN $>0.95$ (depth)",                 dnn_depth),
+    ]
+
+    if sample["kind"] == "data":
+        # Insert MET filters immediately after LJDC/SJDC (index 3)
+        steps.insert(4, ("MET filters", "Flag_METFilters_2022_2023_PromptReco == 1"))
+
+    # ── build cumulative selection strings ────────────────────────────────────
+    cum_cuts = []
+    running  = ""
+    for _, inc in steps:
+        if inc == "":
+            running = ""
+        elif running == "":
+            running = inc
+        else:
+            running = f"{running} && {inc}"
+        cum_cuts.append(running)
+
+    # Optionally prepend the LLP truth requirement to every level
+    if apply_llp_truth:
+        cum_cuts = [
+            LLP_truth if c == "" else f"{LLP_truth} && {c}"
+            for c in cum_cuts
+        ]
+
+    # ── weighted sum helper (signal MC only) ────────────────────────────────
+    # For signal MC the "weight" branch holds per-event generator/pileup weights.
+    # ROOT's GetEntries() ignores weights, so we use a TH1 to accumulate the
+    # weighted sum instead.  Data always uses unweighted counts.
+    # use_weights: None → auto-detect from filename, otherwise honour caller's choice
+    if use_weights is None:
+        use_weights = (sample["kind"] == "signal")
+
+    _hist_counter = [0]   # unique name counter to avoid ROOT name collisions
+
+    def get_yield(selection):
+        """Return weighted (MC) or unweighted (data) yield for a selection."""
+        if not use_weights:
+            return float(tree.GetEntries(selection) if selection else tree.GetEntries())
+        _hist_counter[0] += 1
+        hname = f"_cutflow_h{_hist_counter[0]}"
+        draw_expr = f"weight>>{hname}(1,0,2)"
+        cut = f"weight*({selection})" if selection else "weight"
+        tree.Draw(draw_expr, cut, "goff")
+        h = ROOT.gDirectory.Get(hname)
+        result = h.GetSumOfWeights() if h else 0.0
+        if h:
+            h.Delete()
+        return result
+
+    # ── header ────────────────────────────────────────────────────────────────
+    weight_note = " [weighted]" if use_weights else ""
+    print("\n")
+    print(f"Cutflow — {sample['plain']}{truth_note}{weight_note}")
+    print("\n")
+
+    caption = None
+    if print_latex:
+        caption = latex_setup(sample["latex"], apply_llp_truth, use_weights)
+
+    col_w = 30
+    if not print_latex:
+        n_col  = "Weighted yield" if use_weights else "N events"
+        header = (f"{'Selection':<{col_w}}  {n_col:>15}"
+                  f"  {'% of All':>10}  {'% of HLT':>10}")
+        print(header)
+        print("─" * len(header))
+
+    # ── loop over cut levels ──────────────────────────────────────────────────
+    init     = -1.0   # denominator: all events
+    hlt_init = -1.0   # denominator: events passing HLT trigger
+
+    for i, (label, _) in enumerate(steps):
+        sel   = cum_cuts[i]
+        n_evt = get_yield(sel)
+
+        if i == 0:
+            init = n_evt      # "All" row sets the primary denominator
+
+        # Detect the HLT row by label and record its yield as second denominator
+        if label == "Trigger (HLT)":
+            hlt_init = n_evt
+
+        frac_all = n_evt / init     if init     > 0 else 0.0
+        frac_hlt = n_evt / hlt_init if hlt_init > 0 else float("nan")
+
+        if print_latex:
+            hlt_str = f"{100.0*frac_hlt:.2f}" if hlt_init > 0 else "--"
+            fmt = ".2f" if use_weights else ".0f"
+            print(f"{label} & {n_evt:{fmt}} & {100.0*frac_all:.2f}\% & {hlt_str}\% \\\\a")
+        else:
+            hlt_str = f"{100.0*frac_hlt:>10.2f}%" if hlt_init > 0 else f"{'--':>11}"
+            fmt = ">15.2f" if use_weights else ">15.0f"
+            print(f"{label:<{col_w}}  {n_evt:{fmt}}"
+                  f"  {100.0*frac_all:>9.2f}%{hlt_str}")
+    if print_latex:
+        latex_end(caption)
+
+    f.Close()
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Entry point – edit file_path and tree_name as needed
+# ──────────────────────────────────────────────────────────────────────────────
+
+if __name__ == "__main__":
+
+    file_path = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_HToSSTo4B_125_50_CTau3000_scores.root"   # ← set your input file here
+    tree_name = "NoSel"           # ← set your tree name here
+
+    # # --- weighted yield (auto for signal, can force with use_weights=True) ---
+    # run_cutflow(file_path, tree_name,
+    #             apply_llp_truth=False,
+    #             use_weights=True,
+    #             print_latex=False)
+
+    # # --- weighted, with LLP HCAL truth matching -------------------------------
+    # run_cutflow(file_path, tree_name,
+    #             apply_llp_truth=True,
+    #             use_weights=True,
+    #             print_latex=False)
+
+    # --- raw event counts (force unweighted even for signal) -----------------
+    run_cutflow(file_path, tree_name,
+                apply_llp_truth=False,
+                use_weights=False,
+                print_latex=True)
+
+    # --- unweighted, with LLP HCAL truth matching -----------------------------
+    run_cutflow(file_path, tree_name,
+                apply_llp_truth=True,
+                use_weights=False,
+                print_latex=True)
