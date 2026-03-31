@@ -57,6 +57,8 @@ unzip Classifiers.zip > /dev/null
 
 source ${BASE_DIR}/Classifiers/VirtualEnvs/keras2pt13pt1/bin/activate
 pip3 install wrapt
+pip3 install awkward
+pip3 install zipp
 
 echo "Evaluating DNN..."
 python3 Evaluate/ScoresToEventBased.py -f  minituple_$filetag.root -t NoSel -d Evaluate/depth_model_v4_LLPanywhere.keras -i Evaluate/inclusive_model_v4_train80.keras -c Evaluate/norm_constants_v4.csv -m filewrite
