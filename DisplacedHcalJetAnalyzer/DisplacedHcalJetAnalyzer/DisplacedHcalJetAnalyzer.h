@@ -128,6 +128,10 @@ public :
    vector<string> HLT_Names;
    map<string, int> HLT_Indices;
 
+   vector<string> L1_Names;
+   map<string, int> L1_Indices;
+   bool has_L1_branches;
+
    vector<int> gLLPDecay_iLLP;
    vector<int> gLLPDecay_iParticle;
    vector<vector<int>> map_gLLP_to_gParticle_indices;
@@ -175,6 +179,8 @@ public :
    vector<float>   *PVTrack_Phi;
    vector<bool>    *HLT_Decision;
    vector<int>     *HLT_Prescale;
+   vector<bool>    *L1_Decision;
+   vector<double>  *L1_Prescale;
    Float_t         met_Pt;
    Float_t         met_Phi;
    Float_t         met_SumEt;
@@ -538,6 +544,8 @@ public :
    TBranch        *b_PVTrack_Phi;   //!
    TBranch        *b_HLT_Decision;   //!
    TBranch        *b_HLT_Prescale;   //!
+   TBranch        *b_L1_Decision;    //!
+   TBranch        *b_L1_Prescale;    //!
    TBranch        *b_met_Pt;   //!
    TBranch        *b_met_Phi;   //!
    TBranch        *b_met_SumEt;   //!
@@ -893,6 +901,7 @@ public :
    virtual void   ProcessEvent( Long64_t jentry );
    // TriggerHelper.cxx
    virtual void   SetTriggerNames();
+   virtual void   SetL1TriggerNames();
    // ObjectHelper.cxx
    virtual float  DeltaR( float eta1, float eta2, float phi1, float phi2);
    virtual double DeltaPhi( double phi1, double phi2);
@@ -1037,6 +1046,9 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    PVTrack_Phi = 0;
    HLT_Decision = 0;
    HLT_Prescale = 0;
+   L1_Decision = 0;
+   L1_Prescale = 0;
+   has_L1_branches = false;
    ele_Pt = 0;
    ele_Eta = 0;
    ele_Phi = 0;
@@ -1386,6 +1398,14 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("PVTrack_Phi", &PVTrack_Phi, &b_PVTrack_Phi);
    fChain->SetBranchAddress("HLT_Decision", &HLT_Decision, &b_HLT_Decision);
    fChain->SetBranchAddress("HLT_Prescale", &HLT_Prescale, &b_HLT_Prescale);
+   if (fChain->GetBranch("L1_Decision") && fChain->GetBranch("L1_Prescale")) {
+      has_L1_branches = true;
+      fChain->SetBranchAddress("L1_Decision", &L1_Decision, &b_L1_Decision);
+      fChain->SetBranchAddress("L1_Prescale", &L1_Prescale, &b_L1_Prescale);
+   } else {
+      has_L1_branches = false;
+      cout << "WARNING: L1_Decision and/or L1_Prescale branches not found. L1 trigger info will be unavailable for this file." << endl;
+   }
    fChain->SetBranchAddress("met_Pt", &met_Pt, &b_met_Pt);
    fChain->SetBranchAddress("met_Phi", &met_Phi, &b_met_Phi);
    fChain->SetBranchAddress("met_SumEt", &met_SumEt, &b_met_SumEt);
@@ -1735,6 +1755,22 @@ Bool_t DisplacedHcalJetAnalyzer::Notify()
    // is started when using PROOF. It is normally not necessary to make changes
    // to the generated code, but the routine can be extended by the
    // user if needed. The return value is currently not used.
+
+   // Re-check L1 branch availability for each new file in the chain
+   TTree *currentTree = fChain->GetTree();
+   if (currentTree) {
+      bool l1_available = (currentTree->GetBranch("L1_Decision") != nullptr &&
+                           currentTree->GetBranch("L1_Prescale") != nullptr);
+      if (l1_available && !has_L1_branches) {
+         has_L1_branches = true;
+         fChain->SetBranchAddress("L1_Decision", &L1_Decision, &b_L1_Decision);
+         fChain->SetBranchAddress("L1_Prescale", &L1_Prescale, &b_L1_Prescale);
+         cout << "INFO: L1 trigger branches found in new file. Enabling L1 info." << endl;
+      } else if (!l1_available && has_L1_branches) {
+         has_L1_branches = false;
+         cout << "WARNING: L1 trigger branches missing in new file. Disabling L1 info for this file." << endl;
+      }
+   }
 
    return kTRUE;
 }

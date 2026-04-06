@@ -21,9 +21,9 @@ void MiniTuplePlotter_ANplots(){
 
 	vector<PlotParams> analysisVars_perJet_HCALdepth = {P_perJet_EnergyFrac_Depth1, P_perJet_EnergyFrac_Depth2, P_perJet_EnergyFrac_Depth3, P_perJet_EnergyFrac_Depth4};
 
-	vector<PlotParams> analysisVars_perJet_jets	= {P_perJet_NeutralHadEFrac, P_perJet_ChargedHadEFrac, P_perJet_MuonEFrac, P_perJet_PhoEFrac, P_perJet_EleEFrac,
+	vector<PlotParams> analysisVars_perJet_jets	= {P_perJet_Eta, P_perJet_NeutralHadEFrac, P_perJet_ChargedHadEFrac, P_perJet_MuonEFrac, P_perJet_PhoEFrac, P_perJet_EleEFrac,
 										P_perJet_Track0PtFrac, P_perJet_Track1PtFrac, P_perJet_Track0dR, P_perJet_Track1dR, 
-										P_perJet_LeadingRechitEFracJet, P_perJet_Sphiphi};
+										P_perJet_LeadingRechitEFracJet, P_perJet_AllRechitEFracJet, P_perJet_Sphiphi};
 
 	cout<<endl;
 	cout<<" ---------- Plots of energy fraction in each of HCAL depths, by LLP decay position ---------- "<<endl;

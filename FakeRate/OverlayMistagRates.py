@@ -9,9 +9,33 @@ nColors = ROOT.TColor.GetNumberOfColors()
 
 from ROOT import SetOwnership
 
-from MisTagParametrization_3D import ProjectHistogram, LabelCMS, ResetAxis # DrawCanvasAndPlots, MakePlot
+from MisTagParametrization_3D import ProjectHistogram, ResetAxis # DrawCanvasAndPlots, MakePlot
 
 debug = False
+
+DNN_cut = 0.9
+era = "2023"
+# ------------------------------------------------------------------------------
+def LabelCMS(xpos=0.13, ypos=0.85, text_size=0.036):
+    cmsLabel = "#scale[1]{#bf{CMS} }"
+    cmsLabelExtra = "#scale[0.8]{#it{Private Work}}"
+    yearLumi = "#scale[0.85]{2023 (13.6 TeV)}" # #sqrt{s} = 
+
+    stamp_text = ROOT.TLatex()
+    stamp_text.SetNDC()
+    stamp_text.SetTextFont(42)
+    stamp_text.SetTextSize(text_size)
+    stamp_text.DrawLatex( xpos, ypos, cmsLabel)
+    stamp_text.DrawLatex( xpos+0.07, ypos, cmsLabelExtra)
+
+    if ypos == 0.85: 
+        stamp_text.DrawLatex( xpos+0.62, ypos+0.06, yearLumi)
+        stamp_text.DrawLatex( xpos+0.4, ypos, "#scale[0.65]{DNN score > "+str(DNN_cut)+"}") # write score on the plot
+        stamp_text.DrawLatex( xpos+0.4, ypos-0.04, "#scale[0.65]{Era = "+era+"}") 
+    else: 
+        stamp_text.DrawLatex( xpos+0.6, ypos+0.03, yearLumi)
+        stamp_text.DrawLatex( xpos+0.3, ypos, "#scale[0.65]{DNN score > "+str(DNN_cut)+"}") # write score on the plot
+        stamp_text.DrawLatex( xpos+0.3, ypos-0.04, "#scale[0.65]{Era = "+era+"}") 
 
 # ------------------------------------------------------------------------------
 def GetHistogram(file_path, hist_name_all, hist_name_mistag):
@@ -84,9 +108,9 @@ def OverlayHistograms(file_paths, hist_name_all, hist_name_mistag):
     
     DrawCanvasAndPlots_overlay(
         "c1", "Projection plots", ": LLP skim, different eras", " in CR for different eras",
-        [[pt_ratios[0], pt_ratios[1], pt_ratios[2], pt_ratios[3], pt_ratios[4], pt_ratios[5], pt_ratios[6]], 
-        [eta_ratios[0], eta_ratios[1], eta_ratios[2], eta_ratios[3], eta_ratios[4], eta_ratios[5], eta_ratios[6]], 
-        [phi_ratios[0], phi_ratios[1], phi_ratios[2], phi_ratios[3], phi_ratios[4], phi_ratios[5], phi_ratios[6]]],  # Wrap each plot in a list
+        [[pt_ratios[0], pt_ratios[1], pt_ratios[2], pt_ratios[3], pt_ratios[4], pt_ratios[5]], 
+        [eta_ratios[0], eta_ratios[1], eta_ratios[2], eta_ratios[3], eta_ratios[4], eta_ratios[5]], 
+        [phi_ratios[0], phi_ratios[1], phi_ratios[2], phi_ratios[3], phi_ratios[4], phi_ratios[5]]],  # Wrap each plot in a list
         legend_labels,
         png_title,
         ["Jet p_{T} Mistag", "Jet #eta Mistag", "Jet #phi Mistag"], "OverlayEra"
@@ -145,13 +169,15 @@ def MakePlot_overlay(hists, legends):
         legend.AddEntry(hists[i], legends[i], "l")
     legend.Draw()
     SetOwnership( legend, 0 ) # 0 = release (not keep), 1 = keep # when legend is in a separate function, it is not saved in memory for the canvas outside of function (scoping issue)
+    DNN_cut = 0.9
+
     LabelCMS()
     
 # ------------------------------------------------------------------------------
 if __name__ == "__main__":
     # List of ROOT files to process
-    root_files = ["output_3D_hists_depth_combined_2023Bv1.root", "output_3D_hists_depth_combined_2023Cv1.root", "output_3D_hists_depth_combined_2023Cv2.root", "output_3D_hists_depth_combined_2023Cv3.root",
-                    "output_3D_hists_depth_combined_2023Cv4.root", "output_3D_hists_depth_combined_2023Dv1.root", "output_3D_hists_depth_combined_2023Dv2.root"]
+    root_files = ["output_3D_hists_depth_combined_2023_Cv1.root", "output_3D_hists_depth_combined_2023_Cv2.root", "output_3D_hists_depth_combined_2023_Cv3.root",
+                    "output_3D_hists_depth_combined_2023_Cv4.root", "output_3D_hists_depth_combined_2023_Dv1.root", "output_3D_hists_depth_combined_2023_Dv2.root"]
 
     # Names of the histograms in the ROOT files
     hist_name_all = "hist3d_CR_all_combined"

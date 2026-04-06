@@ -878,7 +878,7 @@ public :
 				myCanvas->cd(1);
 			}
 
-			if( plot_type == "efficiency" || plot_type == "acceptance"){
+			if( plot_type == "efficiency" || plot_type == "efficiencyHLT" || plot_type == "acceptance"){
 				myCanvas->cd(2);
 				gPad->SetTickx(1);
 				gPad->SetTicky(1);
@@ -902,6 +902,7 @@ public :
 							string label_y = "Efficiency";
 							if (plot_type == "acceptance") label_y = "Acceptance";
 							if (multiple) label_y = "L1T efficiency";
+							if (plot_type == "efficiencyHLT") label_y = "HLT efficiency";
 							pEff->SetTitle(Form("; %s; %s", PlotParams_temp.label_x.c_str(), label_y.c_str())); // HCAL LLP Trigger Efficiencies
 							pEff->SetLineColor( colors[i] );
 							pEff->SetLineWidth(3.);
@@ -944,7 +945,7 @@ public :
 							}
 							fout->cd(); // write to a root file
 							std::string temp(legend_names.at(i).c_str());
-							if (plot_type == "efficiency") pEff->Write(output_file_name+"_"+temp.substr(6,3)); // for L1 efficiency with 2 mass points
+							if (plot_type == "efficiency" || plot_type == "efficiencyHLT") pEff->Write(output_file_name+"_"+temp.substr(6,3)); // for L1 efficiency with 2 mass points
 							else pEff->Write(output_file_name);
 						}
 					}
@@ -972,7 +973,7 @@ public :
 			myCanvas->Write(); 
 
 			myCanvas->SaveAs( output_directory+"/"+output_file_name+".png", "png" );
-			if( plot_type == "efficiency" || plot_type == "acceptance" ) {
+			if( plot_type == "efficiency" || plot_type == "efficiencyHLT" || plot_type == "acceptance" ) {
 				myCanvas->SaveAs( output_directory+"/"+output_file_name+".pdf", "pdf" );
 				// myCanvas->SaveAs( output_directory+"/"+output_file_name+".C", "C" );
 			}
