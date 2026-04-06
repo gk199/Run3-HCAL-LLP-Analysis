@@ -66,6 +66,7 @@ public :
    bool save_bdtscores = true;
    bool blind_data     = false;
 
+   float event_weight = 1;
    float weight = 1;
    float weight_unskimmed = 1;
    double lumi_samplefrac = 1.0;
