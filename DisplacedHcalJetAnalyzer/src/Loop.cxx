@@ -23,15 +23,7 @@ void DisplacedHcalJetAnalyzer::ProcessEvent(Long64_t jentry){
 	if (jet_Pt->size() == 0) return; // added to avoid vector out of range if there are no jets -- issue on signal file 
 	count["Pass_JetPtCut"]++;	
 
-//	double event_weight = 1.0;    // per-event weight (trigger)
-//	double trigSF = 1.0;
-//
-//	if(!HLT_SF_Tot->empty()) {trigSF = HLT_SF_Tot->at(0);}
-//
-//	event_weight = trigSF;
-//
-//	if( debug ) std::cout << "weight=" << weight
-//		<< " HLT SF =" << trigSF << std::endl;
+//	event_weight = HLT_SF_Tot->at(0);
 
 	// check the jet veto map. If jet in veto region, skip event
 	if (PassJetVetoEvent() == false) return;
