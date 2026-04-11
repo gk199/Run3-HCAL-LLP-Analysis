@@ -47,7 +47,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 	}
 
 	vector<string> myvars_float = {
-		"met_Pt", "met_Phi", "met_SumEt", "eventHT", "weight", "randomFloat",
+		"met_Pt", "met_Phi", "met_SumEt", "eventHT", "weight", "event_weight", "randomFloat",
 		// Per-trigger L1 prescale values. Stored as float because the ntupler
 		// stores them as double. Value is -1 when L1 branches are absent.
 		// For MC, the ntupler fills luminosity-weighted effective prescales
@@ -555,6 +555,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 
 	tree_output_vars_float["eventHT"]   = EventHT();
 	tree_output_vars_float["weight"]	= weight; // from SetWeight() in WeightsHelper.cxx
+	tree_output_vars_float["event_weight"]	= event_weight; 
 
 	for (int i = 0; i < HLT_Indices.size(); i++) {
 		tree_output_vars_bool[HLT_Names[i]] = HLT_Decision->at(i);
