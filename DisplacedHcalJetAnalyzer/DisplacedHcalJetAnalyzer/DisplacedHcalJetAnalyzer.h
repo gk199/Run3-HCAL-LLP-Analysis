@@ -67,6 +67,7 @@ public :
    bool blind_data     = false;
 
    float weight = 1;
+   float event_weight = 1;
    float weight_unskimmed = 1;
    double lumi_samplefrac = 1.0;
 
