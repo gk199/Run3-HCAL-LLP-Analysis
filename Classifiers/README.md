@@ -3,20 +3,23 @@
 Two DNN classifiers are trained, one as a depth jet tagger, the other as an inclusive jet tagger. A virtual environment is used to do the training and score evaluations:
 
 ```
-source ../Run/Condor/VirtualEnvs/keras2pt13pt1/bin/activate
+source VirtualEnvs/keras2pt13pt1/bin/activate
 
 cd Archive
-python3 runner-v4.py
-python3 runner-v4-depth.py
-
-python3 ScoresToEventBased-v4.py <option-filename.root>
+python3 runner-v5.py
+python3 runner-v5-depth.py
 ```
 
-Need to run the inclusive tagger before the depth tagger training can be run, since depth training is done in the CR! 
+Need to run the inclusive tagger before the depth tagger training can be run, since depth training is done in the CR! The root files with inclusive scores are listed as the input to the depth training. This is done via:
+```
+cd ..
+python3 Evaluate/ScoresToEventBased_iterate.py -f /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v*/<filename>.root -t NoSel -d Evaluate/depth_model_v4_LLPanywhere.keras -i Evaluate/inclusive_model_v5.keras -c Evaluate/norm_constants_v4.csv -m filewrite
+./AddScores.sh
+```
 
-List files to train over and to write scores to in these scripts. The output DNNs are `dense_model_v4.keras` and `inclusive_model_v4.keras`.
+List files to train over and to write scores to in these scripts. The output DNNs are `depth_model_v5.keras` and `inclusive_model_v5.keras` (April 2026).
 
-The trained models from v4 (trained in summer 2025) are used for the analysis. Now the scores are added during the Condor production of the minituples, but there is also the option to add scores afterwards if needed. For this, an optimized version of the ScoresToEventBased code was written, allowing the ROOT file to be iterated and read in chunks, to prevent a large amount of data being stored in memory and crashing the python process. This is run with:
+The trained models from v4 (trained in summer 2025) are used for the analysis (through v5.1). Now the scores are added during the Condor production of the minituples, but there is also the option to add scores afterwards if needed. For this, an optimized version of the `ScoresToEventBased` code was written, allowing the ROOT file to be iterated and read in chunks, to prevent a large amount of data being stored in memory and crashing the python process. This is run with:
 
 ```
 python3 Evaluate/ScoresToEventBased_iterate.py -f /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v*/<filename>.root -t NoSel -d Evaluate/depth_model_v4_LLPanywhere.keras -i Evaluate/inclusive_model_v4_train80.keras -c Evaluate/norm_constants_v4.csv -m filewrite
