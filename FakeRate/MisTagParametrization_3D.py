@@ -986,8 +986,9 @@ def parseArgs():
         description=''
     )
 
-    parser.add_argument("-e", "--era",              action="store", help="era (2022, 2023, or specify year and era)", required=True) 
-    parser.add_argument("-s", "--DNN_cut",          action="store", default=0.8, help="Depth DNN score cut (default: 0.8)")
+    parser.add_argument("-e", "--era",              action="store", help="era (2022, 2023, or specify year and era)", required=True)
+    parser.add_argument("-d", "--DNN_cut",          action="store", default=0.9,  type=float, help="Depth DNN score cut (default: 0.9)")
+    parser.add_argument("-i", "--DNN_cut_inc",      action="store", default=0.97, type=float, help="Inclusive DNN score cut (default: 0.97)")
     parser.add_argument("-b", "--b_tag_combined",   action="store_true", help="combined b-tag categories (True if -b passed) or not (False no -b)")
     
     args = parser.parse_args()
@@ -999,9 +1000,10 @@ def main():
     print("Parsing arguments...")
 
     args = parseArgs()
-    global era, DNN_cut, b_tag_combined, era_name
-    era = args.era   
+    global era, DNN_cut, DNN_cut_inc, b_tag_combined, era_name
+    era = args.era
     DNN_cut = args.DNN_cut
+    DNN_cut_inc = args.DNN_cut_inc
     b_tag_combined = args.b_tag_combined
 
     era_name = era.replace(" ", "") # for plot saving
@@ -1016,48 +1018,43 @@ def main():
     print("Depth DNN cut is " + str(DNN_cut))
     print("Inclusive DNN cut is " + str(DNN_cut_inc))
 
-    if era == "2023 Bv1":   infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Bv1_scores.root"]
-    elif era == "2023_Cv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv1_scores.root"]
-    elif era == "2023_Cv2": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv2_scores.root"]
-    elif era == "2023_Cv3": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv3_scores.root"]
-    elif era == "2023_Cv4": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv4_scores.root"]
-    elif era == "2023_Dv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv1_scores.root"]
-    elif era == "2023_Dv2" and not CNN: infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv2_scores.root"]
-    elif era == "2023_Dv2" and CNN: infilepath_list = ["/afs/cern.ch/work/f/fsimpson/public/minituple_outputs/minituple_Run2023D-EXOLLPJetHCAL-PromptReco-v2_partial28k-v4-scores_added.root"]
-    elif era == "2022": infilepath_list = [
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Dv1_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Ev1_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Fv1_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Gv1_scores.root"]
-    elif era == "2022_D": infilepath_list = [
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Dv1_scores.root"]
-    elif era == "2022_E": infilepath_list = [
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Ev1_scores.root"]
-    elif era == "2022_DE": infilepath_list = [
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Dv1_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Ev1_scores.root"]
-    elif era == "2022_FG": infilepath_list = [
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Fv1_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Gv1_scores.root"]
-    elif era == "2022_F": infilepath_list = [
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Fv1_scores.root"]
-    elif era == "2022_G": infilepath_list = [
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2022Gv1_scores.root"]
-    elif era == "2023": infilepath_list = [
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv1_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv2_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv3_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv4_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv1_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv2_scores.root"]
+    if era == "2023 Bv1":   infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Bv1_scores.root"]
+    elif era == "2023_Cv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv1_scores.root"]
+    elif era == "2023_Cv2": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv2_scores.root"]
+    elif era == "2023_Cv3": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv3_scores.root"]
+    elif era == "2023_Cv4": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv4_scores.root"]
+    elif era == "2023_Dv1": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Dv1_scores.root"]
+    elif era == "2023_Dv2": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Dv2_scores.root"]
     elif era == "2023_C1234": infilepath_list = [
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv1_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv2_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv3_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Cv4_scores.root"]
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv2_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv3_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv4_scores.root"]
     elif era == "2023_D": infilepath_list = [
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv1_scores.root",
-                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_data_2023Dv2_scores.root"]
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Dv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Dv2_scores.root"]
+    elif era == "2023": infilepath_list = [
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv2_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv3_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv4_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Dv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Dv2_scores.root"]
+
+    elif era == "2022": infilepath_list = [
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Dv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Ev1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Fv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Gv1_scores.root"]
+    elif era == "2022_D": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Dv1_scores.root"]
+    elif era == "2022_E": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Ev1_scores.root"]
+    elif era == "2022_F": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Fv1_scores.root"]
+    elif era == "2022_G": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Gv1_scores.root"]
+    elif era == "2022_DE": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Dv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Ev1_scores.root"]
+    elif era == "2022_FG": infilepath_list = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Fv1_scores.root",
+                        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Gv1_scores.root"]
+
     if LLPskim: combined_tree = GetData(infilepath_list, label)
 
     infilepath_list_Zmu = ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituples_Zmu_2023Bv1_allscores.root",
@@ -1070,11 +1067,12 @@ def main():
 
     if Zmu: combined_tree_Zmu = GetData(infilepath_list_Zmu, label)
 
-    # Format DNN value like pt8 instead of 0.8
-    dnn_str = str(DNN_cut).replace("0.", "pt")
+    # Format DNN values like pt95 instead of 0.95
+    dnn_str     = str(DNN_cut).replace("0.", "pt")
+    dnn_inc_str = str(DNN_cut_inc).replace("0.", "pt")
     # Optional suffix
     btag_str = "_combined" if b_tag_combined else ""
-    output_filename = f"DNN_{dnn_str}_{era}_forPython{btag_str}.txt"
+    output_filename = f"DNN_{dnn_str}_inc{dnn_inc_str}_{era}_forPython{btag_str}.txt"
     print(f"Writing output to: {output_filename}")
 
     with open(output_filename, "w") as f:

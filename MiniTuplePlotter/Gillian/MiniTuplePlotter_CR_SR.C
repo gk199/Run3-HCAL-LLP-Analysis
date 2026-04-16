@@ -93,7 +93,7 @@ void MiniTuplePlotter_CR_SR(){
 
 	MC_allPlots.insert(MC_allPlots.begin(), allPlots.begin(), allPlots.end());
 
-	bool DepthFlag = false;
+	bool DepthFlag = true;
 	bool Depth_CR_VR = false;
 	bool dPhi_CR_VR = true;
 	bool Skim_WJets = false;			// BDT input variables, plot LLP skim vs W+Jets selection

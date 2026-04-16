@@ -1,5 +1,6 @@
 import re
 import os
+import argparse
 import ROOT
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -62,12 +63,17 @@ def parse_filename(file_path):
 # Helpers for LaTeX output
 # ──────────────────────────────────────────────────────────────────────────────
 
-def latex_setup(sample_latex, apply_llp_truth, use_weights=False):
+def latex_setup(sample_latex, apply_llp_truth, weight_expr=None):
     truth_note = (
         r", with LLP truth matching ($177 \leq R_{\text{decay}} < 295$~cm, $\abs{\eta_{LLP}} < 1.26$)"
         if apply_llp_truth else ""
     )
-    weight_note = r", weighted" if use_weights else ""
+    _weight_label = {
+        "weight":                       "cross-section and luminosity weighted",
+        "L1_prescale_weight":           "L1 prescale weighted",
+        "weight * L1_prescale_weight":  "cross-section, luminosity, and L1 prescale weighted",
+    }
+    weight_note = f", {_weight_label.get(weight_expr, weight_expr)}" if weight_expr else ""
     caption = rf"Cutflow for {sample_latex}{truth_note}{weight_note}."
     print(r"\begin{table}[h!]")
     print(r"\centering")
@@ -91,10 +97,13 @@ def latex_end(caption):
 
 def run_cutflow(
     file_path,
-    tree_name       = "Events",
-    apply_llp_truth = False,
-    print_latex     = False,
-    use_weights     = None,
+    tree_name         = "Events",
+    apply_llp_truth   = False,
+    print_latex       = False,
+    use_weights       = None,
+    use_l1_prescale   = None,
+    dnn_inc_cut       = 0.97,
+    dnn_depth_cut     = 0.95,
 ):
     """
     Print a cutflow table for the displaced-jet search.
@@ -110,6 +119,11 @@ def run_cutflow(
     use_weights     : bool|None  – True  → always use the "weight" branch
                                    False → always use raw event counts
                                    None  → auto: weighted for signal, counts for data
+    use_l1_prescale : bool|None  – True  → multiply weight by "L1_prescale_weight"
+                                   False → ignore L1_prescale_weight even if present
+                                   None  → auto: apply if branch exists and use_weights
+    dnn_inc_cut     : float      – score threshold for the inclusive DNN (default 0.97)
+    dnn_depth_cut   : float      – score threshold for the depth DNN (default 0.95)
     """
 
     # ── open file / tree ──────────────────────────────────────────────────────
@@ -126,15 +140,15 @@ def run_cutflow(
     JDC_OR = f"({LJDC} || {SJDC})"
 
     # DNN cuts applied per-category so the correct jet role is used
-    # "inc" cut (> 0.97): applied to the inclusive-tagged jet
+    # "inc" cut: applied to the inclusive-tagged jet
     dnn_inc = (
-        f"(({SJDC} && jet0_scores_inc_train80 > 0.97) || "
-        f" ({LJDC} && jet1_scores_inc_train80 > 0.97))"
+        f"(({SJDC} && jet0_scores_inc_train80 > {dnn_inc_cut}) || "
+        f" ({LJDC} && jet1_scores_inc_train80 > {dnn_inc_cut}))"
     )
-    # "depth" cut (> 0.95): applied to the depth-tagged jet
+    # "depth" cut: applied to the depth-tagged jet
     dnn_depth = (
-        f"(({SJDC} && jet1_scores_depth_LLPanywhere > 0.95) || "
-        f" ({LJDC} && jet0_scores_depth_LLPanywhere > 0.95))"
+        f"(({SJDC} && jet1_scores_depth_LLPanywhere > {dnn_depth_cut}) || "
+        f" ({LJDC} && jet0_scores_depth_LLPanywhere > {dnn_depth_cut}))"
     )
 
     # ── LLP truth cut ─────────────────────────────────────────────────────────
@@ -158,11 +172,13 @@ def run_cutflow(
     steps = [
         ("All",                                 ""),
         ("Trigger (L1)",                        "Pass_L1SingleLLPJet == 1"),
+#        ("Trigger (L1 DoubleLLPJet40)",         "L1_DoubleLLPJet40 == 1"),
+#        ("Trigger (L1, but not L1 DoubleLLPJet40)",         "L1_DoubleLLPJet40 == 0 && Pass_L1SingleLLPJet == 1"),
         ("Trigger (HLT)",                       "Pass_HLTDisplacedJet == 1"),
         ("LJDC or SJDC",                        JDC_OR),
         ("$\Delta\phi$ (beam halo) veto",       "abs(jet0_jet1_dPhi) > 0.2"),
-        ("DNN $>0.97$ (inc)",                   dnn_inc),
-        ("DNN $>0.95$ (depth)",                 dnn_depth),
+        (f"DNN $>{dnn_inc_cut}$ (inc)",           dnn_inc),
+        (f"DNN $>{dnn_depth_cut}$ (depth)",      dnn_depth),
     ]
 
     if sample["kind"] == "data":
@@ -196,16 +212,40 @@ def run_cutflow(
     if use_weights is None:
         use_weights = (sample["kind"] == "signal")
 
+    # Auto-detect L1 prescale weight: apply if branch exists and we are weighting
+    has_l1_prescale_branch = bool(tree.GetBranch("L1_prescale_weight"))
+    if use_l1_prescale is None:
+        use_l1_prescale = use_weights and has_l1_prescale_branch
+        if use_weights and not has_l1_prescale_branch:
+            print("NOTE: 'L1_prescale_weight' branch not found; running without L1 prescale reweighting.")
+    elif use_l1_prescale and not has_l1_prescale_branch:
+        print("WARNING: use_l1_prescale=True but 'L1_prescale_weight' branch not found; ignoring.")
+        use_l1_prescale = False
+
+    # Build the effective weight expression for the four modes:
+    #   use_weights=F, use_l1_prescale=F  →  None  (raw counts via GetEntries)
+    #   use_weights=T, use_l1_prescale=F  →  "weight"
+    #   use_weights=F, use_l1_prescale=T  →  "L1_prescale_weight"
+    #   use_weights=T, use_l1_prescale=T  →  "weight * L1_prescale_weight"
+    if use_weights and use_l1_prescale:
+        weight_expr = "weight * L1_prescale_weight"
+    elif use_weights:
+        weight_expr = "weight"
+    elif use_l1_prescale:
+        weight_expr = "L1_prescale_weight"
+    else:
+        weight_expr = None
+
     _hist_counter = [0]   # unique name counter to avoid ROOT name collisions
 
     def get_yield(selection):
-        """Return weighted (MC) or unweighted (data) yield for a selection."""
-        if not use_weights:
+        """Return weighted yield for a selection, or raw count if weight_expr is None."""
+        if weight_expr is None:
             return float(tree.GetEntries(selection) if selection else tree.GetEntries())
         _hist_counter[0] += 1
         hname = f"_cutflow_h{_hist_counter[0]}"
-        draw_expr = f"weight>>{hname}(1,0,2)"
-        cut = f"weight*({selection})" if selection else "weight"
+        draw_expr = f"{weight_expr}>>{hname}(1,-1e6,1e6)"
+        cut = f"({weight_expr})*({selection})" if selection else weight_expr
         tree.Draw(draw_expr, cut, "goff")
         h = ROOT.gDirectory.Get(hname)
         result = h.GetSumOfWeights() if h else 0.0
@@ -214,18 +254,21 @@ def run_cutflow(
         return result
 
     # ── header ────────────────────────────────────────────────────────────────
-    weight_note = " [weighted]" if use_weights else ""
+    if weight_expr is None:
+        weight_note = ""
+    else:
+        weight_note = f" [weighted by: {weight_expr}]"
     print("\n")
     print(f"Cutflow — {sample['plain']}{truth_note}{weight_note}")
     print("\n")
 
     caption = None
     if print_latex:
-        caption = latex_setup(sample["latex"], apply_llp_truth, use_weights)
+        caption = latex_setup(sample["latex"], apply_llp_truth, weight_expr)
 
     col_w = 30
     if not print_latex:
-        n_col  = "Weighted yield" if use_weights else "N events"
+        n_col  = f"Yield ({weight_expr})" if weight_expr else "N events"
         header = (f"{'Selection':<{col_w}}  {n_col:>15}"
                   f"  {'% of All':>10}  {'% of HLT':>10}")
         print(header)
@@ -251,11 +294,11 @@ def run_cutflow(
 
         if print_latex:
             hlt_str = f"{100.0*frac_hlt:.2f}" if hlt_init > 0 else "--"
-            fmt = ".2f" if use_weights else ".0f"
-            print(f"{label} & {n_evt:{fmt}} & {100.0*frac_all:.2f}\% & {hlt_str}\% \\\\a")
+            fmt = ".2f" if weight_expr else ".0f"
+            print(f"{label} & {n_evt:{fmt}} & {100.0*frac_all:.2f}\% & {hlt_str}\% \\\\")
         else:
             hlt_str = f"{100.0*frac_hlt:>10.2f}%" if hlt_init > 0 else f"{'--':>11}"
-            fmt = ">15.2f" if use_weights else ">15.0f"
+            fmt = ">15.2f" if weight_expr else ">15.0f"
             print(f"{label:<{col_w}}  {n_evt:{fmt}}"
                   f"  {100.0*frac_all:>9.2f}%{hlt_str}")
     if print_latex:
@@ -265,34 +308,60 @@ def run_cutflow(
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Entry point – edit file_path and tree_name as needed
+# Entry point
 # ──────────────────────────────────────────────────────────────────────────────
+
+def _parse_args():
+    parser = argparse.ArgumentParser(
+        description="Print a displaced-jet search cutflow table."
+    )
+    parser.add_argument(
+        "--file", default=(
+            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/"
+            "minituple_HToSSTo4B_125_50_CTau3000_scores.root"
+        ),
+        help="Input ROOT file.",
+    )
+    parser.add_argument(
+        "--tree", default="NoSel",
+        help="TTree name inside the file (default: NoSel).",
+    )
+    parser.add_argument(
+        "--inc", type=float, default=0.97,
+        help="Inclusive DNN score threshold (default: 0.97).",
+    )
+    parser.add_argument(
+        "--depth", type=float, default=0.95,
+        help="Depth DNN score threshold (default: 0.95).",
+    )
+    parser.add_argument(
+        "--truth", action="store_true",
+        help="Apply LLP truth matching.",
+    )
+    parser.add_argument(
+        "--latex", action="store_true",
+        help="Print LaTeX-formatted output.",
+    )
+    parser.add_argument(
+        "--no-weights", dest="weights", action="store_false", default=None,
+        help="Use raw event counts (disable generator/PU weights).",
+    )
+    parser.add_argument(
+        "--no-l1-prescale", dest="l1_prescale", action="store_false", default=None,
+        help="Disable L1 prescale reweighting.",
+    )
+    return parser.parse_args()
+
 
 if __name__ == "__main__":
 
-    file_path = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_HToSSTo4B_125_50_CTau3000_scores.root"   # ← set your input file here
-    tree_name = "NoSel"           # ← set your tree name here
+    args = _parse_args()
 
-    # # --- weighted yield (auto for signal, can force with use_weights=True) ---
-    # run_cutflow(file_path, tree_name,
-    #             apply_llp_truth=False,
-    #             use_weights=True,
-    #             print_latex=False)
-
-    # # --- weighted, with LLP HCAL truth matching -------------------------------
-    # run_cutflow(file_path, tree_name,
-    #             apply_llp_truth=True,
-    #             use_weights=True,
-    #             print_latex=False)
-
-    # --- raw event counts (force unweighted even for signal) -----------------
-    run_cutflow(file_path, tree_name,
-                apply_llp_truth=False,
-                use_weights=False,
-                print_latex=True)
-
-    # --- unweighted, with LLP HCAL truth matching -----------------------------
-    run_cutflow(file_path, tree_name,
-                apply_llp_truth=True,
-                use_weights=False,
-                print_latex=True)
+    # --- L1 prescale weighted counts (no gen/PU weight) -----------------------
+    run_cutflow(args.file, args.tree,
+                apply_llp_truth = args.truth,
+                use_weights     = args.weights,
+                use_l1_prescale = args.l1_prescale,
+                print_latex     = args.latex,
+                dnn_inc_cut     = args.inc,
+                dnn_depth_cut   = args.depth)

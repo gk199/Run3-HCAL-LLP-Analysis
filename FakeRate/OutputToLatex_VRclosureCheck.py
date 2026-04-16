@@ -103,7 +103,7 @@ def compute_pull(obs, pred, syst_up, syst_down, stat_only=False):
     return diff / sigma_total if sigma_total > 0 else 0.0
 
 
-def generate_latex_table(data, year, score, stat_only=False):
+def generate_latex_table(data, year, depth_score, inclusive_score, stat_only=False):
     def entry(jet, key):
         if key == 'Observed VR':
             val, stat = data[jet]['central'][key]
@@ -115,13 +115,17 @@ def generate_latex_table(data, year, score, stat_only=False):
             syst_up, syst_down = compute_syst((val, stat), low, high)
             return format_predicted(val, stat, syst_up, syst_down)
 
+    score_label = f"depth = {depth_score}, inclusive = {inclusive_score}"
+    depth_tag = depth_score.replace("0.", "")
+    inc_tag = inclusive_score.replace("0.", "")
+
     lines = []
     lines.append("\\begin{table}[h!]")
     lines.append("    \\centering")
     # lines.append("    % Requires in preamble: \\usepackage{colortbl} and \\definecolor{lightred}{rgb}{1.0, 0.8, 0.8}")
     lines.append("    \\begin{tabular}{c|c|c}")
 
-    lines.append("        \\multicolumn{2}{c|}{\\textbf{Categories}} & \\textbf{DNN Score = " + score + "} \\\\ \\hline")
+    lines.append("        \\multicolumn{2}{c|}{\\textbf{Categories}} & \\textbf{DNN Score (" + score_label + ")} \\\\ \\hline")
 
     disagreements = []  # collect (jet_label, pull) for incompatible entries
     for jet in ['leading', 'sub-leading']:
@@ -147,7 +151,7 @@ def generate_latex_table(data, year, score, stat_only=False):
     lines.append("    \\end{tabular}")
 
     # Build caption, appending disagreement info if any
-    caption = f"Depth DNN score = {score} for {year_text}."
+    caption = f"Depth DNN score = {depth_score}, inclusive DNN score = {inclusive_score} for {year_text}."
     if disagreements:
         parts = []
         for jet, pull in disagreements:
@@ -160,7 +164,7 @@ def generate_latex_table(data, year, score, stat_only=False):
                    f", where {sigma_formula}."
 
     lines.append("    \\caption{" + caption + "}")
-    lines.append("    \\label{Table:VRclosure_pt" + score.replace("0.", "") + "_" + year + "_combined}")
+    lines.append("    \\label{Table:VRclosure_pt" + depth_tag + "_incpt" + inc_tag + "_" + year + "_combined}")
     lines.append("\\end{table}")
     return "\n".join(lines)
 
@@ -172,8 +176,9 @@ def parseArgs():
         description=''
     )
 
-    parser.add_argument("-e", "--era",              action="store", help="era (2022, 2023, or specify year and era)", required=True) 
-    parser.add_argument("-s", "--DNN_cut",          action="store", default=0.8, help="Depth DNN score cut (default: 0.8)")
+    parser.add_argument("-e", "--era",              action="store", help="era (2022, 2023, or specify year and era)", required=True)
+    parser.add_argument("-d", "--depth_score",      action="store", default="0.93", help="Depth DNN score cut, e.g. 0.93 or 93 (default: 0.93)")
+    parser.add_argument("-i", "--inclusive_score",  action="store", default="0.95", help="Inclusive DNN score cut, e.g. 0.95 or 95 (default: 0.95)")
     parser.add_argument("-b", "--b_tag_combined",   action="store_true", help="combined b-tag categories (True if -b passed) or not (False no -b)")
     parser.add_argument("--stat_only",              action="store_true", help="evaluate closure using statistical uncertainties only (ignore systematics)")
     
@@ -187,13 +192,22 @@ if __name__ == "__main__":
     print (" ")
 
     args = parseArgs()
-    year = args.era   
-    score = args.DNN_cut
+    year = args.era
     b_tag_combined = args.b_tag_combined
     stat_only = args.stat_only
     btag_str = "_combined" if b_tag_combined else ""
 
-    filename = "HigherInclusiveCut_pt97/DNN_pt" + score.replace("0.", "") + "_" + year + "_forPython" + btag_str + ".txt"
+    # Normalize scores: accept either "0.93" or "93" style; store both forms
+    def normalize_score(s):
+        s = str(s)
+        tag = s.replace("0.", "") if s.startswith("0.") else s          # "93"
+        label = "0." + tag if not s.startswith("0.") else s             # "0.93"
+        return tag, label
+
+    depth_tag, depth_label = normalize_score(args.depth_score)
+    inc_tag, inc_label     = normalize_score(args.inclusive_score)
+
+    filename = "DNN_pt" + depth_tag + "_incpt" + inc_tag + "_" + year + "_forPython" + btag_str + ".txt"
     data = parse_file(filename)
 
     debug = False
@@ -205,5 +219,5 @@ if __name__ == "__main__":
                 for name, val in values.items():
                     print(f"    {name}: {val}")
 
-    latex = generate_latex_table(data, year, score, stat_only=stat_only)
+    latex = generate_latex_table(data, year, depth_label, inc_label, stat_only=stat_only)
     print(latex)

@@ -3,11 +3,13 @@
 ## Mistag Rate Evaluation
 The newer approach uses 3D histograms to evaluate the mistag rates, so information from each dimension can be used in the prediction.
 ```
-python3 MisTagParameterization_3D.py -e <era or year> -s <depth DNN score> -b
+python3 MisTagParametrization_3D.py -e <era or year> -i <inclusive DNN score> -d <depth DNN score> -b
+
+python3 MisTagParametrization_3D_optimized.py -e <era or year> -i <inclusive DNN score> -d <depth DNN score> -b
 ```
 This will write to `DNN_pt*_202*_forPython_combined.txt`. For the case with b-tagged categories separated and written to `DNN_pt*_202*_forPython.txt`, do
 ```
-python3 MisTagParameterization_3D.py -e <era or year> -s <depth DNN score> 
+python3 MisTagParametrization_3D.py -e <era or year> -s <depth DNN score> 
 ```
 Now the arguments passed determine which year, DNN score, and b-tag option is run. Combined `-b` does not split by b-tagging. The bash script `./ScanScore.sh` scans over year and DNN score. 
 
@@ -17,21 +19,43 @@ Change the booleans `Zmu` and `LLPskim` and the era name at the beginning of the
 ```
 python3 OverlayMistagRates.py
 ```
-This takes the output root files from `MisTagParameterization_3D` and overlays them to evalute changes throughout the year.
+This takes the output root files from `MisTagParametrization_3D` and overlays them to evalute changes throughout the year.
 
 ## Convert Fake Rate Results to Latex Tables
 ```
 python3 OutputToLatex.py -e 2022 -s 0.7 # uses DNN_pt*_forPython.txt
-python3 OutputToLatex_combined.py -e 2022 -s 0.7 -b# uses DNN_pt*_forPython_combined.txt
+python3 OutputToLatex_combined.py -e 2022 -d 0.7 -i 0.7 -b# uses DNN_pt*_forPython_combined.txt
 ```
 Score, year, and combined b-tag categories are now passed via arguments to the python script. 
 
-`OutputToLatex.py` is for the results of running `MisTagParameterization_3D.py` with depth, b-tagged (leading, subleading, combined); depth, not b-tagged; depth, b-tagged, low PV; depth, not b-tagged, low PV; depth, b-tagged, high PV; depth, not b-tagged, high PV (used for Tables 8-11 in v2 of the AN). `OutputToLatex_combined.py` is for depth (leading, subleading, combined); depth, low PV; depth, high PV (used for Table 12 in v2 of the AN). 
+`OutputToLatex.py` is for the results of running `MisTagParametrization_3D.py` with depth, b-tagged (leading, subleading, combined); depth, not b-tagged; depth, b-tagged, low PV; depth, not b-tagged, low PV; depth, b-tagged, high PV; depth, not b-tagged, high PV (used for Tables 8-11 in v2 of the AN). `OutputToLatex_combined.py` is for depth (leading, subleading, combined); depth, low PV; depth, high PV (used for Table 12 in v2 of the AN). 
 
 To run everything:
 ```
 ./ScanScore.sh
 ./ProduceTables.sh
+```
+
+# Scan Scores for Optimization
+## Full scan with defaults (depth: 0.90–0.97, inc: 0.93–0.99, eras 2022+2023)
+```
+cd FakeRate/
+python3 ScanDNNCuts_bkg.py
+```
+
+## Custom scan
+```
+python3 ScanDNNCuts_bkg.py -e 2022 -d 0.93 0.95 0.97 -i 0.95 0.97
+```
+
+## Check commands without running
+```
+python3 ScanDNNCuts_bkg.py --dry-run
+```
+
+## Re-print summary from already-existing output files
+```
+python3 ScanDNNCuts_bkg.py --parse-only
 ```
 
 # Archive
