@@ -294,3 +294,8 @@ Ongoing wish list:
 
 Updates:
 * updated isRechitValid to include HE rechits and PF cuts there
+  
+## v5.2
+Updates:
+* PassEventPreselection now includes the PassHLT requirement
+* weights contain MC weights and event_weights contain trigger SF values correctly added
