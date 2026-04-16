@@ -7,3 +7,11 @@ python3 CutflowTable.py /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3
 python3 BkgEstimation.py /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.6.1/minituple_v3.6_LLPskim_Run2023_HADD.root 60
 ```
 With option to print as table to terminal, or print in a latex format (`print_latex = True`). 
+
+# Final Analysis Selections (LLP MC)
+```
+python3 FinalAnalysisCutflow.py --inc 0.97 --depth 0.95 --latex
+python3 FinalAnalysisCutflow.py --inc 0.97 --depth 0.95 --truth --latex
+
+python3 ScanDNNCuts.py --inc  0.90 0.95 0.97 0.99 --depth 0.90 0.93 0.95 0.97
+```

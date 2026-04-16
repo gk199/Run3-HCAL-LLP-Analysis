@@ -1,5 +1,6 @@
 import re
 import os
+import argparse
 import ROOT
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -68,9 +69,9 @@ def latex_setup(sample_latex, apply_llp_truth, weight_expr=None):
         if apply_llp_truth else ""
     )
     _weight_label = {
-        "weight":                       "gen/PU weighted",
+        "weight":                       "cross-section and luminosity weighted",
         "L1_prescale_weight":           "L1 prescale weighted",
-        "weight * L1_prescale_weight":  "gen/PU and L1 prescale weighted",
+        "weight * L1_prescale_weight":  "cross-section, luminosity, and L1 prescale weighted",
     }
     weight_note = f", {_weight_label.get(weight_expr, weight_expr)}" if weight_expr else ""
     caption = rf"Cutflow for {sample_latex}{truth_note}{weight_note}."
@@ -101,6 +102,8 @@ def run_cutflow(
     print_latex       = False,
     use_weights       = None,
     use_l1_prescale   = None,
+    dnn_inc_cut       = 0.97,
+    dnn_depth_cut     = 0.95,
 ):
     """
     Print a cutflow table for the displaced-jet search.
@@ -119,6 +122,8 @@ def run_cutflow(
     use_l1_prescale : bool|None  – True  → multiply weight by "L1_prescale_weight"
                                    False → ignore L1_prescale_weight even if present
                                    None  → auto: apply if branch exists and use_weights
+    dnn_inc_cut     : float      – score threshold for the inclusive DNN (default 0.97)
+    dnn_depth_cut   : float      – score threshold for the depth DNN (default 0.95)
     """
 
     # ── open file / tree ──────────────────────────────────────────────────────
@@ -135,15 +140,15 @@ def run_cutflow(
     JDC_OR = f"({LJDC} || {SJDC})"
 
     # DNN cuts applied per-category so the correct jet role is used
-    # "inc" cut (> 0.97): applied to the inclusive-tagged jet
+    # "inc" cut: applied to the inclusive-tagged jet
     dnn_inc = (
-        f"(({SJDC} && jet0_scores_inc_train80 > 0.97) || "
-        f" ({LJDC} && jet1_scores_inc_train80 > 0.97))"
+        f"(({SJDC} && jet0_scores_inc_train80 > {dnn_inc_cut}) || "
+        f" ({LJDC} && jet1_scores_inc_train80 > {dnn_inc_cut}))"
     )
-    # "depth" cut (> 0.95): applied to the depth-tagged jet
+    # "depth" cut: applied to the depth-tagged jet
     dnn_depth = (
-        f"(({SJDC} && jet1_scores_depth_LLPanywhere > 0.95) || "
-        f" ({LJDC} && jet0_scores_depth_LLPanywhere > 0.95))"
+        f"(({SJDC} && jet1_scores_depth_LLPanywhere > {dnn_depth_cut}) || "
+        f" ({LJDC} && jet0_scores_depth_LLPanywhere > {dnn_depth_cut}))"
     )
 
     # ── LLP truth cut ─────────────────────────────────────────────────────────
@@ -166,14 +171,14 @@ def run_cutflow(
     # MET filters are only applied to data, not LLP MC signal.
     steps = [
         ("All",                                 ""),
-#         ("Trigger (L1)",                        "Pass_L1SingleLLPJet == 1"),
+        ("Trigger (L1)",                        "Pass_L1SingleLLPJet == 1"),
 #        ("Trigger (L1 DoubleLLPJet40)",         "L1_DoubleLLPJet40 == 1"),
-        ("Trigger (L1, but not L1 DoubleLLPJet40)",         "L1_DoubleLLPJet40 == 0 && Pass_L1SingleLLPJet == 1"),
+#        ("Trigger (L1, but not L1 DoubleLLPJet40)",         "L1_DoubleLLPJet40 == 0 && Pass_L1SingleLLPJet == 1"),
         ("Trigger (HLT)",                       "Pass_HLTDisplacedJet == 1"),
         ("LJDC or SJDC",                        JDC_OR),
         ("$\Delta\phi$ (beam halo) veto",       "abs(jet0_jet1_dPhi) > 0.2"),
-        ("DNN $>0.97$ (inc)",                   dnn_inc),
-        ("DNN $>0.95$ (depth)",                 dnn_depth),
+        (f"DNN $>{dnn_inc_cut}$ (inc)",           dnn_inc),
+        (f"DNN $>{dnn_depth_cut}$ (depth)",      dnn_depth),
     ]
 
     if sample["kind"] == "data":
@@ -303,24 +308,60 @@ def run_cutflow(
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Entry point – edit file_path and tree_name as needed
+# Entry point
 # ──────────────────────────────────────────────────────────────────────────────
+
+def _parse_args():
+    parser = argparse.ArgumentParser(
+        description="Print a displaced-jet search cutflow table."
+    )
+    parser.add_argument(
+        "--file", default=(
+            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/"
+            "minituple_HToSSTo4B_125_50_CTau3000_scores.root"
+        ),
+        help="Input ROOT file.",
+    )
+    parser.add_argument(
+        "--tree", default="NoSel",
+        help="TTree name inside the file (default: NoSel).",
+    )
+    parser.add_argument(
+        "--inc", type=float, default=0.97,
+        help="Inclusive DNN score threshold (default: 0.97).",
+    )
+    parser.add_argument(
+        "--depth", type=float, default=0.95,
+        help="Depth DNN score threshold (default: 0.95).",
+    )
+    parser.add_argument(
+        "--truth", action="store_true",
+        help="Apply LLP truth matching.",
+    )
+    parser.add_argument(
+        "--latex", action="store_true",
+        help="Print LaTeX-formatted output.",
+    )
+    parser.add_argument(
+        "--no-weights", dest="weights", action="store_false", default=None,
+        help="Use raw event counts (disable generator/PU weights).",
+    )
+    parser.add_argument(
+        "--no-l1-prescale", dest="l1_prescale", action="store_false", default=None,
+        help="Disable L1 prescale reweighting.",
+    )
+    return parser.parse_args()
+
 
 if __name__ == "__main__":
 
-    file_path = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_HToSSTo4B_125_50_CTau3000_L1Trigger_scores.root"   # ← set your input file here
-    tree_name = "NoSel"           # set your tree name here
+    args = _parse_args()
 
     # --- L1 prescale weighted counts (no gen/PU weight) -----------------------
-    run_cutflow(file_path, tree_name,
-                apply_llp_truth=False,
-                use_weights=False,
-                use_l1_prescale=True,
-                print_latex=True)
-
-    # --- with LLP HCAL truth matching -----------------------------
-    run_cutflow(file_path, tree_name,
-                apply_llp_truth=True,
-                use_weights=False,
-                use_l1_prescale=True,
-                print_latex=True)
+    run_cutflow(args.file, args.tree,
+                apply_llp_truth = args.truth,
+                use_weights     = args.weights,
+                use_l1_prescale = args.l1_prescale,
+                print_latex     = args.latex,
+                dnn_inc_cut     = args.inc,
+                dnn_depth_cut   = args.depth)

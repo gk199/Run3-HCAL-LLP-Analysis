@@ -150,6 +150,32 @@ TCut Cut_LLPinHCAL34_Jet3	= 	( "(" + LLP0inHCAL_d34 + AND + Jet3_LLP0 + ")" + 	O
 TCut Cut_LLPinHCAL34_Jet4	= 	( "(" + LLP0inHCAL_d34 + AND + Jet4_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet4_LLP1 + ")" ).Data();
 TCut Cut_LLPinHCAL34_Jet5	= 	( "(" + LLP0inHCAL_d34 + AND + Jet5_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet5_LLP1 + ")" ).Data();
 
+// for prompt and displaced tracking requirements
+TString Cut_Jet[6];
+for (int j = 0; j < 6; j++) {
+    // --- Prompt track cuts ---
+    // "Prompt" = dxyToBS < 1mm (0.1 cm)
+    // "At most two prompt" = NOT all three are prompt
+    // Equivalent: at least one track has dxyToBS >= 0.1
+    TString prompt = TString::Format(
+        "!(jet%d_Track0dxyToBS < 0.1 && jet%d_Track1dxyToBS < 0.1 && jet%d_Track2dxyToBS < 0.1)",
+        j, j, j);
+
+    // --- Displaced track cuts ---
+    // "Displaced" = dxyOverErr > 5 AND dxyToBS > 0.5mm (0.05 cm)
+    // "At least one displaced" = any of the four tracks passes both criteria
+    TString displaced = "";
+    for (int t = 0; t < 3; t++) {
+        if (t > 0) displaced += " || ";
+        displaced += TString::Format(
+            "(jet%d_Track%ddxyOverErr > 5 && jet%d_Track%ddxyToBS > 0.05)",
+            j, t, j, t);
+    }
+    // --- Combined cut (OR of the two conditions) ---
+    Cut_Jet[j] = TString::Format("((%s) || (%s))", prompt.Data(), displaced.Data());
+}
+
+// Efficiency plots for LLP in HCAL depth 3 or 4
 TCut Cut_LLPinHCAL34_AnyJet = ( "( jet0_Pt > 0" + AND + "( (" + LLP0inHCAL_d34 + AND + Jet0_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet0_LLP1 + ") ) )" + OR + 
                                 "( jet1_Pt > 0" + AND + "( (" + LLP0inHCAL_d34 + AND + Jet1_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet1_LLP1 + ") ) )" + OR + 
                                 "( jet2_Pt > 0" + AND + "( (" + LLP0inHCAL_d34 + AND + Jet2_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet2_LLP1 + ") ) )" + OR + 
@@ -157,12 +183,12 @@ TCut Cut_LLPinHCAL34_AnyJet = ( "( jet0_Pt > 0" + AND + "( (" + LLP0inHCAL_d34 +
                                 "( jet4_Pt > 0" + AND + "( (" + LLP0inHCAL_d34 + AND + Jet4_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet4_LLP1 + ") ) )" + OR + 
                                 "( jet5_Pt > 0" + AND + "( (" + LLP0inHCAL_d34 + AND + Jet5_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet5_LLP1 + ") ) )" ).Data();
 // below jet cut is 100 for hard cut plots
-TCut Cut_LLPinHCAL34_AnyJet80 = ( "( jet0_Pt > 80" + AND + "jet0_L1trig_Matched == 1" + AND + "( (" + LLP0inHCAL_d34 + AND + Jet0_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet0_LLP1 + ") ) )" + OR + 
-                                "( jet1_Pt > 80" + AND + "jet1_L1trig_Matched == 1" + AND + "( (" + LLP0inHCAL_d34 + AND + Jet1_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet1_LLP1 + ") ) )" + OR + 
-                                "( jet2_Pt > 80" + AND + "jet2_L1trig_Matched == 1" + AND + "( (" + LLP0inHCAL_d34 + AND + Jet2_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet2_LLP1 + ") ) )" + OR + 
-                                "( jet3_Pt > 80" + AND + "jet3_L1trig_Matched == 1" + AND + "( (" + LLP0inHCAL_d34 + AND + Jet3_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet3_LLP1 + ") ) )" + OR + 
-                                "( jet4_Pt > 80" + AND + "jet4_L1trig_Matched == 1" + AND + "( (" + LLP0inHCAL_d34 + AND + Jet4_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet4_LLP1 + ") ) )" + OR + 
-                                "( jet5_Pt > 80" + AND + "jet5_L1trig_Matched == 1" + AND + "( (" + LLP0inHCAL_d34 + AND + Jet5_LLP0 + ")" + 	OR += "(" + LLP1inHCAL_d34 + AND + Jet5_LLP1 + ") ) )" ).Data();
+TCut Cut_LLPinHCAL34_AnyJet80 = ( "( jet0_Pt > 80 && jet1_Pt > 80" + AND + Cut_Jet[0] + AND + "jet0_L1trig_Matched == 1" + AND + "( (" + LLP0inHCAL_d34 + AND + Jet0_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet0_LLP1 + ") ) )" + OR + 
+                                "( jet1_Pt > 80 " + AND + Cut_Jet[1] + AND + "jet1_L1trig_Matched == 1" + AND + "( (" + LLP0inHCAL_d34 + AND + Jet1_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet1_LLP1 + ") ) )" + OR + 
+                                "( jet2_Pt > 80 " + AND + Cut_Jet[2] + AND + "jet2_L1trig_Matched == 1" + AND + "( (" + LLP0inHCAL_d34 + AND + Jet2_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet2_LLP1 + ") ) )" + OR + 
+                                "( jet3_Pt > 80 " + AND + Cut_Jet[3] + AND + "jet3_L1trig_Matched == 1" + AND + "( (" + LLP0inHCAL_d34 + AND + Jet3_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet3_LLP1 + ") ) )" + OR + 
+                                "( jet4_Pt > 80 " + AND + Cut_Jet[4] + AND + "jet4_L1trig_Matched == 1" + AND + "( (" + LLP0inHCAL_d34 + AND + Jet4_LLP0 + ")" + 	OR + "(" + LLP1inHCAL_d34 + AND + Jet4_LLP1 + ") ) )" + OR + 
+                                "( jet5_Pt > 80 " + AND + Cut_Jet[5] + AND + "jet5_L1trig_Matched == 1" + AND + "( (" + LLP0inHCAL_d34 + AND + Jet5_LLP0 + ")" + 	OR += "(" + LLP1inHCAL_d34 + AND + Jet5_LLP1 + ") ) )" ).Data();
 
 TCut Cut_LLPinHCAL123_Jet0	= 	( "( (" + LLP0inHCAL_d2 + OR + LLP0inHCAL_d34 + ")" + AND + Jet0_LLP0 + ")" + 	OR + "( (" + LLP1inHCAL_d2 + OR + LLP1inHCAL_d34 + ")" + AND + Jet0_LLP1 + ")" ).Data();
 
@@ -285,3 +311,4 @@ TCut Cut_RunExcluded = Form("run == 357776 || run == 359661 || run == 359690 || 
 
 // runs_to_exclude_2022.append(362596) HE issue
 // runs_to_exclude_2022.extend(range(362597, 362697)) timing 6:1 unexpected 
+
