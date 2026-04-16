@@ -30,7 +30,7 @@ from collections import defaultdict
 DEFAULT_ERAS       = ["2022", "2023"]
 DEFAULT_DEPTH_CUTS = [0.90, 0.93, 0.95, 0.97]
 DEFAULT_INC_CUTS   = [0.93, 0.95, 0.97, 0.98, 0.99]
-MISTAG_SCRIPT      = os.path.join(os.path.dirname(__file__), "MisTagParametrization_3D.py")
+MISTAG_SCRIPT      = os.path.join(os.path.dirname(__file__), "MisTagParametrization_3D_optimized.py")
 
 
 # ──────────────────────────────────────────────────────────────────────────────
