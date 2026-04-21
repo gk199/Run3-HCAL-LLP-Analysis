@@ -682,7 +682,7 @@ def CreateHistograms_1D(tree, cut, hist_name):
     hist1d_pt = ROOT.TH1F(hist_name + "_pt", "1D histogram; p_{T}", len(pT_bins)-1, pT_bins)
     hist1d_eta = ROOT.TH1F(hist_name + "_eta", "1D histogram; #eta", len(eta_bins)-1, eta_bins)
     hist1d_phi = ROOT.TH1F(hist_name + "_phi", "1D histogram; #phi", len(phi_bins)-1, phi_bins)
-    hist1d_run = ROOT.TH1F(hist_name + "_run", "1D histogram; Run Number", 5000, 356000, 364000) # run range specified
+    hist1d_run = ROOT.TH1F(hist_name + "_run", "1D histogram; Run Number", 8000, 356000, 364000) # run range specified
     if ("2023" in era):
         hist1d_run = ROOT.TH1F(hist_name + "_run", "1D histogram; Run Number", 5000, 366000, 371000) # run range specified
     tree.Draw("jet0_Pt >> " + hist_name + "_pt", cut, "")

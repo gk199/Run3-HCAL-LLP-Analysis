@@ -41,21 +41,26 @@ c_tag_bins = np.array([0, 0.102,  1.0], dtype=float)
 
 DNN_cut_inc = 0.97
 
+CR_cut_inc = 0.2
+
 # ---- Run exclusion lists (identical to original) ----
-runs_to_exclude_2022 = [
-    357776, 359661, 359690, 359869, 360890, 361044, 362087, 362437,
-    362615, 362616, 362653, 360128, 360887, 360949, 361053, 361994,
-    362063, 362698,
-]
-runs_to_exclude_2022.append(362596)
-runs_to_exclude_2022.extend(range(362597, 362697))  # 100 runs from L1 LUT issue
+runs_to_exclude_2022 = [362615, 362653, 360485]   # based on CR 0.1 
+runs_to_exclude_2022 = [362615, 362617, 362653, 362655]   # based on CR 0.2
+    # 357776, 359661, 359690, 359869, 360890, 361044, 362087, 362437,
+    # 362615, 362616, 362653, 360128, 360887, 360949, 361053, 361994,
+    # 362063, 362698,
+# runs_to_exclude_2022.append(362596)
+# runs_to_exclude_2022.extend(range(362597, 362697))  # 100 runs from L1 LUT issue
 runs_to_exclude_2022 = list(set(runs_to_exclude_2022))  # deduplicate
 
-runs_to_exclude_2023 = list(set([367228, 368684, 370460, 368684, 370460]))
+runs_to_exclude_2023 = [] # based on CR 0.1 # list(set([367228, 368684, 370460, 368684, 370460]))
+runs_to_exclude_2023 = [367691, 368684] # based on CR 0.2
 
 Zmu     = False
 LLPskim = True
 CNN     = False
+
+current_jet_type = "leading"  # updated per-iteration in MisTagParametrization
 
 output_dir = "outPlots_3D"
 if not os.path.exists(output_dir):
@@ -65,10 +70,13 @@ if not os.path.exists(output_dir):
 # ---- Declare C++ sets for O(log n) per-event run exclusion lookup ----
 _excl_2022_cpp = "{" + ", ".join(str(r) for r in sorted(runs_to_exclude_2022)) + "}"
 _excl_2023_cpp = "{" + ", ".join(str(r) for r in sorted(runs_to_exclude_2023)) + "}"
+_excl_combined = sorted(set(runs_to_exclude_2022) | set(runs_to_exclude_2023))
+_excl_combined_cpp = "{" + ", ".join(str(r) for r in _excl_combined) + "}"
 ROOT.gInterpreter.Declare(f"""
 #include <set>
-static const std::set<int> g_excl_runs_2022 = {_excl_2022_cpp};
-static const std::set<int> g_excl_runs_2023 = {_excl_2023_cpp};
+static const std::set<int> g_excl_runs_2022          = {_excl_2022_cpp};
+static const std::set<int> g_excl_runs_2023          = {_excl_2023_cpp};
+static const std::set<int> g_excl_runs_2022_2023     = {_excl_combined_cpp};
 """)
 
 # ==============================================================================
@@ -212,7 +220,12 @@ def MakePlotWithRatio(hists, legends, type, png_label):
 def LabelCMS(xpos=0.13, ypos=0.85, text_size=0.036):
     cmsLabel      = "#scale[1]{#bf{CMS} }"
     cmsLabelExtra = "#scale[0.8]{#it{Private Work}}"
-    yearLumi      = "#scale[0.85]{2023 (13.6 TeV)}"
+    if "2022_2023" in era:
+        yearLumi = "#scale[0.85]{2022+2023 (13.6 TeV)}"
+    elif "2022" in era:
+        yearLumi = "#scale[0.85]{2022 (13.6 TeV)}"
+    else:
+        yearLumi = "#scale[0.85]{2023 (13.6 TeV)}"
     stamp_text = ROOT.TLatex()
     stamp_text.SetNDC()
     stamp_text.SetTextFont(42)
@@ -221,11 +234,15 @@ def LabelCMS(xpos=0.13, ypos=0.85, text_size=0.036):
     stamp_text.DrawLatex(xpos + 0.07, ypos, cmsLabelExtra)
     if ypos == 0.85:
         stamp_text.DrawLatex(xpos + 0.62, ypos + 0.06, yearLumi)
-        stamp_text.DrawLatex(xpos + 0.4,  ypos,        "#scale[0.65]{DNN score > " + str(DNN_cut) + "}")
+        _dnn_label = DNN_cut_SJDC if current_jet_type == "sub-leading" else DNN_cut_LJDC
+        stamp_text.DrawLatex(xpos + 0.4,  ypos,        "#scale[0.65]{DNN score > " + str(_dnn_label) + "}")
         stamp_text.DrawLatex(xpos + 0.4,  ypos - 0.04, "#scale[0.65]{Era = " + era + "}")
     else:
-        stamp_text.DrawLatex(xpos + 0.6,  ypos + 0.03, yearLumi)
-        stamp_text.DrawLatex(xpos + 0.3,  ypos,        "#scale[0.65]{DNN score > " + str(DNN_cut) + "}")
+        _dnn_label = DNN_cut_SJDC if current_jet_type == "sub-leading" else DNN_cut_LJDC
+        if "2022_2023" in era:
+            stamp_text.DrawLatex(xpos + 0.5,  ypos + 0.03, yearLumi)
+        else: stamp_text.DrawLatex(xpos + 0.6,  ypos + 0.03, yearLumi)
+        stamp_text.DrawLatex(xpos + 0.3,  ypos,        "#scale[0.65]{DNN score > " + str(_dnn_label) + "}")
         stamp_text.DrawLatex(xpos + 0.3,  ypos - 0.04, "#scale[0.65]{Era = " + era + "}")
 
 
@@ -280,17 +297,17 @@ def book_all_histograms(rdf_base):
     booked : dict
         booked[option]["CR_all"] etc. are RResultPtr<TH3D> objects.
     """
-    # Region filters — jet1 defines CR/VR/SR when jet0 is the tagged jet
-    CR_str     = f"jet1_scores_inc_train80 >= 0.0  && jet1_scores_inc_train80 < 0.2"
-    VR_str     = f"jet1_scores_inc_train80 >= 0.2  && jet1_scores_inc_train80 < {DNN_cut_inc}"
-    SR_str     = f"jet1_scores_inc_train80 >= {DNN_cut_inc} && jet1_scores_inc_train80 < 1.1"
-    mistag_str = f"jet0_scores_depth_LLPanywhere >= {DNN_cut} && jet0_scores_depth_LLPanywhere < 1.1"
+    # LJDC: jet0 is the depth tag candidate; jet1 inclusive score defines CR/VR/SR
+    CR_str     = f"jet1_scores_inc_train80 >= 0.0 && jet1_scores_inc_train80 < {CR_cut_inc}"
+    VR_str     = f"jet1_scores_inc_train80 >= {CR_cut_inc} && jet1_scores_inc_train80 < {DNN_cut_inc_LJDC}"
+    SR_str     = f"jet1_scores_inc_train80 >= {DNN_cut_inc_LJDC} && jet1_scores_inc_train80 < 1.1"
+    mistag_str = f"jet0_scores_depth_LLPanywhere >= {DNN_cut_LJDC} && jet0_scores_depth_LLPanywhere < 1.1"
 
-    # Same regions with jets swapped (jet0 defines CR/VR/SR, jet1 is the tagged jet)
-    CR_0_str     = f"jet0_scores_inc_train80 >= 0.0  && jet0_scores_inc_train80 < 0.2"
-    VR_0_str     = f"jet0_scores_inc_train80 >= 0.2  && jet0_scores_inc_train80 < {DNN_cut_inc}"
-    SR_0_str     = f"jet0_scores_inc_train80 >= {DNN_cut_inc} && jet0_scores_inc_train80 < 1.1"
-    mistag_1_str = f"jet1_scores_depth_LLPanywhere >= {DNN_cut} && jet1_scores_depth_LLPanywhere < 1.1"
+    # SJDC: jet1 is the depth tag candidate; jet0 inclusive score defines CR/VR/SR
+    CR_0_str     = f"jet0_scores_inc_train80 >= 0.0 && jet0_scores_inc_train80 < {CR_cut_inc}"
+    VR_0_str     = f"jet0_scores_inc_train80 >= {CR_cut_inc} && jet0_scores_inc_train80 < {DNN_cut_inc_SJDC}"
+    SR_0_str     = f"jet0_scores_inc_train80 >= {DNN_cut_inc_SJDC} && jet0_scores_inc_train80 < 1.1"
+    mistag_1_str = f"jet1_scores_depth_LLPanywhere >= {DNN_cut_SJDC} && jet1_scores_depth_LLPanywhere < 1.1"
 
     # Emulated trigger: leading jet has depth tag candidate + subleading has inclusive tag candidate
     depth_j0_str = "jet0_DepthTagCand == 1 && jet1_InclTagCand == 1"
@@ -436,6 +453,9 @@ def MisTagParametrization(hists, option):
     for i, (CR_all_i, CR_mistag_i, VR_all_i, VR_mistag_i, SR_all_i) in enumerate(
             zip(CR_all_list, CR_mistag_list, VR_all_list, VR_mistag_list, SR_all_list)):
 
+        global current_jet_type
+        current_jet_type = mistag_jet_list[i]
+
         print(" ************* \n " + mistag_jet_list[i] + " \n *************")
 
         # Write base histograms to ROOT file using canonical names
@@ -542,88 +562,198 @@ def MisTagParametrization(hists, option):
 # Argument parsing and main
 # ==============================================================================
 
+# ==============================================================================
+# Config file support
+# ==============================================================================
+
+def parse_config_file(path):
+    """
+    Parse a whitespace-delimited config file.  Lines starting with # are
+    comments.  The first non-comment line is treated as the header and defines
+    the column order.  All subsequent non-empty lines are data rows.
+
+    Required columns: era, DNN_cut_LJDC, DNN_cut_inc_LJDC, DNN_cut_SJDC, DNN_cut_inc_SJDC
+    Optional column:  CR_cut_inc  (defaults to 0.2 if absent)
+
+    Example file
+    ------------
+    # era   DNN_cut_LJDC  DNN_cut_inc_LJDC  DNN_cut_SJDC  DNN_cut_inc_SJDC  CR_cut_inc
+    2022    0.90          0.97              0.90           0.97              0.20
+    2023    0.93          0.97              0.95           0.95              0.15
+    2023    0.90          0.97              0.90           0.97              0.20
+    """
+    required = ["era", "DNN_cut_LJDC", "DNN_cut_inc_LJDC", "DNN_cut_SJDC", "DNN_cut_inc_SJDC"]
+    defaults = {"CR_cut_inc": 0.2}
+
+    rows = []
+    header = None
+    with open(path) as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            if header is None:
+                # First non-comment line is the header
+                header = line.split()
+                continue
+            values = line.split()
+            if len(values) != len(header):
+                raise ValueError(f"Config row has {len(values)} columns, expected {len(header)}: {line!r}")
+            row = dict(zip(header, values))
+            # Validate required columns
+            for col in required:
+                if col not in row:
+                    raise ValueError(f"Config file is missing required column: {col}")
+            # Apply defaults for optional columns
+            for col, default in defaults.items():
+                if col not in row:
+                    row[col] = default
+            # Type conversion
+            row["era"] = str(row["era"])
+            for col in ["DNN_cut_LJDC", "DNN_cut_inc_LJDC", "DNN_cut_SJDC", "DNN_cut_inc_SJDC", "CR_cut_inc"]:
+                row[col] = float(row[col])
+            rows.append(row)
+
+    if not rows:
+        raise ValueError(f"Config file {path!r} contains no data rows.")
+    return rows
+
+
+# ==============================================================================
+# Argument parsing and main
+# ==============================================================================
+
 def parseArgs():
     parser = argparse.ArgumentParser(add_help=True, description="Optimised mistag parametrisation")
-    parser.add_argument("-e", "--era",            action="store", required=True,
+
+    # --- Config file mode (takes precedence over individual score flags) ---
+    parser.add_argument("--config",             action="store", default=None,
+                        help="Path to a config file listing parameter sets to scan "
+                             "(see parse_config_file docstring for format). "
+                             "When provided, -e/-d/-i/-c are ignored.")
+
+    # --- Single-run flags (used when --config is not given) ---
+    parser.add_argument("-e", "--era",            action="store", default=None,
                         help="era: '2022' or '2023'")
-    parser.add_argument("-d", "--DNN_cut",         action="store", default=0.9,   type=float,
-                        help="Depth DNN score cut (default: 0.9)")
-    parser.add_argument("-i", "--DNN_cut_inc",     action="store", default=0.97,  type=float,
-                        help="Inclusive DNN score cut (default: 0.97)")
+    parser.add_argument("-d", "--DNN_cut",          action="store", default=0.9,   type=float,
+                        help="Depth DNN score cut for both LJDC and SJDC (default: 0.9)")
+    parser.add_argument("--DNN_cut_LJDC",           action="store", default=None,  type=float,
+                        help="Depth DNN score cut for LJDC only (default: same as -d)")
+    parser.add_argument("--DNN_cut_SJDC",           action="store", default=None,  type=float,
+                        help="Depth DNN score cut for SJDC only (default: same as -d)")
+    parser.add_argument("-i", "--DNN_cut_inc",      action="store", default=0.97,  type=float,
+                        help="Inclusive DNN score VR/SR boundary for both LJDC and SJDC (default: 0.97)")
+    parser.add_argument("--DNN_cut_inc_LJDC",       action="store", default=None,  type=float,
+                        help="Inclusive DNN score VR/SR boundary for LJDC only (default: same as -i)")
+    parser.add_argument("--DNN_cut_inc_SJDC",       action="store", default=None,  type=float,
+                        help="Inclusive DNN score VR/SR boundary for SJDC only (default: same as -i)")
+    parser.add_argument("-c", "--CR_cut_inc",       action="store", default=0.2,   type=float,
+                        help="Inclusive DNN score upper bound for CR, shared by LJDC and SJDC (default: 0.2)")
+
+    # --- Always required ---
     parser.add_argument("-b", "--b_tag_combined",  action="store_true",
-                        help="combined b-tag categories (required for this script)")
+                        help="combined b-tag categories")
     parser.add_argument("-t", "--threads",         action="store", default=0, type=int,
                         help="Number of threads for RDataFrame (0 = auto-detect)")
     return parser.parse_args()
 
 
-def main():
-    print("Parsing arguments...")
-    args = parseArgs()
+# Input file lists
+_file_map = {
+    "2022_2023": [
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Dv1_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Ev1_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Fv1_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Gv1_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv1_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv2_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv3_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv4_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Dv1_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Dv2_scores.root",
+    ],
+    "2022": [
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Dv1_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Ev1_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Fv1_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Gv1_scores.root",
+    ],
+    "2022_D": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Dv1_scores.root"],
+    "2022_E": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Ev1_scores.root"],
+    "2022_F": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Fv1_scores.root"],
+    "2022_G": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Gv1_scores.root"],
 
-    global era, DNN_cut, DNN_cut_inc, b_tag_combined, era_name
-    era            = args.era
-    DNN_cut        = args.DNN_cut
-    DNN_cut_inc    = args.DNN_cut_inc
-    b_tag_combined = args.b_tag_combined
-    era_name       = era.replace(" ", "")
+    "2023": [
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv1_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv2_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv3_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv4_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Dv1_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Dv2_scores.root",
+    ],
+    "2023_Cv1": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv1_scores.root"],
+    "2023_Cv2": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv2_scores.root"],
+    "2023_Cv3": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv3_scores.root"],
+    "2023_Cv4": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv4_scores.root"],
+    "2023_Dv1": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Dv1_scores.root"],
+    "2023_Dv2": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Dv2_scores.root"],
+}
 
-    if era not in ("2022", "2023"):
-        raise ValueError(f"This optimised script only supports era='2022' or '2023'. Got: {era}")
 
-    # Enable multi-threading — the single biggest speedup lever
-    if args.threads > 0:
-        ROOT.EnableImplicitMT(args.threads)
+def _build_rdf_base(era_key):
+    """Build the base RDataFrame (run exclusion + deltaPhi) for a given era."""
+    rdf = ROOT.RDataFrame("NoSel", _file_map[era_key])
+    if era_key == "2022_2023":
+        run_excl = "g_excl_runs_2022_2023.find(run) == g_excl_runs_2022_2023.end()"
+    elif era_key.startswith("2023"):
+        run_excl = "g_excl_runs_2023.find(run) == g_excl_runs_2023.end()"
     else:
-        ROOT.EnableImplicitMT()
+        run_excl = "g_excl_runs_2022.find(run) == g_excl_runs_2022.end()"
+    return (rdf
+            .Filter(run_excl, "run exclusion")
+            .Filter("abs(jet0_jet1_dPhi) > 0.2 && Flag_METFilters_2022_2023_PromptReco == 1",
+                    "deltaPhi + METFilters"))
 
+
+def _run_one(rdf_base, row, b_tag_combined_flag):
+    """
+    Set globals for one parameter set, book histograms, and write all output.
+    rdf_base is already filtered for run exclusion and deltaPhi.
+    """
+    global era, era_name, DNN_cut, DNN_cut_LJDC, DNN_cut_SJDC, \
+           DNN_cut_inc, DNN_cut_inc_LJDC, DNN_cut_inc_SJDC, \
+           CR_cut_inc, b_tag_combined
+
+    era              = row["era"]
+    era_name         = era.replace(" ", "")
+    DNN_cut_LJDC     = row["DNN_cut_LJDC"]
+    DNN_cut_SJDC     = row["DNN_cut_SJDC"]
+    DNN_cut_inc_LJDC = row["DNN_cut_inc_LJDC"]
+    DNN_cut_inc_SJDC = row["DNN_cut_inc_SJDC"]
+    CR_cut_inc       = row["CR_cut_inc"]
+    b_tag_combined   = b_tag_combined_flag
+    # Keep DNN_cut / DNN_cut_inc as the LJDC values for plot labels (LabelCMS)
+    DNN_cut          = DNN_cut_LJDC
+    DNN_cut_inc      = DNN_cut_inc_LJDC
+
+    print(f"\n{'='*60}")
     print(f"Era: {era}")
-    print(f"Depth DNN cut: {DNN_cut}")
-    print(f"Inclusive DNN cut: {DNN_cut_inc}")
+    print(f"Depth DNN cut  — LJDC: {DNN_cut_LJDC},  SJDC: {DNN_cut_SJDC}")
+    print(f"Inclusive cut  — LJDC: {DNN_cut_inc_LJDC},  SJDC: {DNN_cut_inc_SJDC}")
+    print(f"CR inclusive upper bound (shared): {CR_cut_inc}")
+    print(f"{'='*60}")
 
-    # Input file lists (identical to original)
-    file_map = {
-        "2022": [
-            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Dv1_scores.root",
-            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Ev1_scores.root",
-            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Fv1_scores.root",
-            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Gv1_scores.root",
-        ],
-        "2023": [
-            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv1_scores.root",
-            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv2_scores.root",
-            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv3_scores.root",
-            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv4_scores.root",
-            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Dv1_scores.root",
-            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Dv2_scores.root",
-        ],
-    }
-    infilepath_list = file_map[era]
-
-    # ---- Build RDataFrame and apply the common base filter once ----
-    print("Building RDataFrame from input files...")
-    tree_name = "NoSel"
-    rdf = ROOT.RDataFrame(tree_name, infilepath_list)
-
-    run_excl_str = (
-        "g_excl_runs_2023.find(run) == g_excl_runs_2023.end()" if "2023" in era
-        else "g_excl_runs_2022.find(run) == g_excl_runs_2022.end()"
-    )
-    deltaPhi_str = "abs(jet0_jet1_dPhi) > 0.2 && Flag_METFilters_2022_2023_PromptReco == 1"
-
-    rdf_base = (rdf
-                .Filter(run_excl_str,  "run exclusion")
-                .Filter(deltaPhi_str,  "deltaPhi + METFilters"))
-
-    # ---- Book all histograms for all 3 options (lazy — no I/O yet) ----
     print("Booking all histograms (lazy, no I/O yet)...")
     booked = book_all_histograms(rdf_base)
 
-    # ---- Format output filename (same convention as original) ----
-    dnn_str     = str(DNN_cut).replace("0.", "pt")
-    dnn_inc_str = str(DNN_cut_inc).replace("0.", "pt")
-    btag_str    = "_combined" if b_tag_combined else ""
-    output_filename = f"DNN_{dnn_str}_inc{dnn_inc_str}_{era}_forPython{btag_str}.txt"
+    def _pt(v): return str(v).replace("0.", "pt")
+    btag_str = "_combined" if b_tag_combined else ""
+    if DNN_cut_LJDC == DNN_cut_SJDC and DNN_cut_inc_LJDC == DNN_cut_inc_SJDC:
+        output_filename = f"DNN_{_pt(DNN_cut_LJDC)}_inc{_pt(DNN_cut_inc_LJDC)}_{era}_forPython{btag_str}.txt"
+    else:
+        output_filename = (f"DNN_LJDC{_pt(DNN_cut_LJDC)}_SJDC{_pt(DNN_cut_SJDC)}"
+                           f"_incLJDC{_pt(DNN_cut_inc_LJDC)}_incSJDC{_pt(DNN_cut_inc_SJDC)}"
+                           f"_{era}_forPython{btag_str}.txt")
     print(f"Writing numeric output to: {output_filename}")
 
     with open(output_filename, "w") as f:
@@ -631,22 +761,62 @@ def main():
             print("\n \n ********************* \n DNN score = " + str(DNN_cut) +
                   " \n ********************* \n \n")
 
-            # materialise() triggers the RDataFrame event loop on the first call.
-            # Because all options share the same computation graph, RDataFrame
-            # computes every histogram across all 3 options in that single pass.
-            # The subsequent materialise() calls return already-computed results.
-
             print("\n \n ********************* \n depth \n ********************* \n \n")
-            hists = materialise(booked, "depth")       # <-- triggers full event loop
+            hists = materialise(booked, "depth")
             MisTagParametrization(hists, "depth")
 
             print("\n \n ********************* \n depth, low PV \n ********************* \n \n")
-            hists = materialise(booked, "depth, low PV")   # already computed, instant
+            hists = materialise(booked, "depth, low PV")
             MisTagParametrization(hists, "depth, low PV")
 
             print("\n \n ********************* \n depth, high PV \n ********************* \n \n")
-            hists = materialise(booked, "depth, high PV")  # already computed, instant
+            hists = materialise(booked, "depth, high PV")
             MisTagParametrization(hists, "depth, high PV")
+
+
+def main():
+    print("Parsing arguments...")
+    args = parseArgs()
+
+    # Enable multi-threading once, before any RDataFrame is created
+    if args.threads > 0:
+        ROOT.EnableImplicitMT(args.threads)
+    else:
+        ROOT.EnableImplicitMT()
+
+    # Build list of parameter sets to process
+    if args.config:
+        print(f"Reading parameter sets from config file: {args.config}")
+        param_sets = parse_config_file(args.config)
+    else:
+        if args.era is None:
+            raise ValueError("Either --config or -e/--era must be provided.")
+        param_sets = [{
+            "era":              args.era,
+            "DNN_cut_LJDC":     args.DNN_cut_LJDC   if args.DNN_cut_LJDC   is not None else args.DNN_cut,
+            "DNN_cut_SJDC":     args.DNN_cut_SJDC   if args.DNN_cut_SJDC   is not None else args.DNN_cut,
+            "DNN_cut_inc_LJDC": args.DNN_cut_inc_LJDC if args.DNN_cut_inc_LJDC is not None else args.DNN_cut_inc,
+            "DNN_cut_inc_SJDC": args.DNN_cut_inc_SJDC if args.DNN_cut_inc_SJDC is not None else args.DNN_cut_inc,
+            "CR_cut_inc":       args.CR_cut_inc,
+        }]
+
+    print(f"Total parameter sets to process: {len(param_sets)}")
+
+    # Group by era so rdf_base is built only once per era
+    from collections import defaultdict
+    by_era = defaultdict(list)
+    for row in param_sets:
+        if row["era"] not in _file_map:
+            raise ValueError(f"Unsupported era: {row['era']}. Must be one of {list(_file_map.keys())}")
+        by_era[row["era"]].append(row)
+
+    for era_key, rows in by_era.items():
+        print(f"\nBuilding RDataFrame for era {era_key} (shared across {len(rows)} parameter set(s))...")
+        rdf_base = _build_rdf_base(era_key)
+
+        for i, row in enumerate(rows, 1):
+            print(f"\n--- Parameter set {i}/{len(rows)} for era {era_key} ---")
+            _run_one(rdf_base, row, args.b_tag_combined)
 
 
 if __name__ == "__main__":

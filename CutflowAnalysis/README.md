@@ -13,5 +13,10 @@ With option to print as table to terminal, or print in a latex format (`print_la
 python3 FinalAnalysisCutflow.py --inc 0.97 --depth 0.95 --latex
 python3 FinalAnalysisCutflow.py --inc 0.97 --depth 0.95 --truth --latex
 
+python3 FinalAnalysisCutflow.py file.root --depth 0.965 --depth-sjdc 0.975 --inc 0.845 --inc-sjdc 0.375
+
+python3 FinalAnalysisCutflow.py --file <your_file.root> --latex --depth 0.965 --depth-sjdc 0.975 --inc 0.845 --inc-sjdc 0.375
+python3 FinalAnalysisCutflow.py --file <your_file.root> --latex --truth --depth 0.965 --depth-sjdc 0.975 --inc 0.845 --inc-sjdc 0.375
+
 python3 ScanDNNCuts.py --inc  0.90 0.95 0.97 0.99 --depth 0.90 0.93 0.95 0.97
 ```

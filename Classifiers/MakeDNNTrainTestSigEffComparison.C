@@ -239,7 +239,7 @@ void TrainTestComparison(string InputFile, string Label, string SigTree, string 
 
   if (!isPerJet) {
     tree_depth->SetBranchAddress("jet0_Pt",                &jet0_Pt);
-    tree_depth->SetBranchAddress("jet0_scores_depth_hcal", &score_depth);
+    tree_depth->SetBranchAddress("jet0_scores_depth_LLPanywhere", &score_depth); // jet0_scores_depth_hcal
     tree_incl->SetBranchAddress("jet0_Pt",                 &jet0_Pt);
     tree_incl->SetBranchAddress("jet0_scores_inc_train80", &score_incl);
   } else {
@@ -429,11 +429,11 @@ void MakeDNNTrainTestSigEffComparison()
 
   string SignalTree = "NoSel";
 
-  vector<pair<string,string>> samples = {
-    {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_HToSSTo4b_125_50_CTau3000_batch2_allscores.root",   "125_mS50"},
-    {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_HToSSTo4b_250_120_CTau10000_batch2_allscores.root", "250_mS120"},
-    {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_HToSSTo4b_350_160_CTau10000_batch2_allscores.root", "350_mS160"},
-    {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.16/minituple_HToSSTo4b_350_80_CTau500_allscores.root",           "350_mX80"},
+  vector<pair<string,string>> samples = { // initialy was with 3.16 minituples, now 5.3 with new DNN scores
+    {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_HToSSTo4B_125_50_CTau3000_scores.root",   "125_mS50"},
+    {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_HToSSTo4B_250_120_CTau10000_scores.root", "250_mS120"},
+    {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_HToSSTo4B_350_160_CTau10000_scores.root", "350_mS160"},
+    {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_HToSSTo4B_350_80_CTau500_scores.root",    "350_mX80"},
   };
 
   for (auto& [file, label] : samples) {

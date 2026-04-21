@@ -23,10 +23,10 @@ void MiniTuplePlotter_DNN(){
 										"HToSSTo4b_350_80_CTau500_allscores"};
 
 
-	string path_v5 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/minituple_"; 
+	string path_v5 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_"; 
 	vector<string> filetags_all_signal_v5 = { "HToSSTo4B_125_50_CTau3000_scores", "HToSSTo4B_250_120_CTau10000_scores", "HToSSTo4B_350_160_CTau10000_scores", "HToSSTo4B_350_80_CTau500_scores"};
-	vector<string> filetags_all_data_v5 = { // "data_2022Dv1_scores", "data_2022Ev1_scores", "data_2022Fv1_scores", "data_2022Gv1_scores", 
-								"data_2023Cv1_scores", "data_2023Cv2_scores", "data_2023Cv3_scores", "data_2023Cv4_scores", "data_2023Dv1_scores", "data_2023Dv2_scores"};
+	vector<string> filetags_all_data_v5 = { "data_2023Cv1_scores", "data_2023Cv2_scores", "data_2023Cv3_scores", "data_2023Cv4_scores", "data_2023Dv1_scores", "data_2023Dv2_scores"};
+	vector<string> filetags_all_data_v5_2022 = { "data_2022Dv1_scores", "data_2022Ev1_scores", "data_2022Fv1_scores", "data_2022Gv1_scores"};
 
 	// ----- Example 1 -----//
 	// - Basic Booleans
@@ -289,5 +289,32 @@ void MiniTuplePlotter_DNN(){
 		DNNscores_data.SetCuts("jet0_Pt > 40 && abs(jet0_Eta) < 1.5 && Pass_WPlusJets"); 		
 		DNNscores_data.use_weight = true;
 		DNNscores_data.Plot();
+
+		class MiniTuplePlotter DNNscores_data_22( filetags_all_data_v5_2022, path_v5 );
+		DNNscores_data_22.SetTreeName( "NoSel" );	// TreeName
+		DNNscores_data_22.SetPlots({P_jet0_scores_inc_train80}); // These "P_" variables are PlotParams structs defined in PlotParams.h
+		DNNscores_data_22.SetOutputFileTag("DNNscores_data_22"); 						
+		DNNscores_data_22.SetOutputDirectory("DNNscores");				
+		DNNscores_data_22.plot_norm 		  = true; 	// Default = true
+		DNNscores_data_22.plot_log  		  = true; 	// Default = true
+		DNNscores_data_22.SetCuts("jet0_InclTagCand == 1"); 		// Apply cuts to all events
+		DNNscores_data_22.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );										// Manual Legend location
+		DNNscores_data_22.SetLegendNames({"Dv1", "Ev1", "Fv1", "Gv1"});
+		DNNscores_data_22.NBins = 30; 									 								// Default = 100
+		DNNscores_data_22.use_weight = true;
+		DNNscores_data_22.Plot();		
+
+		DNNscores_data_22.ClearFileTrees();
+		DNNscores_data_22.SetPlots({P_jet0_scores_depth_LLPanywhere});
+		DNNscores_data_22.SetCuts("jet0_DepthTagCand == 1 && jet1_InclTagCand == 1 && jet1_scores_inc_train80 < 0.9"); // only look at depth scores outside of MR		
+		DNNscores_data_22.use_weight = true;
+		DNNscores_data_22.Plot();
+
+		DNNscores_data_22.ClearFileTrees();
+		DNNscores_data_22.SetPlots({P_jet0_scores_inc_train80, P_jet0_scores_depth_LLPanywhere});
+		DNNscores_data_22.SetOutputFileTag("DNNscores_data_22_WPlusJets");
+		DNNscores_data_22.SetCuts("jet0_Pt > 40 && abs(jet0_Eta) < 1.5 && Pass_WPlusJets"); 		
+		DNNscores_data_22.use_weight = true;
+		DNNscores_data_22.Plot();
 	}
 }
