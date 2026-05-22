@@ -35,8 +35,8 @@ debug = False
 # ---- Histogram bin definitions (identical to original) ----
 pT_bins  = np.array([0, 40, 50, 60, 70, 80, 100, 120, 160, 240, 400], dtype=float)
 eta_bins = np.linspace(-1.26, 1.26, 9)
-phi_bins = np.linspace(-np.pi, np.pi, 9)
-# phi_bins = np.linspace(-np.pi, np.pi, 2) # one bin in phi to test impact on prediction closure
+#phi_bins = np.linspace(-np.pi, np.pi, 9)
+phi_bins = np.linspace(-np.pi, np.pi, 2) # one bin in phi to test impact on prediction closure
 b_tag_bins = np.array([0, 0.2435, 1.0], dtype=float)
 c_tag_bins = np.array([0, 0.102,  1.0], dtype=float)
 
@@ -152,7 +152,12 @@ def MakePlot(hists, legends):
         hists[0].Draw("HIST E")
     for hist in hists[1:]:
         hist.Draw("SAME HIST E")
-    hists[0].SetMaximum(max(h.GetMaximum() for h in hists) * 1.1)
+    max_with_errors = max(
+        h.GetBinContent(b) + h.GetBinError(b)
+        for h in hists
+        for b in range(1, h.GetNbinsX() + 1)
+    )
+    hists[0].SetMaximum(max_with_errors * 1.1)
     hists[0].SetMinimum(0)
     legend = ROOT.TLegend(0.7, 0.7, 0.9, 0.9)
     for i, hist in enumerate(hists):
@@ -299,6 +304,7 @@ def book_all_histograms(rdf_base, is_mc=False):
         booked[option]["CR_all"] etc. are RResultPtr<TH3D> objects.
     """
     # LJDC: jet0 is the depth tag candidate; jet1 inclusive score defines CR/VR/SR
+    # note for 4.1 W+jets sample, branches are "train80_updated" and "anywhere_updated" instead of "depth_LLPanywhere"; adjust accordingly
     CR_str     = f"jet1_scores_inc_train80 >= 0.0 && jet1_scores_inc_train80 < {CR_cut_inc}"
     VR_str     = f"jet1_scores_inc_train80 >= {CR_cut_inc} && jet1_scores_inc_train80 < {DNN_cut_inc_LJDC}"
     SR_str     = f"jet1_scores_inc_train80 >= {DNN_cut_inc_LJDC} && jet1_scores_inc_train80 < 1.1"
@@ -313,8 +319,14 @@ def book_all_histograms(rdf_base, is_mc=False):
     # Emulated trigger: leading jet has depth tag candidate + subleading has inclusive tag candidate
     # For MC (W+Jets), DepthTagCand/InclTagCand are almost never set; require 2 valid jets instead
     if is_mc:
-        depth_j0_str = "validJet >= 1"
-        depth_j1_str = "validJet >= 1"
+        # j0 leg: jet0 is depth candidate, jet1 is inclusive candidate
+        depth_j0_str = ("validJet >= 1"
+                        " && jet0_Pt > 60 && abs(jet0_Eta) < 1.26"
+                        " && jet1_Pt > 40 && abs(jet1_Eta) < 2")
+        # j1 leg: jet1 is depth candidate, jet0 is inclusive candidate
+        depth_j1_str = ("validJet >= 1"
+                        " && jet1_Pt > 60 && abs(jet1_Eta) < 1.26"
+                        " && jet0_Pt > 40 && abs(jet0_Eta) < 2")
     else:
         depth_j0_str = "jet0_DepthTagCand == 1 && jet1_InclTagCand == 1"
         depth_j1_str = "jet1_DepthTagCand == 1 && jet0_InclTagCand == 1"
@@ -349,6 +361,9 @@ def book_all_histograms(rdf_base, is_mc=False):
                              _h3_model(f"h_VR_mistag_{s}"),               "jet0_Pt", "jet0_Eta", "jet0_Phi"),
             "SR_all":    rdf_SR_j0.Histo3D(_h3_model(f"h_SR_all_{s}"),    "jet0_Pt", "jet0_Eta", "jet0_Phi"),
         }
+        if is_mc:
+            booked[option]["SR_mistag"] = rdf_SR_j0.Filter(mistag_str).Histo3D(
+                             _h3_model(f"h_SR_mistag_{s}"),               "jet0_Pt", "jet0_Eta", "jet0_Phi")
 
         # --- jet1 triggered (jet1 has depth tag, jet0 defines CR/VR/SR) ---
         rdf_j1    = rdf_base.Filter(depth_j1_str,        f"depth_j1_{s}")
@@ -365,6 +380,9 @@ def book_all_histograms(rdf_base, is_mc=False):
                                _h3_model(f"h_VR_mistag_1_{s}"),               "jet1_Pt", "jet1_Eta", "jet1_Phi"),
             "SR_all_1":    rdf_SR_j1.Histo3D(_h3_model(f"h_SR_all_1_{s}"),    "jet1_Pt", "jet1_Eta", "jet1_Phi"),
         })
+        if is_mc:
+            booked[option]["SR_mistag_1"] = rdf_SR_j1.Filter(mistag_1_str).Histo3D(
+                               _h3_model(f"h_SR_mistag_1_{s}"),               "jet1_Pt", "jet1_Eta", "jet1_Phi")
 
     return booked
 
@@ -394,11 +412,13 @@ def materialise(booked, option):
         "VR_all":    "hist3d_VR_all",
         "VR_mistag": "hist3d_VR_mistag",
         "SR_all":    "hist3d_SR_all",
+        "SR_mistag": "hist3d_SR_mistag",
         "CR_all_1":    "hist3d_CR_all_1",
         "CR_mistag_1": "hist3d_CR_mistag_1",
         "VR_all_1":    "hist3d_VR_all_1",
         "VR_mistag_1": "hist3d_VR_mistag_1",
         "SR_all_1":    "hist3d_SR_all_1",
+        "SR_mistag_1": "hist3d_SR_mistag_1",
     }
     return {k: get(v, key_to_name[k]) for k, v in h.items()}
 
@@ -446,6 +466,12 @@ def MisTagParametrization(hists, option):
     VR_mistag_combined = VR_mistag.Clone("hist3d_VR_mistag_combined"); VR_mistag_combined.Add(VR_mistag_1)
     SR_all_combined    = SR_all.Clone("hist3d_SR_all_combined");    SR_all_combined.Add(SR_all_1)
 
+    if is_mc:
+        SR_mistag   = hists["SR_mistag"]
+        SR_mistag_1 = hists["SR_mistag_1"]
+        SR_mistag_combined = SR_mistag.Clone("hist3d_SR_mistag_combined"); SR_mistag_combined.Add(SR_mistag_1)
+        SR_mistag_list = [SR_mistag, SR_mistag_1, SR_mistag_combined]
+
     print("created histograms for 1D rate evaluation")
     print("completed 1D rate evaluation")
 
@@ -456,8 +482,9 @@ def MisTagParametrization(hists, option):
     SR_all_list    = [SR_all,    SR_all_1,    SR_all_combined]
     mistag_jet_list = ["leading", "sub-leading", "combined"]
 
-    for i, (CR_all_i, CR_mistag_i, VR_all_i, VR_mistag_i, SR_all_i) in enumerate(
-            zip(CR_all_list, CR_mistag_list, VR_all_list, VR_mistag_list, SR_all_list)):
+    _sr_mistag_iter = SR_mistag_list if is_mc else [None, None, None]
+    for i, (CR_all_i, CR_mistag_i, VR_all_i, VR_mistag_i, SR_all_i, SR_mistag_i) in enumerate(
+            zip(CR_all_list, CR_mistag_list, VR_all_list, VR_mistag_list, SR_all_list, _sr_mistag_iter)):
 
         global current_jet_type
         current_jet_type = mistag_jet_list[i]
@@ -524,6 +551,9 @@ def MisTagParametrization(hists, option):
         print(option + ", " + mistag_jet_list[i])
         print(f"Observed mistagged events in VR: {total_actual:.2f} \u00b1 {err_actual:.2f} (stat)")
         print(f"Predicted mistagged events in VR: {total_pred:.2f} \u00b1 {err_pred:.2f} (stat)")
+        if is_mc:
+            total_SR_actual, err_SR_actual = get_total_and_error(SR_mistag_i)
+            print(f"Observed mistagged events in SR: {total_SR_actual:.2f} \u00b1 {err_SR_actual:.2f} (stat)")
         print(f"Predicted mistagged events in SR: {total_SR:.2f} \u00b1 {err_SR:.2f} (stat)")
 
         MistagRate(CR_mistag_i, CR_all_i, "CR", option, title, label, mistag_jet_list[i])
@@ -724,7 +754,7 @@ def _build_rdf_base(era_key):
                     .Filter(run_excl, "run exclusion")
                     .Filter(met_filter, "deltaPhi + METFilters"))
     if is_mc:
-        rdf_filtered = rdf_filtered.Filter("Pass_WPlusJets == 1", "W+Jets selection")
+        rdf_filtered = rdf_filtered.Filter("Pass_WPlusJets >= 0", "W+Jets selection")
     return rdf_filtered
 
 
@@ -735,10 +765,11 @@ def _run_one(rdf_base, row, b_tag_combined_flag):
     """
     global era, era_name, DNN_cut, DNN_cut_LJDC, DNN_cut_SJDC, \
            DNN_cut_inc, DNN_cut_inc_LJDC, DNN_cut_inc_SJDC, \
-           CR_cut_inc, b_tag_combined
+           CR_cut_inc, b_tag_combined, is_mc
 
     era              = row["era"]
     era_name         = era.replace(" ", "")
+    is_mc            = era == "WPlusJets"
     DNN_cut_LJDC     = row["DNN_cut_LJDC"]
     DNN_cut_SJDC     = row["DNN_cut_SJDC"]
     DNN_cut_inc_LJDC = row["DNN_cut_inc_LJDC"]

@@ -42,6 +42,7 @@ Change the booleans `Zmu` and `LLPskim` and the era name at the beginning of the
 ## Overlay Mistag Rates
 ```
 python3 OverlayMistagRates.py
+python3 OverlayMistagRates_TEff.py
 ```
 This takes the output root files from `MisTagParametrization_3D` and overlays them to evalute changes throughout the year.
 
