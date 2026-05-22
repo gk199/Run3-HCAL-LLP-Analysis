@@ -22,7 +22,7 @@ perJet = False
 num_jets = 1 if perJet else 4 # in v3.13 only 4 jets are saved! In earlier versions, 6 jets are saved
 
 class DataProcessor:
-    def __init__(self, num_classes=2, mode=None, sel=True, tree="NoSel", constants=None): #counting from 0 
+    def __init__(self, num_classes=2, mode=None, sel=True, tree="NoSel", constants=None, outfile_tag="", disabled_features=[]): #counting from 0 
         self.return_value_bkg = num_classes
         self.return_sig_value = num_classes - 1
         self.num_classes = num_classes
@@ -30,6 +30,8 @@ class DataProcessor:
         self.tree = tree
         self.sel = sel
         self.constants = constants
+        self.outfile_tag = outfile_tag
+        self.disabled_features = disabled_features
     
     def load_data(self, input_file=None):
         
@@ -121,6 +123,9 @@ class DataProcessor:
                 data.loc[mask_condition, feature] = 0  # Default to 0 for matching entries
                 normed_data[feature] = (data[feature] - self.constants[feature][0])/ self.constants[feature][1]
 
+                if feature in self.disabled_features:
+                   normed_data[feature] = 0
+
             print(normed_data.describe())
         
             print("Processing Complete")
@@ -146,7 +151,7 @@ class DataProcessor:
             data.loc[mask_condition, useful_variable] = 0  # Default to 0 for matching entries
     
     def write_to_root(self, scores, scores_inc, filename, labels=None):
-        filename = f"{filename[:-5]}_{self.tree}_scores.root" # remove .root from initial filename
+        filename = f"{filename[:-5]}_{self.tree}_scores{self.outfile_tag}.root" # remove .root from initial filename
         # TODO: know the first time you open this file, call recreate before even starting (when loop over filenames, before loop over tree names), and then here call update
         dataframe = self.cumulative_df
         if self.num_classes == 2:
@@ -228,7 +233,7 @@ class ModelHandler:
             print("wrote to file")  
 
 class Runner:
-    def __init__(self, input_file=None, filepath=None, mode="train", num_classes=3, inclusive=False, load=True, tree="NoSel", depth_model_keras="depth_model.keras", incl_model_keras="inclusive_model.keras", constants=None):
+    def __init__(self, input_file=None, filepath=None, mode="train", num_classes=3, inclusive=False, load=True, tree="NoSel", depth_model_keras="depth_model.keras", incl_model_keras="inclusive_model.keras", constants=None, outfile_tag="", disabled_features=[]):
         self.mode = mode
         self.num_classes = num_classes
         self.inclusive = inclusive
@@ -240,7 +245,9 @@ class Runner:
         self.depth_model_keras = depth_model_keras
         self.incl_model_keras  = incl_model_keras
         self.constants         = constants
+        self.disabled_features = disabled_features
 
+        self.outfile_tag = outfile_tag
         #self.model_name = "inclusive_model_v4_train40.keras"
     
     def evaluate_scores(self): # this code used to be in run_file_evaluation -- still testing
@@ -273,7 +280,7 @@ class Runner:
         # processes one file per run for now
         print("Loaded files")
         if self.load:
-            self.processor = DataProcessor(num_classes=self.num_classes - 1, mode="filewrite", sel=False, tree=self.tree, constants=self.constants)
+            self.processor = DataProcessor(num_classes=self.num_classes - 1, mode="filewrite", sel=False, tree=self.tree, constants=self.constants, outfile_tag=self.outfile_tag, disabled_features=self.disabled_features)
             self.processor.load_data(input_file=self.sig)
         self.processor.no_selections_concatenate() # automatically inclusive
         self.fname = self.sig
@@ -316,6 +323,9 @@ def parseArgs():
     
     parser.add_argument("-m", "--mode",       action="store", default="filewrite", help="Running mode (train, eval, filewrite)")
 
+    parser.add_argument( "--disable", type=lambda s: [item.strip() for item in s.split(",")], default=[], help="Comma-separated list of features to disable (perJet_X)" )
+    parser.add_argument( "--outfiletag", action="store", default="", help="Outfile Tag")
+
     args = parser.parse_args()
 
     return args        
@@ -331,6 +341,8 @@ def main():
     depth_model_keras = args.depth
     incl_model_keras  = args.inclusive
     normconstants_csv = args.constants
+    disabled_features = args.disable
+    outfile_tag       = args.outfiletag
 
     constants = pd.read_csv(normconstants_csv)
 
@@ -350,7 +362,7 @@ def main():
         print(input_tree)
         print(num_entries)
         if (num_entries > 0):
-            runner = Runner(input_file=input_file, mode=mode, num_classes=2, inclusive=False, tree=input_tree, depth_model_keras=depth_model_keras, incl_model_keras=incl_model_keras, constants=constants)
+            runner = Runner(input_file=input_file, mode=mode, num_classes=2, inclusive=False, tree=input_tree, depth_model_keras=depth_model_keras, incl_model_keras=incl_model_keras, constants=constants, outfile_tag=outfile_tag, disabled_features=disabled_features)
             runner.run()
     
 if __name__ == "__main__":

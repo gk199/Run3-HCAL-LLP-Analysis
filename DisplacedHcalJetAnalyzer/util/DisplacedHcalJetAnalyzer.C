@@ -153,7 +153,13 @@ int main(int argc, char** argv) { // For running in compiled mode
 
 	    DisplacedHcalJetAnalyzer( infiletag, systematic, infilepaths );
 
-	} else {
+	} else if( Nargs > 2 ){
+        string infiletag  = argv[1];
+        vector<string> infilepaths;
+        for( int i = 2; i < Nargs; i++ ) infilepaths.push_back( argv[i] );
+        DisplacedHcalJetAnalyzer( infiletag, "Nominal", infilepaths );
+
+    } else {
 		cout<<"ERROR: Not enough arguments!"<<endl;
 	}
 
