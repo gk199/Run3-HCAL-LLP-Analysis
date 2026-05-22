@@ -944,6 +944,8 @@ public :
    virtual void   ResetGlobalEventVars();
    virtual bool   PassL1SingleLLPJet();
    virtual bool   PassHLTDisplacedJet();
+   virtual bool   PassHLTMonitoring();
+   virtual bool   GetTriggerDecision( string trigger_name );
    virtual bool   PassEventPreselection( bool PassedHLT = false, bool PassedWPlusJets = true );
    virtual bool   PassWPlusJetsSelection();
    virtual bool   PassLeptonVeto();

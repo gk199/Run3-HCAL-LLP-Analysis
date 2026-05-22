@@ -51,16 +51,15 @@ bool DisplacedHcalJetAnalyzer::PassL1SingleLLPJet(){
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::PassL1SingleLLPJet()"<<endl;
 
-	for (int i = 0; i < HLT_Indices.size(); i++) {
-		if (HLT_Decision->at(i) > 0) {
-			if (debug) cout << HLT_Decision->at(i) << " for the trigger " << HLT_Names[i] << "\n" << endl;
-			if (HLT_Names[i] == "HLT_L1SingleLLPJet") return true;
-			if (HLT_Names[i].find("L1SingleLLPJet") != std::string::npos ) return true;
+    if( !has_L1_branches ) return false;
 
-		}		
-	}
+    for (int i = 0; i < L1_Indices.size(); i++) {
+        if (L1_Decision->at(i) > 0){
+            return true;
+        }
+    }
+    return false;
 
-	return false;
 }
 
 /* ====================================================================================================================== */
@@ -82,6 +81,34 @@ bool DisplacedHcalJetAnalyzer::PassHLTDisplacedJet(){
 }
 
 /* ====================================================================================================================== */
+bool DisplacedHcalJetAnalyzer::PassHLTMonitoring(){
+
+    if( debug ) cout<<"DisplacedHcalJetAnalyzer::PassHLTMonitoring()"<<endl;
+
+    return GetTriggerDecision("HLT_L1SingleLLPJet");
+
+}
+
+/* ====================================================================================================================== */
+bool DisplacedHcalJetAnalyzer::GetTriggerDecision( string trigger_name ){
+
+    auto it_hlt = std::find(HLT_Names.begin(), HLT_Names.end(), trigger_name);
+
+    if (it_hlt != HLT_Names.end()) {
+        int i = std::distance(HLT_Names.begin(), it_hlt);
+        return HLT_Decision->at(i);
+    }
+
+    auto it_l1 = std::find(L1_Names.begin(), L1_Names.end(), trigger_name);
+
+    if (it_l1 != L1_Names.end()) {
+        int i = std::distance(L1_Names.begin(), it_l1);
+        return L1_Decision->at(i);
+    }
+
+    return false;
+}
+    
 bool DisplacedHcalJetAnalyzer::PassEventPreselection( bool PassedHLT, bool PassedWPlusJets ){
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::PassEventPreselection()"<<endl;
@@ -98,9 +125,9 @@ bool DisplacedHcalJetAnalyzer::PassEventPreselection( bool PassedHLT, bool Passe
 
 	// Veto on W Plus Jets //
 
-	if( PassedWPlusJets ){ // Default is true
-		if( PassWPlusJetsSelection() ) return false;
-	}
+	//if( PassedWPlusJets ){ // Default is true
+	//	if( PassWPlusJetsSelection() ) return false;
+	//}
 
 	// Depth Tag Jet //
 
@@ -212,7 +239,7 @@ bool DisplacedHcalJetAnalyzer::PassWPlusJetsSelection() {
 	double jet_lepton_dPhi_muon = -999;
 	bool matched_jet = false;
 	for (int i = 0; i < n_jet; i++) { 			
-		if (jet_Pt->at(i) > 30 && abs(jet_Eta->at(i)) < 1.26 ) {
+		if (jet_Pt->at(i) > 30 && abs(jet_Eta->at(i)) < 2.0 ) {
 			if (electron) {
 				jet_lepton_dPhi_ele = DeltaPhi(jet_Phi->at(i), phiVectorSum_ele);
 				WPlusJets_leptonPhi = phiVectorSum_ele;

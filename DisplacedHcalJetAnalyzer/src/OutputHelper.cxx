@@ -17,9 +17,17 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		"Pass_PreSel",
 		"Pass_L1SingleLLPJet",
 		"Pass_HLTDisplacedJet",
+        "Pass_HLTMonitoring",
 		"Pass_WPlusJets",
 		"Pass_ZPlusJets",
 		"Pass_NoLepton",
+        "HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5",
+        "HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5",
+        "L1_HTT120_SingleLLPJet40",
+        "L1_HTT160_SingleLLPJet50",
+        "L1_HTT200_SingleLLPJet60",
+        "L1_HTT240_SingleLLPJet70",
+        "L1_DoubleLLPJet40"
 	};
 	
 	for (int i = 0; i < HLT_Indices.size(); i++) {
@@ -351,6 +359,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 		"Pass_PreSel",
 		"Pass_L1SingleLLPJet",
 		"Pass_HLTDisplacedJet",
+        "Pass_HLTMonitoring",
 		"Pass_WPlusJets",
 		"Pass_ZPlusJets",
 		"Pass_NoLepton",
@@ -535,6 +544,14 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 	// Fill Pass_EventSelections
 	for( const auto &pair : Pass_EventSelections )
 		tree_output_vars_bool[pair.first] = pair.second;
+
+    tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5"] = GetTriggerDecision("HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5");
+    tree_output_vars_bool["HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5"] = GetTriggerDecision("HLT_HT200_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5");
+    tree_output_vars_bool["L1_HTT120_SingleLLPJet40"] = GetTriggerDecision("L1_HTT120_SingleLLPJet40");
+    tree_output_vars_bool["L1_HTT160_SingleLLPJet50"] = GetTriggerDecision("L1_HTT160_SingleLLPJet50");
+    tree_output_vars_bool["L1_HTT200_SingleLLPJet60"] = GetTriggerDecision("L1_HTT200_SingleLLPJet60");
+    tree_output_vars_bool["L1_HTT240_SingleLLPJet70"] = GetTriggerDecision("L1_HTT240_SingleLLPJet70");
+    tree_output_vars_bool["L1_DoubleLLPJet40"] = GetTriggerDecision("L1_DoubleLLPJet40");
 
 	tree_output_vars_int["run"] 	= runNum;
 	tree_output_vars_string["era"] 	= currentEra_;
