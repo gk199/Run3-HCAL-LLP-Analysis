@@ -126,6 +126,13 @@ def parse_file(filename):
                 key = current_jet
                 data[key]['central']['Observed VR'] = (val, err)
 
+        elif "observed mistagged events in sr" in line_lower:
+            match = re.search(r"([\d.]+)\s*±\s*([\d.]+)", line)
+            if match:
+                val, err = map(float, match.groups())
+                key = current_jet
+                data[key]['central']['Observed SR'] = (val, err)
+
     return data
 
 
@@ -235,7 +242,7 @@ def generate_latex_table(data, year, depth_score, inclusive_score, stat_only=Fal
                      f"_SJDC_pt{depth_tag_sjdc}_incpt{inc_tag_sjdc}")
 
     def entry(jet, key):
-        if key == 'Observed VR':
+        if key in ('Observed VR', 'Observed SR'):
             val, stat = data[jet]['central'][key]
             return format_observed(val, stat)
         else:
@@ -268,9 +275,13 @@ def generate_latex_table(data, year, depth_score, inclusive_score, stat_only=Fal
         else:
             compatible = True
         highlight = "\\cellcolor{lightred}" if not compatible else ""
+        has_obs_sr = 'Observed SR' in data[jet]['central']
+        nrows = 4 if has_obs_sr else 3
 
-        lines.append(f"        \\multirow{{3}}{{*}}{{{jet.capitalize()} Jet}} & {highlight}Observed VR  & {highlight}{entry(jet, 'Observed VR')} \\\\")
+        lines.append(f"        \\multirow{{{nrows}}}{{*}}{{{jet.capitalize()} Jet}} & {highlight}Observed VR  & {highlight}{entry(jet, 'Observed VR')} \\\\")
         lines.append(f"        & {highlight}Predicted VR & {highlight}{entry(jet, 'Predicted VR')} \\\\")
+        if has_obs_sr:
+            lines.append(f"        & Observed SR  & {entry(jet, 'Observed SR')} \\\\")
         lines.append(f"        & Predicted SR & {entry(jet, 'Predicted SR')} \\\\ \\hline")
 
     year_text = year.replace("_", " ")

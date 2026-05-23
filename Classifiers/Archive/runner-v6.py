@@ -29,7 +29,7 @@ tf.random.set_seed(311)
 CONSTANTS = pd.read_csv("norm_constants_v3.csv") # large negative values removed from mean / std dev computation 
       
 FEATURES = ['perJet_Eta', 'perJet_Mass', 
-       'perJet_S_phiphi', 'perJet_S_etaeta', 'perJet_S_etaphi', 
+    #    'perJet_S_phiphi', 'perJet_S_etaeta', 'perJet_S_etaphi', 
        'perJet_Tracks_dR', 
        'perJet_Track0dR', 'perJet_Track0dEta', 'perJet_Track0dPhi', 
        'perJet_Track1dR', 'perJet_Track1dEta', 'perJet_Track1dPhi',
@@ -58,7 +58,7 @@ class DataProcessor:
         print("Filtering and saving data to HDF5 for DNN training...")
         
         tree_name = "PerJet_NoSel"
-        filepath = '/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/'
+        filepath = '/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/'
         sig_fps = [filepath + filename for filename in sig_files] if sig_files is not None else []
         bkg_fps = [filepath + filename for filename in bkg_files] if bkg_files is not None else []
 
@@ -180,7 +180,7 @@ class DataProcessor:
             0 <= row['perJet_EnergyFrac_Depth2'] <= 1 and 
             0 <= row['perJet_EnergyFrac_Depth3'] <= 1 and 
             0 <= row['perJet_EnergyFrac_Depth4'] <= 1 and 
-            0 < row['perJet_S_phiphi'] < 900 and 
+            # 0 < row['perJet_S_phiphi'] < 900 and 
             0 < row['perJet_LeadingRechitE'] < 900 and 
             0 <= row['perJet_Track0Pt'] < 900 and 
             0 <= row['perJet_Track0dR'] < 1 and 
@@ -302,10 +302,10 @@ class DataProcessor:
             print(f"{useful_variable} std: {std_value}")
             constants_df.loc[useful_variable, 'Mean'] = mean_value
             constants_df.loc[useful_variable, 'Standard Deviation'] = std_value
-        constants_df.T.to_csv("norm_constants_v5.csv")
+        constants_df.T.to_csv("norm_constants_v6.csv")
 
 class ModelHandler:
-    def __init__(self, num_classes=3, num_layers=2, optimizer="adam", lr=0.00027848106048644665, model_name="dense_model_v5.keras"):
+    def __init__(self, num_classes=3, num_layers=2, optimizer="adam", lr=0.00027848106048644665, model_name="dense_model_v6.keras"):
         # this function is passed num_classes = 2
 
         self.num_classes = num_classes
@@ -325,7 +325,7 @@ class ModelHandler:
             self.optimizer= tf.keras.optimizers.SGD(learning_rate=lr)    
             
     def build_resnet(self):                 
-        inputs = layers.Input(shape=(40,)) # 40 is number of features
+        inputs = layers.Input(shape=(37,)) # 37 is number of features
         x = layers.Dense(64, activation="relu", kernel_initializer=GlorotUniform())(inputs)
         x = layers.BatchNormalization()(x)
         for _ in range(self.num_layers):
@@ -364,7 +364,7 @@ class ModelHandler:
                   
     def train(self, X_train, y_train, epochs=200, batch_size=512, val=0.25):
         self.build() # similar to runner-v2
-        name="best_model_v5.keras"
+        name="best_model_v6.keras"
         early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
         checkpoint = ModelCheckpoint(name, monitor='val_loss', save_best_only=True, save_weights_only=True)
         history = self.model.fit(X_train, y_train, epochs=epochs, batch_size=512, validation_split=val, verbose=1, callbacks = [early_stopping, checkpoint])
@@ -379,7 +379,7 @@ class ModelHandler:
         plt.ylabel('Loss')
         plt.xlabel('Epoch')
         plt.legend(['train', 'val'], loc='upper left')
-        plt.savefig("ModelLoss_v5.png")
+        plt.savefig("ModelLoss_v6.png")
 
         # Print summary of model
         print("Model summary:")
@@ -454,7 +454,7 @@ class ModelHandler:
         ax.set_title('One-vs-One ROC Curves')
         ax.legend(loc="lower right")
         ax.grid(True)
-        fig.savefig("ROC1v1_v5.png")
+        fig.savefig("ROC1v1_v6.png")
             
     def one_vs_all_roc(self):       
         fig, ax = plt.subplots()
@@ -475,7 +475,7 @@ class ModelHandler:
         ax.set_title('One-vs-All ROC Curves')
         ax.legend(loc="lower right")
         ax.grid(True)  
-        fig.savefig("ROC1vA_v5.png")
+        fig.savefig("ROC1vA_v6.png")
         print("-------ROC data-------")
         print("fpr shape ", fpr.shape)
         print("First non-zero TPR", tpr[fpr !=0][0])
@@ -492,7 +492,7 @@ class ModelHandler:
         mutual_info = mutual_info_regression(features, scores)
         mi_results = pd.Series(mutual_info, index=FEATURES)
         mi_results_sorted = mi_results.sort_values(ascending=False)
-        mi_results_sorted.to_csv("mutual_info_v5_inclusive.csv")
+        mi_results_sorted.to_csv("mutual_info_v6_inclusive.csv")
         print("Computed mutual information")
         
         
@@ -504,7 +504,7 @@ class Runner:
         self.load = load
         self.sig = sig_files
         self.bkg = bkg_files
-        self.model_name = "dense_model_v5.keras"
+        self.model_name = "dense_model_v6.keras"
      
     def run_training(self):
         # modifying to do per-event splitting
@@ -619,28 +619,28 @@ class Runner:
     def set_load(self,load=True):
         self.load = load
     
-    def set_model_name(self, model_name="dense_model_v5.keras"):
+    def set_model_name(self, model_name="dense_model_v6.keras"):
         self.model_name = model_name
         
 def main():
     sig_files = [
-        "minituple_HToSSTo4B_125_50_CTau3000_L1Trigger.root",
-        "minituple_HToSSTo4B_250_120_CTau10000_L1Trigger.root",
-        "minituple_HToSSTo4B_350_160_CTau10000_L1Trigger.root",
-        "minituple_HToSSTo4B_350_80_CTau500_L1Trigger.root"
+        "minituple_HToSSTo4B_125_50_CTau3000.root",
+        "minituple_HToSSTo4B_250_120_CTau10000.root",
+        "minituple_HToSSTo4B_350_160_CTau10000.root",
+        "minituple_HToSSTo4B_350_80_CTau500.root"
     ]
     
     bkg_files = [
-        "DisplacedJet_Run2022D-v1_RAW_v5.root",
-        "DisplacedJet_Run2022E-v1_RAW_v5.root",
-        "DisplacedJet_Run2022F-v1_RAW_v5.root",
-        "DisplacedJet_Run2022G-v1_RAW_v5.root",
-        "DisplacedJet_Run2023C-EXOLLPJetHCAL-PromptReco-v1_AOD_v5.root",
-        "DisplacedJet_Run2023C-EXOLLPJetHCAL-PromptReco-v2_AOD_v5.root",
-        "DisplacedJet_Run2023C-EXOLLPJetHCAL-PromptReco-v3_AOD_v5.root",
-        "DisplacedJet_Run2023C-EXOLLPJetHCAL-PromptReco-v4_AOD_v5.root",
-        "DisplacedJet_Run2023D-EXOLLPJetHCAL-PromptReco-v1_AOD_v5.root",
-        "DisplacedJet_Run2023D-EXOLLPJetHCAL-PromptReco-v2_AOD_v5.root"
+        "minituple_data_2022Dv1.root",
+        "minituple_data_2022Ev1.root",
+        "minituple_data_2022Fv1.root",
+        "minituple_data_2022Gv1.root",
+        "minituple_data_2023Cv1.root",
+        "minituple_data_2023Cv2.root",
+        "minituple_data_2023Cv3.root",
+        "minituple_data_2023Cv4.root",
+        "minituple_data_2023Dv1.root",
+        "minituple_data_2023Dv2.root"
     ]
 
     # this is for the depth training, the per event tree with inclusive scores appended
@@ -651,7 +651,7 @@ def main():
     
     print("Running Inclusive Tagger")
     runner = Runner(sig_files=sig_files[:], bkg_files=bkg_files[:], mode=mode, num_classes=2, inclusive=True)
-    runner.set_model_name(model_name="inclusive_model_v5.keras")
+    runner.set_model_name(model_name="inclusive_model_v6.keras")
     runner.run()
       
 if __name__ == "__main__":

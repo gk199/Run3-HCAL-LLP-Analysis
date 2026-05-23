@@ -61,7 +61,7 @@ pip3 install awkward
 pip3 install zipp
 
 echo "Evaluating DNN..."
-python3 Evaluate/ScoresToEventBased.py -f  minituple_$filetag.root -t NoSel -d Evaluate/depth_model_v5.keras -i Evaluate/inclusive_model_v5.keras -c Evaluate/norm_constants_v4.csv -m filewrite
+# python3 Evaluate/ScoresToEventBased.py -f  minituple_$filetag.root -t NoSel -d Evaluate/depth_model_v5.keras -i Evaluate/inclusive_model_v5.keras -c Evaluate/norm_constants_v4.csv -m filewrite
 
 echo "Timestamp: $(date '+%Y-%m-%d %H:%M:%S')\n"
 

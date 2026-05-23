@@ -82,7 +82,7 @@ class DataProcessor:
         print("Processing...")
 
         features = ['perJet_Eta', 'perJet_Mass', 
-       'perJet_S_phiphi', 'perJet_S_etaeta', 'perJet_S_etaphi', 
+    #    'perJet_S_phiphi', 'perJet_S_etaeta', 'perJet_S_etaphi', 
        'perJet_Tracks_dR', 
        'perJet_Track0dR', 'perJet_Track0dEta', 'perJet_Track0dPhi', 
        'perJet_Track1dR', 'perJet_Track1dEta', 'perJet_Track1dPhi',
@@ -201,7 +201,7 @@ class ModelHandler:
             print("wrote to file")  
 
 class Runner:
-    def __init__(self, input_file=None, filepath=None, mode="train", num_classes=3, inclusive=False, load=True, tree="NoSel", depth_model_keras="depth_model.keras", incl_model_keras="inclusive_model.keras", constants=None):
+    def __init__(self, input_file=None, filepath=None, mode="train", num_classes=3, inclusive=False, load=True, tree="NoSel", depth_model_keras=None, incl_model_keras="inclusive_model.keras", constants=None):
         self.mode = mode
         self.num_classes = num_classes
         self.inclusive = inclusive
@@ -227,11 +227,13 @@ class Runner:
         )
 
         # Load models once
-        depth_handler = ModelHandler(
-            num_classes=self.num_classes,
-            model_name=self.depth_model_keras
-        )
-        depth_handler.load()
+        depth_handler = None
+        if self.depth_model_keras is not None:
+            depth_handler = ModelHandler(
+                num_classes=self.num_classes,
+                model_name=self.depth_model_keras
+            )
+            depth_handler.load()
 
         incl_handler = ModelHandler(
             num_classes=self.num_classes,
@@ -277,9 +279,10 @@ class Runner:
             preds_inc = []
 
             for i in range(num_jets):
-                preds.append(
-                    depth_handler.model.predict(predicting_data[i].values, batch_size=4096, verbose=0)
-                )
+                if depth_handler is not None:
+                    preds.append(
+                        depth_handler.model.predict(predicting_data[i].values, batch_size=4096, verbose=0)
+                    )
                 preds_inc.append(
                     incl_handler.model.predict(predicting_data[i].values, batch_size=4096, verbose=0)
                 )
@@ -289,7 +292,8 @@ class Runner:
 
             # Add scores
             for i in range(num_jets):
-                dataframe[f'jet{i}_scores_depth_LLPanywhere'] = preds[i][:,0]
+                if depth_handler is not None:
+                    dataframe[f'jet{i}_scores_depth_LLPanywhere'] = preds[i][:,0]
                 dataframe[f'jet{i}_scores_inc_train80'] = preds_inc[i][:,0]
 
             # Convert to ROOT-safe numpy arrays
@@ -370,7 +374,7 @@ def parseArgs():
     parser.add_argument("-f", "--input_file", action="store", help="Input file (.root)", required=True) #nargs='+'
     parser.add_argument("-t", "--tree",       action="store", default="NoSel", help="Tree name")
     
-    parser.add_argument("-d", "--depth",      action="store", default="depth_model_v4_LLPanywhere.keras", help="Depth model (.keras)")
+    parser.add_argument("-d", "--depth",      action="store", default=None, help="Depth model (.keras), optional")
     parser.add_argument("-i", "--inclusive",  action="store", default="inclusive_model_v4_train80.keras", help="Inclusive model (.keras)")
     parser.add_argument("-c", "--constants",  action="store", default="norm_constants_v4.csv", help="Norm constants file (.csv)")
     
@@ -388,7 +392,6 @@ def main():
 
     input_file        = args.input_file
     input_tree        = args.tree
-    depth_model_keras = args.depth
     incl_model_keras  = args.inclusive
     normconstants_csv = args.constants
 
@@ -410,7 +413,7 @@ def main():
         print(input_tree)
         print(num_entries)
         if (num_entries > 0):
-            runner = Runner(input_file=input_file, mode=mode, num_classes=2, inclusive=False, tree=input_tree, depth_model_keras=depth_model_keras, incl_model_keras=incl_model_keras, constants=constants)
+            runner = Runner(input_file=input_file, mode=mode, num_classes=2, inclusive=False, tree=input_tree, depth_model_keras=args.depth, incl_model_keras=incl_model_keras, constants=constants)
             runner.run()
     
 if __name__ == "__main__":

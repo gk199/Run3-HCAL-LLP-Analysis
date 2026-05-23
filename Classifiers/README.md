@@ -6,8 +6,8 @@ Two DNN classifiers are trained, one as a depth jet tagger, the other as an incl
 source VirtualEnvs/keras2pt13pt1/bin/activate
 
 cd Archive
-python3 runner-v5.py
-python3 runner-v5-depth.py
+python3 runner-v6.py
+python3 runner-v6-depth.py
 ```
 
 Need to run the inclusive tagger before the depth tagger training can be run, since depth training is done in the CR! The root files with inclusive scores are listed as the input to the depth training. This is done via:

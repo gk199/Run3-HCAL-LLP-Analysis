@@ -279,6 +279,9 @@ Updates:
 
 ## V4
 
+### v4.1
+* note that W+jets files have multiple versions. The `_NoSel_scores_NoSel_scores` has the v5 DNN, while `NoSel_scores` has the v4 DNN
+
 ## V5 
 * MET filters
 
@@ -302,6 +305,13 @@ Updates:
 
 ### v5.4
 * Re-done trigger re-weighting by trigger re-emulation
+
+### v5.5
+* W+jets requirements extended, L1 trigger info added, clarified Pass_ triggers
+* Pass_L1SingleLLPJet returns the L1 seed decision (v5 signal), though is always false in v5 data as the data files do not save the L1 decisions
+* Pass_HLTMonitoring returns the decision of `HLT_L1SingleLLPJet' (monitoring path, highly prescaled in data)
+* PasS_HLTDisplacedJet returns true if any path with `L1SingleLLPJet' in its name is set
+* v6 DNN trained off of these minituples. Improvements in the DNN: fix of bug in the inclusive eta selection, fix of W+jets eta requirements (extending to 2.0 instead of 1.26), remove all S variables in the training. 
 
 Ongoing wish list:
 * Some duplication in coding between event and jet filled trees, can this be reduced or simplified?

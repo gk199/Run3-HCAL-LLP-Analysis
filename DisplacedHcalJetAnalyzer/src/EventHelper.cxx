@@ -96,14 +96,18 @@ bool DisplacedHcalJetAnalyzer::GetTriggerDecision( string trigger_name ){
 
     if (it_hlt != HLT_Names.end()) {
         int i = std::distance(HLT_Names.begin(), it_hlt);
-        return HLT_Decision->at(i);
+        if (HLT_Decision && i < (int)HLT_Decision->size())
+            return HLT_Decision->at(i);
+        return false;
     }
 
     auto it_l1 = std::find(L1_Names.begin(), L1_Names.end(), trigger_name);
 
     if (it_l1 != L1_Names.end()) {
         int i = std::distance(L1_Names.begin(), it_l1);
-        return L1_Decision->at(i);
+        if (has_L1_branches && L1_Decision && i < (int)L1_Decision->size())
+            return L1_Decision->at(i);
+        return false;
     }
 
     return false;
@@ -115,7 +119,7 @@ bool DisplacedHcalJetAnalyzer::PassEventPreselection( bool PassedHLT, bool Passe
 
 	// Description:
 	// At least 1 jet with L1 HW Qual, pt > 60 GeV, aeta < 1.26	-- depth tag jet
-	// At least 1 other jet with pt > 40 GeV, aeta < 2.4 -- inclusive tag jet
+	// At least 1 other jet with pt > 40 GeV, and eta < 2 -- inclusive tag jet
 
 	// Pass HLT // 
 
