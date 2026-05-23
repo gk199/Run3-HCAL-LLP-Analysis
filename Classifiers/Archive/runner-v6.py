@@ -624,23 +624,23 @@ class Runner:
         
 def main():
     sig_files = [
-        "minituple_HToSSTo4B_125_50_CTau3000_L1Trigger.root",
-        "minituple_HToSSTo4B_250_120_CTau10000_L1Trigger.root",
-        "minituple_HToSSTo4B_350_160_CTau10000_L1Trigger.root",
-        "minituple_HToSSTo4B_350_80_CTau500_L1Trigger.root"
+        "minituple_HToSSTo4B_125_50_CTau3000.root",
+        "minituple_HToSSTo4B_250_120_CTau10000.root",
+        "minituple_HToSSTo4B_350_160_CTau10000.root",
+        "minituple_HToSSTo4B_350_80_CTau500.root"
     ]
     
     bkg_files = [
-        "DisplacedJet_Run2022D-v1_RAW_v5.root",
-        "DisplacedJet_Run2022E-v1_RAW_v5.root",
-        "DisplacedJet_Run2022F-v1_RAW_v5.root",
-        "DisplacedJet_Run2022G-v1_RAW_v5.root",
-        "DisplacedJet_Run2023C-EXOLLPJetHCAL-PromptReco-v1_AOD_v5.root",
-        "DisplacedJet_Run2023C-EXOLLPJetHCAL-PromptReco-v2_AOD_v5.root",
-        "DisplacedJet_Run2023C-EXOLLPJetHCAL-PromptReco-v3_AOD_v5.root",
-        "DisplacedJet_Run2023C-EXOLLPJetHCAL-PromptReco-v4_AOD_v5.root",
-        "DisplacedJet_Run2023D-EXOLLPJetHCAL-PromptReco-v1_AOD_v5.root",
-        "DisplacedJet_Run2023D-EXOLLPJetHCAL-PromptReco-v2_AOD_v5.root"
+        "minituple_data_2022Dv1.root",
+        "minituple_data_2022Ev1.root",
+        "minituple_data_2022Fv1.root",
+        "minituple_data_2022Gv1.root",
+        "minituple_data_2023Cv1.root",
+        "minituple_data_2023Cv2.root",
+        "minituple_data_2023Cv3.root",
+        "minituple_data_2023Cv4.root",
+        "minituple_data_2023Dv1.root",
+        "minituple_data_2023Dv2.root"
     ]
 
     # this is for the depth training, the per event tree with inclusive scores appended

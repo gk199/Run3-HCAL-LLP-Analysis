@@ -46,7 +46,7 @@ FEATURES = ['perJet_Eta', 'perJet_Mass',
 
 debug_mode = False
 
-read_from_h5 = True # if True, will read from h5 files that have already been created. If False, will load from root files and create h5 files (takes much longer but can be useful for first time running or if you want to change the selections applied in the loading step)
+read_from_h5 = False # if True, will read from h5 files that have already been created. If False, will load from root files and create h5 files (takes much longer but can be useful for first time running or if you want to change the selections applied in the loading step)
 chunk_size = 100000
 h5_output_dir = '/eos/user/g/gkopp/LLP_Analysis/'
 
@@ -681,24 +681,25 @@ class Runner:
         
         
 def main():
+
     sig_files = [
-        "minituple_HToSSTo4B_125_50_CTau3000_L1Trigger.root",
-        "minituple_HToSSTo4B_250_120_CTau10000_L1Trigger.root",
-        "minituple_HToSSTo4B_350_160_CTau10000_L1Trigger.root",
-        "minituple_HToSSTo4B_350_80_CTau500_L1Trigger.root"
+        "minituple_HToSSTo4B_125_50_CTau3000.root",
+        "minituple_HToSSTo4B_250_120_CTau10000.root",
+        "minituple_HToSSTo4B_350_160_CTau10000.root",
+        "minituple_HToSSTo4B_350_80_CTau500.root"
     ]
     
     bkg_files = [ # TODO change this, need files that have inclusive scores added! 
-        "Scores_v4Depth_v5Inclusive/DisplacedJet_Run2022D-v1_RAW_v5_NoSel_scores.root",
-        "Scores_v4Depth_v5Inclusive/DisplacedJet_Run2022E-v1_RAW_v5_NoSel_scores.root",
-        "Scores_v4Depth_v5Inclusive/DisplacedJet_Run2022F-v1_RAW_v5_NoSel_scores.root",
-        "Scores_v4Depth_v5Inclusive/DisplacedJet_Run2022G-v1_RAW_v5_NoSel_scores.root",
-        "Scores_v4Depth_v5Inclusive/DisplacedJet_Run2023C-EXOLLPJetHCAL-PromptReco-v1_AOD_v5_NoSel_scores.root",
-        "Scores_v4Depth_v5Inclusive/DisplacedJet_Run2023C-EXOLLPJetHCAL-PromptReco-v2_AOD_v5_NoSel_scores.root",
-        "Scores_v4Depth_v5Inclusive/DisplacedJet_Run2023C-EXOLLPJetHCAL-PromptReco-v3_AOD_v5_NoSel_scores.root",
-        "Scores_v4Depth_v5Inclusive/DisplacedJet_Run2023C-EXOLLPJetHCAL-PromptReco-v4_AOD_v5_NoSel_scores.root",
-        "Scores_v4Depth_v5Inclusive/DisplacedJet_Run2023D-EXOLLPJetHCAL-PromptReco-v1_AOD_v5_NoSel_scores.root",
-        "Scores_v4Depth_v5Inclusive/DisplacedJet_Run2023D-EXOLLPJetHCAL-PromptReco-v2_AOD_v5_NoSel_scores.root"
+        "Scores_v6Inclusive/minituple_data_2022Dv1_NoSel_scores.root",
+        "Scores_v6Inclusive/minituple_data_2022Ev1_NoSel_scores.root",
+        "Scores_v6Inclusive/minituple_data_2022Fv1_NoSel_scores.root",
+        "Scores_v6Inclusive/minituple_data_2022Gv1_NoSel_scores.root",
+        "Scores_v6Inclusive/minituple_data_2023Cv1_NoSel_scores.root",
+        "Scores_v6Inclusive/minituple_data_2023Cv2_NoSel_scores.root",
+        "Scores_v6Inclusive/minituple_data_2023Cv3_NoSel_scores.root",
+        "Scores_v6Inclusive/minituple_data_2023Cv4_NoSel_scores.root",
+        "Scores_v6Inclusive/minituple_data_2023Dv1_NoSel_scores.root",
+        "Scores_v6Inclusive/minituple_data_2023Dv2_NoSel_scores.root"
     ]
 
     mode = "train" # "train", "eval", "filewrite", "constants"

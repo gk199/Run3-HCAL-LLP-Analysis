@@ -82,7 +82,7 @@ class DataProcessor:
         print("Processing...")
 
         features = ['perJet_Eta', 'perJet_Mass', 
-       'perJet_S_phiphi', 'perJet_S_etaeta', 'perJet_S_etaphi', 
+#        'perJet_S_phiphi', 'perJet_S_etaeta', 'perJet_S_etaphi', 
        'perJet_Tracks_dR', 
        'perJet_Track0dR', 'perJet_Track0dEta', 'perJet_Track0dPhi', 
        'perJet_Track1dR', 'perJet_Track1dEta', 'perJet_Track1dPhi',
