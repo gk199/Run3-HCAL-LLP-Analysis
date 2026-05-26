@@ -45,8 +45,12 @@ DNN_cut_inc = 0.97
 CR_cut_inc = 0.2
 
 # ---- Run exclusion lists (identical to original) ----
+# v5.3 minituples
 runs_to_exclude_2022 = [362615, 362653, 360485]   # based on CR 0.1 
 runs_to_exclude_2022 = [362615, 362617, 362653, 362655]   # based on CR 0.2
+# v5.5 minituples 
+runs_to_exclude_2022 = [357698, 362653, 362655, 359661, 360991] # based on CR 0.2
+
     # 357776, 359661, 359690, 359869, 360890, 361044, 362087, 362437,
     # 362615, 362616, 362653, 360128, 360887, 360949, 361053, 361994,
     # 362063, 362698,
@@ -54,8 +58,11 @@ runs_to_exclude_2022 = [362615, 362617, 362653, 362655]   # based on CR 0.2
 # runs_to_exclude_2022.extend(range(362597, 362697))  # 100 runs from L1 LUT issue
 runs_to_exclude_2022 = list(set(runs_to_exclude_2022))  # deduplicate
 
+# v5.3 minituples
 runs_to_exclude_2023 = [] # based on CR 0.1 # list(set([367228, 368684, 370460, 368684, 370460]))
 runs_to_exclude_2023 = [367691, 368684] # based on CR 0.2
+# v5.5 minituples
+runs_to_exclude_2023 = [369998, 370790, 368676, 370093] # based on CR 0.2
 
 Zmu     = False
 LLPskim = True
@@ -697,42 +704,42 @@ def parseArgs():
 # Input file lists
 _file_map = {
     "2022_2023": [
-        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Dv1_scores.root",
-        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Ev1_scores.root",
-        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Fv1_scores.root",
-        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Gv1_scores.root",
-        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv1_scores.root",
-        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv2_scores.root",
-        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv3_scores.root",
-        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv4_scores.root",
-        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Dv1_scores.root",
-        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Dv2_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2022Dv1_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2022Ev1_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2022Fv1_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2022Gv1_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv1_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv2_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv3_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv4_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Dv1_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Dv2_scores.root",
     ],
     "2022": [
-        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Dv1_scores.root",
-        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Ev1_scores.root",
-        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Fv1_scores.root",
-        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Gv1_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2022Dv1_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2022Ev1_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2022Fv1_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2022Gv1_scores.root",
     ],
-    "2022_D": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Dv1_scores.root"],
-    "2022_E": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Ev1_scores.root"],
-    "2022_F": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Fv1_scores.root"],
-    "2022_G": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2022Gv1_scores.root"],
+    "2022_D": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2022Dv1_scores.root"],
+    "2022_E": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2022Ev1_scores.root"],
+    "2022_F": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2022Fv1_scores.root"],
+    "2022_G": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2022Gv1_scores.root"],
 
     "2023": [
-        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv1_scores.root",
-        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv2_scores.root",
-        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv3_scores.root",
-        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv4_scores.root",
-        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Dv1_scores.root",
-        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Dv2_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv1_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv2_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv3_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv4_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Dv1_scores.root",
+        "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Dv2_scores.root",
     ],
-    "2023_Cv1": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv1_scores.root"],
-    "2023_Cv2": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv2_scores.root"],
-    "2023_Cv3": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv3_scores.root"],
-    "2023_Cv4": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Cv4_scores.root"],
-    "2023_Dv1": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Dv1_scores.root"],
-    "2023_Dv2": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_data_2023Dv2_scores.root"],
+    "2023_Cv1": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv1_scores.root"],
+    "2023_Cv2": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv2_scores.root"],
+    "2023_Cv3": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv3_scores.root"],
+    "2023_Cv4": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv4_scores.root"],
+    "2023_Dv1": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Dv1_scores.root"],
+    "2023_Dv2": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Dv2_scores.root"],
     "WPlusJets": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_WJetsToLNu_MC22preEE_NoSel_scores_NoSel_scores.root"]
 }
 

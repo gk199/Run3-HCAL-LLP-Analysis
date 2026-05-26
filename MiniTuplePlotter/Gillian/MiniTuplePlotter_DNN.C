@@ -23,7 +23,7 @@ void MiniTuplePlotter_DNN(){
 										"HToSSTo4b_350_80_CTau500_allscores"};
 
 
-	string path_v5 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_"; 
+	string path_v5 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_"; // used to be from v5.3 (v4 AN)
 	vector<string> filetags_all_signal_v5 = { "HToSSTo4B_125_50_CTau3000_scores", "HToSSTo4B_250_120_CTau10000_scores", "HToSSTo4B_350_160_CTau10000_scores", "HToSSTo4B_350_80_CTau500_scores"};
 	vector<string> filetags_all_data_v5 = { "data_2023Cv1_scores", "data_2023Cv2_scores", "data_2023Cv3_scores", "data_2023Cv4_scores", "data_2023Dv1_scores", "data_2023Dv2_scores"};
 	vector<string> filetags_all_data_v5_2022 = { "data_2022Dv1_scores", "data_2022Ev1_scores", "data_2022Fv1_scores", "data_2022Gv1_scores"};
