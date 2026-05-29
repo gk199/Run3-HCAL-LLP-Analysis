@@ -50,6 +50,9 @@ runs_to_exclude_2022 = [362615, 362653, 360485]   # based on CR 0.1
 runs_to_exclude_2022 = [362615, 362617, 362653, 362655]   # based on CR 0.2
 # v5.5 minituples 
 runs_to_exclude_2022 = [357698, 362653, 362655, 359661, 360991] # based on CR 0.2
+runs_to_exclude_2022 = [357698, 362653, 359661, 360991] # based on CR 0.2, above 0.1%
+runs_to_exclude_2022 = [357698, 359661, 360991] # based on CR 0.1, above 0.1%
+runs_to_exclude_2022 = []
 
     # 357776, 359661, 359690, 359869, 360890, 361044, 362087, 362437,
     # 362615, 362616, 362653, 360128, 360887, 360949, 361053, 361994,
@@ -63,6 +66,9 @@ runs_to_exclude_2023 = [] # based on CR 0.1 # list(set([367228, 368684, 370460, 
 runs_to_exclude_2023 = [367691, 368684] # based on CR 0.2
 # v5.5 minituples
 runs_to_exclude_2023 = [369998, 370790, 368676, 370093] # based on CR 0.2
+runs_to_exclude_2023 = [370790] # based on CR 0.2, above 0.1% 
+runs_to_exclude_2023 = [370790, 368676, 370093] # based on CR 0.1 above 0.1%
+runs_to_exclude_2023 = []
 
 Zmu     = False
 LLPskim = True
@@ -310,18 +316,30 @@ def book_all_histograms(rdf_base, is_mc=False):
     booked : dict
         booked[option]["CR_all"] etc. are RResultPtr<TH3D> objects.
     """
+    # WPlusJets (v4.1) uses "_updated" suffixes; data (v5.5) uses the original names
+    if is_mc:
+        inc_suf   = "inc_train80_updated"
+        depth_suf = "depth_anywhere_updated"
+    else:
+        inc_suf   = "inc_train80"
+        depth_suf = "depth_LLPanywhere"
+
+    inc0   = f"jet0_scores_{inc_suf}"
+    inc1   = f"jet1_scores_{inc_suf}"
+    depth0 = f"jet0_scores_{depth_suf}"
+    depth1 = f"jet1_scores_{depth_suf}"
+
     # LJDC: jet0 is the depth tag candidate; jet1 inclusive score defines CR/VR/SR
-    # note for 4.1 W+jets sample, branches are "train80_updated" and "anywhere_updated" instead of "depth_LLPanywhere"; adjust accordingly
-    CR_str     = f"jet1_scores_inc_train80 >= 0.0 && jet1_scores_inc_train80 < {CR_cut_inc}"
-    VR_str     = f"jet1_scores_inc_train80 >= {CR_cut_inc} && jet1_scores_inc_train80 < {DNN_cut_inc_LJDC}"
-    SR_str     = f"jet1_scores_inc_train80 >= {DNN_cut_inc_LJDC} && jet1_scores_inc_train80 < 1.1"
-    mistag_str = f"jet0_scores_depth_LLPanywhere >= {DNN_cut_LJDC} && jet0_scores_depth_LLPanywhere < 1.1"
+    CR_str     = f"{inc1} >= 0.0 && {inc1} < {CR_cut_inc}"
+    VR_str     = f"{inc1} >= {CR_cut_inc} && {inc1} < {DNN_cut_inc_LJDC}"
+    SR_str     = f"{inc1} >= {DNN_cut_inc_LJDC} && {inc1} < 1.1"
+    mistag_str = f"{depth0} >= {DNN_cut_LJDC} && {depth0} < 1.1"
 
     # SJDC: jet1 is the depth tag candidate; jet0 inclusive score defines CR/VR/SR
-    CR_0_str     = f"jet0_scores_inc_train80 >= 0.0 && jet0_scores_inc_train80 < {CR_cut_inc}"
-    VR_0_str     = f"jet0_scores_inc_train80 >= {CR_cut_inc} && jet0_scores_inc_train80 < {DNN_cut_inc_SJDC}"
-    SR_0_str     = f"jet0_scores_inc_train80 >= {DNN_cut_inc_SJDC} && jet0_scores_inc_train80 < 1.1"
-    mistag_1_str = f"jet1_scores_depth_LLPanywhere >= {DNN_cut_SJDC} && jet1_scores_depth_LLPanywhere < 1.1"
+    CR_0_str     = f"{inc0} >= 0.0 && {inc0} < {CR_cut_inc}"
+    VR_0_str     = f"{inc0} >= {CR_cut_inc} && {inc0} < {DNN_cut_inc_SJDC}"
+    SR_0_str     = f"{inc0} >= {DNN_cut_inc_SJDC} && {inc0} < 1.1"
+    mistag_1_str = f"{depth1} >= {DNN_cut_SJDC} && {depth1} < 1.1"
 
     # Emulated trigger: leading jet has depth tag candidate + subleading has inclusive tag candidate
     # For MC (W+Jets), DepthTagCand/InclTagCand are almost never set; require 2 valid jets instead
@@ -740,7 +758,7 @@ _file_map = {
     "2023_Cv4": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv4_scores.root"],
     "2023_Dv1": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Dv1_scores.root"],
     "2023_Dv2": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Dv2_scores.root"],
-    "WPlusJets": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_WJetsToLNu_MC22preEE_NoSel_scores_NoSel_scores.root"]
+    "WPlusJets": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_WJetsToLNu_MC22preEE_NoSel_scores_v5updatedscores.root"]
 }
 
 
