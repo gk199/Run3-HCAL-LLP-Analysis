@@ -125,7 +125,7 @@ def MisTagParametrization(tree, option=""):
     low_PV = GetCut("PV", [0,42])
     high_PV = GetCut("PV", [42,100])
 
-    CR = GetCut("jet1_scores_inc_train80", [0,0.2])
+    CR = GetCut("jet1_scores_inc_train80", [0,0.2]) # CR boundary 0.1 or 0.2
     VR = GetCut("jet1_scores_inc_train80", [0.2,DNN_cut_inc])
     SR = GetCut("jet1_scores_inc_train80", [DNN_cut_inc,1.1])
     mistag = GetCut("jet0_scores_depth_LLPanywhere", [DNN_cut,1.1])

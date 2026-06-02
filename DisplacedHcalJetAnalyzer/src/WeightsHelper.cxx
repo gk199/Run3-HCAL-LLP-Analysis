@@ -20,14 +20,12 @@ void DisplacedHcalJetAnalyzer::SetWeight(string infiletag){
         return;
 	}
 
-    // when process multiple years will need to handle each lumi
-    // 2023: CMS recorded 30.12 fb^-1
-    // 2022: CMS recorded 38.01 fb^-1
-
     // MC
     // lumi in fb^-1
     double lumi = 1;
-    double lumi_2022 = 38.01,  lumi_2023 = 30.12; // fb^-1, https://twiki.cern.ch/twiki/bin/view/CMSPublic/LumiPublicResults#2023_proton_proton_collisions_at
+    // when process multiple years need to handle each lumi (CMS recorded lumi)
+    double lumi_2022 = 34.76,  lumi_2023 = 28.28; // fb^-1, from brilcalc tool on 1 June 2026, agrees with HLT trigger prescale settings
+    // double lumi_2022 = 38.01,  lumi_2023 = 30.12; // fb^-1, https://twiki.cern.ch/twiki/bin/view/CMSPublic/LumiPublicResults#2023_proton_proton_collisions_at
     // deal with luminosity from different MC samples, if year depedent. Now everything is 2023
     lumi = lumi_2022 + lumi_2023;
 
