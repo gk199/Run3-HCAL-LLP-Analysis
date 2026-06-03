@@ -189,7 +189,7 @@ def calculate_results( filetag, signaltag ):
     infile_sig = ROOT.TFile.Open(infile_sig) 
     tree_sig  = infile_sig.Get("NoSel")
 
-    outfile_temp = ROOT.TFile("skim_temp_{0}.root".format(filetag),"RECREATE")
+    outfile_temp = ROOT.TFile("deleteme_skimtemp_{0}.root".format(filetag),"RECREATE")
     outfile_temp.cd()
 
     # ----- Scan Over Scores ----- #

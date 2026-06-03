@@ -13,7 +13,7 @@ python3 optimize_cuts.py -h
 # Usage: 
 python3 optimize_cuts.py -i <input-filetag> -s <settings-filetag> <optional arguments: -c, -p, -t>
 ```
-To calculate significance for a grid of signal points with `-c`. The output will be a .npy file. This step may take a while, so it has been decoupled from the plotting step (next step). 
+To calculate significance for a grid of signal points with `-c`. The output will be a .npy file. This step may take a while, so it has been decoupled from the plotting step (next step). Note that the `deleteme_skimtemp_*.root` files can be deleted after this step is completed.
 ```
 python3 optimize_cuts.py -i HToSSTo4B_125_50_CTau3000 -s mytest -c
 ```
