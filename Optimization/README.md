@@ -37,4 +37,12 @@ source run_examples.sh
 ```
 ## Editing Additional Options
 
-To edit additional options: you can edit `root_file_path`, file `version`, `score_mode_global`, and more parameters by editing `optimize_cuts.py` directly. Please note that editing these in-script global variables *only* controls inputs to the calculate_results (`-c`) function -- the plot_results (`-p`) function automatically stores these variables in the .npy file. 
+You can edit additional options directly in `optimize_cuts.py`, including the following: 
+* `root_file_path`
+* `version`
+* `n_bins_global`
+* `score_range_incl_global`
+* `score_range_depth_global`
+* score_range_depth_global
+
+Please note that editing many of these in-script global variables at the top of the scropt *only* controls inputs to the calculate_results (`-c`) function -- the plot_results (`-p`) function automatically stores these variables in the .npy file. 
