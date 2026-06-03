@@ -43,6 +43,6 @@ You can edit additional options directly in `optimize_cuts.py`, including the fo
 * `n_bins_global`
 * `score_range_incl_global`
 * `score_range_depth_global`
-* score_range_depth_global
+* `score_range_depth_global`
 
 Please note that editing many of these in-script global variables at the top of the scropt *only* controls inputs to the calculate_results (`-c`) function -- the plot_results (`-p`) function automatically stores these variables in the .npy file. 
