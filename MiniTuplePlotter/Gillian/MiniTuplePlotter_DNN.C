@@ -23,7 +23,7 @@ void MiniTuplePlotter_DNN(){
 										"HToSSTo4b_350_80_CTau500_allscores"};
 
 
-	string path_v5 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_"; 
+	string path_v5 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_"; // used to be from v5.3 (v4 AN)
 	vector<string> filetags_all_signal_v5 = { "HToSSTo4B_125_50_CTau3000_scores", "HToSSTo4B_250_120_CTau10000_scores", "HToSSTo4B_350_160_CTau10000_scores", "HToSSTo4B_350_80_CTau500_scores"};
 	vector<string> filetags_all_data_v5 = { "data_2023Cv1_scores", "data_2023Cv2_scores", "data_2023Cv3_scores", "data_2023Cv4_scores", "data_2023Dv1_scores", "data_2023Dv2_scores"};
 	vector<string> filetags_all_data_v5_2022 = { "data_2022Dv1_scores", "data_2022Ev1_scores", "data_2022Fv1_scores", "data_2022Gv1_scores"};
@@ -34,7 +34,8 @@ void MiniTuplePlotter_DNN(){
 	bool study2 = false;
 	bool study3 = false;
 	bool study4 = false;
-	bool study5 = true; // for v3 AN plots
+	bool study5 = false; // for v3, v5 AN plots
+	bool study6 = true; // DNN input variable distributions per era
  	
 	cout<<endl;
 	cout<<" ---------- Study 1: Overlay LLP MC and data ---------- "<<endl;
@@ -242,24 +243,25 @@ void MiniTuplePlotter_DNN(){
 		DNNscores_signal.SetOutputDirectory("DNNscores");				
 		DNNscores_signal.plot_norm 		  = true; 	// Default = true
 		DNNscores_signal.plot_log  		  = true; 	// Default = true
+		DNNscores_signal.plot_cdf 		  = true;   // Default = false. Cumulative distribution function
 		DNNscores_signal.SetCuts("jet0_InclTagCand == 1"); 		// Apply cuts to all events
 		DNNscores_signal.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );										// Manual Legend location
 		DNNscores_signal.SetLegendNames({"m_{H} = 125, m_{S} = 50 GeV", "m_{H} = 250, m_{S} = 120 GeV", "m_{H} = 350, m_{S} = 160 GeV", "m_{H} = 350, m_{S} = 80 GeV"});
 		DNNscores_signal.use_weight = false; // otherwise plots are 0! 
 		DNNscores_signal.NBins = 30; 									 								// Default = 100
-		DNNscores_signal.Plot();
+		DNNscores_signal.Plot("ratio");
 
 		DNNscores_signal.ClearFileTrees();
 		DNNscores_signal.SetPlots({P_jet0_scores_depth_LLPanywhere});
 		DNNscores_signal.SetCuts("jet0_DepthTagCand == 1 && jet0_isTruthMatched == 1");
-		DNNscores_signal.Plot();	
+		DNNscores_signal.Plot("ratio");	
 
 		// pt, eta, truth match
 		DNNscores_signal.ClearFileTrees();
 		DNNscores_signal.SetPlots({P_jet0_scores_inc_train80, P_jet0_scores_depth_LLPanywhere});
 		DNNscores_signal.SetOutputFileTag("DNNscores_signal_truthMatch");
 		DNNscores_signal.SetCuts("jet0_Pt > 40 && abs(jet0_Eta) < 1.5 && jet0_isTruthMatched == 1"); 		
-		DNNscores_signal.Plot();
+		DNNscores_signal.Plot("ratio");
 	
 		// -------------------------------------------------------------- //
 		// data inclusive and depth tagger now
@@ -270,25 +272,26 @@ void MiniTuplePlotter_DNN(){
 		DNNscores_data.SetOutputDirectory("DNNscores");				
 		DNNscores_data.plot_norm 		  = true; 	// Default = true
 		DNNscores_data.plot_log  		  = true; 	// Default = true
+		DNNscores_data.plot_cdf 		  = true;   // Default = false. Cumulative distribution function
 		DNNscores_data.SetCuts("jet0_InclTagCand == 1"); 		// Apply cuts to all events
 		DNNscores_data.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );										// Manual Legend location
 		DNNscores_data.SetLegendNames({"Cv1", "Cv2", "Cv3", "Cv4", "Dv1", "Dv2"});
 		DNNscores_data.NBins = 30; 									 								// Default = 100
 		DNNscores_data.use_weight = true;
-		DNNscores_data.Plot();		
+		DNNscores_data.Plot("ratio");		
 
 		DNNscores_data.ClearFileTrees();
 		DNNscores_data.SetPlots({P_jet0_scores_depth_LLPanywhere});
 		DNNscores_data.SetCuts("jet0_DepthTagCand == 1 && jet1_InclTagCand == 1 && jet1_scores_inc_train80 < 0.9"); // only look at depth scores outside of MR		
 		DNNscores_data.use_weight = true;
-		DNNscores_data.Plot();
+		DNNscores_data.Plot("ratio");
 
 		DNNscores_data.ClearFileTrees();
 		DNNscores_data.SetPlots({P_jet0_scores_inc_train80, P_jet0_scores_depth_LLPanywhere});
 		DNNscores_data.SetOutputFileTag("DNNscores_data_WPlusJets");
 		DNNscores_data.SetCuts("jet0_Pt > 40 && abs(jet0_Eta) < 1.5 && Pass_WPlusJets"); 		
 		DNNscores_data.use_weight = true;
-		DNNscores_data.Plot();
+		DNNscores_data.Plot("ratio");
 
 		class MiniTuplePlotter DNNscores_data_22( filetags_all_data_v5_2022, path_v5 );
 		DNNscores_data_22.SetTreeName( "NoSel" );	// TreeName
@@ -297,24 +300,95 @@ void MiniTuplePlotter_DNN(){
 		DNNscores_data_22.SetOutputDirectory("DNNscores");				
 		DNNscores_data_22.plot_norm 		  = true; 	// Default = true
 		DNNscores_data_22.plot_log  		  = true; 	// Default = true
+		DNNscores_data_22.plot_cdf 		  	  = true;   // Default = false. Cumulative distribution function
 		DNNscores_data_22.SetCuts("jet0_InclTagCand == 1"); 		// Apply cuts to all events
 		DNNscores_data_22.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );										// Manual Legend location
 		DNNscores_data_22.SetLegendNames({"Dv1", "Ev1", "Fv1", "Gv1"});
 		DNNscores_data_22.NBins = 30; 									 								// Default = 100
 		DNNscores_data_22.use_weight = true;
-		DNNscores_data_22.Plot();		
+		DNNscores_data_22.Plot("ratio");		
 
 		DNNscores_data_22.ClearFileTrees();
 		DNNscores_data_22.SetPlots({P_jet0_scores_depth_LLPanywhere});
 		DNNscores_data_22.SetCuts("jet0_DepthTagCand == 1 && jet1_InclTagCand == 1 && jet1_scores_inc_train80 < 0.9"); // only look at depth scores outside of MR		
 		DNNscores_data_22.use_weight = true;
-		DNNscores_data_22.Plot();
+		DNNscores_data_22.Plot("ratio");
 
 		DNNscores_data_22.ClearFileTrees();
 		DNNscores_data_22.SetPlots({P_jet0_scores_inc_train80, P_jet0_scores_depth_LLPanywhere});
 		DNNscores_data_22.SetOutputFileTag("DNNscores_data_22_WPlusJets");
 		DNNscores_data_22.SetCuts("jet0_Pt > 40 && abs(jet0_Eta) < 1.5 && Pass_WPlusJets"); 		
 		DNNscores_data_22.use_weight = true;
-		DNNscores_data_22.Plot();
+		DNNscores_data_22.Plot("ratio");
+	}
+
+	// -------------------------------------------------------------- //
+	// Study 6: DNN input variable distributions overlaid per era
+	// Run: mkdir -p Plots/DNNinputs  before executing
+	// -------------------------------------------------------------- //
+	cout<<endl;
+	cout<<" ---------- Study 6: DNN input variable distributions overlaid per era ---------- "<<endl;
+	cout<<endl;
+	if (study6) {
+		// PlotParams for rechit energy fractions not defined in PlotParams.h
+		PlotParams P_jet0_SubLeadingRechitEFrac  = {"jet0_SubLeadingRechitE / jet0_AllRechitE", "Sub-Leading Rechit E Fraction", "Sub-Leading Rechit E / All Rechit E", 0, 1};
+		PlotParams P_jet0_SSubLeadingRechitEFrac = {"jet0_SSubLeadingRechitE / jet0_AllRechitE", "3rd Rechit E Fraction", "3rd-Leading Rechit E / All Rechit E", 0, 1};
+
+		vector<PlotParams> DNN_input_vars = {
+			P_jet0_Eta, P_jet0_Mass,
+			P_jet0_Setaeta, P_jet0_Sphiphi, P_jet0_Setaphi,
+			P_jet0_Tracks_dR,
+			P_jet0_Track0dR, P_jet0_Track0dEta, P_jet0_Track0dPhi,
+			P_jet0_Track1dR, P_jet0_Track1dEta, P_jet0_Track1dPhi,
+			P_jet0_Track2dR, P_jet0_Track2dEta, P_jet0_Track2dPhi,
+			P_jet0_Track0PtFrac, P_jet0_Track1PtFrac, P_jet0_Track2PtFrac,
+			P_jet0_EnergyFrac_Depth1, P_jet0_EnergyFrac_Depth2, P_jet0_EnergyFrac_Depth3, P_jet0_EnergyFrac_Depth4,
+			P_jet0_LeadingRechitD,
+			P_jet0_LeadingRechitEFrac, P_jet0_SubLeadingRechitEFrac, P_jet0_SSubLeadingRechitEFrac,
+			P_jet0_AllRechitE,
+			P_jet0_NeutralHadEFrac, P_jet0_ChargedHadEFrac, P_jet0_PhoEFrac, P_jet0_EleEFrac, P_jet0_MuonEFrac
+		};
+
+		// 2023 data eras
+		class MiniTuplePlotter DNNinputs_data_23( filetags_all_data_v5, path_v5 );
+		DNNinputs_data_23.SetTreeName( "NoSel" );
+		DNNinputs_data_23.SetPlots( DNN_input_vars );
+		DNNinputs_data_23.SetOutputFileTag("DNNinputs_data_2023");
+		DNNinputs_data_23.SetOutputDirectory("DNNinputs");
+		DNNinputs_data_23.plot_norm       = true;
+		DNNinputs_data_23.plot_log        = true;
+		DNNinputs_data_23.SetCuts("jet0_InclTagCand == 1");
+		DNNinputs_data_23.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+		DNNinputs_data_23.SetLegendNames({"Cv1", "Cv2", "Cv3", "Cv4", "Dv1", "Dv2"});
+		DNNinputs_data_23.NBins           = 50;
+		DNNinputs_data_23.use_weight      = true;
+		DNNinputs_data_23.Plot();
+
+		DNNinputs_data_23.ClearFileTrees();
+		DNNinputs_data_23.SetPlots( DNN_input_vars );
+		DNNinputs_data_23.SetOutputFileTag("DNNinputs_data_2023_depth");
+		DNNinputs_data_23.SetCuts("jet0_DepthTagCand == 1");
+		DNNinputs_data_23.Plot();
+
+		// 2022 data eras
+		class MiniTuplePlotter DNNinputs_data_22( filetags_all_data_v5_2022, path_v5 );
+		DNNinputs_data_22.SetTreeName( "NoSel" );
+		DNNinputs_data_22.SetPlots( DNN_input_vars );
+		DNNinputs_data_22.SetOutputFileTag("DNNinputs_data_2022");
+		DNNinputs_data_22.SetOutputDirectory("DNNinputs");
+		DNNinputs_data_22.plot_norm       = true;
+		DNNinputs_data_22.plot_log        = true;
+		DNNinputs_data_22.SetCuts("jet0_InclTagCand == 1");
+		DNNinputs_data_22.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+		DNNinputs_data_22.SetLegendNames({"Dv1", "Ev1", "Fv1", "Gv1"});
+		DNNinputs_data_22.NBins           = 50;
+		DNNinputs_data_22.use_weight      = true;
+		DNNinputs_data_22.Plot();
+
+		DNNinputs_data_22.ClearFileTrees();
+		DNNinputs_data_22.SetPlots( DNN_input_vars );
+		DNNinputs_data_22.SetOutputFileTag("DNNinputs_data_2022_depth");
+		DNNinputs_data_22.SetCuts("jet0_DepthTagCand == 1");
+		DNNinputs_data_22.Plot();
 	}
 }

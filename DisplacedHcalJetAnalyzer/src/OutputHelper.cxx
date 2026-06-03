@@ -62,7 +62,12 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		// (e.g. 100, 50, 1, 1, 1 for the 5 LLP triggers) so no external
 		// correction is needed -- just apply L1_prescale_weight to MC events.
 		// L1_prescale_weight = 1/prescale of lowest-prescaled fired L1 trigger.
-		"L1_prescale_weight"
+		"L1_prescale_weight",
+		// HLT_prescale_weight: all HLTs have prescale 1 except
+		// HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5, which was
+		// disabled for 34.95% of the data-taking period. Weight is 0 or 1 (random draw
+		// with p=0.6505 keep) when that is the only L1SingleLLPJet HLT that fired, else 1.
+		"HLT_prescale_weight"
 	};
 
 	for (int i = 0; i < (int)L1_Indices.size(); i++) {
@@ -382,7 +387,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 		"PV","jet","muon","ele","pho",
 	};
 
-	vector<string> myvars_float = {"eventHT", "randomFloat", "L1_prescale_weight"};
+	vector<string> myvars_float = {"eventHT", "randomFloat", "L1_prescale_weight", "HLT_prescale_weight"};
 
 	// Per-trigger L1 prescale values (float; -1 = branch absent)
 	for (int i = 0; i < (int)L1_Indices.size(); i++) {
@@ -618,6 +623,34 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 		}
 	}
 	tree_output_vars_float["L1_prescale_weight"] = l1_prescale_weight;
+
+	// HLT prescale weight: 0 if no HLT fires; 1 if any HLT fires, except when the only
+	// L1SingleLLPJet HLT that fired is the _35_ variant (disabled 34.95% of the time in data).
+	// In that MC-only special case, emulate the 65.05% acceptance with a deterministic draw.
+	float hlt_prescale_weight = 0.0f;
+	bool any_hlt = false;
+	for (int i = 0; i < (int)HLT_Names.size(); i++)
+		if (HLT_Names[i].find("L1SingleLLPJet") != string::npos &&
+		    i < (int)HLT_Decision->size() && HLT_Decision->at(i))
+			{ any_hlt = true; break; }
+	if (any_hlt) {
+		hlt_prescale_weight = 1.0f;
+		if (!isData) {
+			bool hlt35 = GetTriggerDecision("HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5");
+			bool other_llpjet_hlt = false;
+			for (int i = 0; i < (int)HLT_Names.size(); i++) {
+				if (HLT_Names[i] == "HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5") continue;
+				if (HLT_Names[i].find("L1SingleLLPJet") != string::npos &&
+				    i < (int)HLT_Decision->size() && HLT_Decision->at(i))
+					other_llpjet_hlt = true;
+			}
+			if (hlt35 && !other_llpjet_hlt) {
+				TRandom3 hlt_rng(lumiNum * 1000033u + (UInt_t)eventNum);
+				hlt_prescale_weight = (hlt_rng.Uniform() < 0.6505) ? 1.0f : 0.0f;
+			}
+		}
+	}
+	tree_output_vars_float["HLT_prescale_weight"] = hlt_prescale_weight;
 
 	tree_output_vars_bool["Flag_HBHENoiseFilter"] = Flag_HBHENoiseFilter;
 	tree_output_vars_bool["Flag_HBHENoiseIsoFilter"] = Flag_HBHENoiseIsoFilter;
@@ -1023,7 +1056,33 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	}
 	jet_tree_output_vars_float["L1_prescale_weight"] = l1_prescale_weight_jet;
 
-	float deltaR_jet_l1jet; 
+	// HLT prescale weight (same logic and seed as event tree — identical seed gives same outcome per event)
+	float hlt_prescale_weight_jet = 0.0f;
+	bool any_hlt_jet = false;
+	for (int i = 0; i < (int)HLT_Names.size(); i++)
+		if (HLT_Names[i].find("L1SingleLLPJet") != string::npos &&
+		    i < (int)HLT_Decision->size() && HLT_Decision->at(i))
+			{ any_hlt_jet = true; break; }
+	if (any_hlt_jet) {
+		hlt_prescale_weight_jet = 1.0f;
+		if (!isData) {
+			bool hlt35_jet = GetTriggerDecision("HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5");
+			bool other_llpjet_hlt_jet = false;
+			for (int i = 0; i < (int)HLT_Names.size(); i++) {
+				if (HLT_Names[i] == "HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5") continue;
+				if (HLT_Names[i].find("L1SingleLLPJet") != string::npos &&
+				    i < (int)HLT_Decision->size() && HLT_Decision->at(i))
+					other_llpjet_hlt_jet = true;
+			}
+			if (hlt35_jet && !other_llpjet_hlt_jet) {
+				TRandom3 hlt_rng_jet(lumiNum * 1000033u + (UInt_t)eventNum);
+				hlt_prescale_weight_jet = (hlt_rng_jet.Uniform() < 0.6505) ? 1.0f : 0.0f;
+			}
+		}
+	}
+	jet_tree_output_vars_float["HLT_prescale_weight"] = hlt_prescale_weight_jet;
+
+	float deltaR_jet_l1jet;
 	bool JetPassL1Trigger = JetPassesHWQual( jetIndex, deltaR_jet_l1jet );
 
 	jet_tree_output_vars_float["perJet_dR_L1jet"] = deltaR_jet_l1jet;

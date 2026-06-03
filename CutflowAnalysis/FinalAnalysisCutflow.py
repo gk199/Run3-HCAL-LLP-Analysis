@@ -324,6 +324,66 @@ def run_cutflow(
             fmt = ">15.2f" if weight_expr else ">15.0f"
             print(f"{label:<{col_w}}  {n_evt:{fmt}}"
                   f"  {100.0*frac_all:>9.2f}%{hlt_str}")
+    # ── fraction of final analysis passing only one specific HLT ─────────────
+    # Show how many final-analysis events fired
+    # HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5
+    # but NO other HLT whose name contains "L1SingleLLPJet"
+    # (passing HLT_L1SingleLLPJet itself is allowed).
+    TARGET_HLT   = "HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5"
+    ALLOWED_PASS = {"HLT_L1SingleLLPJet"} # ideally this would be removed but the prescale isn't handled right...
+
+    # Use GetListOfLeaves so individual HLT flag branches (which may be leaves
+    # inside a parent branch) are found by their full path name.
+    branch_names   = [b.GetName() for b in tree.GetListOfBranches()]
+    leaf_names     = [l.GetName() for l in tree.GetListOfLeaves()]
+    all_names      = set(branch_names) | set(leaf_names)
+
+    other_llp_hlts = sorted(
+        b for b in all_names
+        if b.startswith("HLT_") and "L1SingleLLPJet" in b
+        and b != TARGET_HLT and b not in ALLOWED_PASS
+    )
+
+    final_sel = cum_cuts[-1]
+    n_final   = get_yield(final_sel)
+
+    if TARGET_HLT in all_names:
+        veto_str = " && ".join(f"{b} == 0" for b in other_llp_hlts)
+        excl_sel = f"{TARGET_HLT} == 1" + (f" && {veto_str}" if veto_str else "")
+        if final_sel:
+            excl_sel = f"{final_sel} && {excl_sel}"
+
+        n_excl     = get_yield(excl_sel)
+        frac_all   = n_excl / init      if init     > 0 else 0.0
+        frac_hlt   = n_excl / hlt_init  if hlt_init > 0 else float("nan")
+        frac_final = n_excl / n_final   if n_final  > 0 else float("nan")
+
+        tex_label  = (r"~~$\hookrightarrow$ only \texttt{HLT\_HT200\_L1SingleLLPJet"
+                      r"\_DisplacedDijet35\_Inclusive1PtrkShortSig5}")
+        plain_label = f"  only {TARGET_HLT}"
+
+        if print_latex:
+            fmt = ".2f" if weight_expr else ".0f"
+            frac_hlt_str   = f"{100.0*frac_hlt:.2f}"  if hlt_init > 0 else "--"
+            frac_final_str = f"{100.0*frac_final:.2f}" if n_final  > 0 else "--"
+            print(r"\hline")
+            print(f"{tex_label} & {n_excl:{fmt}} & {100.0*frac_all:.2f}\\% & "
+                  f"{frac_hlt_str}\\% (HLT); {frac_final_str}\\% (final) \\\\")
+        else:
+            fmt = ">15.2f" if weight_expr else ">15.0f"
+            hlt_str   = f"{100.0*frac_hlt:>9.2f}%"   if hlt_init > 0 else f"{'--':>10}"
+            final_str = f"{100.0*frac_final:>9.2f}%"  if n_final  > 0 else f"{'--':>10}"
+            print("─" * (col_w + 50))
+            print(f"{plain_label:<{col_w}}  {n_excl:{fmt}}"
+                  f"  {100.0*frac_all:>9.2f}%{hlt_str}  {final_str} of final")
+    else:
+        llp_found = sorted(b for b in all_names if "L1SingleLLPJet" in b)
+        print(f"\nNOTE: branch/leaf '{TARGET_HLT}' not found in tree; skipping exclusive-HLT line.")
+        if llp_found:
+            print(f"      L1SingleLLPJet branches/leaves found: {llp_found}")
+        else:
+            print("      No branches/leaves containing 'L1SingleLLPJet' found at all.")
+
     if print_latex:
         latex_end(caption)
 
