@@ -20,9 +20,9 @@ cwd = os.getcwd()
 # ------------------------------------------------------------------------------
 # Modify Me!
 
-# Note:
-# - This *only* controls inputs to the calculate_results function.
-# - The plot_results function automatically stores these variables in the .npy file
+# ----- Calculate Results Inputs ----- # 
+
+# NB: The following params *only* control inputs to the calculate_results function.
 
 # Inputs:
 root_file_path = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples"
@@ -35,6 +35,16 @@ score_range_depth_global = [0, 1]
 
 # Score Mode: Use combination inclusive+depth ("Normal"), or only inclusive ("InclusiveOnly"), or only depth ("DepthOnly") to define analysis regions
 score_mode_global = "Normal" # "InclusiveOnly", "DepthOnly"
+
+# ----- Plot Results Inputs ----- # 
+
+# NB: The following params *only* control inputs to the plot_results function.
+
+# Require 2022 and 2023 to have same score selections
+combine_years = True 
+
+# Require LJDC and SJDC to have same score selections
+# Not implemented # combine_categories = False
 
 # ------------------------------------------------------------------------------
 def parseArgs():
@@ -324,7 +334,11 @@ def plot_results( filetag ):
             
         significance_array_tot = np.zeros((n_bins, n_bins), dtype=float)
 
-        for year in ["2022", "2023"]: # Total
+        years = ["2022", "2023"]
+        if combine_years_global: 
+            years = ["Total"]
+
+        for year in years:
             for cat in ["ljdc", "sjdc"]:
 
                 key = "{0}_{1}".format(cat, year)
@@ -343,7 +357,7 @@ def plot_results( filetag ):
                 significance_tot_temp = math.hypot( significance_tot_temp, max_significance_temp )
                 
                 significance_array_tot = np.sqrt(significance_array_tot**2 + significance_array_temp[key]**2)
-
+        """
         if False:
             significance_tot_temp = np.max(significance_array_tot) 
             idx = np.unravel_index(np.argmax(significance_array_tot), significance_array_tot.shape)
@@ -355,6 +369,7 @@ def plot_results( filetag ):
                     incl_score_cut_temp[key]  = incl_centers[idx[0]]
                     depth_score_cut_temp[key] = incl_centers[idx[1]]
                     #significance_temp[key]    = significance_array_temp[key]
+        """
 
         if significance_tot_temp > exclusion_significance and significance_tot_temp < significance_tot_minOK:
             #print(sig_frac_temp, significance_tot_temp )

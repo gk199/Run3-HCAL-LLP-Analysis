@@ -35,14 +35,18 @@ To run over all (private) signal points:
 ```
 source run_examples.sh
 ```
+
 ## Editing Additional Options
 
-You can edit additional options directly in `optimize_cuts.py`, including the following: 
+You can edit additional options directly in `optimize_cuts.py`. Many of these are towards the top of the script, under `Modify Me`:
+
+The following parameters *only* control inputs to the `calculate_results` (`-c`) function. The plot_results (`-p`) function automatically stores these variables in the .npy file:
 * `root_file_path`
 * `version`
 * `n_bins_global`
 * `score_range_incl_global`
 * `score_range_depth_global`
-* `score_range_depth_global`
+* `score_mode` -- use combination inclusive+depth ("Normal"), or only inclusive ("InclusiveOnly"), or only depth ("DepthOnly") to define analysis regions
 
-Please note that editing many of these in-script global variables at the top of the scropt *only* controls inputs to the calculate_results (`-c`) function -- the plot_results (`-p`) function automatically stores these variables in the .npy file. 
+The following parameters *only* control inputs to the `plot_results` (`-p`) function:
+* `combine_years` -- if True, requires optimal scores be the same in 2022 and 2023; if False, permits different optimal scores in different years
