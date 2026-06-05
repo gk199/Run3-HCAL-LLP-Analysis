@@ -1,9 +1,0 @@
-root://cmsxrootd.fnal.gov///store/user/kikenned/HTo2LongLivedTo4b_MH-125_MFF-25_CTau-15000mm_TuneCP5_13p6TeV-pythia8/RAW_HToSSTo4B_MH125_MS25_CTau15000_PU70_2022postEE_batch1_v6/260528_225613/0000/output_10.root
-root://cmsxrootd.fnal.gov///store/user/kikenned/HTo2LongLivedTo4b_MH-125_MFF-25_CTau-15000mm_TuneCP5_13p6TeV-pythia8/RAW_HToSSTo4B_MH125_MS25_CTau15000_PU70_2022postEE_batch1_v6/260528_225613/0000/output_17.root
-root://cmsxrootd.fnal.gov///store/user/kikenned/HTo2LongLivedTo4b_MH-125_MFF-25_CTau-15000mm_TuneCP5_13p6TeV-pythia8/RAW_HToSSTo4B_MH125_MS25_CTau15000_PU70_2022postEE_batch1_v6/260528_225613/0000/output_18.root
-root://cmsxrootd.fnal.gov///store/user/kikenned/HTo2LongLivedTo4b_MH-125_MFF-25_CTau-15000mm_TuneCP5_13p6TeV-pythia8/RAW_HToSSTo4B_MH125_MS25_CTau15000_PU70_2022postEE_batch1_v6/260528_225613/0000/output_19.root
-root://cmsxrootd.fnal.gov///store/user/kikenned/HTo2LongLivedTo4b_MH-125_MFF-25_CTau-15000mm_TuneCP5_13p6TeV-pythia8/RAW_HToSSTo4B_MH125_MS25_CTau15000_PU70_2022postEE_batch1_v6/260528_225613/0000/output_1.root
-root://cmsxrootd.fnal.gov///store/user/kikenned/HTo2LongLivedTo4b_MH-125_MFF-25_CTau-15000mm_TuneCP5_13p6TeV-pythia8/RAW_HToSSTo4B_MH125_MS25_CTau15000_PU70_2022postEE_batch1_v6/260528_225613/0000/output_20.root
-root://cmsxrootd.fnal.gov///store/user/kikenned/HTo2LongLivedTo4b_MH-125_MFF-25_CTau-15000mm_TuneCP5_13p6TeV-pythia8/RAW_HToSSTo4B_MH125_MS25_CTau15000_PU70_2022postEE_batch1_v6/260528_225613/0000/output_5.root
-root://cmsxrootd.fnal.gov///store/user/kikenned/HTo2LongLivedTo4b_MH-125_MFF-25_CTau-15000mm_TuneCP5_13p6TeV-pythia8/RAW_HToSSTo4B_MH125_MS25_CTau15000_PU70_2022postEE_batch1_v6/260528_225613/0000/output_6.root
-root://cmsxrootd.fnal.gov///store/user/kikenned/HTo2LongLivedTo4b_MH-125_MFF-25_CTau-15000mm_TuneCP5_13p6TeV-pythia8/RAW_HToSSTo4B_MH125_MS25_CTau15000_PU70_2022postEE_batch1_v6/260528_225613/0000/output_7.root
