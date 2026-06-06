@@ -41,7 +41,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 	// Add Event Variables //
 
 	vector<string> myvars_int = {
-		"run","lumi","event","PV","jet","validJet","muon","ele","pho",
+		"run","lumi","event","era_category","PV","jet","validJet","muon","ele","pho",
 		"RechitN","RechitN_1GeV","RechitN_5GeV","RechitN_10GeV",
 		"TrackN", "ecalRechitN", "HBHE_Rechit_auxTDC"
 	};
@@ -55,7 +55,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 	}
 
 	vector<string> myvars_float = {
-		"met_Pt", "met_Phi", "met_SumEt", "eventHT", "weight", "event_weight", "randomFloat",
+		"met_Pt", "met_Phi", "met_SumEt", "eventHT", "weight", "event_weight", "lumi_frac", "randomFloat",
 		// Per-trigger L1 prescale values. Stored as float because the ntupler
 		// stores them as double. Value is -1 when L1 branches are absent.
 		// For MC, the ntupler fills luminosity-weighted effective prescales
@@ -383,7 +383,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 
 	// Add Event Variables //
 	vector<string> myvars_int = {
-		"run","lumi","event","jetIndex",
+		"run","lumi","event","jetIndex","era_category",
 		"PV","jet","muon","ele","pho",
 	};
 
@@ -560,6 +560,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 
 	tree_output_vars_int["run"] 	= runNum;
 	tree_output_vars_string["era"] 	= currentEra_;
+	tree_output_vars_int["era_category"] = currentEraCategory_;
 	tree_output_vars_int["lumi"] 	= lumiNum;
 	tree_output_vars_int["event"] 	= eventNum;
 	tree_output_vars_int["PV"] 		= n_PV;
@@ -577,6 +578,7 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 
 	tree_output_vars_float["eventHT"]   = EventHT();
 	tree_output_vars_float["weight"]	= weight; // from SetWeight() in WeightsHelper.cxx
+	tree_output_vars_float["lumi_frac"]	= lumi_frac; // from SetWeight() in WeightsHelper.cxx
 	tree_output_vars_float["event_weight"]	= event_weight; 
 
 	for (int i = 0; i < HLT_Indices.size(); i++) {
@@ -624,31 +626,44 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 	}
 	tree_output_vars_float["L1_prescale_weight"] = l1_prescale_weight;
 
-	// HLT prescale weight: 0 if no HLT fires; 1 if any HLT fires, except when the only
-	// L1SingleLLPJet HLT that fired is the _35_ variant (disabled 34.95% of the time in data).
-	// In that MC-only special case, emulate the 65.05% acceptance with a deterministic draw.
-	float hlt_prescale_weight = 0.0f;
-	bool any_hlt = false;
-	for (int i = 0; i < (int)HLT_Names.size(); i++)
-		if (HLT_Names[i].find("L1SingleLLPJet") != string::npos &&
-		    i < (int)HLT_Decision->size() && HLT_Decision->at(i))
-			{ any_hlt = true; break; }
-	if (any_hlt) {
-		hlt_prescale_weight = 1.0f;
-		if (!isData) {
-			bool hlt35 = GetTriggerDecision("HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5");
-			bool other_llpjet_hlt = false;
-			for (int i = 0; i < (int)HLT_Names.size(); i++) {
-				if (HLT_Names[i] == "HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5") continue;
-				if (HLT_Names[i].find("L1SingleLLPJet") != string::npos &&
-				    i < (int)HLT_Decision->size() && HLT_Decision->at(i))
-					other_llpjet_hlt = true;
-			}
-			if (hlt35 && !other_llpjet_hlt) {
-				TRandom3 hlt_rng(lumiNum * 1000033u + (UInt_t)eventNum);
-				hlt_prescale_weight = (hlt_rng.Uniform() < 0.6505) ? 1.0f : 0.0f;
-			}
+	// HLT prescale weight — corrects for the _35_ dijet variant being prescaled in some eras.
+	// This is a prescale correction, not a trigger efficiency: 1 unless the prescale caused a loss.
+	//   preEE MC / data: no prescale correction needed → always 1
+	//   postEE + preBPix MC: _35_ prescaled for 27.67% of era → if only _35_ fired, accept with prob 0.7233
+	//   postBPix MC: _35_ fully disabled → if only _35_ fired, weight 0
+	float hlt_prescale_weight = 1.0f;
+	static bool hlt_prescale_debug_printed = false;
+	if (hlt_prescale_debug_printed) {
+		cout << "DEBUG HLT prescale: era=" << currentEra_ << " isData=" << isData << endl;
+		hlt_prescale_debug_printed = false;
+	}
+	if (!isData && (currentEra_ == "2022postEE" || currentEra_ == "2023preBPix")) {
+		bool hlt35 = GetTriggerDecision("HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5");
+		bool other_llpjet_hlt = false;
+		for (int i = 0; i < (int)HLT_Names.size(); i++) {
+			if (HLT_Names[i] == "HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5") continue;
+			if (HLT_Names[i].find("L1SingleLLPJet") != string::npos &&
+			    HLT_Names[i] != "HLT_L1SingleLLPJet" &&
+			    i < (int)HLT_Decision->size() && HLT_Decision->at(i))
+				other_llpjet_hlt = true;
 		}
+		if (hlt35 && !other_llpjet_hlt) {
+			TRandom3 hlt_rng(lumiNum * 1000033u + (UInt_t)eventNum);
+			hlt_prescale_weight = (hlt_rng.Uniform() < 0.7233) ? 1.0f : 0.0f;
+		}
+	}
+	if (!isData && currentEra_ == "2023postBPix") {
+		bool hlt35 = GetTriggerDecision("HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5");
+		bool other_llpjet_hlt = false;
+		for (int i = 0; i < (int)HLT_Names.size(); i++) {
+			if (HLT_Names[i] == "HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5") continue;
+			if (HLT_Names[i].find("L1SingleLLPJet") != string::npos &&
+			    HLT_Names[i] != "HLT_L1SingleLLPJet" &&
+			    i < (int)HLT_Decision->size() && HLT_Decision->at(i))
+				other_llpjet_hlt = true;
+		}
+		if (hlt35 && !other_llpjet_hlt)
+			hlt_prescale_weight = 0.0f;
 	}
 	tree_output_vars_float["HLT_prescale_weight"] = hlt_prescale_weight;
 
@@ -1009,6 +1024,7 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	
 	jet_tree_output_vars_int["run"] 		= runNum;
 	jet_tree_output_vars_string["era"] 	    = currentEra_;
+	jet_tree_output_vars_int["era_category"] = currentEraCategory_;
 	jet_tree_output_vars_int["lumi"] 		= lumiNum;
 	jet_tree_output_vars_int["event"] 		= eventNum;
 	jet_tree_output_vars_int["jetIndex"] 	= jetIndex;
@@ -1057,28 +1073,34 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	jet_tree_output_vars_float["L1_prescale_weight"] = l1_prescale_weight_jet;
 
 	// HLT prescale weight (same logic and seed as event tree — identical seed gives same outcome per event)
-	float hlt_prescale_weight_jet = 0.0f;
-	bool any_hlt_jet = false;
-	for (int i = 0; i < (int)HLT_Names.size(); i++)
-		if (HLT_Names[i].find("L1SingleLLPJet") != string::npos &&
-		    i < (int)HLT_Decision->size() && HLT_Decision->at(i))
-			{ any_hlt_jet = true; break; }
-	if (any_hlt_jet) {
-		hlt_prescale_weight_jet = 1.0f;
-		if (!isData) {
-			bool hlt35_jet = GetTriggerDecision("HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5");
-			bool other_llpjet_hlt_jet = false;
-			for (int i = 0; i < (int)HLT_Names.size(); i++) {
-				if (HLT_Names[i] == "HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5") continue;
-				if (HLT_Names[i].find("L1SingleLLPJet") != string::npos &&
-				    i < (int)HLT_Decision->size() && HLT_Decision->at(i))
-					other_llpjet_hlt_jet = true;
-			}
-			if (hlt35_jet && !other_llpjet_hlt_jet) {
-				TRandom3 hlt_rng_jet(lumiNum * 1000033u + (UInt_t)eventNum);
-				hlt_prescale_weight_jet = (hlt_rng_jet.Uniform() < 0.6505) ? 1.0f : 0.0f;
-			}
+	float hlt_prescale_weight_jet = 1.0f;
+	if (!isData && (currentEra_ == "2022postEE" || currentEra_ == "2023preBPix")) {
+		bool hlt35_jet = GetTriggerDecision("HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5");
+		bool other_llpjet_hlt_jet = false;
+		for (int i = 0; i < (int)HLT_Names.size(); i++) {
+			if (HLT_Names[i] == "HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5") continue;
+			if (HLT_Names[i].find("L1SingleLLPJet") != string::npos &&
+			    HLT_Names[i] != "HLT_L1SingleLLPJet" &&
+			    i < (int)HLT_Decision->size() && HLT_Decision->at(i))
+				other_llpjet_hlt_jet = true;
 		}
+		if (hlt35_jet && !other_llpjet_hlt_jet) {
+			TRandom3 hlt_rng_jet(lumiNum * 1000033u + (UInt_t)eventNum);
+			hlt_prescale_weight_jet = (hlt_rng_jet.Uniform() < 0.7233) ? 1.0f : 0.0f;
+		}
+	}
+	if (!isData && currentEra_ == "2023postBPix") {
+		bool hlt35_jet = GetTriggerDecision("HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5");
+		bool other_llpjet_hlt_jet = false;
+		for (int i = 0; i < (int)HLT_Names.size(); i++) {
+			if (HLT_Names[i] == "HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5") continue;
+			if (HLT_Names[i].find("L1SingleLLPJet") != string::npos &&
+			    HLT_Names[i] != "HLT_L1SingleLLPJet" &&
+			    i < (int)HLT_Decision->size() && HLT_Decision->at(i))
+				other_llpjet_hlt_jet = true;
+		}
+		if (hlt35_jet && !other_llpjet_hlt_jet)
+			hlt_prescale_weight_jet = 0.0f;
 	}
 	jet_tree_output_vars_float["HLT_prescale_weight"] = hlt_prescale_weight_jet;
 

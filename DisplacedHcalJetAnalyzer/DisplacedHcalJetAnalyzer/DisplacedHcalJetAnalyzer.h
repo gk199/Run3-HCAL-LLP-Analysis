@@ -70,6 +70,7 @@ public :
    float event_weight = 1;
    float weight_unskimmed = 1;
    double lumi_samplefrac = 1.0;
+   double lumi_frac = 1.0;
 
    Long64_t NEvents   = -1; 
    Long64_t NEvents_HLT = -1;
@@ -85,6 +86,7 @@ public :
    std::map<std::string, TH2F*> vetoMaps_; // this will load all maps, then look thme up by era
 
    std::string currentEra_ = "UNKNOWN";
+   int currentEraCategory_ = -1;
 
    // ----- My Hists ----- //
 
