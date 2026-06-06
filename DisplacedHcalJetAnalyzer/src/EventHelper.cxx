@@ -39,7 +39,20 @@ void DisplacedHcalJetAnalyzer::SetEra(){
 
 	if ( debug ) cout<<"DisplacedHcalJetAnalyzer::SetEra()"<<endl;
 
-	currentEra_ = *era; 
+	currentEra_ = *era;
+
+	// 1 = preEE         : MC 2022preEE,   data 2022C, 2022D
+	// 2 = postEE+preBPix: MC 2022postEE, 2023preBPix, data 2022E, 2022F, 2022G, 2023C
+	// 3 = postBPix      : MC 2023postBPix, data 2023D
+	if      (currentEra_ == "2022preEE"   || currentEra_ == "Run2022C" || currentEra_ == "Run2022D")
+		currentEraCategory_ = 1;
+	else if (currentEra_ == "2022postEE"  || currentEra_ == "2023preBPix" ||
+	         currentEra_ == "Run2022E"       || currentEra_ == "Run2022F" || currentEra_ == "Run2022G" || currentEra_ == "Run2023C")
+		currentEraCategory_ = 2;
+	else if (currentEra_ == "2023postBPix" || currentEra_ == "Run2023D")
+		currentEraCategory_ = 3;
+	else
+		currentEraCategory_ = -1;
 
 }
 

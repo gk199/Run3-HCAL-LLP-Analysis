@@ -6,16 +6,15 @@ void DisplacedHcalJetAnalyzer::SetWeight(string infiletag){
 	// determine weights for MC to add as a new branch to the minituples
     cout << "Getting samples weight" << endl;
 
-    bool data = false, signal = false;
-    cout << infiletag << endl;
-    if (infiletag.find("CTau") != string::npos ) signal = true;
-    if (infiletag.find("PromptReco") != string::npos ) data = true;
-
-    //cout << data << " = is data flag" << endl;
-    //cout << signal << " = is signal flag" << endl;
+    // read isData and era from the ntuple itself — reliable regardless of file naming
+    if (fChain) { b_isData->GetEntry(0); b_era->GetEntry(0); currentEra_ = *era; }
+    bool data = isData;
+    bool signal = infiletag.find("CTau") != string::npos;
+    cout << infiletag << " (isData=" << data << ")" << endl;
 
 	if( data ){
         weight = 1;
+        lumi_frac = 1;
         cout << "weight --> " << weight << endl;
         return;
 	}
@@ -24,8 +23,12 @@ void DisplacedHcalJetAnalyzer::SetWeight(string infiletag){
     // lumi in fb^-1
     double lumi = 1;
     // when process multiple years need to handle each lumi (CMS recorded lumi)
-    double lumi_2022 = 34.76,  lumi_2023 = 28.28; // fb^-1, from brilcalc tool on 1 June 2026, agrees with HLT trigger prescale settings
+    double lumi_2022 = 34.6644,  lumi_2023 = 27.6410; // fb^-1, from brilcalc tool on 6 June 2026, agrees with HLT trigger prescale settings
     // double lumi_2022 = 38.01,  lumi_2023 = 30.12; // fb^-1, https://twiki.cern.ch/twiki/bin/view/CMSPublic/LumiPublicResults#2023_proton_proton_collisions_at
+    double lumi_preEE = 7.9895; // preEE
+    double lumi_postEE = 26.6749; // postEE only
+    double lumi_preBPix = 17.9642; // preBPix only
+    double lumi_postBPix = 9.67674; // postBPix
     // deal with luminosity from different MC samples, if year depedent. Now everything is 2023
     lumi = lumi_2022 + lumi_2023;
 
@@ -42,14 +45,22 @@ void DisplacedHcalJetAnalyzer::SetWeight(string infiletag){
     } else {
         // would also deal with MC background processes here, like W+jets or Z->mu, to get BRxSigma
         weight = 1.0;
+        lumi_frac = 1.0;
     }
 	
     // Weight for each event
 	weight = BRxSigma*lumi/NEvents_produced; // weight = lumi * xsec (=# higgs) * BR (=# LLP)
     // if NEvents_produced == 1, then the filetag was not found. Instead of setting a too high weight, set event weight to 1
     if ( !data && infiletag.find("CTau") != string::npos && NEvents_produced == 1) weight = 1;
-	lumi_samplefrac  = lumiNum/(lumi_2022+lumi_2023);
-	cout<<"  weight   --> "<<weight<<" (event-by-event weight components included later)"<<endl;
+	// lumi_samplefrac  = lumiNum/lumi;
+    
+    if      (!data && currentEra_ == "2022preEE")    lumi_frac = lumi_preEE/lumi;
+    else if (!data && currentEra_ == "2022postEE")   lumi_frac = (lumi_postEE + lumi_preBPix)/lumi;
+    // else if (!data && currentEra_ == "2023preBPix")  lumi_frac = lumi_preBPix/lumi;
+    else if (!data && currentEra_ == "2023postBPix") lumi_frac = lumi_postBPix/lumi;
+	
+    cout<<"  weight   --> "<<weight<<" (event-by-event weight components included later)"<<endl;
+    cout<<"  lumi_frac   --> "<<lumi_frac<<endl;
 
 	cout<<endl;
 

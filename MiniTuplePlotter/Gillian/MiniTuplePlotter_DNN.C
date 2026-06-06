@@ -26,6 +26,7 @@ void MiniTuplePlotter_DNN(){
 	string path_v5 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_"; // used to be from v5.3 (v4 AN)
 	vector<string> filetags_all_signal_v5 = { "HToSSTo4B_125_50_CTau3000_scores", "HToSSTo4B_250_120_CTau10000_scores", "HToSSTo4B_350_160_CTau10000_scores", "HToSSTo4B_350_80_CTau500_scores"};
 	vector<string> filetags_all_data_v5 = { "data_2023Cv1_scores", "data_2023Cv2_scores", "data_2023Cv3_scores", "data_2023Cv4_scores", "data_2023Dv1_scores", "data_2023Dv2_scores"};
+	// vector<string> filetags_all_data_v5 = { "data_2023Cv4_scores"};
 	vector<string> filetags_all_data_v5_2022 = { "data_2022Dv1_scores", "data_2022Ev1_scores", "data_2022Fv1_scores", "data_2022Gv1_scores"};
 
 	// ----- Example 1 -----//
@@ -35,7 +36,8 @@ void MiniTuplePlotter_DNN(){
 	bool study3 = false;
 	bool study4 = false;
 	bool study5 = false; // for v3, v5 AN plots
-	bool study6 = true; // DNN input variable distributions per era
+	bool study6 = false; // DNN input variable distributions per era
+	bool study7 = true; // Depth energy fractions vs jet pT bins, per era
  	
 	cout<<endl;
 	cout<<" ---------- Study 1: Overlay LLP MC and data ---------- "<<endl;
@@ -360,6 +362,9 @@ void MiniTuplePlotter_DNN(){
 		DNNinputs_data_23.SetCuts("jet0_InclTagCand == 1");
 		DNNinputs_data_23.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
 		DNNinputs_data_23.SetLegendNames({"Cv1", "Cv2", "Cv3", "Cv4", "Dv1", "Dv2"});
+		// DNNinputs_data_23.SetSelectiveCuts("Cv4", "run < 368822");
+		// DNNinputs_data_23.SetLegendNames({"Cv4, pre alignment", "Cv4, post alignment"});
+		// DNNinputs_data_23.SetComparisonCuts({"run < 368822", "run >= 368822"});
 		DNNinputs_data_23.NBins           = 50;
 		DNNinputs_data_23.use_weight      = true;
 		DNNinputs_data_23.Plot();
@@ -390,5 +395,73 @@ void MiniTuplePlotter_DNN(){
 		DNNinputs_data_22.SetOutputFileTag("DNNinputs_data_2022_depth");
 		DNNinputs_data_22.SetCuts("jet0_DepthTagCand == 1");
 		DNNinputs_data_22.Plot();
+	}
+
+	// Study 7: Depth energy fractions vs jet pT bins, per era
+	// Run: mkdir -p Plots/DepthFracsVsPt  before executing
+	// -------------------------------------------------------------- //
+	cout<<endl;
+	cout<<" ---------- Study 7: Depth energy fractions vs jet pT bins, per era ---------- "<<endl;
+	cout<<endl;
+	if (study7) {
+		vector<PlotParams> depth_frac_vars = {
+			P_jet0_EnergyFrac_Depth1, P_jet0_EnergyFrac_Depth2, P_jet0_EnergyFrac_Depth3, P_jet0_EnergyFrac_Depth4
+		};
+		vector<TCut> pT_cuts = {
+			"jet0_Pt >= 60 && jet0_Pt < 70",
+			"jet0_Pt >= 70 && jet0_Pt < 80",
+			"jet0_Pt >= 80 && jet0_Pt < 90",
+			"jet0_Pt >= 90 && jet0_Pt < 100",
+			"jet0_Pt >= 100"
+		};
+		vector<string> pT_legend = {"p_{T} 60-70 GeV", "p_{T} 70-80 GeV", "p_{T} 80-90 GeV", "p_{T} 90-100 GeV", "p_{T} 100+ GeV"};
+
+		// 2023Cv3
+		class MiniTuplePlotter depthfracs_Cv3( {"data_2023Cv3_scores"}, path_v5 );
+		depthfracs_Cv3.SetTreeName( "NoSel" );
+		depthfracs_Cv3.SetPlots( depth_frac_vars );
+		depthfracs_Cv3.SetOutputFileTag("DepthFracs_pTbins_2023Cv3");
+		depthfracs_Cv3.SetOutputDirectory("DepthFracsVsPt");
+		depthfracs_Cv3.plot_norm       = true;
+		depthfracs_Cv3.plot_log        = true;
+		depthfracs_Cv3.SetCuts("jet0_DepthTagCand == 1");
+		depthfracs_Cv3.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+		depthfracs_Cv3.SetLegendNames( pT_legend );
+		depthfracs_Cv3.SetComparisonCuts( pT_cuts );
+		depthfracs_Cv3.NBins           = 50;
+		depthfracs_Cv3.use_weight      = true;
+		depthfracs_Cv3.Plot();
+
+		// 2023Cv4
+		class MiniTuplePlotter depthfracs_Cv4( {"data_2023Cv4_scores"}, path_v5 );
+		depthfracs_Cv4.SetTreeName( "NoSel" );
+		depthfracs_Cv4.SetPlots( depth_frac_vars );
+		depthfracs_Cv4.SetOutputFileTag("DepthFracs_pTbins_2023Cv4");
+		depthfracs_Cv4.SetOutputDirectory("DepthFracsVsPt");
+		depthfracs_Cv4.plot_norm       = true;
+		depthfracs_Cv4.plot_log        = true;
+		depthfracs_Cv4.SetCuts("jet0_DepthTagCand == 1");
+		depthfracs_Cv4.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+		depthfracs_Cv4.SetLegendNames( pT_legend );
+		depthfracs_Cv4.SetComparisonCuts( pT_cuts );
+		depthfracs_Cv4.NBins           = 50;
+		depthfracs_Cv4.use_weight      = true;
+		depthfracs_Cv4.Plot();
+
+		// 2023Dv1
+		class MiniTuplePlotter depthfracs_Dv1( {"data_2023Dv1_scores"}, path_v5 );
+		depthfracs_Dv1.SetTreeName( "NoSel" );
+		depthfracs_Dv1.SetPlots( depth_frac_vars );
+		depthfracs_Dv1.SetOutputFileTag("DepthFracs_pTbins_2023Dv1");
+		depthfracs_Dv1.SetOutputDirectory("DepthFracsVsPt");
+		depthfracs_Dv1.plot_norm       = true;
+		depthfracs_Dv1.plot_log        = true;
+		depthfracs_Dv1.SetCuts("jet0_DepthTagCand == 1");
+		depthfracs_Dv1.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+		depthfracs_Dv1.SetLegendNames( pT_legend );
+		depthfracs_Dv1.SetComparisonCuts( pT_cuts );
+		depthfracs_Dv1.NBins           = 50;
+		depthfracs_Dv1.use_weight      = true;
+		depthfracs_Dv1.Plot();
 	}
 }
