@@ -312,6 +312,14 @@ Updates:
 * Pass_HLTMonitoring returns the decision of `HLT_L1SingleLLPJet' (monitoring path, highly prescaled in data)
 * PasS_HLTDisplacedJet returns true if any path with `L1SingleLLPJet' in its name is set
 * v6 DNN trained off of these minituples. Improvements in the DNN: fix of bug in the inclusive eta selection, fix of W+jets eta requirements (extending to 2.0 instead of 1.26), remove all S variables in the training. 
+* These minituples have v6 DNN scores added unless otherwise noted
+
+### v5.6
+* HLT prescale added
+* `lumi_frac` added
+* `era_category` added
+* central samples processed
+* v7 DNN trained off of these minituples
 
 Ongoing wish list:
 * Some duplication in coding between event and jet filled trees, can this be reduced or simplified?
