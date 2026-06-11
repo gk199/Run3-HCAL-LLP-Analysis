@@ -111,6 +111,7 @@ hadd -j /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HTo
 # # ================================================================================= #
 
 echo "2022 displaced jet skim"
+hadd -j /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_data_2022Cv1.root /eos/user/g/gkopp/LLP_Analysis/MiniTuples/v5.6/DisplacedJet_Run2022C-v1_RAW_v5/minituple_job*.root
 hadd -j /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_data_2022Dv1.root /eos/user/g/gkopp/LLP_Analysis/MiniTuples/v5.6/DisplacedJet_Run2022D-v1_RAW_v5/minituple_job*.root
 hadd -j /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_data_2022Ev1.root /eos/user/g/gkopp/LLP_Analysis/MiniTuples/v5.6/DisplacedJet_Run2022E-v1_RAW_v5/minituple_job*.root
 hadd -j /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_data_2022Fv1.root /eos/user/g/gkopp/LLP_Analysis/MiniTuples/v5.6/DisplacedJet_Run2022F-v1_RAW_v5/minituple_job*.root
