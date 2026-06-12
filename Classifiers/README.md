@@ -52,7 +52,11 @@ python3 PlotScoresDNN_v2.py --mode background_overlay --normalize
 
 ## Custom ROC Curve Plots
 ```
+cd Archive
 root -b -q -l MakeDNNPerformancePlots_SigBkg.C
+# change third_decimal < 8 (trained) or third_decimal >= 8 (tested)
+cd ..
+root -b -q -l MakeDNNTrainTestSigEffComparison.C
 ```
 The input root files are listed in the script. 
 

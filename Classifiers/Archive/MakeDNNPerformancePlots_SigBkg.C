@@ -486,13 +486,13 @@ bool fileExists(const std::string& filename) {
 
 //*************************************************************************************************
 //*************************************************************************************************
-void BDTPerformancePlots(string InputFile, string Label, string SigTree, string InputFile2, string Label2, string BkgTree, Int_t Option, Int_t Option2, Int_t Option3, string plotType)
+void BDTPerformancePlots(vector<string> InputFile, string Label, string SigTree, string InputFile2, string Label2, string BkgTree, Int_t Option, Int_t Option2, Int_t Option3, string plotType)
 {  
   string label = "";
   if (Label != "") label = "_" + Label;
 
-  string plotDir = "ROC_Sig_Bkg_v5.5/" + plotType + "/"; // trained on if third_decimal < 8
-  if (plotType == "") plotDir = "ROC_Sig_Bkg_v5.5/";
+  string plotDir = "ROC_Sig_Bkg_v5.6/" + plotType + "/"; // trained on if third_decimal < 8
+  if (plotType == "") plotDir = "ROC_Sig_Bkg_v5.6/";
 
   //--------------------------------------------------------------------------------------------------------------
   // Histograms
@@ -511,7 +511,8 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   //*****************************************************************************************
   // Get signal distribution
   //*****************************************************************************************
-  TTree *tree_sig = getTreeFromFile(InputFile.c_str(), SigTree.c_str());
+  TChain *tree_sig = new TChain(SigTree.c_str());
+  for (const auto& f : InputFile) tree_sig->Add(f.c_str());
 
   float LLP0_DecayR, LLP1_DecayR, LLP0_Eta, LLP1_Eta, jet0_isMatchedTo, jet0_Eta, jet0_Pt, jet0_MatchedLLP_DecayR, jet0_isTruthMatched;
   float perJet_MatchedLLP_DecayR, perJet_MatchedLLP_Eta;
@@ -620,25 +621,25 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
   cout << "Total Entries (background, depth selections): " << tree_bkg->GetEntries("jet0_DepthTagCand && jet1_scores_inc_train80 < 0.2") << "\n";
   cout << "Total Entries (background, inclusive W+jets selections): " << tree_bkg->GetEntries("Pass_WPlusJets && jet0_Pt > 40 && (abs(jet0_Eta) < 1.26)") << "\n";
   cout << "Total Entries (background, inclusive selections): " << tree_bkg->GetEntries("jet0_InclTagCand") << "\n";
-  if (fileExists("background_histograms_trained.root")) {
-    cout << "Reading from existing root histogram file for background distributions!" << endl;
-    TFile *histFile = new TFile("background_histograms_trained.root", "READ");
-    if (!histFile || histFile->IsZombie()) {
-      cerr << "Error: Could not open background_histograms_trained.root!" << endl;
-      exit(1);
-    }
-    Background_DNN_depth = (TH1F*)histFile->Get("Background_DNN_depth");
-    Background_DNN_inclusive = (TH1F*)histFile->Get("Background_DNN_inclusive");
-    if (!Background_DNN_depth || !Background_DNN_inclusive) {
-      cerr << "Error: One or both histograms not found!" << endl;
-      exit(1);
-    }
-    cout << "Successfully accessed background histograms from file" << endl;
-    Background_DNN_inclusive->SetDirectory(0);
-    Background_DNN_depth->SetDirectory(0);
-    histFile->Close();
-  }
-  else {
+  // if (fileExists("background_histograms_trained.root")) {
+  //   cout << "Reading from existing root histogram file for background distributions!" << endl;
+  //   TFile *histFile = new TFile("background_histograms_trained.root", "READ");
+  //   if (!histFile || histFile->IsZombie()) {
+  //     cerr << "Error: Could not open background_histograms_trained.root!" << endl;
+  //     exit(1);
+  //   }
+  //   Background_DNN_depth = (TH1F*)histFile->Get("Background_DNN_depth");
+  //   Background_DNN_inclusive = (TH1F*)histFile->Get("Background_DNN_inclusive");
+  //   if (!Background_DNN_depth || !Background_DNN_inclusive) {
+  //     cerr << "Error: One or both histograms not found!" << endl;
+  //     exit(1);
+  //   }
+  //   cout << "Successfully accessed background histograms from file" << endl;
+  //   Background_DNN_inclusive->SetDirectory(0);
+  //   Background_DNN_depth->SetDirectory(0);
+  //   histFile->Close();
+  // }
+  // else {
     cout << "Will load background distributions and save to a root file for future use" << endl;
     for(int ientry=0; ientry < nentries_bkg; ientry++) {       	
       tree_bkg->GetEntry(ientry);
@@ -647,7 +648,7 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
       int third_decimal = static_cast<int>(std::floor(jet0_Pt * 1000)) % 10;
 
       // eventually need to fill with weights
-      if (jet0_DepthTagCand && jet1_scores_inc_train80 < 0.2 && third_decimal < 8) Background_DNN_depth->Fill(score_depth_bkg);
+      if (jet0_DepthTagCand && jet1_scores_inc_train80 < 0.2 && third_decimal >= 8) Background_DNN_depth->Fill(score_depth_bkg);
       // if (Pass_WPlusJets && third_decimal < 8 && jet0_Pt > 40 && (abs(jet0_Eta) < 1.26)) Background_DNN_inclusive->Fill(score_inclusive_bkg);
       if (jet0_InclTagCand && third_decimal >= 8) Background_DNN_inclusive->Fill(score_inclusive_bkg);
     } 
@@ -655,7 +656,7 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
     Background_DNN_depth->Write();
     Background_DNN_inclusive->Write();
     outFile->Close();
-  }
+  // }
 
   //*****************************************************************************************
   // Current Working Points
@@ -773,23 +774,23 @@ void BDTPerformancePlots(string InputFile, string Label, string SigTree, string 
 
   float signal_eff = 0;
   string mass = "";
-  if (InputFile.find("MH-125_MS-15") != std::string::npos) { // mh 125 working point, for per jet approach
+  if (InputFile[0].find("MH-125_MS-15") != std::string::npos) { // mh 125 working point, for per jet approach
     signal_eff = 0.66;
     mass = "125";
   }
-  if (InputFile.find("350_80") != std::string::npos) { // mh 350 working point, for per jet approach
+  if (InputFile[0].find("350_80") != std::string::npos) { // mh 350 working point, for per jet approach
     signal_eff = 0.77;
     mass = "350";
   }
-  if (InputFile.find("125_50") != std::string::npos) { // mh 125 working point, for per jet approach
+  if (InputFile[0].find("125_50") != std::string::npos) { // mh 125 working point, for per jet approach
     signal_eff = 0.58;
     mass = "125";
   }
-  if (InputFile.find("250_120") != std::string::npos) { // mh 250 working point, for per jet approach
+  if (InputFile[0].find("250_120") != std::string::npos) { // mh 250 working point, for per jet approach
     signal_eff = 0.65;
     mass = "250";
   }
-  if (InputFile.find("350_160") != std::string::npos) { // mh 125 working point, for per jet approach
+  if (InputFile[0].find("350_160") != std::string::npos) { // mh 125 working point, for per jet approach
     signal_eff = 0.68;
     mass = "350";
   }
@@ -898,22 +899,53 @@ void MakeDNNPerformancePlots_SigBkg()
   // Signals
   string SignalTree = "NoSel";
 
-  string Signal = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_HToSSTo4B_125_50_CTau3000_scores.root";
+  vector<string> Signal = {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_125_50_CTau3000_scores.root"};
   string SigLabel = "125_mS50";
 
-  string Signal2 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_HToSSTo4B_250_120_CTau10000_scores.root";
+  vector<string> Signal2 = {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_250_120_CTau10000_scores.root"};
   string SigLabel2 = "250_mS120";
 
-  string Signal3 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_HToSSTo4B_350_160_CTau10000_scores.root";
+  vector<string> Signal3 = {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_350_160_CTau10000_scores.root"};
   string SigLabel3 = "350_mS160";
 
-  string Signal4 = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_HToSSTo4B_350_80_CTau500_scores.root";
+  vector<string> Signal4 = {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_350_80_CTau500_scores.root"};
   string SigLabel4 = "350_mX80";
+
+  // pre-BPix versions of the signals for comparison (list multiple files to increase stats)
+  vector<string> Signal5 = {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_MH125_MS50_CTau3000_PU70_2022postEE_scores.root",
+                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_MH125_MS50_CTau3000_Premix_2022preEE_scores.root",
+                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_MH125_MS50_CTau3000_Premix_2023postBPix-pythia_scores.root",
+                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_MH125_MS50_CTau3000_Premix_2023postBPix_pythia_scores.root",
+                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_MH125_MS50_CTau3000_PU60_2022postEE_scores.root"};
+  string SigLabel5 = "125_mS50_preBPix";
+
+  vector<string> Signal6 = {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_MH250_MS120_CTau10000_PU70_2022postEE_scores.root",
+                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_MH250_MS120_CTau10000_Premix_2022preEE_scores.root",
+                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_MH250_MS120_CTau10000_Premix_2023postBPix-pythia_scores.root",
+                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_MH250_MS120_CTau10000_Premix_2023postBPix_pythia_scores.root",
+                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_MH250_MS120_CTau10000_PU60_2022postEE_scores.root"};
+  string SigLabel6 = "250_mS120_preBPix";
+
+  vector<string> Signal7 = {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_MH350_MS160_CTau10000_Premix_2022preEE_scores.root",
+                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_MH350_MS160_CTau10000_Premix_2023postBPix_pythia_scores.root",
+                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_MH350_MS160_CTau10000_PU60_2022postEE_scores.root",
+                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_MH350_MS160_CTau10000_PU70_2022postEE_scores.root"};
+  string SigLabel7 = "350_mS160_preBPix";
+
+  vector<string> Signal8 = {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_MH350_MS80_CTau500_Premix_2022preEE_scores.root",
+                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_MH350_MS80_CTau500_Premix_2023postBPix-pythia_scores.root",
+                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_MH350_MS80_CTau500_Premix_2023postBPix_pythia_scores.root",
+                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_MH350_MS80_CTau500_PU60_2022postEE_scores.root",
+                            "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_MH350_MS80_CTau500_PU70_2022postEE_scores.root"};
+  string SigLabel8 = "350_mS80_preBPix";
 
   // Backgrounds
   string BackgroundTree = "NoSel";
-  string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv4_scores.root";
+  string Background = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_data_2023Dv1_scores.root";
   string BkgLabel = "W+Jets";
+
+  // pre-BPix version of the background for comparison
+  string Background_preBPix = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_data_2023Cv4_scores.root";
 
   int Color1 = 30;
   int Color2 = 38;
@@ -929,6 +961,14 @@ void MakeDNNPerformancePlots_SigBkg()
     BDTPerformancePlots(Signal3, SigLabel3, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
     SetupPlots();
     BDTPerformancePlots(Signal4, SigLabel4, SignalTree, Background, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
+    SetupPlots();
+    BDTPerformancePlots(Signal5, SigLabel5, SignalTree, Background_preBPix, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
+    SetupPlots();
+    BDTPerformancePlots(Signal6, SigLabel6, SignalTree, Background_preBPix, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);  
+    SetupPlots();
+    BDTPerformancePlots(Signal7, SigLabel7, SignalTree, Background_preBPix, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
+    SetupPlots();
+    BDTPerformancePlots(Signal8, SigLabel8, SignalTree, Background_preBPix, BkgLabel, BackgroundTree, Color1, Color2, Color3, type);
     SetupPlots();
   }
 }
