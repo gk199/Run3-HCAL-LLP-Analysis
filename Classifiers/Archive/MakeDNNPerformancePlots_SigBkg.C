@@ -581,7 +581,7 @@ void BDTPerformancePlots(vector<string> InputFile, string Label, string SigTree,
     int third_decimal = static_cast<int>(std::floor(jet0_Pt * 1000)) % 10;
     // eventually need to fill with weights
     // don't evaluate performance using training events
-    if (third_decimal >= 8) Signal_DNN_depth->Fill(score_depth_sig);
+    if (third_decimal < 8) Signal_DNN_depth->Fill(score_depth_sig);
   } 
   cout << "Total Inclusive Entries (signal): " << tree_sig_reduced_inc->GetEntries() << "\n";
   int nentries_inc = tree_sig_reduced_inc->GetEntries();
@@ -590,7 +590,7 @@ void BDTPerformancePlots(vector<string> InputFile, string Label, string SigTree,
     if (ientry % 100000 == 0) cout << "Event " << ientry << endl;
 
     int third_decimal = static_cast<int>(std::floor(jet0_Pt * 1000)) % 10;
-    if (third_decimal >= 8) Signal_DNN_inclusive->Fill(score_inclusive_sig);
+    if (third_decimal < 8) Signal_DNN_inclusive->Fill(score_inclusive_sig);
   } 
   //*****************************************************************************************
   // Get background distribution
@@ -648,9 +648,9 @@ void BDTPerformancePlots(vector<string> InputFile, string Label, string SigTree,
       int third_decimal = static_cast<int>(std::floor(jet0_Pt * 1000)) % 10;
 
       // eventually need to fill with weights
-      if (jet0_DepthTagCand && jet1_scores_inc_train80 < 0.2 && third_decimal >= 8) Background_DNN_depth->Fill(score_depth_bkg);
+      if (jet0_DepthTagCand && jet1_scores_inc_train80 < 0.2 && third_decimal < 8) Background_DNN_depth->Fill(score_depth_bkg);
       // if (Pass_WPlusJets && third_decimal < 8 && jet0_Pt > 40 && (abs(jet0_Eta) < 1.26)) Background_DNN_inclusive->Fill(score_inclusive_bkg);
-      if (jet0_InclTagCand && third_decimal >= 8) Background_DNN_inclusive->Fill(score_inclusive_bkg);
+      if (jet0_InclTagCand && third_decimal < 8) Background_DNN_inclusive->Fill(score_inclusive_bkg);
     } 
     TFile *outFile = new TFile("background_histograms_trained.root", "RECREATE"); // approach to save the background depth and inclusive hisograms to disk so runs quicker
     Background_DNN_depth->Write();
