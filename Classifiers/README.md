@@ -3,21 +3,28 @@
 Two DNN classifiers are trained, one as a depth jet tagger, the other as an inclusive jet tagger. A virtual environment is used to do the training and score evaluations:
 
 ```
+systemctl --user start tmux.service # to avoid session being killed when logout
+tmux new -s v7_DNN_training # setup tmux if needed
+# run below commands, to detach and reattach:
+Ctrl+b, then d
+tmux attach -t v7_DNN_training
+# make sure to login to the same lxplus node to reattach
+
 source VirtualEnvs/keras2pt13pt1/bin/activate
 
 cd Archive
-python3 runner-v6.py
-python3 runner-v6-depth.py
+python3 runner-v7.py
+python3 runner-v7-depth.py
 ```
 
 Need to run the inclusive tagger before the depth tagger training can be run, since depth training is done in the CR! The root files with inclusive scores are listed as the input to the depth training. This is done via:
 ```
 cd ..
-python3 Evaluate/ScoresToEventBased_iterate.py -f /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v*/<filename>.root -t NoSel -d Evaluate/depth_model_v4_LLPanywhere.keras -i Evaluate/inclusive_model_v5.keras -c Evaluate/norm_constants_v4.csv -m filewrite
+python3 Evaluate/ScoresToEventBased_iterate.py -f /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v*/<filename>.root -t NoSel -d Evaluate/depth_model_v5_LLPanywhere.keras -i Evaluate/inclusive_model_v7.keras -c Evaluate/norm_constants_v7.csv -m filewrite
 ./AddScores.sh
 ```
 
-List files to train over and to write scores to in these scripts. The output DNNs are `depth_model_v5.keras` and `inclusive_model_v5.keras` (April 2026).
+List files to train over and to write scores to in these scripts. The output DNNs are `depth_model_v7.keras` and `inclusive_model_v7.keras` (April 2026).
 
 The trained models from v4 (trained in summer 2025) are used for the analysis (through v5.1). Now the scores are added during the Condor production of the minituples, but there is also the option to add scores afterwards if needed. For this, an optimized version of the `ScoresToEventBased` code was written, allowing the ROOT file to be iterated and read in chunks, to prevent a large amount of data being stored in memory and crashing the python process. This is run with:
 
@@ -45,7 +52,11 @@ python3 PlotScoresDNN_v2.py --mode background_overlay --normalize
 
 ## Custom ROC Curve Plots
 ```
+cd Archive
 root -b -q -l MakeDNNPerformancePlots_SigBkg.C
+# change third_decimal < 8 (trained) or third_decimal >= 8 (tested)
+cd ..
+root -b -q -l MakeDNNTrainTestSigEffComparison.C
 ```
 The input root files are listed in the script. 
 

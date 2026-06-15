@@ -8,9 +8,11 @@ void DisplacedHcalJetAnalyzer::SetWeight(string infiletag){
 
     // read isData and era from the ntuple itself — reliable regardless of file naming
     if (fChain) { b_isData->GetEntry(0); b_era->GetEntry(0); currentEra_ = *era; }
-    bool data = isData;
+    // Data era strings always begin with "Run" (e.g. "Run2022C"); MC eras do not (e.g. "2022preEE").
+    // Use both isData and era as a cross-check: some older ntuples (e.g. 2022 RAW) may have isData=0.
+    bool data = isData || (currentEra_.find("Run") == 0);
     bool signal = infiletag.find("CTau") != string::npos;
-    cout << infiletag << " (isData=" << data << ")" << endl;
+    cout << infiletag << " (isData=" << isData << ", era=" << currentEra_ << ", treated as data=" << data << ")" << endl;
 
 	if( data ){
         weight = 1;

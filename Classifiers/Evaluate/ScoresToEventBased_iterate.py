@@ -241,7 +241,8 @@ class Runner:
         )
         incl_handler.load()
 
-        output_filename = f"{self.sig[:-5]}_{self.tree}_scores.root"
+        # output_filename = f"{self.sig[:-5]}_{self.tree}_scores.root"
+        output_filename = f"{self.sig[:-5]}_scores.root"
 
         first_write = True
         outfile = None

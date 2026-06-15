@@ -430,10 +430,14 @@ void MakeDNNTrainTestSigEffComparison()
   string SignalTree = "NoSel";
 
   vector<pair<string,string>> samples = { // initialy was with 3.16 minituples, now 5.3 with new DNN scores
-    {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_HToSSTo4B_125_50_CTau3000_scores.root",   "125_mS50"},
-    {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_HToSSTo4B_250_120_CTau10000_scores.root", "250_mS120"},
-    {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_HToSSTo4B_350_160_CTau10000_scores.root", "350_mS160"},
-    {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_HToSSTo4B_350_80_CTau500_scores.root",    "350_mX80"},
+    {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_125_50_CTau3000_scores.root",   "125_mS50"},
+    {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_250_120_CTau10000_scores.root", "250_mS120"},
+    {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_350_160_CTau10000_scores.root", "350_mS160"},
+    {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_350_80_CTau500_scores.root",    "350_mX80"},
+    {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_MH125_MS50_CTau3000_PU70_2022postEE_scores.root",  "125_mS50_postEE"},
+    {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_MH250_MS120_CTau10000_PU70_2022postEE_scores.root", "250_mS120_postEE"},
+    {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_MH350_MS160_CTau10000_PU70_2022postEE_scores.root", "350_mS160_postEE"},
+    {"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_HToSSTo4B_MH350_MS80_CTau500_PU70_2022postEE_scores.root",    "350_mS80_postEE"}
   };
 
   for (auto& [file, label] : samples) {
