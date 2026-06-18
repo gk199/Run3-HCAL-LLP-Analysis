@@ -61,7 +61,16 @@ pip3 install awkward
 pip3 install zipp
 
 echo "Evaluating DNN..."
-python3 Evaluate/ScoresToEventBased_iterate.py -f  minituple_$filetag.root -t NoSel -d Evaluate/depth_model_v5.keras -i Evaluate/inclusive_model_v5.keras -c Evaluate/norm_constants_v4.csv -m filewrite
+if [[ "$filetag" == *"Run2022"* ]] || [[ "$filetag" == *"Run2023C"* ]] \
+   || [[ "$filetag" == *"2022preEE"* ]] || [[ "$filetag" == *"2022postEE"* ]]; then
+    DNN_DEPTH="Evaluate/depth_model_v7_cat12.keras"
+    DNN_INCL="Evaluate/inclusive_model_v7_cat12.keras"
+else
+    DNN_DEPTH="Evaluate/depth_model_v7_cat3.keras"
+    DNN_INCL="Evaluate/inclusive_model_v7_cat3.keras"
+fi
+echo "  - DNN models: $DNN_DEPTH, $DNN_INCL"
+python3 Evaluate/ScoresToEventBased_iterate.py -f minituple_$filetag.root -t NoSel -d $DNN_DEPTH -i $DNN_INCL -c Evaluate/norm_constants_v4.csv -m filewrite
 
 echo "Timestamp: $(date '+%Y-%m-%d %H:%M:%S')\n"
 

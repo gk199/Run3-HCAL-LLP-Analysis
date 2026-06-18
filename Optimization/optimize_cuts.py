@@ -26,7 +26,7 @@ cwd = os.getcwd()
 
 # Inputs:
 root_file_path = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples"
-version        = "v5.3" # Corresponds to directory name
+version        = "v5.6" # Corresponds to directory name
 
 # Binning
 n_bins_global = 100
@@ -55,7 +55,8 @@ def parseArgs():
         description=''
     )
 
-    parser.add_argument("-i", "--input-signaltag", action="store", help="Input signal tag (example: HToSSTo4B_125_50_CTau3000)", required=True)
+    parser.add_argument("--sig22", action="store", help="Signal tag for 2022 (example: HToSSTo4B_125_50_CTau3000_2022)", required=True)
+    parser.add_argument("--sig23", action="store", help="Signal tag for 2023 (example: HToSSTo4B_125_50_CTau3000_2023)", required=True)
     parser.add_argument("-s", "--settings-tag",    action="store", help="Input parameter tag", default="test", required=False)
     parser.add_argument("-c", "--calculate",       action="store_true", help="Run calculation of optimal SR cuts", default=False, required=False)
     parser.add_argument("-p", "--plot",            action="store_true", help="Plot calculation of optimal SR cuts", default=False, required=False)
@@ -111,36 +112,46 @@ def calculate_significance(n_signal, n_background):
         return Zprime
 
 # ------------------------------------------------------------------------------
-def calculate_results( filetag, signaltag ):
+def read_filetags( arg ):
+    """Return list of filetags from a .txt file (one tag per line) or a single tag string."""
+    if arg.endswith('.txt') and os.path.isfile(arg):
+        with open(arg) as f:
+            return [line.strip() for line in f if line.strip() and not line.startswith('#')]
+    return [arg]
 
-    print( "Running calculate_results for", filetag, signaltag )    
+# ------------------------------------------------------------------------------
+def calculate_results( filetag, signaltag_22, signaltag_23 ):
+
+    print( "Running calculate_results for", filetag, signaltag_22, signaltag_23 )
 
     # ----- Process Inputs ----- #
+
+    signaltags_22 = read_filetags(signaltag_22)
+    signaltags_23 = read_filetags(signaltag_23)
 
     # Local inputs for testing
     infile_data_22 = "../Files/MiniTuples/v5.1/minituple_data_2022Ev1_scores.root"
     infile_data_23 = "../Files/MiniTuples/v5.1/minituple_data_2023Dv2_scores.root"
-    infile_sig     = "../Files/MiniTuples/v5.1.1/minituple_HToSSTo4B_125_50_CTau3000_scores.root"
 
     # All inputs on lxplus
-    
-    if platform.system() == "Linux": # On lxplus 
+    if platform.system() == "Linux": # On lxplus
         infile_data_22 = ""
         infile_data_23 = ""
-        infile_sig = "{}/{}/minituple_{}_scores.root".format(root_file_path, version, signaltag)
 
     infiles_data_22 = [
+        "{}/{}/minituple_data_2022Cv1_scores.root".format(root_file_path, version),
         "{}/{}/minituple_data_2022Dv1_scores.root".format(root_file_path, version),
         "{}/{}/minituple_data_2022Ev1_scores.root".format(root_file_path, version),
         "{}/{}/minituple_data_2022Fv1_scores.root".format(root_file_path, version),
         "{}/{}/minituple_data_2022Gv1_scores.root".format(root_file_path, version),
-    ]
-
-    infiles_data_23 = [
-        #"/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/{}/minituple_data_2023Cv1_scores.root".format(version),
+        # 2023, pre-BPix:
+        "{}/{}/minituple_data_2023Cv1_scores.root".format(root_file_path, version),
         "{}/{}/minituple_data_2023Cv2_scores.root".format(root_file_path, version),
         "{}/{}/minituple_data_2023Cv3_scores.root".format(root_file_path, version),
         "{}/{}/minituple_data_2023Cv4_scores.root".format(root_file_path, version),
+     ]
+
+    infiles_data_23 = [
         "{}/{}/minituple_data_2023Dv1_scores.root".format(root_file_path, version),
         "{}/{}/minituple_data_2023Dv2_scores.root".format(root_file_path, version),
     ]
@@ -155,8 +166,8 @@ def calculate_results( filetag, signaltag ):
     lumi_sf_22 = 34.76 / 5.81
     lumi_sf_23 = 28.28 / (0.21*9.68)
 
-    lumi_2022 = 34.76
-    lumi_2023 = 28.28
+    lumi_2022 = 7.9895 + 26.6749 + 17.9642      # 34.76 (just 2022)
+    lumi_2023 = 9.67674                         # 28.28 (just 2023)
     lumi_total = lumi_2022 + lumi_2023
 
     tree_data_22 = ROOT.TChain("NoSel")
@@ -175,7 +186,7 @@ def calculate_results( filetag, signaltag ):
         tree_data_23.Add(infile_data_23)
     else:
         lumi_sf_23 = 1
-        lumi_sf_23 = 1.267
+        # lumi_sf_23 = 1.267 # TODO check why this was needed, is it for Cv1? 
         print( "Reading in lumi_sf_23 as", lumi_sf_23 )
         for infile in infiles_data_23:
             print("Adding", infile, "to chain")
@@ -183,11 +194,22 @@ def calculate_results( filetag, signaltag ):
 
     # ----- Read in Signal ----- #
 
-    print("Reading in signal tree...")
-    print("Opening", infile_sig)
+    print("Reading in signal trees...")
+    tree_sig_22 = ROOT.TChain("NoSel")
+    tree_sig_23 = ROOT.TChain("NoSel")
 
-    infile_sig = ROOT.TFile.Open(infile_sig) 
-    tree_sig  = infile_sig.Get("NoSel")
+    if platform.system() == "Linux":
+        for tag in signaltags_22:
+            path = "{}/{}/minituple_{}_scores.root".format(root_file_path, version, tag)
+            print("Opening 2022:", path)
+            tree_sig_22.Add(path)
+        for tag in signaltags_23:
+            path = "{}/{}/minituple_{}_scores.root".format(root_file_path, version, tag)
+            print("Opening 2023:", path)
+            tree_sig_23.Add(path)
+    else:
+        tree_sig_22.Add("../Files/MiniTuples/v5.1.1/minituple_HToSSTo4B_125_50_CTau3000_scores.root")
+        tree_sig_23.Add("../Files/MiniTuples/v5.1.1/minituple_HToSSTo4B_125_50_CTau3000_scores.root")
 
     outfile_temp = ROOT.TFile("deleteme_skimtemp_{0}.root".format(filetag),"RECREATE")
     outfile_temp.cd()
@@ -229,17 +251,21 @@ def calculate_results( filetag, signaltag ):
         tree_data_23.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_inc_train80 >> n_bkgpred_{0}_{1}".format("ljdc", "2023"), selections["ljdc"] )
         tree_data_23.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_inc_train80 >> n_bkgpred_{0}_{1}".format("sjdc", "2023"), selections["sjdc"] )
 
-        tree_sig.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_inc_train80 >> n_signal_{0}_{1}".format("ljdc", "Total"), "(event_weight * weight) * ({})".format(selections["ljdc"]) )
-        tree_sig.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_inc_train80 >> n_signal_{0}_{1}".format("sjdc", "Total"), "(event_weight * weight) * ({})".format(selections["sjdc"]) )
-    
-    elif score_mode == "InclusiveOnly": 
+        tree_sig_22.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_inc_train80 >> n_signal_{0}_{1}".format("ljdc", "2022"), "(event_weight * weight) * ({})".format(selections["ljdc"]) )
+        tree_sig_22.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_inc_train80 >> n_signal_{0}_{1}".format("sjdc", "2022"), "(event_weight * weight) * ({})".format(selections["sjdc"]) )
+        tree_sig_23.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_inc_train80 >> n_signal_{0}_{1}".format("ljdc", "2023"), "(event_weight * weight) * ({})".format(selections["ljdc"]) )
+        tree_sig_23.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_inc_train80 >> n_signal_{0}_{1}".format("sjdc", "2023"), "(event_weight * weight) * ({})".format(selections["sjdc"]) )
+
+    elif score_mode == "InclusiveOnly":
         tree_data_22.Draw( "jet0_scores_inc_train80:jet1_scores_inc_train80 >> n_bkgpred_{0}_{1}".format("ljdc", "2022"), selections["ljdc"] )
         tree_data_22.Draw( "jet1_scores_inc_train80:jet0_scores_inc_train80 >> n_bkgpred_{0}_{1}".format("sjdc", "2022"), selections["sjdc"] )
         tree_data_23.Draw( "jet0_scores_inc_train80:jet1_scores_inc_train80 >> n_bkgpred_{0}_{1}".format("ljdc", "2023"), selections["ljdc"] )
         tree_data_23.Draw( "jet1_scores_inc_train80:jet0_scores_inc_train80 >> n_bkgpred_{0}_{1}".format("sjdc", "2023"), selections["sjdc"] )
 
-        tree_sig.Draw( "jet0_scores_inc_train80:jet1_scores_inc_train80 >> n_signal_{0}_{1}".format("ljdc", "Total"), "(event_weight * weight) * ({})".format(selections["ljdc"]) )
-        tree_sig.Draw( "jet1_scores_inc_train80:jet0_scores_inc_train80 >> n_signal_{0}_{1}".format("sjdc", "Total"), "(event_weight * weight) * ({})".format(selections["sjdc"]) )
+        tree_sig_22.Draw( "jet0_scores_inc_train80:jet1_scores_inc_train80 >> n_signal_{0}_{1}".format("ljdc", "2022"), "(event_weight * weight) * ({})".format(selections["ljdc"]) )
+        tree_sig_22.Draw( "jet1_scores_inc_train80:jet0_scores_inc_train80 >> n_signal_{0}_{1}".format("sjdc", "2022"), "(event_weight * weight) * ({})".format(selections["sjdc"]) )
+        tree_sig_23.Draw( "jet0_scores_inc_train80:jet1_scores_inc_train80 >> n_signal_{0}_{1}".format("ljdc", "2023"), "(event_weight * weight) * ({})".format(selections["ljdc"]) )
+        tree_sig_23.Draw( "jet1_scores_inc_train80:jet0_scores_inc_train80 >> n_signal_{0}_{1}".format("sjdc", "2023"), "(event_weight * weight) * ({})".format(selections["sjdc"]) )
 
     elif score_mode == "DepthOnly":
         tree_data_22.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_depth_LLPanywhere >> n_bkgpred_{0}_{1}".format("ljdc", "2022"), selections["ljdc"] )
@@ -247,8 +273,10 @@ def calculate_results( filetag, signaltag ):
         tree_data_23.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_depth_LLPanywhere >> n_bkgpred_{0}_{1}".format("ljdc", "2023"), selections["ljdc"] )
         tree_data_23.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_depth_LLPanywhere >> n_bkgpred_{0}_{1}".format("sjdc", "2023"), selections["sjdc"] )
 
-        tree_sig.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_depth_LLPanywhere >> n_signal_{0}_{1}".format("ljdc", "Total"), "(event_weight * weight) * ({})".format(selections["ljdc"]) )
-        tree_sig.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_depth_LLPanywhere >> n_signal_{0}_{1}".format("sjdc", "Total"), "(event_weight * weight) * ({})".format(selections["sjdc"]) )
+        tree_sig_22.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_depth_LLPanywhere >> n_signal_{0}_{1}".format("ljdc", "2022"), "(event_weight * weight) * ({})".format(selections["ljdc"]) )
+        tree_sig_22.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_depth_LLPanywhere >> n_signal_{0}_{1}".format("sjdc", "2022"), "(event_weight * weight) * ({})".format(selections["sjdc"]) )
+        tree_sig_23.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_depth_LLPanywhere >> n_signal_{0}_{1}".format("ljdc", "2023"), "(event_weight * weight) * ({})".format(selections["ljdc"]) )
+        tree_sig_23.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_depth_LLPanywhere >> n_signal_{0}_{1}".format("sjdc", "2023"), "(event_weight * weight) * ({})".format(selections["sjdc"]) )
 
     """
     reweight_llp0 = "pow ( {0} / {1}, 1 ) * exp( -LLP0_DecayCtau * 10. * ( 1.0/{2} - 1.0/{3} ) )".format(ctau_sample, ctau_target, ctau_target, ctau_sample)
@@ -264,11 +292,13 @@ def calculate_results( filetag, signaltag ):
         h2["n_bkgpred_{0}_{1}".format(cat, "Total")] = h2["n_bkgpred_{0}_{1}".format(cat, "2022")].Clone()
         h2["n_bkgpred_{0}_{1}".format(cat, "Total")].Add( h2["n_bkgpred_{0}_{1}".format(cat, "2023")] )
 
-        h2["n_signal_{0}_{1}".format(cat, "2022")] = h2["n_signal_{0}_{1}".format(cat, "Total")].Clone()
         h2["n_signal_{0}_{1}".format(cat, "2022")].Scale(lumi_2022 / lumi_total)
-
-        h2["n_signal_{0}_{1}".format(cat, "2023")] = h2["n_signal_{0}_{1}".format(cat, "Total")].Clone()
+        h2["n_signal_{0}_{1}".format(cat, "2022")].Scale(100.)  # TEMPORARY: weight uses N_gen=3.99M instead of actual 40k; remove once sig22 files are reprocessed
+        print("TEMPORARY: Scaling signal 2022 by 100x to account for N_gen=40k; remove once sig22 files are reprocessed")
         h2["n_signal_{0}_{1}".format(cat, "2023")].Scale(lumi_2023 / lumi_total)
+
+        h2["n_signal_{0}_{1}".format(cat, "Total")] = h2["n_signal_{0}_{1}".format(cat, "2022")].Clone()
+        h2["n_signal_{0}_{1}".format(cat, "Total")].Add( h2["n_signal_{0}_{1}".format(cat, "2023")] )
 
     # Loop
 
@@ -335,7 +365,7 @@ def plot_results( filetag ):
         significance_array_tot = np.zeros((n_bins, n_bins), dtype=float)
 
         years = ["2022", "2023"]
-        if combine_years_global: 
+        if combine_years: 
             years = ["Total"]
 
         for year in years:
@@ -461,9 +491,10 @@ def plot_results( filetag ):
             plt.title("Category: {}, Year: {}, Scores: {}".format(cat, year, score_mode), fontsize=10)
 
             levels = np.max(significance) * np.array([ 0.6, 0.8, 0.9 ])
-            levels = [round(l,2) for l in levels]
-            cs = plt.contour(X, Y, significance.T, levels=levels, colors='black', linewidths=0.7)
-            plt.clabel(cs, fontsize=10)#, fmt="%.0e")
+            levels = sorted(set(round(l, 2) for l in levels))
+            if len(levels) >= 2:
+                cs = plt.contour(X, Y, significance.T, levels=levels, colors='black', linewidths=0.7)
+                plt.clabel(cs, fontsize=10)
             #plt.clabel(cs, fmt=lambda x: f"{x:.2g}", fontsize=10)
 
             plt.savefig("Plots/h2_significance_{}_{}.png".format(key, filetag), dpi=450, bbox_inches='tight')
@@ -622,16 +653,19 @@ def print_results(filetag):
 def main():
 
     args = parseArgs()
-    signal_tag     = args.input_signaltag
+    signaltag_22  = args.sig22
+    signaltag_23  = args.sig23
     settings_tag  = args.settings_tag
-    calculate      = args.calculate
-    plot           = args.plot
-    print_info     = args.print_info
+    calculate     = args.calculate
+    plot          = args.plot
+    print_info    = args.print_info
 
-    filetag = "{}-{}".format(signal_tag, settings_tag)
-    
+    tag22 = os.path.splitext(os.path.basename(signaltag_22))[0]
+    tag23 = os.path.splitext(os.path.basename(signaltag_23))[0]
+    filetag = "{}-{}-{}".format(tag22, tag23, settings_tag)
+
     if calculate:
-        calculate_results( filetag, signal_tag )
+        calculate_results( filetag, signaltag_22, signaltag_23 )
 
     if plot:
         plot_results( filetag )
