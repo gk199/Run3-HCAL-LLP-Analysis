@@ -235,12 +235,13 @@ double DisplacedHcalJetAnalyzer::GetNEventsProduced(string infiletag){
     cout << NEvents_produced << endl;
 
     if (NEvents_produced < 1) {
+        string best_key = "";
         for(map<string,double>::iterator it = MCTag_to_NEvents.begin(); it != MCTag_to_NEvents.end(); ++it){
-			string key = it->first;
-			if( infiletag.find(key) != string::npos ){
-				NEvents_produced = MCTag_to_NEvents[key];
-				break;
-			}	
+            string key = it->first;
+            if( infiletag.find(key) != string::npos && key.size() > best_key.size() ){
+                best_key = key;
+                NEvents_produced = it->second;
+            }
         }
     }
     
