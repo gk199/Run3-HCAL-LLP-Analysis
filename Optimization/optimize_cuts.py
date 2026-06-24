@@ -41,7 +41,7 @@ score_mode_global = "Normal" # "InclusiveOnly", "DepthOnly"
 # NB: The following params *only* control inputs to the plot_results function.
 
 # Require 2022 and 2023 to have same score selections
-combine_years = True 
+combine_years = False 
 
 # Require LJDC and SJDC to have same score selections
 # Not implemented # combine_categories = False

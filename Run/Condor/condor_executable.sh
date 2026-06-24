@@ -31,7 +31,6 @@ unzip DisplacedHcalJetAnalyzer.zip > /dev/null
 
 cd DisplacedHcalJetAnalyzer/
 source compile.sh
-mkdir exe
 cd ../
 
 echo "Exporting LD_LIBRARY_PATH..."
@@ -55,14 +54,13 @@ echo "Setting up DNN environment..."
 echo "Unpacking classifier information:"
 unzip Classifiers.zip > /dev/null
 
-source ${BASE_DIR}/Classifiers/VirtualEnvs/keras2pt13pt1/bin/activate
+source VirtualEnvs/keras2pt13pt1/bin/activate
 pip3 install wrapt
 pip3 install awkward
 pip3 install zipp
 
 echo "Evaluating DNN..."
-if [[ "$filetag" == *"Run2022"* ]] || [[ "$filetag" == *"Run2023C"* ]] \
-   || [[ "$filetag" == *"2022preEE"* ]] || [[ "$filetag" == *"2022postEE"* ]]; then
+if echo "$ds_in" | grep -qE "Run2022|Run2023C|2022preEE|2022postEE"; then
     DNN_DEPTH="Evaluate/depth_model_v7_cat12.keras"
     DNN_INCL="Evaluate/inclusive_model_v7_cat12.keras"
 else

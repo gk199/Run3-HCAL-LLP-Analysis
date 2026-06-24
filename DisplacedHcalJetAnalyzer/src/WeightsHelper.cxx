@@ -75,8 +75,11 @@ double DisplacedHcalJetAnalyzer::GetSignalBRxSigma(string infiletag){
 
     double H_LLP_to_xs = 52200; // fb // https://pdg.lbl.gov/2023/reviews/rpp2023-rev-higgs-boson.pdf
 
-    // Find the position of "MH" and extract the mass
-    string HiggsMass = infiletag.substr( infiletag.find("MH")+2,3 );
+    // Find "MH" followed by a digit (skips "MH-125" style with hyphens in XRootD URLs)
+    size_t mh_pos = string::npos;
+    for (size_t p = 0; (p = infiletag.find("MH", p)) != string::npos; ++p)
+        if (p+2 < infiletag.size() && isdigit(infiletag[p+2])) { mh_pos = p; break; }
+    string HiggsMass = (mh_pos != string::npos) ? infiletag.substr(mh_pos+2, 3) : "0";
 	double BRxSigma = H_LLP_to_xs;
 
 	cout<<"  HiggsMass --> "<<HiggsMass<<endl;
@@ -230,9 +233,7 @@ double DisplacedHcalJetAnalyzer::GetNEventsProduced(string infiletag){
     /eos/uscms/store/user/lpclonglived/apresyan/privateProduction/DR/step2_RECOSIM/Run3Summer22/ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV
     */
 
-    double NEvents_produced = MCTag_to_NEvents[infiletag];
-
-    cout << NEvents_produced << endl;
+    double NEvents_produced = 0.0; // operator[] would insert {infiletag:0} into map, corrupting longest-match search below
 
     if (NEvents_produced < 1) {
         string best_key = "";
