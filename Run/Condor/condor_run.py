@@ -179,19 +179,8 @@ def main():
     zip_dir(Executable_DisplacedHcalJetAnalyzer, ZIP_DisplacedHcalJetAnalyzer )
 
     print("Zipping Classifiers input...")
-    ZIP_Classifier = os.path.join(cwd, "Classifiers.zip")
-    if os.path.exists(ZIP_Classifier):
-        print("Zip file", ZIP_Classifier, "already exists. Using this (not re-zipping!)")
-    else:
-        Classifiers_dir = os.path.abspath("../../Classifiers")
-        with zipfile.ZipFile(ZIP_Classifier, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            for subdir in ['Evaluate', 'VirtualEnvs']:
-                src = os.path.join(Classifiers_dir, subdir)
-                for root, dirs, files in os.walk(src):
-                    for file in files:
-                        full_path = os.path.join(root, file)
-                        arcname = os.path.join(subdir, os.path.relpath(full_path, src))
-                        zipf.write(full_path, arcname)
+    ZIP_Classifier = os.path.join( cwd, "Classifiers.zip")
+    zip_dir(Executable_ClassifierInputs, ZIP_Classifier )
 
     print("Zipping Jet Veto Maps input...")
     ZIP_JetVeto = os.path.join(cwd, "JetVetoMaps_Run3.zip")

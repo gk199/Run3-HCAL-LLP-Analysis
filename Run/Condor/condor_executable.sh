@@ -54,7 +54,7 @@ echo "Setting up DNN environment..."
 echo "Unpacking classifier information:"
 unzip Classifiers.zip > /dev/null
 
-source VirtualEnvs/keras2pt13pt1/bin/activate
+source ${BASE_DIR}/Classifiers/VirtualEnvs/keras2pt13pt1/bin/activate
 pip3 install wrapt
 pip3 install awkward
 pip3 install zipp
