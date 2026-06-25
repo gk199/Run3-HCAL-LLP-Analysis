@@ -30,6 +30,11 @@ Submit all (modify first):
 source submit_all.sh
 ```
 
+To check the output of the condor jobs before hadding together the produced files:
+```
+./check_empty_output.sh /eos/home-g/gkopp/LLP_Analysis/MiniTuples/v5.6/ checkOutput.txt
+```
+
 ## Score Addition Options
 In the case where the minituples ran but the score addition needs to be re-run, this is generally quite fast and a bash script is set up to do so:
 ```
