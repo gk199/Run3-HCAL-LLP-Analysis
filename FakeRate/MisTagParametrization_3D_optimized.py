@@ -35,7 +35,7 @@ debug = False
 # ---- Histogram bin definitions (identical to original) ----
 pT_bins  = np.array([0, 40, 50, 60, 70, 80, 100, 120, 160, 240, 400], dtype=float)
 eta_bins = np.linspace(-1.26, 1.26, 9)
-#phi_bins = np.linspace(-np.pi, np.pi, 9)
+# phi_bins = np.linspace(-np.pi, np.pi, 9)
 phi_bins = np.linspace(-np.pi, np.pi, 2) # one bin in phi to test impact on prediction closure
 b_tag_bins = np.array([0, 0.2435, 1.0], dtype=float)
 c_tag_bins = np.array([0, 0.102,  1.0], dtype=float)
@@ -53,6 +53,8 @@ runs_to_exclude_2022 = [357698, 362653, 362655, 359661, 360991] # based on CR 0.
 runs_to_exclude_2022 = [357698, 362653, 359661, 360991] # based on CR 0.2, above 0.1%
 runs_to_exclude_2022 = [357698, 359661, 360991] # based on CR 0.1, above 0.1%
 runs_to_exclude_2022 = []
+# v5.6 minituples
+runs_to_exclude_2022 = [361106] # based on CR 0.2, above 0.5% with depth > 0.9
 
     # 357776, 359661, 359690, 359869, 360890, 361044, 362087, 362437,
     # 362615, 362616, 362653, 360128, 360887, 360949, 361053, 361994,
@@ -69,6 +71,8 @@ runs_to_exclude_2023 = [369998, 370790, 368676, 370093] # based on CR 0.2
 runs_to_exclude_2023 = [370790] # based on CR 0.2, above 0.1% 
 runs_to_exclude_2023 = [370790, 368676, 370093] # based on CR 0.1 above 0.1%
 runs_to_exclude_2023 = []
+# v5.6 minituples
+runs_to_exclude_2023 = [370790] # based on CR 0.2 above 0.5% with depth > 0.9
 
 Zmu     = False
 LLPskim = True
@@ -319,7 +323,7 @@ def book_all_histograms(rdf_base, is_mc=False):
     # WPlusJets (v4.1) uses "_updated" suffixes; data (v5.5) uses the original names
     if is_mc:
         inc_suf   = "inc_train80_updated"
-        depth_suf = "depth_anywhere_updated"
+        depth_suf = "depth_LLPanywhere_updated"
     else:
         inc_suf   = "inc_train80"
         depth_suf = "depth_LLPanywhere"
@@ -738,6 +742,10 @@ _file_map = {
         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2022Ev1_scores.root",
         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2022Fv1_scores.root",
         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2022Gv1_scores.root",
+        # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv1_scores.root",
+        # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv2_scores.root",
+        # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv3_scores.root",
+        # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv4_scores.root",
     ],
     "2022_D": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2022Dv1_scores.root"],
     "2022_E": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2022Ev1_scores.root"],
@@ -758,7 +766,8 @@ _file_map = {
     "2023_Cv4": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv4_scores.root"],
     "2023_Dv1": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Dv1_scores.root"],
     "2023_Dv2": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Dv2_scores.root"],
-    "WPlusJets": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_WJetsToLNu_MC22preEE_NoSel_scores_v5updatedscores.root"]
+    # "WPlusJets": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_WJetsToLNu_MC22preEE_NoSel_scores_v5updatedscores.root"]
+    "WPlusJets": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_WJetsToLNu_MC22preEE_NoSel_scores_v7_cat12.root"]
 }
 
 

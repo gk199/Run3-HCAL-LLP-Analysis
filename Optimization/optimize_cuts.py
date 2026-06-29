@@ -41,7 +41,7 @@ score_mode_global = "Normal" # "InclusiveOnly", "DepthOnly"
 # NB: The following params *only* control inputs to the plot_results function.
 
 # Require 2022 and 2023 to have same score selections
-combine_years = False 
+combine_years = True 
 
 # Require LJDC and SJDC to have same score selections
 # Not implemented # combine_categories = False
@@ -294,7 +294,7 @@ def calculate_results( filetag, signaltag_22, signaltag_23 ):
 
         h2["n_signal_{0}_{1}".format(cat, "2022")].Scale(lumi_2022 / lumi_total)
         # h2["n_signal_{0}_{1}".format(cat, "2022")].Scale(100.)  # TEMPORARY: weight uses N_gen=3.99M instead of actual 40k; remove once sig22 files are reprocessed
-        print("TEMPORARY: Scaling signal 2022 by 100x to account for N_gen=40k; remove once sig22 files are reprocessed")
+        # print("TEMPORARY: Scaling signal 2022 by 100x to account for N_gen=40k; remove once sig22 files are reprocessed")
         h2["n_signal_{0}_{1}".format(cat, "2023")].Scale(lumi_2023 / lumi_total)
 
         h2["n_signal_{0}_{1}".format(cat, "Total")] = h2["n_signal_{0}_{1}".format(cat, "2022")].Clone()

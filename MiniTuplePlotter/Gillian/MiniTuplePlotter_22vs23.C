@@ -5,62 +5,66 @@
 // -------------------------------------------------------------------------------------------------
 void MiniTuplePlotter_22vs23(){
 
-	string path = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.3/minituple_";
+	string path = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_";
 	
 	vector<string> filetags = { "data_2022Dv1_scores", "data_2022Ev1_scores", "data_2022Fv1_scores", "data_2022Gv1_scores", 
 								"data_2023Cv1_scores", "data_2023Cv2_scores", "data_2023Cv3_scores", "data_2023Cv4_scores", "data_2023Dv1_scores", "data_2023Dv2_scores"}; 
 	vector<string> filetags_EraC = { "data_2023Cv3_scores" };
+	vector<string> filetags_EraD = { "data_2023Dv2_scores" };
+	vector<string> filetags_EraF = { "data_2022Fv1_scores" };
 	vector<string> filetags_EraG = { "data_2022Gv1_scores" };
 	vector<string> filetags_small = { "data_2022Gv1_scores", "data_2023Cv4_scores"}; 
 
 	// ----- Flavor tagging probabilities -----//
+	bool WJets_Towers = false; // Set to true to plot W+jets background towers, false to just plot DNN scores in CR/VR.
+	if (WJets_Towers) {
+		// W+jets background
+		class MiniTuplePlotter bkg_plotter_depth( {"data_2022Dv1_scores"}, path );
+		bkg_plotter_depth.SetPlots({P_jet0_DepthTowers, P_jet0_TimingTowers, P_jet0_FlaggedTowers}); 
+		bkg_plotter_depth.SetTreeName( "NoSel" );	
+		bkg_plotter_depth.SetOutputFileTag("v5.3_2022");
+		bkg_plotter_depth.plot_log_ratio    = false; 
+		bkg_plotter_depth.plot_log 			= false;
+		bkg_plotter_depth.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+		bkg_plotter_depth.SetCuts("jet0_Pt >= 100 && abs(jet0_Eta) <= 1.26 && jet0_dR_L1jet < 0.1 && Pass_WPlusJets == 1");
+		bkg_plotter_depth.SetComparisonCuts({Cut_L1_LLPtriggered0, Cut_L1_LLPtriggered1});
+		bkg_plotter_depth.SetLegendNames({"2022: W+jets, not triggered", "2022: W+jets, triggered"});
+		bkg_plotter_depth.colors = { kViolet+4, kMagenta-7};
+		bkg_plotter_depth.SetVariableBins({-0.25,0.25,0.75,1.25,1.75,2.25,2.75,3.25,3.75,4.25,4.75,5.25,5.75,6.25,6.75,7.25,7.75,8.25});
+		bkg_plotter_depth.SetOutputDirectory("DepthTowers");
+		bkg_plotter_depth.Plot();
+		bkg_plotter_depth.ClearFileTrees();
+		bkg_plotter_depth.SetPlots({P_jet0_DepthTowers, P_jet0_TimingTowers, P_jet0_FlaggedTowers}); 
+		bkg_plotter_depth.SetOutputFileTag("v5.3_2022_2plus");
+		bkg_plotter_depth.SetVariableBins({0,1,2,10});
+		bkg_plotter_depth.Plot();
 
-	// W+jets background
-	class MiniTuplePlotter bkg_plotter_depth( {"data_2022Dv1_scores"}, path );
-	bkg_plotter_depth.SetPlots({P_jet0_DepthTowers, P_jet0_TimingTowers, P_jet0_FlaggedTowers}); 
-	bkg_plotter_depth.SetTreeName( "NoSel" );	
-	bkg_plotter_depth.SetOutputFileTag("v5.3_2022");
-	bkg_plotter_depth.plot_log_ratio    = false; 
-	bkg_plotter_depth.plot_log 			= false;
-	bkg_plotter_depth.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
-	bkg_plotter_depth.SetCuts("jet0_Pt >= 100 && abs(jet0_Eta) <= 1.26 && jet0_dR_L1jet < 0.1 && Pass_WPlusJets == 1");
-	bkg_plotter_depth.SetComparisonCuts({Cut_L1_LLPtriggered0, Cut_L1_LLPtriggered1});
-	bkg_plotter_depth.SetLegendNames({"2022: W+jets, not triggered", "2022: W+jets, triggered"});
-	bkg_plotter_depth.colors = { kViolet+4, kMagenta-7};
-	bkg_plotter_depth.SetVariableBins({-0.25,0.25,0.75,1.25,1.75,2.25,2.75,3.25,3.75,4.25,4.75,5.25,5.75,6.25,6.75,7.25,7.75,8.25});
-	bkg_plotter_depth.SetOutputDirectory("DepthTowers");
-	bkg_plotter_depth.Plot();
-	bkg_plotter_depth.ClearFileTrees();
-	bkg_plotter_depth.SetPlots({P_jet0_DepthTowers, P_jet0_TimingTowers, P_jet0_FlaggedTowers}); 
-	bkg_plotter_depth.SetOutputFileTag("v5.3_2022_2plus");
-	bkg_plotter_depth.SetVariableBins({0,1,2,10});
-	bkg_plotter_depth.Plot();
-
-	class MiniTuplePlotter bkg_plotter_depth_23( {"data_2023Cv4_scores"}, path );
-	bkg_plotter_depth_23.SetPlots({P_jet0_DepthTowers, P_jet0_TimingTowers, P_jet0_FlaggedTowers}); 
-	bkg_plotter_depth_23.SetTreeName( "NoSel" );	
-	bkg_plotter_depth_23.SetOutputFileTag("v5.3_2023");
-	bkg_plotter_depth_23.plot_log_ratio    = false; 
-	bkg_plotter_depth_23.plot_log	       = false; 
-	bkg_plotter_depth_23.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
-	bkg_plotter_depth_23.SetCuts("jet0_Pt >= 100 && abs(jet0_Eta) <= 1.26 && jet0_dR_L1jet < 0.1 && Pass_WPlusJets == 1");
-	bkg_plotter_depth_23.SetComparisonCuts({Cut_L1_LLPtriggered0, Cut_L1_LLPtriggered1});
-	bkg_plotter_depth_23.SetLegendNames({"2023: W+jets, not triggered", "2023: W+jets, triggered"});
-	bkg_plotter_depth_23.colors = { kViolet+4, kMagenta-7};
-	bkg_plotter_depth_23.SetVariableBins({-0.25,0.25,0.75,1.25,1.75,2.25,2.75,3.25,3.75,4.25,4.75,5.25,5.75,6.25,6.75,7.25,7.75,8.25});
-	bkg_plotter_depth_23.SetOutputDirectory("DepthTowers");
-	bkg_plotter_depth_23.Plot();
-	bkg_plotter_depth_23.ClearFileTrees();
-	bkg_plotter_depth_23.SetPlots({P_jet0_DepthTowers, P_jet0_TimingTowers, P_jet0_FlaggedTowers}); 
-	bkg_plotter_depth_23.SetOutputFileTag("v5.3_2023_2plus");
-	bkg_plotter_depth_23.SetVariableBins({0,1,2,10});
-	bkg_plotter_depth_23.Plot();
+		class MiniTuplePlotter bkg_plotter_depth_23( {"data_2023Cv4_scores"}, path );
+		bkg_plotter_depth_23.SetPlots({P_jet0_DepthTowers, P_jet0_TimingTowers, P_jet0_FlaggedTowers}); 
+		bkg_plotter_depth_23.SetTreeName( "NoSel" );	
+		bkg_plotter_depth_23.SetOutputFileTag("v5.3_2023");
+		bkg_plotter_depth_23.plot_log_ratio    = false; 
+		bkg_plotter_depth_23.plot_log	       = false; 
+		bkg_plotter_depth_23.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );
+		bkg_plotter_depth_23.SetCuts("jet0_Pt >= 100 && abs(jet0_Eta) <= 1.26 && jet0_dR_L1jet < 0.1 && Pass_WPlusJets == 1");
+		bkg_plotter_depth_23.SetComparisonCuts({Cut_L1_LLPtriggered0, Cut_L1_LLPtriggered1});
+		bkg_plotter_depth_23.SetLegendNames({"2023: W+jets, not triggered", "2023: W+jets, triggered"});
+		bkg_plotter_depth_23.colors = { kViolet+4, kMagenta-7};
+		bkg_plotter_depth_23.SetVariableBins({-0.25,0.25,0.75,1.25,1.75,2.25,2.75,3.25,3.75,4.25,4.75,5.25,5.75,6.25,6.75,7.25,7.75,8.25});
+		bkg_plotter_depth_23.SetOutputDirectory("DepthTowers");
+		bkg_plotter_depth_23.Plot();
+		bkg_plotter_depth_23.ClearFileTrees();
+		bkg_plotter_depth_23.SetPlots({P_jet0_DepthTowers, P_jet0_TimingTowers, P_jet0_FlaggedTowers}); 
+		bkg_plotter_depth_23.SetOutputFileTag("v5.3_2023_2plus");
+		bkg_plotter_depth_23.SetVariableBins({0,1,2,10});
+		bkg_plotter_depth_23.Plot();
+	}
 
 	cout<<endl;
 	cout<<" ---------- Flavor tagging probabilities by DNN scores ---------- "<<endl;
 	cout<<endl;
 
-	bool plot_all = true; // Set to true to plot all variables, false to just plot DNN scores in CR/VR.
+	bool plot_all = false; // Set to true to plot all variables, false to just plot DNN scores in CR/VR.
 	if (plot_all) {
 		class MiniTuplePlotter kinematics( filetags, path );
 
@@ -89,9 +93,12 @@ void MiniTuplePlotter_22vs23(){
 			// kViolet-8, kSpring-6};
 		kinematics.NBins = 50; 		
 		// kinematics.Plot();
-
+	}
+	
+	bool plot_22vs23 = true; // Set to true to plot 2022 vs 2023, false to just plot DNN scores in CR/VR.
+	if (plot_22vs23) {
 		// class MiniTuplePlotter kinematics_RunStudy( filetags_EraG, path );
-		class MiniTuplePlotter kinematics_RunStudy( filetags_EraC, path );
+		class MiniTuplePlotter kinematics_RunStudy( filetags_EraD, path );
 		kinematics_RunStudy.SetTreeName( "NoSel" );
 		kinematics_RunStudy.SetPlots({P_jet0_Pt, P_jet0_Eta, P_jet0_Phi, P_jet0_RechitN, P_jet0_dEta, P_jet0_dPhi, P_jet0_DeepCSV_prob_b, 
 							P_jet0_DepthTowers, P_jet0_TimingTowers, P_jet0_FlaggedTowers, 
@@ -106,11 +113,12 @@ void MiniTuplePlotter_22vs23(){
 							P_jet0_scores_inc_train80,
 						});
 		// kinematics_RunStudy.SetOutputFileTag("22vs23_runExclusion_EraG_trigConfig"); // ones labeled 22vs23_runExclusion are Era G, without extra HE and 6:1 run exclusion
-		kinematics_RunStudy.SetOutputFileTag("22vs23_runExclusion_EraC");
+		kinematics_RunStudy.SetOutputFileTag("22vs23_runExclusion_EraD");
 		kinematics_RunStudy.SetOutputDirectory("2022vs2023");
-		kinematics_RunStudy.SetComparisonCuts({Cut_No_HighMistagRuns_TrigIssue, Cut_HighMistagRuns_TrigIssue}); 
+		// kinematics_RunStudy.SetComparisonCuts({Cut_No_TrigIssue, Cut_TrigIssue}); 
 		// kinematics_RunStudy.SetLegendNames({"Data 2022 G (no trigger change)", "Data 2022 G (trigger configuration change)"}); // Data 2022 G (excluded) for Cut_HighMistagRuns, Data 2022 G (trigger configuration change) for Cut_HighMistagRuns_TrigIssue
-		kinematics_RunStudy.SetLegendNames({"Data 2023 Cv3", "Data 2023 Cv3 (excluded)"});
+		kinematics_RunStudy.SetComparisonCuts({Cut_IncludedRuns, Cut_HighMistagRuns}); 
+		kinematics_RunStudy.SetLegendNames({"Data 2023 D", "Data 2023 D (excluded)"});
 		kinematics_RunStudy.SetLegendPosition( 0.6, 0.7, 0.88, 0.88 );	// 0.6 for Cut_HighMistagRuns, 0.4 for Cut_HighMistagRuns_TrigIssue
 		kinematics_RunStudy.colors = {kViolet+3, kAzure+6};
 		kinematics_RunStudy.NBins = 50; 		

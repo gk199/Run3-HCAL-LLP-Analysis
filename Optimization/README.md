@@ -19,7 +19,8 @@ python3 optimize_cuts.py -i HToSSTo4B_125_50_CTau3000 -s mytest -c
 ```
 Now updated to split into pre and post-BPix:
 ```
-python3 optimize_cuts.py --sig22 HToSSTo4B_MH125_MS50_CTau3000_PU60_2022postEE --sig23 HToSSTo4B_125_50_CTau3000 -s test -c -p
+python3 optimize_cuts.py --sig22 HToSSTo4B_MH125_MS50_CTau3000_22.txt --sig23 HToSSTo4B_125_50_CTau3000 -s test -c -p
+./run_examples.sh
 ```
 To plot the map/grid of significance values and their contours, use the option `-p`. This will read in information from .npy files, so the input signal tag and settings tags will both need to match what you used with the calculation step.
 ```
