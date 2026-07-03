@@ -23,20 +23,28 @@ def parse_filename(file_path):
 
     # ── signal ────────────────────────────────────────────────────────────────
     m = re.search(
-        r"HToSSTo4B_(?P<mH>\d+)_(?P<mS>\d+)_CTau(?P<ctau>\d+)",
+        r"HToSSTo4B_(?:MH)?(?P<mH>\d+)_(?:MS)?(?P<mS>\d+)_CTau(?P<ctau>\d+)",
         stem, re.IGNORECASE
     )
     if m:
         mH, mS, ctau = m.group("mH"), m.group("mS"), m.group("ctau")
+        ctau_mm = int(ctau)
+        if ctau_mm % 1000 == 0:
+            ctau_short = rf"{ctau_mm // 1000}~m"
+        elif ctau_mm % 100 == 0:
+            ctau_short = rf"{ctau_mm / 1000:.1f}~m"
+        else:
+            ctau_short = rf"{ctau_mm}~mm"
         return dict(
-            kind  = "signal",
-            plain = f"H→SS→4b  mH={mH} GeV  mS={mS} GeV  cτ={ctau} mm",
-            latex = (
+            kind        = "signal",
+            plain       = f"H→SS→4b  mH={mH} GeV  mS={mS} GeV  cτ={ctau} mm",
+            latex       = (
                 r"$H \to SS \to 4b$, "
                 rf"$m_{{H}}={mH}$~GeV, $m_{{S}}={mS}$~GeV, "
                 rf"$c\tau={ctau}$~mm"
             ),
-            short = f"HToSS_mH{mH}_mS{mS}_CTau{ctau}",
+            short_latex = rf"{mH}~GeV, {mS}~GeV, {ctau_short}",
+            short       = f"HToSS_mH{mH}_mS{mS}_CTau{ctau}",
         )
 
     # ── data ──────────────────────────────────────────────────────────────────
@@ -44,18 +52,20 @@ def parse_filename(file_path):
     if m:
         era = m.group("era")
         return dict(
-            kind  = "data",
-            plain = f"Data  era={era}",
-            latex = rf"Data, era {era}",
-            short = f"data_{era}",
+            kind        = "data",
+            plain       = f"Data  era={era}",
+            latex       = rf"Data, era {era}",
+            short_latex = rf"Data, era {era}",
+            short       = f"data_{era}",
         )
 
     # ── fallback ──────────────────────────────────────────────────────────────
     return dict(
-        kind  = "unknown",
-        plain = stem,
-        latex = stem.replace("_", r"\_"),
-        short = stem[:30],
+        kind        = "unknown",
+        plain       = stem,
+        latex       = stem.replace("_", r"\_"),
+        short_latex = stem.replace("_", r"\_")[:40],
+        short       = stem[:30],
     )
 
 
@@ -69,9 +79,13 @@ def latex_setup(sample_latex, apply_llp_truth, weight_expr=None):
         if apply_llp_truth else ""
     )
     _weight_label = {
-        "weight":                       "cross-section and luminosity weighted",
-        "L1_prescale_weight":           "L1 prescale weighted",
-        "weight * L1_prescale_weight":  "cross-section, luminosity, and L1 prescale weighted",
+        "weight":                                             "cross-section and luminosity weighted",
+        "L1_prescale_weight":                                 "L1 prescale weighted",
+        "weight * L1_prescale_weight":                        "cross-section, luminosity, and L1 prescale weighted",
+        "HLT_prescale_weight":                                "HLT prescale weighted",
+        "weight * HLT_prescale_weight":                       "cross-section, luminosity, and HLT prescale weighted",
+        "L1_prescale_weight * HLT_prescale_weight":           "L1 and HLT prescale weighted",
+        "weight * L1_prescale_weight * HLT_prescale_weight":  "cross-section, luminosity, L1, and HLT prescale weighted",
     }
     weight_note = f", {_weight_label.get(weight_expr, weight_expr)}" if weight_expr else ""
     caption = rf"Cutflow for {sample_latex}{truth_note}{weight_note}."
@@ -92,19 +106,150 @@ def latex_end(caption):
 
 
 # ──────────────────────────────────────────────────────────────────────────────
+# Prescale impact summary table
+# ──────────────────────────────────────────────────────────────────────────────
+
+def prescale_impact_table(
+    file_paths,
+    tree_name          = "NoSel",
+    dnn_inc_cut        = 0.97,
+    dnn_depth_cut      = 0.95,
+    dnn_inc_cut_sjdc   = None,
+    dnn_depth_cut_sjdc = None,
+):
+    """
+    Print a LaTeX table with one row per signal sample showing the fractional
+    impact of L1 and HLT prescale weights relative to lumi×xsec weighting only.
+
+    Columns:
+        Sample | L1 @ LJDC+SJDC | L1 @ final | L1+HLT @ LJDC+SJDC | L1+HLT @ final
+
+    Each cell = yield(with prescale weight) / yield(weight only) at that cut level.
+    """
+    rows = []
+
+    for file_path in file_paths:
+        sample = parse_filename(file_path)
+        f = ROOT.TFile.Open(file_path)
+        if not f or f.IsZombie():
+            print(f"WARNING: cannot open {file_path}; skipping.")
+            continue
+        tree = f.Get(tree_name)
+        if not tree:
+            print(f"WARNING: tree '{tree_name}' not found in {file_path}; skipping.")
+            f.Close()
+            continue
+
+        has_l1  = bool(tree.GetBranch("L1_prescale_weight"))
+        has_hlt = bool(tree.GetBranch("HLT_prescale_weight"))
+
+        _inc_ljdc   = dnn_inc_cut
+        _inc_sjdc   = dnn_inc_cut_sjdc   if dnn_inc_cut_sjdc   is not None else dnn_inc_cut
+        _depth_ljdc = dnn_depth_cut
+        _depth_sjdc = dnn_depth_cut_sjdc if dnn_depth_cut_sjdc is not None else dnn_depth_cut
+
+        LJDC   = "(jet0_DepthTagCand == 1 && jet1_InclTagCand == 1)"
+        SJDC   = "(jet1_DepthTagCand == 1 && jet0_InclTagCand == 1)"
+        JDC_OR = f"({LJDC} || {SJDC})"
+        PT_ETA = (
+            "((jet0_Pt > 60 && abs(jet0_Eta) < 1.26 && jet1_Pt > 40 && abs(jet1_Eta) < 2.0) || "
+            " (jet1_Pt > 60 && abs(jet1_Eta) < 1.26 && jet0_Pt > 40 && abs(jet0_Eta) < 2.0))"
+        )
+        dnn_inc = (
+            f"(({SJDC} && jet0_scores_inc_train80 > {_inc_sjdc}) || "
+            f" ({LJDC} && jet1_scores_inc_train80 > {_inc_ljdc}))"
+        )
+        dnn_depth = (
+            f"(({SJDC} && jet1_scores_depth_LLPanywhere > {_depth_sjdc}) || "
+            f" ({LJDC} && jet0_scores_depth_LLPanywhere > {_depth_ljdc}))"
+        )
+
+        trig_sel  = "Pass_L1SingleLLPJet == 1 && Pass_HLTDisplacedJet == 1"
+        jdc_sel   = f"{trig_sel} && {PT_ETA} && {JDC_OR}"
+        final_sel = f"{jdc_sel} && abs(jet0_jet1_dPhi) > 0.2 && {dnn_inc} && {dnn_depth}"
+
+        _ctr = [0]
+
+        def get_yield(sel, wexpr):
+            _ctr[0] += 1
+            hname = f"_pi_h{_ctr[0]}"
+            draw_expr = f"{wexpr}>>{hname}(1,-1e6,1e6)"
+            cut = f"({wexpr})*({sel})"
+            tree.Draw(draw_expr, cut, "goff")
+            h = ROOT.gDirectory.Get(hname)
+            result = h.GetSumOfWeights() if h else 0.0
+            if h:
+                h.Delete()
+            return result
+
+        w_base    = "weight "
+        w_l1      = "weight * L1_prescale_weight"                    if has_l1              else None
+        w_l1_hlt  = "weight * L1_prescale_weight * HLT_prescale_weight" if (has_l1 and has_hlt) else w_l1
+
+        n_jdc_base   = get_yield(jdc_sel,   w_base)
+        n_jdc_l1     = get_yield(jdc_sel,   w_l1)     if w_l1     else float("nan")
+        n_jdc_l1_hlt = get_yield(jdc_sel,   w_l1_hlt) if w_l1_hlt else float("nan")
+        n_fin_base   = get_yield(final_sel,  w_base)
+        n_fin_l1     = get_yield(final_sel,  w_l1)     if w_l1     else float("nan")
+        n_fin_l1_hlt = get_yield(final_sel,  w_l1_hlt) if w_l1_hlt else float("nan")
+
+        def ratio(num, den):
+            return num / den if den > 0 and num == num else float("nan")
+
+        rows.append((
+            sample["short_latex"],
+            ratio(n_jdc_l1,     n_jdc_base),
+            ratio(n_fin_l1,     n_fin_base),
+            ratio(n_jdc_l1_hlt, n_jdc_base),
+            ratio(n_fin_l1_hlt, n_fin_base),
+        ))
+
+        f.Close()
+
+    def _pct(x):
+        return f"{100.0*x:.1f}\\%" if x == x else "--"  # x != x iff NaN
+
+    print(r"\begin{table}[h!]")
+    print(r"\centering")
+    print(r"\begin{tabular}{lrrrr}")
+    print(r"\hline")
+    print(
+        r"\textbf{Sample ($m_H$, $m_S$, $c\tau$)} & "
+        r"\textbf{L1 @ LJDC+SJDC} & "
+        r"\textbf{L1 @ final} & "
+        r"\textbf{L1+HLT @ LJDC+SJDC} & "
+        r"\textbf{L1+HLT @ final} \\"
+    )
+    print(r"\hline")
+    for label, f_l1_jdc, f_l1_fin, f_l1hlt_jdc, f_l1hlt_fin in rows:
+        print(
+            f"{label} & {_pct(f_l1_jdc)} & {_pct(f_l1_fin)} & "
+            f"{_pct(f_l1hlt_jdc)} & {_pct(f_l1hlt_fin)} \\\\"
+        )
+    print(r"\hline")
+    print(r"\end{tabular}")
+    print(
+        r"\caption{Fractional impact of L1 and HLT prescale weights on signal yields "
+        r"(prescale-weighted yield / lumi$\times$xsec-weighted yield).}"
+    )
+    print(r"\end{table}")
+
+
+# ──────────────────────────────────────────────────────────────────────────────
 # Core cutflow function
 # ──────────────────────────────────────────────────────────────────────────────
 
 def run_cutflow(
     file_path,
-    tree_name         = "Events",
-    apply_llp_truth   = False,
-    print_latex       = False,
-    use_weights       = None,
-    use_l1_prescale   = None,
-    dnn_inc_cut       = 0.97,
-    dnn_depth_cut     = 0.95,
-    dnn_inc_cut_sjdc  = None,
+    tree_name          = "Events",
+    apply_llp_truth    = False,
+    print_latex        = False,
+    use_weights        = None,
+    use_l1_prescale    = None,
+    use_hlt_prescale   = None,
+    dnn_inc_cut        = 0.97,
+    dnn_depth_cut      = 0.95,
+    dnn_inc_cut_sjdc   = None,
     dnn_depth_cut_sjdc = None,
 ):
     """
@@ -124,6 +269,11 @@ def run_cutflow(
     use_l1_prescale    : bool|None  – True  → multiply weight by "L1_prescale_weight"
                                       False → ignore L1_prescale_weight even if present
                                       None  → auto: apply if branch exists and use_weights
+    use_hlt_prescale   : bool|None  – True  → multiply weight by "HLT_prescale_weight"
+                                               (applied from the HLT row onward; L1 row
+                                               still uses only weight * L1_prescale_weight)
+                                      False → ignore HLT_prescale_weight even if present
+                                      None  → auto: apply if branch exists and use_l1_prescale
     dnn_inc_cut        : float      – inclusive DNN threshold for LJDC (and SJDC if
                                       dnn_inc_cut_sjdc is not given); default 0.97
     dnn_depth_cut      : float      – depth DNN threshold for LJDC (and SJDC if
@@ -184,9 +334,9 @@ def run_cutflow(
     # MET filters are only applied to data, not LLP MC signal.
     steps = [
         ("All",                                 ""),
-        ("Trigger (L1)",                        "Pass_L1SingleLLPJet == 1"),
-#        ("Trigger (L1 DoubleLLPJet40)",         "L1_DoubleLLPJet40 == 1"),
-#        ("Trigger (L1, but not L1 DoubleLLPJet40)",         "L1_DoubleLLPJet40 == 0 && Pass_L1SingleLLPJet == 1"),
+        # ("Trigger (L1)",                        "Pass_L1SingleLLPJet == 1"),
+    #    ("Trigger (L1 DoubleLLPJet40)",         "L1_DoubleLLPJet40 == 1"),
+       ("Trigger (L1, but not L1 DoubleLLPJet40)",         "L1_DoubleLLPJet40 == 0 && Pass_L1SingleLLPJet == 1"),
         # ("L1 trigger matched, $pT > 60$",       "((jet0_L1trig_Matched == 1 && jet0_Pt > 60 && abs(jet0_Eta) < 1.26 && jet1_Pt > 40 && abs(jet1_Eta) < 2.0) || (jet1_L1trig_Matched == 1 && jet1_Pt > 60 && abs(jet1_Eta) < 1.26 && jet0_Pt > 40 && abs(jet0_Eta) < 2.0))"),
         ("Trigger (HLT)",                       "Pass_HLTDisplacedJet == 1"),
         ("$pT>60, |\eta|<1.26; pT>40, |\eta|<2.0$", "((jet0_Pt > 60 && abs(jet0_Eta) < 1.26 && jet1_Pt > 40 && abs(jet1_Eta) < 2.0) || (jet1_Pt > 60 && abs(jet1_Eta) < 1.26 && jet0_Pt > 40 && abs(jet0_Eta) < 2.0))"),
@@ -239,26 +389,39 @@ def run_cutflow(
         print("WARNING: use_l1_prescale=True but 'L1_prescale_weight' branch not found; ignoring.")
         use_l1_prescale = False
 
-    # Build the effective weight expression for the four modes:
-    #   use_weights=F, use_l1_prescale=F  →  None  (raw counts via GetEntries)
-    #   use_weights=T, use_l1_prescale=F  →  "weight"
-    #   use_weights=F, use_l1_prescale=T  →  "L1_prescale_weight"
-    #   use_weights=T, use_l1_prescale=T  →  "weight * L1_prescale_weight"
+    # Auto-detect HLT prescale weight: apply if branch exists and L1 prescale is active
+    has_hlt_prescale_branch = bool(tree.GetBranch("HLT_prescale_weight"))
+    if use_hlt_prescale is None:
+        use_hlt_prescale = use_l1_prescale and has_hlt_prescale_branch
+        if use_l1_prescale and not has_hlt_prescale_branch:
+            print("NOTE: 'HLT_prescale_weight' branch not found; running without HLT prescale reweighting.")
+    elif use_hlt_prescale and not has_hlt_prescale_branch:
+        print("WARNING: use_hlt_prescale=True but 'HLT_prescale_weight' branch not found; ignoring.")
+        use_hlt_prescale = False
+
+    # Build three weight expressions, each used at a different cut level:
+    #   base_weight_expr : "All"  row – lumi×xsec only
+    #   l1_weight_expr   : "L1"   row – adds L1 prescale factor
+    #   weight_expr      : HLT+  rows – adds HLT prescale factor on top
+    base_weight_expr = "weight" if use_weights else None
+
     if use_weights and use_l1_prescale:
-        weight_expr = "weight * L1_prescale_weight"
+        l1_weight_expr = "weight * L1_prescale_weight"
     elif use_weights:
-        weight_expr = "weight"
+        l1_weight_expr = "weight"
     elif use_l1_prescale:
-        weight_expr = "L1_prescale_weight"
+        l1_weight_expr = "L1_prescale_weight"
     else:
-        weight_expr = None
+        l1_weight_expr = None
+
+    if l1_weight_expr and use_hlt_prescale:
+        weight_expr = f"{l1_weight_expr} * HLT_prescale_weight"
+    elif use_hlt_prescale:
+        weight_expr = "HLT_prescale_weight"
+    else:
+        weight_expr = l1_weight_expr
 
     _hist_counter = [0]   # unique name counter to avoid ROOT name collisions
-
-    # Weight expression used for "All" row: lumi×xsec only, no L1 prescale factor.
-    # The L1 prescale weight (fractional or binary) only applies from the trigger
-    # rows onward, so "All" reflects the true pre-trigger expected yield.
-    base_weight_expr = "weight" if use_weights else None
 
     def get_yield(selection, wexpr=None):
         """Return weighted yield for a selection, or raw count if weight_expr is None."""
@@ -279,6 +442,12 @@ def run_cutflow(
     # ── header ────────────────────────────────────────────────────────────────
     if weight_expr is None:
         weight_note = ""
+    elif use_hlt_prescale:
+        weight_note = (
+            f" [HLT+ rows: {weight_expr}; "
+            f"L1 row: {l1_weight_expr}; "
+            f"All row: {base_weight_expr}]"
+        )
     else:
         weight_note = f" [weighted by: {weight_expr}; 'All' row by: {base_weight_expr}]"
     print("\n")
@@ -303,8 +472,14 @@ def run_cutflow(
 
     for i, (label, _) in enumerate(steps):
         sel   = cum_cuts[i]
-        # "All" row: weight by lumi×xsec only — L1 prescale not yet applied
-        n_evt = get_yield(sel, wexpr=base_weight_expr if i == 0 else None)
+        # Row-specific weights: All=base, L1=l1_weight_expr, HLT+=weight_expr (default)
+        if i == 0:
+            row_wexpr = base_weight_expr
+        elif i == 1:
+            row_wexpr = l1_weight_expr
+        else:
+            row_wexpr = None  # falls back to weight_expr inside get_yield
+        n_evt = get_yield(sel, wexpr=row_wexpr)
 
         if i == 0:
             init = n_evt      # "All" row sets the primary denominator
@@ -368,8 +543,8 @@ def run_cutflow(
             frac_hlt_str   = f"{100.0*frac_hlt:.2f}"  if hlt_init > 0 else "--"
             frac_final_str = f"{100.0*frac_final:.2f}" if n_final  > 0 else "--"
             print(r"\hline")
-            print(f"{tex_label} & {n_excl:{fmt}} & {100.0*frac_all:.2f}\\% & "
-                  f"{frac_hlt_str}\\% (HLT); {frac_final_str}\\% (final) \\\\")
+            # print(f"{tex_label} & {n_excl:{fmt}} & {100.0*frac_all:.2f}\\% & "
+            #       f"{frac_hlt_str}\\% (HLT); {frac_final_str}\\% (final) \\\\")
         else:
             fmt = ">15.2f" if weight_expr else ">15.0f"
             hlt_str   = f"{100.0*frac_hlt:>9.2f}%"   if hlt_init > 0 else f"{'--':>10}"
@@ -442,6 +617,17 @@ def _parse_args():
         "--no-l1-prescale", dest="l1_prescale", action="store_false", default=None,
         help="Disable L1 prescale reweighting.",
     )
+    parser.add_argument(
+        "--no-hlt-prescale", dest="hlt_prescale", action="store_false", default=None,
+        help="Disable HLT prescale reweighting.",
+    )
+    parser.add_argument(
+        "--prescale-table", nargs="+", metavar="FILE", default=None,
+        help=(
+            "Print a LaTeX prescale-impact summary table instead of a per-file cutflow. "
+            "Accepts one or more ROOT files; each becomes one table row."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -449,11 +635,22 @@ if __name__ == "__main__":
 
     args = _parse_args()
 
-    # --- L1 prescale weighted counts (no gen/PU weight) -----------------------
-    run_cutflow(args.file, args.tree,
+    if args.prescale_table:
+        prescale_impact_table(
+            args.prescale_table,
+            tree_name          = args.tree,
+            dnn_inc_cut        = args.inc,
+            dnn_depth_cut      = args.depth,
+            dnn_inc_cut_sjdc   = args.inc_sjdc,
+            dnn_depth_cut_sjdc = args.depth_sjdc,
+        )
+    else:
+        # --- full cutflow for a single file -----------------------------------
+        run_cutflow(args.file, args.tree,
                 apply_llp_truth    = args.truth,
                 use_weights        = args.weights,
                 use_l1_prescale    = args.l1_prescale,
+                use_hlt_prescale   = args.hlt_prescale,
                 print_latex        = args.latex,
                 dnn_inc_cut        = args.inc,
                 dnn_depth_cut      = args.depth,

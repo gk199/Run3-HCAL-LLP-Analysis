@@ -305,10 +305,10 @@ TCut Cut_VR = Form("jet1_scores_inc_train80 > 0.2 && jet1_scores_inc_train80 <= 
 TCut Cut_CR_jet0 = Form("jet0_scores_inc_train80 >= 0 && jet0_scores_inc_train80 <= 0.2 && jet0_InclTagCand == 1");
 TCut Cut_VR_jet0 = Form("jet0_scores_inc_train80 > 0.2 && jet0_scores_inc_train80 <= 0.9 && jet0_InclTagCand == 1");
 
-TCut Cut_HighMistagRuns = Form("run == 362615 || run == 362617 || run == 362653 || run == 362655 || run == 367691 || run == 368684"); // based on CR 0.2
-TCut Cut_HighMistagRuns_TrigIssue = Form("run == 362615 || run == 362617 || run == 362653 || run == 362655 || run == 367691 || run == 368684 || run == 362596 || (run >= 362597 && run < 362697)"); // based on CR 0.2
-TCut Cut_IncludedRuns = Form("run != 362615 && run != 362617 && run != 362653 && run != 362655 && run != 367691 && run != 368684"); // based on CR 0.2
-TCut Cut_No_HighMistagRuns_TrigIssue = Form("run != 362615 && run != 362617 && run != 362653 && run != 362655 && run != 367691 && run != 368684 && run != 362596 && !(run >= 362597 && run < 362697)"); // based on CR 0.2
+TCut Cut_HighMistagRuns = Form("run == 361106 || run == 370790"); // based on CR 0.2
+TCut Cut_IncludedRuns = Form("run != 361106 && run != 370790"); // based on CR 0.2
+TCut Cut_TrigIssue = Form("run == 362596 || (run >= 362597 && run < 362697)"); // based on CR 0.2
+TCut Cut_No_TrigIssue = Form("run != 362596 && !(run >= 362597 && run < 362697)"); // based on CR 0.2
 // TCut Cut_RunExclusion = Form("run != 357776 && run != 359661 && run != 359690 && run != 359869 && run != 360890 && run != 361044 && run != 362087 && run != 362437 && run != 362596 && run != 362615 && run != 362616 && run != 362653 && run != 360128 && run != 360887 && run != 360949 && run != 361053 && run != 361994 && run != 362063 && run != 362698 && run != 367228 && (run < 3 sixty two five ninety seven || run >= thirty six two six ninety seven)"); // updated to include timing issue runs, and HE issue runs
 // TCut Cut_RunExcluded = Form("run ==  thirty five seven seven seventy six || run == thirty five nine six sixty one || run == thirty five nine six ninety || run == thirty five nine eight sixty nine || run == thirty six zero eight ninety || run == thirty six one zero four four || run == thirty six two zero eighty seven || run == thirty six two four thirty seven || run == thirty six two five ninety six ||	run == thirty six two six one five ||	run == thirty six two six one six ||	run == thirty six two six fifty three ||	run == thirty six zero one twenty eight ||	run == thirty six zero eight eighty seven ||	run == thirty six zero nine forty nine ||	run == thirty six one zero fifty three ||	run == thirty six one nine ninety four ||	run == thirty six two zero sixty three ||	run == thirty six two six ninety eight ||	run == thirty six seven two twenty eight ||	(run >= thirty six two five ninety seven &&	run < thirty six two six ninety seven)");
 

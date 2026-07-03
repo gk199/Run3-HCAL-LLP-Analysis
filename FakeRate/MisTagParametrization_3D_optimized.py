@@ -33,9 +33,18 @@ from ROOT import SetOwnership
 debug = False
 
 # ---- Histogram bin definitions (identical to original) ----
-pT_bins  = np.array([0, 40, 50, 60, 70, 80, 100, 120, 160, 240, 400], dtype=float)
-eta_bins = np.linspace(-1.26, 1.26, 9)
-#phi_bins = np.linspace(-np.pi, np.pi, 9)
+# pT_bins  = np.array([0, 40, 50, 60, 70, 80, 100, 120, 160, 240, 400], dtype=float)
+pT_bins  = np.array([0, 40, 140, 200, 400], dtype=float)
+# Set to True to book the eta axis (and jet0/1_EtaAxis columns) using |eta|
+# instead of signed eta. Flip back to False to restore signed-eta behavior.
+USE_ABS_ETA = True
+if USE_ABS_ETA:
+    # eta_bins = np.linspace(0, 1.26, 2)     # |eta|: to test impact on prediction closure
+    eta_bins = np.array([0, 1, 1.26], dtype=float)     # |eta|: to test impact on prediction closure
+else:
+    # eta_bins = np.linspace(-1.26, 1.26, 9)
+    eta_bins = np.linspace(-1.26, 1.26, 5) # signed eta: one bin to test impact on prediction closure
+# phi_bins = np.linspace(-np.pi, np.pi, 9)
 phi_bins = np.linspace(-np.pi, np.pi, 2) # one bin in phi to test impact on prediction closure
 b_tag_bins = np.array([0, 0.2435, 1.0], dtype=float)
 c_tag_bins = np.array([0, 0.102,  1.0], dtype=float)
@@ -53,6 +62,8 @@ runs_to_exclude_2022 = [357698, 362653, 362655, 359661, 360991] # based on CR 0.
 runs_to_exclude_2022 = [357698, 362653, 359661, 360991] # based on CR 0.2, above 0.1%
 runs_to_exclude_2022 = [357698, 359661, 360991] # based on CR 0.1, above 0.1%
 runs_to_exclude_2022 = []
+# v5.6 minituples
+runs_to_exclude_2022 = [361106] # based on CR 0.2, above 0.5% with depth > 0.9
 
     # 357776, 359661, 359690, 359869, 360890, 361044, 362087, 362437,
     # 362615, 362616, 362653, 360128, 360887, 360949, 361053, 361994,
@@ -69,6 +80,8 @@ runs_to_exclude_2023 = [369998, 370790, 368676, 370093] # based on CR 0.2
 runs_to_exclude_2023 = [370790] # based on CR 0.2, above 0.1% 
 runs_to_exclude_2023 = [370790, 368676, 370093] # based on CR 0.1 above 0.1%
 runs_to_exclude_2023 = []
+# v5.6 minituples
+runs_to_exclude_2023 = [370790] # based on CR 0.2 above 0.5% with depth > 0.9
 
 Zmu     = False
 LLPskim = True
@@ -319,7 +332,7 @@ def book_all_histograms(rdf_base, is_mc=False):
     # WPlusJets (v4.1) uses "_updated" suffixes; data (v5.5) uses the original names
     if is_mc:
         inc_suf   = "inc_train80_updated"
-        depth_suf = "depth_anywhere_updated"
+        depth_suf = "depth_LLPanywhere_updated"
     else:
         inc_suf   = "inc_train80"
         depth_suf = "depth_LLPanywhere"
@@ -378,17 +391,17 @@ def book_all_histograms(rdf_base, is_mc=False):
         rdf_SR_j0 = rdf_j0.Filter(SR_str,               f"SR_j0_{s}")
 
         booked[option] = {
-            "CR_all":    rdf_CR_j0.Histo3D(_h3_model(f"h_CR_all_{s}"),    "jet0_Pt", "jet0_Eta", "jet0_Phi"),
+            "CR_all":    rdf_CR_j0.Histo3D(_h3_model(f"h_CR_all_{s}"),    "jet0_Pt", "jet0_EtaAxis", "jet0_Phi"),
             "CR_mistag": rdf_CR_j0.Filter(mistag_str).Histo3D(
-                             _h3_model(f"h_CR_mistag_{s}"),               "jet0_Pt", "jet0_Eta", "jet0_Phi"),
-            "VR_all":    rdf_VR_j0.Histo3D(_h3_model(f"h_VR_all_{s}"),    "jet0_Pt", "jet0_Eta", "jet0_Phi"),
+                             _h3_model(f"h_CR_mistag_{s}"),               "jet0_Pt", "jet0_EtaAxis", "jet0_Phi"),
+            "VR_all":    rdf_VR_j0.Histo3D(_h3_model(f"h_VR_all_{s}"),    "jet0_Pt", "jet0_EtaAxis", "jet0_Phi"),
             "VR_mistag": rdf_VR_j0.Filter(mistag_str).Histo3D(
-                             _h3_model(f"h_VR_mistag_{s}"),               "jet0_Pt", "jet0_Eta", "jet0_Phi"),
-            "SR_all":    rdf_SR_j0.Histo3D(_h3_model(f"h_SR_all_{s}"),    "jet0_Pt", "jet0_Eta", "jet0_Phi"),
+                             _h3_model(f"h_VR_mistag_{s}"),               "jet0_Pt", "jet0_EtaAxis", "jet0_Phi"),
+            "SR_all":    rdf_SR_j0.Histo3D(_h3_model(f"h_SR_all_{s}"),    "jet0_Pt", "jet0_EtaAxis", "jet0_Phi"),
         }
         if is_mc:
             booked[option]["SR_mistag"] = rdf_SR_j0.Filter(mistag_str).Histo3D(
-                             _h3_model(f"h_SR_mistag_{s}"),               "jet0_Pt", "jet0_Eta", "jet0_Phi")
+                             _h3_model(f"h_SR_mistag_{s}"),               "jet0_Pt", "jet0_EtaAxis", "jet0_Phi")
 
         # --- jet1 triggered (jet1 has depth tag, jet0 defines CR/VR/SR) ---
         rdf_j1    = rdf_base.Filter(depth_j1_str,        f"depth_j1_{s}")
@@ -397,17 +410,17 @@ def book_all_histograms(rdf_base, is_mc=False):
         rdf_SR_j1 = rdf_j1.Filter(SR_0_str,             f"SR_j1_{s}")
 
         booked[option].update({
-            "CR_all_1":    rdf_CR_j1.Histo3D(_h3_model(f"h_CR_all_1_{s}"),    "jet1_Pt", "jet1_Eta", "jet1_Phi"),
+            "CR_all_1":    rdf_CR_j1.Histo3D(_h3_model(f"h_CR_all_1_{s}"),    "jet1_Pt", "jet1_EtaAxis", "jet1_Phi"),
             "CR_mistag_1": rdf_CR_j1.Filter(mistag_1_str).Histo3D(
-                               _h3_model(f"h_CR_mistag_1_{s}"),               "jet1_Pt", "jet1_Eta", "jet1_Phi"),
-            "VR_all_1":    rdf_VR_j1.Histo3D(_h3_model(f"h_VR_all_1_{s}"),    "jet1_Pt", "jet1_Eta", "jet1_Phi"),
+                               _h3_model(f"h_CR_mistag_1_{s}"),               "jet1_Pt", "jet1_EtaAxis", "jet1_Phi"),
+            "VR_all_1":    rdf_VR_j1.Histo3D(_h3_model(f"h_VR_all_1_{s}"),    "jet1_Pt", "jet1_EtaAxis", "jet1_Phi"),
             "VR_mistag_1": rdf_VR_j1.Filter(mistag_1_str).Histo3D(
-                               _h3_model(f"h_VR_mistag_1_{s}"),               "jet1_Pt", "jet1_Eta", "jet1_Phi"),
-            "SR_all_1":    rdf_SR_j1.Histo3D(_h3_model(f"h_SR_all_1_{s}"),    "jet1_Pt", "jet1_Eta", "jet1_Phi"),
+                               _h3_model(f"h_VR_mistag_1_{s}"),               "jet1_Pt", "jet1_EtaAxis", "jet1_Phi"),
+            "SR_all_1":    rdf_SR_j1.Histo3D(_h3_model(f"h_SR_all_1_{s}"),    "jet1_Pt", "jet1_EtaAxis", "jet1_Phi"),
         })
         if is_mc:
             booked[option]["SR_mistag_1"] = rdf_SR_j1.Filter(mistag_1_str).Histo3D(
-                               _h3_model(f"h_SR_mistag_1_{s}"),               "jet1_Pt", "jet1_Eta", "jet1_Phi")
+                               _h3_model(f"h_SR_mistag_1_{s}"),               "jet1_Pt", "jet1_EtaAxis", "jet1_Phi")
 
     return booked
 
@@ -738,6 +751,10 @@ _file_map = {
         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2022Ev1_scores.root",
         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2022Fv1_scores.root",
         "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2022Gv1_scores.root",
+        # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv1_scores.root",
+        # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv2_scores.root",
+        # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv3_scores.root",
+        # "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv4_scores.root",
     ],
     "2022_D": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2022Dv1_scores.root"],
     "2022_E": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2022Ev1_scores.root"],
@@ -758,7 +775,8 @@ _file_map = {
     "2023_Cv4": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Cv4_scores.root"],
     "2023_Dv1": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Dv1_scores.root"],
     "2023_Dv2": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.5/minituple_data_2023Dv2_scores.root"],
-    "WPlusJets": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_WJetsToLNu_MC22preEE_NoSel_scores_v5updatedscores.root"]
+    # "WPlusJets": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_WJetsToLNu_MC22preEE_NoSel_scores_v5updatedscores.root"]
+    "WPlusJets": ["/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v4.1/minituple_WJetsToLNu_MC22preEE_NoSel_scores_v7_cat12.root"]
 }
 
 
@@ -775,9 +793,15 @@ def _build_rdf_base(era_key):
     # Flag_METFilters_2022_2023_PromptReco is always 0 in MC; skip it for MC samples
     met_filter = "abs(jet0_jet1_dPhi) > 0.2" if is_mc else \
                  "abs(jet0_jet1_dPhi) > 0.2 && Flag_METFilters_2022_2023_PromptReco == 1"
+    # jet0_EtaAxis / jet1_EtaAxis feed the eta axis of Histo3D bookings below;
+    # toggle USE_ABS_ETA (top of file) to switch between |eta| and signed eta.
+    eta_expr0 = "abs(jet0_Eta)" if USE_ABS_ETA else "jet0_Eta"
+    eta_expr1 = "abs(jet1_Eta)" if USE_ABS_ETA else "jet1_Eta"
     rdf_filtered = (rdf
                     .Filter(run_excl, "run exclusion")
-                    .Filter(met_filter, "deltaPhi + METFilters"))
+                    .Filter(met_filter, "deltaPhi + METFilters")
+                    .Define("jet0_EtaAxis", eta_expr0)
+                    .Define("jet1_EtaAxis", eta_expr1))
     if is_mc:
         rdf_filtered = rdf_filtered.Filter("Pass_WPlusJets >= 0", "W+Jets selection")
     return rdf_filtered

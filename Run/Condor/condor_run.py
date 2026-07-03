@@ -180,7 +180,7 @@ def main():
 
     print("Zipping Classifiers input...")
     ZIP_Classifier = os.path.join( cwd, "Classifiers.zip")
-    zip_dir(Executable_ClassifierInputs, ZIP_Classifier )    
+    zip_dir(Executable_ClassifierInputs, ZIP_Classifier )
 
     print("Zipping Jet Veto Maps input...")
     ZIP_JetVeto = os.path.join(cwd, "JetVetoMaps_Run3.zip")

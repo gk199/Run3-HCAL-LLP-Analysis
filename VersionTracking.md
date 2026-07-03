@@ -320,6 +320,8 @@ Updates:
 * `era_category` added
 * central samples processed
 * v7 DNN trained off of these minituples
+* scores added are v7 DNN
+* weights added correctly for central samples
 
 Ongoing wish list:
 * Some duplication in coding between event and jet filled trees, can this be reduced or simplified?

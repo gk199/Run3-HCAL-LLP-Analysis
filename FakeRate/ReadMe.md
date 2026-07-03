@@ -68,6 +68,12 @@ python3 OutputToLatex_VRclosureCheck.py --config my_scan.txt -b
 ```
 Files that don't exist yet are skipped with a `% WARNING` comment. Add `--stat_only` to evaluate closure with statistical uncertainties only (no PV-variation systematic).
 
+To check the 2D rates used in the background prediction, and overlay rates for each era:
+```
+python3 PhiParametrizationStudy.py --era 2023
+python3 OverlayMistagRates_TEff.py (and edit eras in the file directly)
+```
+
 ### Legacy tables (output of MisTagParametrization_3D.py)
 ```
 python3 OutputToLatex.py -e 2022 -s 0.7 # uses DNN_pt*_forPython.txt

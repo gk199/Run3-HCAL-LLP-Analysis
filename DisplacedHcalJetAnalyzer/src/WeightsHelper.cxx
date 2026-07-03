@@ -75,8 +75,11 @@ double DisplacedHcalJetAnalyzer::GetSignalBRxSigma(string infiletag){
 
     double H_LLP_to_xs = 52200; // fb // https://pdg.lbl.gov/2023/reviews/rpp2023-rev-higgs-boson.pdf
 
-    // Find the position of "MH" and extract the mass
-    string HiggsMass = infiletag.substr( infiletag.find("MH")+2,3 );
+    // Find "MH" followed by a digit (skips "MH-125" style with hyphens in XRootD URLs)
+    size_t mh_pos = string::npos;
+    for (size_t p = 0; (p = infiletag.find("MH", p)) != string::npos; ++p)
+        if (p+2 < infiletag.size() && isdigit(infiletag[p+2])) { mh_pos = p; break; }
+    string HiggsMass = (mh_pos != string::npos) ? infiletag.substr(mh_pos+2, 3) : "0";
 	double BRxSigma = H_LLP_to_xs;
 
 	cout<<"  HiggsMass --> "<<HiggsMass<<endl;
@@ -107,106 +110,107 @@ double DisplacedHcalJetAnalyzer::GetNEventsProduced(string infiletag){
     MCTag_to_NEvents["HToSSTo4B_MH350_MS160_CTau10000"] = 3992496; // 999100 in batch 1, 2993396 in batch 2
 
     // Central Samples 
+    // note that -pythia is _batch1 and _pythia is _batch2
     MCTag_to_NEvents["HToSSTo4B_MH1000_MS450_CTau100000_PU60_2022postEE"] = 39929;
     MCTag_to_NEvents["HToSSTo4B_MH1000_MS450_CTau100000_PU70_2022postEE"] = 39929;
-    MCTag_to_NEvents["HToSSTo4B_MH1000_MS450_CTau100000_Premix_2023postBPix-pythia"] = 40020;
+    MCTag_to_NEvents["HToSSTo4B_MH1000_MS450_CTau100000_Premix_2023postBPix_batch1"] = 40020;
     MCTag_to_NEvents["HToSSTo4B_MH1000_MS450_CTau100000_Premix_2022preEE"] = 39364;
-    MCTag_to_NEvents["HToSSTo4B_MH1000_MS450_CTau100000_Premix_2023postBPix_pythia"] = 39944;
+    MCTag_to_NEvents["HToSSTo4B_MH1000_MS450_CTau100000_Premix_2023postBPix_batch2"] = 39944;
     MCTag_to_NEvents["HToSSTo4B_MH1000_MS450_CTau10000_PU60_2022postEE"] = 39920;
     MCTag_to_NEvents["HToSSTo4B_MH1000_MS450_CTau10000_PU70_2022postEE"] = 39920;
-    MCTag_to_NEvents["HToSSTo4B_MH1000_MS450_CTau10000_Premix_2023postBPix-pythia"] = 39972;
+    MCTag_to_NEvents["HToSSTo4B_MH1000_MS450_CTau10000_Premix_2023postBPix_batch1"] = 39972;
     MCTag_to_NEvents["HToSSTo4B_MH1000_MS450_CTau10000_Premix_2022preEE"] = 38657;
-    MCTag_to_NEvents["HToSSTo4B_MH1000_MS450_CTau10000_Premix_2023postBPix_pythia"] = 39930;
+    MCTag_to_NEvents["HToSSTo4B_MH1000_MS450_CTau10000_Premix_2023postBPix_batch2"] = 39930;
     MCTag_to_NEvents["HToSSTo4B_MH125_MS12_CTau9000_PU60_2022postEE"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH125_MS12_CTau9000_PU70_2022postEE"] = 26000;
-    MCTag_to_NEvents["HToSSTo4B_MH125_MS12_CTau9000_Premix_2023postBPix-pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH125_MS12_CTau9000_Premix_2023postBPix_batch1"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH125_MS12_CTau9000_Premix_2022preEE"] = 39265;
-    MCTag_to_NEvents["HToSSTo4B_MH125_MS12_CTau9000_Premix_2023postBPix_pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH125_MS12_CTau9000_Premix_2023postBPix_batch2"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH125_MS12_CTau900_PU60_2022postEE"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH125_MS12_CTau900_PU70_2022postEE"] = 40000;
-    MCTag_to_NEvents["HToSSTo4B_MH125_MS12_CTau900_Premix_2023postBPix-pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH125_MS12_CTau900_Premix_2023postBPix_batch1"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH125_MS12_CTau900_Premix_2022preEE"] = 40000;
-    MCTag_to_NEvents["HToSSTo4B_MH125_MS12_CTau900_Premix_2023postBPix_pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH125_MS12_CTau900_Premix_2023postBPix_batch2"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH125_MS25_CTau15000_PU60_2022postEE"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH125_MS25_CTau15000_PU70_2022postEE"] = 40000;
-    MCTag_to_NEvents["HToSSTo4B_MH125_MS25_CTau15000_Premix_2023postBPix-pythia"] = 0; // Should be 40000, but DNE in v5;
+    MCTag_to_NEvents["HToSSTo4B_MH125_MS25_CTau15000_Premix_2023postBPix_batch1"] = 0; // Should be 40000, but DNE in v5;
     MCTag_to_NEvents["HToSSTo4B_MH125_MS25_CTau15000_Premix_2022preEE"] = 37807;
-    MCTag_to_NEvents["HToSSTo4B_MH125_MS25_CTau15000_Premix_2023postBPix_pythia"] = 39000;
+    MCTag_to_NEvents["HToSSTo4B_MH125_MS25_CTau15000_Premix_2023postBPix_batch2"] = 39000;
     MCTag_to_NEvents["HToSSTo4B_MH125_MS25_CTau1500_PU60_2022postEE"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH125_MS25_CTau1500_PU70_2022postEE"] = 40000;
-    MCTag_to_NEvents["HToSSTo4B_MH125_MS25_CTau1500_Premix_2023postBPix-pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH125_MS25_CTau1500_Premix_2023postBPix_batch1"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH125_MS25_CTau1500_Premix_2022preEE"] = 39275;
-    MCTag_to_NEvents["HToSSTo4B_MH125_MS25_CTau1500_Premix_2023postBPix_pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH125_MS25_CTau1500_Premix_2023postBPix_batch2"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH125_MS50_CTau30000_PU60_2022postEE"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH125_MS50_CTau30000_PU70_2022postEE"] = 40000;
-    MCTag_to_NEvents["HToSSTo4B_MH125_MS50_CTau30000_Premix_2023postBPix-pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH125_MS50_CTau30000_Premix_2023postBPix_batch1"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH125_MS50_CTau30000_Premix_2022preEE"] = 40000;
-    MCTag_to_NEvents["HToSSTo4B_MH125_MS50_CTau30000_Premix_2023postBPix_pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH125_MS50_CTau30000_Premix_2023postBPix_batch2"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH125_MS50_CTau3000_PU60_2022postEE"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH125_MS50_CTau3000_PU70_2022postEE"] = 40000;
-    MCTag_to_NEvents["HToSSTo4B_MH125_MS50_CTau3000_Premix_2023postBPix-pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH125_MS50_CTau3000_Premix_2023postBPix_batch1"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH125_MS50_CTau3000_Premix_2022preEE"] = 40000;
-    MCTag_to_NEvents["HToSSTo4B_MH125_MS50_CTau3000_Premix_2023postBPix_pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH125_MS50_CTau3000_Premix_2023postBPix_batch2"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH250_MS120_CTau10000_PU60_2022postEE"] = 39993;
     MCTag_to_NEvents["HToSSTo4B_MH250_MS120_CTau10000_PU70_2022postEE"] = 39993;
-    MCTag_to_NEvents["HToSSTo4B_MH250_MS120_CTau10000_Premix_2023postBPix-pythia"] = 39992;
+    MCTag_to_NEvents["HToSSTo4B_MH250_MS120_CTau10000_Premix_2023postBPix_batch1"] = 39992;
     MCTag_to_NEvents["HToSSTo4B_MH250_MS120_CTau10000_Premix_2022preEE"] = 39998;
-    MCTag_to_NEvents["HToSSTo4B_MH250_MS120_CTau10000_Premix_2023postBPix_pythia"] = 39987;
+    MCTag_to_NEvents["HToSSTo4B_MH250_MS120_CTau10000_Premix_2023postBPix_batch2"] = 39987;
     MCTag_to_NEvents["HToSSTo4B_MH250_MS120_CTau1000_PU60_2022postEE"] = 39990;
     MCTag_to_NEvents["HToSSTo4B_MH250_MS120_CTau1000_PU70_2022postEE"] = 39990;
-    MCTag_to_NEvents["HToSSTo4B_MH250_MS120_CTau1000_Premix_2023postBPix-pythia"] = 0; // Should be 39994, but DNE in v5;
+    MCTag_to_NEvents["HToSSTo4B_MH250_MS120_CTau1000_Premix_2023postBPix_batch1"] = 0; // Should be 39994, but DNE in v5;
     MCTag_to_NEvents["HToSSTo4B_MH250_MS120_CTau1000_Premix_2022preEE"] = 34231;
-    MCTag_to_NEvents["HToSSTo4B_MH250_MS120_CTau1000_Premix_2023postBPix_pythia"] = 36996;
+    MCTag_to_NEvents["HToSSTo4B_MH250_MS120_CTau1000_Premix_2023postBPix_batch2"] = 36996;
     MCTag_to_NEvents["HToSSTo4B_MH250_MS120_CTau500_PU60_2022postEE"] = 39994;
     MCTag_to_NEvents["HToSSTo4B_MH250_MS120_CTau500_PU70_2022postEE"] = 39994;
-    MCTag_to_NEvents["HToSSTo4B_MH250_MS120_CTau500_Premix_2023postBPix-pythia"] = 39994;
+    MCTag_to_NEvents["HToSSTo4B_MH250_MS120_CTau500_Premix_2023postBPix_batch1"] = 39994;
     MCTag_to_NEvents["HToSSTo4B_MH250_MS120_CTau500_Premix_2022preEE"] = 40000;
-    MCTag_to_NEvents["HToSSTo4B_MH250_MS120_CTau500_Premix_2023postBPix_pythia"] = 40006;
+    MCTag_to_NEvents["HToSSTo4B_MH250_MS120_CTau500_Premix_2023postBPix_batch2"] = 40006;
     MCTag_to_NEvents["HToSSTo4B_MH250_MS60_CTau10000_PU60_2022postEE"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH250_MS60_CTau10000_PU70_2022postEE"] = 40000;
-    MCTag_to_NEvents["HToSSTo4B_MH250_MS60_CTau10000_Premix_2023postBPix-pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH250_MS60_CTau10000_Premix_2023postBPix_batch1"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH250_MS60_CTau10000_Premix_2022preEE"] = 39278;
-    MCTag_to_NEvents["HToSSTo4B_MH250_MS60_CTau10000_Premix_2023postBPix_pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH250_MS60_CTau10000_Premix_2023postBPix_batch2"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH250_MS60_CTau1000_PU60_2022postEE"] = 37000;
     MCTag_to_NEvents["HToSSTo4B_MH250_MS60_CTau1000_PU70_2022postEE"] = 40000;
-    MCTag_to_NEvents["HToSSTo4B_MH250_MS60_CTau1000_Premix_2023postBPix-pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH250_MS60_CTau1000_Premix_2023postBPix_batch1"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH250_MS60_CTau1000_Premix_2022preEE"] = 38566;
-    MCTag_to_NEvents["HToSSTo4B_MH250_MS60_CTau1000_Premix_2023postBPix_pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH250_MS60_CTau1000_Premix_2023postBPix_batch2"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH250_MS60_CTau500_PU60_2022postEE"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH250_MS60_CTau500_PU70_2022postEE"] = 40000;
-    MCTag_to_NEvents["HToSSTo4B_MH250_MS60_CTau500_Premix_2023postBPix-pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH250_MS60_CTau500_Premix_2023postBPix_batch1"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH250_MS60_CTau500_Premix_2022preEE"] = 39283;
-    MCTag_to_NEvents["HToSSTo4B_MH250_MS60_CTau500_Premix_2023postBPix_pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH250_MS60_CTau500_Premix_2023postBPix_batch2"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH350_MS160_CTau10000_PU60_2022postEE"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH350_MS160_CTau10000_PU70_2022postEE"] = 39000;
-    MCTag_to_NEvents["HToSSTo4B_MH350_MS160_CTau10000_Premix_2023postBPix-pythia"] = 0; // Should be 40000, but DNE in v5;
+    MCTag_to_NEvents["HToSSTo4B_MH350_MS160_CTau10000_Premix_2023postBPix_batch1"] = 0; // Should be 40000, but DNE in v5;
     MCTag_to_NEvents["HToSSTo4B_MH350_MS160_CTau10000_Premix_2022preEE"] = 39277;
-    MCTag_to_NEvents["HToSSTo4B_MH350_MS160_CTau10000_Premix_2023postBPix_pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH350_MS160_CTau10000_Premix_2023postBPix_batch2"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH350_MS160_CTau1000_PU60_2022postEE"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH350_MS160_CTau1000_PU70_2022postEE"] = 40000;
-    MCTag_to_NEvents["HToSSTo4B_MH350_MS160_CTau1000_Premix_2023postBPix-pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH350_MS160_CTau1000_Premix_2023postBPix_batch1"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH350_MS160_CTau1000_Premix_2022preEE"] = 37900;
-    MCTag_to_NEvents["HToSSTo4B_MH350_MS160_CTau1000_Premix_2023postBPix_pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH350_MS160_CTau1000_Premix_2023postBPix_batch2"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH350_MS160_CTau500_PU60_2022postEE"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH350_MS160_CTau500_PU70_2022postEE"] = 40000;
-    MCTag_to_NEvents["HToSSTo4B_MH350_MS160_CTau500_Premix_2023postBPix-pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH350_MS160_CTau500_Premix_2023postBPix_batch1"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH350_MS160_CTau500_Premix_2022preEE"] = 38590;
-    MCTag_to_NEvents["HToSSTo4B_MH350_MS160_CTau500_Premix_2023postBPix_pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH350_MS160_CTau500_Premix_2023postBPix_batch2"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau10000_PU60_2022postEE"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau10000_PU70_2022postEE"] = 40000;
-    MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau10000_Premix_2023postBPix-pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau10000_Premix_2023postBPix_batch1"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau10000_Premix_2022preEE"] = 36410;
-    MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau10000_Premix_2023postBPix_pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau10000_Premix_2023postBPix_batch2"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau1000_PU60_2022postEE"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau1000_PU70_2022postEE"] = 31000;
-    MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau1000_Premix_2023postBPix-pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau1000_Premix_2023postBPix_batch1"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau1000_Premix_2022preEE"] = 34320;
-    MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau1000_Premix_2023postBPix_pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau1000_Premix_2023postBPix_batch2"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau500_PU60_2022postEE"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau500_PU70_2022postEE"] = 40000;
-    MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau500_Premix_2023postBPix-pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau500_Premix_2023postBPix_batch1"] = 40000;
     MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau500_Premix_2022preEE"] = 39291;
-    MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau500_Premix_2023postBPix_pythia"] = 40000;
+    MCTag_to_NEvents["HToSSTo4B_MH350_MS80_CTau500_Premix_2023postBPix_batch2"] = 40000;
 
     // MCTag_to_NEvents["LLP_MC_125_mX50_batch1"] = 998000;
     // MCTag_to_NEvents["LLP_MC_125_mX50_batch2"] = 2994000;
@@ -230,17 +234,16 @@ double DisplacedHcalJetAnalyzer::GetNEventsProduced(string infiletag){
     /eos/uscms/store/user/lpclonglived/apresyan/privateProduction/DR/step2_RECOSIM/Run3Summer22/ggH_HToSSTobbbb_MH-125_MS-15_CTau1000_13p6TeV
     */
 
-    double NEvents_produced = MCTag_to_NEvents[infiletag];
-
-    cout << NEvents_produced << endl;
+    double NEvents_produced = 0.0; // operator[] would insert {infiletag:0} into map, corrupting longest-match search below
 
     if (NEvents_produced < 1) {
+        string best_key = "";
         for(map<string,double>::iterator it = MCTag_to_NEvents.begin(); it != MCTag_to_NEvents.end(); ++it){
-			string key = it->first;
-			if( infiletag.find(key) != string::npos ){
-				NEvents_produced = MCTag_to_NEvents[key];
-				break;
-			}	
+            string key = it->first;
+            if( infiletag.find(key) != string::npos && key.size() > best_key.size() ){
+                best_key = key;
+                NEvents_produced = it->second;
+            }
         }
     }
     
