@@ -3,8 +3,8 @@
 // -------------------------------------------------------------------------------------------------
 void Plot_Scores(){
 
-	string path = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.1/";
-	path = "../Files/MiniTuples/v5.3/minituple_";
+	string path = "/eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v5.6/minituple_";
+	// path = "../Files/MiniTuples/v5.3/minituple_";
 
 	vector<string> filetags_example1;
 
@@ -255,162 +255,161 @@ void Plot_Scores(){
 	};
 
 	vector<PlotParams> P_jet1_vars_ALL = {
-		P_jet1_RechitN,
-		P_jet1_E,
-		P_jet1_Pt,
-		P_jet1_Eta,
-		P_jet1_Phi,
-		P_jet1_Mass,
-		P_jet1_JetArea,
+		// P_jet1_RechitN,
+		// P_jet1_E,
+		// P_jet1_Pt,
+		// P_jet1_Eta,
+		// P_jet1_Phi,
+		// P_jet1_Mass,
+		// P_jet1_JetArea,
 		//P_jet1_dEta,
 		//P_jet1_dPhi,
 		//P_jet1_dPhi_v316,
-		P_jet1met_dPhi,
-		P_jet1_DeepCSV_prob_b,
-		P_jet1_DeepCSV_prob_c,
-		P_jet1_DeepCSV_prob_bb,
-		P_jet1_DeepCSV_prob_udsg,
-		P_jet1_EtaSpread,
-		P_jet1_EtaSpread_energy,
-		P_jet1_PhiSpread,
-		P_jet1_PhiSpread_energy,
-		P_jet1_EtaPhiQuadSpread,
-		P_jet1_EtaPhiQuadSpread_energy,
-		P_jet1_Setaeta,
-		P_jet1_Sphiphi,
-		P_jet1_Setaphi,
-		P_jet1_Smajor,
-		P_jet1_Sminor,
-		P_jet1_SminorSmajor,
-		P_jet1_TDCaverage,
-		P_jet1_TDCaverage_Eweight,
-		P_jet1_TDCnDelayed,
-		P_jet1_DepthTowers_pt1,
-		P_jet1_DepthTowers,
-		P_jet1_TimingTowers_pt1,
-		P_jet1_TimingTowers,
-		P_jet1_FlaggedTowers_pt1,
-		P_jet1_FlaggedTowers,
-		P_jet1_dR_L1jet,
-		P_jet1_Track0PtFrac,
-		P_jet1_Track1PtFrac,
-		P_jet1_Track2PtFrac,
-		P_jet1_Track0Pt,
-		P_jet1_Track1Pt,
-		P_jet1_Track2Pt,
-		P_jet1_Track0dxyToBS,
-		P_jet1_Track1dxyToBS,
-		P_jet1_Track2dxyToBS,
-		P_jet1_Track0dxyOverErr,
-		P_jet1_Track1dxyOverErr,
-		P_jet1_Track2dxyOverErr,
-		P_jet1_Track0dzToPV,
-		P_jet1_Track1dzToPV,
-		P_jet1_Track2dzToPV,
-		P_jet1_Track0dzOverErr,
-		P_jet1_Track1dzOverErr,
-		P_jet1_Track2dzOverErr,
-		P_jet1_Track0nMissingInnerHits,
-		P_jet1_Track0nMissingOuterHits,
-		P_jet1_Track0nPixelHits,
-		P_jet1_Track0nHits,
-		P_jet1_Tracks_dR,
-		P_jet1_Track0dR,
-		P_jet1_Track1dR,
-		P_jet1_Track2dR,
-		P_jet1_Track0dEta,
-		P_jet1_Track1dEta,
-		P_jet1_Track2dEta,
-		P_jet1_Track0dPhi,
-		P_jet1_Track1dPhi,
-		P_jet1_Track2dPhi,
-		P_jet1_PtAllTracks,
-		P_jet1_PtAllPVTracks,
-		P_jet1_NVertexTracks,
-		P_jet1_NSelectedTracks,
-		P_jet1_NSV,
-		P_jet1_NSVCand,
-		P_jet1_SV_x,
-		P_jet1_SV_y,
-		P_jet1_SV_z,
-		P_jet1_SV_NTracks,
-		P_jet1_SV_Mass,
-		P_jet1_FlightDist2D,
-		P_jet1_FlightDist2DErr,
-		P_jet1_FlightDist3D,
-		P_jet1_FlightDist3DErr,
-		P_jet1_LeadingRechitE,
-		P_jet1_SubLeadingRechitE,
-		P_jet1_SSubLeadingRechitE,
-		P_jet1_AllRechitE,
-		P_jet1_AllRechitEFracJet,
-		P_jet1_3RechitFracE,
-		P_jet1_LeadingRechitEFracJet,
-		P_jet1_SubLeadingRechitEFracJet,
-		P_jet1_SSubLeadingRechitEFracJet,
-		P_jet1_LeadingRechitEFrac,
-		P_jet1_SubLeadingRechitEFrac,
-		P_jet1_SSubLeadingRechitEFrac,
-		P_jet1_LeadingRechitJetEDiff,
-		P_jet1_LeadingSubRechitEQuad,
-		P_jet1_LeadingRechitD,
-		P_jet1_SubLeadingRechitD,
-		P_jet1_SSubLeadingRechitD,
-		P_jet1_NeutralHadEFrac,
-		P_jet1_ChargedHadEFrac,
-		P_jet1_PhoEFrac,
-		P_jet1_EleEFrac,
-		P_jet1_MuonEFrac,
-		P_jet1_NeutralHadEFrac_zero,
-		P_jet1_ChargedHadEFrac_zero,
-		P_jet1_PhoEFrac_zero,
-		P_jet1_EleEFrac_zero,
-		P_jet1_MuonEFrac_zero,
-		P_jet1_NeutralHadMult,
-		P_jet1_ChargedHadMult,
-		P_jet1_PhoMult,
-		P_jet1_EleMult,
-		P_jet1_HoverE,
-		P_jet1_NeutralElePhoEFrac,
-		P_jet1_NeutralPhoEFrac,
-		P_jet1_NeutralOverChargedHad,
-		P_jet1_LogNeutralOverChargedHad,
-		P_jet1_EnergyFrac_Depth1,
-		P_jet1_EnergyFrac_Depth2,
-		P_jet1_EnergyFrac_Depth3,
-		P_jet1_EnergyFrac_Depth4,
-		P_jet1_HCALd1_over_d2,
-		P_jet1_HCALd1_over_d3,
-		P_jet1_HCALd1_over_d4,
-		P_jet1_HCALd12_over_d34,
-		P_jet1_isTruthMatched,
-		P_jet1_isMatchedTo,
-		P_jet1_MatchedLLP_DecayR,
-		P_jet1_MatchedLLP_Eta,
-		P_jet1_llp0_ptDiff,
-		P_jet1_llp1_ptDiff,
-		P_jet1_rechitN,
-		P_jet1_energy,
-		P_jet1_pt,
-		P_jet1_energyFrac_depth1,
-		P_jet1_energyFrac_depth2,
-		P_jet1_energyFrac_depth3,
-		P_jet1_energyFrac_depth4,
-		P_jet1_etaSpread,
-		P_jet1_etaSpread_energy,
-		P_jet1_phiSpread,
-		P_jet1_phiSpread_energy,
-		P_jet1_track0Pt,
-		P_jet1_track1Pt,
-		P_jet1_track2Pt,
-		P_jet1_bdtscoreX_LLP350_MS80_perJet,
-		P_jet1_scores,
-		P_jet1_scores_inc,
-		P_jet1_scores_inc_train80,
-		P_jet1_scores_inc_train40,
-		P_jet1_scores_depth_hcal,
-		P_jet1_scores_depth_LLPanywhere
-
+		// P_jet1met_dPhi,
+		// P_jet1_DeepCSV_prob_b,
+		// P_jet1_DeepCSV_prob_c,
+		// P_jet1_DeepCSV_prob_bb,
+		// P_jet1_DeepCSV_prob_udsg,
+		// P_jet1_EtaSpread,
+		// P_jet1_EtaSpread_energy,
+		// P_jet1_PhiSpread,
+		// P_jet1_PhiSpread_energy,
+		// P_jet1_EtaPhiQuadSpread,
+		// P_jet1_EtaPhiQuadSpread_energy,
+		// P_jet1_Setaeta,
+		// P_jet1_Sphiphi,
+		// P_jet1_Setaphi,
+		// P_jet1_Smajor,
+		// P_jet1_Sminor,
+		// P_jet1_SminorSmajor,
+		// P_jet1_TDCaverage,
+		// P_jet1_TDCaverage_Eweight,
+		// P_jet1_TDCnDelayed,
+		// P_jet1_DepthTowers_pt1,
+		// P_jet1_DepthTowers,
+		// P_jet1_TimingTowers_pt1,
+		// P_jet1_TimingTowers,
+		// P_jet1_FlaggedTowers_pt1,
+		// P_jet1_FlaggedTowers,
+		// P_jet1_dR_L1jet,
+		// P_jet1_Track0PtFrac,
+		// P_jet1_Track1PtFrac,
+		// P_jet1_Track2PtFrac,
+		// P_jet1_Track0Pt,
+		// P_jet1_Track1Pt,
+		// P_jet1_Track2Pt,
+		// P_jet1_Track0dxyToBS,
+		// P_jet1_Track1dxyToBS,
+		// P_jet1_Track2dxyToBS,
+		// P_jet1_Track0dxyOverErr,
+		// P_jet1_Track1dxyOverErr,
+		// P_jet1_Track2dxyOverErr,
+		// P_jet1_Track0dzToPV,
+		// P_jet1_Track1dzToPV,
+		// P_jet1_Track2dzToPV,
+		// P_jet1_Track0dzOverErr,
+		// P_jet1_Track1dzOverErr,
+		// P_jet1_Track2dzOverErr,
+		// P_jet1_Track0nMissingInnerHits,
+		// P_jet1_Track0nMissingOuterHits,
+		// P_jet1_Track0nPixelHits,
+		// P_jet1_Track0nHits,
+		// P_jet1_Tracks_dR,
+		// P_jet1_Track0dR,
+		// P_jet1_Track1dR,
+		// P_jet1_Track2dR,
+		// P_jet1_Track0dEta,
+		// P_jet1_Track1dEta,
+		// P_jet1_Track2dEta,
+		// P_jet1_Track0dPhi,
+		// P_jet1_Track1dPhi,
+		// P_jet1_Track2dPhi,
+		// P_jet1_PtAllTracks,
+		// P_jet1_PtAllPVTracks,
+		// P_jet1_NVertexTracks,
+		// P_jet1_NSelectedTracks,
+		// P_jet1_NSV,
+		// P_jet1_NSVCand,
+		// P_jet1_SV_x,
+		// P_jet1_SV_y,
+		// P_jet1_SV_z,
+		// P_jet1_SV_NTracks,
+		// P_jet1_SV_Mass,
+		// P_jet1_FlightDist2D,
+		// P_jet1_FlightDist2DErr,
+		// P_jet1_FlightDist3D,
+		// P_jet1_FlightDist3DErr,
+		// P_jet1_LeadingRechitE,
+		// P_jet1_SubLeadingRechitE,
+		// P_jet1_SSubLeadingRechitE,
+		// P_jet1_AllRechitE,
+		// P_jet1_AllRechitEFracJet,
+		// P_jet1_3RechitFracE,
+		// P_jet1_LeadingRechitEFracJet,
+		// P_jet1_SubLeadingRechitEFracJet,
+		// P_jet1_SSubLeadingRechitEFracJet,
+		// P_jet1_LeadingRechitEFrac,
+		// P_jet1_SubLeadingRechitEFrac,
+		// P_jet1_SSubLeadingRechitEFrac,
+		// P_jet1_LeadingRechitJetEDiff,
+		// P_jet1_LeadingSubRechitEQuad,
+		// P_jet1_LeadingRechitD,
+		// P_jet1_SubLeadingRechitD,
+		// P_jet1_SSubLeadingRechitD,
+		// P_jet1_NeutralHadEFrac,
+		// P_jet1_ChargedHadEFrac,
+		// P_jet1_PhoEFrac,
+		// P_jet1_EleEFrac,
+		// P_jet1_MuonEFrac,
+		// P_jet1_NeutralHadEFrac_zero,
+		// P_jet1_ChargedHadEFrac_zero,
+		// P_jet1_PhoEFrac_zero,
+		// P_jet1_EleEFrac_zero,
+		// P_jet1_MuonEFrac_zero,
+		// P_jet1_NeutralHadMult,
+		// P_jet1_ChargedHadMult,
+		// P_jet1_PhoMult,
+		// P_jet1_EleMult,
+		// P_jet1_HoverE,
+		// P_jet1_NeutralElePhoEFrac,
+		// P_jet1_NeutralPhoEFrac,
+		// P_jet1_NeutralOverChargedHad,
+		// P_jet1_LogNeutralOverChargedHad,
+		// P_jet1_EnergyFrac_Depth1,
+		// P_jet1_EnergyFrac_Depth2,
+		// P_jet1_EnergyFrac_Depth3,
+		// P_jet1_EnergyFrac_Depth4,
+		// P_jet1_HCALd1_over_d2,
+		// P_jet1_HCALd1_over_d3,
+		// P_jet1_HCALd1_over_d4,
+		// P_jet1_HCALd12_over_d34,
+		// P_jet1_isTruthMatched,
+		// P_jet1_isMatchedTo,
+		// P_jet1_MatchedLLP_DecayR,
+		// P_jet1_MatchedLLP_Eta,
+		// P_jet1_llp0_ptDiff,
+		// P_jet1_llp1_ptDiff,
+		// P_jet1_rechitN,
+		// P_jet1_energy,
+		// P_jet1_pt,
+		// P_jet1_energyFrac_depth1,
+		// P_jet1_energyFrac_depth2,
+		// P_jet1_energyFrac_depth3,
+		// P_jet1_energyFrac_depth4,
+		// P_jet1_etaSpread,
+		// P_jet1_etaSpread_energy,
+		// P_jet1_phiSpread,
+		// P_jet1_phiSpread_energy,
+		// P_jet1_track0Pt,
+		// P_jet1_track1Pt,
+		// P_jet1_track2Pt,
+		// P_jet1_bdtscoreX_LLP350_MS80_perJet,
+		// P_jet1_scores,
+		// P_jet1_scores_inc,
+		// P_jet1_scores_inc_train80,
+		// P_jet1_scores_inc_train40,
+		// P_jet1_scores_depth_hcal,
+		// P_jet1_scores_depth_LLPanywhere
 	};
 
 	PlotParams P_jet1_jet2_dPhi				= {"abs(jet1_Phi-jet2_Phi)*( abs(jet1_Phi-jet2_Phi) <= 3.14) + (abs(jet1_Phi-jet2_Phi)-2.*3.14)*( abs(jet1_Phi-jet2_Phi) > 3.14)", "Subleading-subsubleading Jet #Delta#phi", "Jet #Delta#phi", 0, 3.5 };
@@ -432,7 +431,7 @@ void Plot_Scores(){
 
 		//"NoSAnything", "NoRecHitAnything", "NoTracks", "NoContentEFrac"} ){ // "OnlyEtaMass"
 
-			path = "../Files/MiniTuples/v5.3/minituple_";
+			// path = "../Files/MiniTuples/v5.3/minituple_";
 
 			filetags_example1 = { "data_2022Ev1_scores"}; //, "HToSSTo4B_125_50_CTau3000_scores" }; //, "test_10k" };
 
@@ -484,7 +483,7 @@ void Plot_Scores(){
 
 		//"NoSAnything", "NoRecHitAnything", "NoTracks", "NoContentEFrac"} ){ // "OnlyEtaMass"
 
-			path = "../Files/MiniTuples/v5.3_scores_DNNv6/minituple_";
+			// path = "../Files/MiniTuples/v5.3_scores_DNNv6/minituple_";
 
 			filetags_example1 = { 
 				"HToSSTo4B_MH125_MS50_CTau3000_CentralFromRAW_2023postBPix_Premix_NoSel_scores"+disabled_feature, // Baseline
@@ -541,7 +540,7 @@ void Plot_Scores(){
 			P_jet1_scores_depth_LLPanywhere, P_jet1_scores_inc_train80
 		};
 
-		path = "../Files/MiniTuples/v5.3/minituple_";
+		// path = "../Files/MiniTuples/v5.3/minituple_";
 
 		filetags_example1 = { 
 			"data_2022Ev1_scores", 
@@ -599,7 +598,7 @@ void Plot_Scores(){
 			P_jet1_scores_depth_LLPanywhere, P_jet1_scores_inc_train80
 		};
 
-		path = "../Files/MiniTuples/v5.3/minituple_";
+		// path = "../Files/MiniTuples/v5.3/minituple_";
 
 		filetags_example1 = { 
 			"HToSSTo4B_125_50_CTau3000_scores", 
@@ -644,45 +643,44 @@ void Plot_Scores(){
 
 	}
 
-	if( false ) {
+	if( true ) {
 
 		vector<PlotParams> P_jet0_vars_important = {
-			/*P_jet0_Pt, P_jet0_Eta, P_jet0_Phi, P_jet0_E, 
-			P_jet0_EnergyFrac_Depth1, P_jet0_EnergyFrac_Depth2, P_jet0_EnergyFrac_Depth3, P_jet0_EnergyFrac_Depth4, 
-			P_jet0_NeutralHadEFrac, P_jet0_ChargedHadEFrac, P_jet0_PhoEFrac, P_jet0_EleEFrac,*/
-			P_jet0_scores_depth_LLPanywhere, P_jet0_scores_inc_train80
+			// P_jet0_Pt, P_jet0_Eta, P_jet0_Phi, P_jet0_E, 
+			// P_jet0_EnergyFrac_Depth1, P_jet0_EnergyFrac_Depth2, P_jet0_EnergyFrac_Depth3, P_jet0_EnergyFrac_Depth4, 
+			// P_jet0_NeutralHadEFrac, P_jet0_ChargedHadEFrac, P_jet0_PhoEFrac, P_jet0_EleEFrac,
+			P_jet0_scores_depth_LLPanywhere, P_jet1_scores_inc_train80
 		};
 
 
 		vector<PlotParams> P_jet1_vars_important = {
-			P_jet1_Pt, P_jet1_Eta, P_jet1_Phi, P_jet1_E, 
-			P_jet1_EnergyFrac_Depth1, P_jet1_EnergyFrac_Depth2, P_jet1_EnergyFrac_Depth3, P_jet1_EnergyFrac_Depth4, 
-			P_jet1_NeutralHadEFrac, P_jet1_ChargedHadEFrac, P_jet1_PhoEFrac, P_jet1_EleEFrac,
-			P_jet1_scores_depth_LLPanywhere, P_jet1_scores_inc_train80
+			// P_jet1_Pt, P_jet1_Eta, P_jet1_Phi, P_jet1_E, 
+			// P_jet1_EnergyFrac_Depth1, P_jet1_EnergyFrac_Depth2, P_jet1_EnergyFrac_Depth3, P_jet1_EnergyFrac_Depth4, 
+			// P_jet1_NeutralHadEFrac, P_jet1_ChargedHadEFrac, P_jet1_PhoEFrac, P_jet1_EleEFrac,
+			P_jet1_scores_depth_LLPanywhere, P_jet0_scores_inc_train80
 		};
 
-		path = "../Files/MiniTuples/v5.3/minituple_";
+		// path = "../Files/MiniTuples/v5.3/minituple_";
 
 		filetags_example1 = { 
 			"HToSSTo4B_125_50_CTau3000_scores", 
-			"HToSSTo4B_MH125_MS50_CTau3000_CentralFromRAW_2022postEE_PU60_NoSel_scores",
-			"HToSSTo4B_MH125_MS50_CTau3000_CentralFromRAW_2022postEE_PU70_NoSel_scores",
-			"HToSSTo4B_MH125_MS50_CTau3000_CentralFromRAW_2022preEE_Premix_NoSel_scores",
-			"HToSSTo4B_MH125_MS50_CTau3000_CentralFromRAW_2023postBPix_Premix_NoSel_scores"
+			// "HToSSTo4B_MH125_MS50_CTau3000_Premix_2022preEE_scores",
+			// "HToSSTo4B_MH125_MS50_CTau3000_PU60_2022postEE_scores",
+			// "HToSSTo4B_MH125_MS50_CTau3000_PU70_2022postEE_scores",
+			"HToSSTo4B_MH125_MS50_CTau3000_Premix_2023postBPix-pythia_scores"
 		}; 
 
 		MiniTuplePlotter plotter( filetags_example1, path );
 
 		plotter.SetTreeName( "NoSel" );	// TreeName
-		//plotter.SetPlots( P_DNN_Training_Vars );
-		plotter.SetPlots( P_DNN_Training_Vars ); 
-		//plotter.SetCuts( "jet0_Pt > 60 && abs(jet0_Eta) < 1.26 && jet0_DepthTagCand == 1" );
-		plotter.SetCuts( "jet1_Pt > 40 && abs(jet0_Eta) < 2") ; // && jet0_DepthTagCand == 1" );
+		// plotter.SetPlots( P_jet0_vars_important ); plotter.SetCuts( "jet0_DepthTagCand == 1" );
+		plotter.SetPlots( P_jet1_vars_important ); plotter.SetCuts( "jet1_DepthTagCand == 1" );
+		// plotter.SetCuts( "Pass_HLTDisplacedJet == 1" );
 		//plotter.SetCuts( "jet0_InclTagCand == 1 && jet0_Pt > 40 && abs(jet0_Eta) < 1.26" );
-
-		//plotter.SetPlots( P_jet1_vars_important ); plotter.SetCuts( "jet1_DepthTagCand == 1" );
 		plotter.SetComparisonCuts( {""} ); //, "Pass_HLTDisplacedJet == 1"} ); //, "Pass_HLTDisplacedJet && Pass_PreSel == 1"} ); // && jet0_DepthTagCand == 1", "Pass_HLTDisplacedJet == 1 && Pass_PreSel == 1 && jet1_DepthTagCand == 1"} ); // "Pass_HLTDisplacedJet == 1 && Pass_PreSel == 1 && jet0_scores_inc_train80 > 0.9", "Pass_HLTDisplacedJet == 1 && Pass_PreSel == 1 && jet1_scores_inc_train80 > 0.9 && jet0_scores_depth_LLPanywhere > 0.1",} );
-		plotter.SetLegendNames({"Private Sample", "Central, 2022postEE_PU60", "Central, 2022postEE_PU70", "Central, 2022preEE", "Central, 2023postBPix"}); //, "+Jet1 Inc Score > 0.9", "+Jet0 Depth Score > 0.01"});
+		// plotter.SetLegendNames({"Private Sample", "Central, 2022preEE", "Central, 2022postEE_PU60", "Central, 2022postEE_PU70", "Central, 2023postBPix"}); 
+		// plotter.SetLegendNames({"Central, 2022preEE", "Central, 2022postEE_PU60", "Central, 2022postEE_PU70"}); 
+		plotter.SetLegendNames({"Private Sample", "Central, 2023postBPix"}); 
 		plotter.SetLegendPosition( 0.5, 0.72, 0.88, 0.88 );
 		//plotter.SetSelectiveCuts("HToSSTo4B", "LLP0_DecayR > 10 && LLP1_DecayR > 10");
 		//plotter.colors = { kRed, kOrange+7, kOrange-3, kMagenta-7 };
@@ -692,12 +690,12 @@ void Plot_Scores(){
 		plotter.stamp_counts    = false;
 		plotter.plot_norm	   	= true; 	// Default = true
 		plotter.plot_grid 	  	= true;	// Default = true. Draw grid lines on plot
-		plotter.plot_cdf 		= false;	// Default = false. Cumulative distribution function 
+		plotter.plot_cdf 		= true;	// Default = false. Cumulative distribution function 
 		plotter.plot_reverse_cdf = false;	// Default = false. Cumulative distribution function 
 		plotter.use_weight       = false;	// Default = true, which uses weight branch when drawing non-normalized hists
 		plotter.NBins = 20;
-		plotter.output_file_tag = "";
-		plotter.Plot("");
+		plotter.output_file_tag = "postBPix";
+		plotter.Plot("ratio");
 	}
 
 
