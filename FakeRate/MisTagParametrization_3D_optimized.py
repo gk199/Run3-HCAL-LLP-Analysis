@@ -33,8 +33,8 @@ from ROOT import SetOwnership
 debug = False
 
 # ---- Histogram bin definitions (identical to original) ----
-# pT_bins  = np.array([0, 40, 50, 60, 70, 80, 100, 120, 160, 240, 400], dtype=float)
-pT_bins  = np.array([0, 40, 140, 200, 400], dtype=float)
+# pT_bins  = np.array([0, 40, 50, 60, 70, 80, 100, 120, 160, 240, 400], dtype=float) # used before reducing number of bins
+pT_bins  = np.array([0, 40, 160, 400], dtype=float)
 # Set to True to book the eta axis (and jet0/1_EtaAxis columns) using |eta|
 # instead of signed eta. Flip back to False to restore signed-eta behavior.
 USE_ABS_ETA = True
@@ -42,8 +42,9 @@ if USE_ABS_ETA:
     # eta_bins = np.linspace(0, 1.26, 2)     # |eta|: to test impact on prediction closure
     eta_bins = np.array([0, 1, 1.26], dtype=float)     # |eta|: to test impact on prediction closure
 else:
-    # eta_bins = np.linspace(-1.26, 1.26, 9)
-    eta_bins = np.linspace(-1.26, 1.26, 5) # signed eta: one bin to test impact on prediction closure
+    # eta_bins = np.linspace(-1.26, 1.26, 9) # used before reducing number of bins
+    # eta_bins = np.linspace(-1.26, 1.26, 5) # signed eta
+    eta_bins = np.array([-1.26, -1, 1, 1.26], dtype=float)  
 # phi_bins = np.linspace(-np.pi, np.pi, 9)
 phi_bins = np.linspace(-np.pi, np.pi, 2) # one bin in phi to test impact on prediction closure
 b_tag_bins = np.array([0, 0.2435, 1.0], dtype=float)

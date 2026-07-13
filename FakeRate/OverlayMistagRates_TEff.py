@@ -11,7 +11,7 @@ from ROOT import SetOwnership
 from MisTagParametrization_3D import ProjectHistogram, ResetAxis
 
 debug = False
-era = "2023_PU" # "2022", "2023", "2022_PU", "2023_PU", or "combined" (all 2022 vs all 2023)
+era = "combined" # "2022", "2023", "2022_PU", "2023_PU", or "combined" (all 2022 vs all 2023)
 DNN_cut = 0.99 # for LJDC depth cut
 
 # ------------------------------------------------------------------------------
