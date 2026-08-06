@@ -104,6 +104,12 @@ void DisplacedHcalJetAnalyzer( string infiletag = "", string systematic = "Nomin
     AnalysisReader.vetoMaps_["Summer23Prompt23"]       = AnalysisReader.LoadJetVetoMap("JetVetoMaps/Summer23Prompt23_RunC_v1.root");
     AnalysisReader.vetoMaps_["Summer23BPixPrompt23"]   = AnalysisReader.LoadJetVetoMap("JetVetoMaps/Summer23BPixPrompt23_RunD_v1.root");
 
+    // ----- Load Pileup Weight Histograms ----- //
+	AnalysisReader.puWeightHists_["2022preEE"]    = AnalysisReader.LoadPileupWeights("PileupWeights/2022preEE_puWeights.root");
+	AnalysisReader.puWeightHists_["2022postEE"]   = AnalysisReader.LoadPileupWeights("PileupWeights/2022EE_puWeights.root");
+	AnalysisReader.puWeightHists_["2023preBPix"]  = AnalysisReader.LoadPileupWeights("PileupWeights/2023_puWeights.root");
+	AnalysisReader.puWeightHists_["2023postBPix"] = AnalysisReader.LoadPileupWeights("PileupWeights/2023BPix_puWeights.root");
+
 	// ----- Initialize ----- // 
 
 

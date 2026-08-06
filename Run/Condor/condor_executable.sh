@@ -22,6 +22,8 @@ voms-proxy-info -all -file $myproxy
 echo "Timestamp: $(date '+%Y-%m-%d %H:%M:%S')\n"
 
 # ----- Create Minituple ----- #
+echo "Unzipping PileupWeights Maps..."
+unzip PileupWeights_Run3.zip > /dev/null
 
 echo "Unzipping Jet Veto Maps..."
 unzip JetVetoMaps_Run3.zip > /dev/null

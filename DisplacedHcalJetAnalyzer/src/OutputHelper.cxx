@@ -67,7 +67,8 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		// HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5, which was
 		// disabled for 34.95% of the data-taking period. Weight is 0 or 1 (random draw
 		// with p=0.6505 keep) when that is the only L1SingleLLPJet HLT that fired, else 1.
-		"HLT_prescale_weight"
+		"HLT_prescale_weight",
+		"puWeight", "puWeightUp", "puWeightDown"
 	};
 
 	for (int i = 0; i < (int)L1_Indices.size(); i++) {
@@ -387,7 +388,7 @@ void DisplacedHcalJetAnalyzer::DeclareOutputJetTrees(){
 		"PV","jet","muon","ele","pho",
 	};
 
-	vector<string> myvars_float = {"eventHT", "randomFloat", "L1_prescale_weight", "HLT_prescale_weight"};
+	vector<string> myvars_float = {"eventHT", "randomFloat", "L1_prescale_weight", "HLT_prescale_weight", "puWeight", "puWeightUp", "puWeightDown"};
 
 	// Per-trigger L1 prescale values (float; -1 = branch absent)
 	for (int i = 0; i < (int)L1_Indices.size(); i++) {
@@ -537,6 +538,48 @@ void DisplacedHcalJetAnalyzer::ResetOutputBranches( string treename ){
 }
 
 /* ====================================================================================================================== */
+float DisplacedHcalJetAnalyzer::GetPileupWeight( const string &variation ){
+
+	if( isData ) return 1.0;
+
+	auto it = puWeightHists_.find( currentEra_ );
+	if( it == puWeightHists_.end() || !it->second.nom ){
+		cout<<"WARNING: no pileup weight histogram loaded for era "<<currentEra_<<"; returning 1.0"<<endl;
+		return 1.0;
+	}
+
+	TH1D* h = it->second.nom;
+	if (variation == "up" && it->second.up)
+		h = it->second.up;
+	else if (variation == "down" && it->second.down)
+		h = it->second.down;
+
+	if( debug ) cout << "BunchXing->size() = " << BunchXing->size() << "  nPUmean->size() = " << nPUmean->size() << endl;
+
+	auto bx0 = std::find(BunchXing->begin(), BunchXing->end(), 0);
+	
+	if (bx0 == BunchXing->end()) {
+		cout << "ERROR: no BX=0 entry!" << endl;
+		return 1.0;
+	}
+	
+	size_t idx = std::distance(BunchXing->begin(), bx0);
+
+	float truePU = nPUmean->at(idx);
+	
+	int bin = h->FindFixBin(truePU);
+	float weight = h->GetBinContent(std::clamp(bin, 1, h->GetNbinsX()));
+
+	if( debug ) cout << "PUDEBUG variation=" << variation
+	 << " hist=" << h->GetName()
+	 << " truePU=" << truePU
+	 << " bin=" << bin
+	 << " weight=" << weight << endl;
+
+	return weight;
+}
+
+/* ====================================================================================================================== */
 void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, bool> Pass_EventSelections ){ 
 	// for the output trees that are filled on a per event basis
 
@@ -666,6 +709,9 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 			hlt_prescale_weight = 0.0f;
 	}
 	tree_output_vars_float["HLT_prescale_weight"] = hlt_prescale_weight;
+	tree_output_vars_float["puWeight"]     = GetPileupWeight("nominal");
+	tree_output_vars_float["puWeightUp"]   = GetPileupWeight("up");
+	tree_output_vars_float["puWeightDown"] = GetPileupWeight("down");
 
 	tree_output_vars_bool["Flag_HBHENoiseFilter"] = Flag_HBHENoiseFilter;
 	tree_output_vars_bool["Flag_HBHENoiseIsoFilter"] = Flag_HBHENoiseIsoFilter;

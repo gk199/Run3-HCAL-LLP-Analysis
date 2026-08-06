@@ -186,8 +186,13 @@ def main():
     ZIP_JetVeto = os.path.join(cwd, "JetVetoMaps_Run3.zip")
     zip_dir(os.path.join(cwd, "../JetVetoMaps"), ZIP_JetVeto)
 
+    print("Zipping Pileup Weights input...")
+    ZIP_PileupWeights = os.path.join(cwd, "PileupWeights_Run3.zip")
+    zip_dir(os.path.join(cwd, "../PileupWeights"), ZIP_PileupWeights)
+
+
     #transfer_input_files = Executable_DisplacedHcalJetAnalyzer + "," + add_scores + "," + keras_depth + "," + keras_inclusive + "," + norm_constants
-    transfer_input_files = ZIP_DisplacedHcalJetAnalyzer  + "," + ZIP_Classifier + "," + ZIP_JetVeto
+    transfer_input_files = ZIP_DisplacedHcalJetAnalyzer  + "," + ZIP_Classifier + "," + ZIP_JetVeto + "," + ZIP_PileupWeights
 
     # ----- Make Submission Dir ----- #
 

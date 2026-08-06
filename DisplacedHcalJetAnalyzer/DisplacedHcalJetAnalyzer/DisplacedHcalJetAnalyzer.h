@@ -52,6 +52,12 @@
 
 using namespace std;
 
+struct PileupWeightHists {
+	TH1D* nom  = nullptr;
+	TH1D* up   = nullptr;
+	TH1D* down = nullptr;
+};
+
 class DisplacedHcalJetAnalyzer {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
@@ -84,6 +90,9 @@ public :
    // jet veto mask
    TH2F* maskMap_ = nullptr;
    std::map<std::string, TH2F*> vetoMaps_; // this will load all maps, then look thme up by era
+   
+   // pileup weight map
+   map<string, PileupWeightHists> puWeightHists_;
 
    std::string currentEra_ = "UNKNOWN";
    int currentEraCategory_ = -1;
@@ -166,6 +175,8 @@ public :
    UInt_t          eventTime;
    Float_t         fixedGridRhoFastjetAll;
    Int_t           n_PV;
+   vector<float>   *nPUmean;
+   vector<int>     *BunchXing;
    Float_t         PV_X;
    Float_t         PV_Y;
    Float_t         PV_Z;
@@ -531,6 +542,8 @@ public :
    TBranch        *b_eventTime;   //!
    TBranch        *b_fixedGridRhoFastjetAll;
    TBranch        *b_n_PV;   //!
+   TBranch        *b_nPUmean;
+   TBranch        *b_BunchXing;
    TBranch        *b_PV_X;   //!
    TBranch        *b_PV_Y;   //!
    TBranch        *b_PV_Z;   //!
@@ -961,6 +974,8 @@ public :
    virtual void   updateCurrentEraMap();
    virtual bool   PassJetVetoEvent();
    virtual TH2F*   LoadJetVetoMap(const std::string& filename);
+   PileupWeightHists LoadPileupWeights(const std::string& filename);
+   float GetPileupWeight(const string &variation);
    virtual std::string eraToVetoMapKey(const std::string& era);
    // BDTHelper.cxx
    virtual void   InitializeTMVA(); 
@@ -1039,6 +1054,8 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    // (once per file to be processed).
 
    // Set object pointer
+   nPUmean = 0;
+   BunchXing = 0;
    PVCand_X = 0;
    PVCand_Y = 0;
    PVCand_Z = 0;
@@ -1386,6 +1403,8 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("eventTime", &eventTime, &b_eventTime);
    fChain->SetBranchAddress("fixedGridRhoFastjetAll", &fixedGridRhoFastjetAll, &b_fixedGridRhoFastjetAll);
    fChain->SetBranchAddress("n_PV", &n_PV, &b_n_PV);
+   fChain->SetBranchAddress("nPUmean", &nPUmean, &b_nPUmean);
+   fChain->SetBranchAddress("BunchXing", &BunchXing, &b_BunchXing);
    fChain->SetBranchAddress("PV_X", &PV_X, &b_PV_X);
    fChain->SetBranchAddress("PV_Y", &PV_Y, &b_PV_Y);
    fChain->SetBranchAddress("PV_Z", &PV_Z, &b_PV_Z);

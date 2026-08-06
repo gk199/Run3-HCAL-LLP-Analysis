@@ -257,3 +257,35 @@ double DisplacedHcalJetAnalyzer::GetNEventsProduced(string infiletag){
 	return NEvents_produced;
 }
 
+PileupWeightHists DisplacedHcalJetAnalyzer::LoadPileupWeights(const std::string& filename) {
+
+    if (debug) cout << "DisplacedHcalJetAnalyzer::LoadPileupWeights()" << endl;
+
+    PileupWeightHists result;
+
+    TFile* f = TFile::Open(filename.c_str(), "READ");
+    if (!f || f->IsZombie()) {
+        if( debug ) cout << "DisplacedHcalJetAnalyzer::LoadPileupWeights(): Cannot open pileup weight file: " << filename << endl;
+        return result;
+    }
+
+    TH1D* h_nom   = (TH1D*)f->Get("pileup_nom");
+    TH1D* h_up    = (TH1D*)f->Get("pileup_up");
+    TH1D* h_down  = (TH1D*)f->Get("pileup_down");
+
+    if (!h_nom || !h_up || !h_down) {
+        if( debug ) cout << "DisplacedHcalJetAnalyzer::LoadPileupWeights(): missing histogram(s) in file: " << filename << endl;
+        f->Close();
+        delete f;
+        return result;
+    }
+
+    result.nom  = (TH1D*)h_nom->Clone();   result.nom->SetDirectory(0);
+    result.up   = (TH1D*)h_up->Clone();    result.up->SetDirectory(0);
+    result.down = (TH1D*)h_down->Clone();  result.down->SetDirectory(0);
+
+    f->Close();
+
+    if (debug) cout << "DisplacedHcalJetAnalyzer::LoadPileupWeights(): Loaded pileup weights from " << filename << endl;
+    return result;
+}
