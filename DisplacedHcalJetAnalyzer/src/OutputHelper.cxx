@@ -1150,7 +1150,6 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 	}
 	jet_tree_output_vars_float["HLT_prescale_weight"] = hlt_prescale_weight_jet;
 
-
 	float deltaR_jet_l1jet;
 	bool JetPassL1Trigger = JetPassesHWQual( jetIndex, deltaR_jet_l1jet );
 
