@@ -319,7 +319,7 @@ Updates:
 * `lumi_frac` added
 * `era_category` added
 * central samples processed
-* v7 DNN trained off of these minituples
+* v7 DNN trained off of these minituples, with 2 DNNs trained (one for 2022+23 preBPix, one for 2023 postBPix). S variables are added back into the trainings. 
 * scores added are v7 DNN
 * weights added correctly for central samples
 
