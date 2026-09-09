@@ -247,6 +247,7 @@ def run_cutflow(
     use_weights        = None,
     use_l1_prescale    = None,
     use_hlt_prescale   = None,
+    use_lumi_frac      = False,
     dnn_inc_cut        = 0.97,
     dnn_depth_cut      = 0.95,
     dnn_inc_cut_sjdc   = None,
@@ -334,9 +335,9 @@ def run_cutflow(
     # MET filters are only applied to data, not LLP MC signal.
     steps = [
         ("All",                                 ""),
-        # ("Trigger (L1)",                        "Pass_L1SingleLLPJet == 1"),
+        ("Trigger (L1)",                        "Pass_L1SingleLLPJet == 1"),
     #    ("Trigger (L1 DoubleLLPJet40)",         "L1_DoubleLLPJet40 == 1"),
-       ("Trigger (L1, but not L1 DoubleLLPJet40)",         "L1_DoubleLLPJet40 == 0 && Pass_L1SingleLLPJet == 1"),
+    #    ("Trigger (L1, but not L1 DoubleLLPJet40)",         "L1_DoubleLLPJet40 == 0 && Pass_L1SingleLLPJet == 1"),
         # ("L1 trigger matched, $pT > 60$",       "((jet0_L1trig_Matched == 1 && jet0_Pt > 60 && abs(jet0_Eta) < 1.26 && jet1_Pt > 40 && abs(jet1_Eta) < 2.0) || (jet1_L1trig_Matched == 1 && jet1_Pt > 60 && abs(jet1_Eta) < 1.26 && jet0_Pt > 40 && abs(jet0_Eta) < 2.0))"),
         ("Trigger (HLT)",                       "Pass_HLTDisplacedJet == 1"),
         ("$pT>60, |\eta|<1.26; pT>40, |\eta|<2.0$", "((jet0_Pt > 60 && abs(jet0_Eta) < 1.26 && jet1_Pt > 40 && abs(jet1_Eta) < 2.0) || (jet1_Pt > 60 && abs(jet1_Eta) < 1.26 && jet0_Pt > 40 && abs(jet0_Eta) < 2.0))"),
@@ -500,6 +501,34 @@ def run_cutflow(
             fmt = ">15.2f" if weight_expr else ">15.0f"
             print(f"{label:<{col_w}}  {n_evt:{fmt}}"
                   f"  {100.0*frac_all:>9.2f}%{hlt_str}")
+
+    # ── lumi_frac-corrected final yield ──────────────────────────────────────
+    # The "weight" branch is normalised to the FULL Run-3 luminosity, so the
+    # cutflow above counts this sample as if it alone represented the whole
+    # dataset. "lumi_frac" is the event's era share of that total (era1 preEE
+    # 0.1282, era2 postEE+preBPix 0.7165, era3 postBPix 0.1553), so applying it
+    # gives the era's true contribution and makes yields from different eras
+    # summable. It is applied per event, which is the only correct treatment for
+    # a mixed-era sample where lumi_frac varies event to event.
+    if use_lumi_frac:
+        if not tree.GetBranch("lumi_frac"):
+            print("\nWARNING: --lumi-frac requested but 'lumi_frac' branch not found; skipping.")
+        elif weight_expr is None:
+            print("\nWARNING: --lumi-frac requested but running unweighted; skipping.")
+        else:
+            n_final_raw = get_yield(cum_cuts[-1])
+            n_final_lf  = get_yield(cum_cuts[-1], wexpr=f"({weight_expr}) * lumi_frac")
+            eff_lf = n_final_lf / n_final_raw if n_final_raw > 0 else float("nan")
+            label_lf = "final yield x lumi_frac"
+            if print_latex:
+                print(r"\hline")
+                print(f"{label_lf} & {n_final_lf:.2f} & "
+                      f"\\multicolumn{{2}}{{r}}{{effective lumi\\_frac = {eff_lf:.4f}}} \\\\")
+            else:
+                print("─" * (col_w + 50))
+                print(f"{label_lf:<{col_w}}  {n_final_lf:>15.2f}"
+                      f"   (effective lumi_frac = {eff_lf:.4f})")
+
     # ── fraction of final analysis passing only one specific HLT ─────────────
     # Show how many final-analysis events fired
     # HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5
@@ -622,6 +651,16 @@ def _parse_args():
         help="Disable HLT prescale reweighting.",
     )
     parser.add_argument(
+        "--lumi-frac", dest="lumi_frac", action="store_true", default=False,
+        help=(
+            "Print an extra final row giving the yield scaled by the per-event "
+            "'lumi_frac' branch (that era's share of the total Run-3 luminosity). "
+            "The 'weight' branch is normalised to the FULL Run-3 lumi, so without "
+            "this each sample counts as if it were the whole dataset; with it, "
+            "yields from different eras become directly summable."
+        ),
+    )
+    parser.add_argument(
         "--prescale-table", nargs="+", metavar="FILE", default=None,
         help=(
             "Print a LaTeX prescale-impact summary table instead of a per-file cutflow. "
@@ -651,6 +690,7 @@ if __name__ == "__main__":
                 use_weights        = args.weights,
                 use_l1_prescale    = args.l1_prescale,
                 use_hlt_prescale   = args.hlt_prescale,
+                use_lumi_frac      = args.lumi_frac,
                 print_latex        = args.latex,
                 dnn_inc_cut        = args.inc,
                 dnn_depth_cut      = args.depth,
