@@ -11,8 +11,8 @@ from ROOT import SetOwnership
 from MisTagParametrization_3D import ProjectHistogram, ResetAxis
 
 debug = False
-era = "combined" # "2022", "2023", "2022_PU", "2023_PU", or "combined" (all 2022 vs all 2023)
-DNN_cut = 0.99 # for LJDC depth cut
+era = "2023" # "2022", "2023", "2022_PU", "2023_PU", or "combined" (all 2022 vs all 2023)
+DNN_cut = 0.905, 0.985 # for LJDC depth cut
 
 # ------------------------------------------------------------------------------
 def LabelCMS(xpos=0.17, ypos=0.85, text_size=0.036):
@@ -31,8 +31,11 @@ def LabelCMS(xpos=0.17, ypos=0.85, text_size=0.036):
 
     if ypos == 0.85:
         stamp_text.DrawLatex(xpos + 0.62, ypos + 0.06, yearLumi)
-        stamp_text.DrawLatex(xpos + 0.35,  ypos,        "#scale[0.65]{DNN score > " + str(DNN_cut) + "}")
-        stamp_text.DrawLatex(xpos + 0.35,  ypos - 0.04, "#scale[0.65]{Era = " + era + "}")
+        # DNN / era text sits on the RIGHT of the header row, pushed further right
+        # (xpos + 0.42 rather than the old + 0.35) to clear the legend, which now
+        # lives in the top-LEFT corner under the CMS label where the pads are empty.
+        stamp_text.DrawLatex(xpos + 0.42,  ypos,        "#scale[0.65]{DNN score > " + str(DNN_cut) + "}")
+        stamp_text.DrawLatex(xpos + 0.42,  ypos - 0.04, "#scale[0.65]{Era = " + era + "}")
     else:
         stamp_text.DrawLatex(xpos + 0.6,  ypos + 0.03, yearLumi)
         stamp_text.DrawLatex(xpos + 0.3,  ypos,        "#scale[0.65]{DNN score > " + str(DNN_cut) + "}")
@@ -141,9 +144,9 @@ def OverlayHistograms(file_paths, hist_name_all, hist_name_mistag):
 
     legend_labels = ["2023 Cv1", "2023 Cv2", "2023 Cv3", "2023 Cv4", "2023 Dv1", "2023 Dv2"]
     if era == "2022": legend_labels = ["2022 D", "2022 E", "2022 F", "2022 G"]
-    if era == "combined": legend_labels = ["2022 D-G", "2023 Cv1-Dv2"]
-    if era == "2022_PU": legend_labels = ["2022 low PU", "2022 high PU"]
-    if era == "2023_PU": legend_labels = ["2023 low PU", "2023 high PU"]
+    if era == "combined": legend_labels = ["2022 + 2023 C", "2023 D"]
+    if era == "2022_PU": legend_labels = ["2022+23 C low PU", "2022+23 C high PU"]
+    if era == "2023_PU": legend_labels = ["2023 D low PU", "2023 D high PU"]
 
     DrawCanvasAndPlots_overlay(
         "c1", "Projection plots", ": LLP skim, different eras", " in CR for different eras",
@@ -217,7 +220,22 @@ def MakePlot_overlay(graphs, legends, title):
 
     ROOT.gPad.Update()
 
-    legend = ROOT.TLegend(0.7, 0.7, 0.9, 0.9)
+    # Legend in the TOP-LEFT, directly under the "CMS Private Work" label, which
+    # is where the pads are empty for these mistag-rate plots. LabelCMS() keeps
+    # the DNN / era text on the right of the header row, so the two no longer
+    # collide. Height scales with the number of entries so the box stays tight.
+    leg_y2 = 0.80
+    leg_y1 = max(leg_y2 - 0.060 * len(graphs) - 0.02, 0.20)
+    # Width follows the longest label so the box hugs the text instead of
+    # trailing empty space. Bounded so short labels ("2023 D") still give a
+    # sane box and long ones ("2022+23 C high PU") do not overflow it.
+    max_lab = max(len(str(legends[i])) for i in range(len(graphs)))
+    leg_w = min(0.30, max(0.16, 0.045 + 0.0125 * max_lab))
+    legend = ROOT.TLegend(0.18, leg_y1, 0.18 + leg_w, leg_y2)
+    legend.SetBorderSize(1)
+    legend.SetFillColor(0)
+    legend.SetFillStyle(1001)
+    legend.SetTextSize(0.030)
     for i, g in enumerate(graphs):
         legend.AddEntry(g, legends[i], "lp")
     legend.Draw()
@@ -244,18 +262,18 @@ if __name__ == "__main__":
         ]
     if era == "combined":
         root_files = [
-            "output_3D_hists_depth_leading_2022.root",
-            "output_3D_hists_depth_leading_2023.root"
+            "output_3D_hists_depth_leading_2022_23_preBPix.root",
+            "output_3D_hists_depth_leading_2023_postBPix.root"
         ]
     if era == "2022_PU":
         root_files = [
-            "output_3D_hists_depth_lowPV_leading_2022.root",
-            "output_3D_hists_depth_highPV_leading_2022.root"
+            "output_3D_hists_depth_lowPV_leading_2022_23_preBPix.root",
+            "output_3D_hists_depth_highPV_leading_2022_23_preBPix.root"
         ]
     if era == "2023_PU":
         root_files = [
-            "output_3D_hists_depth_lowPV_leading_2023.root",
-            "output_3D_hists_depth_highPV_leading_2023.root"
+            "output_3D_hists_depth_lowPV_leading_2023_postBPix.root",
+            "output_3D_hists_depth_highPV_leading_2023_postBPix.root"
         ]
 
     hist_name_all    = "hist3d_CR_all"
