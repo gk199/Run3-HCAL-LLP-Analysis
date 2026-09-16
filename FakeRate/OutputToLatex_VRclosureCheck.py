@@ -88,9 +88,18 @@ def parse_file(filename):
     current_tag = None
     current_jet = None
     current_mode = 'central'
+    pv_split_file = False
 
     for line in lines:
         line_lower = line.lower()
+
+        # --- Detect SidebandParameterization_BkgPred.py --pv_split output.  The
+        # marker line precedes all data lines.  In those files the low/high PV
+        # blocks hold per-slice observations, so observed yields are filed under
+        # the current PV mode instead of overwriting 'central'.  All other files
+        # keep the original behaviour (observed always filed under 'central').
+        if "pv treatment: split" in line_lower:
+            pv_split_file = True
 
         # --- Detect PV mode from context
         if "low pv" in line_lower:
@@ -124,27 +133,51 @@ def parse_file(filename):
             if match:
                 val, err = map(float, match.groups())
                 key = current_jet
-                data[key]['central']['Observed VR'] = (val, err)
+                obs_mode = current_mode if pv_split_file else 'central'
+                data[key][obs_mode]['Observed VR'] = (val, err)
 
         elif "observed mistagged events in sr" in line_lower:
             match = re.search(r"([\d.]+)\s*±\s*([\d.]+)", line)
             if match:
                 val, err = map(float, match.groups())
                 key = current_jet
-                data[key]['central']['Observed SR'] = (val, err)
+                obs_mode = current_mode if pv_split_file else 'central'
+                data[key][obs_mode]['Observed SR'] = (val, err)
 
     return data
+
+
+def is_pv_split_file(filename):
+    """True if the file was written by SidebandParameterization_BkgPred.py --pv_split."""
+    with open(filename, 'r') as f:
+        return any("pv treatment: split" in line.lower() for line in f)
 
 
 # ---------------------------------------------------------------------------
 # Formatting helpers
 # ---------------------------------------------------------------------------
 
-def compute_syst(central, low, high):
+def compute_syst(central, low, high, pv_split=False):
+    """
+    PV systematic on a prediction.
+
+    pv_split=False (CR-only PV variation): asymmetric envelope of the low-PV and
+        high-PV shifts from the central prediction.
+    pv_split=True (--pv_split files): low and high are predictions for disjoint
+        PV slices, so their sum is the PV-binned prediction; the systematic is
+        the symmetrized shift |low + high - central|.
+    """
     if central is None:
         return 0.0, 0.0
 
     c = central[0]
+
+    if pv_split:
+        if low is None or high is None:
+            return 0.0, 0.0
+        shift = abs(low[0] + high[0] - c)
+        return shift, shift
+
     l = low[0] if low is not None else c
     h = high[0] if high is not None else c
 
@@ -196,12 +229,13 @@ def compute_pull(obs, pred, syst_up, syst_down, stat_only=False):
 # ---------------------------------------------------------------------------
 
 def generate_latex_table(data, year, depth_score, inclusive_score, stat_only=False,
-                          depth_score_sjdc=None, inclusive_score_sjdc=None):
+                          depth_score_sjdc=None, inclusive_score_sjdc=None, pv_split=False):
     """
     Generate a LaTeX table for VR closure.
 
     depth_score / inclusive_score  — LJDC (leading jet depth candidate) cuts
     depth_score_sjdc / inclusive_score_sjdc — SJDC cuts; if None, assumed same as LJDC
+    pv_split — input written with --pv_split: use the PV-binned systematic
     """
     # Normalise: accept "0.93" or "93"
     def _label(s):
@@ -247,9 +281,9 @@ def generate_latex_table(data, year, depth_score, inclusive_score, stat_only=Fal
             return format_observed(val, stat)
         else:
             val, stat = data[jet]['central'][key]
-            low = data[jet]['low'].get(key, (val, stat))
-            high = data[jet]['high'].get(key, (val, stat))
-            syst_up, syst_down = compute_syst((val, stat), low, high)
+            low = data[jet]['low'].get(key)
+            high = data[jet]['high'].get(key)
+            syst_up, syst_down = compute_syst((val, stat), low, high, pv_split=pv_split)
             return format_predicted(val, stat, syst_up, syst_down)
 
     lines = []
@@ -265,9 +299,9 @@ def generate_latex_table(data, year, depth_score, inclusive_score, stat_only=Fal
         obs  = data[jet]['central'].get('Observed VR')
         pred = data[jet]['central'].get('Predicted VR')
         if obs and pred:
-            low  = data[jet]['low'].get('Predicted VR', pred)
-            high = data[jet]['high'].get('Predicted VR', pred)
-            syst_up, syst_down = compute_syst(pred, low, high)
+            low  = data[jet]['low'].get('Predicted VR')
+            high = data[jet]['high'].get('Predicted VR')
+            syst_up, syst_down = compute_syst(pred, low, high, pv_split=pv_split)
             pull = compute_pull(obs, pred, syst_up, syst_down, stat_only=stat_only)
             compatible = abs(pull) <= 1.0
             if not compatible:
@@ -298,9 +332,14 @@ def generate_latex_table(data, year, depth_score, inclusive_score, stat_only=Fal
             "$\\sigma = |\\text{obs} - \\text{pred}| \\,/\\, \\sqrt{\\sigma^2_{\\text{obs,stat}} + \\sigma^2_{\\text{pred,stat}} + \\sigma^2_{\\text{pred,syst}}}$"
         caption += " " + "; ".join(p.capitalize() for p in parts) + \
                    f", where {sigma_formula}."
+    if pv_split:
+        caption += (" The PV systematic is the shift of the PV-binned prediction,"
+                    " $|N_{\\text{pred}}(\\text{PV}<42) + N_{\\text{pred}}(\\text{PV}\\geq 42)"
+                    " - N_{\\text{pred}}|$.")
 
     lines.append("    \\caption{" + caption + "}")
-    lines.append("    \\label{Table:VRclosure_" + label_tag + "_" + year + "_combined}")
+    pv_tag = "_PVsplit" if pv_split else ""
+    lines.append("    \\label{Table:VRclosure_" + label_tag + "_" + year + "_combined" + pv_tag + "}")
     lines.append("\\end{table}")
     return "\n".join(lines)
 
@@ -334,6 +373,16 @@ def parseArgs():
                         help="Inclusive DNN score boundary for SJDC (default: same as -i)")
 
     # --- Always applicable ---
+    parser.add_argument("--input_dir", "--dir",     action="store", default=None,
+                        help="Directory holding the *_forPython*.txt files (default: current "
+                             "directory, or SidebandBkgPred_PVsplit with --pv_split). Use "
+                             "--input_dir SidebandBkgPred to read the output of "
+                             "SidebandParameterization_BkgPred.py.")
+    parser.add_argument("--pv_split",               action="store_true",
+                        help="Read the output of SidebandParameterization_BkgPred.py --pv_split: "
+                             "looks in SidebandBkgPred_PVsplit/ unless --input_dir is given, and "
+                             "skips any file that was not produced with --pv_split. (PV-split "
+                             "files are also recognised without this flag.)")
     parser.add_argument("-b", "--b_tag_combined",  action="store_true",
                         help="combined b-tag categories")
     parser.add_argument("--stat_only",             action="store_true",
@@ -368,6 +417,20 @@ if __name__ == "__main__":
 
     debug = False
 
+    # Input directory: None (no flag) keeps the original behaviour of reading
+    # bare filenames from the current directory.
+    input_dir = args.input_dir
+    if input_dir is None and args.pv_split:
+        # Say so loudly: --pv_split changes WHICH files are read, so without this
+        # note it is easy to think it re-interprets the files in the current
+        # directory (e.g. fresh MisTagParametrization_3D_optimized.py output).
+        input_dir = "SidebandBkgPred_PVsplit"
+        print(f"# --pv_split: reading {input_dir}/, not the current directory "
+              f"(pass --input_dir to read elsewhere)")
+    if input_dir is not None and not os.path.isdir(input_dir):
+        raise SystemExit(f"Input directory not found: {os.path.abspath(input_dir)} "
+                         f"(relative paths are resolved from {os.getcwd()})")
+
     for row in rows:
         era           = row["era"]
         depth_ljdc    = row["DNN_cut_LJDC"]
@@ -376,14 +439,33 @@ if __name__ == "__main__":
         inc_sjdc      = row["DNN_cut_inc_SJDC"]
 
         filename = _make_filename(depth_ljdc, inc_ljdc, depth_sjdc, inc_sjdc, era, btag_str)
+        if input_dir is not None:
+            filename = os.path.join(input_dir, filename)
 
         if not os.path.exists(filename):
             print(f"# WARNING: file not found, skipping: {filename}")
+            # Most common cause: -b given (or omitted) but the input was produced
+            # the other way.  Point at the other variant if it exists.
+            other = _make_filename(depth_ljdc, inc_ljdc, depth_sjdc, inc_sjdc, era,
+                                   "" if btag_str else "_combined")
+            if input_dir is not None:
+                other = os.path.join(input_dir, other)
+            if os.path.exists(other):
+                print(f"#   found {other} instead — "
+                      f"{'drop' if btag_str else 'add'} -b to read it")
+            continue
+
+        pv_split = is_pv_split_file(filename)
+        if args.pv_split and not pv_split:
+            print(f"# WARNING: --pv_split given but {filename} was not produced with "
+                  f"--pv_split, skipping")
             continue
 
         print(f"\n% --- {filename} ---")
 
         data = parse_file(filename)
+        if pv_split:
+            print("% PV-split input (--pv_split): PV systematic = |pred(low PV) + pred(high PV) - pred|")
 
         if debug:
             for key, modes in data.items():
@@ -403,5 +485,6 @@ if __name__ == "__main__":
             stat_only=stat_only,
             depth_score_sjdc=sjdc_depth,
             inclusive_score_sjdc=sjdc_inc,
+            pv_split=pv_split,
         )
         print(latex)

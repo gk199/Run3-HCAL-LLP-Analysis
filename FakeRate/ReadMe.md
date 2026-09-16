@@ -28,6 +28,9 @@ Create a whitespace-delimited file where the first non-comment line is the heade
 Then run:
 ```
 python3 MisTagParametrization_3D_optimized.py --config my_scan.txt -b
+python3 MisTagParametrization_3D_optimized.py --config my_scan.txt -b --pv_split
+python3 SidebandParameterization_BkgPred.py --config my_scan.txt --input_dir SidebandBkgPred
+python3 SidebandParameterization_BkgPred.py --config my_scan.txt --input_dir SidebandBkgPred_PVsplit --pv_split
 ```
 Parameter sets grouped by era share a single RDataFrame, so multiple 2023 rows only read the files once. `CR_cut_inc` is optional and defaults to 0.2 if the column is omitted.
 
@@ -64,8 +67,24 @@ python3 OutputToLatex_VRclosureCheck.py -e 2023 -d 0.965 -i 0.845 \
 
 Config file mode — process the same scan config used to produce the output files, one table per row:
 ```
-python3 OutputToLatex_VRclosureCheck.py --config my_scan.txt -b
+# MisTagParametrization_3D_optimized.py — conservative: current dir
+python3 MisTagParametrization_3D_optimized.py --config my_scan.txt -b
+python3 OutputToLatex_VRclosureCheck.py      --config my_scan.txt -b
+
+# MisTagParametrization_3D_optimized.py — tighter: PVsplit/
+python3 MisTagParametrization_3D_optimized.py --config my_scan.txt -b --pv_split
+python3 OutputToLatex_VRclosureCheck.py      --config my_scan.txt -b --input_dir PVsplit
+
+# SidebandParameterization_BkgPred.py — conservative: SidebandBkgPred/
+python3 SidebandParameterization_BkgPred.py --config my_scan.txt
+python3 OutputToLatex_VRclosureCheck.py    --config my_scan.txt --input_dir SidebandBkgPred
+
+# SidebandParameterization_BkgPred.py — tighter: SidebandBkgPred_PVsplit/
+python3 SidebandParameterization_BkgPred.py --config my_scan.txt --pv_split
+python3 OutputToLatex_VRclosureCheck.py    --config my_scan.txt --pv_split
 ```
+These correspond to the four versions of `MisTagParameterization` and `SidebandParameterization_BkgPred.py` from above. 
+
 Files that don't exist yet are skipped with a `% WARNING` comment. Add `--stat_only` to evaluate closure with statistical uncertainties only (no PV-variation systematic).
 
 To check the 2D rates used in the background prediction, and overlay rates for each era:
