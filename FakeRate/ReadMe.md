@@ -49,6 +49,13 @@ python3 OverlayMistagRates_TEff.py
 ```
 This takes the output root files from `MisTagParametrization_3D` and overlays them to evalute changes throughout the year.
 
+For the sideband method the equivalent quantity is the transfer factor (CR tagged / CR depth sideband), overlaid with
+```
+python3 OverlayTransferFactors_TEff.py -e 2022 2023 combined      # reads SidebandBkgPred_PVsplit/output_3D_hists_depth_leading_*.root
+python3 OverlayTransferFactors_TEff.py -e combined -j sub-leading -i SidebandBkgPred
+```
+Era groups: `2022` (D, E, F, G), `2023` (Cv1-Dv2), `combined` (2022 + 2023 C vs 2023 D), `2022_PU`, `2023_PU`. Central values and (default) error bars match the per-era `3d_hist_projection_CR_transfer_factor_*.png`; `--errors CP` gives asymmetric Clopper-Pearson-style intervals instead. Output goes to `<input_dir>/outPlots_3D/Overlay_LLPskim_TransferFactorOverlayEra_<jet>_<era>.png`.
+
 ## Convert Fake Rate Results to Latex Tables
 
 ### VR closure tables (output of MisTagParametrization_3D_optimized.py)
@@ -84,6 +91,12 @@ python3 SidebandParameterization_BkgPred.py --config my_scan.txt --pv_split
 python3 OutputToLatex_VRclosureCheck.py    --config my_scan.txt --pv_split
 ```
 These correspond to the four versions of `MisTagParameterization` and `SidebandParameterization_BkgPred.py` from above. 
+
+Then run this from the directory with the corresponding output:
+```
+python3 PhiParametrizationStudy.py --era all
+```
+for the eta vs pT parameterization plots.
 
 Files that don't exist yet are skipped with a `% WARNING` comment. Add `--stat_only` to evaluate closure with statistical uncertainties only (no PV-variation systematic).
 

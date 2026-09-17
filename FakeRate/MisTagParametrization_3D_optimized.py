@@ -77,7 +77,7 @@ debug = False
 #   * close the overflow bin at 250 rather than 400 — with a 400 edge the
 #     [400,inf) x |eta|>1 cell has CR_mistag == 0 in both era groups, and a cell
 #     with an empty numerator predicts exactly 0, biasing the estimate low.
-pT_bins  = np.array([40, 100, 1000], dtype=float) # np.array([40, 100, 160, 250, 1000], dtype=float)
+pT_bins  = np.array([40, 100, 160, 400]) #np.array([40, 100, 400], dtype=float) # np.array([40, 100, 160, 250, 1000], dtype=float)
 # Fill value for jets above the top edge — just inside the last bin, so they land
 # in the overflow bin rather than in ROOT's (uncounted) overflow bin.
 PT_FILL_CLAMP = pT_bins[-1] - 1e-3
@@ -86,7 +86,7 @@ PT_FILL_CLAMP = pT_bins[-1] - 1e-3
 USE_ABS_ETA = True
 if USE_ABS_ETA:
     # eta_bins = np.linspace(0, 1.26, 2)     # |eta|: to test impact on prediction closure
-    eta_bins = np.array([0, 1, 1.26], dtype=float)     # |eta|: to test impact on prediction closure
+    eta_bins = np.array([0, 1.26], dtype=float)  # np.array([0, 1, 1.26], dtype=float)     # |eta|: to test impact on prediction closure
 else:
     # eta_bins = np.linspace(-1.26, 1.26, 9) # used before reducing number of bins
     # eta_bins = np.linspace(-1.26, 1.26, 5) # signed eta
