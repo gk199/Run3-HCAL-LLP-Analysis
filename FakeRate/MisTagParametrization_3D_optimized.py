@@ -33,6 +33,7 @@ import numpy as np
 import os
 import math
 import argparse
+import fnmatch
 import array
 import sys
 from contextlib import redirect_stdout
@@ -130,6 +131,20 @@ runs_to_exclude_2023 = []
 # v5.6 minituples
 # runs_to_exclude_2023 = [370790] # based on CR 0.2 above 0.5% with depth > 0.9
 
+# ---- HLT exclusion (analogous to the run exclusion above) ----
+# Emulates a dataset in which these HLT paths were not in the menu: an event is
+# dropped if it fires one of these paths and NO other L1SingleLLPJet HLT path
+# (HLT_L1SingleLLPJet itself does not count, same as the "and no other LLP HLT"
+# rows of CutflowAnalysis/FinalAnalysisCutflow.py).  Events that also fire any
+# other L1SingleLLPJet path are kept.  Entries are shell globs.
+# Empty list = no HLT exclusion.  When non-empty, output goes to exclHLT/
+# (or PVsplit_exclHLT/ with --pv_split).
+hlts_to_exclude = []
+# The four delayed-jet paths seeded by L1_SingleLLPJet:
+#   SingleDelay1nsTrackless, SingleDelay2nsInclusive,
+#   DoubleDelay0p5nsTrackless, DoubleDelay1nsInclusive
+hlts_to_exclude = ["HLT_HT200_L1SingleLLPJet_DelayedJet40_*"]
+
 Zmu     = False
 LLPskim = True
 CNN     = False
@@ -164,9 +179,12 @@ def configure_pv_mode(pv_split):
     """Select the PV treatment and the matching output directories."""
     global PV_SPLIT, OUT_BASE, output_dir
     PV_SPLIT = pv_split
-    if not pv_split:
+    if pv_split:
+        OUT_BASE = OUT_BASE_PV_SPLIT
+    if hlts_to_exclude:            # keep HLT-excluded output apart from the nominal
+        OUT_BASE = OUT_BASE + "_exclHLT" if OUT_BASE else "exclHLT"
+    if not OUT_BASE:
         return                     # default paths already set above
-    OUT_BASE   = OUT_BASE_PV_SPLIT
     output_dir = os.path.join(OUT_BASE, "outPlots_3D")
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -1027,8 +1045,31 @@ _file_map = {
 }
 
 
+def hlt_exclusion_filter(rdf):
+    """
+    Filter string that drops events firing ONLY the paths in hlts_to_exclude
+    (see the comment at hlts_to_exclude).  Returns None when the list is empty.
+    """
+    if not hlts_to_exclude:
+        return None
+    columns = [str(c) for c in rdf.GetColumnNames()]
+    excluded = [c for c in columns if any(fnmatch.fnmatch(c, p) for p in hlts_to_exclude)]
+    if not excluded:
+        raise ValueError(f"No HLT branch matches hlts_to_exclude = {hlts_to_exclude}")
+    # "L1SingleLLP" rather than "L1SingleLLPJet": one v5.6 branch name is truncated
+    # (HLT_HT240_L1SingleLLPacedDijet40_Inclusive1PtrkShortSig5).
+    others = [c for c in columns
+              if c.startswith("HLT_") and "L1SingleLLP" in c
+              and c not in excluded and c != "HLT_L1SingleLLPJet"]
+    print(f"HLT exclusion: dropping events that fire only {excluded}")
+    print(f"               and none of {others}")
+    fires_excluded = " || ".join(f"{c} == 1" for c in excluded)
+    fires_other    = " || ".join(f"{c} == 1" for c in others) or "false"
+    return f"!(({fires_excluded}) && !({fires_other}))"
+
+
 def _build_rdf_base(era_key):
-    """Build the base RDataFrame (run exclusion + deltaPhi) for a given era."""
+    """Build the base RDataFrame (run + HLT exclusion + deltaPhi) for a given era."""
     rdf = ROOT.RDataFrame("NoSel", _file_map[era_key])
     is_mc = era_key == "WPlusJets"
     if era_key == "2022_2023":
@@ -1056,6 +1097,9 @@ def _build_rdf_base(era_key):
                     .Define("jet1_EtaAxis", eta_expr1)
                     .Define("jet0_PtAxis", pt_expr0)
                     .Define("jet1_PtAxis", pt_expr1))
+    hlt_excl = hlt_exclusion_filter(rdf)
+    if hlt_excl:
+        rdf_filtered = rdf_filtered.Filter(hlt_excl, "HLT exclusion")
     if is_mc:
         rdf_filtered = rdf_filtered.Filter("Pass_WPlusJets >= 0", "W+Jets selection")
     return rdf_filtered

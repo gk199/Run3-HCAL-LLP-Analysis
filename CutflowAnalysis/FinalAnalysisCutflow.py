@@ -1,7 +1,49 @@
 import re
 import os
+import fnmatch
 import argparse
 import ROOT
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Exclusive-HLT groups reported at the bottom of every cutflow
+# ──────────────────────────────────────────────────────────────────────────────
+# Each group is a set of HLT paths whose importance to the final selection we
+# want to quantify.  Two rows are printed per group:
+#
+#   "passing"    – final-selection events firing at least one path in the group
+#   "only"       – of those, the ones firing NO other HLT containing
+#                  "L1SingleLLPJet", i.e. the events that would be lost if the
+#                  whole group were removed from the menu.  This is the number
+#                  that measures how much the group is worth.
+#
+# "patterns" are shell globs matched against the branch/leaf names actually
+# present in the tree, so a group can be a single path or a family.
+# ALLOWED_PASS lists paths that do not count as "another HLT" in the veto.
+
+# Monitoring pass-through of the L1 seed the selection already requires, so it
+# fires on ~every final-selection event; vetoing it would zero every "only" row.
+ALLOWED_PASS = {"HLT_L1SingleLLPJet"}
+
+EXCLUSIVE_HLT_GROUPS = [
+    dict(
+        patterns = ["HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5"],
+        plain    = "DisplacedDijet35_Incl1PtrkSig5",
+        # Short label: the full path names go in the caption, so that a long
+        # name here cannot stretch the tabular past the page width.
+        tex      = r"\texttt{DisplacedDijet35}",
+        latex    = False,   # plain-text table only (this row lives in ExclusiveHLTTable.py)
+    ),
+    dict(
+        # The four delayed-jet paths seeded by L1_SingleLLPJet:
+        #   SingleDelay1nsTrackless, SingleDelay2nsInclusive,
+        #   DoubleDelay0p5nsTrackless, DoubleDelay1nsInclusive
+        patterns = ["HLT_HT200_L1SingleLLPJet_DelayedJet40_*"],
+        plain    = "DelayedJet40 (delay paths)",
+        tex      = r"\texttt{DelayedJet40\_*}",
+        latex    = True,
+    ),
+]
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Filename parser
@@ -252,6 +294,7 @@ def run_cutflow(
     dnn_depth_cut      = 0.95,
     dnn_inc_cut_sjdc   = None,
     dnn_depth_cut_sjdc = None,
+    excl_hlt_groups    = None,
 ):
     """
     Print a cutflow table for the displaced-jet search.
@@ -283,6 +326,8 @@ def run_cutflow(
                                       dnn_inc_cut (same cut for both categories)
     dnn_depth_cut_sjdc : float|None – depth DNN threshold for SJDC; if None, uses
                                       dnn_depth_cut (same cut for both categories)
+    excl_hlt_groups    : list|None  – override EXCLUSIVE_HLT_GROUPS for the
+                                      per-HLT lines printed after the cutflow
     """
     # Per-category cut values (fall back to shared value when SJDC override not given)
     _inc_ljdc   = dnn_inc_cut
@@ -502,6 +547,33 @@ def run_cutflow(
             print(f"{label:<{col_w}}  {n_evt:{fmt}}"
                   f"  {100.0*frac_all:>9.2f}%{hlt_str}")
 
+    # ── SJDC share of the final selection ────────────────────────────────────
+    # Events passing every cut above in which jet1 is the depth-tagged
+    # candidate (SJDC).  LJDC and SJDC are mutually exclusive (a single jet
+    # index is the depth candidate per event), so the LJDC share is the
+    # remainder.  Label deliberately avoids "(depth)": run_cutflows.sh
+    # greps that string to pick out the final-selection row.
+    final_sel  = cum_cuts[-1]
+    n_final    = get_yield(final_sel)
+    sjdc_sel   = f"{final_sel} && {SJDC}" if final_sel else SJDC
+    n_sjdc     = get_yield(sjdc_sel)
+    frac_all   = n_sjdc / init     if init     > 0 else 0.0
+    frac_hlt   = n_sjdc / hlt_init if hlt_init > 0 else float("nan")
+    frac_final = n_sjdc / n_final  if n_final  > 0 else float("nan")
+
+    if print_latex:
+        fmt       = ".2f" if weight_expr else ".0f"
+        hlt_str   = f"{100.0*frac_hlt:.2f}"   if hlt_init > 0 else "--"
+        final_str = f"{100.0*frac_final:.1f}" if n_final  > 0 else "--"
+        print(rf"~~$\hookrightarrow$ of which SJDC ({final_str}\% of final) & "
+              f"{n_sjdc:{fmt}} & {100.0*frac_all:.2f}\\% & {hlt_str}\\% \\\\")
+    else:
+        fmt       = ">15.2f" if weight_expr else ">15.0f"
+        hlt_str   = f"{100.0*frac_hlt:>10.2f}%"  if hlt_init > 0 else f"{'--':>11}"
+        final_str = f"{100.0*frac_final:>6.2f}%" if n_final  > 0 else f"{'--':>7}"
+        print(f"{'  of which SJDC':<{col_w}}  {n_sjdc:{fmt}}"
+              f"  {100.0*frac_all:>9.2f}%{hlt_str}  {final_str} of final")
+
     # ── lumi_frac-corrected final yield ──────────────────────────────────────
     # The "weight" branch is normalised to the FULL Run-3 luminosity, so the
     # cutflow above counts this sample as if it alone represented the whole
@@ -522,74 +594,148 @@ def run_cutflow(
             label_lf = "final yield x lumi_frac"
             if print_latex:
                 print(r"\hline")
-                print(f"{label_lf} & {n_final_lf:.2f} & "
+                # "lumi\_frac" escaped: a bare _ outside math mode is a LaTeX error.
+                print(f"final yield x lumi\\_frac & {n_final_lf:.2f} & "
                       f"\\multicolumn{{2}}{{r}}{{effective lumi\\_frac = {eff_lf:.4f}}} \\\\")
             else:
                 print("─" * (col_w + 50))
                 print(f"{label_lf:<{col_w}}  {n_final_lf:>15.2f}"
                       f"   (effective lumi_frac = {eff_lf:.4f})")
 
-    # ── fraction of final analysis passing only one specific HLT ─────────────
-    # Show how many final-analysis events fired
-    # HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5
-    # but NO other HLT whose name contains "L1SingleLLPJet"
-    # (passing HLT_L1SingleLLPJet itself is allowed).
-    TARGET_HLT   = "HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5"
-    ALLOWED_PASS = {"HLT_L1SingleLLPJet"} # ideally this would be removed but the prescale isn't handled right...
+    # ── importance of individual HLT paths in the final selection ────────────
+    # For each group in EXCLUSIVE_HLT_GROUPS, report the final-selection events
+    # that fire at least one path in the group ("passing"), and those that fire
+    # no other HLT containing "L1SingleLLPJet" on top of it ("only") — the
+    # events that would be lost if the group were dropped from the menu.
+    #
+    # These rows carry the SAME weight as the rest of the cutflow, HLT prescale
+    # included, so they describe the menu as it actually ran.  What that weight
+    # does (OutputHelper.cxx:629) is narrow: it is 1 for every event except one
+    # where HLT_..._DisplacedDijet35_Inclusive1PtrkShortSig5 fired and no other
+    # L1SingleLLPJet HLT did — that path was prescaled off for 27.67% of
+    # postEE/preBPix and disabled outright in postBPix.  So:
+    #   * for any group other than DisplacedDijet35 the weight is identically 1
+    #     (firing one of its paths is itself an "other L1SingleLLPJet HLT"), and
+    #     including it changes the numerator not at all;
+    #   * the DisplacedDijet35 "only" row correctly collapses towards 0 in the
+    #     later eras, because those events genuinely were not recorded.
+    # ExclusiveHLTTable.py drops the HLT prescale instead, which answers the
+    # different, menu-independent question "how many events does this path
+    # uniquely select, had it been running"; see its docstring.
+    excl_wexpr = weight_expr
 
-    # Use GetListOfLeaves so individual HLT flag branches (which may be leaves
-    # inside a parent branch) are found by their full path name.
-    branch_names   = [b.GetName() for b in tree.GetListOfBranches()]
-    leaf_names     = [l.GetName() for l in tree.GetListOfLeaves()]
-    all_names      = set(branch_names) | set(leaf_names)
-
-    other_llp_hlts = sorted(
+    # Use GetListOfLeaves too, so HLT flags stored as leaves inside a parent
+    # branch are found by their full path name.
+    all_names = (
+        {b.GetName() for b in tree.GetListOfBranches()} |
+        {l.GetName() for l in tree.GetListOfLeaves()}
+    )
+    llp_hlts = sorted(
         b for b in all_names
-        if b.startswith("HLT_") and "L1SingleLLPJet" in b
-        and b != TARGET_HLT and b not in ALLOWED_PASS
+        if b.startswith("HLT_") and "L1SingleLLPJet" in b and b not in ALLOWED_PASS
     )
 
-    final_sel = cum_cuts[-1]
-    n_final   = get_yield(final_sel)
+    groups = excl_hlt_groups if excl_hlt_groups is not None else EXCLUSIVE_HLT_GROUPS
 
-    if TARGET_HLT in all_names:
-        veto_str = " && ".join(f"{b} == 0" for b in other_llp_hlts)
-        excl_sel = f"{TARGET_HLT} == 1" + (f" && {veto_str}" if veto_str else "")
+    if not llp_hlts:
+        print("\nNOTE: no branches/leaves containing 'L1SingleLLPJet' found; "
+              "skipping the exclusive-HLT lines.")
+        groups = []
+
+    # Denominators are the cutflow's own "All" and final rows, so these
+    # percentages read on the same scale as the columns above.
+    n_all_excl   = init
+    n_final_excl = n_final
+
+    def _excl_row(plain_label, tex_label, n):
+        """Print one exclusive-HLT row in whichever format is active."""
+        f_all   = n / n_all_excl   if n_all_excl   > 0 else float("nan")
+        f_final = n / n_final_excl if n_final_excl > 0 else float("nan")
+        if print_latex:
+            fmt       = ".2f" if excl_wexpr else ".0f"
+            all_str   = f"{100.0*f_all:.2f}"   if n_all_excl   > 0 else "--"
+            final_str = f"{100.0*f_final:.2f}" if n_final_excl > 0 else "--"
+            print(f"{tex_label} & {n:{fmt}} & {all_str}\\% & {final_str}\\% \\\\")
+        else:
+            fmt       = ">15.2f" if excl_wexpr else ">15.0f"
+            all_str   = f"{100.0*f_all:>9.2f}%"   if n_all_excl   > 0 else f"{'--':>10}"
+            final_str = f"{100.0*f_final:>9.2f}%" if n_final_excl > 0 else f"{'--':>10}"
+            print(f"{plain_label:<{col_w}}  {n:{fmt}}  {all_str}"
+                  f"  {final_str} of final")
+
+    printed_header    = False
+    hlt_caption_notes = []   # full path lists, appended to the caption in LaTeX mode
+    for group in groups:
+        targets = sorted(
+            b for b in llp_hlts
+            if any(fnmatch.fnmatch(b, p) for p in group["patterns"])
+        )
+        if not targets:
+            print(f"\nNOTE: no branch/leaf matches {group['patterns']}; "
+                  f"skipping the '{group['plain']}' lines.")
+            continue
+
+        # Groups flagged latex=False are plain-text only (they live in their own
+        # table elsewhere); drop them entirely rather than print a bare header.
+        emit_latex = group.get("latex", True)
+        if print_latex and not emit_latex:
+            continue
+
+        pass_sel = "(" + " || ".join(f"{b} == 1" for b in targets) + ")"
+        others   = [b for b in llp_hlts if b not in targets]
+        only_sel = pass_sel + (
+            "".join(f" && {b} == 0" for b in others) if others else ""
+        )
         if final_sel:
-            excl_sel = f"{final_sel} && {excl_sel}"
+            pass_sel = f"{final_sel} && {pass_sel}"
+            only_sel = f"{final_sel} && {only_sel}"
 
-        n_excl     = get_yield(excl_sel)
-        frac_all   = n_excl / init      if init     > 0 else 0.0
-        frac_hlt   = n_excl / hlt_init  if hlt_init > 0 else float("nan")
-        frac_final = n_excl / n_final   if n_final  > 0 else float("nan")
+        if not printed_header:
+            if print_latex:
+                print(r"\hline")
+                print(r"\multicolumn{4}{l}{\textit{Final selection, split by HLT}} \\")
+            else:
+                print("─" * (col_w + 50))
+                print(f"{'Final selection, split by HLT':<{col_w}}"
+                      f"  {'Yield':>15}  {'% of All':>10}  {'% of final':>10}")
+            printed_header = True
 
-        tex_label  = (r"~~$\hookrightarrow$ only \texttt{HLT\_HT200\_L1SingleLLPJet"
-                      r"\_DisplacedDijet35\_Inclusive1PtrkShortSig5}")
-        plain_label = f"  only {TARGET_HLT}"
+        # Name the paths compactly: factor out the common prefix when there is
+        # more than one, e.g. HLT_HT200_..._DelayedJet40_{SingleDelay2nsInclusive, ...}
+        if len(targets) == 1:
+            path_desc = targets[0]
+        else:
+            prefix    = os.path.commonprefix(targets)
+            path_desc = prefix + "{" + ", ".join(t[len(prefix):] for t in targets) + "}"
 
         if print_latex:
-            fmt = ".2f" if weight_expr else ".0f"
-            frac_hlt_str   = f"{100.0*frac_hlt:.2f}"  if hlt_init > 0 else "--"
-            frac_final_str = f"{100.0*frac_final:.2f}" if n_final  > 0 else "--"
-            print(r"\hline")
-            # print(f"{tex_label} & {n_excl:{fmt}} & {100.0*frac_all:.2f}\\% & "
-            #       f"{frac_hlt_str}\\% (HLT); {frac_final_str}\\% (final) \\\\")
+            # The path list goes in the CAPTION, not in a row. An "l" column
+            # never wraps, so a \multicolumn holding these names stretches the
+            # tabular past \textwidth and everything to its right is clipped off
+            # the page. Captions wrap, so the width problem disappears.
+            hlt_caption_notes.append(
+                r"\texttt{"
+                + path_desc.replace("_", r"\_").replace("{", r"\{").replace("}", r"\}")
+                + "}"
+            )
         else:
-            fmt = ">15.2f" if weight_expr else ">15.0f"
-            hlt_str   = f"{100.0*frac_hlt:>9.2f}%"   if hlt_init > 0 else f"{'--':>10}"
-            final_str = f"{100.0*frac_final:>9.2f}%"  if n_final  > 0 else f"{'--':>10}"
-            print("─" * (col_w + 50))
-            print(f"{plain_label:<{col_w}}  {n_excl:{fmt}}"
-                  f"  {100.0*frac_all:>9.2f}%{hlt_str}  {final_str} of final")
-    else:
-        llp_found = sorted(b for b in all_names if "L1SingleLLPJet" in b)
-        print(f"\nNOTE: branch/leaf '{TARGET_HLT}' not found in tree; skipping exclusive-HLT line.")
-        if llp_found:
-            print(f"      L1SingleLLPJet branches/leaves found: {llp_found}")
-        else:
-            print("      No branches/leaves containing 'L1SingleLLPJet' found at all.")
+            print(f"  paths: {path_desc}")
+
+        _excl_row("    passing any of these",
+                  r"~~$\hookrightarrow$ passing " + group["tex"],
+                  get_yield(pass_sel, wexpr=excl_wexpr))
+        _excl_row("    and no other LLP HLT",
+                  r"~~$\hookrightarrow$ only " + group["tex"],
+                  get_yield(only_sel, wexpr=excl_wexpr))
 
     if print_latex:
+        if hlt_caption_notes:
+            caption += (
+                r" The rows below the line split the final selection by trigger: "
+                r"events passing at least one of "
+                + ", ".join(hlt_caption_notes)
+                + r", and those passing no other \texttt{L1SingleLLPJet} HLT on top of it."
+            )
         latex_end(caption)
 
     f.Close()
@@ -661,6 +807,16 @@ def _parse_args():
         ),
     )
     parser.add_argument(
+        "--excl-hlt", nargs="+", metavar="PATTERN", default=None,
+        help=(
+            "Replace the default exclusive-HLT groups with a single group made of "
+            "the HLT paths matching these shell globs, e.g. "
+            "'HLT_HT200_L1SingleLLPJet_DelayedJet40_*'. Two lines are printed after "
+            "the cutflow: final-selection events passing any path in the group, and "
+            "those passing no other L1SingleLLPJet HLT on top of it."
+        ),
+    )
+    parser.add_argument(
         "--prescale-table", nargs="+", metavar="FILE", default=None,
         help=(
             "Print a LaTeX prescale-impact summary table instead of a per-file cutflow. "
@@ -685,6 +841,17 @@ if __name__ == "__main__":
         )
     else:
         # --- full cutflow for a single file -----------------------------------
+        excl_groups = None
+        if args.excl_hlt:
+            excl_groups = [dict(
+                patterns = args.excl_hlt,
+                plain    = " / ".join(args.excl_hlt),
+                # Short label only; the resolved path names go in the caption,
+                # so a long --excl-hlt glob cannot widen the table.
+                tex      = r"\texttt{custom}",
+                latex    = True,
+            )]
+
         run_cutflow(args.file, args.tree,
                 apply_llp_truth    = args.truth,
                 use_weights        = args.weights,
@@ -695,4 +862,5 @@ if __name__ == "__main__":
                 dnn_inc_cut        = args.inc,
                 dnn_depth_cut      = args.depth,
                 dnn_inc_cut_sjdc   = args.inc_sjdc,
-                dnn_depth_cut_sjdc = args.depth_sjdc)
+                dnn_depth_cut_sjdc = args.depth_sjdc,
+                excl_hlt_groups    = excl_groups)
