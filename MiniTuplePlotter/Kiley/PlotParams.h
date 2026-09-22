@@ -338,24 +338,24 @@ PlotParams P_jet1and2_scores_inc = {"jet1_scores_inc + jet2_scores_inc", "DNN In
 PlotParams P_jet0_scores_inc_train80 = {"jet0_scores_inc_train80", "Leading Jet Inclusive DNN Score", "Leading Jet Inclusive DNN Score", 0, 1};
 PlotParams P_jet0_scores_inc_train40 = {"jet0_scores_inc_train40", "DNN Inclusive Score, train 40%", "DNN Inclusive 40%, jet0", 0, 1};
 PlotParams P_jet0_scores_depth_hcal = {"jet0_scores_depth_hcal", "DNN Depth Score (HCAL)", "DNN Depth HCAL, jet0", 0, 1};
-PlotParams P_jet0_scores_depth_LLPanywhere = {"jet0_scores_depth_LLPanywhere", "DNN Depth Score", "DNN Depth, jet0", 0, 1};
+PlotParams P_jet0_scores_depth_LLPanywhere = {"jet0_scores_depth_LLPanywhere", "Leading Jet Depth DNN Score", "Leading Jet Depth DNN Score", 0, 1};
 
 PlotParams P_jet0_scores_depth_LLPanywhereLog = {"log10(jet0_scores_depth_LLPanywhere)", "DNN Depth Score (HCAL)", "LOG10 DNN Depth HCAL, jet0", -10, 1};
 
 PlotParams P_jet1_scores_inc_train80 = {"jet1_scores_inc_train80", "Subleading Jet Inclusive DNN Score", "Subleading Jet Inclusive DNN Score", 0, 1};
 PlotParams P_jet1_scores_inc_train40 = {"jet1_scores_inc_train40", "DNN Inclusive Score (subleading), train 40%", "DNN Inclusive 40%, jet1", 0, 1};
 PlotParams P_jet1_scores_depth_hcal = {"jet1_scores_depth_hcal", "DNN Depth Score (HCAL, subleading)", "DNN Depth HCAL, jet1", 0, 1};
-PlotParams P_jet1_scores_depth_LLPanywhere = {"jet1_scores_depth_LLPanywhere", "DNN Depth Score (subleading)", "DNN Depth, jet1", 0, 1};
+PlotParams P_jet1_scores_depth_LLPanywhere = {"jet1_scores_depth_LLPanywhere", "Subleading Jet Depth DNN Score", "Subleading Jet Depth DNN Score", 0, 1};
 
 PlotParams P_jet2_scores_inc_train80 = {"jet2_scores_inc_train80", "DNN Inclusive Score (subleading), train 80%", "DNN Inclusive 80%, jet2", 0, 1};
 PlotParams P_jet2_scores_inc_train40 = {"jet2_scores_inc_train40", "DNN Inclusive Score (subleading), train 40%", "DNN Inclusive 40%, jet2", 0, 1};
 PlotParams P_jet2_scores_depth_hcal = {"jet2_scores_depth_hcal", "DNN Depth Score (HCAL, subleading)", "DNN Depth HCAL, jet2", 0, 1};
-PlotParams P_jet2_scores_depth_LLPanywhere = {"jet2_scores_depth_LLPanywhere", "DNN Depth Score (subleading)", "DNN Depth, jet2", 0, 1};
+PlotParams P_jet2_scores_depth_LLPanywhere = {"jet2_scores_depth_LLPanywhere", "Subleading Jet Depth DNN Score", "Subleading Jet Depth DNN Score", 0, 1};
 
 PlotParams P_jet3_scores_inc_train80 = {"jet3_scores_inc_train80", "DNN Inclusive Score (subleading), train 80%", "DNN Inclusive 80%, jet3", 0, 1};
 PlotParams P_jet3_scores_inc_train40 = {"jet3_scores_inc_train40", "DNN Inclusive Score (subleading), train 40%", "DNN Inclusive 40%, jet3", 0, 1};
 PlotParams P_jet3_scores_depth_hcal = {"jet3_scores_depth_hcal", "DNN Depth Score (HCAL, subleading)", "DNN Depth HCAL, jet3", 0, 1};
-PlotParams P_jet3_scores_depth_LLPanywhere = {"jet3_scores_depth_LLPanywhere", "DNN Depth Score (subleading)", "DNN Depth, jet3", 0, 1};
+PlotParams P_jet3_scores_depth_LLPanywhere = {"jet3_scores_depth_LLPanywhere", "Subleading Jet Depth DNN Score", "Subleading Jet Depth DNN Score", 0, 1};
 
 // --------------------------------------------------------------------- //
 // -------------------------- per jet variables ------------------------ //

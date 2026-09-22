@@ -36,12 +36,44 @@ score_range_depth_global = [0, 1]
 # Score Mode: Use combination inclusive+depth ("Normal"), or only inclusive ("InclusiveOnly"), or only depth ("DepthOnly") to define analysis regions
 score_mode_global = "Normal" # "InclusiveOnly", "DepthOnly"
 
+# Signal event weight.
+#   weight               : BRxSigma * lumi / NEvents_produced, where lumi is the FULL
+#                          Run-3 luminosity -- so every sample is normalised to the
+#                          whole dataset regardless of which era it simulates.
+#   lumi_frac            : that sample's era share of the total luminosity
+#                          (era1 preEE 0.1282, era2 postEE+preBPix 0.7165,
+#                          era3 postBPix 0.1553). This replaces the old
+#                          Scale(lumi_20xx / lumi_total) calls, which applied one
+#                          factor to a whole chain and so weighted the eras within
+#                          that chain equally instead of by their own lumi shares.
+#                          NB: requires ONE sample per era in each .txt list,
+#                          otherwise an era is counted more than once.
+#   L1/HLT_prescale_weight : matches CutflowAnalysis/FinalAnalysisCutflow.py, which
+#                          uses "weight * L1_prescale_weight * HLT_prescale_weight".
+#                          Both are effectively 0/1 flags rather than continuous
+#                          factors. Within the analysis selection L1_prescale_weight
+#                          is 1 for ~97% of cat12 and ~94% of cat3 events (means
+#                          0.974 and 0.938), so this is a few-percent correction,
+#                          not a large one -- included for consistency with the
+#                          cutflow. (Averaged over ALL events it looks like ~0.02,
+#                          but that is dominated by events where no L1 seed fired,
+#                          which the selection removes anyway.)
+#
+# event_weight (= HLT_SF_Tot, an HLT scale factor) is NOT used by the cutflow, so it
+# is off by default here to keep the two consistent. Set True to restore the old
+# behaviour.
+include_event_weight = False
+
+signal_weight = "weight * L1_prescale_weight * HLT_prescale_weight * lumi_frac"
+if include_event_weight:
+    signal_weight = "event_weight * " + signal_weight
+
 # ----- Plot Results Inputs ----- # 
 
 # NB: The following params *only* control inputs to the plot_results function.
 
 # Require 2022 and 2023 to have same score selections
-combine_years = True 
+combine_years = False 
 
 # Require LJDC and SJDC to have same score selections
 # Not implemented # combine_categories = False
@@ -71,7 +103,8 @@ def calculate_bkg_prediction( h2, i_bin, j_bin, n_bins):
 
     #h2["n_bkgpred_{0}_{1}".format(cat, year)], i_bin, j_bin, n_bins)
 
-    i_cr = h2.FindBin( 0.2 ) # Control region inclusive candidate score cut
+    i_cr = h2.GetXaxis().FindBin( 0.2 ) # Control region inclusive candidate score cut
+    # previously this was returning a global bin, not just CR bin
 
     nevents_bkg_cr       = h2.Integral( 1, i_cr, 1, h2.GetNbinsY() )
     nevents_bkg_cr_depth = h2.Integral( 1, i_cr, j_bin, h2.GetNbinsY() )
@@ -239,44 +272,59 @@ def calculate_results( filetag, signaltag_22, signaltag_23 ):
 
     selections = {}
     selections["all"] = "Pass_HLTDisplacedJet == 1 && Pass_PreSel == 1 && abs(jet0_jet1_dPhi) > 0.2"
-    selections["ljdc"] = selections["all"] + " && jet0_DepthTagCand == 1"
-    selections["sjdc"] = selections["all"] + " && jet1_DepthTagCand == 1"
+    # NB: DepthTagCand is paired with the OTHER jet's InclTagCand, matching
+    # CutflowAnalysis/FinalAnalysisCutflow.py and all FakeRate/*.py scripts.
+    # Pass_PreSel only guarantees SOME jet is the depth candidate and a
+    # DIFFERENT jet is the incl candidate -- not that they are specifically
+    # jet0/jet1 -- so jet0_DepthTagCand==1 alone does not guarantee jet1 is
+    # the actual incl candidate whose score this code goes on to read.
+    selections["ljdc"] = selections["all"] + " && jet0_DepthTagCand == 1 && jet1_InclTagCand == 1"
+    selections["sjdc"] = selections["all"] + " && jet1_DepthTagCand == 1 && jet0_InclTagCand == 1"
+
+    # MET filters are applied to data only, not signal MC (matches
+    # CutflowAnalysis/FinalAnalysisCutflow.py and FakeRate/*.py). The private
+    # postBPix signal samples never had these flags computed -- they read 0
+    # for every event -- so applying this cut to signal zeroes it entirely.
+    selections_data = {
+        "ljdc": selections["ljdc"] + " && Flag_METFilters_2022_2023_PromptReco == 1",
+        "sjdc": selections["sjdc"] + " && Flag_METFilters_2022_2023_PromptReco == 1",
+    }
 
     # Fill Hists 
     score_mode = score_mode_global
 
     if score_mode == "Normal":
-        tree_data_22.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_inc_train80 >> n_bkgpred_{0}_{1}".format("ljdc", "2022"), selections["ljdc"] )
-        tree_data_22.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_inc_train80 >> n_bkgpred_{0}_{1}".format("sjdc", "2022"), selections["sjdc"] )
-        tree_data_23.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_inc_train80 >> n_bkgpred_{0}_{1}".format("ljdc", "2023"), selections["ljdc"] )
-        tree_data_23.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_inc_train80 >> n_bkgpred_{0}_{1}".format("sjdc", "2023"), selections["sjdc"] )
+        tree_data_22.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_inc_train80 >> n_bkgpred_{0}_{1}".format("ljdc", "2022"), selections_data["ljdc"] )
+        tree_data_22.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_inc_train80 >> n_bkgpred_{0}_{1}".format("sjdc", "2022"), selections_data["sjdc"] )
+        tree_data_23.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_inc_train80 >> n_bkgpred_{0}_{1}".format("ljdc", "2023"), selections_data["ljdc"] )
+        tree_data_23.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_inc_train80 >> n_bkgpred_{0}_{1}".format("sjdc", "2023"), selections_data["sjdc"] )
 
-        tree_sig_22.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_inc_train80 >> n_signal_{0}_{1}".format("ljdc", "2022"), "(event_weight * weight) * ({})".format(selections["ljdc"]) )
-        tree_sig_22.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_inc_train80 >> n_signal_{0}_{1}".format("sjdc", "2022"), "(event_weight * weight) * ({})".format(selections["sjdc"]) )
-        tree_sig_23.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_inc_train80 >> n_signal_{0}_{1}".format("ljdc", "2023"), "(event_weight * weight) * ({})".format(selections["ljdc"]) )
-        tree_sig_23.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_inc_train80 >> n_signal_{0}_{1}".format("sjdc", "2023"), "(event_weight * weight) * ({})".format(selections["sjdc"]) )
+        tree_sig_22.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_inc_train80 >> n_signal_{0}_{1}".format("ljdc", "2022"), "({}) * ({})".format(signal_weight, selections["ljdc"]) )
+        tree_sig_22.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_inc_train80 >> n_signal_{0}_{1}".format("sjdc", "2022"), "({}) * ({})".format(signal_weight, selections["sjdc"]) )
+        tree_sig_23.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_inc_train80 >> n_signal_{0}_{1}".format("ljdc", "2023"), "({}) * ({})".format(signal_weight, selections["ljdc"]) )
+        tree_sig_23.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_inc_train80 >> n_signal_{0}_{1}".format("sjdc", "2023"), "({}) * ({})".format(signal_weight, selections["sjdc"]) )
 
     elif score_mode == "InclusiveOnly":
-        tree_data_22.Draw( "jet0_scores_inc_train80:jet1_scores_inc_train80 >> n_bkgpred_{0}_{1}".format("ljdc", "2022"), selections["ljdc"] )
-        tree_data_22.Draw( "jet1_scores_inc_train80:jet0_scores_inc_train80 >> n_bkgpred_{0}_{1}".format("sjdc", "2022"), selections["sjdc"] )
-        tree_data_23.Draw( "jet0_scores_inc_train80:jet1_scores_inc_train80 >> n_bkgpred_{0}_{1}".format("ljdc", "2023"), selections["ljdc"] )
-        tree_data_23.Draw( "jet1_scores_inc_train80:jet0_scores_inc_train80 >> n_bkgpred_{0}_{1}".format("sjdc", "2023"), selections["sjdc"] )
+        tree_data_22.Draw( "jet0_scores_inc_train80:jet1_scores_inc_train80 >> n_bkgpred_{0}_{1}".format("ljdc", "2022"), selections_data["ljdc"] )
+        tree_data_22.Draw( "jet1_scores_inc_train80:jet0_scores_inc_train80 >> n_bkgpred_{0}_{1}".format("sjdc", "2022"), selections_data["sjdc"] )
+        tree_data_23.Draw( "jet0_scores_inc_train80:jet1_scores_inc_train80 >> n_bkgpred_{0}_{1}".format("ljdc", "2023"), selections_data["ljdc"] )
+        tree_data_23.Draw( "jet1_scores_inc_train80:jet0_scores_inc_train80 >> n_bkgpred_{0}_{1}".format("sjdc", "2023"), selections_data["sjdc"] )
 
-        tree_sig_22.Draw( "jet0_scores_inc_train80:jet1_scores_inc_train80 >> n_signal_{0}_{1}".format("ljdc", "2022"), "(event_weight * weight) * ({})".format(selections["ljdc"]) )
-        tree_sig_22.Draw( "jet1_scores_inc_train80:jet0_scores_inc_train80 >> n_signal_{0}_{1}".format("sjdc", "2022"), "(event_weight * weight) * ({})".format(selections["sjdc"]) )
-        tree_sig_23.Draw( "jet0_scores_inc_train80:jet1_scores_inc_train80 >> n_signal_{0}_{1}".format("ljdc", "2023"), "(event_weight * weight) * ({})".format(selections["ljdc"]) )
-        tree_sig_23.Draw( "jet1_scores_inc_train80:jet0_scores_inc_train80 >> n_signal_{0}_{1}".format("sjdc", "2023"), "(event_weight * weight) * ({})".format(selections["sjdc"]) )
+        tree_sig_22.Draw( "jet0_scores_inc_train80:jet1_scores_inc_train80 >> n_signal_{0}_{1}".format("ljdc", "2022"), "({}) * ({})".format(signal_weight, selections["ljdc"]) )
+        tree_sig_22.Draw( "jet1_scores_inc_train80:jet0_scores_inc_train80 >> n_signal_{0}_{1}".format("sjdc", "2022"), "({}) * ({})".format(signal_weight, selections["sjdc"]) )
+        tree_sig_23.Draw( "jet0_scores_inc_train80:jet1_scores_inc_train80 >> n_signal_{0}_{1}".format("ljdc", "2023"), "({}) * ({})".format(signal_weight, selections["ljdc"]) )
+        tree_sig_23.Draw( "jet1_scores_inc_train80:jet0_scores_inc_train80 >> n_signal_{0}_{1}".format("sjdc", "2023"), "({}) * ({})".format(signal_weight, selections["sjdc"]) )
 
     elif score_mode == "DepthOnly":
-        tree_data_22.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_depth_LLPanywhere >> n_bkgpred_{0}_{1}".format("ljdc", "2022"), selections["ljdc"] )
-        tree_data_22.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_depth_LLPanywhere >> n_bkgpred_{0}_{1}".format("sjdc", "2022"), selections["sjdc"] )
-        tree_data_23.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_depth_LLPanywhere >> n_bkgpred_{0}_{1}".format("ljdc", "2023"), selections["ljdc"] )
-        tree_data_23.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_depth_LLPanywhere >> n_bkgpred_{0}_{1}".format("sjdc", "2023"), selections["sjdc"] )
+        tree_data_22.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_depth_LLPanywhere >> n_bkgpred_{0}_{1}".format("ljdc", "2022"), selections_data["ljdc"] )
+        tree_data_22.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_depth_LLPanywhere >> n_bkgpred_{0}_{1}".format("sjdc", "2022"), selections_data["sjdc"] )
+        tree_data_23.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_depth_LLPanywhere >> n_bkgpred_{0}_{1}".format("ljdc", "2023"), selections_data["ljdc"] )
+        tree_data_23.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_depth_LLPanywhere >> n_bkgpred_{0}_{1}".format("sjdc", "2023"), selections_data["sjdc"] )
 
-        tree_sig_22.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_depth_LLPanywhere >> n_signal_{0}_{1}".format("ljdc", "2022"), "(event_weight * weight) * ({})".format(selections["ljdc"]) )
-        tree_sig_22.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_depth_LLPanywhere >> n_signal_{0}_{1}".format("sjdc", "2022"), "(event_weight * weight) * ({})".format(selections["sjdc"]) )
-        tree_sig_23.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_depth_LLPanywhere >> n_signal_{0}_{1}".format("ljdc", "2023"), "(event_weight * weight) * ({})".format(selections["ljdc"]) )
-        tree_sig_23.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_depth_LLPanywhere >> n_signal_{0}_{1}".format("sjdc", "2023"), "(event_weight * weight) * ({})".format(selections["sjdc"]) )
+        tree_sig_22.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_depth_LLPanywhere >> n_signal_{0}_{1}".format("ljdc", "2022"), "({}) * ({})".format(signal_weight, selections["ljdc"]) )
+        tree_sig_22.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_depth_LLPanywhere >> n_signal_{0}_{1}".format("sjdc", "2022"), "({}) * ({})".format(signal_weight, selections["sjdc"]) )
+        tree_sig_23.Draw( "jet0_scores_depth_LLPanywhere:jet1_scores_depth_LLPanywhere >> n_signal_{0}_{1}".format("ljdc", "2023"), "({}) * ({})".format(signal_weight, selections["ljdc"]) )
+        tree_sig_23.Draw( "jet1_scores_depth_LLPanywhere:jet0_scores_depth_LLPanywhere >> n_signal_{0}_{1}".format("sjdc", "2023"), "({}) * ({})".format(signal_weight, selections["sjdc"]) )
 
     """
     reweight_llp0 = "pow ( {0} / {1}, 1 ) * exp( -LLP0_DecayCtau * 10. * ( 1.0/{2} - 1.0/{3} ) )".format(ctau_sample, ctau_target, ctau_target, ctau_sample)
@@ -292,10 +340,13 @@ def calculate_results( filetag, signaltag_22, signaltag_23 ):
         h2["n_bkgpred_{0}_{1}".format(cat, "Total")] = h2["n_bkgpred_{0}_{1}".format(cat, "2022")].Clone()
         h2["n_bkgpred_{0}_{1}".format(cat, "Total")].Add( h2["n_bkgpred_{0}_{1}".format(cat, "2023")] )
 
-        h2["n_signal_{0}_{1}".format(cat, "2022")].Scale(lumi_2022 / lumi_total)
-        # h2["n_signal_{0}_{1}".format(cat, "2022")].Scale(100.)  # TEMPORARY: weight uses N_gen=3.99M instead of actual 40k; remove once sig22 files are reprocessed
-        # print("TEMPORARY: Scaling signal 2022 by 100x to account for N_gen=40k; remove once sig22 files are reprocessed")
-        h2["n_signal_{0}_{1}".format(cat, "2023")].Scale(lumi_2023 / lumi_total)
+        # The era scaling is now carried by lumi_frac inside signal_weight (applied
+        # per sample), so the old per-chain Scale() calls below would double-apply it:
+        #   h2["n_signal_{0}_{1}".format(cat, "2022")].Scale(lumi_2022 / lumi_total)
+        #   h2["n_signal_{0}_{1}".format(cat, "2023")].Scale(lumi_2023 / lumi_total)
+        # lumi_frac also distributes correctly WITHIN the 2022 chain (era1 0.1282 +
+        # era2 0.7165 = 0.8447 = lumi_2022/lumi_total), which a single Scale() could
+        # not do -- it weighted both eras equally.
 
         h2["n_signal_{0}_{1}".format(cat, "Total")] = h2["n_signal_{0}_{1}".format(cat, "2022")].Clone()
         h2["n_signal_{0}_{1}".format(cat, "Total")].Add( h2["n_signal_{0}_{1}".format(cat, "2023")] )

@@ -28,6 +28,9 @@ Create a whitespace-delimited file where the first non-comment line is the heade
 Then run:
 ```
 python3 MisTagParametrization_3D_optimized.py --config my_scan.txt -b
+python3 MisTagParametrization_3D_optimized.py --config my_scan.txt -b --pv_split
+python3 SidebandParameterization_BkgPred.py --config my_scan.txt --input_dir SidebandBkgPred
+python3 SidebandParameterization_BkgPred.py --config my_scan.txt --input_dir SidebandBkgPred_PVsplit --pv_split
 ```
 Parameter sets grouped by era share a single RDataFrame, so multiple 2023 rows only read the files once. `CR_cut_inc` is optional and defaults to 0.2 if the column is omitted.
 
@@ -45,6 +48,13 @@ python3 OverlayMistagRates.py
 python3 OverlayMistagRates_TEff.py
 ```
 This takes the output root files from `MisTagParametrization_3D` and overlays them to evalute changes throughout the year.
+
+For the sideband method the equivalent quantity is the transfer factor (CR tagged / CR depth sideband), overlaid with
+```
+python3 OverlayTransferFactors_TEff.py -e 2022 2023 combined      # reads SidebandBkgPred_PVsplit/output_3D_hists_depth_leading_*.root
+python3 OverlayTransferFactors_TEff.py -e combined -j sub-leading -i SidebandBkgPred
+```
+Era groups: `2022` (D, E, F, G), `2023` (Cv1-Dv2), `combined` (2022 + 2023 C vs 2023 D), `2022_PU`, `2023_PU`. Central values and (default) error bars match the per-era `3d_hist_projection_CR_transfer_factor_*.png`; `--errors CP` gives asymmetric Clopper-Pearson-style intervals instead. Output goes to `<input_dir>/outPlots_3D/Overlay_LLPskim_TransferFactorOverlayEra_<jet>_<era>.png`.
 
 ## Convert Fake Rate Results to Latex Tables
 
@@ -64,8 +74,30 @@ python3 OutputToLatex_VRclosureCheck.py -e 2023 -d 0.965 -i 0.845 \
 
 Config file mode — process the same scan config used to produce the output files, one table per row:
 ```
-python3 OutputToLatex_VRclosureCheck.py --config my_scan.txt -b
+# MisTagParametrization_3D_optimized.py — conservative: current dir
+python3 MisTagParametrization_3D_optimized.py --config my_scan.txt -b
+python3 OutputToLatex_VRclosureCheck.py      --config my_scan.txt -b
+
+# MisTagParametrization_3D_optimized.py — tighter: PVsplit/
+python3 MisTagParametrization_3D_optimized.py --config my_scan.txt -b --pv_split
+python3 OutputToLatex_VRclosureCheck.py      --config my_scan.txt -b --input_dir PVsplit
+
+# SidebandParameterization_BkgPred.py — conservative: SidebandBkgPred/
+python3 SidebandParameterization_BkgPred.py --config my_scan.txt
+python3 OutputToLatex_VRclosureCheck.py    --config my_scan.txt --input_dir SidebandBkgPred
+
+# SidebandParameterization_BkgPred.py — tighter: SidebandBkgPred_PVsplit/
+python3 SidebandParameterization_BkgPred.py --config my_scan.txt --pv_split
+python3 OutputToLatex_VRclosureCheck.py    --config my_scan.txt --pv_split
 ```
+These correspond to the four versions of `MisTagParameterization` and `SidebandParameterization_BkgPred.py` from above. 
+
+Then run this from the directory with the corresponding output:
+```
+python3 PhiParametrizationStudy.py --era all
+```
+for the eta vs pT parameterization plots.
+
 Files that don't exist yet are skipped with a `% WARNING` comment. Add `--stat_only` to evaluate closure with statistical uncertainties only (no PV-variation systematic).
 
 To check the 2D rates used in the background prediction, and overlay rates for each era:

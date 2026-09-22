@@ -1,31 +1,104 @@
 #!/usr/bin/env python3
 """
-Optimized version of MisTagParametrization_3D.py (b_tag_combined mode, 2022/2023 full datasets).
+Sideband (ABCD-style) background prediction — companion to
+MisTagParametrization_3D_optimized.py, from which it is copied.
 
-Key speedups vs. original:
-  1. ROOT RDataFrame with EnableImplicitMT replaces TChain + tree.Draw().
-     All histograms for all 3 options are booked lazily and evaluated in a
-     single multi-threaded event loop over the data.
-  2. Run exclusion uses a C++ std::set (O(log n) per event) instead of a
-     119-term AND-chain of != conditions evaluated by ROOT's string interpreter.
-  3. The common base filter (run exclusion + deltaPhi) is applied once,
-     not 30 times (3 options x 10 tree.Draw calls each).
+Difference vs. the mistag-rate method
+-------------------------------------
+MisTagParametrization_3D_optimized.py measures
 
-Usage (same flags as original):
-  python MisTagParametrization_3D_optimized.py -e 2022 -b -d 0.9 -i 0.97
-  python MisTagParametrization_3D_optimized.py -e 2023 -b -d 0.93 -i 0.97
+    mistag rate = N(CR, depth >= DNN_cut) / N(CR, all depth scores)
 
-PV systematic: two modes (see PV_SPLIT below)
-  default     conservative — PV cut on the CR only; the two PV variations are
-              applied to the PV-inclusive VR/SR and enveloped by
-              OutputToLatex_VRclosureCheck.py.  Output in the current directory.
-  --pv_split  tighter — PV cut on every region, so PV<42 and PV>=42 are summed
-              into a PV-binned prediction and the systematic is
-              |PV-binned - inclusive|.  Output under PVsplit/, and the txt
-              carries a "PV treatment: split" marker plus a PV-binned summary.
-              Read it back with:
-                python3 OutputToLatex_VRclosureCheck.py --config my_scan.txt -b \\
-                    --input_dir PVsplit
+and multiplies the *inclusive* VR / SR yields by it.
+
+This script instead measures a TRANSFER FACTOR from a data sideband in the
+DEPTH score:
+
+    TF = N(CR, depth >= DNN_cut) / N(CR, SB_low <= depth < DNN_cut)
+
+i.e. numerator = the high-scoring (tagged) CR, denominator = the CR sideband
+running from SB_low up to the tag threshold.  The two regions are disjoint,
+so the numerator is no longer a subset of the denominator.  The TF is then
+applied to the *sideband* of the VR and of the SR:
+
+    predicted tags in VR = TF x N(VR, SB_low <= depth < DNN_cut)
+    predicted tags in SR = TF x N(SR, SB_low <= depth < DNN_cut)
+
+SB_low is 0.8 for postBPix eras and 0.3 for preBPix eras (see
+POSTBPIX_ERAS / SIDEBAND_LOW_POSTBPIX / SIDEBAND_LOW_PREBPIX below, and the
+--sideband_low override).
+
+This is a 2D ABCD in (inclusive score of one jet) x (depth score of the other
+jet):
+
+      depth score
+        ^
+ tagged |   [CR tag]     [VR tag]     [SR tag]  <-- SR cell is BLINDED
+        |   (A, meas.)   (obs.)       (predicted only)
+ SB_low |-------------------------------------
+        | [CR sideband] [VR sideband] [SR sideband]
+        |   (B, meas.)   (C, meas.)   (D, meas.)
+        +-------------------------------------> inclusive score
+            CR             VR            SR
+
+BLINDING
+--------
+The signal-region tagged cell (high depth score AND high inclusive score) is
+NEVER read out of the data.  For data no histogram is even BOOKED for that
+cell — book_all_histograms() only creates the SR *sideband* histogram, and
+both book_all_histograms() and materialise() carry a hard tripwire that raises
+if an SR-tagged histogram ever appears for a non-MC era.  Nothing in this
+script integrates, projects, plots or prints the blinded cell.  The only SR
+numbers reported are (a) the SR sideband yield, which is by construction below
+the tag threshold, and (b) the *prediction* TF x N(SR sideband).
+(The W+Jets MC era is the sole exception: MC is not blinded, so the SR-tagged
+histogram is booked there to allow a closure test, exactly as in the original.)
+
+Outputs
+-------
+Same format as MisTagParametrization_3D_optimized.py (same text lines, same
+plot set, same ROOT histogram names), but everything is written under
+OUT_BASE ("SidebandBkgPred/") so that nothing produced by the original script
+is overwritten.  The .txt files keep their original names inside that
+directory, so from FakeRate/ (use the same -b choice as for this script)
+
+    python3 OutputToLatex_VRclosureCheck.py --config my_scan.txt --input_dir SidebandBkgPred
+    python3 OutputToLatex_VRclosureCheck.py --config my_scan.txt --pv_split
+
+parse them unchanged.
+
+Usage (same flags as MisTagParametrization_3D_optimized.py):
+  python SidebandParameterization_BkgPred.py -e 2022 -b -d 0.9 -i 0.97
+  python SidebandParameterization_BkgPred.py -e 2023_postBPix -b -d 0.93 -i 0.97
+  python SidebandParameterization_BkgPred.py --config my_scan.txt -b
+Optional extra flags:
+  --sideband_low 0.5      # override the era-derived depth sideband lower bound
+  --pv_split              # PV systematic from a PV-binned prediction (see below)
+
+PV systematic: two modes
+------------------------
+Default (no flag) — "CR-only" PV variation, identical to the original script:
+the "depth, low PV" / "depth, high PV" options apply the PV cut to the CR ONLY,
+so each measures a TF from one PV slice of the CR and applies it to the
+PV-inclusive VR/SR.  OutputToLatex_VRclosureCheck.py takes the envelope of the
+two shifts as the systematic.  Output goes to SidebandBkgPred/.
+
+--pv_split — "PV-binned" prediction: the PV cut is applied to EVERY region
+(CR, VR and SR sidebands, and the CR/VR tagged cells), so each PV option is a
+self-contained prediction for that PV slice.  The two slices partition the
+inclusive sample, so
+
+    PV-binned prediction = pred(low PV) + pred(high PV)
+
+uses the actual PV mix of the VR/SR, and the PV systematic is
+|PV-binned - inclusive|.  It vanishes when the VR/SR PV mix matches the CR's,
+and it does not pick up the subsampling noise of the CR-only variation.  Each
+PV slice also gets its own VR closure test.  The SR is still booked in the
+sideband only, so blinding is unchanged.  Output goes to
+SidebandBkgPred_PVsplit/, the txt carries a "PV treatment: split" marker line
+that OutputToLatex_VRclosureCheck.py uses to pick the matching systematic, and
+a PV-binned summary (with a check that the two slices add up to the inclusive
+yields) is appended to the txt.
 """
 
 import ROOT
@@ -78,7 +151,7 @@ debug = False
 #   * close the overflow bin at 250 rather than 400 — with a 400 edge the
 #     [400,inf) x |eta|>1 cell has CR_mistag == 0 in both era groups, and a cell
 #     with an empty numerator predicts exactly 0, biasing the estimate low.
-pT_bins  = np.array([40, 100, 160, 400]) #np.array([40, 100, 400], dtype=float) # np.array([40, 100, 160, 250, 1000], dtype=float)
+pT_bins  = np.array([40, 100, 160, 400]) # np.array([40, 100, 400], dtype=float) # np.array([40, 100, 160, 250, 1000], dtype=float)
 # Fill value for jets above the top edge — just inside the last bin, so they land
 # in the overflow bin rather than in ROOT's (uncounted) overflow bin.
 PT_FILL_CLAMP = pT_bins[-1] - 1e-3
@@ -91,7 +164,7 @@ if USE_ABS_ETA:
 else:
     # eta_bins = np.linspace(-1.26, 1.26, 9) # used before reducing number of bins
     # eta_bins = np.linspace(-1.26, 1.26, 5) # signed eta
-    eta_bins = np.array([-1.26, -1, 1, 1.26], dtype=float)  
+    eta_bins = np.array([-1.26, -1, 1, 1.26], dtype=float)
 # phi_bins = np.linspace(-np.pi, np.pi, 9)
 phi_bins = np.linspace(-np.pi, np.pi, 2) # one bin in phi to test impact on prediction closure
 b_tag_bins = np.array([0, 0.2435, 1.0], dtype=float)
@@ -101,11 +174,37 @@ DNN_cut_inc = 0.97
 
 CR_cut_inc = 0.2
 
+# ---- Depth-score sideband definition ----
+# The transfer factor denominator is the depth-score band [SB_low, DNN_cut).
+# SB_low depends on the era group: the depth score distribution is shifted
+# between preBPix and postBPix, so the sideband is placed higher for postBPix.
+SIDEBAND_LOW_POSTBPIX = 0.8
+SIDEBAND_LOW_PREBPIX  = 0.3
+# Eras taken after the BPix issue.  Everything else in _file_map (2022*, the
+# 2023 C-eras, and the W+Jets MC, which is a 2022 sample) is preBPix.  The
+# mixed "2022_2023" era group is predominantly preBPix and is treated as such,
+# with a warning printed at run time.
+POSTBPIX_ERAS = {"2023_postBPix", "2023_Dv1", "2023_Dv2"}
+MIXED_BPIX_ERAS = {"2022_2023"}
+SB_low = SIDEBAND_LOW_PREBPIX   # set per parameter set in _run_one()
+
+
+def sideband_low_for_era(era_key):
+    """Depth-score sideband lower bound for an era key (see POSTBPIX_ERAS)."""
+    if era_key in POSTBPIX_ERAS:
+        return SIDEBAND_LOW_POSTBPIX
+    if era_key in MIXED_BPIX_ERAS:
+        print(f"*** WARNING: era '{era_key}' mixes preBPix and postBPix data; "
+              f"using the preBPix sideband bound {SIDEBAND_LOW_PREBPIX}. "
+              f"Override with --sideband_low if that is not what you want.")
+    return SIDEBAND_LOW_PREBPIX
+
+
 # ---- Run exclusion lists (identical to original) ----
 # v5.3 minituples
-runs_to_exclude_2022 = [362615, 362653, 360485]   # based on CR 0.1 
+runs_to_exclude_2022 = [362615, 362653, 360485]   # based on CR 0.1
 runs_to_exclude_2022 = [362615, 362617, 362653, 362655]   # based on CR 0.2
-# v5.5 minituples 
+# v5.5 minituples
 runs_to_exclude_2022 = [357698, 362653, 362655, 359661, 360991] # based on CR 0.2
 runs_to_exclude_2022 = [357698, 362653, 359661, 360991] # based on CR 0.2, above 0.1%
 runs_to_exclude_2022 = [357698, 359661, 360991] # based on CR 0.1, above 0.1%
@@ -125,7 +224,7 @@ runs_to_exclude_2023 = [] # based on CR 0.1 # list(set([367228, 368684, 370460, 
 runs_to_exclude_2023 = [367691, 368684] # based on CR 0.2
 # v5.5 minituples
 runs_to_exclude_2023 = [369998, 370790, 368676, 370093] # based on CR 0.2
-runs_to_exclude_2023 = [370790] # based on CR 0.2, above 0.1% 
+runs_to_exclude_2023 = [370790] # based on CR 0.2, above 0.1%
 runs_to_exclude_2023 = [370790, 368676, 370093] # based on CR 0.1 above 0.1%
 runs_to_exclude_2023 = []
 # v5.6 minituples
@@ -137,8 +236,7 @@ runs_to_exclude_2023 = []
 # (HLT_L1SingleLLPJet itself does not count, same as the "and no other LLP HLT"
 # rows of CutflowAnalysis/FinalAnalysisCutflow.py).  Events that also fire any
 # other L1SingleLLPJet path are kept.  Entries are shell globs.
-# Empty list = no HLT exclusion.  When non-empty, output goes to exclHLT/
-# (or PVsplit_exclHLT/ with --pv_split).
+# Empty list = no HLT exclusion.  When non-empty, output goes to <OUT_BASE>_exclHLT/.
 hlts_to_exclude = []
 # The four delayed-jet paths seeded by L1_SingleLLPJet:
 #   SingleDelay1nsTrackless, SingleDelay2nsInclusive,
@@ -149,42 +247,28 @@ Zmu     = False
 LLPskim = True
 CNN     = False
 
-current_jet_type = "leading"  # updated per-iteration in MisTagParametrization
+current_jet_type = "leading"  # updated per-iteration in SidebandParametrization
 
-output_dir = "outPlots_3D"
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
-    print(f"Directory '{output_dir}' created.")
+# All output lives under OUT_BASE so that nothing written by
+# MisTagParametrization_3D_optimized.py is overwritten.  Names inside are
+# unchanged, so the downstream parsers work when run from within OUT_BASE.
+# --pv_split writes to its own directory so both PV treatments can coexist.
+OUT_BASE_DEFAULT  = "SidebandBkgPred"
+OUT_BASE_PV_SPLIT = "SidebandBkgPred_PVsplit"
+OUT_BASE   = OUT_BASE_DEFAULT
+output_dir = os.path.join(OUT_BASE, "outPlots_3D")
 
-# ---- PV systematic treatment -------------------------------------------------
-# Default (PV_SPLIT = False): the low/high PV options apply the PV cut to the CR
-# only, so the mistag rate from one PV slice is applied to the PV-inclusive
-# VR/SR.  OutputToLatex_VRclosureCheck.py then takes the envelope of the two
-# shifts -- the conservative systematic, and the historical behaviour.
-#
-# --pv_split (PV_SPLIT = True): the PV cut is applied to every region, so each
-# PV option is a self-contained prediction for that PV slice and the two slices
-# can be summed into a PV-binned prediction that uses the actual PV mix of the
-# VR/SR.  The systematic is then |PV-binned - inclusive|, which vanishes when
-# the VR/SR PV mix matches the CR's instead of carrying the subsampling noise of
-# the envelope.  Same option as in SidebandParameterization_BkgPred.py.
-# Output then goes to OUT_BASE_PV_SPLIT/ so it cannot overwrite the default run
-# (neither the ROOT nor the txt filenames encode the PV treatment).
-PV_SPLIT          = False
-OUT_BASE_PV_SPLIT = "PVsplit"
-OUT_BASE          = ""            # "" keeps every path exactly as it was
+# False: PV cut on the CR only (default).  True: PV cut on every region.
+PV_SPLIT = False
 
 
 def configure_pv_mode(pv_split):
-    """Select the PV treatment and the matching output directories."""
+    """Set the PV treatment and the matching output directories (see module docstring)."""
     global PV_SPLIT, OUT_BASE, output_dir
-    PV_SPLIT = pv_split
-    if pv_split:
-        OUT_BASE = OUT_BASE_PV_SPLIT
+    PV_SPLIT   = pv_split
+    OUT_BASE   = OUT_BASE_PV_SPLIT if pv_split else OUT_BASE_DEFAULT
     if hlts_to_exclude:            # keep HLT-excluded output apart from the nominal
-        OUT_BASE = OUT_BASE + "_exclHLT" if OUT_BASE else "exclHLT"
-    if not OUT_BASE:
-        return                     # default paths already set above
+        OUT_BASE += "_exclHLT"
     output_dir = os.path.join(OUT_BASE, "outPlots_3D")
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -289,34 +373,42 @@ def MakePlot(hists, legends):
     LabelCMS()
 
 
-def MistagRate(mistag_hist, all_hist, plot_type, option, title, label, type_of_jet):
-    mistag_rate = mistag_hist.Clone("mistag_rate_" + plot_type)
-    ResetAxis(mistag_rate)
-    proj_pT_mistag_rate, proj_eta_mistag_rate, proj_phi_mistag_rate = \
-        ProjectHistogram(mistag_rate, "Mistag rate")
-    total = all_hist.Clone("total_" + plot_type)
+def TransferFactorPlot(pass_hist, sideband_hist, plot_type, option, title, label, type_of_jet):
+    """
+    Plot the transfer factor N(tagged) / N(sideband) projected onto pT, eta, phi.
+
+    Same structure as MistagRate() in MisTagParametrization_3D_optimized.py; only
+    the denominator (depth sideband instead of all depth scores) and the labels
+    differ.  Only ever called for the CR and the VR — never for the SR, whose
+    tagged cell is blinded.
+    """
+    transfer_factor = pass_hist.Clone("transfer_factor_" + plot_type)
+    ResetAxis(transfer_factor)
+    proj_pT_TF, proj_eta_TF, proj_phi_TF = \
+        ProjectHistogram(transfer_factor, "Transfer factor")
+    total = sideband_hist.Clone("sideband_" + plot_type)
     proj_pT_total, proj_eta_total, proj_phi_total = \
         ProjectHistogram(total, "Number of events")
-    proj_pT_mistag_rate.Divide(proj_pT_total)
-    proj_eta_mistag_rate.Divide(proj_eta_total)
-    proj_phi_mistag_rate.Divide(proj_phi_total)
+    proj_pT_TF.Divide(proj_pT_total)
+    proj_eta_TF.Divide(proj_eta_total)
+    proj_phi_TF.Divide(proj_phi_total)
 
-    legend_labels = ["Mistag rate (" + plot_type + ")"]
-    png_title     = "3d_hist_projection_" + plot_type + "_mistag_rate_" + type_of_jet
+    legend_labels = ["Transfer factor (" + plot_type + ")"]
+    png_title     = "3d_hist_projection_" + plot_type + "_transfer_factor_" + type_of_jet
     DrawCanvasAndPlots(
         "c_" + plot_type,
-        "Mistag rate plots in the " + plot_type + " with " + type_of_jet,
+        "Transfer factor plots in the " + plot_type + " with " + type_of_jet,
         option, title,
-        [[proj_pT_mistag_rate], [proj_eta_mistag_rate], [proj_phi_mistag_rate]],
+        [[proj_pT_TF], [proj_eta_TF], [proj_phi_TF]],
         legend_labels, png_title,
-        ["Jet p_{T} Mistag Rate from " + plot_type + ", " + type_of_jet,
-         "Jet #eta Mistag Rate from " + plot_type + ", " + type_of_jet,
-         "Jet #phi Mistag Rate from " + plot_type + ", " + type_of_jet],
+        ["Jet p_{T} Transfer Factor from " + plot_type + ", " + type_of_jet,
+         "Jet #eta Transfer Factor from " + plot_type + ", " + type_of_jet,
+         "Jet #phi Transfer Factor from " + plot_type + ", " + type_of_jet],
         label
     )
-    proj_pT_mistag_rate.Clear()
-    proj_eta_mistag_rate.Clear()
-    proj_phi_mistag_rate.Clear()
+    proj_pT_TF.Clear()
+    proj_eta_TF.Clear()
+    proj_phi_TF.Clear()
 
 
 def MakePlotWithRatio(hists, legends, type, png_label):
@@ -365,12 +457,14 @@ def LabelCMS(xpos=0.13, ypos=0.85, text_size=0.036):
             stamp_text.DrawLatex(xpos + 0.55, ypos + 0.06, yearLumi)
         else: stamp_text.DrawLatex(xpos + 0.62, ypos + 0.06, yearLumi)
         _dnn_label = DNN_cut_SJDC if current_jet_type == "sub-leading" else DNN_cut_LJDC
-        stamp_text.DrawLatex(xpos + 0.4,  ypos,        "#scale[0.65]{DNN score > " + str(_dnn_label) + "}")
+        stamp_text.DrawLatex(xpos + 0.4,  ypos,        "#scale[0.65]{DNN score > " + str(_dnn_label) +
+                                                       ", SB #geq " + str(SB_low) + "}")
         stamp_text.DrawLatex(xpos + 0.4,  ypos - 0.04, "#scale[0.65]{Era = " + era + "}")
     else:
         _dnn_label = DNN_cut_SJDC if current_jet_type == "sub-leading" else DNN_cut_LJDC
         stamp_text.DrawLatex(xpos + 0.6,  ypos + 0.03, yearLumi)
-        stamp_text.DrawLatex(xpos + 0.3,  ypos,        "#scale[0.65]{DNN score > " + str(_dnn_label) + "}")
+        stamp_text.DrawLatex(xpos + 0.3,  ypos,        "#scale[0.65]{DNN score > " + str(_dnn_label) +
+                                                       ", SB #geq " + str(SB_low) + "}")
         stamp_text.DrawLatex(xpos + 0.3,  ypos - 0.04, "#scale[0.65]{Era = " + era + "}")
 
 
@@ -452,10 +546,16 @@ def book_all_histograms(rdf_base, is_mc=False):
     evaluate the full computation graph in one multi-threaded pass when the
     first result is accessed.
 
+    Compared with MisTagParametrization_3D_optimized.py the depth-score
+    categories change: instead of (all depth scores) and (depth >= DNN_cut),
+    this books the SIDEBAND [SB_low, DNN_cut) and the TAGGED [DNN_cut, 1.1)
+    cells.  For data the SR is booked ONLY in the sideband — the SR tagged cell
+    is blinded and no histogram for it exists.
+
     Returns
     -------
     booked : dict
-        booked[option]["CR_all"] etc. are RResultPtr<TH3D> objects.
+        booked[option]["CR_side"] etc. are RResultPtr<TH3D> objects.
     """
     # WPlusJets (v4.1) uses "_updated" suffixes; data (v5.5) uses the original names
     if is_mc:
@@ -471,16 +571,18 @@ def book_all_histograms(rdf_base, is_mc=False):
     depth1 = f"jet1_scores_{depth_suf}"
 
     # LJDC: jet0 is the depth tag candidate; jet1 inclusive score defines CR/VR/SR
-    CR_str     = f"{inc1} >= 0.0 && {inc1} < {CR_cut_inc}"
-    VR_str     = f"{inc1} >= {CR_cut_inc} && {inc1} < {DNN_cut_inc_LJDC}"
-    SR_str     = f"{inc1} >= {DNN_cut_inc_LJDC} && {inc1} < 1.1"
-    mistag_str = f"{depth0} >= {DNN_cut_LJDC} && {depth0} < 1.1"
+    CR_str       = f"{inc1} >= 0.0 && {inc1} < {CR_cut_inc}"
+    VR_str       = f"{inc1} >= {CR_cut_inc} && {inc1} < {DNN_cut_inc_LJDC}"
+    SR_str       = f"{inc1} >= {DNN_cut_inc_LJDC} && {inc1} < 1.1"
+    pass_str     = f"{depth0} >= {DNN_cut_LJDC} && {depth0} < 1.1"
+    sideband_str = f"{depth0} >= {SB_low} && {depth0} < {DNN_cut_LJDC}"
 
     # SJDC: jet1 is the depth tag candidate; jet0 inclusive score defines CR/VR/SR
-    CR_0_str     = f"{inc0} >= 0.0 && {inc0} < {CR_cut_inc}"
-    VR_0_str     = f"{inc0} >= {CR_cut_inc} && {inc0} < {DNN_cut_inc_SJDC}"
-    SR_0_str     = f"{inc0} >= {DNN_cut_inc_SJDC} && {inc0} < 1.1"
-    mistag_1_str = f"{depth1} >= {DNN_cut_SJDC} && {depth1} < 1.1"
+    CR_0_str       = f"{inc0} >= 0.0 && {inc0} < {CR_cut_inc}"
+    VR_0_str       = f"{inc0} >= {CR_cut_inc} && {inc0} < {DNN_cut_inc_SJDC}"
+    SR_0_str       = f"{inc0} >= {DNN_cut_inc_SJDC} && {inc0} < 1.1"
+    pass_1_str     = f"{depth1} >= {DNN_cut_SJDC} && {depth1} < 1.1"
+    sideband_1_str = f"{depth1} >= {SB_low} && {depth1} < {DNN_cut_SJDC}"
 
     # Emulated trigger: leading jet has depth tag candidate + subleading has inclusive tag candidate
     # For MC (W+Jets), DepthTagCand/InclTagCand are almost never set; require 2 valid jets instead
@@ -506,10 +608,10 @@ def book_all_histograms(rdf_base, is_mc=False):
     for option in options:
         s = option.replace(", ", "_").replace(" ", "_")  # safe name fragment
 
-        # Default: PV cut is applied only to the CR (mistag rate measurement
-        # region), not to VR or SR — matches original MisTagParametrization logic
-        # exactly.  --pv_split: the same PV cut is applied to the VR and SR too,
-        # so each PV option is a complete prediction for that PV slice.
+        # Default: PV cut is applied only to the CR (transfer factor measurement
+        # region), not to VR or SR — matches original MisTagParametrization logic.
+        # --pv_split: the same PV cut is applied to the VR and SR as well, so each
+        # PV option is a complete prediction for that PV slice.
         cr_extra = ""
         if "low PV"  in option: cr_extra = " && " + low_PV_str
         if "high PV" in option: cr_extra = " && " + high_PV_str
@@ -522,17 +624,22 @@ def book_all_histograms(rdf_base, is_mc=False):
         rdf_SR_j0 = rdf_j0.Filter(SR_str + vr_sr_extra,   f"SR_j0_{s}")
 
         booked[option] = {
-            "CR_all":    rdf_CR_j0.Histo3D(_h3_model(f"h_CR_all_{s}"),    "jet0_PtAxis", "jet0_EtaAxis", "jet0_Phi"),
-            "CR_mistag": rdf_CR_j0.Filter(mistag_str).Histo3D(
-                             _h3_model(f"h_CR_mistag_{s}"),               "jet0_PtAxis", "jet0_EtaAxis", "jet0_Phi"),
-            "VR_all":    rdf_VR_j0.Histo3D(_h3_model(f"h_VR_all_{s}"),    "jet0_PtAxis", "jet0_EtaAxis", "jet0_Phi"),
-            "VR_mistag": rdf_VR_j0.Filter(mistag_str).Histo3D(
-                             _h3_model(f"h_VR_mistag_{s}"),               "jet0_PtAxis", "jet0_EtaAxis", "jet0_Phi"),
-            "SR_all":    rdf_SR_j0.Histo3D(_h3_model(f"h_SR_all_{s}"),    "jet0_PtAxis", "jet0_EtaAxis", "jet0_Phi"),
+            "CR_side": rdf_CR_j0.Filter(sideband_str).Histo3D(
+                           _h3_model(f"h_CR_side_{s}"),   "jet0_PtAxis", "jet0_EtaAxis", "jet0_Phi"),
+            "CR_pass": rdf_CR_j0.Filter(pass_str).Histo3D(
+                           _h3_model(f"h_CR_pass_{s}"),   "jet0_PtAxis", "jet0_EtaAxis", "jet0_Phi"),
+            "VR_side": rdf_VR_j0.Filter(sideband_str).Histo3D(
+                           _h3_model(f"h_VR_side_{s}"),   "jet0_PtAxis", "jet0_EtaAxis", "jet0_Phi"),
+            "VR_pass": rdf_VR_j0.Filter(pass_str).Histo3D(
+                           _h3_model(f"h_VR_pass_{s}"),   "jet0_PtAxis", "jet0_EtaAxis", "jet0_Phi"),
+            # SR: SIDEBAND ONLY for data.  The SR tagged cell is blinded.
+            "SR_side": rdf_SR_j0.Filter(sideband_str).Histo3D(
+                           _h3_model(f"h_SR_side_{s}"),   "jet0_PtAxis", "jet0_EtaAxis", "jet0_Phi"),
         }
         if is_mc:
-            booked[option]["SR_mistag"] = rdf_SR_j0.Filter(mistag_str).Histo3D(
-                             _h3_model(f"h_SR_mistag_{s}"),               "jet0_PtAxis", "jet0_EtaAxis", "jet0_Phi")
+            # MC only — not blinded, used for a closure test of the prediction.
+            booked[option]["SR_pass"] = rdf_SR_j0.Filter(pass_str).Histo3D(
+                           _h3_model(f"h_SR_pass_{s}"),   "jet0_PtAxis", "jet0_EtaAxis", "jet0_Phi")
 
         # --- jet1 triggered (jet1 has depth tag, jet0 defines CR/VR/SR) ---
         rdf_j1    = rdf_base.Filter(depth_j1_str,        f"depth_j1_{s}")
@@ -541,31 +648,35 @@ def book_all_histograms(rdf_base, is_mc=False):
         rdf_SR_j1 = rdf_j1.Filter(SR_0_str + vr_sr_extra,  f"SR_j1_{s}")
 
         booked[option].update({
-            "CR_all_1":    rdf_CR_j1.Histo3D(_h3_model(f"h_CR_all_1_{s}"),    "jet1_PtAxis", "jet1_EtaAxis", "jet1_Phi"),
-            "CR_mistag_1": rdf_CR_j1.Filter(mistag_1_str).Histo3D(
-                               _h3_model(f"h_CR_mistag_1_{s}"),               "jet1_PtAxis", "jet1_EtaAxis", "jet1_Phi"),
-            "VR_all_1":    rdf_VR_j1.Histo3D(_h3_model(f"h_VR_all_1_{s}"),    "jet1_PtAxis", "jet1_EtaAxis", "jet1_Phi"),
-            "VR_mistag_1": rdf_VR_j1.Filter(mistag_1_str).Histo3D(
-                               _h3_model(f"h_VR_mistag_1_{s}"),               "jet1_PtAxis", "jet1_EtaAxis", "jet1_Phi"),
-            "SR_all_1":    rdf_SR_j1.Histo3D(_h3_model(f"h_SR_all_1_{s}"),    "jet1_PtAxis", "jet1_EtaAxis", "jet1_Phi"),
+            "CR_side_1": rdf_CR_j1.Filter(sideband_1_str).Histo3D(
+                             _h3_model(f"h_CR_side_1_{s}"),  "jet1_PtAxis", "jet1_EtaAxis", "jet1_Phi"),
+            "CR_pass_1": rdf_CR_j1.Filter(pass_1_str).Histo3D(
+                             _h3_model(f"h_CR_pass_1_{s}"),  "jet1_PtAxis", "jet1_EtaAxis", "jet1_Phi"),
+            "VR_side_1": rdf_VR_j1.Filter(sideband_1_str).Histo3D(
+                             _h3_model(f"h_VR_side_1_{s}"),  "jet1_PtAxis", "jet1_EtaAxis", "jet1_Phi"),
+            "VR_pass_1": rdf_VR_j1.Filter(pass_1_str).Histo3D(
+                             _h3_model(f"h_VR_pass_1_{s}"),  "jet1_PtAxis", "jet1_EtaAxis", "jet1_Phi"),
+            # SR: SIDEBAND ONLY for data.  The SR tagged cell is blinded.
+            "SR_side_1": rdf_SR_j1.Filter(sideband_1_str).Histo3D(
+                             _h3_model(f"h_SR_side_1_{s}"),  "jet1_PtAxis", "jet1_EtaAxis", "jet1_Phi"),
         })
         if is_mc:
-            booked[option]["SR_mistag_1"] = rdf_SR_j1.Filter(mistag_1_str).Histo3D(
-                               _h3_model(f"h_SR_mistag_1_{s}"),               "jet1_PtAxis", "jet1_EtaAxis", "jet1_Phi")
+            # MC only — not blinded, used for a closure test of the prediction.
+            booked[option]["SR_pass_1"] = rdf_SR_j1.Filter(pass_1_str).Histo3D(
+                             _h3_model(f"h_SR_pass_1_{s}"),  "jet1_PtAxis", "jet1_EtaAxis", "jet1_Phi")
 
     # ---- BLINDING TRIPWIRE -------------------------------------------------
-    # For data, no histogram of the SR tagged cell (SR region AND the depth
-    # mistag cut) may exist.  SR_all is inclusive in depth score and is allowed;
-    # SR_mistag isolates the blinded cell and is booked for MC only.  If a future
-    # edit books one for data, fail here rather than quietly unblinding.
+    # For data, no histogram of the SR tagged cell (high depth AND high
+    # inclusive score) may exist.  If a future edit books one, fail loudly here
+    # rather than quietly unblinding the analysis.
     if not is_mc:
         for opt, d in booked.items():
-            offenders = [k for k in d if k.startswith("SR_") and "mistag" in k]
+            offenders = [k for k in d if k.startswith("SR_") and "side" not in k]
             if offenders:
                 raise RuntimeError(
-                    "BLINDING VIOLATION: SR mistag histogram(s) booked for data "
-                    f"in option '{opt}': {offenders}. The signal region (both DNN "
-                    "cuts applied) must remain blinded.")
+                    "BLINDING VIOLATION: SR tagged histogram(s) booked for data "
+                    f"in option '{opt}': {offenders}. The signal region (high depth "
+                    "score + high inclusive score) must remain blinded.")
 
     return booked
 
@@ -581,6 +692,14 @@ def materialise(booked, option):
     """
     h = booked[option]
 
+    # ---- BLINDING TRIPWIRE (second line of defence, at read-out time) ----
+    if not is_mc:
+        offenders = [k for k in h if k.startswith("SR_") and "side" not in k]
+        if offenders:
+            raise RuntimeError(
+                "BLINDING VIOLATION: refusing to read out SR tagged histogram(s) "
+                f"for data: {offenders}.")
+
     def get(ptr, name):
         th = ptr.GetPtr()           # triggers computation on first access
         out = th.Clone(name)
@@ -591,25 +710,25 @@ def materialise(booked, option):
         return out
 
     key_to_name = {
-        "CR_all":    "hist3d_CR_all",
-        "CR_mistag": "hist3d_CR_mistag",
-        "VR_all":    "hist3d_VR_all",
-        "VR_mistag": "hist3d_VR_mistag",
-        "SR_all":    "hist3d_SR_all",
-        "SR_mistag": "hist3d_SR_mistag",
-        "CR_all_1":    "hist3d_CR_all_1",
-        "CR_mistag_1": "hist3d_CR_mistag_1",
-        "VR_all_1":    "hist3d_VR_all_1",
-        "VR_mistag_1": "hist3d_VR_mistag_1",
-        "SR_all_1":    "hist3d_SR_all_1",
-        "SR_mistag_1": "hist3d_SR_mistag_1",
+        "CR_side":   "hist3d_CR_sideband",
+        "CR_pass":   "hist3d_CR_pass",
+        "VR_side":   "hist3d_VR_sideband",
+        "VR_pass":   "hist3d_VR_pass",
+        "SR_side":   "hist3d_SR_sideband",
+        "SR_pass":   "hist3d_SR_pass",
+        "CR_side_1": "hist3d_CR_sideband_1",
+        "CR_pass_1": "hist3d_CR_pass_1",
+        "VR_side_1": "hist3d_VR_sideband_1",
+        "VR_pass_1": "hist3d_VR_pass_1",
+        "SR_side_1": "hist3d_SR_sideband_1",
+        "SR_pass_1": "hist3d_SR_pass_1",
     }
     return {k: get(v, key_to_name[k]) for k, v in h.items()}
 
 
 # ==============================================================================
-# Analysis logic — same as original MisTagParametrization(), but receives
-# pre-computed histograms instead of filling them itself.
+# Analysis logic — same structure as MisTagParametrization(), but the CR rate
+# is a sideband transfer factor and it is applied to the VR / SR sidebands.
 # ==============================================================================
 
 _option_meta = {
@@ -619,10 +738,10 @@ _option_meta = {
 }
 
 
-def MisTagParametrization(hists, option):
+def SidebandParametrization(hists, option):
     """
     Process pre-computed histograms for one option and produce all plots /
-    ROOT output files.  Logic identical to the original function.
+    ROOT output files.
 
     Parameters
     ----------
@@ -631,81 +750,91 @@ def MisTagParametrization(hists, option):
     """
     title, label = _option_meta[option]
 
-    CR_all    = hists["CR_all"]
-    CR_mistag = hists["CR_mistag"]
-    VR_all    = hists["VR_all"]
-    VR_mistag = hists["VR_mistag"]
-    SR_all    = hists["SR_all"]
+    CR_side = hists["CR_side"]
+    CR_pass = hists["CR_pass"]
+    VR_side = hists["VR_side"]
+    VR_pass = hists["VR_pass"]
+    SR_side = hists["SR_side"]
 
-    CR_all_1    = hists["CR_all_1"]
-    CR_mistag_1 = hists["CR_mistag_1"]
-    VR_all_1    = hists["VR_all_1"]
-    VR_mistag_1 = hists["VR_mistag_1"]
-    SR_all_1    = hists["SR_all_1"]
+    CR_side_1 = hists["CR_side_1"]
+    CR_pass_1 = hists["CR_pass_1"]
+    VR_side_1 = hists["VR_side_1"]
+    VR_pass_1 = hists["VR_pass_1"]
+    SR_side_1 = hists["SR_side_1"]
 
     # Combine leading + sub-leading jet triggered histograms
-    CR_all_combined    = CR_all.Clone("hist3d_CR_all_combined");    CR_all_combined.Add(CR_all_1)
-    CR_mistag_combined = CR_mistag.Clone("hist3d_CR_mistag_combined"); CR_mistag_combined.Add(CR_mistag_1)
-    VR_all_combined    = VR_all.Clone("hist3d_VR_all_combined");    VR_all_combined.Add(VR_all_1)
-    VR_mistag_combined = VR_mistag.Clone("hist3d_VR_mistag_combined"); VR_mistag_combined.Add(VR_mistag_1)
-    SR_all_combined    = SR_all.Clone("hist3d_SR_all_combined");    SR_all_combined.Add(SR_all_1)
+    CR_side_combined = CR_side.Clone("hist3d_CR_sideband_combined"); CR_side_combined.Add(CR_side_1)
+    CR_pass_combined = CR_pass.Clone("hist3d_CR_pass_combined");     CR_pass_combined.Add(CR_pass_1)
+    VR_side_combined = VR_side.Clone("hist3d_VR_sideband_combined"); VR_side_combined.Add(VR_side_1)
+    VR_pass_combined = VR_pass.Clone("hist3d_VR_pass_combined");     VR_pass_combined.Add(VR_pass_1)
+    SR_side_combined = SR_side.Clone("hist3d_SR_sideband_combined"); SR_side_combined.Add(SR_side_1)
 
     if is_mc:
-        SR_mistag   = hists["SR_mistag"]
-        SR_mistag_1 = hists["SR_mistag_1"]
-        SR_mistag_combined = SR_mistag.Clone("hist3d_SR_mistag_combined"); SR_mistag_combined.Add(SR_mistag_1)
-        SR_mistag_list = [SR_mistag, SR_mistag_1, SR_mistag_combined]
+        SR_pass   = hists["SR_pass"]
+        SR_pass_1 = hists["SR_pass_1"]
+        SR_pass_combined = SR_pass.Clone("hist3d_SR_pass_combined"); SR_pass_combined.Add(SR_pass_1)
+        SR_pass_list = [SR_pass, SR_pass_1, SR_pass_combined]
 
     print("created histograms for 1D rate evaluation")
     print("completed 1D rate evaluation")
 
-    CR_all_list    = [CR_all,    CR_all_1,    CR_all_combined]
-    CR_mistag_list = [CR_mistag, CR_mistag_1, CR_mistag_combined]
-    VR_all_list    = [VR_all,    VR_all_1,    VR_all_combined]
-    VR_mistag_list = [VR_mistag, VR_mistag_1, VR_mistag_combined]
-    SR_all_list    = [SR_all,    SR_all_1,    SR_all_combined]
+    CR_side_list = [CR_side, CR_side_1, CR_side_combined]
+    CR_pass_list = [CR_pass, CR_pass_1, CR_pass_combined]
+    VR_side_list = [VR_side, VR_side_1, VR_side_combined]
+    VR_pass_list = [VR_pass, VR_pass_1, VR_pass_combined]
+    SR_side_list = [SR_side, SR_side_1, SR_side_combined]
     mistag_jet_list = ["leading", "sub-leading", "combined"]
 
     # Integrated yields per jet category, returned for the --pv_split summary.
-    # SR_all is inclusive in depth score; the blinded SR mistag cell is not here.
+    # Contains only sideband yields, VR observations and predictions — never
+    # the SR tagged yield for data.
     yields = {}
 
-    _sr_mistag_iter = SR_mistag_list if is_mc else [None, None, None]
-    for i, (CR_all_i, CR_mistag_i, VR_all_i, VR_mistag_i, SR_all_i, SR_mistag_i) in enumerate(
-            zip(CR_all_list, CR_mistag_list, VR_all_list, VR_mistag_list, SR_all_list, _sr_mistag_iter)):
+    _sr_pass_iter = SR_pass_list if is_mc else [None, None, None]
+    for i, (CR_side_i, CR_pass_i, VR_side_i, VR_pass_i, SR_side_i, SR_pass_i) in enumerate(
+            zip(CR_side_list, CR_pass_list, VR_side_list, VR_pass_list, SR_side_list, _sr_pass_iter)):
 
         global current_jet_type
         current_jet_type = mistag_jet_list[i]
 
         print(" ************* \n " + mistag_jet_list[i] + " \n *************")
 
-        # Write base histograms to ROOT file using canonical names
+        # Write base histograms to ROOT file.  Both the descriptive sideband
+        # names and the canonical names used by MisTagParametrization_3D_optimized.py
+        # are written, so existing ROOT-reading tools (e.g. OverlayMistagRates.py)
+        # work on these files too — bearing in mind that here "_all" means the
+        # depth SIDEBAND, not all depth scores.
         outfile_name = os.path.join(
             OUT_BASE,
             "output_3D_hists" + label + "_" + mistag_jet_list[i] + "_" + era_name + ".root")
         output_file  = ROOT.TFile(outfile_name, "RECREATE")
         output_file.cd()
-        CR_all_i.Write("hist3d_CR_all")
-        CR_mistag_i.Write("hist3d_CR_mistag")
-        VR_all_i.Write("hist3d_VR_all")
-        VR_mistag_i.Write("hist3d_VR_mistag")
-        SR_all_i.Write("hist3d_SR_all")
+        CR_side_i.Write("hist3d_CR_sideband")
+        CR_pass_i.Write("hist3d_CR_pass")
+        VR_side_i.Write("hist3d_VR_sideband")
+        VR_pass_i.Write("hist3d_VR_pass")
+        SR_side_i.Write("hist3d_SR_sideband")
+        CR_side_i.Write("hist3d_CR_all")
+        CR_pass_i.Write("hist3d_CR_mistag")
+        VR_side_i.Write("hist3d_VR_all")
+        VR_pass_i.Write("hist3d_VR_mistag")
+        SR_side_i.Write("hist3d_SR_all")
         print("Created root file for output, wrote 3D histograms")
         output_file.Close()
 
-        # Projection overlay: CR and VR all + mistag
-        proj_pT_CR_all,    proj_eta_CR_all,    proj_phi_CR_all    = ProjectHistogram(CR_all_i,    "Number of events")
-        proj_pT_CR_mistag, proj_eta_CR_mistag, proj_phi_CR_mistag = ProjectHistogram(CR_mistag_i, "Number of events")
-        proj_pT_VR_all,    proj_eta_VR_all,    proj_phi_VR_all    = ProjectHistogram(VR_all_i,    "Number of events")
-        proj_pT_VR_mistag, proj_eta_VR_mistag, proj_phi_VR_mistag = ProjectHistogram(VR_mistag_i, "Number of events")
+        # Projection overlay: CR and VR sideband + tagged
+        proj_pT_CR_side, proj_eta_CR_side, proj_phi_CR_side = ProjectHistogram(CR_side_i, "Number of events")
+        proj_pT_CR_pass, proj_eta_CR_pass, proj_phi_CR_pass = ProjectHistogram(CR_pass_i, "Number of events")
+        proj_pT_VR_side, proj_eta_VR_side, proj_phi_VR_side = ProjectHistogram(VR_side_i, "Number of events")
+        proj_pT_VR_pass, proj_eta_VR_pass, proj_phi_VR_pass = ProjectHistogram(VR_pass_i, "Number of events")
 
-        legend_labels = ["CR (no cuts)", "CR, mistag", "VR (no cuts)", "VR, mistag"]
+        legend_labels = ["CR, sideband", "CR, tagged", "VR, sideband", "VR, tagged"]
         png_title     = "3d_hist_projection_overlay_CR_VR_" + mistag_jet_list[i]
         DrawCanvasAndPlots(
             "c1", "Projection plots", option, title,
-            [[proj_pT_CR_all,  proj_pT_CR_mistag,  proj_pT_VR_all,  proj_pT_VR_mistag],
-             [proj_eta_CR_all, proj_eta_CR_mistag, proj_eta_VR_all, proj_eta_VR_mistag],
-             [proj_phi_CR_all, proj_phi_CR_mistag, proj_phi_VR_all, proj_phi_VR_mistag]],
+            [[proj_pT_CR_side,  proj_pT_CR_pass,  proj_pT_VR_side,  proj_pT_VR_pass],
+             [proj_eta_CR_side, proj_eta_CR_pass, proj_eta_VR_side, proj_eta_VR_pass],
+             [proj_phi_CR_side, proj_phi_CR_pass, proj_phi_VR_side, proj_phi_VR_pass]],
             legend_labels, png_title,
             ["Jet p_{T} Projection with various cuts, " + mistag_jet_list[i],
              "Jet #eta Projection with various cuts, " + mistag_jet_list[i],
@@ -713,63 +842,83 @@ def MisTagParametrization(hists, option):
             label, normalize=True
         )
 
-        # Mistag rate from CR; use it to predict VR and SR
-        CR_mistag_rate    = CR_mistag_i.Clone("CR_mistag_rate")
-        CR_mistag_rate.Divide(CR_all_i)
-        VR_mistag_predict = VR_all_i.Clone("VR_mistag_predict")
-        VR_mistag_predict.Multiply(CR_mistag_rate)
+        # Transfer factor from the CR sideband; use it to predict VR and SR.
+        # Numerator and denominator are DISJOINT samples here (unlike the mistag
+        # rate, where the numerator is a subset of the denominator), so the plain
+        # uncorrelated error propagation done by TH1::Divide is the right one.
+        CR_transfer_factor = CR_pass_i.Clone("CR_transfer_factor")
+        CR_transfer_factor.Divide(CR_side_i)
+        VR_pass_predict = VR_side_i.Clone("VR_pass_predict")
+        VR_pass_predict.Multiply(CR_transfer_factor)
 
-        ResetAxis(CR_mistag_rate)
-        ResetAxis(VR_mistag_predict)
+        ResetAxis(CR_transfer_factor)
+        ResetAxis(VR_pass_predict)
 
-        proj_pT_VR_mistag_predict, proj_eta_VR_mistag_predict, proj_phi_VR_mistag_predict = \
-            ProjectHistogram(VR_mistag_predict, "Number of events")
+        proj_pT_VR_pass_predict, proj_eta_VR_pass_predict, proj_phi_VR_pass_predict = \
+            ProjectHistogram(VR_pass_predict, "Number of events")
 
-        # Raw region counts, captured before SR_all_i is turned into the
-        # prediction in place below (used by the --pv_split coverage check).
-        n_CR_all, n_CR_mistag = CR_all_i.Integral(), CR_mistag_i.Integral()
-        n_VR_all, n_SR_all    = VR_all_i.Integral(), SR_all_i.Integral()
+        # NOTE: every number printed below is either a sideband yield (depth
+        # score BELOW the tag threshold) or a prediction.  The SR tagged cell is
+        # never read.
+        print("\nNumber of events in CR sideband = " + str(CR_side_i.Integral()))
+        print("Number of events in VR sideband = " + str(VR_side_i.Integral()))
+        print("Number of events in SR sideband = " + str(SR_side_i.Integral()) + "\n")
+        print("Number of tagged events in CR = " + str(CR_pass_i.Integral()))
 
-        print("\nNumber of events in CR = " + str(CR_all_i.Integral()))
-        print("Number of events in VR = " + str(VR_all_i.Integral()))
-        print("Number of events in SR = " + str(SR_all_i.Integral()) + "\n")
+        tf_num, tf_num_err = get_total_and_error(CR_pass_i)
+        tf_den, tf_den_err = get_total_and_error(CR_side_i)
+        if tf_den > 0:
+            # Numerator and denominator are disjoint samples, so their relative
+            # errors simply add in quadrature.
+            tf_int      = tf_num / tf_den
+            rel_num_sq  = (tf_num_err / tf_num) ** 2 if tf_num > 0 else 0.0
+            rel_den_sq  = (tf_den_err / tf_den) ** 2
+            tf_int_err  = tf_int * math.sqrt(rel_num_sq + rel_den_sq)
+            print(f"Transfer factor (integrated, CR): {tf_int:.5f} ± {tf_int_err:.5f} (stat)")
+        else:
+            print("Transfer factor (integrated, CR): undefined — empty CR sideband")
 
-        SR_all_i.Multiply(CR_mistag_rate)
-        print("Predicted number of mistagged events in SR = " + str(SR_all_i.Integral()) + "\n")
-        proj_pT_SR_mistag_predict, proj_eta_SR_mistag_predict, proj_phi_SR_mistag_predict = \
-            ProjectHistogram(SR_all_i, "Number of events")
+        SR_pass_predict = SR_side_i.Clone("SR_pass_predict")
+        SR_pass_predict.Multiply(CR_transfer_factor)
+        print("Predicted number of mistagged events in SR = " + str(SR_pass_predict.Integral()) + "\n")
+        proj_pT_SR_pass_predict, proj_eta_SR_pass_predict, proj_phi_SR_pass_predict = \
+            ProjectHistogram(SR_pass_predict, "Number of events")
 
-        total_pred,   err_pred   = get_total_and_error(VR_mistag_predict)
-        total_actual, err_actual = get_total_and_error(VR_mistag_i)
-        total_SR,     err_SR     = get_total_and_error(SR_all_i)
+        total_pred,   err_pred   = get_total_and_error(VR_pass_predict)
+        total_actual, err_actual = get_total_and_error(VR_pass_i)
+        total_SR,     err_SR     = get_total_and_error(SR_pass_predict)
 
         print(option + ", " + mistag_jet_list[i])
-        print(f"Observed mistagged events in VR: {total_actual:.2f} \u00b1 {err_actual:.2f} (stat)")
-        print(f"Predicted mistagged events in VR: {total_pred:.2f} \u00b1 {err_pred:.2f} (stat)")
+        print(f"Observed mistagged events in VR: {total_actual:.2f} ± {err_actual:.2f} (stat)")
+        print(f"Predicted mistagged events in VR: {total_pred:.2f} ± {err_pred:.2f} (stat)")
         if is_mc:
-            total_SR_actual, err_SR_actual = get_total_and_error(SR_mistag_i)
-            print(f"Observed mistagged events in SR: {total_SR_actual:.2f} \u00b1 {err_SR_actual:.2f} (stat)")
-        print(f"Predicted mistagged events in SR: {total_SR:.2f} \u00b1 {err_SR:.2f} (stat)")
+            # MC closure only — for data this branch is never taken and the SR
+            # tagged yield does not exist.
+            total_SR_actual, err_SR_actual = get_total_and_error(SR_pass_i)
+            print(f"Observed mistagged events in SR: {total_SR_actual:.2f} ± {err_SR_actual:.2f} (stat)")
+        print(f"Predicted mistagged events in SR: {total_SR:.2f} ± {err_SR:.2f} (stat)")
 
         yields[mistag_jet_list[i]] = {
-            "CR_all": n_CR_all, "CR_mistag": n_CR_mistag,
-            "VR_all": n_VR_all, "SR_all": n_SR_all,
+            "CR_side": CR_side_i.Integral(),
+            "CR_pass": CR_pass_i.Integral(),
+            "VR_side": VR_side_i.Integral(),
+            "SR_side": SR_side_i.Integral(),
             "obs_VR":  (total_actual, err_actual),
             "pred_VR": (total_pred,   err_pred),
             "pred_SR": (total_SR,     err_SR),
         }
 
-        MistagRate(CR_mistag_i, CR_all_i, "CR", option, title, label, mistag_jet_list[i])
-        MistagRate(VR_mistag_i, VR_all_i, "VR", option, title, label, mistag_jet_list[i])
+        TransferFactorPlot(CR_pass_i, CR_side_i, "CR", option, title, label, mistag_jet_list[i])
+        TransferFactorPlot(VR_pass_i, VR_side_i, "VR", option, title, label, mistag_jet_list[i])
 
-        # VR closure: observed vs predicted mistag
+        # VR closure: observed vs predicted tagged yield
         legend_labels = ["Observed mistag (VR)", "Predicted mistag (VR)"]
         png_title     = "3d_hist_projection_VR_mistags_" + mistag_jet_list[i]
         DrawCanvasAndPlots(
             "c3", "Mistag plots in the VR", option, title,
-            [[proj_pT_VR_mistag,  proj_pT_VR_mistag_predict],
-             [proj_eta_VR_mistag, proj_eta_VR_mistag_predict],
-             [proj_phi_VR_mistag, proj_phi_VR_mistag_predict]],
+            [[proj_pT_VR_pass,  proj_pT_VR_pass_predict],
+             [proj_eta_VR_pass, proj_eta_VR_pass_predict],
+             [proj_phi_VR_pass, proj_phi_VR_pass_predict]],
             legend_labels, png_title,
             ["Jet p_{T} Mistags in VR, " + mistag_jet_list[i],
              "Jet #eta Mistags in VR, " + mistag_jet_list[i],
@@ -777,18 +926,18 @@ def MisTagParametrization(hists, option):
             label
         )
 
-        MakePlotWithRatio([proj_pT_VR_mistag,  proj_pT_VR_mistag_predict],  legend_labels, label + "_pT",  png_title)
-        MakePlotWithRatio([proj_eta_VR_mistag, proj_eta_VR_mistag_predict], legend_labels, label + "_eta", png_title)
-        MakePlotWithRatio([proj_phi_VR_mistag, proj_phi_VR_mistag_predict], legend_labels, label + "_phi", png_title)
+        MakePlotWithRatio([proj_pT_VR_pass,  proj_pT_VR_pass_predict],  legend_labels, label + "_pT",  png_title)
+        MakePlotWithRatio([proj_eta_VR_pass, proj_eta_VR_pass_predict], legend_labels, label + "_eta", png_title)
+        MakePlotWithRatio([proj_phi_VR_pass, proj_phi_VR_pass_predict], legend_labels, label + "_phi", png_title)
 
-        # SR prediction (blinded — no observed mistag plotted)
+        # SR prediction (blinded — the observed SR tagged yield is never read)
         legend_labels = ["Predicted mistag (SR)"]
         png_title     = "3d_hist_projection_SR_mistags_" + mistag_jet_list[i]
         DrawCanvasAndPlots(
             "c4", "Mistag plots in the SR", option, title,
-            [[proj_pT_SR_mistag_predict],
-             [proj_eta_SR_mistag_predict],
-             [proj_phi_SR_mistag_predict]],
+            [[proj_pT_SR_pass_predict],
+             [proj_eta_SR_pass_predict],
+             [proj_phi_SR_pass_predict]],
             legend_labels, png_title,
             ["Jet p_{T} Projected Mistags from CR, " + mistag_jet_list[i],
              "Jet #eta Projected Mistags from CR, " + mistag_jet_list[i],
@@ -805,7 +954,7 @@ def print_pv_split_summary(results):
     with the PV-inclusive prediction, and check that the two PV slices really
     partition the inclusive sample.
 
-    results : {option: yields dict returned by MisTagParametrization}
+    results : {option: yields dict returned by SidebandParametrization}
 
     Line wording deliberately avoids everything OutputToLatex_VRclosureCheck.py
     and ScanDNNCuts_bkg_config.py key on ("... mistagged events in VR/SR",
@@ -851,13 +1000,13 @@ def print_pv_split_summary(results):
         # enter the prediction directly) or exceed 0.1% of a region; otherwise
         # they are reported without a warning.
         lost_tagged, lost_denom = [], []
-        d = i_["CR_mistag"] - (l_["CR_mistag"] + h_["CR_mistag"])
+        d = i_["CR_pass"] - (l_["CR_pass"] + h_["CR_pass"])
         if abs(d) > 0.5:
-            lost_tagged.append(f"CR_mistag: {d:+.0f}")
+            lost_tagged.append(f"CR_pass: {d:+.0f}")
         d = i_["obs_VR"][0] - (l_["obs_VR"][0] + h_["obs_VR"][0])
         if abs(d) > 0.5:
             lost_tagged.append(f"VR observed: {d:+.0f}")
-        for key in ["CR_all", "VR_all", "SR_all"]:
+        for key in ["CR_side", "VR_side", "SR_side"]:
             d = i_[key] - (l_[key] + h_[key])
             if abs(d) > 0.5:
                 lost_denom.append((key, d, d / i_[key] if i_[key] else 0.0))
@@ -876,10 +1025,6 @@ def print_pv_split_summary(results):
 
 
 # ==============================================================================
-# Argument parsing and main
-# ==============================================================================
-
-# ==============================================================================
 # Config file support
 # ==============================================================================
 
@@ -890,7 +1035,8 @@ def parse_config_file(path):
     the column order.  All subsequent non-empty lines are data rows.
 
     Required columns: era, DNN_cut_LJDC, DNN_cut_inc_LJDC, DNN_cut_SJDC, DNN_cut_inc_SJDC
-    Optional column:  CR_cut_inc  (defaults to 0.2 if absent)
+    Optional columns: CR_cut_inc    (defaults to 0.2 if absent)
+                      sideband_low  (defaults to the era-derived value if absent)
 
     Example file
     ------------
@@ -929,6 +1075,8 @@ def parse_config_file(path):
             row["era"] = str(row["era"])
             for col in ["DNN_cut_LJDC", "DNN_cut_inc_LJDC", "DNN_cut_SJDC", "DNN_cut_inc_SJDC", "CR_cut_inc"]:
                 row[col] = float(row[col])
+            # Optional per-row sideband lower bound; None -> derive from the era
+            row["sideband_low"] = float(row["sideband_low"]) if "sideband_low" in row else None
             rows.append(row)
 
     if not rows:
@@ -941,7 +1089,7 @@ def parse_config_file(path):
 # ==============================================================================
 
 def parseArgs():
-    parser = argparse.ArgumentParser(add_help=True, description="Optimised mistag parametrisation")
+    parser = argparse.ArgumentParser(add_help=True, description="Sideband transfer-factor background prediction")
 
     # --- Config file mode (takes precedence over individual score flags) ---
     parser.add_argument("--config",             action="store", default=None,
@@ -966,13 +1114,16 @@ def parseArgs():
                         help="Inclusive DNN score VR/SR boundary for SJDC only (default: same as -i)")
     parser.add_argument("-c", "--CR_cut_inc",       action="store", default=0.2,   type=float,
                         help="Inclusive DNN score upper bound for CR, shared by LJDC and SJDC (default: 0.2)")
+    parser.add_argument("-s", "--sideband_low",     action="store", default=None,  type=float,
+                        help="Lower bound of the depth-score sideband used as the transfer factor "
+                             f"denominator (default: {SIDEBAND_LOW_POSTBPIX} for postBPix eras "
+                             f"{sorted(POSTBPIX_ERAS)}, {SIDEBAND_LOW_PREBPIX} otherwise)")
 
     parser.add_argument("--pv_split",               action="store_true",
                         help="Apply the low/high PV cut to every region (CR, VR, SR) instead of the "
-                             "CR only, so the PV systematic comes from a PV-binned prediction "
-                             f"(same option as SidebandParameterization_BkgPred.py). Output goes to "
-                             f"{OUT_BASE_PV_SPLIT}/ instead of the current directory. Omit to get "
-                             "the default, conservative CR-only PV variation.")
+                             "CR only, so the PV systematic comes from a PV-binned prediction. "
+                             f"Output goes to {OUT_BASE_PV_SPLIT}/ instead of {OUT_BASE_DEFAULT}/. "
+                             "Omit to get the default CR-only PV variation.")
 
     # --- Always required ---
     parser.add_argument("-b", "--b_tag_combined",  action="store_true",
@@ -1105,14 +1256,14 @@ def _build_rdf_base(era_key):
     return rdf_filtered
 
 
-def _run_one(rdf_base, row, b_tag_combined_flag):
+def _run_one(rdf_base, row, b_tag_combined_flag, sideband_low_override=None):
     """
     Set globals for one parameter set, book histograms, and write all output.
     rdf_base is already filtered for run exclusion and deltaPhi.
     """
     global era, era_name, DNN_cut, DNN_cut_LJDC, DNN_cut_SJDC, \
            DNN_cut_inc, DNN_cut_inc_LJDC, DNN_cut_inc_SJDC, \
-           CR_cut_inc, b_tag_combined, is_mc
+           CR_cut_inc, b_tag_combined, is_mc, SB_low
 
     era              = row["era"]
     era_name         = era.replace(" ", "")
@@ -1127,12 +1278,29 @@ def _run_one(rdf_base, row, b_tag_combined_flag):
     DNN_cut          = DNN_cut_LJDC
     DNN_cut_inc      = DNN_cut_inc_LJDC
 
+    # Depth-score sideband lower bound: explicit override (CLI or config column)
+    # wins, otherwise derived from the era group.
+    if sideband_low_override is not None:
+        SB_low = sideband_low_override
+    elif row.get("sideband_low") is not None:
+        SB_low = row["sideband_low"]
+    else:
+        SB_low = sideband_low_for_era(era)
+
     print(f"\n{'='*60}")
     print(f"Era: {era}")
     print(f"Depth DNN cut  — LJDC: {DNN_cut_LJDC},  SJDC: {DNN_cut_SJDC}")
     print(f"Inclusive cut  — LJDC: {DNN_cut_inc_LJDC},  SJDC: {DNN_cut_inc_SJDC}")
     print(f"CR inclusive upper bound (shared): {CR_cut_inc}")
+    print(f"Depth sideband: [{SB_low}, DNN cut)  —  LJDC: [{SB_low}, {DNN_cut_LJDC}), "
+          f"SJDC: [{SB_low}, {DNN_cut_SJDC})")
     print(f"{'='*60}")
+
+    for leg, cut in (("LJDC", DNN_cut_LJDC), ("SJDC", DNN_cut_SJDC)):
+        if cut <= SB_low:
+            print(f"*** WARNING: {leg} depth cut {cut} is not above the sideband lower bound "
+                  f"{SB_low} — the sideband [{SB_low}, {cut}) is EMPTY and the transfer "
+                  f"factor is undefined. Lower --sideband_low or raise the depth cut.")
 
     print("Booking all histograms (lazy, no I/O yet)...")
     booked = book_all_histograms(rdf_base, is_mc=(era == "WPlusJets"))
@@ -1151,6 +1319,7 @@ def _run_one(rdf_base, row, b_tag_combined_flag):
     with open(output_filename, "w") as f:
         with redirect_stdout(f):
             print("\n \n ********************* \n DNN score = " + str(DNN_cut) +
+                  ", sideband from " + str(SB_low) +
                   " \n ********************* \n \n")
             if PV_SPLIT:
                 # Marker read by OutputToLatex_VRclosureCheck.py to select the
@@ -1161,15 +1330,15 @@ def _run_one(rdf_base, row, b_tag_combined_flag):
             results = {}
             print("\n \n ********************* \n depth \n ********************* \n \n")
             hists = materialise(booked, "depth")
-            results["depth"] = MisTagParametrization(hists, "depth")
+            results["depth"] = SidebandParametrization(hists, "depth")
 
             print("\n \n ********************* \n depth, low PV \n ********************* \n \n")
             hists = materialise(booked, "depth, low PV")
-            results["depth, low PV"] = MisTagParametrization(hists, "depth, low PV")
+            results["depth, low PV"] = SidebandParametrization(hists, "depth, low PV")
 
             print("\n \n ********************* \n depth, high PV \n ********************* \n \n")
             hists = materialise(booked, "depth, high PV")
-            results["depth, high PV"] = MisTagParametrization(hists, "depth, high PV")
+            results["depth, high PV"] = SidebandParametrization(hists, "depth, high PV")
 
             if PV_SPLIT:
                 print_pv_split_summary(results)
@@ -1180,7 +1349,7 @@ def main():
     args = parseArgs()
     configure_pv_mode(args.pv_split)
     print(f"PV treatment: {'split in all regions' if PV_SPLIT else 'CR only (default)'}"
-          f"  ->  output under {OUT_BASE + '/' if OUT_BASE else 'the current directory'}")
+          f"  ->  output under {OUT_BASE}/")
 
     # Enable multi-threading once, before any RDataFrame is created
     if args.threads > 0:
@@ -1202,6 +1371,7 @@ def main():
             "DNN_cut_inc_LJDC": args.DNN_cut_inc_LJDC if args.DNN_cut_inc_LJDC is not None else args.DNN_cut_inc,
             "DNN_cut_inc_SJDC": args.DNN_cut_inc_SJDC if args.DNN_cut_inc_SJDC is not None else args.DNN_cut_inc,
             "CR_cut_inc":       args.CR_cut_inc,
+            "sideband_low":     None,
         }]
 
     print(f"Total parameter sets to process: {len(param_sets)}")
@@ -1220,7 +1390,7 @@ def main():
 
         for i, row in enumerate(rows, 1):
             print(f"\n--- Parameter set {i}/{len(rows)} for era {era_key} ---")
-            _run_one(rdf_base, row, args.b_tag_combined)
+            _run_one(rdf_base, row, args.b_tag_combined, args.sideband_low)
 
 
 if __name__ == "__main__":

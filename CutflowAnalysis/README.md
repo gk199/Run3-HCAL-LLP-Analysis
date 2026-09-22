@@ -22,3 +22,10 @@ python3 FinalAnalysisCutflow.py --file <your_file.root> --latex --truth --depth 
 
 python3 ScanDNNCuts.py --inc  0.90 0.95 0.97 0.99 --depth 0.90 0.93 0.95 0.97
 ```
+
+Bash script:
+```
+./run_cutflows.sh MH125_MS50_CTau3000 MH350_MS80_CTau500
+./run_cutflows.sh -n MH350_MS80_CTau500   # print commands, run nothing
+./run_cutflows.sh -l                      # list known mass points
+```
