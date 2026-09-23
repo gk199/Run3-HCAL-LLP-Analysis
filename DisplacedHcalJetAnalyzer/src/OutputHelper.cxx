@@ -66,7 +66,8 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		// HLT_prescale_weight: all HLTs have prescale 1 except
 		// HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5, which was
 		// disabled for 34.95% of the data-taking period. Weight is 0 or 1 (random draw
-		// with p=0.6505 keep) when that is the only L1SingleLLPJet HLT that fired, else 1.
+		// with p=0.6505 keep) when that is the only analysis L1SingleLLPJet HLT (excluding
+		// DelayedJet40) that fired, else 1.
 		"HLT_prescale_weight",
 		"puWeight", "puWeightUp", "puWeightDown"
 	};
@@ -686,8 +687,9 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 		for (int i = 0; i < (int)HLT_Names.size(); i++) {
 			if (HLT_Names[i] == "HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5") continue;
 			if (HLT_Names[i].find("L1SingleLLPJet") != string::npos &&
-			    HLT_Names[i] != "HLT_L1SingleLLPJet" &&
-			    i < (int)HLT_Decision->size() && HLT_Decision->at(i))
+				HLT_Names[i] != "HLT_L1SingleLLPJet" &&
+				HLT_Names[i].find("DelayedJet40") == string::npos &&
+				i < (int)HLT_Decision->size() && HLT_Decision->at(i))
 				other_llpjet_hlt = true;
 		}
 		if (hlt35 && !other_llpjet_hlt) {
@@ -701,8 +703,9 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 		for (int i = 0; i < (int)HLT_Names.size(); i++) {
 			if (HLT_Names[i] == "HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5") continue;
 			if (HLT_Names[i].find("L1SingleLLPJet") != string::npos &&
-			    HLT_Names[i] != "HLT_L1SingleLLPJet" &&
-			    i < (int)HLT_Decision->size() && HLT_Decision->at(i))
+				HLT_Names[i] != "HLT_L1SingleLLPJet" &&
+				HLT_Names[i].find("DelayedJet40") == string::npos &&
+				i < (int)HLT_Decision->size() && HLT_Decision->at(i))
 				other_llpjet_hlt = true;
 		}
 		if (hlt35 && !other_llpjet_hlt)
@@ -1126,8 +1129,9 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 		for (int i = 0; i < (int)HLT_Names.size(); i++) {
 			if (HLT_Names[i] == "HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5") continue;
 			if (HLT_Names[i].find("L1SingleLLPJet") != string::npos &&
-			    HLT_Names[i] != "HLT_L1SingleLLPJet" &&
-			    i < (int)HLT_Decision->size() && HLT_Decision->at(i))
+				HLT_Names[i] != "HLT_L1SingleLLPJet" &&
+				HLT_Names[i].find("DelayedJet40") == string::npos &&
+				i < (int)HLT_Decision->size() && HLT_Decision->at(i))
 				other_llpjet_hlt_jet = true;
 		}
 		if (hlt35_jet && !other_llpjet_hlt_jet) {
@@ -1141,8 +1145,9 @@ void DisplacedHcalJetAnalyzer::FillOutputJetTrees( string treename, int jetIndex
 		for (int i = 0; i < (int)HLT_Names.size(); i++) {
 			if (HLT_Names[i] == "HLT_HT200_L1SingleLLPJet_DisplacedDijet35_Inclusive1PtrkShortSig5") continue;
 			if (HLT_Names[i].find("L1SingleLLPJet") != string::npos &&
-			    HLT_Names[i] != "HLT_L1SingleLLPJet" &&
-			    i < (int)HLT_Decision->size() && HLT_Decision->at(i))
+				HLT_Names[i] != "HLT_L1SingleLLPJet" &&
+				HLT_Names[i].find("DelayedJet40") == string::npos &&
+				i < (int)HLT_Decision->size() && HLT_Decision->at(i))
 				other_llpjet_hlt_jet = true;
 		}
 		if (hlt35_jet && !other_llpjet_hlt_jet)

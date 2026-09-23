@@ -84,7 +84,8 @@ bool DisplacedHcalJetAnalyzer::PassHLTDisplacedJet(){
 		if (HLT_Decision->at(i) > 0) {
 			if (debug) cout << HLT_Decision->at(i) << " for the trigger " << HLT_Names[i] << "\n" << endl;
 
-			if (HLT_Names[i].find("L1SingleLLPJet") != std::string::npos && HLT_Names[i] != "HLT_L1SingleLLPJet" ) 
+			// if (HLT_Names[i].find("L1SingleLLPJet") != std::string::npos && HLT_Names[i] != "HLT_L1SingleLLPJet" ) 
+			if (HLT_Names[i].find("L1SingleLLPJet") != std::string::npos && HLT_Names[i] != "HLT_L1SingleLLPJet" && HLT_Names[i].find("DelayedJet40") == std::string::npos )
 				return true;
 		}		
 	}
