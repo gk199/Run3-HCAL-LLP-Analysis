@@ -179,7 +179,7 @@ CR_cut_inc = 0.2
 # SB_low depends on the era group: the depth score distribution is shifted
 # between preBPix and postBPix, so the sideband is placed higher for postBPix.
 SIDEBAND_LOW_POSTBPIX = 0.8
-SIDEBAND_LOW_PREBPIX  = 0.3
+SIDEBAND_LOW_PREBPIX  = 0.25
 # Eras taken after the BPix issue.  Everything else in _file_map (2022*, the
 # 2023 C-eras, and the W+Jets MC, which is a 2022 sample) is preBPix.  The
 # mixed "2022_2023" era group is predominantly preBPix and is treated as such,

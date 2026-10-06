@@ -423,7 +423,7 @@ void Plot_Scores(){
 	// Leading track pt/ jet pt
 
 
-	if( false ) { 
+	if( true ) { 
 
 		//for( auto disabled_feature: vector<string>{ "", "NoCustomRecHitAnything", "NoSAnything", "NoSEtaEta", "NoSPhiPhi", "NoSEtaPhi", "NoHcalEnergyFracs", "NoIndividualRechits", "NoTracks", "NoTrackPosition", "NoTrackPtFrac", "NoJetEnergyFracs" } ){
 		for( auto category: vector<string>{ "LJDC", "SJDC" } ){
@@ -433,9 +433,9 @@ void Plot_Scores(){
 
 			// path = "../Files/MiniTuples/v5.3/minituple_";
 
-			filetags_example1 = { "data_2022Ev1_scores"}; //, "HToSSTo4B_125_50_CTau3000_scores" }; //, "test_10k" };
+			filetags_example1 = { "data_2022Fv1_scores"}; //, "HToSSTo4B_125_50_CTau3000_scores" }; //, "test_10k" };
 
-			if( year == "2023" ) filetags_example1 = {"data_2023Dv2_scores"};
+			if( year == "2023" ) filetags_example1 = {"data_2023Dv1_scores"};
 
 			MiniTuplePlotter plotter( filetags_example1, path );
 
@@ -443,15 +443,19 @@ void Plot_Scores(){
 			
 			plotter.SetPlots( {P_PV} ); 
 
+			// VR/MR boundary = era-matched inclusive DNN cut (FakeRate/my_scan.txt, WP1): 2022Fv1 preBPix, 2023Dv1 postBPix
+			float incl_cut = (category == "LJDC") ? 0.785 : 0.955;
+			if( year == "2023" ) incl_cut = (category == "LJDC") ? 0.995 : 0.975;
+
 			if( category == "LJDC" ){
-				plotter.SetCuts( "jet0_DepthTagCand == 1" );
-				plotter.SetComparisonCuts( {"jet1_scores_inc_train80 < 0.2",  "jet1_scores_inc_train80 > 0.2 && jet1_scores_inc_train80 < 0.845", "jet1_scores_inc_train80 > 0.845" } ); 
+				plotter.SetCuts( "jet0_DepthTagCand == 1 && jet1_InclTagCand == 1" );
+				plotter.SetComparisonCuts( {"jet1_scores_inc_train80 >= 0 && jet1_scores_inc_train80 < 0.2", Form("jet1_scores_inc_train80 >= 0.2 && jet1_scores_inc_train80 < %.3f", incl_cut), Form("jet1_scores_inc_train80 >= %.3f && jet1_scores_inc_train80 < 1.1", incl_cut) } );
 				// "jet1_scores_inc_train80 < 0.2 && jet0_scores_depth_LLPanywhere > 0.8",
 			}
 			else if( category == "SJDC" ){
-				plotter.SetCuts( "jet1_DepthTagCand == 1" );
-				plotter.SetComparisonCuts( {"jet0_scores_inc_train80 < 0.2", "jet0_scores_inc_train80 > 0.2 && jet0_scores_inc_train80 < 0.375", "jet0_scores_inc_train80 > 0.375" } ); 
-				// "jet0_scores_inc_train80 < 0.2 && jet1_scores_depth_LLPanywhere > 0.8", 
+				plotter.SetCuts( "jet1_DepthTagCand == 1 && jet0_InclTagCand == 1" );
+				plotter.SetComparisonCuts( {"jet0_scores_inc_train80 >= 0 && jet0_scores_inc_train80 < 0.2", Form("jet0_scores_inc_train80 >= 0.2 && jet0_scores_inc_train80 < %.3f", incl_cut), Form("jet0_scores_inc_train80 >= %.3f && jet0_scores_inc_train80 < 1.1", incl_cut) } );
+				// "jet0_scores_inc_train80 < 0.2 && jet1_scores_depth_LLPanywhere > 0.8",
 			}
 
 			plotter.SetLegendNames({ year+" Data: CR, "+category, year+" Data: VR, "+category, year+" Data: MR, "+category}); //, "+Jet1 Inc Score > 0.9", "+Jet0 Depth Score > 0.01"});
@@ -471,6 +475,165 @@ void Plot_Scores(){
 			plotter.NBins = 35;
 			plotter.output_file_tag = year+category;
 			plotter.Plot("ratio");
+		}
+		}
+	}
+
+	// N_PV in the transfer-factor regions (FakeRate/SidebandParameterization_BkgPred.py):
+	// CR/VR/SR depth sideband [SB_low, depth_cut) and CR/VR tagged (depth >= depth_cut).
+	// The SR appears ONLY with the depth sideband (tripwire below). Cuts are era-matched (FakeRate/my_scan.txt, WP1).
+	if( true ) {
+
+		for( auto category: vector<string>{ "LJDC", "SJDC" } ){
+		for( auto year: vector<string>{"2022", "2023"}){
+
+			// 2022Fv1 = preBPix WP1 cuts; 2023Dv1 = postBPix cuts
+			string filetag  = "data_2022Fv1_scores";
+			float depth_cut = (category == "LJDC") ? 0.905 : 0.925;
+			float incl_cut  = (category == "LJDC") ? 0.785 : 0.955;
+			float SB_low    = 0.25;
+			if( year == "2023" ){
+				filetag   = "data_2023Dv1_scores";
+				depth_cut = (category == "LJDC") ? 0.985 : 0.995;
+				incl_cut  = (category == "LJDC") ? 0.995 : 0.975;
+				SB_low    = 0.8;
+			}
+			float CR_cut = 0.2;
+
+			MiniTuplePlotter plotter( {filetag}, path );
+
+			plotter.SetTreeName( "NoSel" );	// TreeName
+
+			plotter.SetPlots( {P_PV} );
+
+			// LJDC: jet0 is the depth candidate, jet1 the inclusive candidate; SJDC: swapped
+			string dj  = (category == "LJDC") ? "jet0" : "jet1";
+			string ij  = (category == "LJDC") ? "jet1" : "jet0";
+			string inc = ij+"_scores_inc_train80";
+			string dep = dj+"_scores_depth_LLPanywhere";
+
+			plotter.SetCuts( (dj+"_DepthTagCand == 1 && "+ij+"_InclTagCand == 1").c_str() );
+			string CR   = Form("%s >= 0 && %s < %.3f", inc.c_str(), inc.c_str(), CR_cut);
+			string VR   = Form("%s >= %.3f && %s < %.3f", inc.c_str(), CR_cut, inc.c_str(), incl_cut);
+			string side = Form("%s >= %.3f && %s < %.3f", dep.c_str(), SB_low, dep.c_str(), depth_cut);
+			string tag  = Form("%s >= %.3f && %s < 1.1", dep.c_str(), depth_cut, dep.c_str());
+			string SR   = Form("%s >= %.3f && %s < 1.1", inc.c_str(), incl_cut, inc.c_str());
+
+			// {region, depth cell} for each curve, in legend order
+			vector<pair<string,string>> cells = { {CR, side}, {VR, side}, {CR, tag}, {VR, tag}, {SR, side} };
+
+			// ---- BLINDING TRIPWIRE: this is data, so the SR may only be paired with the depth sideband.
+			// If a future edit pairs the SR with the tag cut, stop here rather than unblind.
+			for( auto &c: cells ){
+				if( c.first == SR && c.second != side )
+					throw std::runtime_error("BLINDING VIOLATION: SR tagged cell requested for data in the TF-region N_PV plot. The SR must remain blinded.");
+			}
+
+			vector<TCut> region_cuts;
+			for( auto &c: cells ) region_cuts.push_back( (c.first+" && "+c.second).c_str() );
+			plotter.SetComparisonCuts( region_cuts );
+
+			plotter.SetLegendNames({ year+" Data: CR sideband, "+category, year+" Data: VR sideband, "+category,
+			                         year+" Data: CR tagged, "+category,   year+" Data: VR tagged, "+category,
+			                         year+" Data: SR sideband, "+category });
+			plotter.SetLegendPosition( 0.5, 0.66, 0.88, 0.88 );
+			plotter.colors = { kBlue-4, kRed, kAzure-4, kOrange-3, kBlack };	// CR side (blue), VR side (red), CR tag (light blue), VR tag (orange), SR side (black)
+
+			// same plot settings as the CR/VR/MR N_PV block above
+			plotter.plot_log         = true;
+			plotter.stamp_counts     = true;
+			plotter.plot_norm        = true;
+			plotter.plot_grid        = true;
+			plotter.plot_reverse_cdf = false;
+			plotter.use_weight       = false;
+			plotter.NBins = 35;
+			plotter.output_file_tag = "TFregions_"+year+category;	// distinct from the year+category tag above
+			plotter.Plot("ratio");
+		}
+		}
+	}
+
+	// Transfer factor N(tagged) / N(sideband) vs PV, in the CR and the VR (regions as in FakeRate/SidebandParameterization_BkgPred.py).
+	// CR/VR only -> nothing blinded. Cuts are era-matched (FakeRate/my_scan.txt, WP1).
+	// PV bins are chosen so each bin has >= ~20 tagged events in both the CR and the VR (2023 SJDC: too few, so 2 bins).
+	if( true ) {
+
+		for( auto category: vector<string>{ "LJDC", "SJDC" } ){
+		for( auto year: vector<string>{"2022", "2023"}){
+
+			// 2022Fv1 = preBPix WP1 cuts; 2023Dv1 = postBPix cuts
+			string filetag  = "data_2022Fv1_scores";
+			float depth_cut = (category == "LJDC") ? 0.905 : 0.925;
+			float incl_cut  = (category == "LJDC") ? 0.785 : 0.955;
+			float SB_low    = 0.25;
+			vector<double> pv_bins = (category == "LJDC") ? vector<double>{0, 35, 41, 100} : vector<double>{0, 39, 100};
+			if( year == "2023" ){
+				filetag   = "data_2023Dv1_scores";
+				depth_cut = (category == "LJDC") ? 0.985 : 0.995;
+				incl_cut  = (category == "LJDC") ? 0.995 : 0.975;
+				SB_low    = 0.8;
+				pv_bins   = (category == "LJDC") ? vector<double>{0, 31, 37, 41, 45, 100} : vector<double>{0, 32, 100};
+			}
+			float CR_cut = 0.2;
+
+			// LJDC: jet0 is the depth candidate, jet1 the inclusive candidate; SJDC: swapped
+			string dj  = (category == "LJDC") ? "jet0" : "jet1";
+			string ij  = (category == "LJDC") ? "jet1" : "jet0";
+			string inc = ij+"_scores_inc_train80";
+			string dep = dj+"_scores_depth_LLPanywhere";
+
+			TCut Cut_Category = (dj+"_DepthTagCand == 1 && "+ij+"_InclTagCand == 1").c_str();
+			TCut Cut_CR   = Form("%s >= 0 && %s < %.3f", inc.c_str(), inc.c_str(), CR_cut);
+			TCut Cut_VR   = Form("%s >= %.3f && %s < %.3f", inc.c_str(), CR_cut, inc.c_str(), incl_cut);
+			TCut Cut_Side = Form("%s >= %.3f && %s < %.3f", dep.c_str(), SB_low, dep.c_str(), depth_cut);
+			TCut Cut_Tag  = Form("%s >= %.3f && %s < 1.1", dep.c_str(), depth_cut, dep.c_str());
+
+			TFile* file = TFile::Open( (path+filetag+".root").c_str() );
+			TTree* tree = (TTree*)file->Get( "NoSel" );
+
+			// TF in each region: tagged and sideband are disjoint, so Divide() gives independent Poisson errors
+			int nb = pv_bins.size() - 1;
+			map<string, TH1D*> TF;
+			map<string, TCut> Cut_Region = { {"CR", Cut_CR}, {"VR", Cut_VR} };
+			for( auto region: vector<string>{ "CR", "VR" } ){
+				TH1D* h_tag  = new TH1D( ("h_tag_" +year+category+region).c_str(), "", nb, pv_bins.data() );
+				TH1D* h_side = new TH1D( ("h_side_"+year+category+region).c_str(), "", nb, pv_bins.data() );
+				h_tag->Sumw2(); h_side->Sumw2();
+				tree->Draw( ("PV >> h_tag_" +year+category+region).c_str(), Cut_Category && Cut_Region[region] && Cut_Tag,  "goff" );
+				tree->Draw( ("PV >> h_side_"+year+category+region).c_str(), Cut_Category && Cut_Region[region] && Cut_Side, "goff" );
+				h_tag->Divide( h_side );
+				TF[region] = h_tag;
+			}
+
+			TCanvas* c = new TCanvas( "c", "c", 1200, 1600 );
+			c->Divide( 0, 2 );
+
+			c->cd(1);
+			gPad->SetGrid();
+			TF["CR"]->SetTitle( ";N_{PV};Transfer factor  N(tagged) / N(sideband)" );
+			TF["CR"]->SetLineColor( kBlue-4 ); TF["CR"]->SetMarkerColor( kBlue-4 ); TF["CR"]->SetMarkerStyle( 20 );
+			TF["VR"]->SetLineColor( kRed );    TF["VR"]->SetMarkerColor( kRed );    TF["VR"]->SetMarkerStyle( 21 );
+			TF["CR"]->SetMinimum( 0 );
+			TF["CR"]->SetMaximum( 1.5 * max( TF["CR"]->GetMaximum(), TF["VR"]->GetMaximum() ) );
+			TF["CR"]->Draw( "E1" );
+			TF["VR"]->Draw( "E1 same" );
+			TLegend* leg = new TLegend( 0.5, 0.75, 0.88, 0.88 );
+			leg->AddEntry( TF["CR"], (year+" Data: CR, "+category).c_str(), "ep" );
+			leg->AddEntry( TF["VR"], (year+" Data: VR, "+category).c_str(), "ep" );
+			leg->Draw();
+
+			c->cd(2);
+			gPad->SetGrid();
+			TH1D* ratio = (TH1D*)TF["VR"]->Clone( ("ratio_"+year+category).c_str() );
+			ratio->Divide( TF["CR"] );
+			ratio->SetTitle( ";N_{PV};VR / CR" );
+			ratio->SetLineColor( kBlack ); ratio->SetMarkerColor( kBlack );
+			ratio->SetMinimum( 0 ); ratio->SetMaximum( 3 );
+			ratio->Draw( "E1" );
+
+			c->SaveAs( ("Plots/Plot_TFvsPV_"+year+category+".png").c_str() );
+			delete c;
+			file->Close();
 		}
 		}
 	}
@@ -643,7 +806,7 @@ void Plot_Scores(){
 
 	}
 
-	if( true ) {
+	if( false ) {
 
 		vector<PlotParams> P_jet0_vars_important = {
 			// P_jet0_Pt, P_jet0_Eta, P_jet0_Phi, P_jet0_E, 
