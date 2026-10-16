@@ -472,7 +472,7 @@ void Plot_Scores(){
 			//plotter.plot_cdf 		= true;	// Default = false. Cumulative distribution function 
 			plotter.plot_reverse_cdf = false;	// Default = false. Cumulative distribution function 
 			plotter.use_weight       = false;	// Default = true, which uses weight branch when drawing non-normalized hists
-			plotter.NBins = 35;
+			plotter.NBins = 15;
 			plotter.output_file_tag = year+category;
 			plotter.Plot("ratio");
 		}
@@ -546,7 +546,7 @@ void Plot_Scores(){
 			plotter.plot_grid        = true;
 			plotter.plot_reverse_cdf = false;
 			plotter.use_weight       = false;
-			plotter.NBins = 35;
+			plotter.NBins = 8;
 			plotter.output_file_tag = "TFregions_"+year+category;	// distinct from the year+category tag above
 			plotter.Plot("ratio");
 		}
@@ -566,13 +566,13 @@ void Plot_Scores(){
 			float depth_cut = (category == "LJDC") ? 0.905 : 0.925;
 			float incl_cut  = (category == "LJDC") ? 0.785 : 0.955;
 			float SB_low    = 0.25;
-			vector<double> pv_bins = (category == "LJDC") ? vector<double>{0, 35, 41, 100} : vector<double>{0, 39, 100};
+			// vector<double> pv_bins = (category == "LJDC") ? vector<double>{0, 34, 42, 100} : vector<double>{0, 42, 100};
+			vector<double> pv_bins = vector<double>{0, 42, 100};
 			if( year == "2023" ){
 				filetag   = "data_2023Dv1_scores";
 				depth_cut = (category == "LJDC") ? 0.985 : 0.995;
 				incl_cut  = (category == "LJDC") ? 0.995 : 0.975;
 				SB_low    = 0.8;
-				pv_bins   = (category == "LJDC") ? vector<double>{0, 31, 37, 41, 45, 100} : vector<double>{0, 32, 100};
 			}
 			float CR_cut = 0.2;
 
