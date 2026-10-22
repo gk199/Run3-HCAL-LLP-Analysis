@@ -29,8 +29,8 @@ Then run:
 ```
 python3 MisTagParametrization_3D_optimized.py --config my_scan.txt -b
 python3 MisTagParametrization_3D_optimized.py --config my_scan.txt -b --pv_split
-python3 SidebandParameterization_BkgPred.py --config my_scan.txt --input_dir SidebandBkgPred
-python3 SidebandParameterization_BkgPred.py --config my_scan.txt --input_dir SidebandBkgPred_PVsplit --pv_split
+python3 SidebandParameterization_BkgPred.py --config my_scan.txt
+python3 SidebandParameterization_BkgPred.py --config my_scan.txt --pv_split
 ```
 Parameter sets grouped by era share a single RDataFrame, so multiple 2023 rows only read the files once. `CR_cut_inc` is optional and defaults to 0.2 if the column is omitted.
 
@@ -90,11 +90,14 @@ python3 OutputToLatex_VRclosureCheck.py    --config my_scan.txt --input_dir Side
 python3 SidebandParameterization_BkgPred.py --config my_scan.txt --pv_split
 python3 OutputToLatex_VRclosureCheck.py    --config my_scan.txt --pv_split
 ```
+(note that `-b` doesn't really matter, just for naming consistency).
+
 These correspond to the four versions of `MisTagParameterization` and `SidebandParameterization_BkgPred.py` from above. 
 
 Then run this from the directory with the corresponding output:
 ```
-python3 PhiParametrizationStudy.py --era all
+python3 PhiParametrizationStudy.py --era all --input_dir SidebandBkgPred_exclHLT_PVaxis
+
 ```
 for the eta vs pT parameterization plots.
 

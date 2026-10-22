@@ -151,7 +151,7 @@ debug = False
 #   * close the overflow bin at 250 rather than 400 — with a 400 edge the
 #     [400,inf) x |eta|>1 cell has CR_mistag == 0 in both era groups, and a cell
 #     with an empty numerator predicts exactly 0, biasing the estimate low.
-pT_bins  = np.array([40, 100, 160, 400]) # np.array([40, 100, 400], dtype=float) # np.array([40, 100, 160, 250, 1000], dtype=float)
+pT_bins  = np.array([40, 100, 400]) # np.array([40, 100, 400], dtype=float) # np.array([40, 100, 160, 250, 1000], dtype=float)
 # Fill value for jets above the top edge — just inside the last bin, so they land
 # in the overflow bin rather than in ROOT's (uncounted) overflow bin.
 PT_FILL_CLAMP = pT_bins[-1] - 1e-3
@@ -167,6 +167,12 @@ else:
     eta_bins = np.array([-1.26, -1, 1, 1.26], dtype=float)
 # phi_bins = np.linspace(-np.pi, np.pi, 9)
 phi_bins = np.linspace(-np.pi, np.pi, 2) # one bin in phi to test impact on prediction closure
+pv_bins = np.array([0, 42, 1000], dtype=float) # PV bins for the PV-split systematic
+# Set to True to book the event PV on the 2nd histogram axis (in place of eta),
+# so the transfer factor is binned in pT x PV.  Output goes to <OUT_BASE>_PVaxis/.
+USE_PV_AXIS = False
+if USE_PV_AXIS:
+    eta_bins = pv_bins
 b_tag_bins = np.array([0, 0.2435, 1.0], dtype=float)
 c_tag_bins = np.array([0, 0.102,  1.0], dtype=float)
 
@@ -269,6 +275,8 @@ def configure_pv_mode(pv_split):
     OUT_BASE   = OUT_BASE_PV_SPLIT if pv_split else OUT_BASE_DEFAULT
     if hlts_to_exclude:            # keep HLT-excluded output apart from the nominal
         OUT_BASE += "_exclHLT"
+    if USE_PV_AXIS:                # keep PV-axis output apart from the eta-binned nominal
+        OUT_BASE += "_PVaxis"
     output_dir = os.path.join(OUT_BASE, "outPlots_3D")
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -469,7 +477,7 @@ def LabelCMS(xpos=0.13, ypos=0.85, text_size=0.036):
 
 
 def ResetAxis(hist):
-    axis_labels = ["p_{T} (GeV)", "#eta", "#phi", "b tagging", "c tagging"]
+    axis_labels = ["p_{T} (GeV)", "PV" if USE_PV_AXIS else "#eta", "#phi", "b tagging", "c tagging"]
     if isinstance(hist, ROOT.TH3):
         hist.GetXaxis().SetTitle(axis_labels[0])
         hist.GetYaxis().SetTitle(axis_labels[1])
@@ -1236,6 +1244,9 @@ def _build_rdf_base(era_key):
     # toggle USE_ABS_ETA (top of file) to switch between |eta| and signed eta.
     eta_expr0 = "abs(jet0_Eta)" if USE_ABS_ETA else "jet0_Eta"
     eta_expr1 = "abs(jet1_Eta)" if USE_ABS_ETA else "jet1_Eta"
+    if USE_PV_AXIS:
+        # PV is event-level, so both jet roles fill the same value.
+        eta_expr0 = eta_expr1 = "static_cast<float>(PV)"
     # jet0_PtAxis / jet1_PtAxis feed the pT axis: jets above the top bin edge are
     # clamped into the overflow bin so they are counted instead of being dropped
     # into ROOT's overflow (which Integral()/get_total_and_error() ignore).
