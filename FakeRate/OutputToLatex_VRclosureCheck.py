@@ -424,7 +424,7 @@ if __name__ == "__main__":
         # Say so loudly: --pv_split changes WHICH files are read, so without this
         # note it is easy to think it re-interprets the files in the current
         # directory (e.g. fresh MisTagParametrization_3D_optimized.py output).
-        input_dir = "SidebandBkgPred_PVsplit"
+        input_dir = "SidebandBkgPred_PVsplit_exclHLT"
         print(f"# --pv_split: reading {input_dir}/, not the current directory "
               f"(pass --input_dir to read elsewhere)")
     if input_dir is not None and not os.path.isdir(input_dir):

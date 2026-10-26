@@ -6,7 +6,7 @@ python3 CutflowTable.py /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3
 
 python3 BkgEstimation.py /eos/cms/store/group/phys_exotica/HCAL_LLP/MiniTuples/v3.6.1/minituple_v3.6_LLPskim_Run2023_HADD.root 60
 ```
-With option to print as table to terminal, or print in a latex format (`print_latex = True`). 
+With option to print as table to terminal, or print in a latex format (`print_latex = True`).
 
 # Final Analysis Selections (LLP MC)
 ```
@@ -19,13 +19,17 @@ python3 FinalAnalysisCutflow.py --file <your_file.root> --latex --depth 0.965 --
 python3 FinalAnalysisCutflow.py --file <your_file.root> --latex --truth --depth 0.965 --depth-sjdc 0.975 --inc 0.845 --inc-sjdc 0.375
 
 --no-l1-prescale
+--no-hlt-prescale
+--truth
 
 python3 ScanDNNCuts.py --inc  0.90 0.95 0.97 0.99 --depth 0.90 0.93 0.95 0.97
 ```
 
-Bash script:
+There is also a bash script to do the cutflows, which outputs them in tex to a `cutflow` directory:
 ```
-./run_cutflows.sh MH125_MS50_CTau3000 MH350_MS80_CTau500
-./run_cutflows.sh -n MH350_MS80_CTau500   # print commands, run nothing
-./run_cutflows.sh -l                      # list known mass points
+./run_cutflows.sh -l                        # list known mass points
+./run_cutflows.sh -n MH350_MS80_CTau500     # print commands, run nothing
+./run_cutflows.sh MH125_MS50_CTau3000
+./run_cutflows.sh MH125_MS50_CTau3000 MH250_MS120_CTau10000 MH350_MS160_CTau10000 MH350_MS80_CTau500
 ```
+Changing the L1 and HLT prescales must be done in the bash script (line 93) as well as the truth information.
