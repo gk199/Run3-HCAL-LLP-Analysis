@@ -417,7 +417,7 @@ void DisplacedHcalJetAnalyzer::InitializeLifetimeReweighting( string infiletag )
 		if( last_temp < last ) last = last_temp;
 	}
 
-	float ctau_sample = std::stof( infiletag_partial.substr(0,last))*0.1; // 0.1 to convert from mm to cm
+	ctau_sample = std::stof( infiletag_partial.substr(0,last))*0.1; // 0.1 to convert from mm to cm
 
 	cout<<"\nReading in signal lifetime as: "<<ctau_sample<<" cm..."<<endl;
 
