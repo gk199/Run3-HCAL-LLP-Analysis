@@ -33,3 +33,10 @@ There is also a bash script to do the cutflows, which outputs them in tex to a `
 ./run_cutflows.sh MH125_MS50_CTau3000 MH250_MS120_CTau10000 MH350_MS160_CTau10000 MH350_MS80_CTau500
 ```
 Changing the L1 and HLT prescales must be done in the bash script (line 93) as well as the truth information.
+
+# Lifetime Reweighting Check
+```
+python3 LifetimeReweight.py --v56-closure --latex
+```
+
+Note that efficiencies reported in these scripts are fractions of produced events, and will be lower than the cutflow table ' "% of All", as that counted stored events (after some selections).
