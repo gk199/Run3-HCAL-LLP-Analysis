@@ -286,6 +286,13 @@ public :
    vector<float>   *jet_Pt_JER_down;
    vector<float>   *jet_E_JER_down;
    vector<float>   *jet_Mass_JER_down;
+   vector<float>   *jet_JES_unc;
+   vector<float>   *jet_Pt_JES_up;
+   vector<float>   *jet_E_JES_up;
+   vector<float>   *jet_Mass_JES_up;
+   vector<float>   *jet_Pt_JES_down;
+   vector<float>   *jet_E_JES_down;
+   vector<float>   *jet_Mass_JES_down;
    vector<float>   *jet_ChargedHadEFrac;
    vector<float>   *jet_NeutralHadEFrac;
    vector<float>   *jet_PhoEFrac;
@@ -649,6 +656,13 @@ public :
    TBranch        *b_jet_Pt_JER_down;
    TBranch        *b_jet_E_JER_down;
    TBranch        *b_jet_Mass_JER_down;
+   TBranch        *b_jet_JES_unc;
+   TBranch        *b_jet_Pt_JES_up;
+   TBranch        *b_jet_E_JES_up;
+   TBranch        *b_jet_Mass_JES_up;
+   TBranch        *b_jet_Pt_JES_down;
+   TBranch        *b_jet_E_JES_down;
+   TBranch        *b_jet_Mass_JES_down;
    TBranch        *b_jet_JetArea;   //!
    TBranch        *b_jet_PileupE;
    TBranch        *b_jet_PileupIdFlag;
@@ -1153,6 +1167,13 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    jet_Pt_JER_down = 0;
    jet_E_JER_down = 0;
    jet_Mass_JER_down = 0;
+   jet_JES_unc = 0;
+   jet_Pt_JES_up = 0;
+   jet_E_JES_up = 0;
+   jet_Mass_JES_up = 0;
+   jet_Pt_JES_down = 0;
+   jet_E_JES_down = 0;
+   jet_Mass_JES_down = 0;
    jet_ChargedHadEFrac = 0;
    jet_NeutralHadEFrac = 0;
    jet_PhoEFrac = 0;
@@ -1517,6 +1538,13 @@ void DisplacedHcalJetAnalyzer::Init(TTree *tree)
    fChain->SetBranchAddress("jet_Pt_JER_down", &jet_Pt_JER_down, &b_jet_Pt_JER_down);
    fChain->SetBranchAddress("jet_E_JER_down", &jet_E_JER_down, &b_jet_E_JER_down);
    fChain->SetBranchAddress("jet_Mass_JER_down", &jet_Mass_JER_down, &b_jet_Mass_JER_down);
+   fChain->SetBranchAddress("jet_JES_unc", &jet_JES_unc, &b_jet_JES_unc);
+   fChain->SetBranchAddress("jet_Pt_JES_up", &jet_Pt_JES_up, &b_jet_Pt_JES_up);
+   fChain->SetBranchAddress("jet_E_JES_up", &jet_E_JES_up, &b_jet_E_JES_up);
+   fChain->SetBranchAddress("jet_Mass_JES_up", &jet_Mass_JES_up, &b_jet_Mass_JES_up);
+   fChain->SetBranchAddress("jet_Pt_JES_down", &jet_Pt_JES_down, &b_jet_Pt_JES_down);
+   fChain->SetBranchAddress("jet_E_JES_down", &jet_E_JES_down, &b_jet_E_JES_down);
+   fChain->SetBranchAddress("jet_Mass_JES_down", &jet_Mass_JES_down, &b_jet_Mass_JES_down);
    fChain->SetBranchAddress("jet_JetArea", &jet_JetArea, &b_jet_JetArea);
    fChain->SetBranchAddress("jet_PileupE", &jet_PileupE, &b_jet_PileupE);
    fChain->SetBranchAddress("jet_PileupIdFlag", &jet_PileupIdFlag, &b_jet_PileupIdFlag);

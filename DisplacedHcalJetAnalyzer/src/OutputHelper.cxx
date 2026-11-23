@@ -114,6 +114,14 @@ void DisplacedHcalJetAnalyzer::DeclareOutputTrees(){
 		myvars_float.push_back( Form("jet%d_Pt_JER_down", i) );
 		myvars_float.push_back( Form("jet%d_E_JER_down", i) );
 		myvars_float.push_back( Form("jet%d_Mass_JER_down", i) );
+		// JES uncertainty and up / down variations
+		myvars_float.push_back( Form("jet%d_JES_unc", i) );
+		myvars_float.push_back( Form("jet%d_Pt_JES_up", i) );
+		myvars_float.push_back( Form("jet%d_E_JES_up", i) );
+		myvars_float.push_back( Form("jet%d_Mass_JES_up", i) );
+		myvars_float.push_back( Form("jet%d_Pt_JES_down", i) );
+		myvars_float.push_back( Form("jet%d_E_JES_down", i) );
+		myvars_float.push_back( Form("jet%d_Mass_JES_down", i) );
 
 		myvars_int.push_back( Form("jet%d_L1trig_Matched", i) );
 		myvars_int.push_back( Form("jet%d_PileupE", i) );
@@ -809,6 +817,16 @@ void DisplacedHcalJetAnalyzer::FillOutputTrees( string treename, map<string, boo
 			tree_output_vars_float[Form("jet%d_Pt_JER_down", valid_jet)] 	= jet_Pt_JER_down->at(i);
 			tree_output_vars_float[Form("jet%d_E_JER_down", valid_jet)] 	= jet_E_JER_down->at(i);
 			tree_output_vars_float[Form("jet%d_Mass_JER_down", valid_jet)]	= jet_Mass_JER_down->at(i);
+		}
+		// JES uncertainty and up / down variations (filled for data and MC)
+		if (jet_JES_unc->size() > 0) {
+			tree_output_vars_float[Form("jet%d_JES_unc", valid_jet)] 		= jet_JES_unc->at(i);
+			tree_output_vars_float[Form("jet%d_Pt_JES_up", valid_jet)] 		= jet_Pt_JES_up->at(i);
+			tree_output_vars_float[Form("jet%d_E_JES_up", valid_jet)] 		= jet_E_JES_up->at(i);
+			tree_output_vars_float[Form("jet%d_Mass_JES_up", valid_jet)]	= jet_Mass_JES_up->at(i);
+			tree_output_vars_float[Form("jet%d_Pt_JES_down", valid_jet)] 	= jet_Pt_JES_down->at(i);
+			tree_output_vars_float[Form("jet%d_E_JES_down", valid_jet)] 	= jet_E_JES_down->at(i);
+			tree_output_vars_float[Form("jet%d_Mass_JES_down", valid_jet)]	= jet_Mass_JES_down->at(i);
 		}
 
 		tree_output_vars_float[Form("jet%d_ChargedHadEFrac", valid_jet)] 		= jet_ChargedHadEFrac->at(i);

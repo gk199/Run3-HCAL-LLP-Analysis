@@ -400,7 +400,7 @@ void DisplacedHcalJetAnalyzer::InitializeSystematic( string systematic ){
 
 	if( debug ) cout<<"DisplacedHcalJetAnalyzer::InitializeSystematic()"<<endl;
 
-	vector<string> valid_systematic_names = { "None", "Nominal", "JER_up", "JER_down" };
+	vector<string> valid_systematic_names = { "None", "Nominal", "JER_up", "JER_down", "JES_up", "JES_down" };
 
 	systematic_name = systematic;
 
@@ -433,6 +433,14 @@ void DisplacedHcalJetAnalyzer::SetEventSystematic(){
 		jet_Pt   = jet_Pt_JER_down;
 		jet_E    = jet_E_JER_down;
 		jet_Mass = jet_Mass_JER_down;
-	} 
+	} else if ( systematic_name == "JES_up" ){
+		jet_Pt   = jet_Pt_JES_up;
+		jet_E    = jet_E_JES_up;
+		jet_Mass = jet_Mass_JES_up;
+	} else if ( systematic_name == "JES_down" ){
+		jet_Pt   = jet_Pt_JES_down;
+		jet_E    = jet_E_JES_down;
+		jet_Mass = jet_Mass_JES_down;
+	}
 
 }
