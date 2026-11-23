@@ -73,13 +73,13 @@ debug = False
 # ------------------------------------------------------------------------------
 # Defaults — edit here (as in OverlayMistagRates_TEff.py) or override on the
 # command line.
-era        = "2023"                     # key of ERA_GROUPS
-jet_type   = "leading"                  # "leading", "sub-leading", "combined"
-region     = "CR"                       # "CR" or "VR" (SR is blinded and refused)
-input_dir  = "SidebandBkgPred_PVsplit"  # or "SidebandBkgPred"
-error_mode = "divide"                   # "divide" or "CP", see module docstring
+era        = "2023"                             # key of ERA_GROUPS
+jet_type   = "leading"                          # "leading", "sub-leading", "combined"
+region     = "CR"                               # "CR" or "VR" (SR is blinded and refused)
+input_dir  = "SidebandBkgPred_PVsplit_exclHLT"  # or "SidebandBkgPred"
+error_mode = "divide"                           # "divide" or "CP", see module docstring
 
-CL_1SIGMA = 0.682689492137              # 68.27% central interval
+CL_1SIGMA = 0.682689492137                      # 68.27% central interval
 
 # Each entry: (file stem, era name in the file name, legend label).
 # File = <input_dir>/output_3D_hists_<stem>_<jet_type>_<era name>.root
@@ -119,7 +119,7 @@ DEPTH_CUT = {
     "preBPix":  {"leading": 0.905, "sub-leading": 0.925},
     "postBPix": {"leading": 0.985, "sub-leading": 0.995},
 }
-SB_LOW = {"preBPix": 0.3, "postBPix": 0.8}
+SB_LOW = {"preBPix": 0.25, "postBPix": 0.8}
 
 # ------------------------------------------------------------------------------
 def HistNames(region):

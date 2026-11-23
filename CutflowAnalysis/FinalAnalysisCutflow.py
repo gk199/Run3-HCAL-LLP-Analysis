@@ -32,7 +32,7 @@ EXCLUSIVE_HLT_GROUPS = [
         # Short label: the full path names go in the caption, so that a long
         # name here cannot stretch the tabular past the page width.
         tex      = r"\texttt{DisplacedDijet35}",
-        latex    = False,   # plain-text table only (this row lives in ExclusiveHLTTable.py)
+        latex    = True,   # plain-text table only (this row lives in ExclusiveHLTTable.py)
     ),
     dict(
         # The four delayed-jet paths seeded by L1_SingleLLPJet:
@@ -41,7 +41,7 @@ EXCLUSIVE_HLT_GROUPS = [
         patterns = ["HLT_HT200_L1SingleLLPJet_DelayedJet40_*"],
         plain    = "DelayedJet40 (delay paths)",
         tex      = r"\texttt{DelayedJet40\_*}",
-        latex    = True,
+        latex    = False,
     ),
 ]
 
@@ -728,6 +728,58 @@ def run_cutflow(
                   r"~~$\hookrightarrow$ only " + group["tex"],
                   get_yield(only_sel, wexpr=excl_wexpr))
 
+    # ── final selection with an additional flat HT cut ───────────────────────
+    # Final-selection events that also pass eventHT > X, for each X below.
+    # Same weight and denominators as the HLT-split rows above.
+    HT_CUTS = [200, 280, 420]
+    if not tree.GetBranch("eventHT"):
+        print("\nNOTE: 'eventHT' branch not found; skipping the HT-cut lines.")
+    else:
+        if print_latex:
+            print(r"\hline")
+            print(r"\multicolumn{4}{l}{\textit{Final selection, with flat HT cut}} \\")
+        else:
+            print("─" * (col_w + 50))
+            print(f"{'Final selection, with flat HT cut':<{col_w}}"
+                  f"  {'Yield':>15}  {'% of All':>10}  {'% of final':>10}")
+        for ht in HT_CUTS:
+            ht_sel = f"{final_sel} && eventHT > {ht}" if final_sel else f"eventHT > {ht}"
+            _excl_row(f"    HT > {ht} GeV",
+                      rf"~~$\hookrightarrow$ $H_T > {ht}$ GeV",
+                      get_yield(ht_sel, wexpr=weight_expr))
+
+    # ── final selection restricted to the unprescaled L1 seeds ───────────────
+    # Final-selection events firing at least one L1 seed with prescale 1, i.e.
+    # what remains if the prescaled seeds (L1_HTT120_SingleLLPJet40 at 100 and
+    # L1_HTT160_SingleLLPJet50 at 50) are dropped.  Same weight and denominators
+    # as the rows above: L1_prescale_weight is always 1 when one of these seeds
+    # fired (OutputHelper.cxx:653), so the only events removed are those kept by
+    # a prescaled seed alone, having survived the emulated prescale.
+    # Label deliberately avoids "(depth)": run_cutflows.sh greps that string.
+    L1_UNPRESCALED = ["L1_HTT200_SingleLLPJet60", "L1_HTT240_SingleLLPJet70", "L1_DoubleLLPJet40"]
+    l1_caption_note = None
+    missing_l1 = [b for b in L1_UNPRESCALED if not tree.GetBranch(b)]
+    if missing_l1:
+        print(f"\nNOTE: {missing_l1} branch(es) not found; skipping the unprescaled-L1 line.")
+    else:
+        if print_latex:
+            print(r"\hline")
+            print(r"\multicolumn{4}{l}{\textit{Final selection, L1 seeds with prescale 1 only}} \\")
+        else:
+            print("─" * (col_w + 50))
+            print(f"{'Final selection, L1 prescale=1':<{col_w}}"
+                  f"  {'Yield':>15}  {'% of All':>10}  {'% of final':>10}")
+            print(f"  seeds: {', '.join(L1_UNPRESCALED)}")
+        l1_sel = "(" + " || ".join(f"{b} == 1" for b in L1_UNPRESCALED) + ")"
+        _excl_row("    passing any of these",
+                  r"~~$\hookrightarrow$ passing prescale-1 L1 seed",
+                  get_yield(f"{final_sel} && {l1_sel}", wexpr=weight_expr))
+        l1_caption_note = (
+            r" The L1 seeds with prescale 1 are "
+            + ", ".join(r"\texttt{" + b.replace("_", r"\_") + "}" for b in L1_UNPRESCALED)
+            + "."
+        )
+
     if print_latex:
         if hlt_caption_notes:
             caption += (
@@ -736,6 +788,8 @@ def run_cutflow(
                 + ", ".join(hlt_caption_notes)
                 + r", and those passing no other \texttt{L1SingleLLPJet} HLT on top of it."
             )
+        if l1_caption_note:
+            caption += l1_caption_note
         latex_end(caption)
 
     f.Close()
