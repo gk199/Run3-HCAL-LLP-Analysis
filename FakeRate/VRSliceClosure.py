@@ -79,6 +79,12 @@ CAT_DEF = {
 OUT_DIR = ("SidebandBkgPred_exclHLT_VRslices" if sbp.hlts_to_exclude
            else "SidebandBkgPred_VRslices")
 
+# PV bins of the --pv_split systematic in SidebandParameterization_BkgPred.py
+# (low_PV_str / high_PV_str in SidebandParametrization).  The PV cut is applied
+# to every region, each PV bin gets its own CR TF, and the systematic is
+# |pred(PV<42) + pred(PV>=42) - pred(PV-inclusive)|.
+PV_BINS = {"lowPV": "PV >= 0  && PV < 42", "highPV": "PV >= 42 && PV < 100"}
+
 _log_lines = []
 
 
@@ -128,15 +134,17 @@ def book_era(rdf_base, row, edges):
 
         rdf_c = rdf_base.Filter(cand, f"{cat}_cand")
 
-        def book(name, inc_lo, inc_hi, depth_cell):
+        def book(name, inc_lo, inc_hi, depth_cell, extra=""):
             # ---- BLINDING TRIPWIRE: nothing tagged at or above the MR boundary.
             if depth_cell == "pass" and inc_hi > inc_cut + 1e-12:
                 raise RuntimeError(
                     f"BLINDING VIOLATION: {row['era']} {cat} '{name}' would book depth-tagged "
                     f"events with inclusive score up to {inc_hi} > inclusive cut {inc_cut}.")
             dstr = side_str if depth_cell == "side" else pass_str
-            return rdf_c.Filter(f"{inc} >= {inc_lo} && {inc} < {inc_hi} && {dstr}",
-                                f"{cat}_{name}")
+            sel = f"{inc} >= {inc_lo} && {inc} < {inc_hi} && {dstr}"
+            if extra:
+                sel += f" && {extra}"
+            return rdf_c.Filter(sel, f"{cat}_{name}")
 
         crs = book("CR_side", 0.0, cr_cut, "side")
         b = {
@@ -163,6 +171,18 @@ def book_era(rdf_base, row, edges):
                 "mean": rs.Mean(inc),
                 "count": rs.Count(),
             })
+        # PV-binned prediction (PV systematic): CR TF and sidebands per PV bin.
+        # Only sideband cells and the CR tagged cell are booked.
+        b["pv"] = {}
+        for pv, pvs in PV_BINS.items():
+            h3 = lambda n: sbp._h3_model(f"h_{row['era']}_{cat}_{n}_{pv}")
+            b["pv"][pv] = {
+                "CR_side": book(f"CR_side_{pv}", 0.0, cr_cut, "side", pvs).Histo3D(h3("CR_side"), *axes),
+                "CR_pass": book(f"CR_pass_{pv}", 0.0, cr_cut, "pass", pvs).Histo3D(h3("CR_pass"), *axes),
+                "VR_side": book(f"VR_side_{pv}", cr_cut, inc_cut, "side", pvs).Histo3D(h3("VR_side"), *axes),
+                "slices": [book(f"S{k}_side_{pv}", lo, hi, "side", pvs).Histo3D(h3(f"S{k}_side"), *axes)
+                           for k, (lo, hi) in enumerate(zip(slice_edges[:-1], slice_edges[1:]))],
+            }
         # SR depth SIDEBAND only (inclusive >= cut, depth BELOW the tag cut).
         srsb = book("SRSB", inc_cut, 1.1, "side")
         b["SRSB_mean"]  = srsb.Mean(inc)
@@ -296,6 +316,34 @@ def evaluate_era(era, booked):
     srsb["combined"] = (sum(srsb[c][0] * srsb[c][1] for c in CATS) / n_sr if n_sr else float("nan"),
                         n_sr)
 
+    # PV-binned inputs, materialised per category and summed for "combined".
+    pvh = {cat: {pv: {k: materialise(booked[cat]["pv"][pv][k], f"m_{era}_{cat}_{k}_{pv}")
+                      for k in ("CR_side", "CR_pass", "VR_side")}
+                 for pv in PV_BINS} for cat in CATS}
+    for cat in CATS:
+        for pv in PV_BINS:
+            pvh[cat][pv]["slices"] = [materialise(s, f"m_{era}_{cat}_S{k}_side_{pv}")
+                                      for k, s in enumerate(booked[cat]["pv"][pv]["slices"])]
+    pvh["combined"] = {pv: {k: summed([pvh[c][pv][k] for c in CATS], f"h_{era}_comb_{k}_{pv}")
+                            for k in ("CR_side", "CR_pass", "VR_side")} for pv in PV_BINS}
+    for pv in PV_BINS:
+        pvh["combined"][pv]["slices"] = [
+            summed([pvh[c][pv]["slices"][k] for c in CATS], f"h_{era}_comb_S{k}_side_{pv}")
+            for k in range(nsl)]
+
+    def pv_binned(cell):
+        """PV-binned prediction for the integrated VR and for each slice."""
+        vr, sls = 0.0, [0.0] * nsl
+        for pv in PV_BINS:
+            h = pvh[cell][pv]
+            tf_pv = h["CR_pass"].Clone(f"tf_{era}_{cell}_{pv}")
+            tf_pv.SetDirectory(0)
+            tf_pv.Divide(h["CR_side"])
+            vr += predict(h["VR_side"], tf_pv)[0]
+            for k in range(nsl):
+                sls[k] += predict(h["slices"][k], tf_pv)[0]
+        return vr, sls
+
     out = {}
     for cell in CELLS:
         g = get[cell]
@@ -323,6 +371,16 @@ def evaluate_era(era, booked):
             raise RuntimeError(f"{era} {cell}: slices do not add up to the integrated VR "
                                f"(obs {sum_obs} vs {obs_i}, pred {sum_pred} vs {pred_i}).")
 
+        # PV systematic: shift of the PV-binned prediction from the nominal one.
+        pv_vr, pv_sl = pv_binned(cell)
+        for x, pb in zip(rows, pv_sl):
+            x["pred_pv"] = pb
+            x["pv_syst"] = abs(pb - x["pred"])
+        pv_syst_i = abs(pv_vr - pred_i)
+        if abs(sum(pv_sl) - pv_vr) > 1e-6 * max(1.0, pv_vr):
+            raise RuntimeError(f"{era} {cell}: PV-binned slices do not add up "
+                               f"({sum(pv_sl)} vs {pv_vr}).")
+
         r_i, er_i, ertf_i = ratio(obs_i, eobs_i, pred_i, eu_i, etf_i)
         tf_rel = etf_i / pred_i if pred_i > 0 else float("nan")
 
@@ -348,6 +406,7 @@ def evaluate_era(era, booked):
 
         out[cell] = dict(tf_regions=tf_regions, sb_low=booked['LJDC']['cuts']['sb_low'],
                          rows=rows, obs=obs_i, eobs=eobs_i, pred=pred_i, epred=etot_i,
+                         pred_pv=pv_vr, pv_syst=pv_syst_i,
                          r=r_i, er=er_i, ertf=ertf_i, tf_rel=tf_rel, fit=fit,
                          srsb_mean=srsb[cell][0], srsb_count=srsb[cell][1])
     return out
@@ -389,6 +448,10 @@ def report_era(era, row, res):
             f"   (slices add up: OK)")
         log(f"  TF normalisation (correlated across slices): ±{100 * r['tf_rel']:.1f}% "
             f"on every prediction / ratio")
+        log("  PV systematic |pred(PV<42) + pred(PV>=42) - pred|:  " +
+            "  ".join(f"{fmt_range(x['lo'], x['hi'], cell, row)} {x['pred_pv']:.2f} -> ±{x['pv_syst']:.2f}"
+                      for x in r["rows"]) +
+            f"  | VR integrated {r['pred_pv']:.2f} -> ±{r['pv_syst']:.2f}")
         log(f"  SR depth sideband: N = {r['srsb_count']}, <S_incl> = {r['srsb_mean']:.3f}")
         f = r["fit"]
         if f:
@@ -415,25 +478,47 @@ def _tf_tex(t):
     return f"${v:.3f} \\pm {e:.3f}$ \\scriptsize{{({p:.0f}/{s:.0f})}}"
 
 
+def _split_points(res):
+    """Interior VR edges of one era (the lower edges of VR slices 2..n)."""
+    return [r["lo"] for r in res["LJDC"]["tf_regions"][2:]]
+
+
 def _region_header(results):
-    """Column headers: CR, then the VR slices (top edge = MR boundary)."""
+    """
+    Column headers: CR, then the VR slices (top edge = MR boundary).
+    Returns (headers, split_column).  When the VR edges differ between eras,
+    the headers name the slices generically and split_column is True, so that
+    the tables carry a column with each era's split point(s) s.
+    """
     any_res = next(iter(results.values()))["LJDC"]["tf_regions"]
+    uniform = len({tuple(_split_points(r)) for r in results.values()}) == 1
     hdr = []
+    nvr = len(any_res) - 1
     for k, r in enumerate(any_res):
         if r["name"] == "CR":
             hdr.append(f"CR $[0, {r['hi']:g})$")
+        elif not uniform:
+            if nvr == 2:
+                hdr.append("VR $[0.2, s)$" if k == 1 else "VR $[s, \\mathrm{MR})$")
+            else:
+                hdr.append(f"VR slice {k}")
         elif k == len(any_res) - 1:
             hdr.append(f"VR $[{r['lo']:g}, \\mathrm{{MR}})$")
         else:
             hdr.append(f"VR $[{r['lo']:g}, {r['hi']:g})$")
-    return hdr
+    return hdr, not uniform
 
 
 def latex_tables(results, rows_cfg, edges):
-    hdr = _region_header(results)
+    hdr, split_col = _region_header(results)
+    if split_col:   # era-dependent VR split: one extra column with s
+        hdr = ["$s$"] + hdr
+
+    def split_txt(res):
+        return [", ".join(f"{e:g}" for e in _split_points(res))] if split_col else []
     ncol = len(hdr)
     L = ["% Generated by FakeRate/VRSliceClosure.py",
-         f"% Slice edges: {edges} + MR boundary (era/category inclusive cut)", ""]
+         f"% VR slice edges per era: {edges} + MR boundary (era/category inclusive cut)", ""]
 
     # ---- Table 1: transfer factors, pT-integrated
     L += ["\\begin{table}[htbp]", "\\centering",
@@ -452,7 +537,8 @@ def latex_tables(results, rows_cfg, edges):
         for ci, cell in enumerate(CELLS):
             era_txt = ERA_LABEL.get(era, era) if ci == 0 else ""
             L.append(f"{era_txt} & {cell} & " +
-                     " & ".join(_tf_tex(r["all"]) for r in res[cell]["tf_regions"]) + " \\\\")
+                     " & ".join(split_txt(res) + [_tf_tex(r["all"]) for r in res[cell]["tf_regions"]])
+                     + " \\\\")
         L.append("\\hline")
     L += ["\\end{tabular}}", "\\end{table}", ""]
 
@@ -473,7 +559,8 @@ def latex_tables(results, rows_cfg, edges):
                 era_txt = ERA_LABEL.get(era, era) if (ci == 0 and b == 0) else ""
                 cat_txt = cell if b == 0 else ""
                 L.append(f"{era_txt} & {cat_txt} & $[{lo:g}, $ {hi_txt}$)$ & " +
-                         " & ".join(_tf_tex(r["pt"][b][2:]) for r in regs) + " \\\\")
+                         " & ".join(split_txt(res) + [_tf_tex(r["pt"][b][2:]) for r in regs])
+                         + " \\\\")
             L.append("\\hline" if ci == len(CELLS) - 1 else f"\\cline{{2-{3 + ncol}}}")
     L += ["\\end{tabular}}", "\\end{table}", ""]
 
@@ -692,6 +779,10 @@ def main():
     p.add_argument("--edges", type=float, nargs="+", default=[0.2, 0.4, 0.6],
                    help="lower slice edges; the first must be the CR cut, and the MR boundary "
                         "(category inclusive cut) is appended as the last upper edge")
+    p.add_argument("--edges-pre", type=float, nargs="+", default=None,
+                   help="lower slice edges for preBPix eras (overrides --edges)")
+    p.add_argument("--edges-post", type=float, nargs="+", default=None,
+                   help="lower slice edges for postBPix eras (overrides --edges)")
     p.add_argument("--eras", nargs="+", default=DEFAULT_ERAS)
     p.add_argument("-t", "--threads", type=int, default=0)
     args = p.parse_args()
@@ -711,10 +802,15 @@ def main():
             raise ValueError("This script uses the data branch names; W+Jets MC is not supported.")
 
     log("VR closure in slices of the inclusive score (reviewer Q10)")
-    log(f"config: {args.config}   slice edges: {args.edges} + MR boundary")
+    edges_pre = args.edges_pre or args.edges
+    edges_post = args.edges_post or args.edges
+    edges_of = lambda era: edges_post if era in sbp.POSTBPIX_ERAS else edges_pre
+    log(f"config: {args.config}   VR slice edges: preBPix {edges_pre}, postBPix {edges_post}"
+        " + MR boundary")
     log(f"pT bins: {list(sbp.pT_bins)}   |eta| bins: {list(sbp.eta_bins)}   "
         f"phi bins: {len(sbp.phi_bins) - 1}")
-    log(f"HLT exclusion: {sbp.hlts_to_exclude}   PV: inclusive (nominal 'depth' option)")
+    log(f"HLT exclusion: {sbp.hlts_to_exclude}   PV: inclusive (nominal 'depth' option); "
+        f"PV systematic from the PV-binned prediction {list(PV_BINS.values())}")
 
     results, rows_cfg = {}, {}
     for era in args.eras:
@@ -728,15 +824,19 @@ def main():
                 f"{row[f'DNN_cut_{cat}']};  CR S_incl < {row['CR_cut_inc']}, "
                 f"MR boundary S_incl = {row[f'DNN_cut_inc_{cat}']}")
         rdf = sbp._build_rdf_base(era)
-        booked = book_era(rdf, row, args.edges)
+        booked = book_era(rdf, row, edges_of(era))
         results[era] = evaluate_era(era, booked)
         report_era(era, row, results[era])
 
     # Tag outputs with the slice edges so runs with different edges coexist.
-    tag = "_edges_" + "_".join(f"{e:g}".replace(".", "p") for e in args.edges)
+    _t = lambda ed: "_".join(f"{e:g}".replace(".", "p") for e in ed)
+    tag = (f"_edges_{_t(edges_pre)}" if edges_pre == edges_post
+           else f"_edges_pre_{_t(edges_pre)}_post_{_t(edges_post)}")
     tex_path = os.path.join(OUT_DIR, f"VRslices_closure{tag}.tex")
     with open(tex_path, "w") as f:
-        f.write(latex_tables(results, rows_cfg, args.edges))
+        f.write(latex_tables(results, rows_cfg,
+                             {"preBPix": edges_pre, "postBPix": edges_post}
+                             if edges_pre != edges_post else edges_pre))
     log(f"\nwrote {tex_path}")
     make_tf_plots(results, rows_cfg, tag)
 
