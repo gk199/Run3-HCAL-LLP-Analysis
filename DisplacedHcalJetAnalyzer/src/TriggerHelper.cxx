@@ -21,7 +21,6 @@ void DisplacedHcalJetAnalyzer::SetTriggerNames(){ //} string infilepath, string 
 	triggerPathNames.push_back("HLT_HT270_L1SingleLLPJet_DisplacedDijet40_DisplacedTrack");
 	triggerPathNames.push_back("HLT_HT280_L1SingleLLPJet_DisplacedDijet40_Inclusive1PtrkShortSig5");
 	triggerPathNames.push_back("HLT_HT320_L1SingleLLPJet_DisplacedDijet60_Inclusive");
-	triggerPathNames.push_back("HLT_HT320_L1SingleLLPJet_DisplacedDijet60_Inclusive");
 	triggerPathNames.push_back("HLT_HT200_L1SingleLLPJet_PFJet60_NeutralHadronFrac0p7");
 	triggerPathNames.push_back("HLT_HT200_L1SingleLLPJet_PFJet60_NeutralHadronFrac0p8");
 	triggerPathNames.push_back("HLT_HT350_DelayedJet40_SingleDelay3nsInclusive");
